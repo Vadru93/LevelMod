@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7EE21ADA-3B02-4CD6-A891-C2257A54B061}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup>
+    <TargetName>d3d8</TargetName>
+    <OutDir>bin\$(Configuration)\</OutDir>
+    <IntDir>intermediate\$(Configuration)\</IntDir>
+    <IncludePath>C:\Users\Vadru\source\repos\Skate3_extension\Skate3_extension;$(WindowsSdkDir)include;C:\Users\Vadru\Documents\Chilkat\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(FrameworkSDKDir)\include;D:\Program Files\Microsoft DirectX SDK %28JUNE 2010%29\Include;D:\Program Files\boost\boost_1_47\;D:\Program Files\Microsoft DirectX SDK %28June 2010%29\Samples\C++\DXUT\Optional;D:\Program Files\Microsoft DirectX SDK %28June 2010%29\Samples\C++\DXUT\Core;D:\Program Files\Visual Leak Detector\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Vadru\Documents\Chilkat\libs;D:\Program Files\Microsoft DirectX SDK %28June 2010%29\Lib\x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_ALLOW_RTCc_IN_STL;WIN32_LEAN_AND_MEAN;_WINSOCK_DEPRECATED_NO_WARNINGS;_DEBUG;EXPORTING;_CRT_SECURE_NO_WARNINGS;D3D_DEBUG_INFO;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <ControlFlowGuard>false</ControlFlowGuard>
+      <FloatingPointExceptions>true</FloatingPointExceptions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ModuleDefinitionFile>res\d3d8.def</ModuleDefinitionFile>
+      <AdditionalDependencies>Shell32.lib;Ws2_32.lib;d3d9.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>D3D8TO9NOLOG;EXPORTING;_WINSOCK_DEPRECATED_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;_USRDLL;SKATE3_EXPORTS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>res\d3d8.def</ModuleDefinitionFile>
+      <AdditionalDependencies>d3d9.lib;Shell32.lib;Ws2_32.lib;Psapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\zip.cpp" />
+    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="source\d3d8to9.cpp" />
+    <ClCompile Include="source\d3d8to9_base.cpp" />
+    <ClCompile Include="source\d3d8to9_device.cpp" />
+    <ClCompile Include="source\d3d8to9_index_buffer.cpp" />
+    <ClCompile Include="source\d3d8to9_surface.cpp" />
+    <ClCompile Include="source\d3d8to9_swap_chain.cpp" />
+    <ClCompile Include="source\d3d8to9_texture.cpp" />
+    <ClCompile Include="source\d3d8to9_vertex_buffer.cpp" />
+    <ClCompile Include="source\d3d8to9_volume.cpp" />
+    <ClCompile Include="source\d3d8types.cpp" />
+    <ClCompile Include="source\interface_query.cpp" />
+    <ClCompile Include="source\lookup_table.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\Checksum.h" />
+    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\Debug.h" />
+    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\Defines.h" />
+    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\Extension.h" />
+    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\framework.h" />
+    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\HTTPRequest.h" />
+    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\KeyState.h" />
+    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\_Math.h" />
+    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\Memory.h" />
+    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\Mesh.h" />
+    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\Node.h" />
+    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\Script.h" />
+    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\Skater.h" />
+    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\SuperSectors.h" />
+    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\unzip.h" />
+    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\zip.h" />
+    <ClInclude Include="res\resource.h" />
+    <ClInclude Include="source\d3d8to9.hpp" />
+    <ClInclude Include="source\d3d8types.hpp" />
+    <ClInclude Include="source\d3dx9.hpp" />
+    <ClInclude Include="source\lookup_table.hpp" />
+    <ClInclude Include="source\QBKey.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\d3d8.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="res\d3d8to9.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>
