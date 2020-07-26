@@ -1,0 +1,18 @@
+﻿  Source.cpp
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt\string.h(11,1): warning C4005: '_CRT_SECURE_NO_WARNINGS': macro redefinition
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp : message : see previous definition of '_CRT_SECURE_NO_WARNINGS'
+C:\Users\Vadru\source\repos\Skate3_extension\Skate3_extension\Script.h(16,21): warning C4091: '__declspec(dllexport)': ignored on left of 'Script' when no variable is declared
+C:\Users\Vadru\source\repos\Skate3_extension\Skate3_extension\Skater.h(283,2): warning C4091: '__declspec(dllexport)': ignored on left of 'Skater' when no variable is declared
+C:\Users\Vadru\source\repos\Skate3_extension\Skate3_extension\SuperSectors.h(95,2): warning C4091: '__declspec(dllexport)': ignored on left of 'SuperSector' when no variable is declared
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9082,58): warning C4101: 'Clipping': unreferenced local variable
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9082,27): warning C4101: 'vShared': unreferenced local variable
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9082,42): warning C4101: 'StencileEnable': unreferenced local variable
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9082,10): warning C4101: 'D3DCMP': unreferenced local variable
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9082,68): warning C4101: 'Clipplane': unreferenced local variable
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9082,89): warning C4101: 'COLORARG1': unreferenced local variable
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9082,79): warning C4101: 'COLOROP1': unreferenced local variable
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9082,100): warning C4101: 'COLORARG2': unreferenced local variable
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9082,18): warning C4101: 'pShared': unreferenced local variable
+C:\Users\Vadru\source\repos\Skate3_extension\Skate3_extension\_Math.h(62): warning C4172: returning address of local variable or temporary: Out
+C:\Users\Vadru\source\repos\Skate3_extension\Skate3_extension\Node.h(23): warning C4172: returning address of local variable or temporary: x
+  d3d8to9.vcxproj -> C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\bin\Debug\d3d8.dll
