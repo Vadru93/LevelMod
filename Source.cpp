@@ -21,12 +21,28 @@
 #include "d3d9.h"
 #include <d3dx9.h>
 #include <d3dx9core.h>
+#include "IniReader.h"
+#include "IniWriter.h"
 
-ID3DXLine* line =NULL;
 
-DWORD numLineVertices=0;
-D3DCOLOR lineColor=0;
+ID3DXLine* line = NULL;
+
+DWORD showmessage = 0;
+
+DWORD numLineVertices = 0;
+D3DCOLOR lineColor = 0;
 D3DXMATRIX lineWorld;
+
+void SetTagLimit(DWORD limit);
+
+
+bool init = true;
+bool init2 = false;
+bool init3 = false;
+
+CIniWriter* OptionWriter = NULL;// ini("LevelMod.ini");
+CIniReader* OptionReader = NULL;
+char IniPath[MAX_PATH + 1] = "";
 
 const DWORD line_fvf = D3DFVF_XYZRHW | D3DFVF_DIFFUSE;
 
@@ -61,7 +77,8 @@ EXTERN Vertex& Vertex::Rotate(const Vertex& axis, const float angle)
 
 
 
-BYTE SpineButton = 7;
+int SpineButton = 7;
+int SpineButton2 = -1;
 
 using namespace std;
 
@@ -154,7 +171,7 @@ struct Script
 				fprintf(debugFile, "AddingKey %s %X, in file %s\r\n", name, key, fileName);
 				printf("AddingKey %s %X, in file %s\r\n", name, key, fileName);
 				fclose(debugFile);*/
-				_printf("AddChecksum %s 0x%X\n", name, key);
+				//_printf("AddChecksum %s 0x%X\n", name, key);
 				qbTable.insert(std::pair<int, char*>(key, name));
 				qbKeys.push_back(key);
 			}
@@ -172,8 +189,12 @@ struct Script
 		}
 	}
 
+	Script(bool nothing)
+	{
+		fileName = NULL;
+	}
 
-	Script()
+	void AddScripts()
 	{
 		char* qdir = (char*)0x5BBAF8;
 		char dir[256] = "data\\";
@@ -181,6 +202,8 @@ struct Script
 		memcpy(&dir[5], qdir, len);
 
 		FILE* f = fopen(dir, "rb+");
+
+
 
 
 		fseek(f, 0, SEEK_END);
@@ -204,13 +227,6 @@ struct Script
 				pFile++;
 			}
 
-			/*char* p = dir;
-			while (*p != '.')
-				p++;
-			p += 2;
-			*p = '\0x0';
-			p++;
-			*p = '\0x0';*/
 			dir[i] = 0;
 
 
@@ -220,6 +236,11 @@ struct Script
 				pFile++;
 		}
 		delete[] oldData;
+	}
+
+	Script()
+	{
+		AddScripts();
 	}
 	char unkString[256] = "";
 	char* GetQBKeyName(int checksum)
@@ -234,11 +255,11 @@ struct Script
 			{
 				return it->second;
 			}
-			else
-				printf("couldn't find QBKey %X\n", checksum);
+			/*else
+				printf("couldn't find QBKey %X\n", checksum);*/
 		}
-		else
-			printf("couldn't find QBKey %X\n", checksum);
+		/*else
+			printf("couldn't find QBKey %X\n", checksum);*/
 		return NULL;
 	}
 
@@ -341,23 +362,32 @@ struct Script
 	}
 };
 
+static char Not_Inited[] = "NOT_INIT";
+static char Unnamed_Param[] = "UnnamedParam";
+char unkString[128] = "";
 
 EXTERN char* FindChecksumName(DWORD checksum)
 {
 	if (qbTable)
 	{
-		char* name = qbTable->GetQBKeyName(checksum);
-		if (name)
-			return name;
-		else
+		if (checksum)
 		{
-			static char unkString[128] = "";
-			sprintf(unkString, "UNKNOWN(0X%X)", checksum);
-			return unkString;
+			char* name = qbTable->GetQBKeyName(checksum);
+			if (name)
+				return name;
+			else
+			{
+				sprintf(unkString, "UNKNOWN(0X%X)", checksum);
+				return unkString;
+
+			}
+			
 		}
+		else
+			return Unnamed_Param;
 	}
 	else
-		return (char*)"NOT_INIT";
+		return Not_Inited;
 }
 
 
@@ -842,7 +872,7 @@ struct ObserveMode
 			skater = (Skater*)*(DWORD*)((DWORD)current + 20);
 			if (firstTime)
 			{
-			  currentDistance = *(D3DXVECTOR3*)camera - *(D3DXVECTOR3*)skater->GetPosition();
+				currentDistance = *(D3DXVECTOR3*)camera - *(D3DXVECTOR3*)skater->GetPosition();
 				if (currentDistance.x < 0.0)
 					currentDistance.x *= -1;
 				if (currentDistance.z < 0.0)
@@ -865,7 +895,7 @@ struct ObserveMode
 	}
 
 	//curr +12
-	void Next(float time=0)//follow next player
+	void Next(float time = 0)//follow next player
 	{
 		timeNext = time;
 		/*static const DWORD ptr = 0x008E1E90;
@@ -881,25 +911,25 @@ struct ObserveMode
 		camMode = *(DWORD*)camMode + 0x580;
 		if (InvalidReadPtr((void*)camMode))
 			return;*/
-		/*DWORD camMode = (DWORD)current + 0x4DD;
-		camMode = *(DWORD*)camMode + 0x38c;
-		camMode = *(DWORD*)camMode + 0x882c;*/
-		/*static const DWORD ptr = 0x008E1E90;
-		if (InvalidReadPtr((void*)ptr))
-			return;
-		DWORD camMode = *(DWORD*)ptr + 0x9C;
-		camMode = *(DWORD*)camMode + 0x34;
-		if (InvalidReadPtr((void*)camMode))
-			return;
-		camMode = *(DWORD*)camMode + 0xC;
-		if (InvalidReadPtr((void*)camMode))
-			return;
-		camMode = *(DWORD*)camMode + 0xC;
-		if (InvalidReadPtr((void*)camMode))
-			return;
-		camMode = *(DWORD*)camMode + 0x580;
-		if (InvalidReadPtr((void*)camMode))
-			return;*/
+			/*DWORD camMode = (DWORD)current + 0x4DD;
+			camMode = *(DWORD*)camMode + 0x38c;
+			camMode = *(DWORD*)camMode + 0x882c;*/
+			/*static const DWORD ptr = 0x008E1E90;
+			if (InvalidReadPtr((void*)ptr))
+				return;
+			DWORD camMode = *(DWORD*)ptr + 0x9C;
+			camMode = *(DWORD*)camMode + 0x34;
+			if (InvalidReadPtr((void*)camMode))
+				return;
+			camMode = *(DWORD*)camMode + 0xC;
+			if (InvalidReadPtr((void*)camMode))
+				return;
+			camMode = *(DWORD*)camMode + 0xC;
+			if (InvalidReadPtr((void*)camMode))
+				return;
+			camMode = *(DWORD*)camMode + 0x580;
+			if (InvalidReadPtr((void*)camMode))
+				return;*/
 		DWORD camMode = Skater::GetCamModeAddress();
 		*(DWORD*)camMode = 0;//Set camera to follow your own skater
 
@@ -1478,12 +1508,12 @@ struct ObserveMode
 			if (InvalidReadPtr((void*)camMode))
 				return;*/
 
-			//Set camera mode to free roaming
-			/*DWORD camMode = (DWORD)current + 0x4DD;
-			camMode = *(DWORD*)camMode + 0x38c;
-			sprintf(msg, "%X", camMode);
-			MessageBox(0, msg, msg, 0);
-			camMode = *(DWORD*)camMode + 0x882c;*/
+				//Set camera mode to free roaming
+				/*DWORD camMode = (DWORD)current + 0x4DD;
+				camMode = *(DWORD*)camMode + 0x38c;
+				sprintf(msg, "%X", camMode);
+				MessageBox(0, msg, msg, 0);
+				camMode = *(DWORD*)camMode + 0x882c;*/
 			DWORD camMode = Skater::GetCamModeAddress();
 			*(DWORD*)camMode = 2;
 			_printf("Got CamMode\n");
@@ -1615,27 +1645,27 @@ bool LeaveObserveMode(CStruct* pParams, CScript* pScript)
 		camMode = *(DWORD*)camMode + 0x580;
 		if (InvalidReadPtr((void*)camMode))
 			return false;*/
-		/*static const DWORD ptr = 0x008E1E90;
-		if (InvalidReadPtr((void*)ptr))
-			return false;
-		DWORD camMode = *(DWORD*)ptr + 0x9C;
-		camMode = *(DWORD*)camMode + 0x34;
-		if (InvalidReadPtr((void*)camMode))
-			return false;
-		camMode = *(DWORD*)camMode + 0xC;
-		if (InvalidReadPtr((void*)camMode))
-			return false;
-		camMode = *(DWORD*)camMode + 0xC;
-		if (InvalidReadPtr((void*)camMode))
-			return false;
-		camMode = *(DWORD*)camMode + 0x580;
-		if (InvalidReadPtr((void*)camMode))
-			return false;*/
-		/*DWORD camMode = (DWORD)observe->current + 0x4DD;
-		camMode = *(DWORD*)camMode + 0x38c;
-		sprintf(msg, "%X", camMode);
-		MessageBox(0, msg, msg, 0);
-		camMode = *(DWORD*)camMode + 0x882c;*/
+			/*static const DWORD ptr = 0x008E1E90;
+			if (InvalidReadPtr((void*)ptr))
+				return false;
+			DWORD camMode = *(DWORD*)ptr + 0x9C;
+			camMode = *(DWORD*)camMode + 0x34;
+			if (InvalidReadPtr((void*)camMode))
+				return false;
+			camMode = *(DWORD*)camMode + 0xC;
+			if (InvalidReadPtr((void*)camMode))
+				return false;
+			camMode = *(DWORD*)camMode + 0xC;
+			if (InvalidReadPtr((void*)camMode))
+				return false;
+			camMode = *(DWORD*)camMode + 0x580;
+			if (InvalidReadPtr((void*)camMode))
+				return false;*/
+				/*DWORD camMode = (DWORD)observe->current + 0x4DD;
+				camMode = *(DWORD*)camMode + 0x38c;
+				sprintf(msg, "%X", camMode);
+				MessageBox(0, msg, msg, 0);
+				camMode = *(DWORD*)camMode + 0x882c;*/
 		DWORD camMode = Skater::GetCamModeAddress();
 		*(DWORD*)camMode = 0;
 	}
@@ -1765,6 +1795,7 @@ enum TransferType
 namespace Slerp
 {
 	static bool transfer = false;
+	static bool landing = false;
 	static Matrix start;
 	static Matrix end;
 	static Matrix old;
@@ -1783,6 +1814,7 @@ namespace Slerp
 	bool addedvel = false;
 	bool landed = true;
 	bool OnGround = false;
+	bool OnGrind = false;
 	bool done = false;
 	bool trying = false;
 	float value = 0.0f;
@@ -1802,11 +1834,13 @@ namespace LevelModSettings
 	BYTE OldMenu[] = { 0xC6, 0x46, 0x04, 0x01, 0x74, 0x70, 0x57, 0x6A, 0x00 };
 
 	bool UseNewMenu = true;
+	bool AllowNewTricks = true;
 	bool AA = false;
 	bool UnlimitedGraf = false;
 	bool FixSound = true;
 	bool TeleFix = true;
 	bool grafCounter = true;
+	bool HookedControls = false;
 	DWORD MemorySize = 0xFA000;
 
 	void ToggleNewMenu()
@@ -2022,6 +2056,7 @@ inline void SendChatMsg(char* text);
 void CommandConsole(const char* message);
 void CommandTell(const char* message);
 void CommandDebug(const char* message);
+void CommandAdd(const char* message);
 
 struct Command
 {
@@ -2029,36 +2064,22 @@ struct Command
 	void(*function)(const char* message);
 	char name[12];
 };
-Command commands[] = { { crc32f((unsigned char*)"commands"), &CommandShowCommands, "commands" }, { crc32f((unsigned char*)"tell"), &CommandTell, "tell" }, { crc32f((unsigned char*)"kick"), &CommandKick, "kick" }, { crc32f((unsigned char*)"ban"), &CommandBan, "ban" }, { crc32f((unsigned char*)"getinfo"), &CommandGetInfo, "getinfo" }, { crc32f((unsigned char*)"console"), &CommandConsole, "console" }, { crc32f((unsigned char*)"debug"), &CommandDebug, "debug" } };
-void CommandShowCommands(const char* message)
-{
-	char msg[128];
-	DWORD k = 0;
-	for (DWORD i = 1; i < sizeof(commands) / sizeof(Command); i++)
-	{
-		DWORD j = 0;
-		while (commands[i].name[j] != 0)
-		{
-			msg[k] = commands[i].name[j];
-			j++;
-			k++;
-		}
-		msg[k] = 0x20;
-		k++;
-	}
-	msg[k] = '\n';
-	msg[k] = 0;
-	//SendChatMsg(msg);
-	printf(msg);
-}
-
+Command commands[] = {
+	{ crc32f((unsigned char*)"commands"), &CommandShowCommands, "commands" },
+	{ crc32f((unsigned char*)"tell"), &CommandTell, "tell" },
+	{ crc32f((unsigned char*)"kick"), &CommandKick, "kick" },
+	{ crc32f((unsigned char*)"ban"), &CommandBan, "ban" },
+	{ crc32f((unsigned char*)"getinfo"), &CommandGetInfo, "getinfo" },
+	{ crc32f((unsigned char*)"console"), &CommandConsole, "console" },
+	{ crc32f((unsigned char*)"debug"), &CommandDebug, "debug" },
+	{ crc32f((unsigned char*)"add"), &CommandAdd, "add"} };
 
 
 void TestInterporlator(Matrix* result, float delta)
 {
 	/* Cap and floor the delta */
 	/* If we are at one end the solution is easy */
-	if (delta <= 0.0f)
+	/*if (delta <= 0.0f)
 	{
 		// delta = 0.0f;
 		*result = Slerp::start;
@@ -2069,7 +2090,7 @@ void TestInterporlator(Matrix* result, float delta)
 		// delta = 1.0f;
 		*result = Slerp::end;
 		return;
-	}
+	}*/
 
 #if 0
 	// GJ:  always lerp, used while slerp was being debugged
@@ -2077,7 +2098,7 @@ void TestInterporlator(Matrix* result, float delta)
 #endif
 
   /* Do the lerp if we are, else... */
-	if (Slerp::lerp)
+	if (Slerp::lerp && false)
 	{
 		/* Get the lerp matrix */
 		Matrix	lerp;
@@ -2126,7 +2147,7 @@ void TestInterporlator(Matrix* result, float delta)
 
 		/* Remove the translation for now */
 		*result = Slerp::start;
-		*(D3DXVECTOR4*)(*result).m[POS] = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f);
+		//*(D3DXVECTOR4*)(*result).m[POS] = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		/* Rotate the new matrix */
 		//      m_axis[W] = 0.0f;
@@ -2139,7 +2160,7 @@ void TestInterporlator(Matrix* result, float delta)
 		(*(Vertex*)&lpos).Scale(delta);
 		rpos = spos + lpos;
 
-		*(D3DXVECTOR3*)(*result).m[POS] = rpos;
+		//*(D3DXVECTOR3*)(*result).m[POS] = rpos;
 	}
 }
 
@@ -2153,9 +2174,9 @@ void Interporlate(Matrix* result, float delta)
 	}
 	else if (delta >= 1.0f)
 	{
-		// delta = 1.0f;
-		*result = Slerp::end;
-		return;
+		delta = 1.0f;
+		/**result = Slerp::end;
+		return;*/
 	}
 
 	if (Slerp::lerp && false)
@@ -2192,8 +2213,8 @@ void Interporlate(Matrix* result, float delta)
 		(*(Vertex*)&((*result)[UP])).Normalize();
 		(*(Vertex*)&((*result)[AT])).Normalize();
 
-		*(D3DXVECTOR4*)&(*result).m[POS] = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f);
-		*(Vertex*)&(*result)[POS] = rpos;
+		/**(D3DXVECTOR4*)&(*result).m[POS] = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f);
+		*(Vertex*)&(*result)[POS] = rpos;*/
 	}
 	else
 	{
@@ -2331,7 +2352,9 @@ void Skater::Slerping()
 		}
 		else
 		{
+			_printf("FINAL\n");
 			Slerp::slerping = false;
+			//tracking = true;
 			/*QBKeyHeader* header = GetQBKeyHeader(crc32f((unsigned char*)"Normal_Lerp_Speed"));
 			if (header)
 			{
@@ -2339,8 +2362,13 @@ void Skater::Slerping()
 			  Slerp::value = header->value.f;
 			  header->value.f = 0.01f;
 			}*/
-			Vector norm = *(Vector*)&Slerp::end.m[Y];
-			SetNormal(norm);
+			if (Slerp::duration < 0.9f)
+			{
+				Vector norm = *(Vector*)&Slerp::end.m[Y];
+				printf("norm %f %f %f, end %f %f %f", norm.x, norm.y, norm.z, Slerp::end.m[Y][X], Slerp::end.m[Y][Y], Slerp::end.m[Y][Z]);
+
+				SetNormal(norm);
+			}
 			//SetPosition(*GetHitPoint());
 		}
 	}
@@ -2435,11 +2463,14 @@ void Skater::ResetLerpingMatrix()
 void OnGround()
 {
 	Slerp::OnGround = true;
+	Slerp::OnGrind = false;
+	Slerp::landing = false;
+	Slerp::slerping = false;
 
-	if (Slerp::transfer)
+	if (Slerp::transfer) [[unlikely]]
 	{
 		Slerp::transfer = false;
-		Slerp::slerping = false;
+
 		Skater* skater = Skater::GetSkater();
 		if (skater == NULL)
 			return;
@@ -2448,7 +2479,7 @@ void OnGround()
 		QBKeyHeader* header = GetQBKeyHeader(Checksums::Normal_Lerp_Speed);
 		if (header)
 			header->value.f = Slerp::value;
-		
+
 
 		skater->ResetLerpingMatrix();
 		if (Slerp::landed == false)
@@ -2574,6 +2605,7 @@ void ResetTransfer(Skater* skater)
 	//*skater->GetVelocity() = -*skater->GetVelocity();
 	skater->SetLanded(Slerp::vert);
 	Slerp::transfer = false;
+	Slerp::landing = false;
 	Slerp::slerping = false;
 	//skater->ResetLerpingMatrix();
 	Slerp::landed = true;
@@ -2613,15 +2645,13 @@ __declspec(naked) void ResetTransfer_naked()
 	_asm mov skater, ebp
 
 	_asm pushad;
-	_asm pushfd;
 	//_asm pushfd;
 	//_printf("inside resettransfer\n");
 
-	if (Slerp::transfer && skater)
+	if (Slerp::transfer && skater) [[unlikely]]
 	{
 		ResetTransfer(skater);
 	}
-	_asm popfd;
 	_asm popad;
 	static DWORD unk1 = 0x0040FA20;
 	_asm call unk1
@@ -2659,7 +2689,7 @@ bool look_for_transfer_target(const D3DXVECTOR3& search_dir, const Vertex& start
 		Vertex vel_normal = ::GetNormal(&vel);*/
 		Vertex start = *(Vertex*)&(*(Vertex*)skater->GetPosition() + search_dir * step);		// start at current height
 		printf("Start %f %f, pos %f %f\n", start.x, start.z, skater->GetPosition()->x, skater->GetPosition()->z);
-		//start.y += 100.0f;
+		//start.y += 100.0f;m
 		Vertex end = start;
 		end.y -= 4500.0f;									// long way below
 		skater->SetRay(*(D3DXVECTOR3*)&start, *(D3DXVECTOR3*)&end);
@@ -2670,17 +2700,24 @@ bool look_for_transfer_target(const D3DXVECTOR3& search_dir, const Vertex& start
 			horizontal_normal.y = 0.0f;
 			horizontal_normal.Normalize();
 			float dot = D3DXVec3Dot((D3DXVECTOR3*)&start_normal, (D3DXVECTOR3*)&horizontal_normal);
-			if (dot <= 0.95f)
+			if (dot <= 0.95f)//same as in thug1src
 			{
 				target = *(Vertex*)skater->GetHitPoint();
 				target_normal = *(Vertex*)skater->GetCollisionNormal();
-				_printf("Target %f %f %f normal %f %f %f\n", target.x, target.y, target.z, target_normal.x, target_normal.y, target_normal.z);
+				//_printf("Target %f %f %f normal %f %f %f\n", target.x, target.y, target.z, target_normal.x, target_normal.y, target_normal.z);
 
-				hip_transfer = dot > -0.866f;
-
-				// feeler.m_end[Y] += 3960.0f;
-				//AddRay(*(D3DXVECTOR3*)&start, *(D3DXVECTOR3*)&end, D3DXCOLOR(255.0f, 100.0f, 100.0f, 255.0f));
-				// feeler.DebugLine(255, 100, 100, 0);
+				hip_transfer = dot > -0.866f;//same as in thug1src
+				if (hip_transfer)
+				{
+					//Added a check here to see if the two normals are on the same axis and have a low angle
+					//Without this check you wil hip transfer to ramps that are on the same horizon as you...
+					if (dot >= 0.4f && Sgn(start_normal.x) == Sgn(horizontal_normal.x) && Sgn(start_normal.z) == Sgn(horizontal_normal.z))
+					{
+						_printf("HIP with too low angle?\n");
+						return false;
+					}
+					_printf("dot %f\nstart %f %f, target %f %f\n", dot, start_normal.x, start_normal.z, horizontal_normal.x, horizontal_normal.z);
+				}
 
 				return true;
 			}
@@ -2689,16 +2726,8 @@ bool look_for_transfer_target(const D3DXVECTOR3& search_dir, const Vertex& start
 				target = *(Vertex*)skater->GetHitPoint();
 				target_normal = *(Vertex*)skater->GetCollisionNormal();
 				_printf("FAlSE Target dot %f\n%f %f %f normal %f %f %f\n", dot, target.x, target.y, target.z, target_normal.x, target_normal.y, target_normal.z);
-				// feeler.m_end[Y] += 3960.0f;
-				//AddRay(*(D3DXVECTOR3*)&start, *(D3DXVECTOR3*)&end, D3DXCOLOR(100.0f, 255.0f, 100.0f, 255.0f));
-				// feeler.DebugLine(100, 255, 100, 0);
+
 			}
-		}
-		else
-		{
-			// feeler.m_end[Y] += 3960.0f;
-			//AddRay(*(D3DXVECTOR3*)&start, *(D3DXVECTOR3*)&end, D3DXCOLOR(100.0f, 100.0f, 255.0f, 255.0f));
-			// feeler.DebugLine(100, 100, 255, 0);
 		}
 	}
 
@@ -2706,9 +2735,25 @@ bool look_for_transfer_target(const D3DXVECTOR3& search_dir, const Vertex& start
 }
 
 
+bool CheatIsOn(DWORD cheat)
+{
+	typedef bool(__cdecl* const pCheatIsOn)(DWORD, DWORD);
+	return pCheatIsOn(0x004B5310)(cheat, 1);
+}
+
+DWORD GetCheat(DWORD checksum)
+{
+	typedef DWORD(__cdecl* const pGetCheat)(DWORD, DWORD);
+	return pGetCheat(0x004263E0)(checksum, 1);
+}
+
 float GetAirGravity()
 {
+
 	return -1350.0f / 1.1f;
+	/*if (CheatIsOn(GetCheat(crc32f((unsigned char*)"CHEAT_MOON"))))
+		gravity *= 0.5f;
+	return gravity;*/
 }
 
 
@@ -2723,6 +2768,8 @@ float CalculateDuration(float target_height, float pos_Y, float vel_Y)
 
 	return (vel + sqrtf(vel * vel + 2.0f * acceleration * distance)) / acceleration;
 }
+
+
 
 bool Skater::CheckForSpine()
 {
@@ -2755,7 +2802,7 @@ bool Skater::CheckForSpine()
 
 	Vertex wall_out = forward; 							// forward facing vector
 	wall_out.Rotate(side, D3DX_PI / 2.0f);					// rotate fowrad 90 degrees
-	//wall_out = -wall_out;
+	wall_out = *(Vertex*)&(-wall_out);
 
 	float speed;
 	float dist = 12.0f;
@@ -2781,8 +2828,7 @@ bool Skater::CheckForSpine()
 	SetRay(start, end);
 	if (CollisionCheck(0x8, false))
 	{
-		//AddRay(*(D3DXVECTOR3*)&start, *(D3DXVECTOR3*)&end, D3DXCOLOR(0.0f, 0.0f, 0.0f, 255.0f));
-		_printf("found target\n");
+		_printf("found target -\n");
 
 		//MessageBox(0, "found wall", "", 0);
 		wall_pos = *(Vertex*)GetHitPoint();
@@ -2791,7 +2837,7 @@ bool Skater::CheckForSpine()
 		start_normal.y = 0.0f;
 		start_normal.Normalize();
 
-		target_found = look_for_transfer_target(-wall_out, start_normal, hip_transfer, target, target_normal);
+		target_found = look_for_transfer_target(wall_out, start_normal, hip_transfer, target, target_normal);
 
 		if (!target_found)
 		{
@@ -2801,15 +2847,99 @@ bool Skater::CheckForSpine()
 			// halfway between the previous search direction and the plane of the vert
 			if (!GetKeyState(KeyState::LEFT)->IsPressed() && GetKeyState(KeyState::RIGHT)->IsPressed())
 			{
-				Vertex search_dir = *(Vertex*)&(-left_along_vert + -wall_out);
+				Vertex search_dir = *(Vertex*)&(-left_along_vert + wall_out);
 				search_dir.Normalize();
 				target_found = look_for_transfer_target(search_dir, start_normal, hip_transfer, target, target_normal);
 			}
 			else if (!GetKeyState(KeyState::RIGHT)->IsPressed() && GetKeyState(KeyState::LEFT)->IsPressed())
 			{
-				Vertex search_dir = *(Vertex*)&(left_along_vert + -wall_out);
+				Vertex search_dir = *(Vertex*)&(left_along_vert + wall_out);
 				search_dir.Normalize();
 				target_found = look_for_transfer_target(search_dir, start_normal, hip_transfer, target, target_normal);
+			}
+		}
+	}
+	else
+	{
+		_printf("Retrying\n");
+		D3DXVECTOR3 start = (*GetPosition() - wall_out * 0.5f);
+		D3DXVECTOR3 end = (*GetPosition() - wall_out * 0.5f);
+		end.y -= 4500.0f;
+
+		SetRay(start, end);
+		if (CollisionCheck(0x8, false))
+		{
+			_printf("found target +\n");
+
+			//MessageBox(0, "found wall", "", 0);
+			wall_pos = *(Vertex*)GetHitPoint();
+
+			Vertex start_normal = *(Vertex*)&this->normal;
+			start_normal.y = 0.0f;
+			start_normal.Normalize();
+
+			target_found = look_for_transfer_target(wall_out, start_normal, hip_transfer, target, target_normal);
+
+			if (!target_found)
+			{
+				Vertex left_along_vert(-start_normal.z, 0.0f, start_normal.x);
+
+				// no target was found in the forward direction, perhaps we should look slightly left or right; look in the horizontal direction which is
+				// halfway between the previous search direction and the plane of the vert
+				if (!GetKeyState(KeyState::LEFT)->IsPressed() && GetKeyState(KeyState::RIGHT)->IsPressed())
+				{
+					Vertex search_dir = *(Vertex*)&(-left_along_vert + wall_out);
+					search_dir.Normalize();
+					target_found = look_for_transfer_target(search_dir, start_normal, hip_transfer, target, target_normal);
+				}
+				else if (!GetKeyState(KeyState::RIGHT)->IsPressed() && GetKeyState(KeyState::LEFT)->IsPressed())
+				{
+					Vertex search_dir = *(Vertex*)&(left_along_vert + wall_out);
+					search_dir.Normalize();
+					target_found = look_for_transfer_target(search_dir, start_normal, hip_transfer, target, target_normal);
+				}
+			}
+		}
+		else
+		{
+			_printf("Retrying\n");
+			D3DXVECTOR3 start = (*GetPosition());
+			D3DXVECTOR3 end = (*GetPosition());
+			end.y -= 4500.0f;
+
+			SetRay(start, end);
+			if (CollisionCheck(0x8, false))
+			{
+				_printf("found target\n");
+
+				//MessageBox(0, "found wall", "", 0);
+				wall_pos = *(Vertex*)GetHitPoint();
+
+				Vertex start_normal = *(Vertex*)&this->normal;
+				start_normal.y = 0.0f;
+				start_normal.Normalize();
+
+				target_found = look_for_transfer_target(wall_out, start_normal, hip_transfer, target, target_normal);
+
+				if (!target_found)
+				{
+					Vertex left_along_vert(-start_normal.z, 0.0f, start_normal.x);
+
+					// no target was found in the forward direction, perhaps we should look slightly left or right; look in the horizontal direction which is
+					// halfway between the previous search direction and the plane of the vert
+					if (!GetKeyState(KeyState::LEFT)->IsPressed() && GetKeyState(KeyState::RIGHT)->IsPressed())
+					{
+						Vertex search_dir = *(Vertex*)&(-left_along_vert + wall_out);
+						search_dir.Normalize();
+						target_found = look_for_transfer_target(search_dir, start_normal, hip_transfer, target, target_normal);
+					}
+					else if (!GetKeyState(KeyState::RIGHT)->IsPressed() && GetKeyState(KeyState::LEFT)->IsPressed())
+					{
+						Vertex search_dir = *(Vertex*)&(left_along_vert + wall_out);
+						search_dir.Normalize();
+						target_found = look_for_transfer_target(search_dir, start_normal, hip_transfer, target, target_normal);
+					}
+				}
 			}
 		}
 	}
@@ -2908,46 +3038,55 @@ bool Skater::CheckForSpine()
 	SetRay(start, end);
 	if (CollisionCheck(0x10))
 	{
-	  _printf("too early\n");
-	  // don't do anything.  We have a valid transfer but we can wait until we get high enough before we try for it
-	  return true;
+		_printf("too early\n");
+		// don't do anything.  We have a valid transfer but we can wait until we get high enough before we try for it
+		return true;
 	}
-
+	target_normal = *(Vertex*)&target_normal;
 	// setup the transfer's matrix slerp
 
-	Vertex land_facing;
+	//Vertex land_facing;
 	if (!hip_transfer)
 	{
-		land_facing = *(Vertex*)&(target - *(Vertex*)GetPosition());
+		//target_normal = *(Vertex*)&(-target_normal);
+		Slerp::facing = *(Vertex*)&(target - *(Vertex*)GetPosition());
+		Slerp::facing.y = -(Slerp::facing.x * target_normal.x + Slerp::facing.z * target_normal.z) / target_normal.y;
+		Slerp::facing.Normalize();
+		/*land_facing = *(Vertex*)&(target - *(Vertex*)GetPosition());
 		land_facing.y = -(land_facing.x * target_normal.x + land_facing.z * target_normal.z) / target_normal.y;
-		land_facing.Normalize();
+		land_facing.Normalize();*/
+		_printf("land_facing X %f Y %f\n", Slerp::facing.x, Slerp::facing.y);
 	}
 	else
 	{
+		_printf("\nHIP TRANSFER\n");
 		Vertex offset = *(Vertex*)&(target - *(Vertex*)GetPosition());
 		offset.Normalize();
 		float dot = D3DXVec3Dot(&offset, &horizontal_target_normal);
 		if (dot < 0.0f)
 		{
-			land_facing = Vertex(0.0f, 1.0f, 0.0f);
+			Slerp::facing = Vertex(0.0f, 1.0f, 0.0f);
+			_printf("land_facing +\n");
 		}
 		else
 		{
-			land_facing = Vertex(0.0f, -1.0f, 0.0f);
+			Slerp::facing = Vertex(0.0f, -1.0f, 0.0f);
+			_printf("land_facing -\n");
 		}
 	}
 
 	Slerp::start = *(Matrix*)GetMatrix();
+	*(D3DXVECTOR4*)Slerp::start.m[W] = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// calculate the facing we want when we land; retain our horizontal direction and choose a vertical component which puts us parallel so the target
 	// poly's plane
 
 	// calculate goal matrix
-	//land_facing = -land_facing;
-	*(Vertex*)Slerp::end.m[Z] = land_facing;
+	//Slerp::facing = *(Vertex*)&(-Slerp::facing);
+	*(Vertex*)Slerp::end.m[Z] = Slerp::facing;
 	(*(Vertex*)Slerp::end.m[Z]).ProjectToPlane(target_normal);
 	(*(Vertex*)Slerp::end.m[Z]).Normalize();
-	Slerp::end.m[X][Z] = 1.0f;
+	Slerp::end.m[Z][W] = 1.0f;
 	*(Vertex*)Slerp::end.m[Y] = target_normal;
 	Slerp::end.m[Y][W] = 1.0f;
 	*(Vertex*)Slerp::end.m[X] = CrossProduct((Vertex*)Slerp::end.m[Y], (Vertex*)Slerp::end.m[Z]);
@@ -2966,10 +3105,291 @@ bool Skater::CheckForSpine()
 	(D3DXMATRIX)inv = inv * Slerp::end;
 
 	// Get the axis and angle.
-	inv.GetRotationAxisAndAngle((Vertex*)&Slerp::axis, &Slerp::radians);
+	/*inv.GetRotationAxisAndAngle((Vertex*)&Slerp::axis, &Slerp::radians, start, end, hip_transfer);
 	const float USE_LERP_INSTEAD_DEGREES = 2.0f;
 	const float USE_LERP_INSTEAD_RADIANS = USE_LERP_INSTEAD_DEGREES * D3DX_PI / 180.0f;
-	Slerp::lerp = Slerp::radians < USE_LERP_INSTEAD_RADIANS;
+	Slerp::lerp = Slerp::radians < USE_LERP_INSTEAD_RADIANS;*/
+
+
+
+	//#if 0 // old transfer code
+		// get angle to rotate about, being the vector perpendicular to the world up vector and the difference between the two face normals
+		// (generally for a spine these normals will be opposite, however they might be up to 90 degrees or more off when doing a hip)
+	/*target_normal = *(Vertex*)&(-target_normal);
+	skater_up = *(Vertex*)&(-skater_up);*/
+	//skater_up = *(Vertex*)&(-skater_up);
+	Vertex normal_diff = *(Vertex*)&(target_normal - skater_up);
+	//normal_diff[Y] = 0.0f;
+
+
+	//normal_diff.Normalize();
+
+
+
+	Slerp::axis[Y] = 0;// don't rotate Y since this bugs us..// -normal_diff[Y];
+
+	/*if (fabsf(Slerp::axis[Z]) > (fabsf(Slerp::axis[X]) + 0.05f))
+	{
+		if (fabsf(Slerp::axis[X]) < 0.04f)
+			Slerp::axis[X] = 0;
+	}
+	else if (fabsf(Slerp::axis[X]) > (fabsf(Slerp::axis[Z]) + 0.05f))
+	{
+		if (fabsf(Slerp::axis[Z]) < 0.04f)
+			Slerp::axis[Z] = 0;
+	}*/
+
+
+
+	float xDiff = fabsf(start.x - end.x);
+	if (fabsf(normal_diff[X]) > 0.005/*xDiff >= 5.0f*/)//x diff is big enough, so apply rotation on Z axis
+		Slerp::axis[Z] = -normal_diff[X];
+	else if (!hip_transfer)
+		Slerp::axis[Z] = 0;
+	float zDiff = fabsf(start.z - end.z);
+	if (fabsf(normal_diff[Z]) > 0.005/*zDiff >= 5.0f*/)//z diff is big enough, so apply rotation on X axis
+		Slerp::axis[X] = normal_diff[Z];
+	else if (!hip_transfer)
+		Slerp::axis[X] = 0;
+
+
+	//If we have rotation on both X and Z it means we do a hip_transfer, or our velocity made us drift in the QP
+	if (Slerp::axis[X] && Slerp::axis[Z]) [[unlikely]]
+	{
+		_printf("Both Axis...\n");
+		if (hip_transfer) [[unlikely]]//hip_transfer, keeep both rotations
+		{
+			_printf("An unlikely event..\n");
+		/*vTwoSinThetaAxis.x = m[UP][Z] - m[AT][Y];
+		vTwoSinThetaAxis.z = m[UP][X] - m[RIGHT][Y];*/
+			}
+			else//need to check if we just drifted or if this is a non vertical ramp
+			{
+				_printf("drifted?");
+				if (xDiff > zDiff)
+				{
+					if ((xDiff - zDiff) > 180.0f || fabsf(start.y - end.y) > 100)//we just drifted, so rotate ONLY on the longest distance
+					{
+						 Slerp::axis[X] = 0;
+						 (*(Vertex*)&Slerp::axis).Normalize();
+						 printf(" YES wall %f %f\n", wall_out.x, wall_out.z);
+					}
+					else
+					{
+						printf(" NO 1 wall %f %f\n", wall_out.x, wall_out.z);
+						//vTwoSinThetaAxis.x = m[UP][Z] - m[AT][Y];
+						//vTwoSinThetaAxis.y = m[AT][X] - m[RIGHT][Z];
+						///vTwoSinThetaAxis.z = 0;// m[UP][X] - m[RIGHT][Y];
+						//reverse = true;
+						/*vTwoSinThetaAxis.x = m[UP][Z] - m[AT][Y];
+						vTwoSinThetaAxis.y = m[AT][X] - m[RIGHT][Z];
+						vTwoSinThetaAxis.z = m[RIGHT][Y] - m[UP][X];*/
+					}
+				 }
+				 else
+				 {
+					 if ((zDiff - xDiff) > 180.0f || fabsf(start.y - end.y) > 100)//we just drifted, so rotate ONLY on the longest distance
+					 {
+						 Slerp::axis[Z] = 0;
+						 (*(Vertex*)&Slerp::axis).Normalize();
+						 printf(" YES wall %f %f\n", wall_out.x, wall_out.z);
+					 }
+					 else
+							{
+						 //reverse = true;
+						 printf(" NO 2 wall %f %f\n", wall_out.x, wall_out.z);
+						 /*vTwoSinThetaAxis.x = m[UP][Z] - m[AT][Y];
+						 vTwoSinThetaAxis.y = m[AT][X] - m[RIGHT][Z];
+						 vTwoSinThetaAxis.z = m[RIGHT][Y] - m[UP][X];*/
+						 //vTwoSinThetaAxis.z = 0.5f;
+						 //vTwoSinThetaAxis.z = 0.5f;
+						 //vTwoSinThetaAxis.z = -m[RIGHT][Y] - m[UP][X];// *= -1.0f;// m[UP][X] - m[RIGHT][Y];
+						 /*vTwoSinThetaAxis.x = 0;// m[UP][Z] - m[AT][Y];
+						 //vTwoSinThetaAxis.y =  m[AT][X] - m[RIGHT][Z];
+						 vTwoSinThetaAxis.z = 0;// m[UP][X] - m[RIGHT][Y];*/
+					 }
+				 }
+			 }
+
+	}
+	else
+		_printf("1 axis\n");
+	/*if (fabsf(Slerp::axis[Z]) > (fabsf(Slerp::axis[X]) + 0.05f))
+	{
+		if (fabsf(Slerp::axis[X]) < 0.045f)
+			Slerp::axis[X] = 0;
+	}
+	else if (fabsf(Slerp::axis[X]) > (fabsf(Slerp::axis[Z]) + 0.05f))
+	{
+		if (fabsf(Slerp::axis[Z]) < 0.045f)
+			Slerp::axis[Z] = 0;
+	}*/
+	/*float nTwoSinTheta = (*(Vertex*)&(Slerp::axis)).Length();
+	float nTwoCosTheta = inv.m[RIGHT][X] + inv.m[UP][Y] + inv.m[AT][Z] - 1.0f;
+	Slerp::radians = (float)atan2(nTwoSinTheta, nTwoCosTheta);*/
+	Slerp::radians = 3.0f;
+	//Slerp::axis[Y] = 0;
+	_printf("\nStart %f %f\nend %f %f\n", start.x, start.z, end.x, end.z);
+	_printf("\nUp %f %f\ntarget_norm %f %f\n", skater_up.x, skater_up.z, target_normal.x, target_normal.z);
+	_printf("Radian %f Axis %f %f\n", Slerp::radians, Slerp::axis.x, Slerp::axis.z);
+	(*(Vertex*)&(Slerp::axis)).Normalize();
+	_printf("Normalized Axis %f %f\n", Slerp::axis.x, Slerp::axis.z);
+	_printf("diffY %f\n", normal_diff[Y]);
+	normal_diff[Y] = 0.0f;
+	normal_diff.Normalize();
+	Matrix slerp_test;
+	TestInterporlator(&slerp_test, 0.5f);
+
+	if (slerp_test.m[Y][Y] < 0.0f)
+	{
+		_printf("Inverting Skater\n");
+
+		Slerp::axis = -Slerp::axis;
+		Slerp::radians = (2.0f * D3DX_PI) - Slerp::radians;
+	}
+
+	_printf("test_angle %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
+	if (!hip_transfer && Slerp::axis[X] && Slerp::axis[Z])//hip transfer seems to not be bugged?
+	{
+
+		//Here comes a hack to get the optimal angle
+		//We check if skater is rotated to "stand" straight in the air @ 50% of transfer
+		//If he is not standing straight enough even after this, we try to scale the axis
+		float optimal = fabsf(slerp_test.m[Y][Y]);
+		if (optimal < 0.95f)//standing straight enough?
+		{
+			int best = 1;
+			Slerp::radians = 3.0f;
+			D3DXVECTOR3 Optimal = Slerp::axis;
+			_printf("goint to find optimum\n");
+			D3DXMatrixIdentity(&slerp_test);
+			Slerp::axis[X] = normal_diff[Z];
+			Slerp::axis[Z] = -normal_diff[X];
+			TestInterporlator(&slerp_test, 0.5f); //test 50 % of transfer
+			if (slerp_test.m[Y][Y] > optimal)
+			{
+				optimal = slerp_test.m[Y][Y];
+				Optimal = Slerp::axis;
+				best++;
+			}
+			_printf("test_angle2 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
+
+			D3DXMatrixIdentity(&slerp_test);
+			Slerp::axis[X] = normal_diff[Z];
+			Slerp::axis[Z] = normal_diff[X];
+			TestInterporlator(&slerp_test, 0.5f);
+			if (slerp_test.m[Y][Y] > optimal)
+			{
+				optimal = slerp_test.m[Y][Y];
+				Optimal = Slerp::axis;
+				best = 3;
+			}
+			_printf("test_angle3 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
+
+			D3DXMatrixIdentity(&slerp_test);
+			Slerp::axis[X] = -normal_diff[Z];
+			Slerp::axis[Z] = -normal_diff[X];
+			TestInterporlator(&slerp_test, 0.5f);
+			if (slerp_test.m[Y][Y] > optimal)
+			{
+				optimal = slerp_test.m[Y][Y];
+				Optimal = Slerp::axis;
+				best = 4;
+			}
+			_printf("test_angle4 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
+
+			D3DXMatrixIdentity(&slerp_test);
+			Slerp::axis[X] = normal_diff[X];
+			Slerp::axis[Z] = normal_diff[Z];
+			TestInterporlator(&slerp_test, 0.5f);
+			if (slerp_test.m[Y][Y] > optimal)
+			{
+				optimal = slerp_test.m[Y][Y];
+				Optimal = Slerp::axis;
+				best = 5;
+			}
+			_printf("test_angle5 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
+
+			D3DXMatrixIdentity(&slerp_test);
+			Slerp::axis[X] = -normal_diff[X];
+			Slerp::axis[Z] = -normal_diff[Z];
+			TestInterporlator(&slerp_test, 0.5f);
+			if (slerp_test.m[Y][Y] > optimal)
+			{
+				optimal = slerp_test.m[Y][Y];
+				Optimal = Slerp::axis;
+				best = 6;
+			}
+			_printf("test_angle6 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
+
+			D3DXMatrixIdentity(&slerp_test);
+			Slerp::axis[X] = -normal_diff[X];
+			Slerp::axis[Z] = normal_diff[Z];
+			TestInterporlator(&slerp_test, 0.5f);
+			if (slerp_test.m[Y][Y] > optimal)
+			{
+				optimal = slerp_test.m[Y][Y];
+				Optimal = Slerp::axis;
+				best = 7;
+			}
+			_printf("test_angle7 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
+
+			D3DXMatrixIdentity(&slerp_test);
+			Slerp::axis[X] = normal_diff[X];
+			Slerp::axis[Z] = -normal_diff[Z];
+			TestInterporlator(&slerp_test, 0.5f);
+			if (slerp_test.m[Y][Y] > optimal)
+			{
+				optimal = slerp_test.m[Y][Y];
+				Optimal = Slerp::axis;
+				best = 8;
+			}
+			_printf("test_angle8 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
+
+			Slerp::axis = Optimal;
+
+			TestInterporlator(&slerp_test, 1.0f);
+			float angDiffX = fabsf(slerp_test[Y][X] - target_normal[Z]);
+			float angDiffZ = fabsf(slerp_test[Y][Z] - target_normal[X]);
+
+			printf("angDiff %f %f\nNormalY %f\n", angDiffX, angDiffZ, target_normal[Y]);
+			printf("final axis %f %f\nBestAngle %d\n", Slerp::axis[X], Slerp::axis[Z], best);
+
+
+			TestInterporlator(&slerp_test, 0.5f);
+			if (slerp_test.m[Y][Y] < 0.95f)//still not straight enough, let's try scaling...
+			{
+				_printf("Scaling axis: ");
+				if (Slerp::axis[X] > Slerp::axis[Z])
+				{
+					_printf("X\n");
+					Slerp::axis[X] /= 2;
+					Slerp::axis[Z] += Slerp::axis[X];
+				}
+				else if (Slerp::axis[X] < Slerp::axis[Z])
+				{
+					_printf("Z\n");
+					Slerp::axis[X] /= 2;
+					Slerp::axis[Z] += Slerp::axis[X];
+				}
+				else
+					_printf("Equal?\n");
+			}
+			/*TestInterporlator(&slerp_test, 0.5f);
+			if (slerp_test.m[Y][Y] < 0.0f)
+			{
+				_printf("Inverting Skater\n");
+
+				Slerp::axis = -Slerp::axis;
+				Slerp::radians = (2.0f * D3DX_PI) - Slerp::radians;
+			}*/
+		}
+	}
+
+
+	//m_spine_rotate_axis[W] = 0.0f;;
+//#endif
+
 	// if the skater is entering the spine transfer with an odd facing due to rotation, we want to preserve that angle in the slerp's goal matrix
 
 	// calculate the deviation between the skater's velocity and facing
@@ -2990,14 +3410,6 @@ bool Skater::CheckForSpine()
 	Slerp::duration = ClampMin(time, 0.9f); // clamp the time to stop super fast rotations
 	Slerp::old = Slerp::start;
 
-	// insure that the slerp takes us over the top, and doesn't invert us
-	Matrix slerp_test;
-	TestInterporlator(&slerp_test, 0.5f);
-	if (slerp_test.m[Y][Y] < 0.0f)
-	{
-		Slerp::axis = -Slerp::axis;
-		Slerp::radians = (2.0f * D3DX_PI) - Slerp::radians;
-	}
 
 	// remember the height we are aiming for, so when we come down through this height
 	// then we remove the non vert velocity (or make it very small....)
@@ -3212,7 +3624,8 @@ bool maybe_acid(bool skated_off_edge, const Vertex& pos, const Vertex& old_pos, 
 		if (skater->CollisionCheck(0x8, false) && is_vert_for_transfers((Vertex*)skater->GetCollisionNormal()))
 		{
 			// the horizontal projection of the vert's normal just correspond somewhat to our direction			 
-			target_normal = *(Vertex*)&(horizontal_target_normal = *(Vertex*)skater->GetCollisionNormal());
+			target_normal = *(Vertex*)skater->GetCollisionNormal();
+			*(Vertex*)&(horizontal_target_normal) = target_normal;
 			horizontal_target_normal.y = 0.0f;
 			horizontal_target_normal.Normalize();
 
@@ -3393,7 +3806,7 @@ EXTERN void Skater::SetRay(D3DXVECTOR3 start, D3DXVECTOR3 end)
 	this->startcol = start;
 	this->endcol = end;
 
-	
+
 	lineVertices[0].x = start.x;
 	lineVertices[0].y = start.y;
 	lineVertices[0].z = start.z;
@@ -3411,6 +3824,12 @@ EXTERN void Skater::SetRay(D3DXVECTOR3 start, D3DXVECTOR3 end)
 	MessageBox(0, "WTF?", "", 0);
 	AddRayd(start, end, c);*/
 }
+
+EXTERN void Skater::SetCanBreakVert(bool value)
+{
+	canbreakvert = value;
+}
+
 
 EXTERN void Skater::SetVertAir(bool value)
 {
@@ -3517,10 +3936,10 @@ void EnterAcid(const SAcidDropData& data)
 		(D3DXMATRIX)inv = inv * Slerp::end;
 
 		// Get the axis and angle.
-		/*inv.GetRotationAxisAndAngle((Vertex*)&Slerp::axis, &Slerp::radians);
+		inv.GetRotationAxisAndAngle((Vertex*)&Slerp::axis, &Slerp::radians, *skater->GetPosition(), *(Vertex*)&target_pos);
 		const float USE_LERP_INSTEAD_DEGREES = 2.0f;
 		const float USE_LERP_INSTEAD_RADIANS = USE_LERP_INSTEAD_DEGREES * D3DX_PI / 180.0f;
-		Slerp::lerp = Slerp::radians < USE_LERP_INSTEAD_RADIANS;*/
+		Slerp::lerp = Slerp::radians < USE_LERP_INSTEAD_RADIANS;
 
 		Vertex horizfacing = *(Vertex*)&(skater->GetMatrix()->m[Z]);
 		horizfacing.y = 0.0f;
@@ -3553,7 +3972,7 @@ void EnterAcid(const SAcidDropData& data)
 
 bool TestForAcid(CStruct* pParams, CScript* pScript)
 {
-	if (Slerp::inAcid || Slerp::transfer)
+	if (Slerp::inAcid || Slerp::transfer || Slerp::landing)
 		return false;
 	Slerp::landed = false;
 	SAcidDropData acid_drop_data;
@@ -3561,13 +3980,113 @@ bool TestForAcid(CStruct* pParams, CScript* pScript)
 	skater->Store();
 	if (skater->InVert())
 	{
-		//MessageBox(0, "INVERT", "", MB_OK);
 		if (skater->CheckForSpine())
 		{
+			//found a spine target
 			Slerp::type = SPINE;
 			Slerp::vert = true;
-			skater->Restore();
+			//skater->Restore();
 			return Slerp::transfer;
+		}
+		else
+		{
+
+			Vertex forward = *(Vertex*)&(*skater->GetVelocity());
+			if (forward.y < 0.0f)
+			{
+				Slerp::landing = true;
+				skater->Restore();
+				return false;
+			}
+			Slerp::landing = true;
+			Slerp::transfer = true;
+			Slerp::slerping = true;
+			_printf("No Spine Target...\n");
+			skater->Restore();
+			Slerp::last = *(Vertex*)skater->GetVelocity();
+			skater->SetVertAir(false);
+			skater->SetCanBreakVert(false);	// and as we "broke" vert, we don't want to do it again
+			skater->SetLanded(false);
+			Slerp::vert = false;
+			Slerp::done = true;
+			D3DXVECTOR3 start = *skater->GetPosition();
+			D3DXVECTOR3 end = start;
+			end.y -= 4000;
+			skater->SetRay(start, end);
+			skater->CollisionCheck(0x10);
+			skater->GetVelocity()->x = 0;
+			skater->GetVelocity()->z = 0;
+
+			Slerp::start = *(Matrix*)skater->GetMatrix();
+			Vertex target_pos = *(Vertex*)skater->GetHitPoint();
+			Vertex target_normal = *(Vertex*)skater->GetCollisionNormal();
+			Slerp::facing = *(Vertex*)&(target_pos - *(Vertex*)skater->GetPosition());
+			Slerp::facing.y = -(Slerp::facing.x * target_normal.x + Slerp::facing.z * target_normal.z) / target_normal.y;
+			Slerp::facing.Normalize();
+			//Slerp::facing = -Slerp::facing;
+
+			*(Vertex*)Slerp::end.m[Z] = Slerp::facing;
+			(*(Vertex*)Slerp::end.m[Z]).ProjectToPlane(target_normal);
+			(*(Vertex*)Slerp::end.m[Z]).Normalize();
+			Slerp::end.m[Z][W] = 1.0f;
+			*(Vertex*)Slerp::end.m[Y] = target_normal;
+			Slerp::end.m[Y][W] = 1.0f;
+			*(Vertex*)Slerp::end.m[X] = CrossProduct((Vertex*)Slerp::end.m[Y], (Vertex*)Slerp::end.m[Z]);
+			Slerp::end.m[X][W] = 1.0f;
+			*(D3DXVECTOR4*)Slerp::end.m[W] = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f);
+
+			Slerp::goal = (*(Vertex*)&(Slerp::end.m[Z]));
+			Slerp::duration = 10.0f;
+
+			Matrix	inv;
+
+
+			// Calculate the inverse transformation.
+			inv = Slerp::start;
+			inv.Invert();
+			(D3DXMATRIX)inv = inv * Slerp::end;
+
+			// Get the axis and angle.
+			/*inv.GetRotationAxisAndAngle((Vertex*)&Slerp::axis, &Slerp::radians);
+			const float USE_LERP_INSTEAD_DEGREES = 2.0f;
+			const float USE_LERP_INSTEAD_RADIANS = USE_LERP_INSTEAD_DEGREES * D3DX_PI / 180.0f;
+			Slerp::lerp = Slerp::radians < USE_LERP_INSTEAD_RADIANS;*/
+
+			Vertex horizfacing = *(Vertex*)&(skater->GetMatrix()->m[Z]);
+			horizfacing.y = 0.0f;
+
+			Vertex horizoffset = *(Vertex*)&(target_pos - *(Vertex*)skater->GetPosition());
+			horizoffset.y = 0.0f;
+			float distance = horizoffset.Length();
+
+			if (D3DXVec3Dot((D3DXVECTOR3*)&horizoffset, (D3DXVECTOR3*)skater->GetVelocity()) < 0.0f)
+				distance = -distance;
+			//distance += 2.0f;
+
+			D3DXVECTOR3 dropdirr = horizoffset / distance;
+
+			float angle = GetAngleAbout(horizfacing, *(Vertex*)&dropdirr, *(Vertex*)&(skater->GetMatrix()[Y]));
+			Slerp::end.RotateYLocal(-angle);
+			Slerp::timer = 0.0f;
+			Slerp::old = Slerp::start;
+
+
+			QBKeyHeader* header = GetQBKeyHeader(Checksums::Normal_Lerp_Speed);
+			if (header)
+			{
+
+				Slerp::value = header->value.f;
+				header->value.f = 0.01f;
+			}
+
+			Vector norm;
+			norm.x = target_normal.x;
+			norm.y = target_normal.y;
+			norm.z = target_normal.z;
+			norm.w = 1.0f;
+			//skater->SetNormal(norm);
+
+			return false;
 		}
 	}
 	else
@@ -3828,6 +4347,7 @@ bool TestForAcid(CStruct* pParams, CScript* pScript)
 	}
 	Slerp::inAcid = false;
 	Slerp::transfer = false;
+	Slerp::landing = false;
 	skater->Restore();
 	return false;
 }
@@ -3835,15 +4355,15 @@ bool TestForAcid(CStruct* pParams, CScript* pScript)
 
 void MaybeAcid()
 {
-	if (Slerp::inAcid || Slerp::transfer)
+	if (!LevelModSettings::AllowNewTricks || Slerp::inAcid || Slerp::transfer || Slerp::landing)
 		return;
 
 	SAcidDropData acid_drop_data;
 	Skater* skater = Skater::GetSkater();
-	if (skater == NULL)
+	if (skater == NULL) [[unlikely]]
 		return;
 	skater->Store();
-	if (skater && !Slerp::OnGround && skater->GetKeyState(SpineButton)->IsPressed())
+	if (!Slerp::OnGround && skater->GetKeyState(SpineButton)->IsPressed() && (SpineButton2 == KeyState::NONE || skater->GetKeyState(SpineButton2)->IsPressed()))
 	{
 		_printf("trying acid\n");
 
@@ -3854,7 +4374,7 @@ void MaybeAcid()
 		if (TestForAcid(NULL, NULL))
 		{
 			_printf("acid returned true\n");
-	
+
 			Slerp::trying = true;
 			Slerp::done = false;
 			switch (Slerp::type)
@@ -3874,6 +4394,7 @@ void MaybeAcid()
 	}
 	skater->Restore();
 	Slerp::OnGround = false;
+	Slerp::OnGrind = false;
 }
 
 __declspec(naked) void MaybeAcid_naked()
@@ -3912,7 +4433,7 @@ __declspec(naked) void CheckForTransfer_naked()
 		_asm mov ecx, skater
 		//_asm call preadjust
 		_asm call adjustnormal
-		
+
 	}
 	else
 	{
@@ -4532,12 +5053,12 @@ void CreateSuperSectors()
 FILE* logFile;
 void __cdecl add_log(const char* string, ...)
 {
-	if (string == (const char*)0x005B6120)
+	if (string == (const char*)0x005B6120) [[unlikely]]
 		DestroySuperSectors();
-	else if (string == (const char*)0x005B6104)
+	else if (string == (const char*)0x005B6104) [[unlikely]]
 		CreateSuperSectors();
 
-	if (debugMode)
+	if (debugMode) [[unlikely]]
 	{
 		static char buf[256] = "";
 		static CScript* pScript = NULL;
@@ -4559,7 +5080,7 @@ void __cdecl add_log(const char* string, ...)
 		  va_end(args);
 		  return k;*/
 
-		if ((DWORD)string == 0 || (DWORD)string < 0x00420000 || (DWORD)string > 0x02000000 || (strstr(string, "Tried to")))//string[0] == '\n' && string[1] == 'T' && string[2] == 'r'))
+		if ((DWORD)string == 0 || (DWORD)string < 0x00420000 || (DWORD)string > 0x02000000 || (strstr(string, "Tried to"))) [[unlikely]]//string[0] == '\n' && string[1] == 'T' && string[2] == 'r'))
 			return;
 
 		va_list args;
@@ -4572,7 +5093,7 @@ void __cdecl add_log(const char* string, ...)
 		{
 			while (*p != 0x0)
 			{
-				if (*p == '?' && *(p + 1) == '?' && *(p + 2) == '?' && *(p + 3) == '?' && *(p + 4) == '?')
+				if (*p == '?' && *(p + 1) == '?' && *(p + 2) == '?' && *(p + 3) == '?' && *(p + 4) == '?') [[unlikely]]
 				{
 					sprintf(buf, "%s:%s", buf, lastQB != NULL ? lastQB : FindChecksumName(pScript->scriptChecksum));
 					break;
@@ -4641,6 +5162,36 @@ void NormalMemoryMode()
 	  0042C280*/
 }
 
+DWORD GrindParamHook(char* str, int unk)
+{
+	//_printf("OnGrind?\n");
+	Slerp::OnGrind = true;
+	if ((Slerp::transfer || Slerp::landing)) [[unlikely]]
+	{
+		Slerp::OnGround = false;
+		Skater* skater = Skater::GetSkater();
+		if (skater)
+		{
+			_printf("OnGrind while inside transfer\nReseting transfer...\n");
+			QBKeyHeader* header = GetQBKeyHeader(Checksums::Normal_Lerp_Speed);
+			if (header)
+				header->value.f = Slerp::value;
+
+			//skater->SetVertAir(false);
+			skater->SetLanded(false);
+
+			Slerp::vert = false;
+			Slerp::transfer = false;
+			Slerp::landing = false;
+			Slerp::slerping = false;
+			skater->ResetLerpingMatrix();
+			Slerp::landed = true;
+
+		}
+	}
+	typedef DWORD(__cdecl* const pGrindParam)(char*, int);
+	return pGrindParam(0x00426570)(str, unk);
+}
 
 void FixSpineFlag()
 {
@@ -4717,12 +5268,12 @@ void FixSpineFlag()
 	*(DWORD*)addr = offset;*/
 	/*if (debugMode)
 	{*/
-		DWORD fopen = *(DWORD*)0x0058D0B0;
-		VirtualProtect((void*)fopen, 5, PAGE_EXECUTE_READWRITE, &old);
-		*(BYTE*)fopen = 0xE9;
-		addr = fopen + 1;
-		offset = (PtrToUlong(Fopen_naked) - fopen) - 5;
-		*(DWORD*)addr = offset;
+	DWORD fopen = *(DWORD*)0x0058D0B0;
+	VirtualProtect((void*)fopen, 5, PAGE_EXECUTE_READWRITE, &old);
+	*(BYTE*)fopen = 0xE9;
+	addr = fopen + 1;
+	offset = (PtrToUlong(Fopen_naked) - fopen) - 5;
+	*(DWORD*)addr = offset;
 	//}
 	/*VirtualProtect((void*)0x0058D0B0, 4, PAGE_EXECUTE_READWRITE, &old);
 	 = (DWORD)_fopen;*/
@@ -4741,7 +5292,11 @@ void FixSpineFlag()
 	*(DWORD*)addr = offset;
 
 
+	VirtualProtect((void*)0x004B2B58, 4, PAGE_EXECUTE_READWRITE, &old);
 
+	addr = 0x004B2B58;
+	offset = (PtrToUlong(GrindParamHook) - 0x004B2B58) - 4;
+	*(DWORD*)addr = offset;
 
 }
 
@@ -5151,7 +5706,7 @@ void StartedGraf(StructScript* pStructScript)
 						if (recv(serverSocket, (char*)&unlimitedGraf, 1, 0) >= 0)
 						{
 							_printf("recieved!!\n");
-	
+
 							//shutdown(serverSocket, SD_RECEIVE);
 							break;
 						}
@@ -5174,7 +5729,7 @@ void StartedGraf(StructScript* pStructScript)
 			if (unlimitedGraf)
 			{
 				_printf("unlimiting graf!!\n");
-	
+
 				if (oldLimit == 32)
 				{
 					CStruct pStruct;//= new CStruct;
@@ -5454,6 +6009,72 @@ void FixTagLimitProtections()
 	*(BYTE*)0x004BFC89 = 200;
 }
 
+void SetTagLimit(DWORD _limit)
+{
+	DWORD tagLimit = _limit;
+
+	oldLimit = tagLimit;
+
+	BYTE limit = oldLimit;//Limit the counters
+	*(BYTE*)0x004BFD66 = limit;
+	*(BYTE*)0x004BFD6A = limit;
+
+
+	int numExtra = (tagLimit - 32) * 4;//Increase Stack Size by  4*(extra number of tags limited)
+	*(DWORD*)0x004359B7 = 0xA0 + numExtra;
+	*(DWORD*)0x004359E1 = 0xB8 + numExtra;
+	*(DWORD*)0x00435A07 = 0xBC + numExtra;
+	*(DWORD*)0x00435A3F = 0xB4 + numExtra;
+	*(DWORD*)0x00435A51 = 0x80 + numExtra;
+	*(DWORD*)0x00435A85 = 0x80 + numExtra;
+	*(DWORD*)0x00435A9D = 0xB4 + numExtra;
+	*(DWORD*)0x00435AB2 = 0xB4 + numExtra;
+	*(DWORD*)0x00435AC2 = 0xAC + numExtra;
+	*(DWORD*)0x00435AD2 = 0xAC + numExtra;
+
+	*(DWORD*)0x00435AF7 = 0x158 + numExtra;
+	*(DWORD*)0x00435B21 = 0x178 + numExtra;
+	*(DWORD*)0x00435B4A = 0x188 + numExtra;
+	*(DWORD*)0x00435B51 = 0x178 + numExtra;
+	*(DWORD*)0x00435B5A = 0x170 + numExtra;
+	*(DWORD*)0x00435B7E = 0x17C + numExtra;
+	*(DWORD*)0x00435B8C = 0x184 + numExtra;
+	*(DWORD*)0x00435B9B = 0x188 + numExtra;
+	*(DWORD*)0x00435BBA = 0x180 + numExtra;
+	*(DWORD*)0x00435BD3 = 0x170 + numExtra;
+	*(DWORD*)0x00435BE8 = 0x170 + numExtra;
+	*(DWORD*)0x00435C29 = 0x80 + numExtra;
+	*(DWORD*)0x00435C6B = 0x80 + numExtra;
+	*(DWORD*)0x00435C90 = 0x17C + numExtra;
+	*(DWORD*)0x00435C97 = 0x180 + numExtra;
+	*(DWORD*)0x00435CBA = 0x184 + numExtra;
+	*(DWORD*)0x00435CFF = 0x80 + numExtra;
+	*(DWORD*)0x00435D2D = 0x180 + numExtra;
+	*(DWORD*)0x00435D50 = 0x184 + numExtra;
+	*(DWORD*)0x00435DAC = 0x80 + numExtra;
+	*(DWORD*)0x00435E07 = 0x170 + numExtra;
+	*(DWORD*)0x00435E1C = 0x170 + numExtra;
+	*(DWORD*)0x00435E2D = 0x180 + numExtra;
+	*(DWORD*)0x00435E38 = 0x184 + numExtra;
+	*(DWORD*)0x00435E67 = 0x170 + numExtra;
+	*(DWORD*)0x00435E7C = 0x170 + numExtra;
+	*(DWORD*)0x00435E8C = 0x168 + numExtra;
+	*(DWORD*)0x00435E9D = 0x164 + numExtra;
+
+	*(DWORD*)0x0043BA97 = 0x134 + numExtra;
+	*(DWORD*)0x0043BABC = 0x150 + numExtra;
+	*(DWORD*)0x0043BB07 = 0x150 + numExtra;
+	*(DWORD*)0x0043BB27 = 0x154 + numExtra;
+	*(DWORD*)0x0043BBED = 0x154 + numExtra;
+	*(DWORD*)0x0043BC0A = 0x80 + numExtra;
+	*(DWORD*)0x0043BC1A = 0x80 + numExtra;
+	*(DWORD*)0x0043BC7F = 0x148 + numExtra;
+	*(DWORD*)0x0043BC94 = 0x148 + numExtra;
+	*(DWORD*)0x0043BCA4 = 0x140 + numExtra;
+	*(DWORD*)0x0043BCB4 = 0x140 + numExtra;
+}
+
+//old code
 bool SetTagLimit(CStruct* pStruct, CScript* pScript)
 {
 	DEBUGSTART()
@@ -5772,7 +6393,7 @@ bool UpdateSpineText(CStruct* pStruct, CScript* pScript)
 {
 	int id = 0;
 	;
-	if(pStruct->GetScript("menu_id", &id))
+	if (pStruct->GetScript("menu_id", &id))
 	{
 		Element* container = AllocateElement(0);
 		Element* element = container->GetElement(id);
@@ -5787,11 +6408,11 @@ bool SetMemoryPoolSize(CStruct* pStruct, CScript* pScript);
 
 bool ChangeString(CStruct* pStruct, CScript* pScript)
 {
-	MessageBox(0, "ChangeStr", "", 0);
-	int s1=0;
+	//MessageBox(0, "ChangeStr", "", 0);
+	int s1 = 0;
 	pStruct->GetScript("string", &s1);
 	QBKeyHeader* header = GetQBKeyHeader(s1);
-	const char* s2=NULL;
+	const char* s2 = NULL;
 	CStructHeader* pParam = NULL;
 	if (pStruct->GetStruct(Checksums::param, &pParam))
 	{
@@ -5864,9 +6485,375 @@ void ExecuteQBThread()
 	delete[] funcParam;
 }
 
+std::map<int, int> options;
+
+bool IsOptionOn(CStruct* pStruct, CScript* pScript)
+{
+	CStructHeader* header = pStruct->head;
+
+	while (header)
+	{
+		if (header->Type == QBKeyHeader::LOCAL)
+		{
+			std::map<int, int>::iterator it = options.find(header->Data);
+			if (it != options.end())
+				return it->second;
+		}
+		header = header->NextHeader;
+	}
+	_printf(__FUNCTION__" No Param?\n");
+	return false;
+}
+void HookControls();
+void UpdateOption(DWORD checksum, int value)
+{
+	DWORD old = 0;//used for VirtualProtect
+	_printf("Updating Option %s %d\n", FindChecksumName(checksum), value);
+	
+	switch (checksum)
+	{
+	case Checksums::LM_DebugOption_bDebugMode:
+		if (init3)//this means we have already added all options, so we have to alert about restart
+		{
+			int result = MessageBox(0, "Do you want to exit now?", "This option requires restart", MB_YESNO);
+			if (result == IDYES)
+				ExitProcess(0);
+			else
+				return;
+		}
+		if (debugMode || !value)//If we are already debugMode or value is false just return
+			return;
+
+		CreateConsole();
+		_printf("Welcome to DebugMode\n");
+
+		//Check if qbTable exist, if it doesn't exists
+		//new Script() will generate qbTable from all .qb files found in qdir
+		//If it does already exists it means it's another function has generated a table
+		//Then just append the qbTables found .qb to the already existing qbTable
+		if (!qbTable)
+			qbTable = new Script();
+		else
+			qbTable->AddScripts();
+
+		//We don't want to hook this twice...
+		//Probably don't need to check since we should not be here twice
+		//But added just in case
+		if (!hooked)
+		{
+			hooked = true;
+			static BYTE callHooked[] = { 0xE9, 0x00, 0x00, 0x00, 0x00, 0xC3 };
+
+			VirtualProtect((void*)0x00401960, 6, PAGE_EXECUTE_READWRITE, &old);
+			memcpy(oldCustomPrint, (void*)0x00401960, 6);
+
+			*(DWORD*)&callHooked[1] = ((DWORD)add_log - 0x00401960 - 5);
+
+			memcpy((void*)0x00401960, callHooked, 6);
+
+
+			static const DWORD addr = (DWORD)GetProcAddress(GetModuleHandle("msvcrt.dll"), "printf");
+			if (addr)
+			{
+				VirtualProtect((void*)addr, 6, PAGE_EXECUTE_READWRITE, &old);
+				memcpy(oldCustomPrint, (void*)addr, 6);
+				DWORD hookedAddrs = ((DWORD)add_log - addr - 5);
+				*(DWORD*)&callHooked[1] = hookedAddrs;
+				memcpy((void*)addr, callHooked, 6);
+			}
+			//logFile = fopen("loggers.txt", "w+t");
+		}
+
+		//Finally tell whole "engine" we are in debugMode
+		debugMode = true;
+		break;
+
+	case Checksums::LM_GameOption_bLimitTags:
+		if (value)
+			SetTagLimit(200);
+		else
+			SetTagLimit(32);
+		LevelModSettings::UnlimitedGraf = !value;
+		break;
+
+
+	case Checksums::LM_GUI_bShowGrafCounter:
+		LevelModSettings::grafCounter = value;
+		break;
+
+	case Checksums::LM_GUI_bNewMenu:
+		VirtualProtect((LPVOID)0x004404CE, sizeof(LevelModSettings::NewMenu), PAGE_EXECUTE_READWRITE, &old);
+		if (value)
+			memcpy((void*)0x004404CE, &LevelModSettings::NewMenu, sizeof(LevelModSettings::NewMenu));
+		else
+			memcpy((void*)0x004404CE, &LevelModSettings::OldMenu, sizeof(LevelModSettings::OldMenu));
+		break;
+
+	case Checksums::LM_BugFix_bSoundFix:
+		LevelModSettings::FixSound = value;
+
+		VirtualProtect((LPVOID)0x004C665D, 1, PAGE_EXECUTE_READWRITE, &old);
+		if (LevelModSettings::FixSound)
+			*(BYTE*)0x004C665D = 0xEB;
+		else
+			*(BYTE*)0x004C665D = 0x75;
+		break;
+
+	case Checksums::LM_BugFix_bTeleFix:
+
+		LevelModSettings::TeleFix = value;
+
+		VirtualProtect((LPVOID)0x004AE562, 4, PAGE_EXECUTE_READWRITE, &old);
+		VirtualProtect((LPVOID)0x004AE581, 1, PAGE_EXECUTE_READWRITE, &old);
+
+		if (LevelModSettings::TeleFix)
+		{
+			*(DWORD*)0x004AE562 = 0x90909090;//84 c0 75 26
+			*(BYTE*)0x004AE581 = 0x75;//74
+		}
+		else
+		{
+			*(DWORD*)0x004AE562 = 0x2675C084;
+			*(BYTE*)0x004AE581 = 0x74;
+		}
+		break;
+
+
+	case Checksums::LM_Control_bNewTricks:
+		LevelModSettings::AllowNewTricks = value;
+		break;
+
+	case Checksums::LM_Control_bXinput:
+		if (init3)//this means we have already added all options, so we have to alert about restart
+		{
+			int result = MessageBox(0, "Do you want to exit now?", "This option requires restart", MB_YESNO);
+			if (result == IDYES)
+				ExitProcess(0);
+			else
+				return;
+		}
+		if (LevelModSettings::HookedControls || !value)
+			return;
+		HookControls();
+		LevelModSettings::HookedControls = value;
+		break;
+
+
+	case Checksums::LM_Control_SpineButton:
+		switch (value)
+		{
+		case 0:
+			SpineButton = KeyState::REVERT;
+			SpineButton2 = KeyState::NONE;
+			break;
+		case 1:
+			SpineButton = KeyState::NOLLIE;
+			SpineButton2 = KeyState::NONE;
+			break;
+		case 2:
+			SpineButton = KeyState::SPINLEFT;
+			SpineButton2 = KeyState::NONE;
+			break;
+		case 3:
+			SpineButton = KeyState::SPINRIGHT;
+			SpineButton2 = KeyState::NONE;
+			break;
+		case 4:
+			SpineButton = KeyState::REVERT;
+			SpineButton2 = KeyState::NOLLIE;
+			break;
+		case 5:
+			SpineButton = KeyState::SPINLEFT;
+			SpineButton2 = KeyState::SPINRIGHT;
+			break;
+		default:
+			SpineButton = KeyState::REVERT;
+			SpineButton2 = KeyState::NONE;
+			_printf("Invalid SpineButton %d defaulting to revert\nPlease check LevelMod.ini\nValue should be between 0-5\n", value);
+			break;
+		}
+		break;
+	}
+}
+
+void AddOption(char* name, int value, bool update = false)
+{
+	DWORD checksum = crc32f((unsigned char*)name);
+	if (update)
+	{
+		_printf("Updating ini file %s value %d\n", name, value);
+		OptionWriter->WriteInt("Script_Settings", name, value);
+	}
+	else
+	{
+		if (!OptionWriter->find("Script_Settings", name))
+			OptionWriter->WriteInt("Script_Settings", name, value);
+		else
+		{
+			_printf("Reading from ini file %s, default %d ", name, value);
+			value = OptionReader->ReadInt("Script_Settings", name, value);
+			_printf("value %d\n");
+		}
+		if (options.find(checksum) == options.end())
+			options.insert(std::pair<int, int>(checksum, value));
+		else
+			MessageBox(0, "Added an option that already exists...", "Check mainmenu.qb you dummy!!", 0);
+
+		if (!qbTable)
+            qbTable = new Script(false);
+
+		//_printf("Adding to QBTable %s\n");
+		char* tempName = new char[strlen(name) + 1];
+		memcpy(tempName, name, strlen(name) + 1);
+		qbTable->qbTable.insert(std::pair<int, char*>(checksum, tempName));
+		//MessageBox(0, FindChecksumName(checksum), "", 0);
+
+	}
+	UpdateOption(checksum, value);
+}
+
+
+bool GetParamScript(CStruct* pStruct, CScript* pScript)
+{
+	CStructHeader* header = pStruct->head;
+	while (header)
+	{
+		if (header->Type == QBKeyHeader::LOCAL)
+		{
+			_printf("GotParam %s(%X) Data %s(%X)\n", FindChecksumName(header->QBkey), header->QBkey, FindChecksumName(header->Data), header->Data);
+			CStructHeader* param = pScript->GetParam(header->Data);
+			if (param)
+			{
+				CStructHeader* pParam = pScript->params->AllocateCStruct();
+				if (!pParam)
+				{
+					_printf(__FUNCTION__ "couldn't Allocate CStruct...\n");
+					return false;
+				}
+
+				if (pScript->params->head)
+				{
+					pScript->params->tail->NextHeader = pParam;
+					pScript->params->tail = pParam;
+				}
+				else
+				{
+					pScript->params->head = pParam;
+					pScript->params->tail = pParam;
+				}
+				pParam->Type = param->Type;
+				pParam->QBkey = param->QBkey;
+				pParam->Data = param->Data;
+				pParam->NextHeader = NULL;
+				/*if (param->Type == QBKeyHeader::STRING)
+				{
+					_printf("Removing old string...\n%s\n", param->pStr);
+					param->Data = 0;
+					param->QBkey = 0;
+					param->Type = QBKeyHeader::LOCAL;
+					pParam->NextHeader = NULL;
+				}*/
+				_printf("Adding Param to pScript...\nName %s(%X) Data %s(%X) Type %s\n", FindChecksumName(param->QBkey), param->QBkey, param->Type == QBKeyHeader::STRING ? param->pStr : FindChecksumName(param->Data), param->Data, QBTypes[param->Type]);
+				param->Data = 0;
+				param->QBkey = 0;
+				param->Type = QBKeyHeader::LOCAL;
+				return true;
+			}
+			return false;
+		}
+		header = header->NextHeader;
+	}
+	return false;
+}
+
+bool LM_GotParamScript(CStruct* pStruct, CScript* pScript)
+{
+	CStructHeader* header = pStruct->head;
+	while (header)
+	{
+		if (header->Type == QBKeyHeader::LOCAL)
+		{
+			bool b = pScript->GotParam(header->Data);
+			if (b)
+			{
+				_printf("LM_GotParam returning true\n");
+				return true;
+			}
+			else
+			{
+				_printf("LM_GotParam returning false\n");
+				return false;
+			}
+		}
+		header = header->NextHeader;
+	}
+	_printf("LM_GotParam returning false\n");
+	return false;
+}
+
+bool ToggleOption(CStruct* pStruct, CScript* pScript)
+{
+	CStructHeader* header = pStruct->head;
+	while (header)
+	{
+		if (header->Type == QBKeyHeader::LOCAL)
+		{
+			auto it = options.find(header->Data);
+			if (it != options.end())
+			{
+				it->second = !it->second;
+				char* ok = FindChecksumName(header->Data);
+				static char tempChar[MAX_PATH + 1] = "";
+				memcpy(tempChar, ok, strlen(ok) + 1);
+				_printf("Toggling option %s(%X)\n",tempChar, header->Data);
+				AddOption(tempChar, it->second, true);
+				return true;
+			}
+			else
+				_printf("couldn't find option %s\nMake Sure to add the option first\n", FindChecksumName(header->Data));
+		}
+		header = header->NextHeader;
+	}
+	_printf(__FUNCTION__ " No param?\n");
+	return false;
+}
+
+bool AddOption(CStruct* pStruct, CScript* pScript)
+{
+	if (init3)
+		return false;
+	CStructHeader* name = NULL;
+
+	if (pStruct->GetStruct(Checksums::Name, &name))
+	{
+		if (name->Type == QBKeyHeader::STRING || name->Type == QBKeyHeader::LOCAL_STRING)
+		{
+			if (options.find(crc32f((unsigned char*)name->pStr)) == options.end())
+			{
+				CStructHeader* DEFAULT = NULL;
+				if (pStruct->GetStruct(Checksums::Value, &DEFAULT))
+				{
+					_printf("Adding option %s default %d\n", name->pStr, DEFAULT->value.i);
+					AddOption(name->pStr, DEFAULT->value.i);
+				}
+				else
+					_printf("Need Param #DEFAULT " __FUNCTION__ "\n");
+			}
+			else
+				_printf("Option already in list..\n");
+		}
+		else
+			_printf("Param #Name needs to be a string " __FUNCTION__ "\n");
+	}
+	else
+		_printf("Need param #Name " __FUNCTION__ "\n");
+
+	return false;
+}
+
 bool ChangeParamToUnnamedScript(CStruct* pStruct, CScript* pScript)
 {
-	MessageBox(0, "UnnamedScript", "", 0);
+	_printf("UnnamedScript ");
 	CStructHeader* pFunc = NULL;
 	if (pStruct->GetStruct(Checksums::FUNCTION, &pFunc))
 	{
@@ -5884,16 +6871,17 @@ bool ChangeParamToUnnamedScript(CStruct* pStruct, CScript* pScript)
 				pStructParam->AddParam(0, QBKeyHeader::STRING, pParam->pStr);
 				/*pStruct.head = &header;
 				pStruct.tail = &header;*/
-				MessageBox(0, pFunc->pStr, pParam->pStr, 0);
+				_printf(pFunc->pStr);
+				_printf("\n");
 				memcpy(funcName, pFunc->pStr, strlen(pFunc->pStr) + 1);
 				funcParam = pStructParam;
 				CreateThread(0, 0, (LPTHREAD_START_ROUTINE)ExecuteQBThread, 0, 0, 0);
-				
+
 				return true;
 			}
 		}
 	}
-	MessageBox(0, "couldn't find function", "", 0);
+	_printf("couldn't find function\n");
 	return false;
 }
 
@@ -5903,7 +6891,7 @@ bool CallWithNoNameScript(CStruct* pStruct, CScript* pScript)
 	CStructHeader* pFunc = NULL;
 	if (pStruct->GetStruct(Checksums::FUNCTION, &pFunc))
 	{
-		if(pStruct->ContainsFlag("String"))
+		if (pStruct->ContainsFlag("String"))
 		{
 			CStruct pStruct;
 			QBKeyHeader* header = GetQBKeyHeader(Checksum("UnnamedString"));
@@ -5923,7 +6911,7 @@ bool CallWithNoNameScript(CStruct* pStruct, CScript* pScript)
 		return false;
 	}
 	else
-	  MessageBox(0, "couldn't find function", "", 0);
+		MessageBox(0, "couldn't find function", "", 0);
 	return false;
 }
 
@@ -6172,44 +7160,124 @@ const CompiledScript scripts[] =
 	{ "StoreSkaterPos", StoreSkaterPos },
 	{ "GotoStoredPos", SetSkaterPos },
 	{ "GetSkaterLook", GetSkaterLook },
-	{ "UsingNewMenu", UsingNewMenu },
-	{ "UsingTeleFix", UsingTeleFix },
-	{ "UsingSoundFix", UsingSoundFix },
-	{ "ToggleNewMenu", ToggleNewMenu },
-	{ "ToggleTeleFix", ToggleTeleFix },
-	{ "ToggleSoundFix", ToggleSoundFix },
 	{ "Not", NotScript },
 	{ "SubToGlobal", SubToGlobal },
 	{ "AddToGlobal", AddToGlobal },
 	{ "FreezeCamera", FreezeCamera },
 	{ "UnfreezeCamera", UnfreezeCamera },
-	{ "HookDebugMessages", HookDebugMessages },
-	{ "UnHookDebugMessages", UnhookDebugMessages },
-{     "CreateConsoleScript", CreateConsole},
-{     "HideConsole", HideConsole},
-	{ "ToggleLogDebugMessages", ToggleHookDebugMessages },
-	{ "SetTagLimit", SetTagLimit },
 	{ "GrafStarted", GrafStarted },
-	//{"Kill3DGrass", Kill3DGrass},
-	{ "UpdateLevelModSettings", UpdateLevelModSettings },
-	{ "ToggleGrafCounter", ToggleGrafCounter },
-	{ "CounterIsOn", CounterIsOn },
 	{ "ChangeValues", ChangeValues },
 	{ "CreatePair", CreatePair },
 	{ "GetSliderValue", GetSliderValue },
 	{ "InitLevelMod", Initialize },
 	{ "MoveObject", MoveObjectScript   },
 { "KillMovingObject", KillMovingObjectScript},
-{"ChangeParamToUnnamed", ChangeParamToUnnamedScript}
-/*{"SetMemoryPoolSize", SetMemoryPoolSize},
-{"GetMemoryPoolSize", GetMemoryPoolSize},
-{"GetMemoryPoolSizeText", GetMemoryPoolSizeText},*/
-//{"GetMotd", GetMotd},
+{"ChangeParamToUnnamed", ChangeParamToUnnamedScript},
+{"IsOptionOn", IsOptionOn},
+{"AddOption", AddOption},
+{"ToggleOption", ToggleOption},
+	{"LM_GotParam", LM_GotParamScript },
+	{"GetParam", GetParamScript},
+	/*{"SetMemoryPoolSize", SetMemoryPoolSize},
+	{"GetMemoryPoolSize", GetMemoryPoolSize},
+	{"GetMemoryPoolSizeText", GetMemoryPoolSizeText},*/
+	//{"GetMotd", GetMotd},
 };
+
+CStructHeader* CScript::GetParam(DWORD name)
+{
+	CStructHeader* header = params->head;
+
+	while (header)
+	{
+		if (header->QBkey == name)
+			return header;
+
+		if (header->Type == QBKeyHeader::LOCAL_STRUCT || header->Type == QBKeyHeader::STRUCT)
+		{
+			CStructHeader* pStruct = *(CStructHeader**)header->pStruct;
+
+			while (pStruct)
+			{
+				if (pStruct->QBkey == name)
+					return pStruct;
+				pStruct = pStruct->NextHeader;
+			}
+		}
+		else if (header->Type == QBKeyHeader::ARRAY)
+		{
+			_printf("Parsing array...\n");
+			CArray* pArray = header->pArray;
+
+			for (int i = 0; i < pArray->GetNumItems(); i++)
+			{
+				CStructHeader* pStruct = pArray->GetCStruct(i);
+
+				while (pStruct)
+				{
+					if (pStruct->QBkey == name)
+						return pStruct;
+					pStruct = pStruct->NextHeader;
+				}
+			}
+		}
+		header = header->NextHeader;
+	}
+	return NULL;
+}
+
+bool CScript::GotParam(DWORD name)
+{
+	CStructHeader* header = params->head;
+
+	while (header)
+	{
+		if (header->QBkey == name)
+			return true;
+
+		if (header->Type == QBKeyHeader::LOCAL_STRUCT || header->Type == QBKeyHeader::STRUCT)
+		{
+			CStructHeader* pStruct = *(CStructHeader**)header->pStruct;
+
+			while (pStruct)
+			{
+				if (pStruct->QBkey == name)
+					return true;
+				pStruct = pStruct->NextHeader;
+			}
+		}
+		else if (header->Type == QBKeyHeader::ARRAY)
+		{
+			_printf("Parsing array...\n");
+			CArray* pArray = header->pArray;
+
+			for (int i = 0; i < pArray->GetNumItems(); i++)
+			{
+				CStructHeader* pStruct = pArray->GetCStruct(i);
+
+				while (pStruct)
+				{
+					if (pStruct->QBkey == name)
+						return true;
+					pStruct = pStruct->NextHeader;
+				}
+			}
+		}
+		header = header->NextHeader;
+	}
+	return false;
+}
 
 
 std::vector<std::string> uninstalled;
 static char download_message[1024] = "";
+
+
+void ShowMessage(char* msg, DWORD numFrames)
+{
+	sprintf(download_message, msg);
+	showmessage = numFrames;
+}
 
 void PrintDownloadString(char* string)
 {
@@ -6349,7 +7417,7 @@ bool DownloadAndInstall(std::string& path, float build, SOCKADDR* service)
 	std::string head = response;
 	response.erase(0, pos);
 	if (size > response.size())
-	  response.reserve(size);
+		response.reserve(size);
 	//fwrite(&response.begin(), response.size(), 1, f);
 
 	DWORD readBytes = response.size();
@@ -6715,7 +7783,7 @@ void GetLevelModVersion()
 			PrintDownloadString((char*)"You have latest version :)");
 
 		//if (sscanf(&response.c_str()[pos], "%f"/* %s %f %s"*///, &latest/*, patchname, &build, buildname*/))
-		if (latest > version&& sucess)
+		if (latest > version && sucess)
 		{
 			/*FILE* fp = fopen("settings", "r+b");
 			fseek(fp, 7, SEEK_SET);
@@ -7029,7 +8097,7 @@ void AddChecksum(int key, char* name, void* retAddr)
 			fprintf(debugFile, "AddingKey %s %X, CalledFrom %p\r\n", name, key, retAddr);
 			printf("AddingKey %s %X, CalledFrom %p\r\n", name, key, retAddr);
 			fclose(debugFile);*/
-			_printf("AddChecksum %s 0x%X\n", name, key);
+			//_printf("AddChecksum %s 0x%X\n", name, key);
 			qbTable->qbTable.insert(std::pair<int, char*>(key, name));
 			qbKeys.push_back(key);
 		}
@@ -7391,7 +8459,8 @@ FILE* Dump;
 
 void AddDump(const char* dump, ...)
 {
-	Dump = fopen("dump.txt", "r+t");
+	_printf("Dumping %s", dump);
+	Dump = fopen("dump.txt", "w+t");
 	fseek(Dump, 0, SEEK_END);
 	va_list va_alist;
 	char logbuf[512] = { 0 };
@@ -8030,13 +9099,13 @@ void GetMotd()
 	WSACleanup();
 }
 
-bool init2 = false;
+
 
 void FixMessage()
 {
 	printf("Fixing Messages\n");
 
-	
+
 
 	/*QBKeyHeader* header = GetQBKeyHeader(Checksum("ver"));
 	DWORD times = 0;
@@ -8112,12 +9181,12 @@ bool DefaultMemoryMode()
 
 		while (ptr < end)
 		{
-			if (*ptr > old&&* ptr < oldEnd)
+			if (*ptr > old && *ptr < oldEnd)
 			{
 				CStructHeader* parser = *ptr;
 				DWORD index = ((DWORD)parser - (DWORD)old) / 0x10;
 				parser = head + index;
-				if (parser > head&& parser < (head + 0xFA00))
+				if (parser > head && parser < (head + 0xFA00))
 					*ptr = parser;
 			}
 			ptr++;//;= (CStructHeader**)((DWORD)ptr+1);
@@ -8463,6 +9532,7 @@ void FixChat()
 void InitSkater()
 {
 	Slerp::transfer = false;
+	Slerp::landing = false;
 	Slerp::slerping = false;
 	D3DXMatrixIdentity(&Slerp::start);
 	D3DXMatrixIdentity(&Slerp::end);
@@ -8557,9 +9627,10 @@ void AddFunctions()
 			MessageBox(0, "couldn't add script", scripts[i].name, 0);
 	}
 }
-
+//void HookControls();
 void InitLevelMod()
 {
+	//HookControls();
 	DWORD old = 0;
 
 	//VirtualProtect((void*)0x00427A9B, 5, PAGE_EXECUTE_READWRITE, &old);
@@ -8582,9 +9653,9 @@ void InitLevelMod()
 	}
 
 	//MessageBox(0, "going to fix msg", "going to fix msg", MB_OK);
-	
 
-	FILE* f;
+
+	/*FILE* f;
 	f = fopen("settings", "r+b");
 	BYTE tagLimit;
 	tagLimit = 32;
@@ -8667,8 +9738,8 @@ void InitLevelMod()
 				CreateConsole();
 				qbTable = new Script();
 
-				debugFile = fopen("debug.txt", "r+t");
-				fseek(debugFile, 0, SEEK_END);
+				//debugFile = fopen("debug.txt", "r+t");
+				//fseek(debugFile, 0, SEEK_END);
 
 				CompiledScript* pScript = (CompiledScript*)0x005B83D8;
 				for (DWORD i = 0; i < 292; i++)
@@ -8692,24 +9763,11 @@ void InitLevelMod()
 					pScript++;
 
 				}
-				fclose(debugFile);
+				//fclose(debugFile);
 
 
 
-				/*QBKeyHeader* header = GetQBKeyHeader(Checksum("bShowConsole"));
-				if (header)
-				{
-					header->value.i = 1;
-					//MessageBox(0, "ShowCOnolse", "", MB_OK);
 
-				}
-				header = GetQBKeyHeader(Checksum("bPrintDebug"));
-				if (header)
-				{
-					header->value.i = 1;
-					//MessageBox(0, "HookDebug", "", MB_OK);
-					HookDebugMessages(NULL, NULL);
-				}*/
 
 			}
 			if (fread(&SpineButton, 1, 1, f) != 1)
@@ -8779,7 +9837,7 @@ void InitLevelMod()
 	}
 	_fcloseall();
 
-	
+
 
 	if (LevelModSettings::UseNewMenu)
 	{
@@ -8811,7 +9869,7 @@ void InitLevelMod()
 		//delete pStruct.head;
 		LevelModSettings::UnlimitedGraf = true;
 	}
-
+	*/
 
 
 	/*//MessageBox(0, "going to hook", "going to hook", MB_OK);
@@ -8849,13 +9907,28 @@ inline void SendChatMsg(char* text)
 	DEBUGEND();
 }
 
-bool init = true;
 static char version_string[150] = "";
 
 bool Initialize(CStruct* pStruct, CScript* pScript)
 {
 	if (init)//00425e10
 	{
+		/*FILE* fp = fopen("LevelMod.ini", "ab+");
+		fseek(fp, 0, SEEK_END);
+		DWORD size = ftell(fp);
+
+
+		if (size == 0)//file was empty
+		{*/
+		char temp[MAX_PATH] = "";
+		GetCurrentDirectory(MAX_PATH, temp);
+		sprintf(IniPath, "%s/LevelMod.ini", temp);
+		OptionWriter = new CIniWriter(IniPath);
+		OptionReader = new CIniReader(IniPath);
+
+		/*}
+		else
+			fclose(fp);*/
 		DWORD old;
 		VirtualProtect((void*)0x00425E32, 0x10, PAGE_EXECUTE_READWRITE, &old);
 		VirtualProtect((void*)0x005B7501, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
@@ -8872,20 +9945,23 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
 		init = false;
 		_printf("Going to init\n");
 		//MessageBox(0, "Going to Init", "", 0);
-		
+
 		InitLevelMod();
 		CreateThread(0, 0, (LPTHREAD_START_ROUTINE)FixMessage, 0, 0, 0);
 		//CreateThread(0, 0, (LPTHREAD_START_ROUTINE)GetLevelModVersion, 0, 0, 0);
-		
+
 
 		while (!init2)
 			Sleep(100);
 		printf("Init DONE\n");
 		return true;
-		
+
 	}
 	else
+	{
 		_printf("Already inited\n");
+		init3 = true;
+	}
 	/*int id = -255;
 	pStruct->GetScript("id", &id);
 	printf("ID %d", id);
@@ -8900,7 +9976,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
 	/*else if (init2)
 	{
 		init2 = false;
-		
+
 	}*/
 	_printf("Already inited\n");
 	//MessageBox(0, "Already Inited", "", 0);
@@ -8974,7 +10050,7 @@ void DrawLines()
 	//pDevice->SetTransfD3DTRANSOFMRorm(0, &lineWorld);
 	pDevice->SetFVF(line_fvf);
 	pDevice->DrawPrimitiveUP(D3DPT_LINELIST,         //PrimitiveType
-		numLineVertices/2,              //PrimitiveCount
+		numLineVertices / 2,              //PrimitiveCount
 		lineVertices,            //pVertexStreamZeroData
 		sizeof(line_vertex));   //VertexStreamZeroStride
 }
@@ -8992,7 +10068,16 @@ void DrawFrame2()
 void OnRelease()
 {
 	m_font->Release();
-	m_font=NULL;
+	m_font = NULL;
+	if (qbTable)
+		delete qbTable;
+	movingObjects.clear();
+	if (observe)
+		delete observe;
+	if (OptionWriter)
+		delete OptionWriter;
+	if (OptionReader)
+		delete OptionReader;
 }
 
 void OnLost()
@@ -9005,43 +10090,43 @@ void OnReset()
 	m_font->OnResetDevice();
 }
 
+
 void DrawFrame()
 {
 	//MessageBox(0, 0, 0, 0);
-	if (!m_font)
+	if (!m_font) [[unlikely]]
 	{
-		//MessageBox(0,"init font","",0);
-		rct.left = 200;
-		rct.right = 200 + 1000;
-		rct.top = 10;
-		rct.bottom = 10 + 80;
+		Player1 = new CXBOXController();
+	//MessageBox(0,"init font","",0);
+	rct.left = 200;
+	rct.right = 200 + 1000;
+	rct.top = 10;
+	rct.bottom = 10 + 80;
 
-		
-		
-		D3DXMatrixIdentity(&lineWorld);
-		/*D3DXCreateLine(pDevice, &line);
-		line->SetWidth(100);
-		line->SetPattern(0xffffffff);
-		//pDevice->CreateLine
-		lineColor = D3DCOLOR_RGBA(255, 255, 255, 255);*/
 
-		D3DXCreateFontA(pDevice, 45, 0, FW_NORMAL, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Arial", &m_font);
+
+	D3DXMatrixIdentity(&lineWorld);
+	/*D3DXCreateLine(pDevice, &line);
+	line->SetWidth(100);
+	line->SetPattern(0xffffffff);
+	//pDevice->CreateLine
+	lineColor = D3DCOLOR_RGBA(255, 255, 255, 255);*/
+
+	D3DXCreateFontA(pDevice, 45, 0, FW_NORMAL, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Arial", &m_font);
 	}
 
-	if (movingObjects.size())
-	{
-		if (GotSuperSectors)
+		if (GotSuperSectors) [[likely]]
 		{
-			//_printf("GotSuperSector...\n");
-			Skater* skater = Skater::GetSkater();
-			if (skater)
+			Skater * skater = Skater::GetSkater();
+			if (skater) [[likely]]
 			{
+				//ProxyPad(skater);
+
 				updatingObjects = true;
-				//_printf("GotSuperSater...\n");
-				for (DWORD i = 0; i < movingObjects.size(); i++)
+				for (DWORD i = 0; i < movingObjects.size(); i++) [[unlikely]]
 				{
 					//_printf("Killed?...");
-					if (!(movingObjects[i].state & MeshState::kill))
+					if (!(movingObjects[i].state & MeshState::kill)) [[likely]]
 					{
 						//_printf("FALSE\n");
 						if (movingObjects[i].Update(skater->GetFrameLength()))
@@ -9057,242 +10142,595 @@ void DrawFrame()
 				updatingObjects = false;
 			}
 		}
-	}
-	if (Modulating() && LevelModSettings::grafCounter)
+			if (observing && observe) [[unlikely]]
+			{
+				Skater * skater = Skater::GetSkater();
+				if (skater)
+				{
+					KeyState* ollie = skater->GetKeyState(KeyState::OLLIE);
+					if (ollie->IsPressed() && ollie->GetPressedTime() != observe->timeNext)
+						observe->Next(ollie->GetPressedTime());
+					observe->Update();
+				}
+				else
+				{
+					observe->Leave();
+					delete observe;
+					observe = NULL;
+				}
+			}
+				if (LevelModSettings::grafCounter && Modulating()) [[unlikely]]
+				{
+					//TestForAcid();
+					DWORD tagCount = GetTagCount();
+					if (tagCount != oldTagCount)
+					{
+						if (tagCount && tagCount < 1000)
+						{
+							oldTagCount = tagCount;
+							sprintf(&tags[6], "%u %X", tagCount, *(DWORD*)(0x0040033C + ((tagCount - 1) * 4)));
+							CStruct params;
+							CStructHeader param(QBKeyHeader::STRING, Checksums::text, tags);
+							params.AddParam(&param);
+							ExecuteQBScript("LaunchGrafCounter", &params);
+						}
+						else
+						{
+							oldTagCount = 0;
+							CStruct params;
+							ExecuteQBScript("LaunchGrafCounter", &params);
+						}
+					}
+				}
+					if (downloading || showmessage) [[unlikely]]
+					{
+						if (showmessage)
+						  showmessage--;
+						m_font->DrawText(NULL, download_message, -1, &rct, DT_LEFT | DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 255));
+					}
+						if (false)
+						{
+							pDevice->BeginScene();
+
+							DWORD  D3DCMP, pShared, vShared, Cull, StencileEnable, Clipping, Clipplane, COLOROP1, COLORARG1, COLORARG2, COLOROP2 = 0;
+							UINT oldStride = 0;
+
+							DWORD oldRenderState;
+							pDevice->GetRenderState(D3DRS_ZENABLE, &oldRenderState);
+							pDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+							pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_NEVER);
+							//pDevice->GetPixelShader(&pShared);
+							pDevice->SetPixelShader(NULL);
+							pDevice->SetVertexShader(NULL);
+							pDevice->SetTexture(0, NULL);
+							pDevice->SetRenderState(D3DRS_ZWRITEENABLE, 0);
+
+							/* IDirect3DVertexBuffer8* oldBuffer = NULL;
+							 IDirect3DBaseTexture8* oldTexture1, * oldTexture2 = NULL;
+							 pDevice->GetStreamSource(0, &oldBuffer, &oldStride);
+							 pDevice->GetPixelShader(&pShared);
+							 pDevice->GetVertexShader(&vShared);*/
+							pDevice->GetRenderState(D3DRS_CULLMODE, &Cull);
+							pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+							pDevice->SetRenderState(D3DRS_CLIPPING, 0);
+							//pDevice->SetStreamSource(0, 0, 0);
+
+							//m_pIDirect3DDevice8->SetStreamSource(0,0,0);
+
+							//m_pIDirect3DDevice8->SetViewport(&pViewport);
+							//m_pIDirect3DDevice8->SetTexture(0,NULL);
+							/*pDevice->SetPixelShader(NULL);
+
+
+							pDevice->SetRenderState(D3DRS_ZENABLE, TRUE);
+							//m_pIDirect3DDevice8->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
+							pDevice->GetRenderState(D3DRS_ZFUNC, &D3DCMP);
+							pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+							//m_pIDirect3DDevice8->SetRenderState( D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL );
+							//m_pIDirect3DDevice8->SetRenderState( D3DRS_FILLMODE, D3DFILL_SOLID );
+							pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+							pDevice->GetRenderState(D3DRS_STENCILENABLE, &StencileEnable);
+							pDevice->SetRenderState(D3DRS_STENCILENABLE, FALSE);
+							pDevice->GetRenderState(D3DRS_CLIPPING, &Clipping);
+							pDevice->SetRenderState(D3DRS_CLIPPING, FALSE);
+							pDevice->GetRenderState(D3DRS_CLIPPLANEENABLE, &Clipplane);
+							pDevice->SetRenderState(D3DRS_CLIPPLANEENABLE, FALSE);
+
+							pDevice->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
+							pDevice->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN |
+								D3DCOLORWRITEENABLE_BLUE | D3DCOLORWRITEENABLE_ALPHA);
+
+							pDevice->GetTextureStageState(0, D3DTSS_COLOROP, &COLOROP1);
+							pDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTSS_COLOROP);
+							pDevice->GetTextureStageState(0, D3DTSS_COLORARG1, &COLORARG1);
+							pDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+							pDevice->GetTextureStageState(0, D3DTSS_COLORARG2, &COLORARG2);
+							pDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+
+							pDevice->GetTextureStageState(1, D3DTSS_COLOROP, &COLOROP2);
+							pDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+							pDevice->GetTexture(0, &oldTexture1);
+							pDevice->GetTexture(1, &oldTexture2);
+							pDevice->SetTexture(0, NULL);
+							pDevice->SetTexture(1, NULL);*/
+
+
+							//pDevice->SetVertexShader(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+
+
+							//pDevice->DrawPrimitiveUP(D3DPT_LINELIST, lineList.size() / 2, &lineList.front(), sizeof(Line));
+							DrawLines();
+							pDevice->EndScene();
+
+							pDevice->SetRenderState(D3DRS_ZENABLE, oldRenderState);
+							//pDevice->SetPixelShader(pShared);
+							/*pDevice->SetTexture(0, oldTexture1);
+							pDevice->SetTexture(1, oldTexture2);
+							pDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
+							//m_pIDirect3DDevice8->SetRenderState( D3DRS_ZENABLE, TRUE);
+							pDevice->SetRenderState(D3DRS_STENCILENABLE, StencileEnable);
+							pDevice->SetRenderState(D3DRS_CLIPPING, Clipping);
+							pDevice->SetRenderState(D3DRS_CLIPPLANEENABLE, Clipplane);*/
+
+
+							pDevice->SetRenderState(D3DRS_CULLMODE, Cull);
+							/*pDevice->SetPixelShader(pShared);
+							pDevice->SetVertexShader(vShared);
+							pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP);
+							pDevice->SetStreamSource(0, oldBuffer, oldStride);*/
+
+
+
+						}
+					/*else if (downloading)
+					{
+					m_font->DrawText(msg, -1, &rct, 0, D3DCOLOR_ARGB(255, 0, 0, 255));
+					}*/
+					/*else
+					{
+					DWORD tagCount = GetTagCount();
+					if (tagCount && tagCount < 1000)
+					{
+					oldTagCount = tagCount;
+					DWORD crc = *(DWORD*)(0x0040033C + (tagCount * 4));
+					if (crc)
+					{
+					sprintf(&tags[6], "%X", crc);
+					CStruct params;
+					CStructHeader* param = params.AddParam("text", QBKeyHeader::STRING);
+					param->pStr = tags;
+					ExecuteQBScript("LaunchGrafCounter", &params);
+					params.DellocateCStruct();
+					}
+					}
+					else if(oldTagCount != 0)
+					{
+					oldTagCount = 0;
+					CStruct params;
+					ExecuteQBScript("LaunchGrafCounter", &params);
+					}
+					}*/
+
+
+					/*DWORD  D3DCMP, pShared, vShared, Cull, StencileEnable, Clipping, Clipplane, COLOROP1, COLORARG1, COLORARG2, COLOROP2;
+					UINT oldStride;
+					IDirect3DVertexBuffer8* oldBuffer;
+					IDirect3DBaseTexture8* oldTexture1, *oldTexture2;
+					m_pIDirect3DDevice8->GetStreamSource(0, &oldBuffer, &oldStride);
+					m_pIDirect3DDevice8->GetPixelShader(&pShared);
+					m_pIDirect3DDevice8->GetVertexShader(&vShared);
+					m_pIDirect3DDevice8->GetRenderState(D3DRS_CULLMODE, &Cull);
+
+					//m_pIDirect3DDevice8->SetStreamSource(0,0,0);
+
+					//m_pIDirect3DDevice8->SetViewport(&pViewport);
+					//m_pIDirect3DDevice8->SetTexture(0,NULL);
+					m_pIDirect3DDevice8->SetPixelShader(NULL);
+
+
+					m_pIDirect3DDevice8->SetRenderState(D3DRS_ZENABLE, TRUE);
+					//m_pIDirect3DDevice8->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
+					m_pIDirect3DDevice8->GetRenderState(D3DRS_ZFUNC, &D3DCMP);
+					m_pIDirect3DDevice8->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+					//m_pIDirect3DDevice8->SetRenderState( D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL );
+					//m_pIDirect3DDevice8->SetRenderState( D3DRS_FILLMODE, D3DFILL_SOLID );
+					m_pIDirect3DDevice8->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+					m_pIDirect3DDevice8->GetRenderState(D3DRS_STENCILENABLE, &StencileEnable);
+					m_pIDirect3DDevice8->SetRenderState(D3DRS_STENCILENABLE, FALSE);
+					m_pIDirect3DDevice8->GetRenderState(D3DRS_CLIPPING, &Clipping);
+					m_pIDirect3DDevice8->SetRenderState(D3DRS_CLIPPING, FALSE);
+					m_pIDirect3DDevice8->GetRenderState(D3DRS_CLIPPLANEENABLE, &Clipplane);
+					m_pIDirect3DDevice8->SetRenderState(D3DRS_CLIPPLANEENABLE, FALSE);
+
+					m_pIDirect3DDevice8->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
+					m_pIDirect3DDevice8->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN |
+					D3DCOLORWRITEENABLE_BLUE | D3DCOLORWRITEENABLE_ALPHA);
+
+					m_pIDirect3DDevice8->GetTextureStageState(0, D3DTSS_COLOROP, &COLOROP1);
+					m_pIDirect3DDevice8->SetTextureStageState(0, D3DTSS_COLOROP, D3DTSS_COLOROP);
+					m_pIDirect3DDevice8->GetTextureStageState(0, D3DTSS_COLORARG1, &COLORARG1);
+					m_pIDirect3DDevice8->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+					m_pIDirect3DDevice8->GetTextureStageState(0, D3DTSS_COLORARG2, &COLORARG2);
+					m_pIDirect3DDevice8->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+
+					m_pIDirect3DDevice8->GetTextureStageState(1, D3DTSS_COLOROP, &COLOROP2);
+					m_pIDirect3DDevice8->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+					m_pIDirect3DDevice8->GetTexture(0, &oldTexture1);
+					m_pIDirect3DDevice8->GetTexture(1, &oldTexture2);
+					m_pIDirect3DDevice8->SetTexture(0, NULL);
+					m_pIDirect3DDevice8->SetTexture(1, NULL);
+
+
+					m_pIDirect3DDevice8->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
+					for (DWORD i = 0; i < pointList.size(); i++)
+					m_pIDirect3DDevice8->DrawPrimitiveUP(D3DPT_LINELIST, (pointList[i].numNodes - 1) / 2, &pointList[i].v[0], sizeof(pointList[i].v[0]));*/
+
+
+					//}
+					/*m_pIDirect3DDevice8->SetTexture(0, oldTexture1);
+					m_pIDirect3DDevice8->SetTexture(1, oldTexture2);
+					m_pIDirect3DDevice8->SetRenderState(D3DRS_ZENABLE, FALSE);
+					//m_pIDirect3DDevice8->SetRenderState( D3DRS_ZENABLE, TRUE);
+					m_pIDirect3DDevice8->SetRenderState(D3DRS_STENCILENABLE, StencileEnable);
+					m_pIDirect3DDevice8->SetRenderState(D3DRS_CLIPPING, Clipping);
+					m_pIDirect3DDevice8->SetRenderState(D3DRS_CLIPPLANEENABLE, Clipplane);
+
+
+					m_pIDirect3DDevice8->SetRenderState(D3DRS_CULLMODE, Cull);
+					m_pIDirect3DDevice8->SetPixelShader(pShared);
+					m_pIDirect3DDevice8->SetVertexShader(vShared);
+					m_pIDirect3DDevice8->SetRenderState(D3DRS_ZFUNC, D3DCMP);
+					m_pIDirect3DDevice8->SetStreamSource(0, oldBuffer, oldStride);*/
+					return;
+}
+
+
+int ClampValue(int value, int min, int max, int outMin, int outMax)
+{
+	double result = outMin + (value - min) * outMax / max;
+	//add 0.5 to round instead of truncate
+	return (int)(result + 0.5);
+}
+
+
+bool UpdateKeyState2(KeyState* state, DWORD press)
+{
+	//MessageBox(0, "TRYYY NOW", "", 0);
+	if (!Player1->IsConnected())
+		return true;
+
+	float time = _GetCurrentTime();
+	switch (state->GetChecksum())
 	{
-		//TestForAcid();
-		DWORD tagCount = GetTagCount();
-		if (tagCount != oldTagCount)
+	case 0x7323E97C:
+		//_printf("Updating X? ");
+		state->Update(time, (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A) * 0xFF);
+		break;
+	case 0x2B489A86:
+		//_printf("Updating CIRCLE? ");
+		state->Update(time, (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B) * 0xFF);
+		break;
+	case 0x321C9756:
+		//_printf("Updating SQUARE? ");
+		state->Update(time, (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_X) * 0xFF);
+		break;
+	case 0x20689278:
+		//_printf("Updating TRIANGLE? ");
+		state->Update(time, (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y) * 0xFF);
+		break;
+	case 0xF2F1F64E://LEFTSPIN
+		//_printf("Updating SPINRIGHT? ");
+		state->Update(time, (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) * 0xFF);
+		break;
+	case 0x26B0C991://RIGHTSPIN
+		//_printf("Updating SPINLEFT? ");
+		state->Update(time, (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) * 0xFF);
+		break;
+	case 0xBFB9982B://NOLLIE
+		//_printf("Updating NOLLIE? ");
+		if ((Player1->GetState().Gamepad.bLeftTrigger) > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
+			state->Update(time, 0xFF);
+		else
+			state->Update(time, 0);
+		break;
+	case 0x6BF8A7F4://REVERT
+		//_printf("Updating REVERT? ");
+		if ((Player1->GetState().Gamepad.bRightTrigger) > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
+			state->Update(time, 0xFF);
+		else
+			state->Update(time, 0);
+		break;
+
+	case 0x4B358AEB://RIGHT
+		//_printf("Updating RIGHT? ");
+		//state->Update(time, press);
+		if (Player1->GetState().Gamepad.sThumbLX >= XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		{
-			if (tagCount && tagCount < 1000)
-			{
-				oldTagCount = tagCount;
-				sprintf(&tags[6], "%u %X", tagCount, *(DWORD*)(0x0040033C + ((tagCount - 1) * 4)));
-				CStruct params;
-				CStructHeader param(QBKeyHeader::STRING, Checksums::text, tags);
-				params.AddParam(&param);
-				ExecuteQBScript("LaunchGrafCounter", &params);
-			}
-			else
-			{
-				oldTagCount = 0;
-				CStruct params;
-				ExecuteQBScript("LaunchGrafCounter", &params);
-			}
+			state->Update(time, ClampValue(Player1->GetState().Gamepad.sThumbLX, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF));
 		}
-	}
-	else if (downloading)
-	{
-		m_font->DrawText(NULL, download_message, -1, &rct, DT_LEFT | DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 255));
-	}
-	if (false)
-	{
-		pDevice->BeginScene();
-
-		DWORD  D3DCMP, pShared, vShared, Cull, StencileEnable, Clipping, Clipplane, COLOROP1, COLORARG1, COLORARG2, COLOROP2 = 0;
-		UINT oldStride = 0;
-
-		DWORD oldRenderState;
-		pDevice->GetRenderState(D3DRS_ZENABLE, &oldRenderState);
-		pDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
-		pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_NEVER);
-		//pDevice->GetPixelShader(&pShared);
-		pDevice->SetPixelShader(NULL);
-		pDevice->SetVertexShader(NULL);
-		pDevice->SetTexture(0, NULL);
-		pDevice->SetRenderState(D3DRS_ZWRITEENABLE, 0);
-
-		/* IDirect3DVertexBuffer8* oldBuffer = NULL;
-		 IDirect3DBaseTexture8* oldTexture1, * oldTexture2 = NULL;
-		 pDevice->GetStreamSource(0, &oldBuffer, &oldStride);
-		 pDevice->GetPixelShader(&pShared);
-		 pDevice->GetVertexShader(&vShared);*/
-		pDevice->GetRenderState(D3DRS_CULLMODE, &Cull);
-		pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-		pDevice->SetRenderState(D3DRS_CLIPPING, 0);
-		//pDevice->SetStreamSource(0, 0, 0);
-
-		//m_pIDirect3DDevice8->SetStreamSource(0,0,0);
-
-		//m_pIDirect3DDevice8->SetViewport(&pViewport);
-		//m_pIDirect3DDevice8->SetTexture(0,NULL);
-		/*pDevice->SetPixelShader(NULL);
-
-
-		pDevice->SetRenderState(D3DRS_ZENABLE, TRUE);
-		//m_pIDirect3DDevice8->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-		pDevice->GetRenderState(D3DRS_ZFUNC, &D3DCMP);
-		pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
-		//m_pIDirect3DDevice8->SetRenderState( D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL );
-		//m_pIDirect3DDevice8->SetRenderState( D3DRS_FILLMODE, D3DFILL_SOLID );
-		pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-		pDevice->GetRenderState(D3DRS_STENCILENABLE, &StencileEnable);
-		pDevice->SetRenderState(D3DRS_STENCILENABLE, FALSE);
-		pDevice->GetRenderState(D3DRS_CLIPPING, &Clipping);
-		pDevice->SetRenderState(D3DRS_CLIPPING, FALSE);
-		pDevice->GetRenderState(D3DRS_CLIPPLANEENABLE, &Clipplane);
-		pDevice->SetRenderState(D3DRS_CLIPPLANEENABLE, FALSE);
-
-		pDevice->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
-		pDevice->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN |
-			D3DCOLORWRITEENABLE_BLUE | D3DCOLORWRITEENABLE_ALPHA);
-
-		pDevice->GetTextureStageState(0, D3DTSS_COLOROP, &COLOROP1);
-		pDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTSS_COLOROP);
-		pDevice->GetTextureStageState(0, D3DTSS_COLORARG1, &COLORARG1);
-		pDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-		pDevice->GetTextureStageState(0, D3DTSS_COLORARG2, &COLORARG2);
-		pDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-
-		pDevice->GetTextureStageState(1, D3DTSS_COLOROP, &COLOROP2);
-		pDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-		pDevice->GetTexture(0, &oldTexture1);
-		pDevice->GetTexture(1, &oldTexture2);
-		pDevice->SetTexture(0, NULL);
-		pDevice->SetTexture(1, NULL);*/
-
-
-		//pDevice->SetVertexShader(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-
-
-		//pDevice->DrawPrimitiveUP(D3DPT_LINELIST, lineList.size() / 2, &lineList.front(), sizeof(Line));
-		DrawLines();
-		pDevice->EndScene();
-
-		pDevice->SetRenderState(D3DRS_ZENABLE, oldRenderState);
-		//pDevice->SetPixelShader(pShared);
-		/*pDevice->SetTexture(0, oldTexture1);
-		pDevice->SetTexture(1, oldTexture2);
-		pDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
-		//m_pIDirect3DDevice8->SetRenderState( D3DRS_ZENABLE, TRUE);
-		pDevice->SetRenderState(D3DRS_STENCILENABLE, StencileEnable);
-		pDevice->SetRenderState(D3DRS_CLIPPING, Clipping);
-		pDevice->SetRenderState(D3DRS_CLIPPLANEENABLE, Clipplane);*/
-
-
-		pDevice->SetRenderState(D3DRS_CULLMODE, Cull);
-		/*pDevice->SetPixelShader(pShared);
-		pDevice->SetVertexShader(vShared);
-		pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP);
-		pDevice->SetStreamSource(0, oldBuffer, oldStride);*/
-
-
-
-	}
-	/*else if (downloading)
-	{
-	m_font->DrawText(msg, -1, &rct, 0, D3DCOLOR_ARGB(255, 0, 0, 255));
-	}*/
-	/*else
-	{
-	DWORD tagCount = GetTagCount();
-	if (tagCount && tagCount < 1000)
-	{
-	oldTagCount = tagCount;
-	DWORD crc = *(DWORD*)(0x0040033C + (tagCount * 4));
-	if (crc)
-	{
-	sprintf(&tags[6], "%X", crc);
-	CStruct params;
-	CStructHeader* param = params.AddParam("text", QBKeyHeader::STRING);
-	param->pStr = tags;
-	ExecuteQBScript("LaunchGrafCounter", &params);
-	params.DellocateCStruct();
-	}
-	}
-	else if(oldTagCount != 0)
-	{
-	oldTagCount = 0;
-	CStruct params;
-	ExecuteQBScript("LaunchGrafCounter", &params);
-	}
-	}*/
-	if (observing && observe)
-	{
-		Skater* skater = Skater::GetSkater();
-		if (skater)
+		else
+			state->Update(time, 0);
+		break;
+	case 0x85981897://LEFT
+		//_printf("Updating LEFT? ");
+		if (Player1->GetState().Gamepad.sThumbLX <= -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		{
-			KeyState* ollie = skater->GetKeyState(KeyState::OLLIE);
-			if (ollie->IsPressed() && ollie->GetPressedTime() != observe->timeNext)
-				observe->Next(ollie->GetPressedTime());
-			observe->Update();
+			state->Update(time, ClampValue(Player1->GetState().Gamepad.sThumbLX, -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, -32767, 0x40, 0xFF));
+		}
+		else
+			state->Update(time, 0);
+		break;
+
+	case 0xBC6B118F://UP
+		//_printf("Updating UP? ");
+		if (Player1->GetState().Gamepad.sThumbLY >= XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+		{
+			state->Update(time, ClampValue(Player1->GetState().Gamepad.sThumbLY, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF));
+		}
+		else
+			state->Update(time, 0);
+		break;
+	case 0xE3006FC4://DOWN
+		//_printf("Updating DOWN? ");
+		if (Player1->GetState().Gamepad.sThumbLY <= -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+		{
+			state->Update(time, ClampValue(Player1->GetState().Gamepad.sThumbLY, -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF));
+		}
+		else
+			state->Update(time, 0);
+		break;
+
+	default:
+		_printf("Unknown button press %s(%X)", FindChecksumName(state->GetChecksum()));
+		break;
+	}
+	//MessageBox(0, "THIS IS NOT GOOD", "", 0);
+	return false;
+}
+static bool bUpdate = false;
+static DWORD pSkater;
+static DWORD press;
+__declspec(naked) void __cdecl UpdateKeyState()
+{
+	static DWORD pCall = 0x0049BAA0;
+	static DWORD pOldESP;
+	static DWORD pOldEBP;
+	_asm mov pOldESP, esp;
+	_asm mov pOldEBP, ebp;
+	_asm mov pSkater, ecx;
+	_asm mov eax, [esp + 4];
+	_asm mov press, eax;
+	bUpdate = UpdateKeyState2((KeyState*)pSkater, press);
+	if (bUpdate)
+	{
+		_asm mov ecx, pSkater;
+		_asm mov esp, pOldESP;
+		_asm mov ebp, pOldEBP;
+		_asm jmp[pCall];
+		_asm ret;
+
+	}
+	_asm mov ecx, pSkater
+	_asm mov esp, pOldESP;
+	_asm mov ebp, pOldEBP;
+	_asm ret 8;
+}
+
+void HookControls()
+{
+	DWORD old;
+	VirtualProtect((LPVOID)0x00498D5D, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00498D6B, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00498D79, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00498D87, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00498D95, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00498DA3, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00498DB1, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00498DBF, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00498DDB, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00498DE9, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00498DF7, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00498F6D, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00498F87, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00498FA3, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00498FBF, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00498FDC, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00498FFB, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x0049901A, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00499037, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00499056, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00499075, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x00499092, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((LPVOID)0x004990B1, 4, PAGE_EXECUTE_READWRITE, &old);
+
+
+	*(DWORD*)0x00498D5D = (PtrToUlong(UpdateKeyState) - 0x00498D5D) - 4;
+	*(DWORD*)0x00498D6B = (PtrToUlong(UpdateKeyState) - 0x00498D6B) - 4;
+	*(DWORD*)0x00498D79 = (PtrToUlong(UpdateKeyState) - 0x00498D79) - 4;
+	*(DWORD*)0x00498D87 = (PtrToUlong(UpdateKeyState) - 0x00498D87) - 4;
+	*(DWORD*)0x00498D95 = (PtrToUlong(UpdateKeyState) - 0x00498D95) - 4;
+	*(DWORD*)0x00498DA3 = (PtrToUlong(UpdateKeyState) - 0x00498DA3) - 4;
+	*(DWORD*)0x00498DB1 = (PtrToUlong(UpdateKeyState) - 0x00498DB1) - 4;
+	*(DWORD*)0x00498DBF = (PtrToUlong(UpdateKeyState) - 0x00498DBF) - 4;
+	*(DWORD*)0x00498DCD = (PtrToUlong(UpdateKeyState) - 0x00498DCD) - 4;
+	*(DWORD*)0x00498DDB = (PtrToUlong(UpdateKeyState) - 0x00498DDB) - 4;
+	*(DWORD*)0x00498DE9 = (PtrToUlong(UpdateKeyState) - 0x00498DE9) - 4;
+	*(DWORD*)0x00498DF7 = (PtrToUlong(UpdateKeyState) - 0x00498DF7) - 4;
+	*(DWORD*)0x00498F6D = (PtrToUlong(UpdateKeyState) - 0x00498F6D) - 4;
+	*(DWORD*)0x00498F87 = (PtrToUlong(UpdateKeyState) - 0x00498F87) - 4;
+	*(DWORD*)0x00498FA3 = (PtrToUlong(UpdateKeyState) - 0x00498FA3) - 4;
+	*(DWORD*)0x00498FBF = (PtrToUlong(UpdateKeyState) - 0x00498FBF) - 4;
+	*(DWORD*)0x00498FDC = (PtrToUlong(UpdateKeyState) - 0x00498FDC) - 4;
+	*(DWORD*)0x00498FFB = (PtrToUlong(UpdateKeyState) - 0x00498FFB) - 4;
+	*(DWORD*)0x0049901A = (PtrToUlong(UpdateKeyState) - 0x0049901A) - 4;
+	*(DWORD*)0x00499037 = (PtrToUlong(UpdateKeyState) - 0x00499037) - 4;
+	*(DWORD*)0x00499056 = (PtrToUlong(UpdateKeyState) - 0x00499056) - 4;
+	*(DWORD*)0x00499075 = (PtrToUlong(UpdateKeyState) - 0x00499075) - 4;
+	*(DWORD*)0x00499092 = (PtrToUlong(UpdateKeyState) - 0x00499092) - 4;
+	*(DWORD*)0x004990B1 = (PtrToUlong(UpdateKeyState) - 0x004990B1) - 4;
+}
+
+EXTERN void ProxyPad(Skater* skater)
+{
+	if (Player1->IsConnected()) [[unlikely]]
+	{
+		//_printf("Player1 Is Connected.\n going to update...\n");
+		skater->UpdateKeyState(KeyState::OLLIE, (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A) * 0xFF);
+		skater->UpdateKeyState(KeyState::GRAB, (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B) * 0xFF);
+		skater->UpdateKeyState(KeyState::FLIP, (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_X) * 0xFF);
+		skater->UpdateKeyState(KeyState::GRIND, (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y) * 0xFF);
+		skater->UpdateKeyState(KeyState::SPINLEFT, (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) * 0xFF);
+		skater->UpdateKeyState(KeyState::SPINRIGHT, (Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) * 0xFF);
+
+		//IsButton above trigger threshold?
+		if ((Player1->GetState().Gamepad.bLeftTrigger) > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
+			skater->UpdateKeyState(KeyState::NOLLIE, 0xFF);
+		else
+			skater->UpdateKeyState(KeyState::NOLLIE, 0);
+
+		//Is button above trigger threshold?
+		if ((Player1->GetState().Gamepad.bRightTrigger) > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
+		  skater->UpdateKeyState(KeyState::REVERT, 0xFF);
+		else
+			skater->UpdateKeyState(KeyState::REVERT, 0);
+
+		//Is thumb in deadzone?
+		if (Player1->GetState().Gamepad.sThumbLX >= XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+		{
+			//ClampValue between 0x40 and 0xFF(0-0x40=deadzone)
+			skater->UpdateKeyState(KeyState::RIGHT, ClampValue(Player1->GetState().Gamepad.sThumbLX, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF));
+			skater->UpdateKeyState(KeyState::LEFT, 0);
+		}
+		else if (Player1->GetState().Gamepad.sThumbLX <= -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+		{
+			//ClampValue between 0x40 and 0xFF(0-0x40=deadzone)
+			skater->UpdateKeyState(KeyState::LEFT, ClampValue(Player1->GetState().Gamepad.sThumbLX, -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, -32767, 0x40, 0xFF));
+			skater->UpdateKeyState(KeyState::RIGHT, 0);
 		}
 		else
 		{
-			observe->Leave();
-			delete observe;
-			observe = NULL;
+			skater->UpdateKeyState(KeyState::LEFT, 0);
+			skater->UpdateKeyState(KeyState::RIGHT, 0);
+		}
+
+	}
+}
+
+bool SpawnFunc = false;
+DWORD CrownCount, ZoneCount, RestartCount = 0;
+
+
+
+void CommandAdd(const char* message)
+{
+	_printf("CommandAdd - %s\n", message);
+	message += 4;
+
+
+	char command[12];
+	DWORD j = 0;
+	while (message[j] != 0x20 && message[j] != 0x0)
+	{
+		command[j] = message[j];
+		j++;
+		if (j > 12)
+		{
+			j = 0;
+			break;
+		}
+	}
+	if (j)
+	{
+		command[j] = 0x00;
+		_printf("Param %s\n", command);
+		Vertex vertex = *GetSkaterPos();
+
+		DWORD chc = crc32f((unsigned char*)command);
+		switch (chc)
+		{
+		case Checksums::Key:
+			AddDump("STRUCT{\nPosition = VECTOR[%f; %f; %f]\nAngles = VECTOR[0.0; 0.0; 0.0]\nName = TRG_ZONE_KEY\nClass = GenericNode\nType = ZONE_KEY\nCreatedAtStart zone_multiplier = 1\n}\n \r\n", vertex.x, vertex.y, vertex.z * -1);
+			break;
+
+		case Checksums::Flag:
+			if (strstr(message, "blue"))
+			{
+				AddDump("STRUCT{\nPosition = VECTOR[%f; %f; %f]\nAngles = VECTOR[0.0; 0.0; 0.0]\nName = TRG_CTF_Team1\nClass = GenericNode\nType = CTF_1\nCreatedAtStart }\n \r\n", vertex.x, vertex.y, vertex.z * -1);
+				AddDump("STRUCT{\nPosition = VECTOR[%f; %f; %f]\nAngles = VECTOR[0.0; 0.0; 0.0]\nName = team1\nClass = Restart\nType = UserDefined\nCreatedAtStart RestartName = Team: CTF\nrestart_types = ARRAY(\n\nCTF_1\n)\nTriggerScript = TRG_SpawnSkater\n}\n \r\n", vertex.x, vertex.y, vertex.z * -1);
+			}
+			else if (strstr(message, "red"))
+			{
+				AddDump("STRUCT{\nPosition = VECTOR[%f; %f; %f]\nAngles = VECTOR[0.0; 0.0; 0.0]\nName = TRG_CTF_Team02\nClass = GenericNode\nType = CTF_2\nCreatedAtStart }\n \r\n", vertex.x, vertex.y, vertex.z * -1);
+				AddDump("STRUCT{\nPosition = VECTOR[%f; %f; %f]\nAngles = VECTOR[0.0; 0.0; 0.0]\nName = team2\nClass = Restart\nType = UserDefined\nCreatedAtStart RestartName = Team: CTF\nrestart_types = ARRAY(\n\nCTF_2\n)\nTriggerScript = TRG_SpawnSkater\n}\n \r\n", vertex.x, vertex.y, vertex.z * -1);
+			}
+			else
+			{
+				AddDump("STRUCT{\nPosition = VECTOR[%f; %f; %f]\nAngles = VECTOR[0.0; 0.0; 0.0]\nName = TRG_CTF_Team1\nClass = GenericNode\nType = CTF_1\nCreatedAtStart }\n \r\n", vertex.x, vertex.y, vertex.z * -1);
+				AddDump("STRUCT{\nPosition = VECTOR[%f; %f; %f]\nAngles = VECTOR[0.0; 0.0; 0.0]\nName = team1\nClass = Restart\nType = UserDefined\nCreatedAtStart RestartName = Team: CTF\nrestart_types = ARRAY(\n\nCTF_1\n)\nTriggerScript = TRG_SpawnSkater\n}\n \r\n", vertex.x, vertex.y, vertex.z * -1);
+			}
+
+			break;
+		case Checksums::Zone:
+			AddDump("STRUCT{\nPosition = VECTOR[%f; %f; %f]\nAngles = VECTOR[0.0; 0.0; 0.0]\nName = TRG_CONTROL_ZONE%d\nClass = GenericNode\nType = ZONE\nCreatedAtStart zone_multiplier = 1\n}\n \r\n", vertex.x, vertex.y + 50, vertex.z * -1, ZoneCount);
+			ZoneCount++;
+			break;
+		case Checksums::Crown:
+			CrownCount++;
+			AddDump("STRUCT{\nPosition = VECTOR[%f; %f; %f]\nAngles = VECTOR[0.0; 0.0; 0.0]\nName = TRG_NewCrown%d\nClass = GenericNode\nType = Crown\nCreatedAtStart }", vertex.x, vertex.y, vertex.z * -1, CrownCount);
+			break;
+
+	    case Checksums::Spawn:
+			RestartCount++;
+			char Chat[MAX_PATH];
+			sprintf(Chat, "STRUCT{\nPosition = VECTOR[%f; %f; %f]\nAngles = VECTOR[0.0; 0.0; 0.0]\nName = TRG_NewRestart_%d\nClass = Restart\nType = MultiPlayer\nCreatedAtStart RestartName = \x22NewRestart%d\x22\nrestart_types = ARRAY(\nMultiPlayer ", vertex.x, vertex.y, vertex.z * -1, RestartCount, RestartCount);
+			if (strstr(message, "horse"))
+				strcat(Chat, "Horse ");
+			if (strstr(message, "blue"))
+				strcat(Chat, "CTF_1");
+			if (strstr(message, "red"))
+				strcat(Chat, "CTF_2");
+			AddDump(Chat);
+			AddDump("\n)\nTriggerScript = TRG_Spawn\n}\n \r\n");
+
+			if (!SpawnFunc)
+			{
+				SpawnFunc = true;
+				AddDump("\n#15801  FUNCTION SpawnFunc\n#15808 MakeSkaterGoto StartSkating1\n#15809 END FUNCTION\n \r\n");
+			}
+			break;
+		default:
+			printf("Default...\n");
+			break;
 		}
 	}
 
-	/*DWORD  D3DCMP, pShared, vShared, Cull, StencileEnable, Clipping, Clipplane, COLOROP1, COLORARG1, COLORARG2, COLOROP2;
-	UINT oldStride;
-	IDirect3DVertexBuffer8* oldBuffer;
-	IDirect3DBaseTexture8* oldTexture1, *oldTexture2;
-	m_pIDirect3DDevice8->GetStreamSource(0, &oldBuffer, &oldStride);
-	m_pIDirect3DDevice8->GetPixelShader(&pShared);
-	m_pIDirect3DDevice8->GetVertexShader(&vShared);
-	m_pIDirect3DDevice8->GetRenderState(D3DRS_CULLMODE, &Cull);
-
-	//m_pIDirect3DDevice8->SetStreamSource(0,0,0);
-
-	//m_pIDirect3DDevice8->SetViewport(&pViewport);
-	//m_pIDirect3DDevice8->SetTexture(0,NULL);
-	m_pIDirect3DDevice8->SetPixelShader(NULL);
-
-
-	m_pIDirect3DDevice8->SetRenderState(D3DRS_ZENABLE, TRUE);
-	//m_pIDirect3DDevice8->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-	m_pIDirect3DDevice8->GetRenderState(D3DRS_ZFUNC, &D3DCMP);
-	m_pIDirect3DDevice8->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
-	//m_pIDirect3DDevice8->SetRenderState( D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL );
-	//m_pIDirect3DDevice8->SetRenderState( D3DRS_FILLMODE, D3DFILL_SOLID );
-	m_pIDirect3DDevice8->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	m_pIDirect3DDevice8->GetRenderState(D3DRS_STENCILENABLE, &StencileEnable);
-	m_pIDirect3DDevice8->SetRenderState(D3DRS_STENCILENABLE, FALSE);
-	m_pIDirect3DDevice8->GetRenderState(D3DRS_CLIPPING, &Clipping);
-	m_pIDirect3DDevice8->SetRenderState(D3DRS_CLIPPING, FALSE);
-	m_pIDirect3DDevice8->GetRenderState(D3DRS_CLIPPLANEENABLE, &Clipplane);
-	m_pIDirect3DDevice8->SetRenderState(D3DRS_CLIPPLANEENABLE, FALSE);
-
-	m_pIDirect3DDevice8->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
-	m_pIDirect3DDevice8->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN |
-	D3DCOLORWRITEENABLE_BLUE | D3DCOLORWRITEENABLE_ALPHA);
-
-	m_pIDirect3DDevice8->GetTextureStageState(0, D3DTSS_COLOROP, &COLOROP1);
-	m_pIDirect3DDevice8->SetTextureStageState(0, D3DTSS_COLOROP, D3DTSS_COLOROP);
-	m_pIDirect3DDevice8->GetTextureStageState(0, D3DTSS_COLORARG1, &COLORARG1);
-	m_pIDirect3DDevice8->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	m_pIDirect3DDevice8->GetTextureStageState(0, D3DTSS_COLORARG2, &COLORARG2);
-	m_pIDirect3DDevice8->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-
-	m_pIDirect3DDevice8->GetTextureStageState(1, D3DTSS_COLOROP, &COLOROP2);
-	m_pIDirect3DDevice8->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-	m_pIDirect3DDevice8->GetTexture(0, &oldTexture1);
-	m_pIDirect3DDevice8->GetTexture(1, &oldTexture2);
-	m_pIDirect3DDevice8->SetTexture(0, NULL);
-	m_pIDirect3DDevice8->SetTexture(1, NULL);
-
-
-	m_pIDirect3DDevice8->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
-	for (DWORD i = 0; i < pointList.size(); i++)
-	m_pIDirect3DDevice8->DrawPrimitiveUP(D3DPT_LINELIST, (pointList[i].numNodes - 1) / 2, &pointList[i].v[0], sizeof(pointList[i].v[0]));*/
-
-
-	//}
-	/*m_pIDirect3DDevice8->SetTexture(0, oldTexture1);
-	m_pIDirect3DDevice8->SetTexture(1, oldTexture2);
-	m_pIDirect3DDevice8->SetRenderState(D3DRS_ZENABLE, FALSE);
-	//m_pIDirect3DDevice8->SetRenderState( D3DRS_ZENABLE, TRUE);
-	m_pIDirect3DDevice8->SetRenderState(D3DRS_STENCILENABLE, StencileEnable);
-	m_pIDirect3DDevice8->SetRenderState(D3DRS_CLIPPING, Clipping);
-	m_pIDirect3DDevice8->SetRenderState(D3DRS_CLIPPLANEENABLE, Clipplane);
-
-
-	m_pIDirect3DDevice8->SetRenderState(D3DRS_CULLMODE, Cull);
-	m_pIDirect3DDevice8->SetPixelShader(pShared);
-	m_pIDirect3DDevice8->SetVertexShader(vShared);
-	m_pIDirect3DDevice8->SetRenderState(D3DRS_ZFUNC, D3DCMP);
-	m_pIDirect3DDevice8->SetStreamSource(0, oldBuffer, oldStride);*/
-	return;
 }
+
+void CommandShowCommands(const char* message)
+{
+	DWORD k = 0;
+	for (DWORD i = 1; i < sizeof(commands) / sizeof(Command); i++)
+	{
+		DWORD j = 0;
+		while (commands[i].name[j] != 0)
+		{
+			msg[k] = commands[i].name[j];
+			j++;
+			k++;
+		}
+		msg[k] = 0x20;
+		k++;
+	}
+	msg[k] = '\n';
+	msg[k] = 0;
+	_printf(msg);
+
+	sprintf(download_message, msg);
+	showmessage = 1000;
+
+	/*CStruct param2;
+	CStructHeader param(QBKeyHeader::STRING, Checksums::text, msg);
+	param2.AddParam(&param);
+	ExecuteQBScript("LaunchGrafCounter", &param2);*/
+}
+

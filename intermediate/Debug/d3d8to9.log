@@ -1,18 +1,66 @@
 ﻿  Source.cpp
 C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt\string.h(11,1): warning C4005: '_CRT_SECURE_NO_WARNINGS': macro redefinition
 C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp : message : see previous definition of '_CRT_SECURE_NO_WARNINGS'
+C:\Users\Vadru\source\repos\Skate3_extension\Skate3_extension\_Math.h(688,51): warning C5051: attribute 'unlikely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\source\repos\Skate3_extension\Skate3_extension\_Math.h(690,24): warning C5051: attribute 'unlikely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\source\CXBOXController.h(5,1): warning C4005: 'WIN32_LEAN_AND_MEAN': macro redefinition
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp : message : see previous definition of 'WIN32_LEAN_AND_MEAN'
 C:\Users\Vadru\source\repos\Skate3_extension\Skate3_extension\Script.h(16,21): warning C4091: '__declspec(dllexport)': ignored on left of 'Script' when no variable is declared
-C:\Users\Vadru\source\repos\Skate3_extension\Skate3_extension\Skater.h(283,2): warning C4091: '__declspec(dllexport)': ignored on left of 'Skater' when no variable is declared
+C:\Users\Vadru\source\repos\Skate3_extension\Skate3_extension\Skater.h(320,2): warning C4091: '__declspec(dllexport)': ignored on left of 'Skater' when no variable is declared
 C:\Users\Vadru\source\repos\Skate3_extension\Skate3_extension\SuperSectors.h(95,2): warning C4091: '__declspec(dllexport)': ignored on left of 'SuperSector' when no variable is declared
-C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9082,58): warning C4101: 'Clipping': unreferenced local variable
-C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9082,27): warning C4101: 'vShared': unreferenced local variable
-C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9082,42): warning C4101: 'StencileEnable': unreferenced local variable
-C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9082,10): warning C4101: 'D3DCMP': unreferenced local variable
-C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9082,68): warning C4101: 'Clipplane': unreferenced local variable
-C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9082,89): warning C4101: 'COLORARG1': unreferenced local variable
-C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9082,79): warning C4101: 'COLOROP1': unreferenced local variable
-C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9082,100): warning C4101: 'COLORARG2': unreferenced local variable
-C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9082,18): warning C4101: 'pShared': unreferenced local variable
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(2461,25): warning C5051: attribute 'unlikely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(2642,35): warning C5051: attribute 'unlikely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(3148,42): warning C5051: attribute 'unlikely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(3151,23): warning C5051: attribute 'unlikely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(4354,24): warning C5051: attribute 'unlikely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(5047,43): warning C5051: attribute 'unlikely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(5049,48): warning C5051: attribute 'unlikely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(5052,19): warning C5051: attribute 'unlikely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(5074,121): warning C5051: attribute 'unlikely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(5087,98): warning C5051: attribute 'unlikely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(5160,45): warning C5051: attribute 'unlikely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(6009,13): warning C4244: '=': conversion from 'DWORD' to 'BYTE', possible loss of data
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9852,17): warning C5051: attribute 'unlikely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9873,26): warning C5051: attribute 'likely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9876,18): warning C5051: attribute 'likely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9881,56): warning C5051: attribute 'unlikely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9884,57): warning C5051: attribute 'likely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9900,32): warning C5051: attribute 'unlikely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9917,58): warning C5051: attribute 'unlikely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9940,25): warning C5051: attribute 'unlikely' requires at least '/std:c++latest'; ignored
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9948,63): warning C4101: 'Clipping': unreferenced local variable
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9948,32): warning C4101: 'vShared': unreferenced local variable
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9948,47): warning C4101: 'StencileEnable': unreferenced local variable
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9948,15): warning C4101: 'D3DCMP': unreferenced local variable
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9948,73): warning C4101: 'Clipplane': unreferenced local variable
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9948,94): warning C4101: 'COLORARG1': unreferenced local variable
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9948,84): warning C4101: 'COLOROP1': unreferenced local variable
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9948,105): warning C4101: 'COLORARG2': unreferenced local variable
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(9948,23): warning C4101: 'pShared': unreferenced local variable
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\Source.cpp(10150,32): warning C5051: attribute 'unlikely' requires at least '/std:c++latest'; ignored
+  CXBOXController.cpp
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\source\CXBOXController.h(5,1): warning C4005: 'WIN32_LEAN_AND_MEAN': macro redefinition
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\source\CXBOXController.cpp : message : see previous definition of 'WIN32_LEAN_AND_MEAN'
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt\string.h(11,1): warning C4005: '_CRT_SECURE_NO_WARNINGS': macro redefinition
+C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\source\CXBOXController.cpp : message : see previous definition of '_CRT_SECURE_NO_WARNINGS'
+  Generating Code...
 C:\Users\Vadru\source\repos\Skate3_extension\Skate3_extension\_Math.h(62): warning C4172: returning address of local variable or temporary: Out
 C:\Users\Vadru\source\repos\Skate3_extension\Skate3_extension\Node.h(23): warning C4172: returning address of local variable or temporary: x
-  d3d8to9.vcxproj -> C:\Users\Vadru\Documents\Visual Studio 2019\d3d8tod3d9\d3d8to9-master\bin\Debug\d3d8.dll
+     Creating library bin\Debug\d3d8.lib and object bin\Debug\d3d8.exp
+Source.obj : error LNK2019: unresolved external symbol ___WSAFDIsSet@8 referenced in function "void __cdecl StartedGraf(struct StructScript *)" (?StartedGraf@@YAXPAUStructScript@@@Z)
+Source.obj : error LNK2019: unresolved external symbol __imp__accept@12 referenced in function "void __cdecl StartedGraf(struct StructScript *)" (?StartedGraf@@YAXPAUStructScript@@@Z)
+Source.obj : error LNK2019: unresolved external symbol __imp__bind@12 referenced in function "void __cdecl StartedGraf(struct StructScript *)" (?StartedGraf@@YAXPAUStructScript@@@Z)
+Source.obj : error LNK2019: unresolved external symbol __imp__closesocket@4 referenced in function "void __cdecl DownloadAndInstall(char *,char *)" (?DownloadAndInstall@@YAXPAD0@Z)
+Source.obj : error LNK2019: unresolved external symbol __imp__connect@12 referenced in function "bool __cdecl DownloadAndInstall(class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > &,float,struct sockaddr *)" (?DownloadAndInstall@@YA_NAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@MPAUsockaddr@@@Z)
+Source.obj : error LNK2019: unresolved external symbol __imp__ioctlsocket@12 referenced in function "bool __cdecl DownloadAndInstall(class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > &,float,struct sockaddr *)" (?DownloadAndInstall@@YA_NAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@MPAUsockaddr@@@Z)
+Source.obj : error LNK2019: unresolved external symbol __imp__htons@4 referenced in function "void __cdecl DownloadAndInstall(char *,char *)" (?DownloadAndInstall@@YAXPAD0@Z)
+Source.obj : error LNK2019: unresolved external symbol __imp__listen@8 referenced in function "void __cdecl StartedGraf(struct StructScript *)" (?StartedGraf@@YAXPAUStructScript@@@Z)
+Source.obj : error LNK2019: unresolved external symbol __imp__recv@16 referenced in function "bool __cdecl DownloadAndInstall(class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > &,float,struct sockaddr *)" (?DownloadAndInstall@@YA_NAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@MPAUsockaddr@@@Z)
+Source.obj : error LNK2019: unresolved external symbol __imp__select@20 referenced in function "void __cdecl StartedGraf(struct StructScript *)" (?StartedGraf@@YAXPAUStructScript@@@Z)
+Source.obj : error LNK2019: unresolved external symbol __imp__send@16 referenced in function "bool __cdecl DownloadAndInstall(class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > &,float,struct sockaddr *)" (?DownloadAndInstall@@YA_NAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@MPAUsockaddr@@@Z)
+Source.obj : error LNK2019: unresolved external symbol __imp__socket@12 referenced in function "void __cdecl DownloadAndInstall(char *,char *)" (?DownloadAndInstall@@YAXPAD0@Z)
+Source.obj : error LNK2019: unresolved external symbol __imp__gethostbyname@4 referenced in function "void __cdecl DownloadAndInstall(char *,char *)" (?DownloadAndInstall@@YAXPAD0@Z)
+Source.obj : error LNK2019: unresolved external symbol __imp__WSAStartup@8 referenced in function "void __cdecl DownloadAndInstall(char *,char *)" (?DownloadAndInstall@@YAXPAD0@Z)
+Source.obj : error LNK2019: unresolved external symbol __imp__WSACleanup@0 referenced in function "void __cdecl DownloadAndInstall(char *,char *)" (?DownloadAndInstall@@YAXPAD0@Z)
+Source.obj : error LNK2019: unresolved external symbol __imp__WSAGetLastError@0 referenced in function "bool __cdecl DownloadAndInstall(class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > &,float,struct sockaddr *)" (?DownloadAndInstall@@YA_NAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@MPAUsockaddr@@@Z)
+bin\Debug\d3d8.dll : fatal error LNK1120: 16 unresolved externals

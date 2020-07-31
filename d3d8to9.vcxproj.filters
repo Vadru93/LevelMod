@@ -31,6 +31,9 @@
       <Filter>helpers</Filter>
     </ClCompile>
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="source\CXBOXController.cpp" />
+    <ClCompile Include="IniReader.cpp" />
+    <ClCompile Include="IniWriter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\d3dx9.hpp">
@@ -97,6 +100,11 @@
     <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\_Math.h">
       <Filter>helpers</Filter>
     </ClInclude>
+    <ClInclude Include="source\CXBOXController.h">
+      <Filter>helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="IniReader.h" />
+    <ClInclude Include="IniWriter.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\d3d8.def">

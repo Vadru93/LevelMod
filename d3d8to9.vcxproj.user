@@ -6,4 +6,10 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>D:\Program Files\Tony hawk 3\</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LocalDebuggerWorkingDirectory>D:\Program Files\Tony hawk 3\</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommandArguments>-window -windowed -start  -play</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommand>D:\Program Files\Tony hawk 3\skate3.exe</LocalDebuggerCommand>
+  </PropertyGroup>
 </Project>
