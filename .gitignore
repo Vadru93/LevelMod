@@ -47,3 +47,5 @@ ipch/
 *.exe
 *.out
 *.app
+
+.vs
