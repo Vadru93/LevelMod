@@ -3,6 +3,10 @@
  * License: https://github.com/crosire/d3d8to9#license
  */
 
+#define NO_DEFINES
+#define PCH_H
+
+#include "pch.h"
 #include "d3d8to9.hpp"
 
 // IDirect3DIndexBuffer8

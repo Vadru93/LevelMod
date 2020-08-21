@@ -3,6 +3,10 @@
  * License: https://github.com/crosire/d3d8to9#license
  */
 
+#define NO_DEFINES
+#define PCH_H
+
+#include "pch.h"
 #include "d3dx9.hpp"
 #include "d3d8to9.hpp"
 #include "QBKey.h"
@@ -10,11 +14,7 @@
 #define pRANDOM_SIZE 0x32000
 
 static BYTE pRandom[pRANDOM_SIZE] = { 0 };
-#define HASH_SIZE 0x2FFD0
-#define OLD_HASH_SIZE 0xBFF4
 BYTE hashTable[HASH_SIZE] = { 0 };//the node hash names, each item is 12 bytes
-#define OTHER_SIZE 0x140000
-#define OLD_OTHER_SIZE 0x14000
 //BYTE otherTable[0x50000];//unknown table, each item is 20 bytes
 
 static DWORD pOld = 0x008A8B48;
@@ -32,8 +32,7 @@ static DWORD pNew = (DWORD)&hashTable;
 };*/
 //struct QBKeyHeader;
 //#pragma pop(pack)
-#define MAX_TRIGGERS OTHER_SIZE / 0x14
-#define OLD_MAX_TRIGGERS OLD_OTHER_SIZE / 0x14
+
 QBKeyHeader triggers[MAX_TRIGGERS]{ 0 };
 static DWORD pOld2 = 0x0087D8F8;
 static DWORD pNew2 = (DWORD)&triggers;

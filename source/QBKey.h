@@ -3,9 +3,18 @@
 #define QBKEY_H
 //this struct needed to be moved to a seperate file so I could include only this part to d3d8
 struct CStruct;
+struct CArray;
 struct CScript;
 struct CStructHeader;
 struct D3DXVECTOR3;
+
+
+#define OTHER_SIZE 0x140000
+#define OLD_OTHER_SIZE 0x14000
+#define HASH_SIZE 0x63AD0
+#define OLD_HASH_SIZE 0xBFF4
+#define MAX_TRIGGERS OTHER_SIZE / 0x14
+#define OLD_MAX_TRIGGERS OLD_OTHER_SIZE / 0x14
 #ifdef EXPORTING
 #define EXTERN __declspec(dllexport)
 #else
@@ -67,6 +76,7 @@ struct QBKeyHeader//Used to store information about QBKeys (Type, Value/Address)
 		char* pStr;
 		CScript* pScript;
 		D3DXVECTOR3* pVec;
+		CArray* pArray;
 		bool(*pFunction)(CStruct*, CScript*);
 		CStructHeader** pStruct;
 	};
@@ -87,6 +97,9 @@ struct QBKeyHeader//Used to store information about QBKeys (Type, Value/Address)
 	{
 		return pScript;
 	}
+
+	EXTERN bool SetFloat(DWORD checksum, float value);
+	
 	inline bool CallScript(CStruct* pStruct, CScript* pScript)
 	{
 		return pFunction(pStruct, pScript);

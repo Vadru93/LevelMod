@@ -1,5 +1,6 @@
-
-#include "CXBOXController.h"
+#define NO_DEFINES
+#define _CRT_SECURE_NO_WARNINGS
+#include "pch.h"
 
 CXBOXController::CXBOXController(int playerNumber)
 {

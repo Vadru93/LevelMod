@@ -36,7 +36,7 @@
     <TargetName>d3d8</TargetName>
     <OutDir>bin\$(Configuration)\</OutDir>
     <IntDir>intermediate\$(Configuration)\</IntDir>
-    <IncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\xinput.h;C:\Users\Vadru\source\repos\Skate3_extension\Skate3_extension;$(WindowsSdkDir)include;C:\Users\Vadru\Documents\Chilkat\include;$(IncludePath);$(DXSDK_DIR)\Include</IncludePath>
+    <IncludePath>C:\Users\Vadru\Documents\Visual Studio 2019\LevelMod\d3d8to9-master\source;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\xinput.h;$(WindowsSdkDir)include;C:\Users\Vadru\Documents\Chilkat\include;$(IncludePath);$(DXSDK_DIR)\Include</IncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.18362.0\um\x86\xinput.lib;C:\Users\Vadru\Documents\Chilkat\libs;$(DXSDK_DIR)\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -62,10 +62,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>D3D8TO9NOLOG;EXPORTING;_WINSOCK_DEPRECATED_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;_USRDLL;SKATE3_EXPORTS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>D3D8TO9NOLOG;EXPORTING;_WINSOCK_DEPRECATED_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;_USRDLL;SKATE3_EXPORTS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <MinimalRebuild>false</MinimalRebuild>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -83,10 +87,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\zip.cpp" />
-    <ClCompile Include="IniReader.cpp" />
-    <ClCompile Include="IniWriter.cpp" />
-    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="source\Checksum.cpp" />
     <ClCompile Include="source\CXBOXController.cpp" />
     <ClCompile Include="source\d3d8to9.cpp" />
     <ClCompile Include="source\d3d8to9_base.cpp" />
@@ -98,35 +99,59 @@
     <ClCompile Include="source\d3d8to9_vertex_buffer.cpp" />
     <ClCompile Include="source\d3d8to9_volume.cpp" />
     <ClCompile Include="source\d3d8types.cpp" />
+    <ClCompile Include="source\debug.cpp" />
+    <ClCompile Include="source\Defines.cpp" />
+    <ClCompile Include="source\Extension.cpp" />
+    <ClCompile Include="source\Globals.cpp" />
+    <ClCompile Include="source\IniReader.cpp" />
+    <ClCompile Include="source\IniWriter.cpp" />
     <ClCompile Include="source\interface_query.cpp" />
+    <ClCompile Include="source\KeyState.cpp" />
     <ClCompile Include="source\lookup_table.cpp" />
+    <ClCompile Include="source\math.cpp" />
+    <ClCompile Include="source\Memory.cpp" />
+    <ClCompile Include="source\Node.cpp" />
+    <ClCompile Include="source\Observe.cpp" />
+    <ClCompile Include="source\pch.cpp" />
+    <ClCompile Include="source\Physics.cpp" />
+    <ClCompile Include="source\Script.cpp" />
+    <ClCompile Include="source\Settings.cpp" />
+    <ClCompile Include="source\Skater.cpp" />
+    <ClCompile Include="source\Source.cpp" />
+    <ClCompile Include="source\SuperSectors.cpp" />
+    <ClCompile Include="source\unzip.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\Checksum.h" />
-    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\Debug.h" />
-    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\Defines.h" />
-    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\Extension.h" />
-    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\framework.h" />
-    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\HTTPRequest.h" />
-    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\KeyState.h" />
-    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\_Math.h" />
-    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\Memory.h" />
-    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\Mesh.h" />
-    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\Node.h" />
-    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\Script.h" />
-    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\Skater.h" />
-    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\SuperSectors.h" />
-    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\unzip.h" />
-    <ClInclude Include="..\..\..\..\source\repos\Skate3_extension\Skate3_extension\zip.h" />
-    <ClInclude Include="IniReader.h" />
-    <ClInclude Include="IniWriter.h" />
     <ClInclude Include="res\resource.h" />
+    <ClInclude Include="source\Checksum.h" />
+    <ClInclude Include="source\Commands.h" />
     <ClInclude Include="source\CXBOXController.h" />
     <ClInclude Include="source\d3d8to9.hpp" />
     <ClInclude Include="source\d3d8types.hpp" />
     <ClInclude Include="source\d3dx9.hpp" />
+    <ClInclude Include="source\Debug.h" />
+    <ClInclude Include="source\Defines.h" />
+    <ClInclude Include="source\Extension.h" />
+    <ClInclude Include="source\framework.h" />
+    <ClInclude Include="source\Globals.h" />
+    <ClInclude Include="source\HTTPRequest.h" />
+    <ClInclude Include="source\IniReader.h" />
+    <ClInclude Include="source\IniWriter.h" />
+    <ClInclude Include="source\KeyState.h" />
     <ClInclude Include="source\lookup_table.hpp" />
+    <ClInclude Include="source\Memory.h" />
+    <ClInclude Include="source\Mesh.h" />
+    <ClInclude Include="source\Node.h" />
+    <ClInclude Include="source\Observe.h" />
+    <ClInclude Include="source\pch.h" />
+    <ClInclude Include="source\Physics.h" />
     <ClInclude Include="source\QBKey.h" />
+    <ClInclude Include="source\Script.h" />
+    <ClInclude Include="source\Settings.h" />
+    <ClInclude Include="source\Skater.h" />
+    <ClInclude Include="source\SuperSectors.h" />
+    <ClInclude Include="source\unzip.h" />
+    <ClInclude Include="source\_Math.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\d3d8.def" />

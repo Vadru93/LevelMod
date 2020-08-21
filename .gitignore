@@ -1,0 +1,16 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
+
+# Visual Studio cache files
+ipch/
+*.aps
+*.VC.db
+*.VC.opendb
+*.sdf
+*.opensdf
+*.suo
+*.user
