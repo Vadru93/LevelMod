@@ -64,6 +64,7 @@ SCRIPT AddOptions
 	AddOption name = "LM_Control_bButtSlap" value = 1
 	AddOption name = "LM_Control_bBoostPlant" value = 0
 	AddOption name = "LM_Control_bWallplant" value = 1
+	AddOption name = "LM_Gameplay_bPedProps" value = 1
 ENDSCRIPT
  
 SCRIPT LM_SetOption
@@ -309,6 +310,9 @@ levelmod_menu_GameOptions_items = [
 	
 	//enables pseudo 3d layered grass in t2x and th4 levels
 	{ LM_Menu_Shared_Bool id = LM_GameOption_bNetSky_id params = { name = LM_GameOption_bNetSky id = LM_GameOption_bNetSky_id on = "Net sky: on" off = "Net sky: off" } }
+	
+	//removes ped props
+	{ LM_Menu_Shared_Bool id = LM_Gameplay_bPedProps_id params = { name = LM_Gameplay_bPedProps id = LM_Gameplay_bPedProps_id on = "Ped Props: on" off = "Ped Props: off" } }
 	
 	//enables debug console, restart required for this option to apply
 	{ LM_Menu_Shared_Bool id = LM_DebugOption_bDebugMode_id params = { name = LM_DebugOption_bDebugMode id = LM_DebugOption_bDebugMode_id on = "Debug Mode: on" off = "Debug Mode: off" } }

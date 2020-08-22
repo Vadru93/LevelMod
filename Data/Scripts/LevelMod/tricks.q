@@ -22,7 +22,7 @@ SCRIPT SkaterInit
 		Obj_Attachframe bone = "left_wrist"
 		Obj_Attachframe bone = "right_wrist"
 		//calling fire spawn defined later
-		Demoness_FlameOn											  
+		Demoness_FlameOn
 	ENDIF
 	PlayAnim Anim = Idle
 	SetBalanceTrickParams ManualParams
@@ -1353,21 +1353,23 @@ SCRIPT CanadaBreath
 ENDSCRIPT
 
 SCRIPT PedProps name = "Ped Props" score = 500
-	IF InSplitScreenGame
-	ELSE
-		LaunchPanelMessage "Spectator Bonus" properties = Panelcombo2
-	ENDIF
-	PlaySound PedProps vol = 500
-	SetTrickName <name>
-	SetTrickScore <score>
-	Display BlockSpin
-	WaitOneGameFrame
-	IF OnGround
-		IF DoingTrick
+	IF IsOptionOn LM_Gameplay_bPedProps
+		IF InSplitScreenGame
 		ELSE
-			CheckGapTricks
-			ClearGapTricks
-			ClearPanel_Landed
+			LaunchPanelMessage "Spectator Bonus" properties = Panelcombo2
+		ENDIF
+		PlaySound PedProps vol = 500
+		SetTrickName <name>
+		SetTrickScore <score>
+		Display BlockSpin
+		WaitOneGameFrame
+		IF OnGround
+			IF DoingTrick
+			ELSE
+				CheckGapTricks
+				ClearGapTricks
+				ClearPanel_Landed
+			ENDIF
 		ENDIF
 	ENDIF
 ENDSCRIPT
@@ -1412,7 +1414,7 @@ SCRIPT LaunchSpecialMessage text = "Special Trick"
 ENDSCRIPT
 
 SCRIPT LaunchExtraMessage text = "Hidden Combo!"
-	PlaySound HUD_specialtrickAA vol = 100
+	PlaySound ExtraTrick vol = 100
 	IF InSplitScreenGame
 	ELSE
 		IF IsOptionOn LM_GUI_bTrickNotifications
