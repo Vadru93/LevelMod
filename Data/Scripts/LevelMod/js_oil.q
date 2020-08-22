@@ -1,7 +1,7 @@
 
 SCRIPT Oil_Startup
 	LoadStreamHeader "streams\oil\streams"
-	LoadSound "Shared\GlassPane2X" vol = 100 dropoff = 100 pitch = 35 posupdateWithDoppler
+	LoadSound "Shared\GlassPane2X" vol = 100 dropoff = 100 pitch = 100 posupdateWithDoppler
 	LoadSound "Shared\FallWater" vol = 100 pitch = 100
 	LoadSound "Shared\FallPungee" vol = 100 pitch = 100
 	LoadSound "Oil\Oil_Elevator" vol = 100 dropoff = 50 pitch = 100 posupdate
@@ -742,7 +742,7 @@ SCRIPT JS_OilG_MPipe2MPipe_E
 ENDSCRIPT
 
 SCRIPT JS_OilS_MPipe2MPipe
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_MPipe2MPipe
 	Wait 1 frame
 	EndGap GapID = Score_MPipe2MPipe text = "FAT PIPE HOP" score = 100
@@ -759,7 +759,7 @@ SCRIPT JS_OilG_Rail2SPipe
 ENDSCRIPT
 
 SCRIPT JS_OilS_SPipe2Rail
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_SPipe2Rail
 	Wait 1 frame
 	EndGap GapID = Score_SPipe2Rail text = "RAIL 2 PIPE" score = 50
@@ -776,7 +776,7 @@ SCRIPT JS_OilG_SiloBaseGap_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_SiloBaseGap
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_SiloBaseGap
 	Wait 1 frame
 	EndGap GapID = Score_SiloBaseGap text = "SILO BASE GAP" score = 150
@@ -793,7 +793,7 @@ SCRIPT JS_OilG_SiloBase2Rail_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_Base2Rail
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_SiloBase2Rail
 	Wait 1 frame
 	EndGap GapID = Score_SiloBase2Rail text = "SILO BASE 2 RAIL" score = 100
@@ -810,7 +810,7 @@ SCRIPT JS_OilG_Rail2SiloRailDrop_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_Rail2SiloRailDrop
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Rail2SiloRailDrop
 	Wait 1 frame
 	EndGap GapID = Score_Rail2SiloRailDrop text = "RAIL 2 SILO RAIL DROP" score = 100
@@ -827,7 +827,7 @@ SCRIPT JS_OilG_SiloRail2Rail_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_SiloRail2Rail
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_SiloRail2Rail
 	Wait 1 frame
 	EndGap GapID = Score_SiloRail2Rail text = "SILO RAIL 2 RAIL" score = 50
@@ -842,7 +842,7 @@ SCRIPT JS_OilG_RampRail2SiloRail_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_RampRail2SiloRail
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_RampRail2SiloRail
 	Wait 1 frame
 	EndGap GapID = Score_RampRail2SiloRail text = "RAMP RAIL 2 SILO RAIL" score = 1000
@@ -857,7 +857,7 @@ SCRIPT JS_OilG_SiloRail2RailDrop_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_SiloRail2RailDrop
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_SiloRail2RailDrop
 	Wait 1 frame
 	EndGap GapID = Score_SiloRail2RailDrop text = "SILO RAIL 2 RAIL DROP" score = 1000
@@ -872,7 +872,7 @@ SCRIPT JS_OilG_SiloRail2PipeLowDrop_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_SiloRail2PipeLowDrop
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_SiloRail2PipeLowDrop
 	Wait 1 frame
 	EndGap GapID = Score_SiloRail2PipeLowDrop text = "SILO RAIL 2 PIPE LOW DROP" score = 1000
@@ -887,7 +887,7 @@ SCRIPT JS_OilG_SiloRail2PipeHighDrop_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_SiloRail2PipeHighDrop
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_SiloRail2PipeHighDrop
 	Wait 1 frame
 	EndGap GapID = Score_SiloRail2PipeHighDrop text = "SILO RAIL 2 PIPE HIGH DROP" score = 1500
@@ -904,7 +904,7 @@ SCRIPT JS_OilG_SiloRailHop_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_SiloRailHop
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_SiloRailHop
 	Wait 1 frame
 	EndGap GapID = Score_SiloRailHop text = "SILO RAIL HOP" score = 1000
@@ -921,7 +921,7 @@ SCRIPT JS_OilG_SiloRailCRailLinkup_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_SiloRailCRailLinkup
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_SiloRailCRailLinkup
 	Wait 1 frame
 	EndGap GapID = Score_SiloRailCRailLinkup text = "SILO RAIL C-RAIL LINKUP" score = 500
@@ -938,7 +938,7 @@ SCRIPT JS_OilG_RailCRailLinkup_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_RailCRailLinkup
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_RailCRailLinkup
 	Wait 1 frame
 	EndGap GapID = Score_RailCRailLinkup text = "RAIL C-RAIL LINKUP" score = 1000
@@ -953,7 +953,7 @@ SCRIPT JS_OilG_CRailPipeDrop_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_CRailPipeDrop
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_CRailPipeDrop
 	Wait 1 frame
 	EndGap GapID = Score_CRailPipeDrop text = "C-RAIL 2 PIPE DROP" score = 750
@@ -968,7 +968,7 @@ SCRIPT JS_OilG_RampRail2Pipe_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_RampRail2Pipe
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_RampRail2Pipe
 	Wait 1 frame
 	EndGap GapID = Score_RampRail2Pipe text = "RAMP RAIL 2 PIPE" score = 100
@@ -995,7 +995,7 @@ SCRIPT JS_OilG_Rail2NEPipe
 ENDSCRIPT
 
 SCRIPT JS_OilS_NESWPipe2Rail
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_NESWPipe2Rail
 	Wait 1 frame
 	EndGap GapID = Score_NESWPipe2Rail text = "UPPER PIPE RAIL LINKUP" score = 50
@@ -1010,7 +1010,7 @@ SCRIPT JS_OilG_SPipe2RailDrop_02
 ENDSCRIPT
 
 SCRIPT JS_OilG_SPipe2RailDrop
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_SPipe2RailDrop
 	Wait 1 frame
 	EndGap GapID = Score_SPipe2RailDrop text = "UPPER PIPE 2 RAIL DROP" score = 300
@@ -1027,7 +1027,7 @@ SCRIPT JS_OilG_LoRail2Pipe
 ENDSCRIPT
 
 SCRIPT JS_OilS_LoPipe2Rail
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_LoPipe2Rail
 	Wait 1 frame
 	EndGap GapID = Score_LoPipe2Rail text = "LOWER PIPE RAIL LINKUP" score = 50
@@ -1044,7 +1044,7 @@ SCRIPT JS_OilG_LoPipe2LoPipe_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_LoPipe2LoPipe
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_LoPipe2LoPipe
 	Wait 1 frame
 	EndGap GapID = Score_LoPipe2LoPipe text = "LOWER PIPE 2 PIPE" score = 100
@@ -1071,7 +1071,7 @@ SCRIPT JS_OilG_LoPipe2PipeXOver_04
 ENDSCRIPT
 
 SCRIPT JS_OilS_LoPipe2PipeXOver
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_LoPipe2PipeXOver
 	Wait 1 frame
 	EndGap GapID = Score_LoPipe2PipeXOver text = "LOWER PIPE 2 PIPE CROSS OVER" score = 200
@@ -1088,7 +1088,7 @@ SCRIPT JS_OilG_ShortPipeRailLinkup_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_ShortPipeRailLinkup
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_ShortPipeRailLinkup
 	Wait 1 frame
 	EndGap GapID = Score_ShortPipeRailLinkup text = "SHORT PIPE RAIL LINKUP" score = 100
@@ -1105,7 +1105,7 @@ SCRIPT JS_OilG_ShortPipe2ShortPipe_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_ShortPipe2ShortPipe
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_ShortPipe2ShortPipe
 	Wait 1 frame
 	EndGap GapID = Score_ShortPipe2ShortPipe text = "SHORT PIPE 2 SHORT PIPE" score = 50
@@ -1122,7 +1122,7 @@ SCRIPT JS_OilG_ShortPipeBowlLinkup_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_ShortPipeBowlLinkup
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_ShortPipeBowlLinkup
 	Wait 1 frame
 	EndGap GapID = Score_ShortPipeBowlLinkup text = "SHORT PIPE BOWL LINKUP" score = 100
@@ -1139,7 +1139,7 @@ SCRIPT JS_OilG_CrankedPipeRailLinkup_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_CrankedPipeRailLinkup
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_CrankedPipeRailLinkup
 	Wait 1 frame
 	EndGap GapID = Score_CrankedPipeRailLinkup text = "CRANKED PIPE RAIL LINKUP" score = 50
@@ -1154,7 +1154,7 @@ SCRIPT JS_OilG_CrankedPipeRail2SiloBase_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_CrankedPipeRail2SiloBase
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_CrankedPipeRail2SiloBase
 	Wait 1 frame
 	EndGap GapID = Score_CrankedPipeRail2SiloBase text = "CRANKED PIPE 2 SILO BASE" score = 100
@@ -1171,7 +1171,7 @@ SCRIPT JS_OilG_Beam2Beam_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_Beam2Beam
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Beam2Beam
 	Wait 1 frame
 	EndGap GapID = Score_Beam2Beam text = "BEAM 2 BEAM" score = 700
@@ -1188,7 +1188,7 @@ SCRIPT JS_OilG_LongBeam2LongBeam_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_LongBeam2LongBeam
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_LongBeam2LongBeam
 	Wait 1 frame
 	EndGap GapID = Score_LongBeam2LongBeam text = "LONG BEAM 2 BEAM" score = 100
@@ -1211,7 +1211,7 @@ SCRIPT JS_OilG_LongBeam_04
 ENDSCRIPT
 
 SCRIPT JS_OilS_LongBeam
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_LongBeam
 	Wait 1 frame
 	EndGap GapID = Score_LongBeam text = "LONG BEAM" score = 800
@@ -1228,7 +1228,7 @@ SCRIPT JS_OilG_RigLongBeamLinkup_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_RigLongBeamLinkup
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_RigLongBeamLinkup
 	Wait 1 frame
 	EndGap GapID = Score_RigLongBeamLinkup text = "RIG LONG BEAM LINKUP" score = 300
@@ -1245,7 +1245,7 @@ SCRIPT JS_OilG_CrookedPipeRailLinkup_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_CrookedPipeRailLinkup
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_CrookedPipeRailLinkup
 	Wait 1 frame
 	EndGap GapID = Score_CrookedPipeRailLinkup text = "CROOKED PIPE RAIL LINKUP" score = 100
@@ -1272,7 +1272,7 @@ SCRIPT JS_OilG_CrookedPipe2Pipe_04
 ENDSCRIPT
 
 SCRIPT JS_OilS_CrookedPipe2Pipe
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_CrookedPipe2Pipe
 	Wait 1 frame
 	EndGap GapID = Score_CrookedPipe2Pipe text = "CROOKED PIPE 2 PIPE" score = 100
@@ -1289,7 +1289,7 @@ SCRIPT JS_OilG_CrookedLedgeRailLinkup_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_CrookedLedgeRailLinkup
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_CrookedLedgeRailLinkup
 	Wait 1 frame
 	EndGap GapID = Score_CrookedLedgeRailLinkup text = "CROOKED LEDGE RAIL LINKUP" score = 250
@@ -1316,7 +1316,7 @@ SCRIPT JS_OilG_Rail2Rail_04
 ENDSCRIPT
 
 SCRIPT JS_OilS_Rail2Rail
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Rail2Rail
 	Wait 1 frame
 	EndGap GapID = Score_Rail2Rail text = "RAIL 2 RAIL" score = 100
@@ -1343,7 +1343,7 @@ SCRIPT JS_OilG_Rail2RailXOver_04
 ENDSCRIPT
 
 SCRIPT JS_OilS_Rail2RailXOver
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Rail2RailXOver
 	Wait 1 frame
 	EndGap GapID = Score_Rail2RailXOver text = "RAIL 2 RAIL CROSS OVER" score = 100
@@ -1366,7 +1366,7 @@ SCRIPT JS_OilG_Rail2RailDrop_04
 ENDSCRIPT
 
 SCRIPT JS_OilS_Rail2RailDrop
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Rail2RailDrop
 	Wait 1 frame
 	EndGap GapID = Score_Rail2RailDrop text = "RAIL 2 RAIL DROP" score = 100
@@ -1381,7 +1381,7 @@ SCRIPT JS_OilG_Rail2RailCrossDrop_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_Rail2RailCrossDrop
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Rail2RailCrossDrop
 	Wait 1 frame
 	EndGap GapID = Score_Rail2RailCrossDrop text = "RAIL 2 RAIL CROSS DROP" score = 100
@@ -1398,7 +1398,7 @@ SCRIPT JS_OilG_RailOverRail_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_RailOverRail
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_RailOverRail
 	Wait 1 frame
 	EndGap GapID = Score_RailOverRail text = "RAIL OVER RAIL" score = 100
@@ -1415,7 +1415,7 @@ SCRIPT JS_OilG_RailLedgeHop_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_RailLedgeHop
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_RailLedgeHop
 	Wait 1 frame
 	EndGap GapID = Score_RailLedgeHop text = "RAIL LEDGE HOP" score = 500
@@ -1432,7 +1432,7 @@ SCRIPT JS_OilG_RailLedgeXover_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_RailLedgeXover
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_RailLedgeXover
 	Wait 1 frame
 	EndGap GapID = Score_RailLedgeXover text = "RAIL LEDGE CROSS OVER" score = 100
@@ -1447,7 +1447,7 @@ SCRIPT JS_OilG_RailLedge2Pipe_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_RailLedge2Pipe
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_RailLedge2Pipe
 	Wait 1 frame
 	EndGap GapID = Score_RailLedge2Pipe text = "RAIL LEDGE 2 PIPE" score = 250
@@ -1462,7 +1462,7 @@ SCRIPT JS_OilG_RailLaunch2Rail_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_RailLaunch2Rail
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_RailLaunch2Rail
 	Wait 1 frame
 	EndGap GapID = Score_RailLaunch2Rail text = "RAIL LAUNCH 2 RAIL" score = 350
@@ -1477,7 +1477,7 @@ SCRIPT JS_OilG_RailLaunch2Pipe_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_RailLaunch2Pipe
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_RailLaunch2Pipe
 	Wait 1 frame
 	EndGap GapID = Score_RailLaunch2Pipe text = "RAIL LAUNCH 2 PIPE" score = 350
@@ -1494,7 +1494,7 @@ SCRIPT JS_OilG_BowlRailLedgeHop_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_BowlRailLedgeHop
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_BowlRailLedgeHop
 	Wait 1 frame
 	EndGap GapID = Score_BowlRailLedgeHop text = "BOWL RAIL LEDGE HOP" score = 100
@@ -1509,7 +1509,7 @@ SCRIPT JS_OilG_Rail2BowlRailDrop_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_Rail2BowlRailDrop
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Rail2BowlRailDrop
 	Wait 1 frame
 	EndGap GapID = Score_Rail2BowlRailDrop text = "RAIL 2 BOWL RAIL DROP" score = 100
@@ -1526,7 +1526,7 @@ SCRIPT JS_OilG_BowlRailLinkup_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_BowlRailLinkup
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_BowlRailLinkup
 	Wait 1 frame
 	EndGap GapID = Score_BowlRailLinkup text = "BOWL RAIL LINKUP" score = 100
@@ -1543,7 +1543,7 @@ SCRIPT JS_OilG_Bowl2Bowl_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_Bowl2Bowl
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Bowl2Bowl
 	Wait 1 frame
 	EndGap GapID = Score_Bowl2Bowl text = "BOWL 2 BOWL" score = 100
@@ -1560,7 +1560,7 @@ SCRIPT JS_OilG_BowlRailXover_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_BowlRailXover
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_BowlRailXover
 	Wait 1 frame
 	EndGap GapID = Score_BowlRailXover text = "BOWL RAIL CROSS OVER" score = 100
@@ -1577,7 +1577,7 @@ SCRIPT JS_OilG_BowlOverRailXover_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_BowlOverRailXover
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_BowlOverRailXover
 	Wait 1 frame
 	EndGap GapID = Score_BowlOverRailXover text = "BOWL OVER RAIL CROSS OVER" score = 200
@@ -1594,7 +1594,7 @@ SCRIPT JS_OilG_RailTankRailLinkup_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_RailTankRailLinkup
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_RailTankRailLinkup
 	Wait 1 frame
 	EndGap GapID = Score_RailTankRailLinkup text = "RAIL TANK RAIL LINKUP" score = 250
@@ -1621,7 +1621,7 @@ SCRIPT JS_OilG_TankRail2Rail_04
 ENDSCRIPT
 
 SCRIPT JS_OilS_TankRail2Rail
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_TankRail2Rail
 	Wait 1 frame
 	EndGap GapID = Score_TankRail2Rail text = "TANK RAIL 2 RAIL" score = 150
@@ -1648,7 +1648,7 @@ SCRIPT JS_OilG_TankRailXOver_04
 ENDSCRIPT
 
 SCRIPT JS_OilS_TankRailXOver
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_TankRailXOver
 	Wait 1 frame
 	EndGap GapID = Score_TankRailXOver text = "TANK RAIL CROSSOVER" score = 100
@@ -1665,7 +1665,7 @@ SCRIPT JS_OilG_LedgeHop_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_LedgeHop
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_LedgeHop
 	Wait 1 frame
 	EndGap GapID = Score_LedgeHop text = "LEDGE HOP" score = 50
@@ -1682,7 +1682,7 @@ SCRIPT JS_OilG_SlantPipeRailLinkup_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_SlantPipeRailLinkup
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_SlantPipeRailLinkup
 	Wait 1 frame
 	EndGap GapID = Score_SlantPipeRailLinkup text = "SLANT PIPE RAIL LINKUP" score = 100
@@ -1709,7 +1709,7 @@ SCRIPT JS_OilG_SlantPipe2SlantPipe_04
 ENDSCRIPT
 
 SCRIPT JS_OilS_SlantPipe2SlantPipe
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_SlantPipe2SlantPipe
 	Wait 1 frame
 	EndGap GapID = Score_SlantPipe2SlantPipe text = "SLANT PIPE 2 SLANT PIPE" score = 100
@@ -1726,7 +1726,7 @@ SCRIPT JS_OilG_SlantPipeOverSlant_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_SlantPipeOverSlant
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_SlantPipeOverSlant
 	Wait 1 frame
 	EndGap GapID = Score_SlantPipeOverSlant text = "SLANT PIPE OVER SLANT" score = 250
@@ -1741,7 +1741,7 @@ SCRIPT JS_OilG_SlantPipe2OverPipe_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_SlantPipe2OverPipe
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_SlantPipe2OverPipe
 	Wait 1 frame
 	EndGap GapID = Score_SlantPipe2OverPipe text = "SLANT PIPE 2 OVER PIPE" score = 250
@@ -1756,7 +1756,7 @@ SCRIPT JS_OilG_OverPipe2SlantPipe_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_OverPipe2SlantPipe
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_OverPipe2SlantPipe
 	Wait 1 frame
 	EndGap GapID = Score_OverPipe2SlantPipe text = "OVER PIPE 2 SLANT PIPE" score = 100
@@ -1773,7 +1773,7 @@ SCRIPT JS_OilG_Rail2FatPipe
 ENDSCRIPT
 
 SCRIPT JS_OilS_FatPipe2Rail
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_FatPipe2Rail
 	Wait 1 frame
 	EndGap GapID = Score_FatPipe2Rail text = "FAT PIPE RAIL LINKUP" score = 350
@@ -1790,7 +1790,7 @@ SCRIPT JS_OilG_RailOverFatPipe_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_RailOverFatPipe
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_RailOverFatPipe
 	Wait 1 frame
 	EndGap GapID = Score_RailOverFatPipe text = "RAIL OVER FAT PIPE" score = 100
@@ -1805,7 +1805,7 @@ SCRIPT JS_OilG_FatPipe2RailDrop_02
 ENDSCRIPT
 
 SCRIPT JS_OilG_FatPipe2RailDrop
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_FatPipe2RailDrop
 	Wait 1 frame
 	EndGap GapID = Score_FatPipe2RailDrop text = "FAT PIPE 2 RAIL DROP" score = 350
@@ -1820,7 +1820,7 @@ SCRIPT JS_OilG_Rail2FatPipeDrop_02
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2FatPipeDrop
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Rail2FatPipeDrop
 	Wait 1 frame
 	EndGap GapID = Score_Rail2FatPipeDrop text = "RAIL 2 FAT PIPE DROP" score = 2000
@@ -1837,7 +1837,7 @@ SCRIPT JS_OilG_FatPipeSlantPipeXOver_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_FatPipeSlantPipeXOver
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_FatPipeSlantPipeXOver
 	Wait 1 frame
 	EndGap GapID = Score_FatPipeSlantPipeXOver text = "FAT PIPE SLANT PIPE X OVER" score = 300
@@ -1854,7 +1854,7 @@ SCRIPT JS_OilG_OverPipeFatPipeXfer_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_OverPipeFatPipeXfer
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_OverPipeFatPipeXfer
 	Wait 1 frame
 	EndGap GapID = Score_OverPipeFatPipeXfer text = "OVER PIPE FAT PIPE XFER" score = 250
@@ -1871,7 +1871,7 @@ SCRIPT JS_OilG_WharfRailGap_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_WharfRailGap
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_WharfRailGap
 	Wait 1 frame
 	EndGap GapID = Score_WharfRailGap text = "WHARF RAIL GAP" score = 150
@@ -1888,7 +1888,7 @@ SCRIPT JS_OilG_WharfRailXOver_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_WharfRailXOver
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_WharfRailXOver
 	Wait 1 frame
 	EndGap GapID = Score_WharfRailXOver text = "WHARF RAIL X OVER" score = 100
@@ -1905,7 +1905,7 @@ SCRIPT JS_OilG_Wharf2Wharf_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_Wharf2Wharf
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Wharf2Wharf
 	Wait 1 frame
 	EndGap GapID = Score_Wharf2Wharf text = "WHARF 2 WHARF" score = 200
@@ -1922,7 +1922,7 @@ SCRIPT JS_OilG_BargeRailGap_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_BargeRailGap
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_BargeRailGap
 	Wait 1 frame
 	EndGap GapID = Score_BargeRailGap text = "BARGE RAIL GAP" score = 100
@@ -1939,7 +1939,7 @@ SCRIPT JS_OilG_BargeBridgeGap_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_BargeBridgeGap
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_BargeBridgeGap
 	Wait 1 frame
 	EndGap GapID = Score_BargeBridgeGap text = "BARGE BRIDGE GAP" score = 150
@@ -1954,7 +1954,7 @@ SCRIPT JS_OilG_Barge2WharfRail_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_Barge2WharfRail
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Barge2WharfRail
 	Wait 1 frame
 	EndGap GapID = Score_Barge2WharfRail text = "BARGE 2 WHARF RAIL" score = 300
@@ -1971,7 +1971,7 @@ SCRIPT JS_OilG_Barge2WharfEdge_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_Barge2WharfEdge
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Barge2WharfEdge
 	Wait 1 frame
 	EndGap GapID = Score_Barge2WharfEdge text = "BARGE 2 WHARF EDGE" score = 300
@@ -1988,7 +1988,7 @@ SCRIPT JS_OilG_PipeAGap_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_PipeAGap
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_PipeAGap
 	Wait 1 frame
 	EndGap GapID = Score_PipeAGap text = "PIPE A GAP" score = 75
@@ -2005,7 +2005,7 @@ SCRIPT JS_OilG_PipeBGap_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_PipeBGap
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_PipeBGap
 	Wait 1 frame
 	EndGap GapID = Score_PipeBGap text = "PIPE B GAP" score = 75
@@ -2022,7 +2022,7 @@ SCRIPT JS_OilG_PipeCGap_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_PipeCGap
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_PipeCGap
 	Wait 1 frame
 	EndGap GapID = Score_PipeCGap text = "PIPE C GAP" score = 75
@@ -2039,7 +2039,7 @@ SCRIPT JS_OilG_PipeEGap_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_PipeEGap
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_PipeEGap
 	Wait 1 frame
 	EndGap GapID = Score_PipeEGap text = "PIPE E GAP" score = 75
@@ -2056,7 +2056,7 @@ SCRIPT JS_OilG_PipeFGap_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_PipeFGap
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_PipeFGap
 	Wait 1 frame
 	EndGap GapID = Score_PipeFGap text = "PIPE F GAP" score = 75
@@ -2073,7 +2073,7 @@ SCRIPT JS_OilG_Walkway2CRail_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_Walkway2CRail
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Walkway2CRail
 	Wait 1 frame
 	EndGap GapID = Score_Walkway2CRail text = "WALKWAY RAIL 2 C-RAIL" score = 550
@@ -2090,7 +2090,7 @@ SCRIPT JS_OilG_CraneRail2Rail_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_CraneRail2Rail
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_CraneRail2Rail
 	Wait 1 frame
 	EndGap GapID = Score_CraneRail2Rail text = "CRANE RAIL 2 RAIL" score = 800
@@ -2107,7 +2107,7 @@ SCRIPT JS_OilG_FanRail2BargeRail_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_FanRail2BargeRail
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_FanRail2BargeRail
 	Wait 1 frame
 	EndGap GapID = Score_FanRail2BargeRail text = "FAN RAIL 2 BARGE RAIL" score = 1000
@@ -2124,7 +2124,7 @@ SCRIPT JS_OilG_FanRail2Rail_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_FanRail2Rail
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_FanRail2Rail
 	Wait 1 frame
 	EndGap GapID = Score_FanRail2Rail text = "FAN RAIL 2 RAIL" score = 2000
@@ -2139,7 +2139,7 @@ SCRIPT JS_OilG_Crane2Pipes_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_Crane2Pipes
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Crane2Pipes
 	Wait 1 frame
 	EndGap GapID = Score_Crane2Pipes text = "CATCHING THE LINE" score = 150
@@ -2154,7 +2154,7 @@ SCRIPT JS_OilG_Up2Crane_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_Up2Crane
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Up2Crane
 	Wait 1 frame
 	EndGap GapID = Score_Up2Crane text = "UP 2 THE CRANE" score = 200
@@ -2169,7 +2169,7 @@ SCRIPT JS_OilG_Up2CraneRail_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_Up2CraneRail
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Up2CraneRail
 	Wait 1 frame
 	EndGap GapID = Score_Up2CraneRail text = "UP 2 CRANE RAIL" score = 300
@@ -2186,7 +2186,7 @@ SCRIPT JS_OilG_Bowl2BowlTransfer_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_Bowl2BowlTransfer
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Bowl2BowlTransfer
 	Wait 1 frame
 	EndGap GapID = Score_Bowl2BowlTransfer text = "BOWL 2 BOWL TRANSFER" score = 450
@@ -2203,7 +2203,7 @@ SCRIPT JS_OilG_BowlTransfer_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_BowlTransfer
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_BowlTransfer
 	Wait 1 frame
 	EndGap GapID = Score_BowlTransfer text = "BOWL TRANSFER" score = 250
@@ -2220,7 +2220,7 @@ SCRIPT JS_OilG_Quarter2BowlTransfer_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_Quarter2BowlTransfer
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Quarter2BowlTransfer
 	Wait 1 frame
 	EndGap GapID = Score_Quarter2BowlTransfer text = "QUARTER 2 BOWL TRANSFER" score = 450
@@ -2235,7 +2235,7 @@ SCRIPT JS_OilG_Bank2Rail_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_Bank2Rail
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Bank2Rail
 	Wait 1 frame
 	EndGap GapID = Score_Bank2Rail text = "BANK 2 RAIL" score = 250
@@ -2252,7 +2252,7 @@ SCRIPT JS_OilG_OverPipesTransfer_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_OverPipesTransfer
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_OverPipesTransfer
 	Wait 1 frame
 	EndGap GapID = Score_OverPipesTransfer text = "OVER PIPES TRANSFER" score = 500
@@ -2267,7 +2267,7 @@ SCRIPT JS_OilG_SlantPipeOverPipe_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_SlantPipeOverPipe
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_SlantPipeOverPipe
 	Wait 1 frame
 	EndGap GapID = Score_SlantPipeOverPipe text = "SLANT PIPE OVER PIPE" score = 350
@@ -2294,7 +2294,7 @@ SCRIPT JS_OilG_SmallFanTransfer_04
 ENDSCRIPT
 
 SCRIPT JS_OilS_SmallFanTransfer
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_SmallFanTransfer
 	Wait 1 frame
 	EndGap GapID = Score_SmallFanTransfer text = "SMALL FAN TRANSFER" score = 250
@@ -2311,7 +2311,7 @@ SCRIPT JS_OilG_BigFanTransfer_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_BigFanTransfer
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_BigFanTransfer
 	Wait 1 frame
 	EndGap GapID = Score_BigFanTransfer text = "BIG FAN TRANSFER" score = 750
@@ -2328,7 +2328,7 @@ SCRIPT JS_OilG_TransferBuildingTransfer_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_TransferBuildingTransfer
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_TransferBuildingTransfer
 	Wait 1 frame
 	EndGap GapID = Score_TransferBuildingTransfer text = "TRANSFER BUILDING TRANSFER" score = 75
@@ -2355,7 +2355,7 @@ SCRIPT JS_OilG_TransferBuildingLevelTransfer_04
 ENDSCRIPT
 
 SCRIPT JS_OilS_TransferBuildingLevelTransfer
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_TransferBuildingLevelTransfer
 	Wait 1 frame
 	EndGap GapID = Score_TransferBuildingLevelTransfer text = "TRANSFER BUILDING LEVEL TRANSFER" score = 300
@@ -2370,7 +2370,7 @@ SCRIPT JS_OilG_TransferBuildingDrop_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_TransferBuildingDrop
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_TransferBuildingDrop
 	Wait 1 frame
 	EndGap GapID = Score_TransferBuildingDrop text = "TRANSFER BUILDING DROP" score = 100
@@ -2387,7 +2387,7 @@ SCRIPT JS_OilG_TransferBuildingBargeDrop_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_TransferBuildingBargeDrop
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_TransferBuildingBargeDrop
 	Wait 1 frame
 	EndGap GapID = Score_TransferBuildingBargeDrop text = "TRANSFER BUILDING BARGE DROP" score = 3000
@@ -2404,7 +2404,7 @@ SCRIPT JS_OilG_BowlLevelTransfer_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_BowlLevelTransfer
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_BowlLevelTransfer
 	Wait 1 frame
 	EndGap GapID = Score_BowlLevelTransfer text = "BOWL LEVEL TRANSFER" score = 150
@@ -2421,7 +2421,7 @@ SCRIPT JS_OilG_BargeTransfer_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_BargeTransfer
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_BargeTransfer
 	Wait 1 frame
 	EndGap GapID = Score_BargeTransfer text = "BARGE TRANSFER" score = 75
@@ -2438,7 +2438,7 @@ SCRIPT JS_OilG_BargeRampGap_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_BargeRampGap
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_BargeRampGap
 	Wait 1 frame
 	EndGap GapID = Score_BargeRampGap text = "BARGE RAMP GAP" score = 100
@@ -2455,7 +2455,7 @@ SCRIPT JS_OilG_Bumper2BumperTransfer_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_Bumper2BumperTransfer
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_Bumper2BumperTransfer
 	Wait 1 frame
 	EndGap GapID = Score_Bumper2BumperTransfer text = "BUMPER 2 BUMPER TRANSFER" score = 600
@@ -2472,7 +2472,7 @@ SCRIPT JS_OilG_HelipadLevelTransfer_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_HelipadLevelTransfer
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_HelipadLevelTransfer
 	Wait 1 frame
 	EndGap GapID = Score_HelipadLevelTransfer text = "HELIPAD LEVEL TRANSFER" score = 250
@@ -2489,7 +2489,7 @@ SCRIPT JS_OilG_HelipadBaseTransfer_02
 ENDSCRIPT
 
 SCRIPT JS_OilS_HelipadBaseTransfer
-	Playsound HUD_JumpGap vol = 100
+	//Playsound HUD_JumpGap vol = 100
 	StartGap GapID = Score_HelipadBaseTransfer
 	Wait 1 frame
 	EndGap GapID = Score_HelipadBaseTransfer text = "HELIPAD BASE TRANSFER" score = 100
