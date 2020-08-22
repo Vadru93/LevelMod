@@ -1,3 +1,5 @@
+#ifndef BUGFIX_H
+#define BUGFIX_H
 //Fix the random texture dissapearing in large levels
 void FixRenderBugs();
 
@@ -15,3 +17,4 @@ void FixChat();
 
 //Fix some crashes while parsing some QB files
 void FixQBParsing();
+#endif

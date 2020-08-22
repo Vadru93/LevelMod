@@ -67,7 +67,7 @@ void FixVertBugs()
 	*(BYTE*)c = 0x4B;*/
 }
 
-//Limit chat message to 149 characters
+//Limit chat message to 149 characters, to prevent crashing
 void FixChatHook(char* chatText)
 {
 	/*chatText[0] = 0x00;
