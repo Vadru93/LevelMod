@@ -32,6 +32,7 @@ extern CXBOXController* Player1;
 //Script stuff
 extern const char* QBTypes[];*/
 
+//Not curently used?
 ID3DXLine* line = NULL;
 
 DWORD numLineVertices = 0;
