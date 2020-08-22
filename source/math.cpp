@@ -1,7 +1,22 @@
-#undef NO_DEFINES
+_#undef NO_DEFINES
 #define _CRT_SECURE_NO_WARNINGS
 #include "pch.h"
 #include "_math.h"
+
+
+EXTERN Vertex& Vertex::Rotate(const Vertex& axis, const float angle)
+{
+
+#if 1
+	Matrix	mat(*(D3DXVECTOR3*)&axis, angle);
+	*this = *(Vertex*)&mat.Rotate(*(D3DXVECTOR3*)&*this);
+#else
+	Quat	quat(*(D3DXVECTOR3*)&axis, angle);
+	*this = *(Vertex*)&quat.Rotate(*(D3DXVECTOR3*)&*this);
+#endif
+
+	return *this;
+}
 
 
 float GetAngleAbout(Vertex& v1, Vertex& v2, Vertex& Axis)

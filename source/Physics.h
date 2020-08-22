@@ -19,5 +19,6 @@
 void Interporlate(Matrix* result, float delta);
 float	SmoothStep(float value);
 float CalculateDuration(float target_height, float pos_Y, float vel_Y, Skater* skater);
+bool WallplantTimeGreaterThan(CStruct* pParams, CScript* pScript);
 
 #endif

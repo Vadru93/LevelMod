@@ -5,6 +5,12 @@
 #include "KeyState.h"
 #include "Script.h"
 
+bool GetZAngle(CStruct* pParams, CScript* pScript);
+bool GetSkaterLook(CStruct* pParams, CScript* pScript);
+bool StoreSkaterPos(CStruct* pParams, CScript* pScript);
+bool SetSkaterPos(CStruct* pParams, CScript* pScript);
+bool GetSkaterPos(CStruct* pParams, CScript* pScript);
+bool GetSpeedScript(CStruct* pParams, CScript* pScript);
 
 //Skater is not yet looked into that much.... 
 struct Settings

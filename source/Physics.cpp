@@ -8,6 +8,15 @@
 #include "Script.h"
 #include "Settings.h"
 
+bool WallplantTimeGreaterThan(CStruct* pParams, CScript* pScript)
+{
+	int time = pParams->GetInt();
+	DWORD currentTime = _GetCurrentTime();
+
+	_printf("targetTime %d timeLapsed %d currentTime %d\n", time, currentTime - Slerp::m_last_wallplant_time_stamp, currentTime);
+	return (currentTime - Slerp::m_last_wallplant_time_stamp) > time;
+}
+
 //Spine and acid stuff, this is based off thug1src
 struct SAcidDropData
 {

@@ -136,30 +136,46 @@ bool CallWithNoNameScript(CStruct* pStruct, CScript* pScript);
 
 //--------Naked Functions--------
 //Gets executed when you call a script that doesn't exist
+//This is used to generate a messagebox instead of crashing game
 void __cdecl NotGood_naked();
 //Gets executed whenever game generates a checksum
+//This is used to generate a list of all checksums
 void Checksum_naked();
 //Gets executed when game opens a level file
+//This is used to know when you can add script functions
+//And used to ncomp node stuff and other level related stuff
 void Fopen_naked();
 //Gets executed at begining of frame
+//This is used in thug1src to tell engine that we began the fram in transfer
+//Currently not used, not sure if we need this?
 void BeganTransferCheck_naked();
 //Currently not yet added
+//This is used in thug1src to temporarly override speed limits
+//Not sure if we need this?
 void handle_post_transfer_limit_overrides_naked();
 //Gets executed when landing
+//This is used to reset new states for spin/acid/bank and wallplant
 void ResetTransfer_naked();
 //Gets executed when "hit" a wall
+//This is used to check for wallplant
 void airhook_naked();
 //Gets executed when state is AIR, this one is used to check if you want to spine/acid/bank
+//This is used to check for spine/acid/bank
 void MaybeAcid_naked();
-//Gets executed when state is AIR, this one is used to reset the lerping matrix while spine/acid/bank
+//Gets executed when state is AIR
+//This is used to reset the lerping matrix while spine/acid/bank
 void CheckForTransfer_naked();
 //Don't remember when this gets executed...
+//This is used to reset the velocity
 void ResetTransferVel_naked();
 //Gets executed when state is AIR, this one is used to lerp the skater in spine/acid/bank
+//This is used to lerp the skater
 void Slerp_naked();
 //Gets executed when state is GROUND
+//This is used to reset new states for spine/acid/bank and wallplant
 void OnGround_naked();
 //Gets executed when Vibration script is called
+//This is used to add vibration for XINPUT
 void __cdecl HookVibrate_naked();
 
 //depricated
@@ -168,6 +184,8 @@ void TestForAcid_naked();
 
 
 //--------Non Naked Hooked Functions--------
+//Gets executed when you grind
+//This is used to reset new states for spine/acid/bank and wallplant
 DWORD GrindParamHook(char* str, int unk);
 //--------Non Naked Hooked Functions--------
 
@@ -177,6 +195,7 @@ void HookVibrate();
 void HookControls();
 //BugFixes and physics control
 void FixSpineFlag();
+//For more functions check bugfixes.h
 //--------Function hooks--------
 
 //--------Game Functions--------
