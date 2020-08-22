@@ -87,6 +87,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Bugfixes.cpp" />
     <ClCompile Include="source\Checksum.cpp" />
     <ClCompile Include="source\CXBOXController.cpp" />
     <ClCompile Include="source\d3d8to9\d3d8to9.cpp">
@@ -149,6 +150,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="res\resource.h" />
+    <ClInclude Include="source\Bugfixes.h" />
     <ClInclude Include="source\Checksum.h" />
     <ClInclude Include="source\Commands.h" />
     <ClInclude Include="source\CXBOXController.h" />

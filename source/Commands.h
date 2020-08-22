@@ -479,18 +479,6 @@ void CommandTell(const char* message)
 
 char* ChatText2 = NULL;
 
-void FixChatHook(char* chatText)
-{
-	/*chatText[0] = 0x00;
-	chatText[1] = 0x00;*/
-	if (chatText && strlen(chatText) > 149)
-	{
-		chatText[0] = 0x00;
-		chatText[1] = 0x00;
-		chatText[148] = 0x00;
-		chatText[149] = 0x00;
-	}
-}
 
 bool SpawnFunc = false;
 DWORD CrownCount = 0, ZoneCount = 0, RestartCount = 0;
