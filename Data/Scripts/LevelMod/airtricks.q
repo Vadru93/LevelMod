@@ -66,6 +66,7 @@ SCR_GRAB = { Scr = GrabTrick }
 
 EXTRA_FLIP = { SCR_FLIP Trigger = { Press Square 300 } }
 EXTRA_GRAB = { SCR_GRAB Trigger = { Press Circle 500 } }
+EXTRA_TRICK = { IsExtra UseCurrent }
 
 GRABTWEAK_SMALL = 15
 GRABTWEAK_MEDIUM = 20
@@ -130,13 +131,13 @@ TrickDef_Kickflip = {
 
 KickflipExtras = [ 
 	{ EXTRA_FLIP Params = { TrickDef_DoubleKickflip IsExtra } } 
-	{ SCR_GRAB Trigger = { AirTrickLogic Circle Right 300 } Params = { TrickDef_KickflipToIndy IsExtra } } 
-	{ SCR_GRAB Trigger = { AirTrickLogic Circle Up 300 } Params = { TrickDef_KickflipToCrail IsExtra } } 
-	{ SCR_GRAB Trigger = { AirTrickLogic Circle Left 300 } Params = { TrickDef_KickflipToMelon IsExtra } } 
+	{ SCR_GRAB Trigger = { AirTrickLogic Circle Right 300 } Params = { TrickDef_KickflipToIndy EXTRA_TRICK } } 
+	{ SCR_GRAB Trigger = { AirTrickLogic Circle Up 300 } Params = { TrickDef_KickflipToCrail EXTRA_TRICK } } 
+	{ SCR_GRAB Trigger = { AirTrickLogic Circle Left 300 } Params = { TrickDef_KickflipToMelon EXTRA_TRICK } } 
 	{ SCR_FLIP Trigger = { Press Up 300 } Params = { TrickDef_KickflipUnderFlip IsExtra } }
 ]
 
-DoubleKickflip = [ { EXTRA_FLIP Params = { TrickDef_DoubleKickflip IsExtra } } ]
+DoubleKickflip = [ { EXTRA_FLIP Params = { TrickDef_DoubleKickflip EXTRA_TRICK } } ]
 
 TrickDef_DoubleKickflip = { 
 	Name = 'Double Kickflip' 
@@ -146,7 +147,7 @@ TrickDef_DoubleKickflip = {
 	ExtraTricks = TripleKickflip
 } 
 
-TripleKickflip = [ { EXTRA_FLIP Params = { TrickDef_TripleKickflip IsExtra } } ] 
+TripleKickflip = [ { EXTRA_FLIP Params = { TrickDef_TripleKickflip EXTRA_TRICK } } ] 
 
 TrickDef_TripleKickflip = { 
 	Name = 'Triple Kickflip' 
@@ -178,7 +179,7 @@ TrickDef_Heelflip = {
 	ExtraTricks = DoubleHeelflip
 }
 
-DoubleHeelflip = [ { EXTRA_FLIP Params = { TrickDef_DoubleHeelflip IsExtra } } ] 
+DoubleHeelflip = [ { EXTRA_FLIP Params = { TrickDef_DoubleHeelflip EXTRA_TRICK } } ] 
 
 TrickDef_DoubleHeelflip = { 
 	Name = 'Double Heelflip' 
@@ -188,7 +189,7 @@ TrickDef_DoubleHeelflip = {
 	ExtraTricks = TripleHeelflip
 }
 
-TripleHeelflip = [ { EXTRA_FLIP Params = { TrickDef_TripleHeelflip IsExtra } } ] 
+TripleHeelflip = [ { EXTRA_FLIP Params = { TrickDef_TripleHeelflip EXTRA_TRICK } } ] 
 
 TrickDef_TripleHeelflip = { 
 	Name = 'Triple Heelflip' 
@@ -210,7 +211,7 @@ TrickDef_Impossible = {
 	ExtraTricks = DoubleImpossible 
 }
 
-DoubleImpossible = [ { EXTRA_FLIP Params = { TrickDef_DoubleImpossible IsExtra } } ]
+DoubleImpossible = [ { EXTRA_FLIP Params = { TrickDef_DoubleImpossible EXTRA_TRICK } } ]
 
 TrickDef_DoubleImpossible = { 
 	Name = 'Double Impossible'
@@ -220,7 +221,7 @@ TrickDef_DoubleImpossible = {
 	TrickSlack = 15 
 }
 
-TripleImpossible = [ { EXTRA_FLIP Params = { TrickDef_TripleImpossible IsExtra } } ]
+TripleImpossible = [ { EXTRA_FLIP Params = { TrickDef_TripleImpossible EXTRA_TRICK } } ]
 
 TrickDef_TripleImpossible = { 
 	Name = 'Triple Impossible' 
@@ -241,10 +242,10 @@ TrickDef_VarialKickflip = {
 	Anim = VarialKickflip 
 	BoardRotate 
 	Nollie = NollieVarialKickflip 
-	ExtraTricks = ExtraVarialKickflip 
+	NewExtraTricks = ExtraVarialKickflip 
 }
 
-ExtraVarialKickflip = [ { EXTRA_FLIP Params = { TrickDef_360Flip IsExtra } } ]
+ExtraVarialKickflip = [ { EXTRA_FLIP Params = { TrickDef_360Flip EXTRA_TRICK } } ]
 
 Trick_360Flip = { SCR_FLIP Params = TrickDef_360Flip }
 
@@ -269,10 +270,10 @@ TrickDef_VarialHeelflip = {
 	Anim = VarialHeelflip 
 	BoardRotate 
 	Nollie = NollieVarialHeelflip 
-	ExtraTricks = ExtraVarialHeelflip
+	NewExtraTricks = ExtraVarialHeelflip
 } 
 
-ExtraVarialHeelflip = [ { EXTRA_FLIP Params = { TrickDef_360Heelflip IsExtra } } ]
+ExtraVarialHeelflip = [ { EXTRA_FLIP Params = { TrickDef_360Heelflip EXTRA_TRICK } } ]
 
 Trick_LaserFlip = { SCR_FLIP Params = TrickDef_360Heelflip }
 
@@ -296,10 +297,10 @@ TrickDef_Hardflip = {
 	Anim = Hardflip 
 	BoardRotate 
 	Nollie = NollieHardflip 
-	ExtraTricks = Extra360Hardflip 
+	NewExtraTricks = Extra360Hardflip 
 }
 
-Extra360Hardflip = [ { EXTRA_FLIP Params = { TrickDef_360Hardflip IsExtra } } ]
+Extra360Hardflip = [ { EXTRA_FLIP Params = { TrickDef_360Hardflip EXTRA_TRICK } } ]
 
 Trick_360Hardflip = { SCR_FLIP Params = TrickDef_360Hardflip }
 
@@ -318,10 +319,10 @@ Trick_InwardHeelflip = { SCR_FLIP Params = TrickDef_InwardHeelflip }
 
 TrickDef_InwardHeelflip = {
 	TrickDef_InwardHeelflip2x
-	ExtraTricks = ExtraInwardHeelflip 
+	NewExtraTricks = ExtraInwardHeelflip 
 }
 
-ExtraInwardHeelflip = [ { EXTRA_FLIP Params = { TrickDef_InwardHeelflip2x IsExtra } } ]
+ExtraInwardHeelflip = [ { EXTRA_FLIP Params = { TrickDef_InwardHeelflip2x EXTRA_TRICK } } ]
 
 TrickDef_InwardHeelflip2x = {
 	Name = 'Inward Heelflip' 
@@ -347,7 +348,7 @@ TrickDef_PopShoveIt = {
 	ExtraTricks = Extra360ShoveIt 
 }
 
-Extra360ShoveIt = [ { EXTRA_FLIP Params = { TrickDef_360ShoveIt IsExtra } } ]
+Extra360ShoveIt = [ { EXTRA_FLIP Params = { TrickDef_360ShoveIt EXTRA_TRICK } } ]
 
 TrickDef_360ShoveIt = { 
 	Name = '360 Shove-It' 
@@ -357,7 +358,7 @@ TrickDef_360ShoveIt = {
 	ExtraTricks = Extra540ShoveIt 
 }
 
-Extra540ShoveIt = [ { EXTRA_FLIP Params = { TrickDef_540ShoveIt IsExtra } } ]
+Extra540ShoveIt = [ { EXTRA_FLIP Params = { TrickDef_540ShoveIt EXTRA_TRICK } } ]
 
 TrickDef_540ShoveIt = {
 	Name = '540 Shove-It' 
@@ -381,7 +382,7 @@ TrickDef_FSShoveIt = {
 	ExtraTricks = ExtraFS360ShoveIt 
 }
 
-ExtraFS360ShoveIt = [ { EXTRA_FLIP Params = { TrickDef_FS360ShoveIt IsExtra } } ]
+ExtraFS360ShoveIt = [ { EXTRA_FLIP Params = { TrickDef_FS360ShoveIt EXTRA_TRICK } } ]
 
 TrickDef_FS360ShoveIt = {
 	Name = '360 FS Shove-It' 
@@ -390,7 +391,7 @@ TrickDef_FS360ShoveIt = {
 	ExtraTricks = ExtraFS540ShoveIt
 }
 
-ExtraFS540ShoveIt = [ { EXTRA_FLIP Params = { TrickDef_FS540ShoveIt IsExtra } } ]
+ExtraFS540ShoveIt = [ { EXTRA_FLIP Params = { TrickDef_FS540ShoveIt EXTRA_TRICK } } ]
 
 TrickDef_FS540ShoveIt = {
 	Name = '540 FS Shove-It'
@@ -412,10 +413,10 @@ TrickDef_180Varial = {
 	BoardRotate 
 	Speed = 1.3 
 	TrickSlack = 25 
-	ExtraTricks = Extra360Varial 
+	NewExtraTricks = Extra360Varial 
 }
 
-Extra360Varial = [ { EXTRA_FLIP Params = { TrickDef_360Varial IsExtra } } ]
+Extra360Varial = [ { EXTRA_FLIP Params = { TrickDef_360Varial EXTRA_TRICK } } ]
 
 Trick_360Varial = { SCR_FLIP Params = TrickDef_360Varial }
 
@@ -439,10 +440,10 @@ TrickDef_FFImpossible = {
 	Anim = FrontFootImposs 
 	TrickSlack = 25 
 	Speed = 1.1 
-	ExtraTricks = Extra2xFFImposs 
+	NewExtraTricks = Extra2xFFImposs 
 }
 
-Extra2xFFImposs = [ { EXTRA_FLIP Params = { TrickDef_2xFFImpossible IsExtra } } ]
+Extra2xFFImposs = [ { EXTRA_FLIP Params = { TrickDef_2xFFImpossible EXTRA_TRICK } } ]
 
 TrickDef_2xFFImpossible = { 
 	Name = 'Dbl. FF Impossible' 
@@ -471,10 +472,10 @@ TrickDef_OllieNorth = {
 	Anim = OllieNorth 
 	Speed = 1.3 
 	TrickSlack = 15 
-	ExtraTricks = ExtraOllieNorthBF 
+	NewExtraTricks = ExtraOllieNorthBF 
 }
 
-ExtraOllieNorthBF = [ { EXTRA_FLIP Params = { TrickDef_OllieNorthBF IsExtra } } ]
+ExtraOllieNorthBF = [ { EXTRA_FLIP Params = { TrickDef_OllieNorthBF EXTRA_TRICK } } ]
 
 TrickDef_OllieNorthBF = { 
 	Name = 'Ollie North Back Foot Flip' 
@@ -502,11 +503,11 @@ TrickDef_Varial = {
 }
 
 
-Trick_OllieAirwalk = { SCR_FLIP Params = { Name = 'Ollie Airwalk' Score = 500 Speed = 1.3 Anim = OllieAirWalk ExtraTricks = CSOllieairwalkshoveit } }
+Trick_OllieAirwalk = { SCR_FLIP Params = { Name = 'Ollie Airwalk' Score = 500 Speed = 1.3 Anim = OllieAirWalk NewExtraTricks = CSOllieairwalkshoveit } }
 CSOllieairwalkshoveit = [ { EXTRA_FLIP Params = { Name = 'Ollie Airwalk Late Shove-it' Score = 1000 Anim = OllieAirWalk Speed = 1.3 CSOllieairwalkshoveit IsExtra UseCurrent } } ]
 Trick_HFVarialLien = { SCR_FLIP Params = { Name = 'Heelflip Varial Lien' Score = 800 Anim = HeelflipVarialLien BoardRotate TrickSlack = 15 } }
 Trick_SalFlip = { SCR_FLIP Params = { Name = 'Sal Flip' Score = 900 Anim = SalFlip TrickSlack = 25 Speed = 1.3 } }
-Trick_Fingerflip = { SCR_FLIP Params = { Name = 'Fingerflip' Score = 700 Anim = FingerFlipVert Speed = 1.3 TrickSlack = 25 ExtraTricks = CSDoubleFingerFlip } }
+Trick_Fingerflip = { SCR_FLIP Params = { Name = 'Fingerflip' Score = 700 Anim = FingerFlipVert Speed = 1.3 TrickSlack = 25 NewExtraTricks = CSDoubleFingerFlip } }
 CSDoubleFingerFlip = [ { EXTRA_FLIP Params = { Name = 'Double Fingerflip' Score = 1000 Anim = FingerFlipVert Speed = 1.3 TrickSlack = 25 GrindSlack = 25 CSDoubleFingerFlip IsExtra UseCurrent } } ]
 CSBenihanaFingerflip = { SCR_FLIP Params = { Name = 'Beni Fingerflip' Score = 1000 Anim = BenihanaFingerflip IsExtra } }
 
@@ -539,10 +540,10 @@ TrickDef_Melon = {
 	Score = 300 
 	Anim = MelonGrab 
 	Idle = MelonGrab_Idle 
-	ExtraTricks = ExtraMethod
+	NewExtraTricks = ExtraMethod
 }
 
-ExtraMethod = [ { EXTRA_GRAB Params = { TrickDef_Method IsExtra } } ]
+ExtraMethod = [ { EXTRA_GRAB Params = { TrickDef_Method EXTRA_TRICK } } ]
 
 TrickDef_Method = { 
 	Name = 'Method' 
@@ -563,10 +564,10 @@ TrickDef_Indy = {
 	Score = 300 
 	Anim = Indy 
 	Idle = Indy_Idle 
-	ExtraTricks = ExtraStiffy 
+	NewExtraTricks = ExtraStiffy 
 }
 
-ExtraStiffy = [ { EXTRA_GRAB Params = { TrickDef_Stiffy IsExtra } } ]
+ExtraStiffy = [ { EXTRA_GRAB Params = { TrickDef_Stiffy EXTRA_TRICK } } ]
 
 TrickDef_Stiffy = { 
 	Name = 'Stiffy' 
@@ -590,10 +591,10 @@ TrickDef_Madonna = {
 	Anim = Madonna 
 	Idle = Madonna_Idle 
 	WaitPercent = 70 
-	ExtraTricks = ExtraJudo 
+	NewExtraTricks = ExtraJudo 
 }
 
-ExtraJudo = [ { EXTRA_GRAB Params = { TrickDef_Judo IsExtra } } ]
+ExtraJudo = [ { EXTRA_GRAB Params = { TrickDef_Judo EXTRA_TRICK } } ]
 
 TrickDef_Judo = {
 	Name = 'Judo' 
@@ -616,10 +617,10 @@ TrickDef_Crail = {
 	Score = 350 
 	Anim = Crail 
 	Idle = Crail_Idle 
-	ExtraTricks = ExtraTuckKnee 
+	NewExtraTricks = ExtraTuckKnee 
 }
 
-ExtraTuckKnee = [ { EXTRA_GRAB Params = { TrickDef_TuckKnee IsExtra } } ]
+ExtraTuckKnee = [ { EXTRA_GRAB Params = { TrickDef_TuckKnee EXTRA_TRICK } } ]
 
 TrickDef_TuckKnee = { 
 	Name = 'TuckKnee' 
@@ -639,10 +640,10 @@ TrickDef_Nosegrab = {
 	Score = 300 
 	Anim = Nosegrab 
 	Idle = Nosegrab_Idle 
-	ExtraTricks = ExtraRocket 
+	NewExtraTricks = ExtraRocket 
 }
 
-ExtraRocket = [ { EXTRA_GRAB Params = { TrickDef_Rocket IsExtra } } ]
+ExtraRocket = [ { EXTRA_GRAB Params = { TrickDef_Rocket EXTRA_TRICK } } ]
 
 TrickDef_Rocket = { 
 	Name = 'Rocket Air' 
@@ -662,10 +663,10 @@ TrickDef_Mute = {
 	Score = 350 
 	Anim = MuteGrab 
 	Idle = MuteGrab_Idle 
-	ExtraTricks = ExtraSeatbelt 
+	NewExtraTricks = ExtraSeatbelt 
 }
 
-ExtraSeatbelt = [ { EXTRA_GRAB Params = { TrickDef_Seatbelt IsExtra } } ]
+ExtraSeatbelt = [ { EXTRA_GRAB Params = { TrickDef_Seatbelt EXTRA_TRICK } } ]
 
 TrickDef_Seatbelt = { 
 	Name = 'Seatbelt Air' 
@@ -685,10 +686,10 @@ TrickDef_IndyNosebone = {
 	Score = 350 
 	Anim = Nosebone 
 	Idle = Nosebone_Idle 
-	ExtraTricks = ExtraDelMarIndy 
+	NewExtraTricks = ExtraDelMarIndy 
 }
 
-ExtraDelMarIndy = [ { EXTRA_GRAB Params = { TrickDef_DelMarIndy IsExtra } } ]
+ExtraDelMarIndy = [ { EXTRA_GRAB Params = { TrickDef_DelMarIndy EXTRA_TRICK } } ]
 
 TrickDef_DelMarIndy = {
 	Name = 'Del Mar Indy' 
@@ -702,7 +703,7 @@ Trick_DelMarIndy = { SCR_GRAB Params = TrickDef_DelMarIndy }
 
 //===japan/one foot japan===
 
-Trick_Japan = { SCR_GRAB Params =  TrickDef_Japan }
+Trick_Japan = { SCR_GRAB Params = TrickDef_Japan }
 
 TrickDef_Japan = { 
 	Name = 'Japan / One Foot Japan' 
@@ -710,10 +711,10 @@ TrickDef_Japan = {
 	Score = 350 
 	Anim = JapanAir 
 	Idle = JapanAir_Idle 
-	ExtraTricks = ExtraOneFootJapan 
+	NewExtraTricks = ExtraOneFootJapan 
 }
 
-ExtraOneFootJapan = [ { EXTRA_GRAB Params = { TrickDef_OneFootJapan IsExtra } } ]
+ExtraOneFootJapan = [ { EXTRA_GRAB Params = { TrickDef_OneFootJapan EXTRA_TRICK } } ]
 
 Trick_OneFootJapan = { SCR_GRAB Params = TrickDef_OneFootJapan }
 
@@ -738,10 +739,10 @@ TrickDef_Crossbone = {
 	Score = 350 
 	Anim = Crossbone 
 	Idle = Crossbone_Idle 
-	ExtraTricks = ExtraCrookedCop 
+	NewExtraTricks = ExtraCrookedCop 
 } 
 
-ExtraCrookedCop = [ { EXTRA_GRAB Params = { TrickDef_CrookedCop IsExtra } } ]
+ExtraCrookedCop = [ { EXTRA_GRAB Params = { TrickDef_CrookedCop EXTRA_TRICK } } ]
 
 Trick_CrookedCop = { SCR_GRAB Params = TrickDef_CrookedCop }
 
@@ -763,10 +764,10 @@ TrickDef_Tailgrab = {
 	Score = 300 
 	Anim = Tailgrab 
 	Idle = Tailgrab_Idle 
-	ExtraTricks = ExtraOneFootTail 
+	NewExtraTricks = ExtraOneFootTail 
 } 
 
-ExtraOneFootTail = [ { EXTRA_GRAB Params = { TrickDef_OneFootTail IsExtra } } ]
+ExtraOneFootTail = [ { EXTRA_GRAB Params = { TrickDef_OneFootTail EXTRA_TRICK } } ]
 
 //this version allows excessive spam, tweak somehow
 TrickDef_OneFootTail = { 
@@ -788,10 +789,10 @@ TrickDef_Airwalk = {
 	Score = 400 
 	Anim = Airwalk 
 	Idle = Airwalk_Idle2 
-	ExtraTricks = ExtraAirwalk
+	NewExtraTricks = ExtraAirwalk
 }
 
-ExtraAirwalk = [ { EXTRA_GRAB Params = { TrickDef_ChristAir IsExtra } } ]
+ExtraAirwalk = [ { EXTRA_GRAB Params = { TrickDef_ChristAir EXTRA_TRICK } } ]
 
 Trick_ChristAir = { SCR_GRAB Params = TrickDef_ChristAir }
 
@@ -816,7 +817,7 @@ TrickDef_Benihana = {
 	Anim = Benihana
 	Idle = Benihana_Idle 
 	OutAnim = Benihana_Out 
-	ExtraTricks = BenihanaFingerflip 
+	NewExtraTricks = BenihanaFingerflip //
 }
 
 BenihanaFingerflip = [ 
@@ -827,7 +828,7 @@ BenihanaFingerflip = [
 TrickDef_BeniFingerFlip = { 
 	Name = 'Beni Fingerflip' 
 	Score = 1000 
-	Anim = BenihanaFingerflip  
+	Anim = BenihanaFingerflip 
 }
 
 Trick_SackTap = { SCR_GRAB Params = TrickDef_Sacktap }
@@ -865,7 +866,19 @@ CSFingerFlipCannonball =
 //these are original KF to tricks i guess?
 Trick_KFIndy = { Scr = FlipGrabBlendFS Params = { Name = 'Kickflip to Indy' Score = 750 Anim = Kickflip IsExtra } }
 Trick_KFMelon = { Scr = FlipGrabBlendBS Params = { Name = 'Kickflip to Melon' Score = 750 Anim = Heelflip IsExtra } }
-KickflipToMelon = [ { Trigger = { AirTrickLogic Circle Left 500 } Scr = FlipGrabBlendBS Params = { Name = 'Kickflip to Melon' Score = 400 Anim = Heelflip Nollie = NollieHeelflip IsExtra } } ]
+KickflipToMelon = [ 
+	{ 
+		Trigger = { AirTrickLogic Circle Left 500 } 
+		Scr = FlipGrabBlendBS 
+		Params = { 
+			Name = 'Kickflip to Melon' 
+			Score = 400 
+			Anim = Heelflip 
+			Nollie = NollieHeelflip 
+			EXTRA_TRICK 
+		} 
+	} 
+]
 
 
 //these are coolsnake's versions of KF to tricks
@@ -931,7 +944,6 @@ LugeTricks = [
 
 
 
-
 script FlipTrick Speed = 1.0 TrickSlack = 10 GrindSlack = 25 Anim2From = 0 Anim2Wait = 0
 	ClearTricksFrom Jumptricks Jumptricks0 Jumptricks
 	CheckForOllie
@@ -949,25 +961,27 @@ script FlipTrick Speed = 1.0 TrickSlack = 10 GrindSlack = 25 Anim2From = 0 Anim2
 		Obj_SetFlag FLAG_SKATER_REVERTBS
 	endif
 
+	//if we're in nollie state
 	if InNollie
+		//it's possible we don't have nollie anim, so check for it
 		if GotParam Nollie
-			if GotParam IsExtra
-				PlayAnim Anim = <Nollie> BlendPeriod = 0.3 From = Current to = End Speed = <Speed>
+			if GotParam UseCurrent
+				PlayAnim { Anim = <Nollie> From = Current to = End Speed = <Speed> BlendPeriod = 0.3 }
 			else
-				PlayAnim Anim = <Nollie> BlendPeriod = 0.3 Speed = <Speed>
+				PlayAnim { Anim = <Nollie> Speed = <Speed> BlendPeriod = 0.3 }
 			endif
 		else
-			if GotParam IsExtra
-				PlayAnim Anim = <Anim> BlendPeriod = 0.3 From = Current to = End Speed = <Speed>
+			if GotParam UseCurrent
+				PlayAnim { Anim = <Anim> From = Current to = End Speed = <Speed> BlendPeriod = 0.3 }
 			else
-				PlayAnim Anim = <Anim> BlendPeriod = 0.3 Speed = <Speed>
+				PlayAnim { Anim = <Anim> Speed = <Speed> BlendPeriod = 0.3 }
 			endif
 		endif
 	else
-		if GotParam IsExtra
-			PlayAnim Anim = <Anim> From = Current BlendPeriod = 0.3 Speed = <Speed>
+		if GotParam UseCurrent
+			PlayAnim { Anim = <Anim> From = Current to = End Speed = <Speed> BlendPeriod = 0.3 }
 		else
-			PlayAnim Anim = <Anim> BlendPeriod = 0.3 Speed = <Speed>
+			PlayAnim { Anim = <Anim> Speed = <Speed> BlendPeriod = 0.3 }
 		endif
 	endif
 
@@ -996,14 +1010,8 @@ script FlipTrick Speed = 1.0 TrickSlack = 10 GrindSlack = 25 Anim2From = 0 Anim2
 		BlendperiodOut 0
 		FlipAfter
 	endif
-	
-	//currently it disables all extra tricks altogether
-	//gotta find if there is a way to add multiple extratricks to separate original and new ones
-	if IsOptionOn LM_Control_bExtraTricks
-		if GotParam ExtraTricks
-			SetExtraTricks tricks = <ExtraTricks> Duration = 15
-		endif
-	endif
+
+	Airtricks_SetExtraTricks <...>
 
 	//rewrite using Anim2
 	if GotParam CSDoubleFingerFlip
@@ -1020,29 +1028,11 @@ script FlipTrick Speed = 1.0 TrickSlack = 10 GrindSlack = 25 Anim2From = 0 Anim2
 	endif
 	
 	Wait 15 frames
-	
-	//the idea is to store trick menu name in Name param and show in game the ShowName param
-	//if no showname param, means we can use just name
-	IF GotParam ShowName
-		SetTrickName <ShowName>
-	ELSE
-		SetTrickName <Name>
-	ENDIF
-	
-	SetTrickScore <Score>
-	Display
-	
+
 	//flips and rolls
 	//SetExtraTricks tricks = 0x1A191817
 	
-	//special sound has higher priority i suppose
-	IF GotParam IsSpecial
-		LaunchSpecialMessage
-	ELSE
-		IF GotParam IsExtra
-			LaunchExtraMessage
-		ENDIF
-	ENDIF
+	Airtricks_ShowTrickName <...>
 
 	if GotParam BloodFrame
 		Wait <BloodFrame> frames
@@ -1099,11 +1089,7 @@ script GrabTrick Speed = 1.0 x = -180 Duration = 1.0 GrabTweak = GRABTWEAK_MEDIU
 		SpawnSkaterScript Ollie_Signage
 	endif
 	
-	if IsOptionOn LM_Control_bExtraTricks
-		if GotParam ExtraTricks
-			SetExtraTricks tricks = <ExtraTricks> Duration = 15
-		endif
-	endif
+	Airtricks_SetExtraTricks <...>
 	
 	if GotParam CSFingerFlipCannonball
 		PlayAnim Anim = FingerFlipVert BlendPeriod = 0.3 Speed = 1.3
@@ -1139,22 +1125,7 @@ script GrabTrick Speed = 1.0 x = -180 Duration = 1.0 GrabTweak = GRABTWEAK_MEDIU
 	
 	WaitAnim 50 percent
 	
-	IF GotParam ShowName
-		SetTrickName <ShowName>
-	ELSE
-		SetTrickName <Name>
-	ENDIF
-	SetTrickScore <Score>
-	Display
-	
-	//special sound has higher priority i suppose
-	if GotParam IsSpecial
-		LaunchSpecialMessage
-	ELSE
-		if GotParam IsExtra
-			LaunchExtraMessage
-		endif
-	endif
+	Airtricks_ShowTrickName <...>
 	
 	//flips and rolls
 	//SetExtraTricks tricks = 0x1A191817
@@ -1339,7 +1310,45 @@ script CalledOllie
 	else
 		#"Jump"
 		IF #"Not" IsOptionOn LM_Control_bButtSlap
-		    ClearException Ollied
+			ClearException Ollied
 		ENDIF
 	endif
 endscript
+
+SCRIPT Airtricks_ShowTrickName
+	//the idea is to store trick menu name in Name param and show in game the ShowName param
+	//if no showname param, means we can use just name
+	IF GotParam ShowName
+		SetTrickName <ShowName>
+	ELSE
+		SetTrickName <Name>
+	ENDIF
+	
+	SetTrickScore <Score>
+	Display
+	
+	//special sound has higher priority i suppose
+	IF GotParam IsSpecial
+		LaunchSpecialMessage
+	ELSE
+		IF GotParam IsExtra
+			LaunchExtraMessage
+		ENDIF
+	ENDIF
+ENDSCRIPT
+
+SCRIPT Airtricks_SetExtraTricks
+	if IsOptionOn LM_Control_bExtraTricks
+		IF GotParam NewExtraTricks
+			SetExtraTricks <NewExtraTricks> name = <name> Duration = 15
+		ELSE
+			IF GotParam ExtraTricks
+				SetExtraTricks <ExtraTricks> name = <name> Duration = 15
+			ENDIF
+		ENDIF
+	ELSE
+		IF GotParam ExtraTricks
+			SetExtraTricks <ExtraTricks> name = <name> Duration = 15
+		ENDIF
+	ENDIF
+ENDSCRIPT
