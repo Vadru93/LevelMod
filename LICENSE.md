@@ -1,3 +1,10 @@
+# LevelMod
+* LevelMod Project 2013 - 2020
+* C++ files by Vadru 2009 - 2020
+* Script files by Vadru and DCxDemo 2010 - 2020
+
+# d3d8to9
+
 Copyright (C) 2015 Patrick Mours. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
