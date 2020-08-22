@@ -9,9 +9,6 @@ void FixRenderBugs();
 //Still need some tweaking for it to work 100% for thug2+ levels
 void FixVertBugs();
 
-//Limit chat message to not crash game
-void FixChatHook(char* chatText);
-
 //Make sure chat messages don't crash the game
 void FixChat();
 
