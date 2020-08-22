@@ -246,12 +246,19 @@ SCRIPT ToggleTH4Comp
 		Change TH4CompDisabled = 0
 		UpdateTH4CompText
 		Create prefix = "G_Comp_"
+		Create prefix = "TRG_G_COMP_"
+		Kill prefix = "G_COMPNOT_"
+		Kill prefix = "TRG_G_COMPNOT_"
 	ELSE
 		Change TH4CompDisabled = 1
 		UpdateTH4CompText
 		Kill prefix = "G_Comp_"
+		Kill prefix = "TRG_G_COMP_"
+		Create prefix = "G_COMPNOT_"
+		Create prefix = "TRG_G_COMPNOT_"
 	ENDIF
 ENDSCRIPT
+
 
 SCRIPT UpdateTH4CompText
 	IF IsTrue TH4CompDisabled
