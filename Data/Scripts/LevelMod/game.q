@@ -200,6 +200,8 @@ SCRIPT ToggleLayers
 	ENDIF
 ENDSCRIPT
 
+ExtraGrassDisabled = 0
+
 SCRIPT ToggleGrass
 	IF IsTrue ExtraGrassDisabled
 		Change ExtraGrassDisabled = 0
