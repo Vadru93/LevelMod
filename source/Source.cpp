@@ -111,7 +111,6 @@ static float version = VERSION;
 
 bool InvalidReadPtr(const void* const __restrict ptr, const DWORD size);
 bool InvalidReadPtr(const void* const __restrict ptr);
-void TestForAcid_naked();
 //FILE* _cdecl _fopen(const char* p, const char* b);
 //void Ncomp_naked();
 struct Matrix;
@@ -3662,6 +3661,7 @@ hi:
 	_asm jmp[jmpBack2];
 }*/
 //char* fopen_path = NULL;
+
 __declspec(naked) void Fopen_naked()
 {
 	static DWORD fopen = *(DWORD*)0x0058D0B0;

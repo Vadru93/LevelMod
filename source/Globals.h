@@ -135,12 +135,43 @@ bool CallWithNoNameScript(CStruct* pStruct, CScript* pScript);
 
 
 //--------Naked Functions--------
-void __cdecl HookVibrate_naked();
+//Gets executed when you call a script that doesn't exist
+void __cdecl NotGood_naked();
+//Gets executed whenever game generates a checksum
 void Checksum_naked();
+//Gets executed when game opens a level file
 void Fopen_naked();
-//--------Naked Functions--------
+//Gets executed at begining of frame
+void BeganTransferCheck_naked();
+//Currently not yet added
+void handle_post_transfer_limit_overrides_naked();
+//Gets executed when landing
+void ResetTransfer_naked();
+//Gets executed when "hit" a wall
+void airhook_naked();
+//Gets executed when state is AIR, this one is used to check if you want to spine/acid/bank
+void MaybeAcid_naked();
+//Gets executed when state is AIR, this one is used to reset the lerping matrix while spine/acid/bank
+void CheckForTransfer_naked();
+//Don't remember when this gets executed...
+void ResetTransferVel_naked();
+//Gets executed when state is AIR, this one is used to lerp the skater in spine/acid/bank
+void Slerp_naked();
+//Gets executed when state is GROUND
+void OnGround_naked();
+//Gets executed when Vibration script is called
+void __cdecl HookVibrate_naked();
 
-//--------Function hooks--------
+//depricated
+void TestForAcid_naked();
+//--------Naked Hooked Functions--------
+
+
+//--------Non Naked Hooked Functions--------
+DWORD GrindParamHook(char* str, int unk);
+//--------Non Naked Hooked Functions--------
+
+//--------Function hooking--------
 //XINPUT
 void HookVibrate();
 void HookControls();
