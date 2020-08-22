@@ -134,7 +134,7 @@ bool CallWithNoNameScript(CStruct* pStruct, CScript* pScript);
 //--------depricated--------
 
 
-//--------Naked Functions--------
+//--------Naked Hooked Functions--------
 //Gets executed when you call a script that doesn't exist
 //This is used to generate a messagebox instead of crashing game
 void __cdecl NotGood_naked();
@@ -146,7 +146,7 @@ void Checksum_naked();
 //And used to ncomp node stuff and other level related stuff
 void Fopen_naked();
 //Gets executed at begining of frame
-//This is used in thug1src to tell engine that we began the fram in transfer
+//This is used in thug1src to tell engine that we began the frame in transfer
 //Currently not used, not sure if we need this?
 void BeganTransferCheck_naked();
 //Currently not yet added
@@ -168,8 +168,8 @@ void CheckForTransfer_naked();
 //Don't remember when this gets executed...
 //This is used to reset the velocity
 void ResetTransferVel_naked();
-//Gets executed when state is AIR, this one is used to lerp the skater in spine/acid/bank
-//This is used to lerp the skater
+//Gets executed when state is AIR
+//This is used to lerp the skater in spine/acid/bank
 void Slerp_naked();
 //Gets executed when state is GROUND
 //This is used to reset new states for spine/acid/bank and wallplant
@@ -193,10 +193,11 @@ DWORD GrindParamHook(char* str, int unk);
 //XINPUT
 void HookVibrate();
 void HookControls();
+
 //BugFixes and physics control
 void FixSpineFlag();
 //For more functions check bugfixes.h
-//--------Function hooks--------
+//--------Function hooking--------
 
 //--------Game Functions--------
 EXTERN DWORD _GetCurrentTime();
