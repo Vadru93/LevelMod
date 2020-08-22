@@ -1,4 +1,9 @@
-#d3d8to9
+# LevelMod
+* LevelMod Project 2013 - 2020
+* C++ files by Vadru 2009 - 2020
+* Script files by Neversoft 2002, modified by Vadru and DCxDemo 2007 - 2020
+
+# d3d8to9
 
 Copyright (C) 2015 Patrick Mours. All rights reserved.
 
