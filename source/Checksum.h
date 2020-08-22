@@ -7,7 +7,7 @@
 EXTERN char* FindChecksumName(DWORD checksum);
 
 
-inline unsigned long Checksum(const char* string);//THPS3 Function for CRC32
+unsigned long Checksum(const char* string);//THPS3 Function for CRC32
 
 
 constexpr DWORD checksumTable[256] =

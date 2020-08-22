@@ -6,7 +6,7 @@
 #define NO_DEFINES
 #define PCH_H
 
-#include "pch.h"
+//#include "..\pch.h"
 #include "d3dx9.hpp"
 #include "d3d8to9.hpp"
 #include <regex>

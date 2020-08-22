@@ -10,178 +10,213 @@
     <Filter Include="LevelMod">
       <UniqueIdentifier>{b6853d93-14dd-44a8-af48-6da5c3dafa55}</UniqueIdentifier>
     </Filter>
+    <Filter Include="resources\NewFilter1">
+      <UniqueIdentifier>{4b72971f-1f83-4b9b-bbe5-f1a93880a492}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="d3d8to9">
+      <UniqueIdentifier>{cd7780da-49b1-42d6-ad37-5b58ac8320da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="zip">
+      <UniqueIdentifier>{05a7947b-6f05-4fec-ac92-f887bab7fb26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LevelMod\Source">
+      <UniqueIdentifier>{008fc4cf-d4ba-4691-b9de-1e6fcf7c1308}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LevelMod\Header">
+      <UniqueIdentifier>{e925a7c2-3ae5-4904-af64-1910b0a68f88}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\d3d8types.cpp">
+    <ClCompile Include="source\d3d8to9\d3d8types.cpp">
       <Filter>helpers</Filter>
     </ClCompile>
-    <ClCompile Include="source\d3d8to9.cpp" />
-    <ClCompile Include="source\d3d8to9_base.cpp" />
-    <ClCompile Include="source\d3d8to9_device.cpp" />
-    <ClCompile Include="source\d3d8to9_index_buffer.cpp" />
-    <ClCompile Include="source\d3d8to9_surface.cpp" />
-    <ClCompile Include="source\d3d8to9_swap_chain.cpp" />
-    <ClCompile Include="source\d3d8to9_texture.cpp" />
-    <ClCompile Include="source\d3d8to9_vertex_buffer.cpp" />
-    <ClCompile Include="source\d3d8to9_volume.cpp" />
-    <ClCompile Include="source\lookup_table.cpp">
+    <ClCompile Include="source\d3d8to9\interface_query.cpp">
       <Filter>helpers</Filter>
     </ClCompile>
-    <ClCompile Include="source\interface_query.cpp">
+    <ClCompile Include="source\d3d8to9\lookup_table.cpp">
       <Filter>helpers</Filter>
     </ClCompile>
-    <ClCompile Include="source\CXBOXController.cpp">
-      <Filter>LevelMod</Filter>
+    <ClCompile Include="source\d3d8to9\d3d8to9.cpp">
+      <Filter>d3d8to9</Filter>
     </ClCompile>
-    <ClCompile Include="source\IniWriter.cpp">
-      <Filter>LevelMod</Filter>
+    <ClCompile Include="source\d3d8to9\d3d8to9_base.cpp">
+      <Filter>d3d8to9</Filter>
     </ClCompile>
-    <ClCompile Include="source\Observe.cpp">
-      <Filter>LevelMod</Filter>
+    <ClCompile Include="source\d3d8to9\d3d8to9_device.cpp">
+      <Filter>d3d8to9</Filter>
     </ClCompile>
-    <ClCompile Include="source\pch.cpp">
-      <Filter>LevelMod</Filter>
+    <ClCompile Include="source\d3d8to9\d3d8to9_index_buffer.cpp">
+      <Filter>d3d8to9</Filter>
     </ClCompile>
-    <ClCompile Include="source\Source.cpp">
-      <Filter>LevelMod</Filter>
+    <ClCompile Include="source\d3d8to9\d3d8to9_surface.cpp">
+      <Filter>d3d8to9</Filter>
     </ClCompile>
-    <ClCompile Include="source\unzip.cpp">
-      <Filter>LevelMod</Filter>
+    <ClCompile Include="source\d3d8to9\d3d8to9_swap_chain.cpp">
+      <Filter>d3d8to9</Filter>
     </ClCompile>
-    <ClCompile Include="source\Defines.cpp">
-      <Filter>LevelMod</Filter>
+    <ClCompile Include="source\d3d8to9\d3d8to9_texture.cpp">
+      <Filter>d3d8to9</Filter>
     </ClCompile>
-    <ClCompile Include="source\IniReader.cpp">
-      <Filter>LevelMod</Filter>
+    <ClCompile Include="source\d3d8to9\d3d8to9_vertex_buffer.cpp">
+      <Filter>d3d8to9</Filter>
+    </ClCompile>
+    <ClCompile Include="source\d3d8to9\d3d8to9_volume.cpp">
+      <Filter>d3d8to9</Filter>
     </ClCompile>
     <ClCompile Include="source\Checksum.cpp">
-      <Filter>LevelMod</Filter>
+      <Filter>LevelMod\Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\Script.cpp">
-      <Filter>LevelMod</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Skater.cpp">
-      <Filter>LevelMod</Filter>
-    </ClCompile>
-    <ClCompile Include="source\KeyState.cpp">
-      <Filter>LevelMod</Filter>
-    </ClCompile>
-    <ClCompile Include="source\math.cpp">
-      <Filter>LevelMod</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Node.cpp">
-      <Filter>LevelMod</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Physics.cpp">
-      <Filter>LevelMod</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Globals.cpp">
-      <Filter>LevelMod</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Settings.cpp">
-      <Filter>LevelMod</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Extension.cpp">
-      <Filter>LevelMod</Filter>
+    <ClCompile Include="source\CXBOXController.cpp">
+      <Filter>LevelMod\Source</Filter>
     </ClCompile>
     <ClCompile Include="source\debug.cpp">
-      <Filter>LevelMod</Filter>
+      <Filter>LevelMod\Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\SuperSectors.cpp">
-      <Filter>LevelMod</Filter>
+    <ClCompile Include="source\Defines.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Extension.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Globals.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IniReader.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IniWriter.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\KeyState.cpp">
+      <Filter>LevelMod\Source</Filter>
     </ClCompile>
     <ClCompile Include="source\Memory.cpp">
-      <Filter>LevelMod</Filter>
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Node.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Observe.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\pch.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Physics.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Settings.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Skater.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Source.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\SuperSectors.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\math.cpp">
+      <Filter>LevelMod\Header</Filter>
+    </ClCompile>
+    <ClCompile Include="source\zip\unzip.cpp">
+      <Filter>zip</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\d3dx9.hpp">
-      <Filter>helpers</Filter>
-    </ClInclude>
-    <ClInclude Include="source\d3d8types.hpp">
-      <Filter>helpers</Filter>
-    </ClInclude>
     <ClInclude Include="res\resource.h">
       <Filter>resources</Filter>
     </ClInclude>
-    <ClInclude Include="source\d3d8to9.hpp" />
-    <ClInclude Include="source\lookup_table.hpp">
+    <ClInclude Include="source\d3d8to9\d3d8types.hpp">
       <Filter>helpers</Filter>
     </ClInclude>
+    <ClInclude Include="source\d3d8to9\d3dx9.hpp">
+      <Filter>helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\d3d8to9\lookup_table.hpp">
+      <Filter>helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\d3d8to9\d3d8to9.hpp">
+      <Filter>d3d8to9</Filter>
+    </ClInclude>
     <ClInclude Include="source\_Math.h">
-      <Filter>LevelMod</Filter>
+      <Filter>LevelMod\Header</Filter>
     </ClInclude>
     <ClInclude Include="source\Checksum.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\CXBOXController.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\IniWriter.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\KeyState.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Memory.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Mesh.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Node.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Observe.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\pch.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\QBKey.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Script.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Skater.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\SuperSectors.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\unzip.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Debug.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Defines.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Extension.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\framework.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\HTTPRequest.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\IniReader.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Globals.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Physics.h">
-      <Filter>LevelMod</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Settings.h">
-      <Filter>LevelMod</Filter>
+      <Filter>LevelMod\Header</Filter>
     </ClInclude>
     <ClInclude Include="source\Commands.h">
-      <Filter>LevelMod</Filter>
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\CXBOXController.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Debug.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Defines.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Extension.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\framework.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Globals.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\HTTPRequest.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\IniReader.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\IniWriter.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\KeyState.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Memory.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Mesh.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Node.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Observe.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\pch.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Physics.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\QBKey.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Script.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Settings.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Skater.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\SuperSectors.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\zip\unzip.h">
+      <Filter>zip</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -98,7 +98,7 @@ bool ChangeValues(CStruct* pStruct, CScript* pScript)
 		{
 			CStructHeader* values = NULL;
 
-			if (pStruct->GetStruct(Checksum("Values"), &values))
+			if (pStruct->GetStruct(crc32f("Values"), &values))
 			{
 				pContainer->SetValues(*values->pStruct);
 				return true;

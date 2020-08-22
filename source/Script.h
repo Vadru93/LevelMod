@@ -22,7 +22,7 @@ void EXTERN SetArrayValues(CArray* pArray, CStructHeader* values);
 EXTERN char* FindChecksumName(DWORD checksum);
 
 
-inline unsigned long Checksum(const char* string);//THPS3 Function for CRC32
+//inline unsigned long Checksum(const char* string);//THPS3 Function for CRC32
 
 //--------Script Stuff--------
 namespace QScript
