@@ -219,67 +219,63 @@ bool GetSkaterPos(CStruct* pParams, CScript* pScript)
 
 bool GetSpeedScript(CStruct* pParams, CScript* pScript)
 {
-	DEBUGSTART()
+	//ExecuteQBScript("DefaultGapScript", pParams, pScript);
+	//ExecuteQBScript("DefaultGapScript", pParams, pScript);
+	static const DWORD ptr = 0x005D06C0;
+	VALIDATE_PTR((void*)ptr);
+	DWORD pSpeed = *(DWORD*)ptr + 0x580;
+	VALIDATE_PTR((void*)pSpeed);
+	pSpeed = *(DWORD*)pSpeed + 0x4;
+	VALIDATE_PTR((void*)pSpeed);
+	pSpeed = *(DWORD*)pSpeed + 0x2C;
+	VALIDATE_PTR((void*)pSpeed);
+	pSpeed = *(DWORD*)pSpeed + 0x48;
+	VALIDATE_PTR((void*)pSpeed);
+	pSpeed = *(DWORD*)pSpeed + 0x334;
+	VALIDATE_DATA((Vertex*)pSpeed, sizeof(Vertex));
+
+	CStruct* const __restrict params = pScript->params;
+	CStructHeader* const __restrict header = params->AllocateCStruct();
+	params->tail->NextHeader = header;
+	params->tail = header;
+	header->Type = QBKeyHeader::FLOAT;
+	header->QBkey = 0xF0D90109;
+	const float speed = GetSpeed((const Vertex* const __restrict)pSpeed);
+	if (speed > 0)
+		header->value.f = speed;
+	else
+		header->value.f = 100.0f;
+	header->NextHeader = NULL;
+	//CStructHeader header = CStructHeader(QBKeyHeader::FLOAT, 0x3BD7B54E, speed != 0 ? speed : 100.0f, 0);
+
+	/*typedef const int (__cdecl *const GetQBKeyHeaderFunc)(const unsigned long QBKey);
+	const int addr = ((GetQBKeyHeaderFunc)(0x00426340))(0x3BD7B54E);
+
+	if(addr!=0)
 	{
-		//ExecuteQBScript("DefaultGapScript", pParams, pScript);
-		//ExecuteQBScript("DefaultGapScript", pParams, pScript);
-		static const DWORD ptr = 0x005D06C0;
-		VALIDATE_PTR((void*)ptr);
-		DWORD pSpeed = *(DWORD*)ptr + 0x580;
-		VALIDATE_PTR((void*)pSpeed);
-		pSpeed = *(DWORD*)pSpeed + 0x4;
-		VALIDATE_PTR((void*)pSpeed);
-		pSpeed = *(DWORD*)pSpeed + 0x2C;
-		VALIDATE_PTR((void*)pSpeed);
-		pSpeed = *(DWORD*)pSpeed + 0x48;
-		VALIDATE_PTR((void*)pSpeed);
-		pSpeed = *(DWORD*)pSpeed + 0x334;
-		VALIDATE_DATA((Vertex*)pSpeed, sizeof(Vertex));
+	const float speed = GetSpeed((const Vertex* const __restrict)pSpeed);
+	if(speed != 0)
+	*(float*)(addr+12) = speed;
+	else
+	*(float*)(addr+12) = 100.0f;
 
-		CStruct* const __restrict params = pScript->params;
-		CStructHeader* const __restrict header = params->AllocateCStruct();
-		params->tail->NextHeader = header;
-		params->tail = header;
-		header->Type = QBKeyHeader::FLOAT;
-		header->QBkey = 0xF0D90109;
-		const float speed = GetSpeed((const Vertex* const __restrict)pSpeed);
-		if (speed > 0)
-			header->value.f = speed;
-		else
-			header->value.f = 100.0f;
-		header->NextHeader = NULL;
-		//CStructHeader header = CStructHeader(QBKeyHeader::FLOAT, 0x3BD7B54E, speed != 0 ? speed : 100.0f, 0);
-
-		/*typedef const int (__cdecl *const GetQBKeyHeaderFunc)(const unsigned long QBKey);
-		const int addr = ((GetQBKeyHeaderFunc)(0x00426340))(0x3BD7B54E);
-
-		if(addr!=0)
-		{
-		const float speed = GetSpeed((const Vertex* const __restrict)pSpeed);
-		if(speed != 0)
-		*(float*)(addr+12) = speed;
-		else
-		*(float*)(addr+12) = 100.0f;
-
-		}
-		else
-		{
-		QBKeyHeader* header = GetQBKeyHeader(0x3BD7B54E);
-		if(header)
-		{
-		const float speed = GetSpeed((const Vertex* const __restrict)pSpeed);
-		if(speed != 0)
-		header->fVal = speed;
-		else
-		header->fVal = 100.0f;
-
-		}
-		MessageBox(0, "couldn't find script variable" ," LastSpeed", 0);
-		return false;
-		}*/
 	}
-	DEBUGEND()
-		CScript::DumpScripts();
+	else
+	{
+	QBKeyHeader* header = GetQBKeyHeader(0x3BD7B54E);
+	if(header)
+	{
+	const float speed = GetSpeed((const Vertex* const __restrict)pSpeed);
+	if(speed != 0)
+	header->fVal = speed;
+	else
+	header->fVal = 100.0f;
+
+	}
+	MessageBox(0, "couldn't find script variable" ," LastSpeed", 0);
+	return false;
+	}*/
+	CScript::DumpScripts();
 	return true;
 }
 
