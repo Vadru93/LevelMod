@@ -2396,7 +2396,36 @@ void FixSpineFlag()
 	*(DWORD*)addr = offset;
 
 
-	
+	/*VirtualProtect((void*)0x00403149, 5, PAGE_EXECUTE_READWRITE, &old);
+	*(BYTE*)0x00403149 = 0xE9;
+	addr = 0x0040314A;
+	offset = (PtrToUlong(Fopen_naked) - 0x00403149) - 5;
+	*(DWORD*)addr = offset;*/
+	/*if (debugMode)
+	{*/
+	DWORD fopen = *(DWORD*)0x0058D0B0;
+	VirtualProtect((void*)fopen, 5, PAGE_EXECUTE_READWRITE, &old);
+	*(BYTE*)fopen = 0xE9;
+	addr = fopen + 1;
+	offset = (PtrToUlong(Fopen_naked) - fopen) - 5;
+	*(DWORD*)addr = offset;
+	//}
+	/*VirtualProtect((void*)0x0058D0B0, 4, PAGE_EXECUTE_READWRITE, &old);
+	 = (DWORD)_fopen;*/
+
+
+	extern bool debugMode;
+	if (debugMode)
+	{
+		VirtualProtect((void*)0x004265F0, 5, PAGE_EXECUTE_READWRITE, &old);
+		*(BYTE*)0x004265F0 = 0xE9;
+		addr = 0x004265F1;
+		offset = (PtrToUlong(Checksum_naked) - 0x004265F0) - 5;
+	}
+	char msg[128] = "";
+	/*sprintf(msg, "OFFSET %X", offset);
+	MessageBox(0, msg, msg, 0);*/
+	*(DWORD*)addr = offset;
 
 
 	VirtualProtect((void*)0x004B2B58, 4, PAGE_EXECUTE_READWRITE, &old);

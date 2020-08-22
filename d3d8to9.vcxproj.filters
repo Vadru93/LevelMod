@@ -209,14 +209,14 @@
     <ClInclude Include="source\Settings.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
-    <ClInclude Include="source\Skater.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
     <ClInclude Include="source\SuperSectors.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
     <ClInclude Include="source\zip\unzip.h">
       <Filter>zip</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Skater.h">
+      <Filter>LevelMod\Header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -112,10 +112,8 @@ static float version = VERSION;
 bool InvalidReadPtr(const void* const __restrict ptr, const DWORD size);
 bool InvalidReadPtr(const void* const __restrict ptr);
 void TestForAcid_naked();
-void Fopen_naked();
 //FILE* _cdecl _fopen(const char* p, const char* b);
 //void Ncomp_naked();
-void Checksum_naked();
 struct Matrix;
 
 FILE* debugFile = NULL;

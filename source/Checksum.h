@@ -4,7 +4,7 @@
 #define CHECKSUM_H
 #include "Defines.h"
 
-EXTERN char* FindChecksumName(DWORD checksum);
+//EXTERN char* FindChecksumName(DWORD checksum);
 
 
 unsigned long Checksum(const char* string);//THPS3 Function for CRC32

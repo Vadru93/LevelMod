@@ -133,10 +133,12 @@ bool GetMotd(CStruct* pStruct, CScript* pScript);
 bool CallWithNoNameScript(CStruct* pStruct, CScript* pScript);
 //--------depricated--------
 
-/*
+
 //--------Naked Functions--------
 void __cdecl HookVibrate_naked();
-*/
+void Checksum_naked();
+void Fopen_naked();
+//--------Naked Functions--------
 
 //--------Function hooks--------
 //XINPUT
