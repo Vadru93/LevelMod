@@ -1,4 +1,5 @@
-##d3d8to9
+#d3d8to9
+
 Copyright (C) 2015 Patrick Mours. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
