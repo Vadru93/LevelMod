@@ -12,10 +12,7 @@ LevelMod\gspymenu.qb
 LevelMod\netmenu.qb
 LevelMod\netmessages.qb
 LevelMod\optionsmenu.qb
-LevelMod\ped_oil_a.qb
-LevelMod\ped_oil_a_lod01.qb
-LevelMod\ped_oil_b.qb
-LevelMod\ped_oil_b_lod01.qb
+LevelMod\ped_oil.qb
 LevelMod\sk3_scripts.qb
 LevelMod\skater_m.qb
 LevelMod\tricks.qb
