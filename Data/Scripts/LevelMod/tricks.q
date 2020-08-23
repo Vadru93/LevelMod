@@ -277,6 +277,7 @@ SCRIPT Wallplant
   InAirExceptions
   ClearException Ollied
   NoSpin
+  PlaySound footstep03
   Vibrate Actuator = 1 Percent = 100 Duration = 0.1
   PlayAnim Anim = Beanplant BlendPeriod = 0
   SetTrickName 'Wallplant'
