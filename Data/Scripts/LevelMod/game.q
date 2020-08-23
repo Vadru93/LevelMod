@@ -181,7 +181,7 @@ SCRIPT UpdateNetNameText
 		SetMenuElementText id = NetName_Toggle "Player names: Off"
 	ENDIF
 ENDSCRIPT
-ExtraLayersDisabled = 0
+//ExtraLayersDisabled = 0
 
 SCRIPT ToggleLayers
 	ToggleOption LM_GameOption_bExtraLayer
@@ -191,9 +191,9 @@ ENDSCRIPT
 
 SCRIPT UpdateLayersText
 	IF IsOptionOn LM_GameOption_bExtraLayer
-		SetMenuElementText id = Layers_Toggle "Layers: Off"
-	ELSE
 		SetMenuElementText id = Layers_Toggle "Layers: On"
+	ELSE
+		SetMenuElementText id = Layers_Toggle "Layers: Off"
 	ENDIF
 ENDSCRIPT
 
