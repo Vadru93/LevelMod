@@ -144,22 +144,21 @@ SCRIPT UpdateSlapText
 		SetMenuElementText id = slap_toggle "Collision: Off"
 	ENDIF
 ENDSCRIPT
-HUDIsOn = 1
-
+//HUDIsOn = 1
+//This is an option and should use IsOptionOn
 SCRIPT ToggleHUD
-	IF IsTrue HUDIsOn
-		TogglePanel 0
-		Change HUDIsOn = 0
-	ELSE
+    ToggleOption LM_GUI_bShowHud
+	IF IsOptionOn LM_GUI_bShowHud
 		TogglePanel 1
-		Change HUDIsOn = 1
+	ELSE
+		TogglePanel 0
 	ENDIF
 	UpdateHUDText
 	//UpdateLevelModSettings
 ENDSCRIPT
 
 SCRIPT UpdateHUDText
-	IF IsTrue HUDIsOn
+	IF IsOptionOn LM_GUI_bShowHud
 		SetMenuElementText id = HUD_Toggle "HUD: On"
 	ELSE
 		SetMenuElementText id = HUD_Toggle "HUD: Off"
@@ -200,20 +199,6 @@ SCRIPT ToggleLayers
 	ENDIF
 ENDSCRIPT
 
-ExtraGrassDisabled = 0
-
-SCRIPT ToggleGrass
-	IF IsTrue ExtraGrassDisabled
-		Change ExtraGrassDisabled = 0
-		UpdateGrassText
-		Create prefix = "3DGrassMesh"
-	ELSE
-		Change ExtraGrassDisabled = 1
-		UpdateGrassText
-		Kill prefix = "3DGrassMesh"
-	ENDIF
-ENDSCRIPT
-
 SCRIPT UpdateLayersText
 	IF IsTrue ExtraLayersDisabled
 		SetMenuElementText id = Layers_Toggle "Layers: Off"
@@ -223,10 +208,10 @@ SCRIPT UpdateLayersText
 ENDSCRIPT
 
 SCRIPT UpdateGrassText
-	IF IsTrue ExtraGrassDisabled
-		SetMenuElementText id = Grass_Toggle "Grass: Off"
-	ELSE
+	IF IsOptionOn LM_GameOption_bGrass
 		SetMenuElementText id = Grass_Toggle "Grass: On"
+	ELSE
+		SetMenuElementText id = Grass_Toggle "Grass: Off"
 	ENDIF
 ENDSCRIPT
 
@@ -248,19 +233,12 @@ SCRIPT ToggleTH4Comp
 		Change TH4CompDisabled = 0
 		UpdateTH4CompText
 		Create prefix = "G_Comp_"
-		Create prefix = "TRG_G_COMP_"
-		Kill prefix = "G_COMPNOT_"
-		Kill prefix = "TRG_G_COMPNOT_"
 	ELSE
 		Change TH4CompDisabled = 1
 		UpdateTH4CompText
 		Kill prefix = "G_Comp_"
-		Kill prefix = "TRG_G_COMP_"
-		Create prefix = "G_COMPNOT_"
-		Create prefix = "TRG_G_COMPNOT_"
 	ENDIF
 ENDSCRIPT
-
 
 SCRIPT UpdateTH4CompText
 	IF IsTrue TH4CompDisabled
