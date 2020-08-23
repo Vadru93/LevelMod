@@ -2,6 +2,7 @@ LevelMod\airtricks.qb
 LevelMod\bails.qb
 LevelMod\buttonscripts.qb
 LevelMod\game.qb
+LevelMod\gameflow.qb
 LevelMod\gamemode.qb
 LevelMod\gameoptions.qb
 LevelMod\helper.qb
@@ -64,7 +65,6 @@ edpieces.qb
 flags.qb
 frontend.qb
 frontendcamanims.qb
-gameflow.qb
 girl_a.qb
 goal_scripts.qb
 grindlist.qb

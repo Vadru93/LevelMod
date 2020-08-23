@@ -30,41 +30,96 @@ SCRIPT CreateLevelModMenus
 	AttachChild parent = contain1 child = spine_button_menu
 ENDSCRIPT
 
+SCRIPT UpdateGrass
+    BEGIN
+	WaitOneGameFrame
+	REPEAT 600000
+    printf "Spawned Script UpdateGras..."
+    IF IsOptionOn LM_GameOption_bGrass
+		Create prefix = "3DGrassMesh"
+		printf "Grass On"
+	ELSE
+		Kill prefix = "3DGrassMesh"
+		printf "Grass Off"
+	ENDIF
+ENDSCRIPT
+
+//This is an option and should use IsOptionOn
+SCRIPT ToggleGrass
+    ToggleOption LM_GameOption_bGrass
+	UpdateGrass
+	UpdateGrassText
+ENDSCRIPT
+
+SCRIPT OptionsOnChangeLevel
+   IF GotParam ChangeLevel
+       printf "Going to spawn Script"
+	   IF GotParam do
+           Goto <do>
+	   ELSE
+	       GetParam do
+		   Goto <do>
+	   ENDIF
+   ENDIF
+ENDSCRIPT
+
+SCRIPT OptionsOnStartGame
+   IF GotParam StartGame
+       printf "Going to spawn Script"
+	   IF GotParam do
+           Goto <do>
+	   ELSE
+	       GetParam do
+		   Goto <do>
+	   ENDIF
+   ENDIF
+ENDSCRIPT
+
+//I was thinking if we have a list of options
+//Then we can have things like UpdateOn = ChangeLevel/StartGame etc
+//Then in ChangeLevel function we can have ForEachIn and update grass etc
+LevelModOptions = [
+	 { name = "LM_Control_bRevert" Value = 1 }
+	 //0 = Revert
+	 //1 = Nollie
+	 //2 = SpinLeft
+	 //3 = SpinRight
+	 //4 = Revert+Nollie
+	 //5 = SpinLeft+SpinRight
+	 { name = "LM_Control_SpineButton" Value = 0 }
+	 { name = "LM_Control_bSpine" Value = 1 }
+	 { name = "LM_Control_bAcid" Value = 1 }
+	 { name = "LM_Control_bBank" Value = 1 }
+	 { name = "LM_Control_bExtraTricks" Value = 1 }
+	 //0 = Normal speed
+	 //1 = Th4 Speed
+	 //2 = Fast Air Speed
+	 //3 = 10% faster
+	 //4 = 20% faster
+	 { name = "LM_Control_AirTrickSpeed" Value = 0 }
+	 { name = "LM_Control_bXinput", value = 0 }
+	 { name = "LM_GUI_bShowHud" Value = 1 }
+	 { name = "LM_GUI_bNewMenu" Value = 1 }
+	 { name = "LM_GUI_bShowGrafCounter" Value = 1 }
+	 { name = "LM_BugFix_bTeleFix" Value = 1 }
+	 { name = "LM_BugFix_bSoundFix" Value = 1 }
+	 { name = "LM_GameOption_bLimitTags" Value = 0 }
+	 { name = "LM_GameOption_bGrass" Value = 1 StartGame Do = UpdateGrass }
+	 { name = "LM_GameOption_bNetSky" Value = 0 }
+	 { name = "LM_DebugOption_bDebugMode" Value = 0 }
+	 { name = "LM_GUI_bTrickNotifications" Value = 1 }
+	 { name = "LM_Control_bWalliePlant" Value = 1 }
+	 { name = "LM_Control_bButtSlap" value = 1 }
+	 { name = "LM_Control_bBoostPlant" value = 0 }
+	 { name = "LM_Control_bWallplant" value = 1 }
+	 { name = "LM_Gameplay_bPedProps" value = 1 }
+	 ]
+SCRIPT sAddOption
+    AddOption Name = <Name> Value = <Value>
+ENDSCRIPT
+
 SCRIPT AddOptions
-	AddOption name = "LM_Control_bRevert" Value = 1
-	//0 = Revert
-	//1 = Nollie
-	//2 = SpinLeft
-	//3 = SpinRight
-	//4 = Revert+Nollie
-	//5 = SpinLeft+SpinRight
-	AddOption name = "LM_Control_SpineButton" Value = 0
-	AddOption name = "LM_Control_bSpine" Value = 1
-	AddOption name = "LM_Control_bAcid" Value = 1
-	AddOption name = "LM_Control_bBank" Value = 1
-	AddOption name = "LM_Control_bExtraTricks" Value = 1
-	//0 = Normal speed
-	//1 = Th4 Speed
-	//2 = Fast Air Speed
-	//3 = 10% faster
-	//4 = 20% faster
-	AddOption name = "LM_Control_AirTrickSpeed" Value = 0
-	AddOption name = "LM_Control_bXinput", value = 0
-	AddOption name = "LM_GUI_bShowHud" Value = 1
-	AddOption name = "LM_GUI_bNewMenu" Value = 1
-	AddOption name = "LM_GUI_bShowGrafCounter" Value = 1
-	AddOption name = "LM_BugFix_bTeleFix" Value = 1
-	AddOption name = "LM_BugFix_bSoundFix" Value = 1
-	AddOption name = "LM_GameOption_bLimitTags" Value = 0
-	AddOption name = "LM_GameOption_bGrass" Value = 1
-	AddOption name = "LM_GameOption_bNetSky" Value = 0
-	AddOption name = "LM_DebugOption_bDebugMode" Value = 0
-	AddOption name = "LM_GUI_bTrickNotifications" Value = 1
-	AddOption name = "LM_Control_bWalliePlant" Value = 1
-	AddOption name = "LM_Control_bButtSlap" value = 1
-	AddOption name = "LM_Control_bBoostPlant" value = 0
-	AddOption name = "LM_Control_bWallplant" value = 1
-	AddOption name = "LM_Gameplay_bPedProps" value = 1
+ ForEachIn LevelModOptions do = sAddOption params =  <...>
 ENDSCRIPT
  
 SCRIPT LM_SetOption

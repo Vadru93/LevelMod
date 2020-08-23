@@ -98,6 +98,7 @@ SCRIPT DisplayProperLoadingScreen
 ENDSCRIPT
 
 SCRIPT PostLevelLoad
+    printf "PostLevelLoad"
 	SetArenaSize
 ENDSCRIPT
 
@@ -128,6 +129,7 @@ SCRIPT LoadLevel
 	LaunchLevel <...>
 	PostLevelLoad
 	MemPopContext
+	//ForEachIn LevelModOptions do = OptionsOnChangeLevel params = <...>
 ENDSCRIPT
 
 SCRIPT FireUpGame
@@ -676,7 +678,6 @@ SCRIPT Load_Level_Func
 	ELSE
 		SetClippingDistances { near = <cnear> far = <cfar> }
 	ENDIF
-
 	//this should be uncommented when all def structs are fixed
 	//LM_MaybeSetTh2Physics <...>
 
@@ -685,6 +686,8 @@ SCRIPT Load_Level_Func
 	ENDIF
 
 	printf "...finshed loading."
+	
+	
 ENDSCRIPT
 
 DEFAULT_WALL_SKATABLE_ANGLE = 25

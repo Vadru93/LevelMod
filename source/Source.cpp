@@ -1370,6 +1370,7 @@ void StartedGraf(StructScript* pStructScript)
 
 bool GrafStarted(CStruct* pStruct, CScript* pScript)
 {
+	//MessageBox(0, "GrafStarted", "", 0);
 	StructScript structScript;
 	structScript.pStruct = pStruct;
 	structScript.pScript = pScript;
