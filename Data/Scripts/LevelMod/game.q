@@ -148,11 +148,7 @@ ENDSCRIPT
 //This is an option and should use IsOptionOn
 SCRIPT ToggleHUD
     ToggleOption LM_GUI_bShowHud
-	IF IsOptionOn LM_GUI_bShowHud
-		TogglePanel 1
-	ELSE
-		TogglePanel 0
-	ENDIF
+	UpdateShowHud
 	UpdateHUDText
 	//UpdateLevelModSettings
 ENDSCRIPT
@@ -188,23 +184,24 @@ ENDSCRIPT
 ExtraLayersDisabled = 0
 
 SCRIPT ToggleLayers
-	IF IsTrue ExtraLayersDisabled
-		Change ExtraLayersDisabled = 0
-		UpdateLayersText
-		Create prefix = "ExtraLayer"
-	ELSE
-		Change ExtraLayersDisabled = 1
-		UpdateLayersText
-		Kill prefix = "ExtraLayer"
-	ENDIF
+	ToggleOption LM_GameOption_bExtraLayer
+	UpdateExtraLayer
+	UpdateLayersText
 ENDSCRIPT
 
 SCRIPT UpdateLayersText
-	IF IsTrue ExtraLayersDisabled
+	IF IsOptionOn LM_GameOption_bExtraLayer
 		SetMenuElementText id = Layers_Toggle "Layers: Off"
 	ELSE
 		SetMenuElementText id = Layers_Toggle "Layers: On"
 	ENDIF
+ENDSCRIPT
+
+//This is an option and should use IsOptionOn
+SCRIPT ToggleGrass
+    ToggleOption LM_GameOption_bGrass
+	UpdateGrass
+	UpdateGrassText
 ENDSCRIPT
 
 SCRIPT UpdateGrassText

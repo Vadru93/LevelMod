@@ -31,9 +31,6 @@ SCRIPT CreateLevelModMenus
 ENDSCRIPT
 
 SCRIPT UpdateGrass
-    BEGIN
-	WaitOneGameFrame
-	REPEAT 600000
     printf "Spawned Script UpdateGras..."
     IF IsOptionOn LM_GameOption_bGrass
 		Create prefix = "3DGrassMesh"
@@ -44,11 +41,23 @@ SCRIPT UpdateGrass
 	ENDIF
 ENDSCRIPT
 
-//This is an option and should use IsOptionOn
-SCRIPT ToggleGrass
-    ToggleOption LM_GameOption_bGrass
-	UpdateGrass
-	UpdateGrassText
+SCRIPT UpdateExtraLayer
+    printf "Spawned Script UpdateExtraLayer..."
+    IF IsOptionOn LM_GameOption_bExtraLayer
+		Create prefix = "ExtraLayer"
+	ELSE
+		
+		Kill prefix = "ExtraLayer"
+	ENDIF
+ENDSCRIPT
+
+SCRIPT UpdateShowHUD
+    printf "Spawned Script UpdateShowHUD..."
+    IF IsOptionOn LM_GUI_bShowHud
+		TogglePanel 1
+	ELSE
+		TogglePanel 0
+	ENDIF
 ENDSCRIPT
 
 SCRIPT OptionsOnChangeLevel
@@ -98,14 +107,15 @@ LevelModOptions = [
 	 //4 = 20% faster
 	 { name = "LM_Control_AirTrickSpeed" Value = 0 }
 	 { name = "LM_Control_bXinput", value = 0 }
-	 { name = "LM_GUI_bShowHud" Value = 1 }
+	 { name = "LM_GUI_bShowHud" Value = 1 StartGame Do = UpdateShowHUD }
 	 { name = "LM_GUI_bNewMenu" Value = 1 }
 	 { name = "LM_GUI_bShowGrafCounter" Value = 1 }
 	 { name = "LM_BugFix_bTeleFix" Value = 1 }
 	 { name = "LM_BugFix_bSoundFix" Value = 1 }
 	 { name = "LM_GameOption_bLimitTags" Value = 0 }
 	 { name = "LM_GameOption_bGrass" Value = 1 StartGame Do = UpdateGrass }
-	 { name = "LM_GameOption_bNetSky" Value = 0 }
+	 { name = "LM_GameOption_bExtraLayer" Value = 1 StartGame Do = UpdateExtraLayer }
+	 { name = "LM_GameOption_bNetSky" Value = 0 StartGame Do = UpdateNetSky }
 	 { name = "LM_DebugOption_bDebugMode" Value = 0 }
 	 { name = "LM_GUI_bTrickNotifications" Value = 1 }
 	 { name = "LM_Control_bWalliePlant" Value = 1 }
