@@ -223,17 +223,23 @@ ENDSCRIPT
 SCRIPT Leaveobsrv
 	LeaveObserveMode2
 ENDSCRIPT
-TH4CompDisabled = 0
+TH4CompDisabled = 1
 
 SCRIPT ToggleTH4Comp
 	IF IsTrue TH4CompDisabled
 		Change TH4CompDisabled = 0
 		UpdateTH4CompText
 		Create prefix = "G_Comp_"
+		Create prefix = "TRG_G_COMP_"
+		Kill prefix = "G_COMPNOT_"
+		Kill prefix = "TRG_G_COMPNOT_"
 	ELSE
 		Change TH4CompDisabled = 1
 		UpdateTH4CompText
 		Kill prefix = "G_Comp_"
+		Kill prefix = "TRG_G_COMP_"
+		Create prefix = "G_COMPNOT_"
+		Create prefix = "TRG_G_COMPNOT_"
 	ENDIF
 ENDSCRIPT
 
@@ -244,26 +250,14 @@ SCRIPT UpdateTH4CompText
 		SetMenuElementText id = TH4Comp_Toggle "Competition objects: On"
 	ENDIF
 ENDSCRIPT
-TH4ProDisabled = 0
+TH4ProDisabled = 1
 
 SCRIPT ToggleTH4Pro
 	IF IsTrue TH4ProDisabled
 		Change TH4ProDisabled = 0
 		UpdateTH4ProText
-		Create prefix = "Proset1_"
-		Create prefix = "Proset2_"
-		Create prefix = "Proset3_"
-		Create prefix = "Proset4_"
-		Create prefix = "Proset5_"
-		Create prefix = "Proset6_"
-		Create prefix = "Proset7_"
-		Create prefix = "TRG_Proset1_"
-		Create prefix = "TRG_Proset2_"
-		Create prefix = "TRG_Proset3_"
-		Create prefix = "TRG_Proset4_"
-		Create prefix = "TRG_Proset5_"
-		Create prefix = "TRG_Proset6_"
-		Create prefix = "TRG_Proset7_"
+		Create prefix = "Proset"
+		Create prefix = "TRG_Proset"
 		Kill prefix = "PROSET1NOT_"
 		Kill prefix = "PROSET2NOT_"
 		Kill prefix = "PROSET3NOT_"
@@ -281,20 +275,8 @@ SCRIPT ToggleTH4Pro
 	ELSE
 		Change TH4ProDisabled = 1
 		UpdateTH4ProText
-		Kill prefix = "Proset1_"
-		Kill prefix = "Proset2_"
-		Kill prefix = "Proset3_"
-		Kill prefix = "Proset4_"
-		Kill prefix = "Proset5_"
-		Kill prefix = "Proset6_"
-		Kill prefix = "Proset7_"
-		Kill prefix = "TRG_Proset1_"
-		Kill prefix = "TRG_Proset2_"
-		Kill prefix = "TRG_Proset3_"
-		Kill prefix = "TRG_Proset4_"
-		Kill prefix = "TRG_Proset5_"
-		Kill prefix = "TRG_Proset6_"
-		Kill prefix = "TRG_Proset7_"
+		Kill prefix = "Proset"
+		Kill prefix = "TRG_Proset"
 		Create prefix = "PROSET1NOT_"
 		Create prefix = "PROSET2NOT_"
 		Create prefix = "PROSET3NOT_"
