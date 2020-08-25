@@ -201,28 +201,22 @@ spine_button_text = "don't touch this..."
 
 SCRIPT SetSpineButton
 	IF GotParam revert
-		ChangeString #"string" = spine_button_text value = "Revert"
+		ChangeString string = spine_button_text value = "Revert"
 	ENDIF
 	IF GotParam nollie
-		ChangeString #"string" = spine_button_text value = "Nollie"
+		ChangeString string = spine_button_text value = "Nollie"
 	ENDIF
 	IF GotParam LeftSpin
-		ChangeString #"string" = spine_button_text value = "Left Spin Button"
+		ChangeString string = spine_button_text value = "Left Spin Button"
 	ENDIF
 	IF GotParam RightSpin
-		ChangeString #"string" = spine_button_text value = "Right Spin Button"
+		ChangeString string = spine_button_text value = "Right Spin Button"
 	ENDIF
 	UpdateLevelModSettings
 ENDSCRIPT
 
 SCRIPT Spine_Button_OnShow
 ENDSCRIPT
-
-
-
-
-
-
 
 
 SCRIPT options_menu_create
@@ -588,12 +582,12 @@ SCRIPT create_cheat_keyboard
 ENDSCRIPT
 
 SCRIPT start_cheat
-	LaunchEvent Type = setcontents target = cheat_keyboard_control #"string" = ""
+	LaunchEvent Type = setcontents target = cheat_keyboard_control string = ""
 ENDSCRIPT
 
 SCRIPT end_cheat
-	printf <#"string">
-	TryCheatString #"string" = <#"string">
+	printf <string>
+	TryCheatString string = <string>
 ENDSCRIPT
 
 SCRIPT palmer_demo
