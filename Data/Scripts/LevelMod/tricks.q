@@ -894,6 +894,13 @@ SCRIPT Airborne StretchTime = 1 BlendPeriod = 0.3
 	REPEAT
 	WaitAnimWhilstChecking
 	PlayAnim Anim = StretchIdle BlendPeriod = 0.1 Cycle
+	
+	//this allows to do tricks after the stretch anim
+	//do we need a toggle for this fix?
+	BEGIN
+		DoNextTrick
+		WaitOneGameFrame
+	REPEAT
 ENDSCRIPT
 
 SCRIPT Land
