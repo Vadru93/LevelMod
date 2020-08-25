@@ -1114,6 +1114,7 @@ SCRIPT EndOfRun
 		IF GameIsOver
 		ELSE
 			EnterObserveMode2
+                        ShowAllObjects
 			IF GameModeEquals is_king
 			ELSE
 				LaunchPanelMessage "Waiting for other players to finish their combos..." properties = netstatusprops
