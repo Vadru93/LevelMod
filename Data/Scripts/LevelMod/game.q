@@ -404,6 +404,7 @@ SCRIPT RefreshGameMenu
 			AddLine parent = game_menu id = backend_cheat_menu text = "Cheats" link = cheat_menu
 		ENDIF
 		AddLine parent = game_menu id = goto_restart_menu text = "Skip to Restart" link = restart_menu
+		AddLine parent = game_menu Type = textmenuelement id = levelmod_settings_item text = "LevelMod Settings" eventhandler = { Type = ChooseEventHandler link = menu_levelmod_settings }
 		AddLine parent = game_menu id = backend_end_run text = "End Run" target = "do_backend_end_run" kill_menu
 		IF IsCompetition
 			AddLine parent = game_menu id = end_comp text = "End Competition" target = "do_end_comp" kill_menu
