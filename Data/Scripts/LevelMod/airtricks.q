@@ -127,14 +127,21 @@ TrickDef_Kickflip = {
 	Anim = Kickflip 
 	Nollie = NollieKickflip 
 	ExtraTricks = KickflipExtras 
+	NewExtraTricks = NewKickflipExtras 
 }
 
 KickflipExtras = [ 
-	{ EXTRA_FLIP Params = { TrickDef_DoubleKickflip IsExtra } } 
+	{ EXTRA_FLIP Params = { TrickDef_DoubleKickflip EXTRA_TRICK } }
+	{ Trigger = { AirTrickLogic Circle Right 300 } Scr = FlipGrabBlend Params = { Name = 'Kickflip to Indy' Score = 400 Anim1 = KickFlipBlendFS Anim2 = Indy IsExtra } }
+	{ Trigger = { AirTrickLogic Circle Up 300 } Scr = FlipGrabBlend Params = { Name = 'Kickflip to Crail' Score = 400 Anim1 = KickFlipBlendFS Anim2 = Crail IsExtra GrabStart = 5 Speed = 1 } } 
+]
+
+NewKickflipExtras = [ 
+	{ EXTRA_FLIP Params = { TrickDef_DoubleKickflip EXTRA_TRICK } } 
 	{ SCR_GRAB Trigger = { AirTrickLogic Circle Right 300 } Params = { TrickDef_KickflipToIndy EXTRA_TRICK } } 
 	{ SCR_GRAB Trigger = { AirTrickLogic Circle Up 300 } Params = { TrickDef_KickflipToCrail EXTRA_TRICK } } 
 	{ SCR_GRAB Trigger = { AirTrickLogic Circle Left 300 } Params = { TrickDef_KickflipToMelon EXTRA_TRICK } } 
-	{ SCR_FLIP Trigger = { Press Up 300 } Params = { TrickDef_KickflipUnderFlip IsExtra } }
+	{ SCR_FLIP Trigger = { Press Up 300 } Params = { TrickDef_KickflipUnderFlip EXTRA_TRICK } }
 ]
 
 DoubleKickflip = [ { EXTRA_FLIP Params = { TrickDef_DoubleKickflip EXTRA_TRICK } } ]
@@ -143,7 +150,6 @@ TrickDef_DoubleKickflip = {
 	Name = 'Double Kickflip' 
 	Score = 500 
 	Anim = DoubleKickflip 
-	TrickSlack = 15 
 	ExtraTricks = TripleKickflip
 } 
 
