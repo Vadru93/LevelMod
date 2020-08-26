@@ -323,6 +323,14 @@ SCRIPT WallRide
 		move x = -36
 	ENDIF
 	
+	//since boostplant is too easy without wall bail, we enable it too
+	IF IsOptionOn LM_Control_bBoostPlant
+		IF BailIsOn
+			SetState Air
+			Goto DoingTrickBail
+		ENDIF
+	ENDIF
+	
 	//added extra tricks for wallieplant
 	IF IsOptionOn LM_Control_bWalliePlant
 		SetQueueTricks WallrideTricks
@@ -895,12 +903,14 @@ SCRIPT Airborne StretchTime = 1 BlendPeriod = 0.3
 	WaitAnimWhilstChecking
 	PlayAnim Anim = StretchIdle BlendPeriod = 0.1 Cycle
 	
-	//this allows to do tricks after the stretch anim
-	//do we need a toggle for this fix?
-	BEGIN
-		DoNextTrick
-		WaitOneGameFrame
-	REPEAT
+	//this allows to do tricks after the stretch anim like in later games
+	//apparently it also enables boostplant, so we use a toggle here
+	IF IsOptionOn LM_Control_bBoostPlant
+		BEGIN
+			DoNextTrick
+			WaitOneGameFrame
+		REPEAT
+	ENDIF
 ENDSCRIPT
 
 SCRIPT Land
