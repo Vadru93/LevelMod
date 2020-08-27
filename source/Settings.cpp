@@ -209,6 +209,12 @@ void UpdateOption(DWORD checksum, int value)
 
 	switch (checksum)
 	{
+	case Checksums::LM_GameOption_b251Patch:
+		if (value)
+			*(BYTE*)0x004355AD = 0xEB;
+		else
+			*(BYTE*)0x004355AD = 0x7E;
+		break;
 	case Checksums::LM_Control_AirTrickSpeed:
 		SetAirTrickSpeed(value);
 		break;

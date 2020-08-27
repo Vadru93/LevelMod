@@ -1577,6 +1577,9 @@ void FixTagLimitProtections()
 	VirtualProtect((void*)0x004BFCEF, 12, PAGE_EXECUTE_READWRITE, &old);
 	VirtualProtect((void*)0x0058C300, 12, PAGE_EXECUTE_READWRITE, &old);
 
+	//251patch
+	VirtualProtect((void*)0x004355AD, 1, PAGE_EXECUTE_READWRITE, &old);
+
 
 	*(DWORD*)0x004BFCD3 = 0x0F39A2E9;
 	*(WORD*)0x004BFCD7 = 0x9000;

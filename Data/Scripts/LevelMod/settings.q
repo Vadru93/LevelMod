@@ -123,6 +123,7 @@ LevelModOptions = [
 	 { name = "LM_Control_bBoostPlant" value = 0 }
 	 { name = "LM_Control_bWallplant" value = 1 }
 	 { name = "LM_Gameplay_bPedProps" value = 1 }
+	 { name = "LM_GameOption_b251Patch" value = 0 }
 	 ]
 SCRIPT sAddOption
     AddOption Name = <Name> Value = <Value>
@@ -369,6 +370,9 @@ levelmod_menu_GameOptions_items = [
 	
 	//removes 32 tags limit
 	{ LM_Menu_Shared_Bool id = LM_GameOption_bLimitTags_id params = { name = LM_GameOption_bLimitTags id = LM_GameOption_bLimitTags_id off = "Unlimited Tags: on" on = "Unlimited Tags: off" } }
+	
+	//251 patch
+	{ LM_Menu_Shared_Bool id = LM_GameOption_b251Patch_id params = { name = LM_GameOption_b251Patch id = LM_GameOption_b251Patch_id on = "251 Patch: on" off = "251 Patch: off" } }
 	
 	//enables pseudo 3d layered grass in t2x and th4 levels
 	{ LM_Menu_Shared_Bool id = LM_GameOption_bGrass_id params = { name = LM_GameOption_bGrass id = LM_GameOption_bGrass_id on = "3D Grass: on" off = "3D Grass: off" } }
