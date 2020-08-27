@@ -314,20 +314,13 @@ EXTERN void Skater::SetCanBreakVert(bool value)
 EXTERN void Skater::SetVertAir(bool value)
 {
 	inVert = value;
-	tracking = false;
-	//canbreakvert = false;
-	autoturn = false;
-	static const DWORD timer = 0x00409AE0;
-	_asm call timer
-	static DWORD temp = 0;
-	static DWORD temp2 = 0;
-	_asm mov temp, eax
-	_asm mov temp2, edx
+	landedfromvert = false;
+	truelandedfromvert = false;
+}
 
-	* (DWORD*)(&inVert + 8) = temp;
-	*(DWORD*)(&inVert + 0xC) = temp2;
-
-
+EXTERN void Skater::SetTracking(bool value)
+{
+	tracking = value;
 }
 
 

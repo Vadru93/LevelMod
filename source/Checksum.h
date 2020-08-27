@@ -286,6 +286,7 @@ namespace Checksums
 		Speed = COMPILE_CRC32("speed"),
 		option = COMPILE_CRC32("option"),
 		Collision = COMPILE_CRC32("collision"),
+			Rotate = COMPILE_CRC32("rotate"),
 
 		//Trick_KFBackflip = 0xF7B4E0CB
 

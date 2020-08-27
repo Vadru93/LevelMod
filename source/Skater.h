@@ -353,6 +353,8 @@ public:
 	//Tell Physcs we are inside vert air
 	EXTERN void SetVertAir(bool value);
 
+	EXTERN void Skater::SetTracking(bool value);
+
 	EXTERN void SetCanBreakVert(bool value);
 
 	typedef void(__thiscall* const pTriggerScript)(Skater* pThis, DWORD triggerType, void*);

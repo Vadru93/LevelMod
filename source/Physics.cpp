@@ -1477,12 +1477,17 @@ bool TestForAcid(CStruct* pParams, CScript* pScript)
 				return false;
 			}
 
-			skater->ResetLerpingMatrix();
+			/*if (skater->IsTracking())
+			{
+				skater->SetTracking(false);
+				//skater->SetCanBreakVert(false);
+			}*/
+			//skater->ResetLerpingMatrix();
 
 			Slerp::last = *(Vertex*)skater->GetVelocity();
-			skater->SetVertAir(false);
-			skater->SetCanBreakVert(false);
-			skater->SetLanded(false);
+			/*skater->SetVertAir(false);*/
+			/*skater->SetCanBreakVert(false);
+			skater->SetLanded(false);*/
 			Slerp::vert = false;
 			Slerp::done = true;
 
@@ -1525,12 +1530,60 @@ bool TestForAcid(CStruct* pParams, CScript* pScript)
 			CScript pScript;
 
 
-			CStructHeader param(QBKeyHeader::INT, 500);
-			pStruct.AddParam(&param);
-			skater->CallMemberFunction(Checksum("SetSpeed"), &pStruct, &pScript);
-			pStruct.head = NULL;
-			pStruct.tail = NULL;
-			skater->CallMemberFunction(Checksums::OrientToNormal, &pStruct, &pScript);
+			
+			
+			
+
+			if (skater->IsTracking())
+			{
+				pStruct.head = NULL;
+				pStruct.tail = NULL;
+				skater->CallMemberFunction(Checksum("resetlandedfromvert"), &pStruct, &pScript);
+				
+				/*skater->SetVertAir(false);
+				skater->SetCanBreakVert(false);*/
+				//skater->ResetLerpingMatrix();
+
+				CStructHeader param(QBKeyHeader::INT, 500);
+				pStruct.AddParam(&param);
+				skater->CallMemberFunction(Checksum("SetSpeed"), &pStruct, &pScript);
+
+
+				param.Type = QBKeyHeader::LOCAL;
+				param.Data = Checksum("Ground");
+				skater->CallMemberFunction(Checksum("SetState"), &pStruct, &pScript);
+				param.QBkey = Checksum("y");
+				param.value.i = -20;
+				skater->CallMemberFunction(Checksum("Move"), &pStruct, &pScript);
+
+				skater->SetTracking(false);
+				param.Type = QBKeyHeader::LOCAL;
+				param.Data = Checksum("Air");
+				skater->CallMemberFunction(Checksum("SetState"), &pStruct, &pScript);
+				pStruct.head = NULL;
+				pStruct.tail = NULL;
+				/*param.Type = QBKeyHeader::FLOAT;
+				param.QBkey = Checksum("z");
+				param.value.f = 90.0f;
+				float value = 0.5f;
+				CStructHeader param2(QBKeyHeader::FLOAT, Checksum("duration"), *(DWORD*)&value);
+				CStructHeader param3(QBKeyHeader::LOCAL, Checksum("seconds"));
+				param.NextHeader = &param2;
+				param2.NextHeader = &param3;
+				pStruct.tail = &param3;*/
+				
+				skater->CallMemberFunction(Checksums::OrientToNormal, &pStruct, &pScript);
+
+			}
+			else
+			{
+				CStructHeader param(QBKeyHeader::INT, 500);
+				pStruct.AddParam(&param);
+				skater->CallMemberFunction(Checksum("SetSpeed"), &pStruct, &pScript);
+				pStruct.head = NULL;
+				pStruct.tail = NULL;
+				skater->CallMemberFunction(Checksums::OrientToNormal, &pStruct, &pScript);
+			}
 
 
 			/*

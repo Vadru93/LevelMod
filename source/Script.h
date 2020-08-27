@@ -289,6 +289,11 @@ struct CStructHeader
 		NextHeader = next;
 	}
 
+	CStructHeader(QBKeyHeader::QBKeyType Type, DWORD checksum, DWORD data)
+	{
+		this->Data = data;
+	}
+
 	
 	CStructHeader(QBKeyHeader::QBKeyType Type, DWORD checksum, void* data)
 	{
