@@ -288,71 +288,6 @@ SCRIPT Load_Foo
 	UnloadPreFile "Foo.pre" dont_assert
 ENDSCRIPT
 
-
-//"=========================================THPS1==========================================="
-
-SCRIPT Load_Jam
-	AddMusicTrack "ambience\thps2\jam"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func { lev_bsp = "Levels_Th1\jam\jam.bsp" lev_sky = "Levels_Th1\jam\jam_sky.bsp" lev_qb = "Levels_Th1\jam\jam.qb" loadscr = "images\load\th1_jam.png" }
-	PrepareLevelFog r = 165 g = 180 b = 202 a = 0 cnear = 12 cfar = 15000
-ENDSCRIPT
-
-SCRIPT Load_Sc1
-	AddMusicTrack "ambience\thps2\sc1"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func { lev_bsp = "Levels_Th1\sc1\sc1.bsp" lev_sky = "Levels_Th1\sc1\sc1_sky.bsp" lev_qb = "Levels_Th1\sc1\sc1.qb" loadscr = "images\load\th1_sc1.png" }
-	PrepareLevelFog r = 145 g = 201 b = 242 a = 0 cnear = 12 cfar = 13000
-ENDSCRIPT
-
-SCRIPT Load_SF1
-	AddMusicTrack "ambience\thps2\sf1"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func lev_bsp = "Levels_Th1\sf1\sf1.bsp" lev_sky = "Levels_Th1\sf1\sf1_sky.bsp" lev_qb = "Levels_Th1\sf1\sf1.qb" loadscr = "images\load\th1_sf1.png"
-	PrepareLevelFog r = 165 g = 180 b = 16 a = 202 cnear = 12 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_Mal
-	AddMusicTrack "ambience\thps2\mall"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func lev_bsp = "Levels_Th1\mall\mall.bsp" lev_sky = "Levels_Th1\mall\mall_sky.bsp" lev_qb = "Levels_Th1\mall\mall.qb" loadscr = "images\load\th1_mall.png"
-	PrepareLevelFog r = 0 g = 0 b = 0 a = 0 cnear = 12 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_Down
-	AddMusicTrack "ambience\thps2\down"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func lev_bsp = "Levels_Th1\down\down.bsp" lev_sky = "Levels_Th1\down\down_sky.bsp" lev_qb = "Levels_Th1\down\down.qb" loadscr = "images\load\th1_down.png"
-	PrepareLevelFog r = 7 g = 8 b = 16 a = 0 cnear = 12 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_Vans
-	AddMusicTrack "ambience\thps2\vans"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func lev_bsp = "Levels_Th1\vans\vans.bsp" lev_sky = "Levels_Th1\vans\vans_sky.bsp" lev_qb = "Levels_Th1\vans\vans.qb" loadscr = "images\load\th1_vans.png"
-	PrepareLevelFog r = 165 g = 180 b = 202 a = 0 cnear = 12 cfar = 10000
-ENDSCRIPT
-
-
-SCRIPT Load_Burn
-	AddMusicTrack "ambience\thps1\burn"
-	SetUpBurnLights
-	Load_Level_Func lev_bsp = "Levels\burn\burn.bsp" lev_sky = "Levels\burn_Sky\burn_Sky.bsp" lev_qb = "Levels\burn\burn.qb" loadscr = "images\loadscrn_burnside.png"
-	CareerStartLevel level = LevelNum_Burnside
-	PrepareLevelFog r = 159 g = 183 b = 214 a = 0 cnear = 13 cfar = 9000
-	LoadTerrain
-	Burn_Startup
-ENDSCRIPT
-
-SCRIPT Load_Ros
-	AddMusicTrack "ambience\thps1\ros"
-	SetUpRoswellLights
-	Load_Level_Func lev_bsp = "Levels\ros\ros.bsp" lev_sky = "Levels\ros_Sky\ros_Sky.bsp" lev_qb = "Levels\ros\ros.qb" loadscr = "images\loadscrn_roswell.png"
-	CareerStartLevel level = LevelNum_Roswell
-	PrepareLevelFog r = 41 g = 34 b = 52 a = 0 cnear = 13 cfar = 9000
-	LoadTerrain
-ENDSCRIPT
-
 //============================================THPS4===================================================
 
 SCRIPT Load_Trn
@@ -619,7 +554,7 @@ SCRIPT Load_Level_Func
 	ENDIF
 	
 	//this should be uncommented when all def structs are fixed
-	//LM_MaybeSetTh2Physics <...>
+	LM_MaybeSetTh2Physics <...>
 
 	IF GotParam startup_func
 		<startup_func>
@@ -648,12 +583,14 @@ SCRIPT LM_MaybeSetTh2Physics
 		Change LM_TH2_PHYSICS = 1
 	endif
 	
+	//this is here for th1 levels in th3 (warehouse, burnside, roswell)
+	if GotParam ignore_th2_physics
+		Change LM_TH2_PHYSICS = 0
+	endif
+	
 	if IsTrue LM_TH2_PHYSICS
-		//this is here for th1 levels in th3 (warehouse, burnside, roswell)
-		if #"not" GotParam ignore_th2_wall
-			printf "need to fix angle!"
-			Change Wall_Non_Skatable_Angle = 0
-		endif
+		printf "need to fix vert angle!"
+		Change Wall_Non_Skatable_Angle = 0
 	endif
 ENDSCRIPT
 
@@ -679,35 +616,247 @@ OnlineModes = {
 //================THPS1===================
 
 //THPS1 WAREHOUSE
+
 Def_Ware = { 
-	level_id = warehouse_id 
-	levelnum = LevelNum_Warehouse
-	
 	level_name = "Warehouse" 
 	location = "Woodland Hills"
-	
-	load_script = Load_Ware 
+	level_id = warehouse_id 
+	levelnum = LevelNum_Warehouse	
+	unlock_flag = LEVEL_UNLOCKED_WAREHOUSE 
 
-	ignore_th2_wall regular_level NoCareer th1_level OnlineModes
-	
+	th1_level regular_level NoCareer OnlineModes ignore_th2_physics
+
 	lev_bsp = "levels\ware\ware.bsp"
 	lev_qb = "levels\ware\ware.qb"
 	lev_amb = "ambience\thps1\ware"
 	loadscr = "images\loadscrn_warehouse.png"
-	
-	unlock_flag = LEVEL_UNLOCKED_WAREHOUSE 
+	lev_lights = SetUpWareLights
 
 	r = 0 g = 0 b = 0 a = 0 
 	cnear = 13 cfar = 20000
+	
+	startup_func = Ware_Startup
+	load_script = Load_Ware 
 }
 
 SCRIPT Load_Ware
-	SetUpWareLights
 	Load_Level_Func { Def_Ware }
-	Ware_Startup
 ENDSCRIPT
 
+//THPS1 SCHOOL
 
+Def_Sc1 = { 
+	level_name = "School" 
+	location = "Miami"
+	level_id = sc1_id 
+	levelnum = LevelNum_New
+
+	th1_level regular_level NoCareer OnlineModes
+
+	lev_bsp = "levels_th1\sc1\sc1.bsp" 
+	lev_sky = "levels_th1\sc1\sc1_sky.bsp" 
+	lev_qb = "levels_th1\sc1\sc1.qb" 
+	lev_amb = "ambience\thps1\sc1"
+	loadscr = "images\load\th1_sc1.png"
+
+	r = 145 g = 201 b = 242 a = 0 
+	cnear = 12 cfar = 13000
+
+	load_script = Load_Sc1
+} 
+
+SCRIPT Load_Sc1
+	Load_Level_Func { Def_Sc1 }
+ENDSCRIPT
+
+//THPS1 MALL
+
+Def_Mall = { 
+	level_name = "The Mall" 
+	location = "New York"
+	level_id = mall_id 
+	levelnum = LevelNum_New
+
+	th1_level regular_level NoCareer OnlineModes
+
+	lev_bsp = "levels_th1\mall\mall.bsp" 
+	lev_sky = "levels_th1\mall\mall_sky.bsp" 
+	lev_qb = "levels_th1\mall\mall.qb" 
+	lev_amb = "ambience\thps1\mall"
+	loadscr = "images\load\th1_mall.png"
+
+	r = 0 g = 0 b = 0 a = 0 
+	cnear = 12 cfar = 20000
+
+	load_script = Load_Mall
+} 
+
+SCRIPT Load_Mall
+	Load_Level_Func { Def_Mall }
+ENDSCRIPT
+
+//THPS1 VANS
+
+Def_Vans = { 
+	level_name = "Skate Park" 
+	location = "Chicago"
+	level_id = vans_id 
+	levelnum = LevelNum_New
+
+	th1_level regular_level NoCareer OnlineModes
+
+	lev_bsp = "levels_th1\vans\vans.bsp" 
+	lev_sky = "levels_th1\vans\vans_sky.bsp" 
+	lev_qb = "levels_th1\vans\vans.qb" 
+	lev_amb = "ambience\thps1\vans"
+	loadscr = "images\load\th1_vans.png"
+
+	r = 165 g = 180 b = 202 a = 0 
+	cnear = 12 cfar = 10000
+
+	load_script = Load_Vans
+} 
+
+SCRIPT Load_Vans
+	Load_Level_Func { Def_Vans }
+ENDSCRIPT
+
+//THPS1 DOWNTOWN
+
+Def_Down = { 
+	level_name = "Downtown" 
+	location = "Minneapolis"
+	level_id = down_id 
+	levelnum = LevelNum_New
+
+	th1_level regular_level NoCareer OnlineModes
+
+	lev_bsp = "levels_th1\down\down.bsp" 
+	lev_sky = "levels_th1\down\down_sky.bsp" 
+	lev_qb = "levels_th1\down\down.qb" 
+	lev_amb = "ambience\thps1\down"
+	loadscr = "images\load\th1_down.png"
+	lev_lights = SetUpTokyoLights
+
+	r = 0 g = 8 b = 19 a = 0 
+	cnear = 12 cfar = 10000
+
+	load_script = Load_Down
+} 
+
+SCRIPT Load_Down
+	Load_Level_Func { Def_Down }
+ENDSCRIPT
+
+//THPS1 DOWNHILL JAM
+
+Def_Jam = { 
+	level_name = "Downhill Jam" 
+	location = "Phoenix"
+	level_id = jam_id 
+	levelnum = LevelNum_New
+
+	th1_level regular_level NoCareer OnlineModes
+
+	lev_bsp = "levels_th1\jam\jam.bsp" 
+	lev_sky = "levels_th1\jam\jam_sky.bsp" 
+	lev_qb = "levels_th1\jam\jam.qb" 
+	lev_amb = "ambience\thps1\jam"
+	loadscr = "images\load\th1_jam.png"
+	lev_lights = SetUpSuburbiaLights
+
+	r = 165 g = 180 b = 202 a = 0 
+	cnear = 12 cfar = 15000
+
+	load_script = Load_Jam
+} 
+
+SCRIPT Load_Jam
+	Load_Level_Func { Def_Jam }
+ENDSCRIPT
+
+//THPS1 BURNSIDE
+
+Def_Burn = { 
+	level_name = "Burnside" 
+	location = "Portland"
+	level_id = jam_id 
+	levelnum = LevelNum_Burnside
+	unlock_flag = LEVEL_UNLOCKED_BURNSIDE
+
+	th1_level regular_level NoCareer OnlineModes ignore_th2_physics
+
+	lev_bsp = "levels\burn\burn.bsp" 
+	lev_sky = "levels\burn\burn_sky.bsp" 
+	lev_qb = "levels\burn\burn.qb" 
+	lev_amb = "ambience\thps1\burn"
+	loadscr = "images\loadscrn_burnside.png"
+	lev_lights = SetUpBurnLights
+
+	r = 159 g = 183 b = 214 a = 0 
+	cnear = 13 cfar = 9000
+
+	startup_func = Burn_Startup
+	load_script = Load_Burn
+} 
+
+SCRIPT Load_Burn
+	Load_Level_Func { Def_Burn }
+ENDSCRIPT
+
+//THPS1 STREETS
+
+Def_SF1 = { 
+	level_name = "Streets" 
+	location = "San Francisco"
+	level_id = sf1_id 
+	levelnum = LevelNum_New
+
+	th1_level regular_level NoCareer OnlineModes ignore_th2_physics
+
+	lev_bsp = "levels_th1\sf1\sf1.bsp" 
+	lev_sky = "levels_th1\sf1\sf1_sky.bsp" 
+	lev_qb = "levels_th1\sf1\sf1.qb" 
+	lev_amb = "ambience\thps1\sf1"
+	loadscr = "images\load\th1_sf1.png"
+
+	r = 165 g = 180 b = 16 a = 202 
+	cnear = 12 cfar = 20000
+
+	load_script = Load_SF1
+}
+
+SCRIPT Load_SF1
+	Load_Level_Func { Def_SF1 }
+ENDSCRIPT
+
+//THPS1 ROSWELL
+
+Def_Ros = {
+	level_name = "Roswell" 
+	location = "New Mexico"
+	level_id = ros_id 
+	levelnum = LevelNum_Roswell
+	unlock_flag = LEVEL_UNLOCKED_ROSWELL
+
+	th1_level regular_level NoCareer OnlineModes ignore_th2_physics
+
+	lev_bsp = "levels\ros\ros.bsp" 
+	lev_sky = "levels\ros\ros_sky.bsp" 
+	lev_qb = "levels\ros\ros.qb" 
+	lev_amb = "ambience\thps1\ros"
+	loadscr = "images\loadscrn_roswell.png"
+	lev_lights = SetUpRoswellLights
+
+	r = 41 g = 34 b = 52 a = 0 
+	cnear = 13 cfar = 9000
+
+	load_script = Load_Ros
+}
+
+SCRIPT Load_Ros
+	Load_Level_Func { Def_Ros }
+ENDSCRIPT
 
 //================THPS2===================
 
@@ -715,7 +864,7 @@ ENDSCRIPT
 
 Def_Han = { 
 	level_name = "Hangar" 
-	localtion = "Mullet Falls MT"
+	location = "Mullet Falls MT"
 	level_id = han_id 
 	levelnum = LevelNum_New
 	NoCareer th2_level regular_level OnlineModes
@@ -741,7 +890,7 @@ ENDSCRIPT
 
 Def_Sc2 = { 
 	level_name = "School II" 
-	localtion = "California"
+	location = "California"
 	level_id = sc2_id 
 	levelnum = LevelNum_New
 	NoCareer th2_level regular_level OnlineModes
@@ -767,7 +916,7 @@ ENDSCRIPT
 
 Def_Mar = { 
 	level_name = "Marseille" 
-	localtion = "France"
+	location = "France"
 	level_id = mar_id 
 	levelnum = LevelNum_New
 	NoCareer th2_level regular_level OnlineModes
@@ -1192,7 +1341,7 @@ SCRIPT Load_Sky
 ENDSCRIPT
 
 
-master_level_list = [ 
+master_level_list = [
 	//THPS3
 	{ Def_Foun }
 	{ Def_Can }
@@ -1209,24 +1358,16 @@ master_level_list = [
 	{ level_name = "Tutorials" load_script = Load_Tut level_id = tutorials_id NoCareer once_on_startup = CPF_Tut_LoadingScript }
 	{ level_name = "Foo" load_script = Load_Foo level_id = foo_id debug_level }
 	{ level_name = "Skate Shop" load_script = Load_SkateShop level_id = skateshop_id debug_level }
-	
+
 	//THPS1
-	{ Def_Ware }
-	{ level_name = "School" load_script = Load_Sc1 level_id = school1_id NoCareer th1_level regular_level supports_ctf supports_own supports_bball }
-	{ level_name = "Mall" load_script = Load_Mal level_id = Mall_id NoCareer th1_level regular_level supports_ctf supports_own supports_bball }
-	{ level_name = "Skate Park Chicago" load_script = Load_Vans level_id = vans_id NoCareer th1_level regular_level supports_ctf supports_own supports_bball }
-	{ level_name = "Downtown" load_script = Load_Down level_id = down_id NoCareer th1_level regular_level supports_ctf supports_own supports_bball }
-	{ level_name = "Downhill Jam" load_script = Load_Jam level_id = jam_id NoCareer th1_level regular_level supports_ctf supports_own supports_bball }
-	{ level_name = "Burnside" load_script = Load_Burn level_id = burnside_id ignore_th2_wall regular_level NoCareer th1_level unlock_flag = LEVEL_UNLOCKED_BURNSIDE supports_ctf supports_own supports_bball }
-	{ level_name = "Streets" load_script = Load_SF1 level_id = streets_id NoCareer th1_level regular_level supports_ctf supports_own supports_bball }
-	{ level_name = "Roswell" load_script = Load_Ros level_id = roswell_id NoCareer ignore_th2_wall unlock_flag = LEVEL_UNLOCKED_ROSWELL regular_level th1_level supports_ctf supports_own supports_bball }
-	
+	{ Def_Ware } { Def_Sc1 } { Def_Mall } { Def_Vans } { Def_Down } { Def_Jam } { Def_Burn } { Def_SF1 } { Def_Ros }
+
 	//THPS2
 	{ Def_Han } { Def_Sc2 } { Def_Mar } { Def_NY1 } { Def_Ven } { Def_Ssv } { Def_Ph } { Def_Bul } { Def_Drop } { Def_Hvn }
-	
+
 	//THPS2X
 	{ Def_Club } { Def_Cons } { Def_Tampa } { Def_Sway } { Def_Sky }
-	
+
 	//THPS4	
 	{ level_name = "Training" load_script = Load_Trn level_id = training_id NoCareer regular_level th4_level supports_ctf supports_own supports_bball }
 	{ level_name = "College" load_script = Load_Sch level_id = college_id NoCareer regular_level th4_level supports_ctf supports_own supports_bball }
@@ -1239,7 +1380,7 @@ master_level_list = [
 	{ level_name = "Carnival" load_script = Load_Cnv level_id = carnival_id NoCareer regular_level th4_level supports_ctf supports_own supports_bball }
 	{ level_name = "Chicago" load_script = Load_Hof level_id = chicago_id NoCareer regular_level th4_level supports_ctf supports_own supports_bball }
 	{ level_name = "MotoX" load_script = Load_Mot level_id = motox_id NoCareer regular_level th4_level supports_ctf supports_own supports_bball }
-	
+
 	//THUG
 	{ level_name = "New Jersey" load_script = Load_NJ level_id = jersey_id NoCareer regular_level ug1_level supports_ctf supports_own supports_bball }
 	{ level_name = "Manhattan" load_script = Load_NY level_id = manhattan_id NoCareer regular_level ug1_level supports_ctf supports_own supports_bball }
@@ -1250,7 +1391,7 @@ master_level_list = [
 	{ level_name = "Slam City Jam" load_script = Load_SJ level_id = slam_id NoCareer regular_level ug1_level supports_ctf supports_own supports_bball }
 	{ level_name = "Moscow" load_script = Load_RU level_id = moscow_id NoCareer regular_level ug1_level supports_ctf supports_own supports_bball }
 	{ level_name = "Hotter Than Hell" load_script = Load_SE level_id = hotter_id NoCareer regular_level ug1_level supports_ctf supports_own supports_bball }
-	
+
 	//THUG2
 	{ level_name = "Boston" load_script = Load_BO_ug2 level_id = BO_id NoCareer regular_level ug2_level supports_ctf supports_own supports_bball }
 	{ level_name = "Barcelona" load_script = Load_BA_ug2 level_id = BA_id NoCareer regular_level ug2_level supports_ctf supports_own supports_bball }
