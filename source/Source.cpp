@@ -120,7 +120,17 @@ typedef HRESULT(__stdcall* Present_t)(LPDIRECT3DDEVICE8 pDevice, CONST RECT* pSo
 Present_t pPresent;*/
 
 
-
+__inline void HookFunction(DWORD addr, void* function, BYTE byteCode = 0, DWORD nopCount = 0)
+{
+	DWORD old;
+	VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+	if (byteCode)
+		*(DWORD*)(addr - 1) = byteCode;
+	*(DWORD*)addr = (PtrToUlong(function) - addr) - 4;
+	for (DWORD i = 0; i < nopCount; i++)
+		*(BYTE*)addr++ = 0x90;
+	VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, NULL);
+}
 
 struct Hook
 {
@@ -484,6 +494,7 @@ bool ToggleNewMenu(CStruct* pStruct, CScript* pScript)
 			memcpy((void*)0x004404CE, &LevelModSettings::NewMenu, sizeof(LevelModSettings::NewMenu));
 		else
 			memcpy((void*)0x004404CE, &LevelModSettings::OldMenu, sizeof(LevelModSettings::OldMenu));
+		VirtualProtect((LPVOID)0x004404CE, sizeof(LevelModSettings::NewMenu), old, NULL);
 		/*FILE*f = fopen("settings","w+b");
 		if(f)
 		{
@@ -576,10 +587,9 @@ bool ToggleTeleFix(CStruct* pStruct, CScript* pScript)
 	const static DWORD Addr = 0x004AE562;
 	const static DWORD Addr2 = 0x004AE581;
 
-	DWORD old;
-	if (VirtualProtect((LPVOID)Addr, 4, PAGE_EXECUTE_READWRITE, &old))
+	if (VirtualProtect((LPVOID)Addr, 4, PAGE_EXECUTE_READWRITE, NULL))
 	{
-		if (VirtualProtect((LPVOID)Addr2, 1, PAGE_EXECUTE_READWRITE, &old))
+		if (VirtualProtect((LPVOID)Addr2, 1, PAGE_EXECUTE_READWRITE, NULL))
 		{
 			LevelModSettings::TeleFix = !LevelModSettings::TeleFix;
 			if (LevelModSettings::TeleFix)
@@ -633,6 +643,7 @@ bool ToggleSoundFix(CStruct* pStruct, CScript* pScript)
 			*(BYTE*)Addr = 0xEB;
 		else
 			*(BYTE*)Addr = 0x75;
+		VirtualProtect((void*)Addr, 1, old, NULL);
 		/*FILE*f = fopen("settings","w+b");
 		if(f)
 		{
@@ -850,17 +861,16 @@ add_log(string, args);
 
 void FixMemoryProtection()
 {
-	DWORD old;
-	VirtualProtect((VOID*)0x0042C18D, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((VOID*)0x0042C1C7, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((VOID*)0x0042C1D5, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((VOID*)0x0042C1E1, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((VOID*)0x0042C1EC, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((VOID*)0x00426088, 1, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((VOID*)0x004260E7, 1, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((VOID*)0x004288F7, 1, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((VOID*)0x00428B97, 1, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((VOID*)0x004288F7, 1, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((VOID*)0x0042C18D, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((VOID*)0x0042C1C7, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((VOID*)0x0042C1D5, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((VOID*)0x0042C1E1, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((VOID*)0x0042C1EC, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((VOID*)0x00426088, 1, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((VOID*)0x004260E7, 1, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((VOID*)0x004288F7, 1, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((VOID*)0x00428B97, 1, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((VOID*)0x004288F7, 1, PAGE_EXECUTE_READWRITE, NULL);
 }
 
 /*void LowMemoryMode()
@@ -980,6 +990,7 @@ bool HookDebugMessages(CStruct* pStruct, CScript* pScript)
 		*(DWORD*)&callHooked[1] = ((DWORD)add_log - 0x00401960 - 5);
 
 		memcpy((void*)0x00401960, callHooked, 6);
+		VirtualProtect((void*)0x00401960, 6, old, NULL);
 
 
 		static const DWORD addr = (DWORD)GetProcAddress(GetModuleHandle("msvcrt.dll"), "printf");
@@ -990,6 +1001,7 @@ bool HookDebugMessages(CStruct* pStruct, CScript* pScript)
 			DWORD hookedAddrs = ((DWORD)add_log - addr - 5);
 			*(DWORD*)&callHooked[1] = hookedAddrs;
 			memcpy((void*)addr, callHooked, 6);
+			VirtualProtect((void*)addr, 6, old, NULL);
 		}
 		//logFile = fopen("loggers.txt", "w+t");
 	}
@@ -1476,6 +1488,7 @@ bool ToggleHookDebugMessages(CStruct* pStruct, CScript* pScript)
 		*(DWORD*)&callHooked[1] = ((DWORD)add_log - 0x00401960 - 5);
 
 		memcpy((void*)0x00401960, callHooked, 6);
+		VirtualProtect((void*)0x00401960, 6, old, NULL);
 
 		if (addr)
 		{
@@ -1484,6 +1497,7 @@ bool ToggleHookDebugMessages(CStruct* pStruct, CScript* pScript)
 			DWORD hookedAddrs = ((DWORD)add_log - addr - 5);
 			*(DWORD*)&callHooked[1] = hookedAddrs;
 			memcpy((void*)addr, callHooked, 6);
+			VirtualProtect((void*)addr, 6, old, NULL);
 		}
 	}
 	else
@@ -1501,64 +1515,63 @@ bool ToggleHookDebugMessages(CStruct* pStruct, CScript* pScript)
 
 void FixTagLimitProtections()
 {
-	DWORD old;
-	VirtualProtect((void*)0x004359B7, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x004359E1, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435A07, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435A3F, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435A51, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435A85, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435A9D, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435AB2, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435AC2, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435AD2, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((void*)0x004359B7, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x004359E1, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435A07, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435A3F, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435A51, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435A85, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435A9D, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435AB2, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435AC2, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435AD2, 4, PAGE_EXECUTE_READWRITE, NULL);
 
 
-	VirtualProtect((void*)0x00435AF7, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435B21, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435B4A, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435B51, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435B5A, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435B7E, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435B8C, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435B9B, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435BBA, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435BD3, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435BE8, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435C29, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435C6B, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435C90, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435C97, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435CBA, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435CFF, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435D2D, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435D50, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435DAC, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435E07, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435E1C, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435E2D, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435E38, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435E67, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435E7C, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435E8C, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x00435E9D, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((void*)0x00435AF7, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435B21, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435B4A, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435B51, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435B5A, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435B7E, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435B8C, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435B9B, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435BBA, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435BD3, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435BE8, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435C29, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435C6B, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435C90, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435C97, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435CBA, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435CFF, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435D2D, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435D50, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435DAC, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435E07, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435E1C, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435E2D, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435E38, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435E67, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435E7C, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435E8C, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x00435E9D, 4, PAGE_EXECUTE_READWRITE, NULL);
 
-	VirtualProtect((void*)0x0043BA97, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x0043BABC, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x0043BB07, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x0043BB27, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x0043BBED, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x0043BC0A, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x0043BC1A, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x0043BC7F, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x0043BC94, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x0043BCA4, 4, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x0043BCB4, 4, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((void*)0x0043BA97, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x0043BABC, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x0043BB07, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x0043BB27, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x0043BBED, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x0043BC0A, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x0043BC1A, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x0043BC7F, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x0043BC94, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x0043BCA4, 4, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x0043BCB4, 4, PAGE_EXECUTE_READWRITE, NULL);
 
-	VirtualProtect((void*)0x004BFCD3, 6, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x004BFD94, 6, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x004BFCEF, 12, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x0058C300, 12, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((void*)0x004BFCD3, 6, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x004BFD94, 6, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x004BFCEF, 12, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x0058C300, 12, PAGE_EXECUTE_READWRITE, NULL);
 
 
 	*(DWORD*)0x004BFCD3 = 0x0F39A2E9;
@@ -1571,18 +1584,18 @@ void FixTagLimitProtections()
 
 	BYTE GrafFix1[] = { 0x85, 0xF6, 0x0F, 0x86, 0x63, 0xC6, 0xF0, 0xFF, 0xBA, 0x3C, 0x03, 0x40, 0x00, 0xE9, 0x4D, 0xC6, 0xF0, 0xFF, 0x89, 0x44, 0x24, 0x10, 0x0F, 0x86, 0x47, 0xC7, 0xF0, 0xFF, 0xBE, 0x3C, 0x03, 0x40, 0x00, 0xE9, 0xFA, 0xC6, 0xF0, 0xFF };
 
-	VirtualProtect((void*)0x005B367A, sizeof(GrafFix1), PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((void*)0x005B367A, sizeof(GrafFix1), PAGE_EXECUTE_READWRITE, NULL);
 	memcpy((void*)0x005B367A, GrafFix1, sizeof(GrafFix1));
 
 	BYTE GrafFix2[] = { 0x89, 0x3D, 0x00, 0xC3, 0x58, 0x00, 0xBF, 0x3C, 0x03, 0x40, 0x00, 0x89, 0x04, 0x97, 0x8B, 0x3D, 0x00, 0xC3, 0x58, 0x00, 0x83, 0xBF, 0x80, 0x00, 0x00, 0x00, 0x00, 0x75, 0x0A, 0xC7, 0x05, 0x06, 0xC3, 0x58, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x05, 0x06, 0xC3, 0x58, 0x00, 0x83, 0xE2, 0x1F, 0x89, 0x04, 0x97, 0x8B, 0x87, 0x80, 0x00, 0x00, 0x00, 0xE9, 0xB1, 0x39, 0xF3, 0xFF };
 
-	VirtualProtect((void*)0x0058C30C, sizeof(GrafFix2), PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((void*)0x0058C30C, sizeof(GrafFix2), PAGE_EXECUTE_READWRITE, NULL);
 	memcpy((void*)0x0058C30C, GrafFix2, sizeof(GrafFix2));
 
-	VirtualProtect((void*)0x004BFD66, 1, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x004BFD6A, 1, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x004BFC85, 1, PAGE_EXECUTE_READWRITE, &old);
-	VirtualProtect((void*)0x004BFD89, 1, PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((void*)0x004BFD66, 1, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x004BFD6A, 1, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x004BFC85, 1, PAGE_EXECUTE_READWRITE, NULL);
+	VirtualProtect((void*)0x004BFD89, 1, PAGE_EXECUTE_READWRITE, NULL);
 
 	*(BYTE*)0x004BFC85 = 200;
 	*(BYTE*)0x004BFC89 = 200;
@@ -3005,8 +3018,10 @@ void FixClampBugs()
 		DWORD old;
 		VirtualProtect((void*)0x004A2C39, sizeof(vertfix1), PAGE_EXECUTE_READWRITE, &old);
 		memcpy((void*)0x004A2C39, vertfix1, sizeof(vertfix1));
+		VirtualProtect((void*)0x004A2C39, sizeof(vertfix1), old, NULL);
 		VirtualProtect((void*)0x004A2C23, sizeof(clampfunc), PAGE_EXECUTE_READWRITE, &old);
 		memcpy((void*)0x004A2C39, clampfunc, sizeof(clampfunc));
+		VirtualProtect((void*)0x004A2C23, sizeof(clampfunc), old, NULL);
 	}
 }
 
@@ -4291,50 +4306,25 @@ void AddFunctions()
 			MessageBox(0, "couldn't add script", scripts[i].name, 0);
 	}
 }
+
 //void HookControls();
 void InitLevelMod()
 {
 	//HookControls();
-	DWORD old = 0;
-
-	//VirtualProtect((void*)0x00427A9B, 5, PAGE_EXECUTE_READWRITE, &old);
-	//test edi, edi
 	*(WORD*)0x00427A9B = 0x840F;//je
-	DWORD addr = 0x00427A9D;
-	DWORD offset = (PtrToUlong(NotGood_naked) - 0x00427A9D) - 4;
-	*(DWORD*)addr = offset;
+	HookFunction(0x00427A9D, NotGood_naked);
 	*(DWORD*)0x00427AA3 = 0x90909090;//nop
 	*(WORD*)(0x00427AA3 + 4) = 0x9090;
+    
+	HookFunction(0x0048E036, Obj_MoveToNode_Naked, 0xE9);
 
-	/*VirtualProtect((void*)0x00403149, 5, PAGE_EXECUTE_READWRITE, &old);
-	*(BYTE*)0x00403149 = 0xE9;
-	addr = 0x0040314A;
-	offset = (PtrToUlong(Fopen_naked) - 0x00403149) - 5;
-	*(DWORD*)addr = offset;*/
-	/*if (debugMode)
-	{*/
-	DWORD fopen = *(DWORD*)0x0058D0B0;
-	VirtualProtect((void*)fopen, 5, PAGE_EXECUTE_READWRITE, &old);
-	*(BYTE*)fopen = 0xE9;
-	addr = fopen + 1;
-	offset = (PtrToUlong(Fopen_naked) - fopen) - 5;
-	*(DWORD*)addr = offset;
-	//}
-	/*VirtualProtect((void*)0x0058D0B0, 4, PAGE_EXECUTE_READWRITE, &old);
-	 = (DWORD)_fopen;*/
-
+	HookFunction(0x0058D0B1, Fopen_naked, 0xE9);
 
 	if (debugMode)
-	{
-		VirtualProtect((void*)0x004265F0, 5, PAGE_EXECUTE_READWRITE, &old);
-		*(BYTE*)0x004265F0 = 0xE9;
-		addr = 0x004265F1;
-		offset = (PtrToUlong(Checksum_naked) - 0x004265F0) - 5;
-	}
+		HookFunction(0x004265F1, Checksum_naked, 0xE9);
 	char msg[128] = "";
 	/*sprintf(msg, "OFFSET %X", offset);
 	MessageBox(0, msg, msg, 0);*/
-	*(DWORD*)addr = offset;
 
 	InitialRand(GetTickCount());
 	QBKeyHeader* header = NULL;
@@ -4677,9 +4667,8 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
 		/*}
 		else
 			fclose(fp);*/
-		DWORD old;
-		VirtualProtect((void*)0x00425E32, 0x10, PAGE_EXECUTE_READWRITE, &old);
-		VirtualProtect((void*)0x005B7501, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+		VirtualProtect((void*)0x00425E32, 0x10, PAGE_EXECUTE_READWRITE, NULL);
+		VirtualProtect((void*)0x005B7501, sizeof(DWORD), PAGE_EXECUTE_READWRITE, NULL);
 		sprintf(version_string, "LevelMod Build %.2f", VERSION);
 		*(DWORD*)0x005B7501 = 0x2073;
 		*(BYTE*)0x00425E32 = 0x68;

@@ -285,6 +285,7 @@ namespace Checksums
 		Trick_Judo = COMPILE_CRC32("trick_judo"),
 		Speed = COMPILE_CRC32("speed"),
 		option = COMPILE_CRC32("option"),
+		Collision = COMPILE_CRC32("collision"),
 
 		//Trick_KFBackflip = 0xF7B4E0CB
 

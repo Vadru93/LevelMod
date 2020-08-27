@@ -9,6 +9,7 @@
 
 //Collision stuff 00501CE0
 struct MovingObject;
+struct Model;
 extern void RemoveMovingObject(SuperSector* sector);
 extern bool updatingObjects;
 
@@ -84,6 +85,36 @@ EXTERN struct SuperSector
 		return NULL;
 	}
 
+	void SetPosition(D3DXVECTOR3& position)
+	{
+		D3DXVECTOR3 pos = (bboxMax + bboxMin) / 2.0f;
+
+		pos = position - pos;
+
+		bboxMax += pos;
+		bboxMin += pos;
+
+		for (DWORD i = 0; i < numVertices; i++)
+		{
+			vertices[i] += pos;
+		}
+	}
+
+	void MoveToNode(DWORD checksum)
+	{
+		CStructHeader* node = Node::GetNodeStruct(checksum);
+		if (node)
+		{
+			D3DXVECTOR3* pos = node->GetVector(Checksums::Position);
+			if (pos)
+				SetPosition(*pos);
+			else
+				SetPosition(Vertex(0, 0, 0));
+		}
+		else
+			_printf("Couldn't find Node %s in " __FUNCTION__ "\n");
+	}
+
 	//Used in the scripts create/kill/shatter/visible/invisible, the state will get updated the next frame
 	void SetState(MeshState state)
 	{
@@ -122,13 +153,14 @@ struct MovingObject
 	};//From thug1source, currently not used
 
 	MeshState state;
-	DWORD rotation;
+	//DWORD rotation;
 	enum Types
 	{
 		MOVE_TO_POS,
 		MOVE_TO_NODE,
 		FOLLOW_PATH_LINKED,
-		ANGULAR_VELOCITY
+		ANGULAR_VELOCITY,
+		FOLLOW_MODEL,
 	};
 	Types Type;
 	float timer;
@@ -155,6 +187,7 @@ struct MovingObject
 	Matrix velocity;
 	
 
+	MovingObject(SuperSector* _sector, Model* mdl);
 
 	MovingObject(SuperSector* _sector, D3DXVECTOR3& _goal, CScript* _pScript)
 	{

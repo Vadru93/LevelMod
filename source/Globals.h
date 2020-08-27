@@ -178,6 +178,8 @@ void OnGround_naked();
 //This is used to add vibration for XINPUT
 void __cdecl HookVibrate_naked();
 
+void Obj_MoveToNode_Naked();
+
 //depricated
 void TestForAcid_naked();
 //--------Naked Hooked Functions--------
