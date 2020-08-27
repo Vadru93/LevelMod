@@ -353,65 +353,6 @@ SCRIPT Load_Ros
 	LoadTerrain
 ENDSCRIPT
 
-//=========================================THPS2========================================
-
-SCRIPT Load_Drop
-	AddMusicTrack "ambience\thps2\drop"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func lev_bsp = "Levels_Th2\Drop\Drop.bsp" lev_sky = "Levels_Th2\Drop\Drop_sky.bsp" lev_qb = "Levels_Th2\Drop\Drop.qb" loadscr = "images\load\th2_drop.png"
-	PrepareLevelFog r = 12 g = 8 b = 9 a = 0 cnear = 12 cfar = 10000
-ENDSCRIPT
-
-SCRIPT Load_Sc2
-	AddMusicTrack "ambience\thps2\sc2"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func lev_bsp = "Levels_Th2\sc2\sc2.bsp" lev_sky = "Levels_Th2\sc2\sc2_sky.bsp" lev_qb = "Levels_Th2\sc2\sc2.qb" loadscr = "images\load\th2_sc2.png"
-	PrepareLevelFog r = 145 g = 201 b = 242 a = 0 cnear = 12 cfar = 13000
-ENDSCRIPT
-
-SCRIPT Load_Ven
-	AddMusicTrack "ambience\thps2\ven"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func lev_bsp = "Levels_Th2\ven\ven.bsp" lev_sky = "Levels_Th2\ven\ven_Sky.bsp" lev_qb = "Levels_Th2\ven\ven.qb" loadscr = "images\load\th2_ven.png"
-	PrepareLevelFog r = 145 g = 201 b = 242 a = 0 cnear = 12 cfar = 18000
-ENDSCRIPT
-
-
-SCRIPT Load_SSV
-	AddMusicTrack "ambience\thps2\ssv"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func lev_bsp = "Levels_Th2\ssv\ssv.bsp" lev_sky = "Levels_Th2\ssv\ssv_Sky.bsp" lev_qb = "Levels_Th2\ssv\ssv.qb" loadscr = "images\load\th2_ssv.png"
-	PrepareLevelFog r = 145 g = 201 b = 242 a = 0 cnear = 12 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_Ph
-	AddMusicTrack "ambience\thps2\ph"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func lev_bsp = "Levels_Th2\Ph\Ph.bsp" lev_sky = "Levels_Th2\Ph\Ph_Sky.bsp" lev_qb = "Levels_Th2\Ph\Ph.qb" loadscr = "images\load\th2_philly.png"
-	PrepareLevelFog r = 145 g = 201 b = 242 a = 0 cnear = 12 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_Bul
-	AddMusicTrack "ambience\thps2\bul"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func lev_bsp = "Levels_Th2\Bul\Bul.bsp" lev_sky = "Levels_Th2\Bul\Bul_Sky.bsp" lev_qb = "Levels_Th2\Bul\Bul.qb" loadscr = "images\load\th2_bul.png"
-	PrepareLevelFog r = 145 g = 201 b = 242 a = 0 cnear = 12 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_Mar
-	AddMusicTrack "ambience\thps2\mar"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func lev_bsp = "Levels_Th2\mar\mar.bsp" lev_sky = "Levels_Th2\mar\mar_sky.bsp" lev_qb = "Levels_Th2\mar\mar.qb" loadscr = "images\load\th2_mar.png"
-	PrepareLevelFog r = 165 g = 180 b = 202 a = 0 cnear = 12 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_Hvn
-	AddMusicTrack "ambience\thps2\hvn"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func lev_bsp = "Levels_Th2\hvn\hvn.bsp" lev_sky = "Levels_Th2\hvn\hvn_sky.bsp" lev_qb = "Levels_Th2\hvn\hvn.qb" loadscr = "images\load\th2_hvn.png"
-	PrepareLevelFog r = 0 g = 0 b = 0 a = 0 cnear = 12 cfar = 17000
-ENDSCRIPT
-
 //============================================THPS4===================================================
 
 SCRIPT Load_Trn
@@ -618,6 +559,7 @@ ENDSCRIPT
 //don't think default params are actually needed
 //if it crashes, fix the struct. we don't want to like load foundry if something's wrong.
 SCRIPT Load_Level_Func 
+	printf "Load_Level_Func begins..."
 
 	IF IsCareerMode
 		IF GotParam loadscr_comp
@@ -643,8 +585,8 @@ SCRIPT Load_Level_Func
 		AddMusicTrack <lev_amb>
 	ENDIF
 
-	IF GotParam custom_lights
-		<custom_lights>
+	IF GotParam lev_lights
+		<lev_lights>
 	ELSE
 		SetUpRioDeJaneiroLights
 	ENDIF
@@ -654,17 +596,14 @@ SCRIPT Load_Level_Func
 	LoadLevelGeometry { level = <lev_bsp> Sky = <lev_sky> }
 	
 	IF InNetGame
-		IF IsOptionOn LM_GameOption_bNetSky
-			printf "should load sky"
-			LoadLevelGeometry { Sky = <lev_sky> }
-		ELSE
-			printf "should not load sky"
+		IF #"Not" IsOptionOn LM_GameOption_bNetSky
 			LoadLevelGeometry { Sky = "" }
 		ENDIF
 	ENDIF
 	
-	printf "Loading NodeArray"
+	printf "Loading NodeArray..."
 	LoadNodeArray <lev_qb>
+	
 	LoadTerrain
 	
 	SetBackgroundColor <...>
@@ -678,6 +617,7 @@ SCRIPT Load_Level_Func
 	ELSE
 		SetClippingDistances { near = <cnear> far = <cfar> }
 	ENDIF
+	
 	//this should be uncommented when all def structs are fixed
 	//LM_MaybeSetTh2Physics <...>
 
@@ -685,9 +625,7 @@ SCRIPT Load_Level_Func
 		<startup_func>
 	ENDIF
 
-	printf "...finshed loading."
-	
-	
+	printf "...finished loading."
 ENDSCRIPT
 
 DEFAULT_WALL_SKATABLE_ANGLE = 25
@@ -738,6 +676,7 @@ OnlineModes = {
 
 //=============================Master Level List==============================
 
+//================THPS1===================
 
 //THPS1 WAREHOUSE
 Def_Ware = { 
@@ -769,14 +708,280 @@ SCRIPT Load_Ware
 ENDSCRIPT
 
 
+
+//================THPS2===================
+
+//THPS2 HANGAR
+
+Def_Han = { 
+	level_name = "Hangar" 
+	localtion = "Mullet Falls MT"
+	level_id = han_id 
+	levelnum = LevelNum_New
+	NoCareer th2_level regular_level OnlineModes
+	
+	lev_bsp = "levels_th2\Han\han.bsp" 
+	lev_sky = "levels_th2\han\han_sky.bsp" 
+	lev_qb = "levels_th2\han\han.qb" 
+	lev_amb = "ambience\thps2\han"
+	loadscr = "images\load\th2_han.png"
+	lev_lights = SetUpTokyoLights
+	
+	r = 6 g = 8 b = 12 a = 0 
+	cnear = 12 cfar = 10000
+	
+	load_script = Load_Han 
+} 
+
+SCRIPT Load_Han
+	Load_Level_Func { Def_Han }
+ENDSCRIPT
+
+//THPS2 SCHOOL 2
+
+Def_Sc2 = { 
+	level_name = "School II" 
+	localtion = "California"
+	level_id = sc2_id 
+	levelnum = LevelNum_New
+	NoCareer th2_level regular_level OnlineModes
+	
+	lev_bsp = "levels_th2\sc2\sc2.bsp"
+	lev_sky = "levels_th2\sc2\sc2_sky.bsp" 
+	lev_qb = "levels_th2\sc2\sc2.qb" 
+	lev_amb = "ambience\thps2\sc2"
+	loadscr = "images\load\th2_sc2.png"
+	lev_lights = SetUpLosAngelesLights
+	
+	r = 145 g = 201 b = 242 a = 0 
+	cnear = 12 cfar = 13000
+	
+	load_script = Load_Sc2 
+} 
+
+SCRIPT Load_Sc2
+	Load_Level_Func { Def_Sc2 }
+ENDSCRIPT
+
+//THPS2 MARSEILLE
+
+Def_Mar = { 
+	level_name = "Marseille" 
+	localtion = "France"
+	level_id = mar_id 
+	levelnum = LevelNum_New
+	NoCareer th2_level regular_level OnlineModes
+	
+	lev_bsp = "levels_th2\mar\mar.bsp"
+	lev_sky = "levels_th2\mar\mar_sky.bsp" 
+	lev_qb = "levels_th2\mar\mar.qb" 
+	lev_amb = "ambience\thps2\mar"
+	loadscr = "images\load\th2_mar.png"
+	lev_lights = SetUpSuburbiaLights
+	
+	r = 187 g = 132 b = 98 a = 0 
+	cnear = 12 cfar = 20000
+	
+	load_script = Load_Mar
+}
+
+SCRIPT Load_Mar
+	Load_Level_Func { Def_Mar }
+ENDSCRIPT
+
+//THPS2 NEW YORK CITY
+
+Def_NY1 = { 
+	level_name = "New York" 
+	location = "NY City"
+	level_id = ny1_id 
+	levelnum = LevelNum_New
+	NoCareer th2_level regular_level OnlineModes
+	
+	lev_bsp = "levels_th2\ny\ny.bsp" 
+	lev_sky = "levels_th2\ny\ny_Sky.bsp" 
+	lev_qb = "levels_th2\ny\ny.qb" 
+	lev_amb = "ambience\thps2\ny"
+	loadscr = "images\load\th2_ny.png"
+	lev_lights = SetUpTokyoLights	
+	
+	r = 4 g = 8 b = 12 a = 0 
+	cnear = 12 cfar = 20000
+	
+	load_script = Load_NY1 
+}
+
+SCRIPT Load_NY1
+	Load_Level_Func { Def_NY1 }
+ENDSCRIPT
+
+//THPS2 VENICE BEACH
+
+Def_Ven = { 
+	level_name = "Venice Beach" 
+	location = "California"
+	level_id = ven_id 
+	levelnum = LevelNum_New
+	NoCareer th2_level regular_level OnlineModes
+	
+	lev_bsp = "levels_th2\ven\ven.bsp" 
+	lev_sky = "levels_th2\ven\ven_Sky.bsp" 
+	lev_qb = "levels_th2\ven\ven.qb" 
+	lev_amb = "ambience\thps2\ven"
+	loadscr = "images\load\th2_ven.png"
+	lev_lights = SetUpShipLights
+	
+	r = 145 g = 201 b = 242 a = 0 
+	cnear = 12 cfar = 18000
+	
+	load_script = Load_Ven
+}
+
+SCRIPT Load_Ven
+	Load_Level_Func { Def_Ven }
+ENDSCRIPT
+
+//THPS2 SKATESTREET
+
+Def_SSV = { 
+	level_name = "Skatestreet" 
+	location = "Ventura"
+	level_id = ssv_id 
+	levelnum = LevelNum_New
+	NoCareer th2_level regular_level OnlineModes
+	
+	lev_bsp = "levels_th2\ssv\ssv.bsp" 
+	lev_sky = "levels_th2\ssv\ssv_Sky.bsp" 
+	lev_qb = "levels_th2\ssv\ssv.qb" 
+	lev_amb = "ambience\thps2\ssv"
+	loadscr = "images\load\th2_ssv.png"
+	lev_lights = SetUpSkatersIslandLights
+	
+	r = 145 g = 201 b = 242 a = 0 
+	cnear = 12 cfar = 20000
+	
+	load_script = Load_SSV
+}
+
+SCRIPT Load_SSV
+	Load_Level_Func { Def_SSV }
+ENDSCRIPT
+
+//THPS2 PHILADELPHIA
+
+Def_Ph = { 
+	level_name = "Philadelphia" 
+	location = "Pennsylvania"
+	level_id = ph_id 
+	levelnum = LevelNum_New
+	NoCareer th2_level regular_level OnlineModes
+	
+	lev_bsp = "levels_th2\ph\ph.bsp" 
+	lev_sky = "levels_th2\ph\ph_Sky.bsp" 
+	lev_qb = "levels_th2\ph\ph.qb" 
+	lev_amb = "ambience\thps2\ph"
+	loadscr = "images\load\th2_philly.png"
+	lev_lights = SetUpLosAngelesLights
+	
+	r = 145 g = 201 b = 242 a = 0 
+	cnear = 12 cfar = 20000
+	
+	load_script = Load_Ph
+}
+
+SCRIPT Load_Ph
+	Load_Level_Func { Def_Ph }
+ENDSCRIPT
+
+//THPS2 BULLRING
+
+Def_Bul = { 
+	level_name = "Bullring" 
+	location = "New Mexico"
+	level_id = bul_id 
+	levelnum = LevelNum_New
+	NoCareer th2_level regular_level OnlineModes
+	
+	lev_bsp = "levels_th2\bul\bul.bsp" 
+	lev_sky = "levels_th2\bul\bul_Sky.bsp" 
+	lev_qb = "levels_th2\bul\bul.qb" 
+	lev_amb = "ambience\thps2\bul"
+	loadscr = "images\load\th2_bul.png"
+	lev_lights = SetUpSuburbiaLights
+	
+	r = 145 g = 201 b = 242 a = 0 
+	cnear = 12 cfar = 20000
+	
+	load_script = Load_Bul
+}
+
+SCRIPT Load_Bul
+	Load_Level_Func { Def_Bul }
+ENDSCRIPT
+
+//THPS2 SKATE HEAVEN
+
+Def_Hvn = { 
+	level_name = "Skate Heaven" 
+	location = "Paradise"
+	level_id = hvn_id 
+	levelnum = LevelNum_New
+	NoCareer th2_level regular_level OnlineModes
+	
+	lev_bsp = "levels_th2\hvn\hvn.bsp" 
+	lev_sky = "levels_th2\hvn\hvn_Sky.bsp" 
+	lev_qb = "levels_th2\hvn\hvn.qb" 
+	lev_amb = "ambience\thps2\hvn"
+	loadscr = "images\load\th2_hvn.png"
+	lev_lights = SetUpTokyoLights
+	
+	r = 1 g = 4 b = 8
+	a = 0 cnear = 12 cfar = 17000
+	
+	load_script = Load_Hvn
+}
+
+SCRIPT Load_Hvn
+	Load_Level_Func { Def_Hvn }
+ENDSCRIPT
+
+//THPS2 CHOPPER DROP
+
+Def_Drop = {
+	level_name = "Chopper Drop"
+	location = "Hawaii"
+	level_id = drop_id
+	levelnum = LevelNum_New
+	NoCareer th2_level regular_level OnlineModes
+	
+	lev_bsp = "levels_th2\Drop\Drop.bsp" 
+	lev_sky = "levels_th2\Drop\Drop_sky.bsp" 
+	lev_qb = "levels_th2\Drop\Drop.qb" 
+	lev_amb = "ambience\thps2\drop"
+	loadscr = "images\load\th2_drop.png"
+	lev_lights = SetUpOilLights
+	
+	r = 12 g = 8 b = 9 a = 0 
+	cnear = 12 cfar = 10000
+	
+	load_script = Load_Drop
+}
+
+SCRIPT Load_Drop
+	Load_Level_Func { Def_Drop }
+ENDSCRIPT
+
+//================THPS3===================
+
 //THPS3 FOUNDRY
+
 Def_Foun = {
 	level_id = foundry_id 
 	levelnum = LevelNum_Foundry 
 	level_name = "Foundry" 
 	location = "Woodland Hills" 
 	
-	custom_lights = SetUpFoundryLights
+	lev_lights = SetUpFoundryLights
 	
 	regular_level th3_level OnlineModes
 	
@@ -806,7 +1011,7 @@ Def_Can = {
 	unlock_flag = LEVEL_UNLOCKED_CANADA 
 	level_name = "Canada" 
 	location = "Canada"
-	custom_lights = SetUpCanadaLights
+	lev_lights = SetUpCanadaLights
 	
 	regular_level th3_level OnlineModes
 	
@@ -840,7 +1045,7 @@ Def_Rio = {
 	location = "Brazil"
 	unlock_flag = LEVEL_UNLOCKED_RIO 
 	
-	custom_lights = SetUpRioDeJaneiroLights
+	lev_lights = SetUpRioDeJaneiroLights
 	
 	regular_level th3_level OnlineModes competition
 	
@@ -863,53 +1068,6 @@ SCRIPT Load_Rio
 	Load_Level_Func { Def_Rio }
 	SetMovementVelocity 2000
 	SetRotateVelocity 120
-ENDSCRIPT
-
-
-//THPS2 HANGAR
-Def_Han = { 
-	level_id = hangar_id 
-	levelnum = LevelNum_New
-	level_name = "Hangar" 
-	localtion = "Mullet Falls MT"
-	load_script = Load_han 
-	NoCareer th2_level regular_level OnlineModes
-	
-	lev_bsp = "Levels_Th2\Han\han.bsp" 
-	lev_sky = "Levels_Th2\han\han_sky.bsp" 
-	lev_qb = "Levels_Th2\han\han.qb" 
-	lev_amb = "ambience\thps2\han"
-	loadscr = "images\load\th2_han.png"
-	
-	r = 6 g = 8 b = 12 a = 0 
-	cnear = 12 cfar = 10000
-} 
-
-SCRIPT Load_han
-	Load_Level_Func { Def_Han }
-ENDSCRIPT
-
-
-//THPS2 NEW YORK CITY
-Def_NY1 = { 
-	level_name = "New York" 
-	level_id = newyork_id 
-	NoCareer th2_level regular_level OnlineModes
-	
-	lev_bsp = "Levels_Th2\ny\ny.bsp" 
-	lev_sky = "Levels_Th2\ny\ny_Sky.bsp" 
-	lev_qb = "Levels_Th2\ny\ny.qb" 
-	lev_amb = "ambience\thps2\ny"
-	loadscr = "images\load\th2_ny.png"
-	
-	r = 4 g = 8 b = 12 a = 0 
-	cnear = 12 cfar = 20000
-	
-	load_script = Load_NY1 
-}
-
-SCRIPT Load_NY1
-	Load_Level_Func { Def_NY1 }
 ENDSCRIPT
 
 
@@ -946,8 +1104,8 @@ Def_Club = {
 	level_name = "Club" 
 	location = "London"
 
-	lev_bsp = "Levels_Th2\Club\Club.bsp" 
-	lev_qb = "Levels_Th2\Club\Club.qb" 
+	lev_bsp = "levels_th2\Club\Club.bsp" 
+	lev_qb = "levels_th2\Club\Club.qb" 
 	lev_amb = "ambience\thps2\club"
 	loadscr = "images\load\th2_club.png"
 	
@@ -970,8 +1128,8 @@ Def_Sway = {
 	load_script = Load_Sway 
 	level_id = sway_id 
 	
-	lev_bsp = "Levels_Th2\Sway\Sway.bsp" 
-	lev_qb = "levels_Th2\Sway\Sway.qb" 
+	lev_bsp = "levels_th2\Sway\Sway.bsp" 
+	lev_qb = "levels_th2\Sway\Sway.qb" 
 	lev_amb = "ambience\thps2\sway"
 	loadscr = "images\load\th2_sway.png"
 	
@@ -994,9 +1152,9 @@ Def_Tampa = {
 	
 	unlock_flag = FIX_LEVELMOD_FLAG 
 	
-	lev_bsp = "Levels_Th2\flor\flor.bsp" 
-	lev_sky = "Levels_Th2\flor\flor_sky.bsp" 
-	lev_qb = "Levels_Th2\flor\flor.qb" 
+	lev_bsp = "levels_th2\flor\flor.bsp" 
+	lev_sky = "levels_th2\flor\flor_sky.bsp" 
+	lev_qb = "levels_th2\flor\flor.qb" 
 	lev_amb = "ambience\thps2\flor"
 	loadscr = "images\load\th2_flor.png"
 	
@@ -1017,8 +1175,8 @@ Def_Sky = {
 	load_script = Load_Sky 
 	level_id = skylines_id 
 	
-	lev_bsp = "Levels_Th2\roof\roof.bsp" 
-	lev_sky = "Levels_Th2\roof\roof_sky.bsp" 
+	lev_bsp = "levels_th2\roof\roof.bsp" 
+	lev_sky = "levels_th2\roof\roof_sky.bsp" 
 	lev_qb = "levels_th2\roof\roof.qb" 
 	lev_amb = "ambience\thps2\sky"
 	loadscr = "images\load\th2_sky.png"
@@ -1064,23 +1222,10 @@ master_level_list = [
 	{ level_name = "Roswell" load_script = Load_Ros level_id = roswell_id NoCareer ignore_th2_wall unlock_flag = LEVEL_UNLOCKED_ROSWELL regular_level th1_level supports_ctf supports_own supports_bball }
 	
 	//THPS2
-	{ Def_Han }
-	{ level_name = "School II" load_script = Load_Sc2 level_id = school2_id NoCareer th2_level regular_level supports_ctf supports_own supports_bball }
-	{ level_name = "Marseille" load_script = Load_Mar level_id = marseilles_id NoCareer th2_level regular_level supports_ctf supports_own supports_bball }
-	{ Def_NY1 }
-	{ level_name = "Venice Beach" load_script = Load_Ven level_id = venice_id NoCareer th2_level regular_level supports_ctf supports_own supports_bball }
-	{ level_name = "Skate Street" load_script = Load_SSV level_id = skatestreet_id NoCareer th2_level regular_level supports_ctf supports_own supports_bball }
-	{ level_name = "Philadelphia" load_script = Load_Ph level_id = philly_id NoCareer th2_level regular_level supports_ctf supports_own supports_bball }
-	{ level_name = "Bullring" load_script = Load_Bul level_id = bullring_id NoCareer th2_level regular_level supports_ctf supports_own supports_bball }
-	{ level_name = "Chopper Drop" load_script = Load_Drop level_id = drop_id NoCareer th2_level regular_level supports_ctf supports_own supports_bball }
-	{ level_name = "Skate Heaven" load_script = Load_Hvn level_id = heaven_id NoCareer th2_level regular_level supports_ctf supports_own supports_bball }
+	{ Def_Han } { Def_Sc2 } { Def_Mar } { Def_NY1 } { Def_Ven } { Def_Ssv } { Def_Ph } { Def_Bul } { Def_Drop } { Def_Hvn }
 	
 	//THPS2X
-	{ Def_Club }
-	{ Def_Cons }
-	{ Def_Tampa }
-	{ Def_Sway }
-	{ Def_Sky }
+	{ Def_Club } { Def_Cons } { Def_Tampa } { Def_Sway } { Def_Sky }
 	
 	//THPS4	
 	{ level_name = "Training" load_script = Load_Trn level_id = training_id NoCareer regular_level th4_level supports_ctf supports_own supports_bball }
