@@ -50,6 +50,7 @@ extern VOID HookFunc(DWORD destAddress, VOID(*func)(VOID), BYTE nopCount);
 extern void AddMessageHook();
 extern void AddFunctions();
 extern void FixSpineFlag();
+extern void FixMemoryProtection();
 
 PFN_D3DXAssembleShader D3DXAssembleShader = nullptr;
 PFN_D3DXDisassembleShader D3DXDisassembleShader = nullptr;
@@ -140,6 +141,14 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 	VirtualProtect((void*)0x004F4B50, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
 	VirtualProtect((void*)0x005C94C8, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
 	VirtualProtect((void*)0x0042B171, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+
+	/*FixMemoryProtection();
+
+	*(DWORD*)0x0042C18D = 0x20AA00;
+	*(DWORD*)0x0042C1C7 = 0x20A9F0;
+	*(DWORD*)0x0042C1D5 = 0x20A9F0;
+	*(DWORD*)0x0042C1E1 = 0x20A9F8;
+	*(DWORD*)0x0042C1EC = 0x20A9FC;*/
 
 
 	VirtualProtect((void*)0x004492C5, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
@@ -256,7 +265,7 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 
 	//this is the NodeArray size maybe need to increase this...
 	//each item in list is 0x10 bytes so the total size need to be able to be divided by that
-	*(DWORD*)0x42C18D = 0x10AA00;
+	*(DWORD*)0x42C18D = 0x20AA00;
 	*(DWORD*)0x42C1C7 = *(DWORD*)0x42C18D - 0x10;//last item
 	*(DWORD*)0x42C1D5 = *(DWORD*)0x42C18D - 0x10;//last item
 	*(DWORD*)0x42C1E1 = *(DWORD*)0x42C18D - 0x10 + 8;//last item+8

@@ -9,6 +9,7 @@
 
 #define NO_EXTRA_INCLUDE
 #include "Extension.h"
+#include "Extension.h"
 
 
 extern bool init3, debugMode, hooked;
@@ -648,6 +649,7 @@ bool AddOption(CStruct* pStruct, CScript* pScript)
 {
 	if (init3)
 		return false;
+
 	CStructHeader* name = NULL;
 
 	if (pStruct->GetStruct(Checksums::Name, &name))

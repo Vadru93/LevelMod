@@ -13,16 +13,18 @@ struct Model
 	DWORD pNULL2;
 	DWORD frameCount;
 	Vertex pos;
+	BYTE unk3[0x18];
+	DWORD nodeIndex;
+	BYTE unk4[0x314];
+	D3DXMATRIX rotation;
 
-	DWORD GetChecksum()
+	DWORD GetNodeIndex()
 	{
-		DWORD pChecksum = *(DWORD*)((DWORD)this + 0x98);
-		pChecksum = *(DWORD*)(pChecksum + 0xC);
-		pChecksum = *(DWORD*)(pChecksum + 4);
-		return *(DWORD*)(pChecksum + 0x58);
+		return nodeIndex;
 	}
 
 };
 
 void Obj_MoveToNode(Model* mdl, CStruct* pStruct);
+void Obj_FollowPathLinked(Model* mdl, CStruct* pStruct);
 #endif

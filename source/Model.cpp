@@ -24,11 +24,33 @@ __declspec(naked) void Obj_MoveToNode_Naked()
 	_asm jmp pJmp;
 }
 
+__declspec(naked) void Obj_FollowPathLinked_Naked()
+{
+	static Model* pModel;
+	static CStruct* pStruct;
+	static DWORD pOldESP;
+	static DWORD pOldEBP;
+	static DWORD pCall = 0x0048B500;
+	static DWORD pJmp = 0x0048DA57;
+	_asm mov pModel, ecx;
+	_asm mov pStruct, eax;
+	_asm mov pOldESP, esp;
+	_asm mov pOldEBP, ebp;
+	Obj_FollowPathLinked(pModel, pStruct);
+	_asm mov ecx, pModel;
+	_asm mov esp, pOldESP;
+	_asm mov ebp, pOldEBP;
+	_asm call[pCall];
+	_asm jmp pJmp;
+}
+
+
+
+std::map<DWORD, DWORD> movableObjects;
+
 void Obj_MoveToNode(Model* mdl, CStruct* pStruct)
 {
-	DWORD checksum = mdl->GetChecksum();
-
-	CStructHeader* node = Node::GetNodeStruct(checksum);
+	CStructHeader* node = Node::GetNodeStructByIndex(mdl->GetNodeIndex());
 
 	if (node)
 	{
@@ -52,16 +74,16 @@ void Obj_MoveToNode(Model* mdl, CStruct* pStruct)
 				_printf("Couldn't find SuperSector %s in " __FUNCTION__ "\n", FindChecksumName(collision->Data));
 			}
 		}
+		else
+			_printf("No Collision found %X?\n", node);
 	}
 	else
-		_printf("Couldn't find Node %s in " __FUNCTION__ "\n", FindChecksumName(checksum));
+		_printf("Couldn't find NodeIndex %d in " __FUNCTION__ "\n", mdl->GetNodeIndex());
 }
 
-void Obj_FollowPathLinked(Model* mdl)
+void Obj_FollowPathLinked(Model* mdl, CStruct* pStruct)
 {
-	DWORD checksum = mdl->GetChecksum();
-
-	CStructHeader* node = Node::GetNodeStruct(checksum);
+	CStructHeader* node = Node::GetNodeStructByIndex(mdl->GetNodeIndex());
 
 	if (node)
 	{
@@ -71,9 +93,20 @@ void Obj_FollowPathLinked(Model* mdl)
 			SuperSector* sector = SuperSector::GetSuperSector(collision->Data);
 			if (sector)
 			{
+				_printf("model %X\n", mdl);
 				_printf(__FUNCTION__ " -> Going to move collision...\n");
 
 				movingObjects.push_back(MovingObject(sector, mdl));
+
+				MovingObject& obj = movingObjects.back();
+				obj.vertices = new D3DXVECTOR3[sector->numVertices];
+				//std::copy(obj.sector->vertices, obj.sector->vertices + obj.sector->numVertices, obj.vertices);
+				D3DXVECTOR3 position = (sector->bboxMax + sector->bboxMin) / 2.0f;
+
+				for (DWORD i = 0; i < sector->numVertices; i++)
+				{
+					obj.vertices[i] = (sector->vertices[i] - position);
+				}
 			}
 			else
 			{
@@ -82,5 +115,5 @@ void Obj_FollowPathLinked(Model* mdl)
 		}
 	}
 	else
-		_printf("Couldn't find Node %s in " __FUNCTION__ "\n", FindChecksumName(checksum));
+		_printf("Couldn't find NodeIndex %d in " __FUNCTION__ "\n", mdl->GetNodeIndex());
 }

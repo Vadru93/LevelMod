@@ -179,6 +179,7 @@ void OnGround_naked();
 void __cdecl HookVibrate_naked();
 
 void Obj_MoveToNode_Naked();
+void Obj_FollowPathLinked_Naked();
 
 //depricated
 void TestForAcid_naked();
