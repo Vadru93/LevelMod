@@ -99,6 +99,15 @@ Trick_Layout = { SCR_FLIP Params = { Name = 'Handspring Layout' UnlockFlag = SKA
 Trick_Berzerker = { SCR_FLIP Params = { Name = 'The Berzerker' UnlockFlag = SKATER_UNLOCKED_WOLVERINE Score = 2500 Anim = Berzerker IsSpecial Speed = 1.3 TrickSlack = 50 GrindSlack = 50 } }
 Trick_ClawPunch = { SCR_FLIP Params = { Name = 'Claw Punch' UnlockFlag = SKATER_UNLOCKED_WOLVERINE Score = 3000 Anim = ClawPunch IsSpecial Speed = 1.2 TrickSlack = 20 } }
 
+Trick_KickflipUnderFlip = { SCR_FLIP Params = { TrickDef_KickflipUnderflip IsSpecial } }
+
+TrickDef_KickflipUnderflip = { 
+	Name = 'Kickflip Underflip' 
+	Score = 1000
+	Anim = KickflipUnderFlip 
+	TrickSlack = 10 
+}
+
 //special grab tricks
 Trick_JudoMadonna = { SCR_GRAB Params = { Name = 'Judo Madonna' Score = 1600 Anim = JudoMadonna_Init Idle = Madonna_Idle BackwardsAnim = Madonna IsSpecial ForceInit TrickSlack = 10 } }
 Trick_KFSuperman = { SCR_GRAB Params = { Name = 'Kickflip Superman' Score = 1500 Anim = KFSupermanGrab_Init Idle = KFSupermanGrab_Range OutAnim = KFSupermanGrab_Out IsSpecial ForceInit } }
@@ -141,36 +150,27 @@ NewKickflipExtras = [
 	{ SCR_GRAB Trigger = { AirTrickLogic Circle Right 300 } Params = { TrickDef_KickflipToIndy EXTRA_TRICK } } 
 	{ SCR_GRAB Trigger = { AirTrickLogic Circle Up 300 } Params = { TrickDef_KickflipToCrail EXTRA_TRICK } } 
 	{ SCR_GRAB Trigger = { AirTrickLogic Circle Left 300 } Params = { TrickDef_KickflipToMelon EXTRA_TRICK } } 
-	{ SCR_FLIP Trigger = { Press Up 300 } Params = { TrickDef_KickflipUnderFlip EXTRA_TRICK } }
+	{ SCR_FLIP Trigger = { Press Up 300 } Params = { TrickDef_KickflipUnderFlip EXTRA_TRICK Speed = 1.1 Score = 500 } }
 ]
 
-DoubleKickflip = [ { EXTRA_FLIP Params = { TrickDef_DoubleKickflip EXTRA_TRICK } } ]
+//DoubleKickflip = [ { EXTRA_FLIP Params = { TrickDef_DoubleKickflip EXTRA_TRICK } } ]
 
 TrickDef_DoubleKickflip = { 
 	Name = 'Double Kickflip' 
 	Score = 500 
 	Anim = DoubleKickflip 
 	ExtraTricks = TripleKickflip
+	NewExtraTricks = NewTripleKickflip
 } 
 
 TripleKickflip = [ { EXTRA_FLIP Params = { TrickDef_TripleKickflip EXTRA_TRICK } } ] 
+NewTripleKickflip = [ { EXTRA_FLIP Params = { TrickDef_TripleKickflip EXTRA_TRICK Speed = 1.3 } } ] 
 
 TrickDef_TripleKickflip = { 
 	Name = 'Triple Kickflip' 
 	Score = 1000 
 	Anim = TripleKickflip 
 }
-
-Trick_KickflipUnderFlip = { SCR_FLIP Params = TrickDef_KickflipUnderflip }
-
-TrickDef_KickflipUnderflip = { 
-	Name = 'Kickflip Underflip' 
-	Score = 500 //was 1000 special
-	Anim = KickflipUnderFlip 
-	TrickSlack = 10 
-	Speed = 1.1
-}
-
 
 //===heelflip chain===
 
@@ -183,9 +183,11 @@ TrickDef_Heelflip = {
 	Anim = Heelflip 
 	Nollie = NollieHeelflip 
 	ExtraTricks = DoubleHeelflip
+	NewExtraTricks = NewDoubleHeelflip
 }
 
 DoubleHeelflip = [ { EXTRA_FLIP Params = { TrickDef_DoubleHeelflip EXTRA_TRICK } } ] 
+NewDoubleHeelflip = [ { EXTRA_FLIP Params = { TrickDef_DoubleHeelflip EXTRA_TRICK Speed = 1.3 } } ] 
 
 TrickDef_DoubleHeelflip = { 
 	Name = 'Double Heelflip' 
@@ -193,9 +195,11 @@ TrickDef_DoubleHeelflip = {
 	Anim = DoubleHeelflip 
 	TrickSlack = 15 
 	ExtraTricks = TripleHeelflip
+	NewExtraTricks = NewTripleHeelflip
 }
 
 TripleHeelflip = [ { EXTRA_FLIP Params = { TrickDef_TripleHeelflip EXTRA_TRICK } } ] 
+NewTripleHeelflip = [ { EXTRA_FLIP Params = { TrickDef_TripleHeelflip EXTRA_TRICK Speed = 1.3 } } ] 
 
 TrickDef_TripleHeelflip = { 
 	Name = 'Triple Heelflip' 
@@ -215,19 +219,23 @@ TrickDef_Impossible = {
 	Anim = Impossible 
 	Nollie = NollieImpossible 
 	ExtraTricks = DoubleImpossible 
+	NewExtraTricks = NewDoubleImpossible 
 }
 
 DoubleImpossible = [ { EXTRA_FLIP Params = { TrickDef_DoubleImpossible EXTRA_TRICK } } ]
+NewDoubleImpossible = [ { EXTRA_FLIP Params = { TrickDef_DoubleImpossible EXTRA_TRICK Speed = 1.3 } } ]
 
 TrickDef_DoubleImpossible = { 
 	Name = 'Double Impossible'
 	Score = 500 
 	Anim = DoubleImpossible 
 	ExtraTricks = TripleImpossible 
+	NewExtraTricks = NewTripleImpossible 
 	TrickSlack = 15 
 }
 
 TripleImpossible = [ { EXTRA_FLIP Params = { TrickDef_TripleImpossible EXTRA_TRICK } } ]
+NewTripleImpossible = [ { EXTRA_FLIP Params = { TrickDef_TripleImpossible EXTRA_TRICK Speed = 1.3 } } ]
 
 TrickDef_TripleImpossible = { 
 	Name = 'Triple Impossible' 
@@ -279,15 +287,14 @@ TrickDef_VarialHeelflip = {
 	NewExtraTricks = ExtraVarialHeelflip
 } 
 
-ExtraVarialHeelflip = [ { EXTRA_FLIP Params = { TrickDef_360Heelflip EXTRA_TRICK } } ]
+ExtraVarialHeelflip = [ { EXTRA_FLIP Params = { TrickDef_360Heelflip EXTRA_TRICK Name = '360 Heelflip' Score = 500 Speed = 1.3 } } ]
 
-Trick_LaserFlip = { SCR_FLIP Params = TrickDef_360Heelflip }
+Trick_LaserFlip = { SCR_FLIP Params = { TrickDef_360Heelflip IsSpecial } }
 
 TrickDef_360Heelflip = { 
-	Name = '360 Heelflip' 
-	Score = 500 
+	Name = 'Laser Flip' 
+	Score = 1000 
 	Anim = laserflip 
-	Speed = 1.3 
 	TrickSlack = 20
 }
 
@@ -352,9 +359,11 @@ TrickDef_PopShoveIt = {
 	BoardRotate 
 	Nollie = NollieBSShoveIt 
 	ExtraTricks = Extra360ShoveIt 
+	NewExtraTricks = NewExtra360ShoveIt 
 }
 
 Extra360ShoveIt = [ { EXTRA_FLIP Params = { TrickDef_360ShoveIt EXTRA_TRICK } } ]
+NewExtra360ShoveIt = [ { EXTRA_FLIP Params = { TrickDef_360ShoveIt EXTRA_TRICK Speed = 1.3 } } ]
 
 TrickDef_360ShoveIt = { 
 	Name = '360 Shove-It' 
@@ -386,9 +395,11 @@ TrickDef_FSShoveIt = {
 	Nollie = NollieFSShoveIt 
 	BoardRotate 
 	ExtraTricks = ExtraFS360ShoveIt 
+	NewExtraTricks = NewExtraFS360ShoveIt 
 }
 
 ExtraFS360ShoveIt = [ { EXTRA_FLIP Params = { TrickDef_FS360ShoveIt EXTRA_TRICK } } ]
+NewExtraFS360ShoveIt = [ { EXTRA_FLIP Params = { TrickDef_FS360ShoveIt EXTRA_TRICK Speed = 1.3 } } ]
 
 TrickDef_FS360ShoveIt = {
 	Name = '360 FS Shove-It' 
