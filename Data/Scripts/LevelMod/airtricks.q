@@ -137,7 +137,7 @@ KickflipExtras = [
 ]
 
 NewKickflipExtras = [ 
-	{ EXTRA_FLIP Params = { TrickDef_DoubleKickflip EXTRA_TRICK } } 
+	{ EXTRA_FLIP Params = { TrickDef_DoubleKickflip EXTRA_TRICK Speed = 1.3 } } 
 	{ SCR_GRAB Trigger = { AirTrickLogic Circle Right 300 } Params = { TrickDef_KickflipToIndy EXTRA_TRICK } } 
 	{ SCR_GRAB Trigger = { AirTrickLogic Circle Up 300 } Params = { TrickDef_KickflipToCrail EXTRA_TRICK } } 
 	{ SCR_GRAB Trigger = { AirTrickLogic Circle Left 300 } Params = { TrickDef_KickflipToMelon EXTRA_TRICK } } 
@@ -496,6 +496,30 @@ TrickDef_OllieNorthBF = {
 }
 
 
+Trick_Fingerflip = { SCR_FLIP Params = { TrickDef_Fingerflip } }
+
+TrickDef_Fingerflip = { 
+	Name = 'Fingerflip' 
+	Score = 700 
+	Anim = FingerFlipVert 
+	Speed = 1.3 
+	TrickSlack = 25 
+	NewExtraTricks = ExtraDoubleFingerFlip
+}
+
+ExtraDoubleFingerFlip = [ { EXTRA_FLIP Params = { TrickDef_DoubleFingerFlip EXTRA_TRICK } } ]
+
+TrickDef_DoubleFingerFlip = {
+	Name = 'Double Fingerflip' 
+	Score = 1000 
+	Anim = FingerFlipVert 
+	Speed = 1.3 
+	Anim2 = FingerFlipVert
+	Anim2Wait = 23
+	Anim2From = 7
+	TrickSlack = 25 
+	GrindSlack = 25 
+}
 
 
 Trick_Varial = { SCR_FLIP Params = TrickDef_Varial }
@@ -513,8 +537,7 @@ Trick_OllieAirwalk = { SCR_FLIP Params = { Name = 'Ollie Airwalk' Score = 500 Sp
 CSOllieairwalkshoveit = [ { EXTRA_FLIP Params = { Name = 'Ollie Airwalk Late Shove-it' Score = 1000 Anim = OllieAirWalk Speed = 1.3 CSOllieairwalkshoveit IsExtra UseCurrent } } ]
 Trick_HFVarialLien = { SCR_FLIP Params = { Name = 'Heelflip Varial Lien' Score = 800 Anim = HeelflipVarialLien BoardRotate TrickSlack = 15 } }
 Trick_SalFlip = { SCR_FLIP Params = { Name = 'Sal Flip' Score = 900 Anim = SalFlip TrickSlack = 25 Speed = 1.3 } }
-Trick_Fingerflip = { SCR_FLIP Params = { Name = 'Fingerflip' Score = 700 Anim = FingerFlipVert Speed = 1.3 TrickSlack = 25 NewExtraTricks = CSDoubleFingerFlip } }
-CSDoubleFingerFlip = [ { EXTRA_FLIP Params = { Name = 'Double Fingerflip' Score = 1000 Anim = FingerFlipVert Speed = 1.3 TrickSlack = 25 GrindSlack = 25 CSDoubleFingerFlip IsExtra UseCurrent } } ]
+
 CSBenihanaFingerflip = { SCR_FLIP Params = { Name = 'Beni Fingerflip' Score = 1000 Anim = BenihanaFingerflip IsExtra } }
 
 
@@ -823,7 +846,7 @@ TrickDef_Benihana = {
 	Anim = Benihana
 	Idle = Benihana_Idle 
 	OutAnim = Benihana_Out 
-	NewExtraTricks = BenihanaFingerflip //
+	NewExtraTricks = BenihanaFingerflip
 }
 
 BenihanaFingerflip = [ 
@@ -1019,12 +1042,6 @@ script FlipTrick Speed = 1.0 TrickSlack = 10 GrindSlack = 25 Anim2From = 0 Anim2
 
 	Airtricks_SetExtraTricks <...>
 
-	//rewrite using Anim2
-	if GotParam CSDoubleFingerFlip
-		WaitAnim 23 frames
-		PlayAnim Anim = FingerFlipVert BlendPeriod = 0.3 From = 7 Speed = <Speed> //1.5
-	endif
-	
 	//rewrite using Anim2	
 	if GotParam CSOllieairwalkshoveit
 		WaitAnim 30 frames
