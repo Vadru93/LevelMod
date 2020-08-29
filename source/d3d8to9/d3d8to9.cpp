@@ -12,8 +12,8 @@
 
 #define pRANDOM_SIZE 0x32000
 
-static BYTE pRandom[pRANDOM_SIZE] = { 0 };
-BYTE hashTable[HASH_SIZE] = { 0 };//the node hash names, each item is 12 bytes
+static BYTE pRandom[pRANDOM_SIZE+0x14] = { 0 };
+BYTE hashTable[HASH_SIZE+0x14] = { 0 };//the node hash names, each item is 12 bytes
 //BYTE otherTable[0x50000];//unknown table, each item is 20 bytes
 
 static DWORD pOld = 0x008A8B48;
@@ -33,6 +33,7 @@ static DWORD pNew = (DWORD)&hashTable;
 //#pragma pop(pack)
 
 QBKeyHeader triggers[MAX_TRIGGERS]{ 0 };
+QBKeyHeader triggers2[MAX_TRIGGERS2]{ 0 };
 static DWORD pOld2 = 0x0087D8F8;
 static DWORD pNew2 = (DWORD)&triggers;
 QBKeyHeader* oldTriggers = (QBKeyHeader*)pOld2;
@@ -149,6 +150,36 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 	*(DWORD*)0x0042C1D5 = 0x20A9F0;
 	*(DWORD*)0x0042C1E1 = 0x20A9F8;
 	*(DWORD*)0x0042C1EC = 0x20A9FC;*/
+
+
+	VirtualProtect((void*)0x0042BFE2, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((void*)0x0042BFE7, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+
+	VirtualProtect((void*)0x0042C114, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((void*)0x0042C126, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((void*)0x0042C151, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((void*)0x0042C254, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((void*)0x0042C271, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((void*)0x0042BFE2, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((void*)0x0042BFE7, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+
+	*(DWORD*)0x0042C114 = (DWORD)&triggers2;
+	*(DWORD*)0x0042C126 = (DWORD)&triggers2 + OTHER2_SIZE;
+
+	*(DWORD*)0x0042C151 = (DWORD)&triggers2;
+
+	*(DWORD*)0x0042C254 = (DWORD)&triggers2;
+	*(DWORD*)0x0042C271 = (DWORD)&triggers2 + OTHER2_SIZE;
+
+	
+	*(DWORD*)0x0042C12D = (DWORD)&triggers2 + 0x10;
+	*(DWORD*)0x0042C13B = (DWORD)&triggers2[MAX_TRIGGERS2-1].NextHeader;
+	*(DWORD*)0x0042C143 = (DWORD)&triggers2[MAX_TRIGGERS2-1].NextHeader;
+
+
+
+	/**(DWORD*)0x0042BFE2 = 0x008B4B48;
+	*(DWORD*)0x0042BFE7 = 0x1D4C0 + *(DWORD*)0x0042BFE7;*/
 
 
 	VirtualProtect((void*)0x004492C5, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);

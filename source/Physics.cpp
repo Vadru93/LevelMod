@@ -2166,11 +2166,9 @@ __declspec(naked) void MaybeAcid_naked()
 {
 	static const DWORD jmpBack = 0x004A8AE0 + 4;
 	_asm pushad;
-	_asm pushfd;
 	/*_printf("inside maybeacidd\n");
 	fflush(stdout);*/
 	MaybeAcid();
-	_asm popfd;
 	_asm popad;
 	static const DWORD handle_air = 0x004A25A0;
 	_asm call handle_air
@@ -2182,7 +2180,6 @@ __declspec(naked) void CheckForTransfer_naked()
 	static Skater* skater = NULL;
 	_asm mov skater, ebp
 	_asm pushad;
-	_asm pushfd;
 	static const DWORD jmpBack = 0x004A2DAB + 4;
 	static bool ok = false;
 	//_asm pop retaddr;
@@ -2213,7 +2210,6 @@ __declspec(naked) void CheckForTransfer_naked()
 	if (Slerp::type == SPINE && Slerp::transfer)
 		ok = true;
 	//_asm push retaddr;
-	_asm popfd;
 	_asm popad;
 	_asm mov al, ok
 	_asm jmp[jmpBack]
@@ -2225,7 +2221,6 @@ __declspec(naked) void ResetTransferVel_naked()
 	_asm mov velocity, ebx
 	static const DWORD jmpBack = 0x004A27B5 + 4;
 	_asm pushad;
-	_asm pushfd;
 	//_asm pushfd;
 	//_printf("inside resettrasnferver\n");
 	//_asm popfd;
@@ -2234,7 +2229,6 @@ __declspec(naked) void ResetTransferVel_naked()
 		//_printf("Reset velocity %f %f\nvel %f %f\n", velocity->x, velocity->z, Slerp::vel.x, Slerp::vel.z);
 		*velocity -= Slerp::vel;
 	}
-	_asm popfd;
 	_asm popad;
 	static DWORD vrtx = 0x0048A720;
 	_asm call vrtx;
