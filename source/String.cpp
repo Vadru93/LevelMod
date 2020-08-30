@@ -15,7 +15,7 @@ namespace String
 	DWORD numNoExtraStrings = 0;
 
 
-#define MAX_NUM_LEVEL 100000
+#define MAX_NUM_LEVEL 30000
 
 	
 	PermanentString levelStrings[MAX_NUM_LEVEL] = { 0 };
