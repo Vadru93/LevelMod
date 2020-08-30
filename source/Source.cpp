@@ -3246,7 +3246,7 @@ void HookedFopen(char* p)
 				/*MessageBox(0, p, qbPath, 0);
 				AddCompressedNodes();*/
 				if (debugMode)
-					QScript::Scripts->OpenScript(p);
+					QScript::Scripts->OpenScript(p, true);
 			}
 		}
 	}

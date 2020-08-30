@@ -143,7 +143,7 @@ void CommandGetInfo(const char* message)
 	_printf("New PermanentHeap(no extra memory) %d %X(MAX %X)\n", String::GetNumStrings(String::HEAP::NEW_NOEXTRA), String::GetHeapSize(String::HEAP::NEW_NOEXTRA), String::GeHeapMaxSize(String::HEAP::NEW_NOEXTRA));
 	_printf("New PermanentHeap(extra memory) %d %X(MAX %X)\n\n", String::GetNumStrings(String::HEAP::NEW_EXTRA), String::GetHeapSize(String::HEAP::NEW_EXTRA), String::GeHeapMaxSize(String::HEAP::NEW_EXTRA));
 	_printf("Level specific strings: \n");
-	_printf("LevelPermanentHeap %d(MAX %d) %X(MAX %X)\n\n", String::GetNumStrings(String::HEAP::LEVEL), String::GetHeapSize(String::HEAP::LEVEL), String::GeHeapMaxSize(String::HEAP::LEVEL));
+	_printf("LevelPermanentHeap %d %X(MAX %X)\n\n", String::GetNumStrings(String::HEAP::LEVEL), String::GetHeapSize(String::HEAP::LEVEL), String::GeHeapMaxSize(String::HEAP::LEVEL));
 	//MessageBox(0, 0, 0, 0);
 
 

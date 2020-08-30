@@ -214,7 +214,7 @@ namespace String
 
 		for (DWORD i = 0; i < numLevelStrings; i++)
 		{
-			if (levelStrings[i].checksum = checksum)
+			if (levelStrings[i].checksum == checksum)
 			{
 				_printf("Returning optimized level string %s\n", levelStrings[i].pStr);
 				return levelStrings[i].pStr;
