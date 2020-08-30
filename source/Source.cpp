@@ -4906,7 +4906,7 @@ void DrawFrame()
 				{
 					//_printf("FALSE\n");
 					if (movingObjects[i].Update(skater->GetFrameLength()))
-						movingObjects[i].sector->mesh->Update();//Send state to update vertexbuffer
+						movingObjects[i].sector->Update();//Send state to update vertexbuffer
 				}
 				else
 				{

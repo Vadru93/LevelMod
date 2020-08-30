@@ -162,6 +162,27 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 	VirtualProtect((void*)0x0042C271, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
 	VirtualProtect((void*)0x0042BFE2, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
 	VirtualProtect((void*)0x0042BFE7, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+	VirtualProtect((void*)0x0042BE4B, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+
+	VirtualProtect((void*)0x004266D3, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+
+		VirtualProtect((void*)0x0042898E, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+
+		VirtualProtect((void*)0x00428992, sizeof(BYTE), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x004266D7, sizeof(BYTE), PAGE_EXECUTE_READWRITE, &old);
+
+
+			VirtualProtect((void*)(0x0042BF3E + 6), sizeof(BYTE), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x0042BF46, sizeof(BYTE), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x0042BF47, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+
+			VirtualProtect((void*)0x0042BF4E, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x0042BF52, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x0042BF56, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x0042BF5A, sizeof(BYTE), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x0042BF5B, sizeof(WORD), PAGE_EXECUTE_READWRITE, &old);
+
+			VirtualProtect((void*)0x0042BF4E, 6, PAGE_EXECUTE_READWRITE, &old);
 
 	*(DWORD*)0x0042C114 = (DWORD)&triggers2;
 	*(DWORD*)0x0042C126 = (DWORD)&triggers2 + OTHER2_SIZE;
@@ -176,10 +197,31 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 	*(DWORD*)0x0042C13B = (DWORD)&triggers2[MAX_TRIGGERS2-1].NextHeader;
 	*(DWORD*)0x0042C143 = (DWORD)&triggers2[MAX_TRIGGERS2-1].NextHeader;
 
+	*(DWORD*)0x004266D3 = (DWORD)&triggers2;
+	*(BYTE*)0x004266D7 = 0x77;
+
+	*(DWORD*)0x0042898E = (DWORD)&triggers2;
+	*(BYTE*)0x00428992 = 0x77;
+
+	*(DWORD*)0x0042BFE2 = 0x008B4B48-40000;
+	*(DWORD*)0x0042BFE7 = /*0x1D4C0*/ 40000+ *(DWORD*)0x0042BFE7;
+
+	*(DWORD*)0x0042BE4B = 0xFF00;
 
 
-	/**(DWORD*)0x0042BFE2 = 0x008B4B48;
-	*(DWORD*)0x0042BFE7 = 0x1D4C0 + *(DWORD*)0x0042BFE7;*/
+	//For debug...
+	//*(BYTE*)(0x0042BF3E + 6) = 1;
+	*(BYTE*)0x0042BF46 = 0x90;
+	*(DWORD*)0x0042BF47 = 0x90909090;
+
+	*(DWORD*)0x0042BF4E = 0x90909090;
+	*(DWORD*)0x0042BF52 = 0x90909090;
+	*(DWORD*)0x0042BF56 = 0x90909090;
+	*(BYTE*)0x0042BF5A = 0x90;
+	*(WORD*)0x0042BF5B = 0x9090;
+
+	*(WORD*)0x0042BF4E = 0x1D89;
+	*(DWORD*)0x0042BF50 = pOld;
 
 
 	VirtualProtect((void*)0x004492C5, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);

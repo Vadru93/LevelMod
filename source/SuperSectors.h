@@ -23,12 +23,12 @@ EXTERN struct SuperSector
 	DWORD* pUnk2;//Looks like axis for CollisionTree?
 	DWORD* pUnk3;//Huge data...
 	DWORD* pUnk4;//Looks like colors?
-	Object* object;
+	Mesh* mesh;
 	DWORD* pUnk6[6];//Points to itself
 	D3DXVECTOR3 bboxMax;
 	D3DXVECTOR3 bboxMin;
 	DWORD* pUnk7;//Always NULL?
-	Mesh* mesh;
+	CSector* sector;
 	DWORD* pUnk9;//Always NULL?
 	WORD padding;
 	WORD numVertices;
@@ -47,6 +47,11 @@ EXTERN struct SuperSector
 	DWORD* pUnk16;//bunch of floats, nothing happens when changing them maybe center/position?
 	DWORD name;//crc32
 	DWORD* pUnk17;//similar to pUnk16
+
+	void Update()
+	{
+		sector->Update();
+	}
 
 	//004fea30 00412230
 	EXTERN static SuperSector* GetSuperSector(DWORD checksum)

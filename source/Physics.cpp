@@ -1544,24 +1544,46 @@ bool TestForAcid(CStruct* pParams, CScript* pScript)
 				skater->SetCanBreakVert(false);*/
 				//skater->ResetLerpingMatrix();
 
+
+
 				CStructHeader param(QBKeyHeader::INT, 500);
 				pStruct.AddParam(&param);
 				skater->CallMemberFunction(Checksum("SetSpeed"), &pStruct, &pScript);
 
+				/*skater->GetVelocity()->x *= 0.1f;
+				skater->GetVelocity()->z *= 0.1f;*/
+				D3DXVECTOR3 vel = *skater->GetVelocity();
+				skater->GetVelocity()->x = 0.0f;
+				skater->GetVelocity()->y = 0.0f;
+				skater->GetVelocity()->z = 0.0f;
 
 				param.Type = QBKeyHeader::LOCAL;
 				param.Data = Checksum("Ground");
 				skater->CallMemberFunction(Checksum("SetState"), &pStruct, &pScript);
+
+				skater->GetVelocity()->x *= 0.1f;
+				skater->GetVelocity()->z *= 0.1f;
+				
+
+				
+				
+
+				*skater->GetVelocity() = vel;
+
+				skater->GetVelocity()->x *= 0.1f;
+				skater->GetVelocity()->z *= 0.1f;
+
 				param.QBkey = Checksum("y");
 				param.value.i = -20;
 				skater->CallMemberFunction(Checksum("Move"), &pStruct, &pScript);
-
-				skater->SetTracking(false);
-				param.Type = QBKeyHeader::LOCAL;
-				param.Data = Checksum("Air");
-				skater->CallMemberFunction(Checksum("SetState"), &pStruct, &pScript);
 				pStruct.head = NULL;
 				pStruct.tail = NULL;
+				skater->SetTracking(false);
+
+				param.Type = QBKeyHeader::LOCAL;
+				param.QBkey = 0;
+				param.Data = Checksum("Air");
+				skater->CallMemberFunction(Checksum("SetState"), &pStruct, &pScript);
 				/*param.Type = QBKeyHeader::FLOAT;
 				param.QBkey = Checksum("z");
 				param.value.f = 90.0f;
