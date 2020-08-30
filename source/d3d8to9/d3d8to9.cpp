@@ -65,7 +65,7 @@ std::ofstream LOG;
 extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 {
 	
-
+	MessageBox(0, 0, 0, 0);
 	memcpy((char*)0x5BBAF8, "Scripts\\qdir_lm.txt", 20);
 	DWORD old;
 	VirtualProtect((void*)0x0042B247, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
@@ -203,8 +203,8 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 	*(DWORD*)0x0042898E = (DWORD)&triggers2;
 	*(BYTE*)0x00428992 = 0x77;
 
-	*(DWORD*)0x0042BFE2 = 0x008B4B48-40000;
-	*(DWORD*)0x0042BFE7 = /*0x1D4C0*/ 40000+ *(DWORD*)0x0042BFE7;
+	*(DWORD*)0x0042BFE2 = 0x008B4B48-EXTRA_STRINGS;
+	*(DWORD*)0x0042BFE7 = /*0x1D4C0*/ EXTRA_STRINGS + *(DWORD*)0x0042BFE7;
 
 	*(DWORD*)0x0042BE4B = 0xFF00;
 

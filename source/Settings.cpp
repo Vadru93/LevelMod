@@ -6,6 +6,7 @@
 #include "IniReader.h"
 #include "IniWriter.h"
 #include "Node.h"
+#include "String.h"
 
 #define NO_EXTRA_INCLUDE
 #include "Extension.h"
@@ -431,9 +432,10 @@ void AddOption(char* name, int value, bool update)
 			QScript::Scripts = new QScript::QBScript(false);
 
 		//_printf("Adding to QBTable %s\n");
-		char* tempName = new char[strlen(name) + 1];
-		memcpy(tempName, name, strlen(name) + 1);
-		QScript::Scripts->qbTable.insert(std::pair<int, char*>(checksum, tempName));
+		/*char* tempName = new char[strlen(name) + 1];
+		memcpy(tempName, name, strlen(name) + 1);*/
+
+		QScript::Scripts->qbTable.insert(std::pair<int, char*>(checksum, String::AddString(name)));
 		//MessageBox(0, FindChecksumName(checksum), "", 0);
 
 	}

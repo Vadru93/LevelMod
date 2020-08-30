@@ -146,6 +146,7 @@
     <ClCompile Include="source\Settings.cpp" />
     <ClCompile Include="source\Skater.cpp" />
     <ClCompile Include="source\Source.cpp" />
+    <ClCompile Include="source\String.cpp" />
     <ClCompile Include="source\SuperSectors.cpp" />
     <ClCompile Include="source\zip\unzip.cpp" />
   </ItemGroup>
@@ -179,6 +180,7 @@
     <ClInclude Include="source\Script.h" />
     <ClInclude Include="source\Settings.h" />
     <ClInclude Include="source\Skater.h" />
+    <ClInclude Include="source\String.h" />
     <ClInclude Include="source\SuperSectors.h" />
     <ClInclude Include="source\zip\unzip.h" />
     <ClInclude Include="source\_Math.h" />

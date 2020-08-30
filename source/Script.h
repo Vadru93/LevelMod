@@ -68,12 +68,18 @@ namespace QScript
 	{
 		char* fileName;
 		std::map<int, char*> qbTable;
+		std::map<int, char*> levelTable;
 
-		void CreateQBTable(BYTE* table);
+		void CreateQBTable(BYTE* table, bool level = false);
 
 		QBScript(bool nothing)
 		{
 			fileName = NULL;
+		}
+
+		void ClearLevelTable()
+		{
+			levelTable.clear();
 		}
 
 		void AddScripts();
@@ -88,7 +94,7 @@ namespace QScript
 
 		char* GetQBKeyName(int checksum);
 
-		void OpenScript(char* path);
+		void OpenScript(char* path, bool level = false);
 
 		~QBScript()
 		{

@@ -3,6 +3,7 @@
 #include "pch.h"
 #include "Defines.h"
 #include "Node.h"
+#include "String.h"
 
 
 char* QScript::QBTypes[] = {
@@ -418,7 +419,7 @@ EXTERN DWORD CScript::GetNodeName()
 	return node->name;
 }
 
-void QBScript::CreateQBTable(BYTE* table)
+void QBScript::CreateQBTable(BYTE* table, bool level)
 {
 	while (*table == ScriptToken::Table)
 	{
@@ -435,6 +436,7 @@ void QBScript::CreateQBTable(BYTE* table)
 
 		//_printf("QbAllocated %s\n", name);
 		map<int, char*>::iterator it = qbTable.find(key);
+
 		if (it == qbTable.end())
 		{
 			/*FILE* debugFile = fopen("debug.txt", "r+t");
@@ -443,8 +445,20 @@ void QBScript::CreateQBTable(BYTE* table)
 			printf("AddingKey %s %X, in file %s\r\n", name, key, fileName);
 			fclose(debugFile);*/
 			//_printf("AddChecksum %s 0x%X\n", name, key);
-			qbTable.insert(pair<int, char*>(key, name));
-			qbKeys.push_back(key);
+			if (!level)
+			{
+				qbTable.insert(pair<int, char*>(key, String::AddString(name)));
+				qbKeys.push_back(key);
+			}
+			else
+			{
+				it = levelTable.find(key);
+				if (it == levelTable.end())
+				{
+					levelTable.insert(pair<int, char*>(key, String::AddLevelString(name)));
+					qbKeys.push_back(key);
+				}
+			}
 		}
 		/*else if (_stricmp(it->second, name))
 		{
@@ -513,9 +527,12 @@ char* QBScript::GetQBKeyName(int checksum)
 		it = qbTable.find(checksum);
 
 		if (it != qbTable.end())
-		{
 			return it->second;
-		}
+
+		it = levelTable.find(checksum);
+
+		if (it != levelTable.end())
+			return it->second;
 		/*else
 			printf("couldn't find QBKey %X\n", checksum);*/
 	}
@@ -524,7 +541,7 @@ char* QBScript::GetQBKeyName(int checksum)
 	return NULL;
 }
 
-void QBScript::OpenScript(char* path)
+void QBScript::OpenScript(char* path, bool level)
 {
 	fileName = path;
 	_printf("OpenScript: %s\n", path);//MessageBox(0, "OpenScript", path, 0);
@@ -602,7 +619,7 @@ void QBScript::OpenScript(char* path)
 		}
 	}
 done:
-	CreateQBTable(pFile);
+	CreateQBTable(pFile, level);
 	_printf("END OpenScript\n");
 	delete[] oldData;
 
@@ -610,10 +627,10 @@ done:
 
 void QBScript::ClearMap()
 {
-	map<int, char*>::iterator end = qbTable.end();
+	/*map<int, char*>::iterator end = qbTable.end();
 	for (map<int, char*>::iterator it = qbTable.begin(); it != end; it++)
 	{
 		delete[] it->second;
-	}
+	}*/
 	qbTable.clear();
 }

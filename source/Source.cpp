@@ -18,6 +18,7 @@
 #include "IniReader.h"
 #include "IniWriter.h"
 #include "Bugfixes.h"
+#include "String.h"
 
 
 /*//Game states
@@ -786,6 +787,8 @@ bool GetMotd(CStruct* pStruct, CScript* pScript)
 
 void DestroySuperSectors()
 {
+	String::RemoveLevelStrings();
+	QScript::Scripts->ClearLevelTable();
 	_printf("Going to remove MovingObjects\n");
 	GameState::GotSuperSectors = false;
 	if (movingObjects.size())
@@ -3278,7 +3281,7 @@ void AddChecksum(int key, char* name, void* retAddr)
 			printf("AddingKey %s %X, CalledFrom %p\r\n", name, key, retAddr);
 			fclose(debugFile);*/
 			//_printf("AddChecksum %s 0x%X\n", name, key);
-			QScript::Scripts->qbTable.insert(std::pair<int, char*>(key, name));
+			QScript::Scripts->qbTable.insert(std::pair<int, char*>(key, String::AddString(name)));
 			QScript::qbKeys.push_back(key);
 		}
 		/*else if (_stricmp(it->second, name))
@@ -3421,7 +3424,7 @@ FILE* __cdecl _fopen(const char* p, const char* b)
 		qbPath[strlen(qbPath) - 1] = 0x0;
 		//MessageBox(0, p, qbPath, 0);
 		AddCompressedNodes();
-		QScript::Scripts->OpenScript((char*)p);
+		QScript::Scripts->OpenScript((char*)p, true);
 	}
 
 	return fopen(p, b);
