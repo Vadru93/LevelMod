@@ -12,16 +12,12 @@ namespace String
 	DWORD numExtraStrings = 0;
 	DWORD numLevelStrings = 0;
 	DWORD numStrings = 0;
+	DWORD numNoExtraStrings = 0;
 
 
 #define MAX_NUM_LEVEL 160000
 
-	struct PermanentString
-	{
-		DWORD checksum;
-		char* pStr;
-	};
-
+	
 	PermanentString levelStrings[MAX_NUM_LEVEL] = { 0 };
 
 	char LevelHeapBottom[MAX_NUM_LEVEL*80];
@@ -57,9 +53,65 @@ namespace String
 		return *(PermanentString**)0x008E1E10;
 	}
 
+	DWORD GetNumStringsTotal()
+	{
+		return numStrings + numExtraStrings;
+	}
+
+	DWORD GetNumMaxStringsTotal()
+	{
+		return MAX_PERMANENT_STRINGS + MAX_NUM_EXTRA;
+	}
+
 	DWORD GetNumStrings()
 	{
 		return *(DWORD*)0x008E1E14;
+	}
+
+	DWORD GetNumStrings(HEAP heap)
+	{
+		switch (heap)
+		{
+		case HEAP::ORIGINAL:
+			return GetNumStrings();
+		case HEAP::NEW_NOEXTRA:
+			return numNoExtraStrings;
+		case HEAP::NEW_EXTRA:
+			return numExtraStrings - numNoExtraStrings;
+		case HEAP::LEVEL:
+			return numLevelStrings;
+		}
+	}
+
+	DWORD GetHeapSize(HEAP heap)
+	{
+		switch (heap)
+		{
+		case HEAP::ORIGINAL:
+			return *(DWORD*)0x008E1E0C-(0x008B4B48 - EXTRA_STRINGS);
+		case HEAP::NEW_NOEXTRA:
+			return ExtraMemoryTop-ExtraMemoryBottom;
+		case HEAP::NEW_EXTRA:
+			return PermanentHeapTop-PermanentHeapBottom;
+		case HEAP::LEVEL:
+			return LevelHeapTop - LevelHeapBottom;
+		}
+	}
+
+	DWORD GeHeapMaxSize(HEAP heap)
+	{
+		switch (heap)
+		{
+		case HEAP::ORIGINAL:
+		case HEAP::NEW_NOEXTRA:
+			return GetHeapSize(heap);
+			
+		case HEAP::NEW_EXTRA:
+			return sizeof(PermanentHeapBottom);
+
+		case HEAP::LEVEL:
+			return sizeof(LevelHeapBottom);
+		}
 	}
 
 	void RemoveLevelStrings()
@@ -84,8 +136,8 @@ namespace String
 				if ((*(DWORD*)0x008E1E0C + len) >= 0x008E1DF0)
 				{
 					char  msg[256] = "";
-					sprintf(msg, "ExtraMemory reached @ %d strings", numStrings + numExtraStrings);
-					MessageBox(0, msg, msg, 0);
+					_printf(("ExtraMemory reached @ %d strings"), numStrings + numExtraStrings);
+					//MessageBox(0, msg, msg, 0);
 					useExtraMemory = true;
 					StringHeapTop = (char*)0x0087D8FC;
 					ExtraMemoryTop = StringHeapTop;
@@ -101,8 +153,9 @@ namespace String
 
 			if ((ExtraMemoryTop + len) >= ExtraMemoryBottom + OLD_OTHER_SIZE)
 			{
-				MessageBox(0, "Out of memory in permanent heap...", "CRITICAL ERROR", 0);
+				_printf("Out of memory in permanent heap...\nGoing to use new heap\n");
 				PermanentHeapTop += len;
+				numNoExtraStrings = numExtraStrings;
 				outOfMemory = true;
 			}
 			else
