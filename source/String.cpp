@@ -15,7 +15,7 @@ namespace String
 	DWORD numNoExtraStrings = 0;
 
 
-#define MAX_NUM_LEVEL 160000
+#define MAX_NUM_LEVEL 100000
 
 	
 	PermanentString levelStrings[MAX_NUM_LEVEL] = { 0 };
@@ -24,7 +24,7 @@ namespace String
 	char* LevelHeapTop = LevelHeapBottom;
 
 
-#define MAX_NUM_EXTRA 150000
+#define MAX_NUM_EXTRA 50000
 
 	PermanentString permanentStrings[MAX_NUM_EXTRA] = { 0 };
 
