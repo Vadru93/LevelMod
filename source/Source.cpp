@@ -2443,6 +2443,7 @@ const CompiledScript scripts[] =
 	{"GetParam", GetParamScript},
 	{"SetOption", SetOption},
 	{"GetOptionText", GetOptionText},
+	{"LM_PrintInfo", GetInfoScript },
 	/*{"SetMemoryPoolSize", SetMemoryPoolSize},
 	{"GetMemoryPoolSize", GetMemoryPoolSize},
 	{"GetMemoryPoolSizeText", GetMemoryPoolSizeText},*/

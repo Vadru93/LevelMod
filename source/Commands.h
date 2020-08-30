@@ -148,6 +148,13 @@ void CommandGetInfo(const char* message)
 
 
 }
+
+bool GetInfoScript(CStruct* pStruct, CScript* pScript)
+{
+	CommandGetInfo(NULL);
+	return true;
+}
+
 void CommandConsole(const char* message);
 void CommandTell(const char* message);
 void CommandDebug(const char* message);
