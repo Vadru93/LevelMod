@@ -19,6 +19,9 @@ BYTE hashTable[HASH_SIZE+0x14] = { 0 };//the node hash names, each item is 12 by
 static DWORD pOld = 0x008A8B48;
 static DWORD pNew = (DWORD)&hashTable;
 
+//faces??
+static BYTE pFaces[0x60804];
+
 //#pragma pack(1)
 /*struct TriggerScript
 {
@@ -64,7 +67,7 @@ std::ofstream LOG;
 
 extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 {
-
+	MessageBox(0, 0, 0, 0);
 	memcpy((char*)0x5BBAF8, "Scripts\\qdir_lm.txt", 20);
 	DWORD old;
 	VirtualProtect((void*)0x0042B247, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
@@ -183,6 +186,13 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 
 			VirtualProtect((void*)0x0042BF4E, 6, PAGE_EXECUTE_READWRITE, &old);
 
+			VirtualProtect((void*)0x0042C09D, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+
+			VirtualProtect((void*)0x0042C0C3, sizeof(DWORD), PAGE_EXECUTE_READWRITE, & old);
+			VirtualProtect((void*)0x0042C0CB, sizeof(DWORD), PAGE_EXECUTE_READWRITE, & old);
+
+			VirtualProtect((void*)0x0042BBCD, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+
 	*(DWORD*)0x0042C114 = (DWORD)&triggers2;
 	*(DWORD*)0x0042C126 = (DWORD)&triggers2 + OTHER2_SIZE;
 
@@ -221,6 +231,15 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 
 	*(WORD*)0x0042BF4E = 0x1D89;
 	*(DWORD*)0x0042BF50 = pOld;
+
+
+	//Total Number of Level CScripts?
+	*(DWORD*)0x0042C09D = *(DWORD*)0x0042C09D * 125;
+
+	*(DWORD*)0x0042C0C4 = *(DWORD*)0x0042C09D - 8;
+	*(DWORD*)0x0042C0CC = *(DWORD*)0x0042C09D - 4;
+
+	*(DWORD*)0x0042BBCD = (DWORD)&pFaces;
 
 
 	VirtualProtect((void*)0x004492C5, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
