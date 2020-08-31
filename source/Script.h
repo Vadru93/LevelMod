@@ -87,6 +87,8 @@ namespace QScript
 	extern std::vector<DWORD> qbKeys;
 	extern std::vector<QBFile> qbFiles;
 
+	bool FileExists(char* file);
+
 	struct QBScript
 	{
 		char* fileName;

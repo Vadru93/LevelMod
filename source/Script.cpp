@@ -550,17 +550,44 @@ char* QBScript::GetQBKeyName(int checksum)
 #include <fstream>
 #include <iostream>
 
+bool CheckForMatch_stub(char* file1, char* & file2)
+{
+	while (*file2 != 0x0D && *file2 != 0x0A && *file2 != 0xFF)
+	{
+		if (*file1 != *file2)
+		{
+			while (*file2 != 0x0A && *file2 != 0x0D)
+			{
+				file2++;
+			}
+			
+			return false;
+		}
+		file1++;
+		file2++;
+	}
+	
+	return true;
+}
+
 char* CheckForMatch(char* fileName, char* qbFiles)
 {
+
 	while (*qbFiles != 0xFF)
 	{
-		if (stricmp(fileName, qbFiles) == 0)
+		if (CheckForMatch_stub(fileName, qbFiles))
+		{
+			//_printf("FileExists: %s\n", fileName);
 			return qbFiles;
-		while (*qbFiles != 0)
+		}
+		
+		while (*qbFiles == 0x0A || *qbFiles == 0x0D)
+		{
 			qbFiles++;
-		while (*qbFiles == 0)
-			qbFiles++;
+		}
 	}
+
+	_printf("New File: %s\n", fileName);
 	return NULL;
 }
 
@@ -714,14 +741,73 @@ void QBScript::ClearMap()
 	qbTable.clear();
 }
 
+bool QScript::FileExists(char* file)
+{
+	for (DWORD i = 0; i < qbFiles.size(); i++)
+	{
+		if (!stricmp(qbFiles[i].fileName, file))
+			return true;
+	}
+	_printf("New File %s\n", file);
+	return false;
+}
+
 bool TestReloadQB(CStruct* pStruct, CScript* pScript)
 {
 	
 	typedef void(__cdecl* const pLoadQB)(char* fileName, bool unknown);
+
 	for (DWORD i = 0; i < qbFiles.size(); i++)
 	{
 		if(qbFiles[i].ContentChanged())
 		    pLoadQB(0x0042B300)(qbFiles[i].fileName, false);
 	}
+	char* qbFiles = *(char**)0x008A8B48;
+
+	
+	char* dir = GetScriptDir();
+	FILE* f = fopen(dir, "rb+");
+
+
+	fseek(f, 0, SEEK_END);
+	DWORD size = ftell(f);
+
+	fseek(f, 0, SEEK_SET);
+	BYTE* pFile = new BYTE[size + 1];
+	fread(pFile, size, 1, f);
+	fclose(f);
+	BYTE* oldData = pFile;
+
+	//MessageBox(0, dir, "going to parse", 0);
+	while (pFile < (oldData + size - 5))
+	{
+		unsigned int i = 13;
+		while (pFile < (oldData + size) && *pFile != 0x0A && *pFile != 0x0D)
+		{
+			dir[i] = *pFile;
+			dir[i + 1] = 0;
+			i++;
+			pFile++;
+		}
+
+		dir[i] = 0;
+		//_printf("CheckingFile: %s\n", &dir[5]);
+
+		if (!FileExists(&dir[5]))
+		{
+			unsigned long checksum;
+			if (FastCRC::CFastCRC32::Calculate(&checksum, dir) != 0)
+				MessageBox(0, "Error calculating checksum for file", &dir[13], 0);
+			QScript::qbFiles.push_back(QBFile(checksum, dir, size));
+
+			pLoadQB(0x0042B300)(&dir[5], false);
+		}
+
+		pFile++;
+		while (pFile < (oldData + size) && (*pFile == 0x0D || *pFile == 0x0A))
+			pFile++;
+	}
+	delete[] oldData;
+
 	return true;
 }
