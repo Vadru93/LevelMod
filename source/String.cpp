@@ -15,7 +15,7 @@ namespace String
 	DWORD numNoExtraStrings = 0;
 
 
-#define MAX_NUM_LEVEL 60000
+#define MAX_NUM_LEVEL 15000
 
 	
 	PermanentString levelStrings[MAX_NUM_LEVEL] = { 0 };
@@ -24,7 +24,7 @@ namespace String
 	char* LevelHeapTop = LevelHeapBottom;
 
 
-#define MAX_NUM_EXTRA 50000
+#define MAX_NUM_EXTRA 35000
 
 	PermanentString permanentStrings[MAX_NUM_EXTRA] = { 0 };
 
@@ -175,8 +175,9 @@ namespace String
 
 	char* GetString(DWORD& checksum, const char* str)
 	{
+		DWORD checksum_non_case = crc32f(str);
 		PermanentString* strings = GetPermanentStringList();
-		numStrings = GetNumStrings();
+		DWORD numStrings = GetNumStrings();
 
 		for (DWORD i = 0; i < numStrings; i++)
 		{
@@ -185,13 +186,13 @@ namespace String
 				_printf("Returning old String %s\n", strings[i].pStr);
 				return strings[i].pStr;
 			}
-			else if (crc32f(strings[i].pStr) == checksum)
+			else if (crc32f(strings[i].pStr) == checksum_non_case)
 			{
 				return strings[i].pStr;
 			}
 		}
 
-		checksum = crc32f(str);
+		checksum = checksum_non_case;
 
 		for (DWORD i = 0; i < numExtraStrings; i++)
 		{
@@ -221,8 +222,6 @@ namespace String
 			}
 		}
 
-		numLevelStrings++;
-
 		if (numLevelStrings >= MAX_NUM_LEVEL)
 		{
 			MessageBox(0, "Please increase it", "Maximum number of permanent strings reached...", 0);
@@ -242,6 +241,7 @@ namespace String
 
 		levelStrings[numLevelStrings].checksum = checksum;
 		levelStrings[numLevelStrings].pStr = StringHeapTop;
+		numLevelStrings++;
 		return StringHeapTop;
 	}
 
