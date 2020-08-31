@@ -28,7 +28,8 @@ script UserSelectSquare
   ReplaceSkinTexture replace = "CS_NH_cargoshorts.png" with = "CS_NH_cargoshorts_HD.png" image_dir = "textures/skater_m" ScreenShot
 endscript
 script UserSelectCircle
-  MoveObject name = wild_Log_Loader_Base_High relpos = (0, 2000, 0)
+  //MoveObject name = wild_Log_Loader_Base_High relpos = (0, 2000, 0)
+  TestReloadQB
 endscript
 script UserSelectStart
   RestripWorld levels = [ "Levels\SI\SI.TDX" "Levels\SI\SI.bsp" ]

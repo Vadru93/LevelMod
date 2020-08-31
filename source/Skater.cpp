@@ -17,13 +17,13 @@ bool Modulating()
 	return false;
 }
 
-typedef bool(__thiscall* const pCollisionCheck)(Skater* pThis, BYTE ignore, BYTE flags, BYTE ignore2);
-EXTERN bool Skater::CollisionCheck(BYTE flag, bool ignore)
+typedef bool(__thiscall* const pCollisionCheck)(Skater* pThis, Collision::Flags ignore0, Collision::Flags flags, Collision::Flags ignore1);
+EXTERN bool Skater::CollisionCheck(Collision::Flags flag, bool ignore)
 {
 	if (ignore)
-		return pCollisionCheck(0x0049FC80)(this, flag, 0, 0);
+		return pCollisionCheck(0x0049FC80)(this, flag, Collision::Flags::Ignore, Collision::Flags::Ignore);
 	else
-		return pCollisionCheck(0x0049FC80)(this, 0, flag, 0);
+		return pCollisionCheck(0x0049FC80)(this, Collision::Flags::Ignore, flag, Collision::Flags::Ignore);
 }
 
 bool GetZAngle(CStruct* pParams, CScript* pScript)

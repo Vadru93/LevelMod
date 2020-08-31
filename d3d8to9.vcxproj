@@ -81,6 +81,7 @@
       </IgnoreSpecificDefaultLibraries>
       <IgnoreAllDefaultLibraries>
       </IgnoreAllDefaultLibraries>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -154,6 +155,7 @@
     <ClInclude Include="res\resource.h" />
     <ClInclude Include="source\Bugfixes.h" />
     <ClInclude Include="source\Checksum.h" />
+    <ClInclude Include="source\Collision.h" />
     <ClInclude Include="source\Commands.h" />
     <ClInclude Include="source\CXBOXController.h" />
     <ClInclude Include="source\d3d8to9\d3d8to9.hpp" />
@@ -163,6 +165,7 @@
     <ClInclude Include="source\Debug.h" />
     <ClInclude Include="source\Defines.h" />
     <ClInclude Include="source\Extension.h" />
+    <ClInclude Include="source\FastCRC.h" />
     <ClInclude Include="source\framework.h" />
     <ClInclude Include="source\Globals.h" />
     <ClInclude Include="source\HTTPRequest.h" />

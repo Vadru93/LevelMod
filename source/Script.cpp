@@ -4,6 +4,7 @@
 #include "Defines.h"
 #include "Node.h"
 #include "String.h"
+#include "FastCRC.h"
 
 
 char* QScript::QBTypes[] = {
@@ -30,6 +31,7 @@ char* QScript::QBTypes[] = {
 QScript::QBScript* QScript::Scripts;
 std::vector<QScript::CompressedNode> QScript::compNodes;
 std::vector<DWORD> QScript::qbKeys;
+std::vector<QScript::QBFile> QScript::qbFiles;
 
 using namespace std;
 using namespace QScript;
@@ -474,16 +476,20 @@ void QBScript::CreateQBTable(BYTE* table, bool level)
 	}
 }
 
-void QBScript::AddScripts()
+char* QScript::GetScriptDir()
 {
 	char* qdir = (char*)0x5BBAF8;
-	char dir[256] = "data\\";
+	static char dir[256] = "data\\";
 	DWORD len = strlen(qdir) + 1;
 	memcpy(&dir[5], qdir, len);
 
+	return dir;
+}
+
+void QBScript::AddScripts()
+{
+	char* dir = GetScriptDir();
 	FILE* f = fopen(dir, "rb+");
-
-
 
 
 	fseek(f, 0, SEEK_END);
@@ -541,6 +547,63 @@ char* QBScript::GetQBKeyName(int checksum)
 	return NULL;
 }
 
+#include <fstream>
+#include <iostream>
+
+char* CheckForMatch(char* fileName, char* qbFiles)
+{
+	while (*qbFiles != 0xFF)
+	{
+		if (stricmp(fileName, qbFiles) == 0)
+			return qbFiles;
+		while (*qbFiles != 0)
+			qbFiles++;
+		while (*qbFiles == 0)
+			qbFiles++;
+	}
+	return NULL;
+}
+
+bool QBFile::ContentChanged()
+{
+
+	char* dir = GetScriptDir();
+
+	unsigned int i = 5;
+
+	/*char* path = new char[strlen(dir) + strlen(fileName) + 1];
+	strcpy(path, dir);*/
+	strcpy(&dir[i], fileName);
+	FILE* f = fopen(dir, "rb+");
+
+	fseek(f, 0, SEEK_END);
+	DWORD newSize = ftell(f);
+	fclose(f);
+
+	unsigned long crc;
+	if (newSize != size)
+	{
+		checksum = FastCRC::CFastCRC32::Calculate(&crc, dir);
+		return true;
+
+	}
+	//_printf("%s %s\n", path, fileName);
+
+	if (FastCRC::CFastCRC32::Calculate(&crc, dir) != 0)
+		MessageBox(0, "Error calculating checksum for file", dir, 0);
+
+	//delete[] path;
+
+	bool changed = crc != checksum;
+	if (changed)
+	{
+		checksum = crc;
+		_printf("Contents changed in file: %s\n", fileName);
+	}
+
+	return changed;
+}
+
 void QBScript::OpenScript(char* path, bool level)
 {
 	fileName = path;
@@ -558,6 +621,22 @@ void QBScript::OpenScript(char* path, bool level)
 	//data = pFile;
 	BYTE* oldData = pFile;
 
+	/*char* match = CheckForMatch(fileName, *(char**)0x008A8B48);
+	if (match)
+	{*/
+		//MessageBox(0, 0, 0, 0);
+	if (!level)
+	{
+		unsigned long checksum;
+		if (FastCRC::CFastCRC32::Calculate(&checksum, path) != 0)
+			MessageBox(0, "Error calculating checksum for file", fileName, 0);
+		qbFiles.push_back(QBFile(checksum, fileName, size));
+	}
+	/*}
+	else
+		MessageBox(0, "couldn't find file in list", fileName, 0);*/
+
+	
 	while (true)
 	{
 		switch (*pFile)
@@ -633,4 +712,16 @@ void QBScript::ClearMap()
 		delete[] it->second;
 	}*/
 	qbTable.clear();
+}
+
+bool TestReloadQB(CStruct* pStruct, CScript* pScript)
+{
+	
+	typedef void(__cdecl* const pLoadQB)(char* fileName, bool unknown);
+	for (DWORD i = 0; i < qbFiles.size(); i++)
+	{
+		if(qbFiles[i].ContentChanged())
+		    pLoadQB(0x0042B300)(qbFiles[i].fileName, false);
+	}
+	return true;
 }

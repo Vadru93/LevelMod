@@ -4,6 +4,7 @@
 #include "_math.h"
 #include "KeyState.h"
 #include "Script.h"
+#include "Collision.h"
 
 bool GetZAngle(CStruct* pParams, CScript* pScript);
 bool GetSkaterLook(CStruct* pParams, CScript* pScript);
@@ -261,7 +262,7 @@ public:
 
 
 	typedef bool(__thiscall* const pCallMemberFunction)(Skater* pThis, DWORD checksum, CStruct* pStruct, CScript* pScript);
-	bool CallMemberFunction(DWORD checksum, CStruct* pStruct, CScript* pScript)
+	bool CallMemberFunction(DWORD checksum, CStruct* pStruct = NULL, CScript* pScript = NULL)
 	{
 		DWORD* pMemberFunction = memberFunctions[1];
 		_printf("Skater -> MemberFunction %p\nName %s pStruct %p pScript %p\n", pMemberFunction, FindChecksumName(checksum), pStruct, pScript);
@@ -380,7 +381,7 @@ public:
 		pFlagException(0x0048F990)(this, name, unk2);
 	}
 
-	EXTERN bool CollisionCheck(BYTE flag, bool ignore = true);
+	EXTERN bool CollisionCheck(Collision::Flags flag, bool ignore = false);
 
 	D3DXVECTOR3* GetNormal()
 	{

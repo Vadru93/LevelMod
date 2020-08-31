@@ -172,7 +172,7 @@ bool look_for_transfer_target(const D3DXVECTOR3& search_dir, const Vertex& start
 		Vertex end = start;
 		end.y -= 4500.0f;									// long way below
 		skater->SetRay(*(D3DXVECTOR3*)&start, *(D3DXVECTOR3*)&end);
-		if (skater->CollisionCheck(0x8, false) && is_vert_for_transfers((Vertex*)skater->GetCollisionNormal()))
+		if (skater->CollisionCheck(Collision::Flags::Vert) && is_vert_for_transfers((Vertex*)skater->GetCollisionNormal()))
 		{
 			_printf("Found Vert\n");
 			Vertex horizontal_normal = *(Vertex*)skater->GetCollisionNormal();
@@ -359,7 +359,7 @@ bool Skater::CheckForSpine()
 
 	Vertex	wall_pos;
 	SetRay(start, end);
-	if (CollisionCheck(0x8, false))
+	if (CollisionCheck(Collision::Flags::Vert))
 	{
 		_printf("found target -\n");
 
@@ -400,7 +400,7 @@ bool Skater::CheckForSpine()
 		end.y -= 4500.0f;
 
 		SetRay(start, end);
-		if (CollisionCheck(0x8, false))
+		if (CollisionCheck(Collision::Flags::Vert))
 		{
 			_printf("found target +\n");
 
@@ -441,7 +441,7 @@ bool Skater::CheckForSpine()
 			end.y -= 4500.0f;
 
 			SetRay(start, end);
-			if (CollisionCheck(0x8, false))
+			if (CollisionCheck(Collision::Flags::Vert))
 			{
 				_printf("found target\n");
 
@@ -569,7 +569,7 @@ bool Skater::CheckForSpine()
 	start = *GetPosition();
 	end = target_XZ;
 	SetRay(start, end);
-	if (CollisionCheck(0x10))
+	if (CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0))
 	{
 		_printf("too early\n");
 		// don't do anything.  We have a valid transfer but we can wait until we get high enough before we try for it
@@ -1097,14 +1097,14 @@ bool TestForClearPath(Vertex& target, Vertex& vel, Vertex& pos, Skater* skater)
 		// check for collisions alone the two-line path
 		Vertex cend = halfway_point;
 		skater->SetRay(*(D3DXVECTOR3*)&cstart, *(D3DXVECTOR3*)&cend);
-		if (!skater->CollisionCheck(0x10))
+		if (!skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0))
 		{
 			// feeler.DebugLine(255, 255, 0);
 			cstart = cend;
 			cend = target;
 			cend.y += 2.0f;
 			skater->SetRay(*(D3DXVECTOR3*)&cstart, *(D3DXVECTOR3*)&cend);
-			if (!skater->CollisionCheck(0x10))
+			if (!skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0))
 			{
 				// feeler.DebugLine(255, 255, 0);
 				return true;
@@ -1158,7 +1158,7 @@ bool maybe_acid(bool skated_off_edge, const Vertex& pos, const Vertex& old_pos, 
 		cstart.y += scan_height;
 		cend.y -= 4000.0f;
 		skater->SetRay(cstart, cend);
-		if (skater->CollisionCheck(0x8, false) && is_vert_for_transfers((Vertex*)skater->GetCollisionNormal()))
+		if (skater->CollisionCheck(Collision::Flags::Vert) && is_vert_for_transfers((Vertex*)skater->GetCollisionNormal()))
 		{
 			// the horizontal projection of the vert's normal just correspond somewhat to our direction			 
 			target_normal = *(Vertex*)skater->GetCollisionNormal();
@@ -1290,14 +1290,14 @@ bool maybe_acid(bool skated_off_edge, const Vertex& pos, const Vertex& old_pos, 
 		// check for collisions alone the two-line path
 		Vertex cend = halfway_point;
 		skater->SetRay(*(D3DXVECTOR3*)&cstart, *(D3DXVECTOR3*)&cend);
-		if (!skater->CollisionCheck(0x10))
+		if (!skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0))
 		{
 			// feeler.DebugLine(255, 255, 0);
 			cstart = cend;
 			cend = target;
 			cend.y += 1.0f;
 			skater->SetRay(*(D3DXVECTOR3*)&cstart, *(D3DXVECTOR3*)&cend);
-			if (!skater->CollisionCheck(0x10))
+			if (!skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0))
 			{
 				// feeler.DebugLine(255, 255, 0);
 				clear_path = true;
@@ -1734,7 +1734,7 @@ bool TestForAcid(CStruct* pParams, CScript* pScript)
 				skater->SetRay(*(D3DXVECTOR3*)&start, *(D3DXVECTOR3*)&end);
 
 
-				if (skater->CollisionCheck(0x8, false) && is_vert_for_transfers((Vertex*)skater->GetCollisionNormal()))
+				if (skater->CollisionCheck(Collision::Flags::Vert) && is_vert_for_transfers((Vertex*)skater->GetCollisionNormal()))
 				{
 					Vertex target_normal = *(Vertex*)skater->GetCollisionNormal();
 					Vertex vel = *(Vertex*)skater->GetVelocity();
@@ -1855,7 +1855,7 @@ bool TestForAcid(CStruct* pParams, CScript* pScript)
 				skater->SetRay(*(D3DXVECTOR3*)&start, *(D3DXVECTOR3*)&end);
 
 
-				if (skater->CollisionCheck(0x10))
+				if (skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0))
 				{
 					Vertex target_normal = *(Vertex*)skater->GetCollisionNormal();
 					Vertex vel = *(Vertex*)skater->GetVelocity();
@@ -2005,6 +2005,7 @@ void MaybeAcid()
 
 			Slerp::trying = true;
 			Slerp::done = false;
+			skater->CallMemberFunction(Checksum("DoNextTrick"));
 			switch (Slerp::type)
 			{
 			case ACID:
@@ -2079,7 +2080,7 @@ bool Skater::CheckForWallpant()
 		Store();
 		SetRay(wall_point + wall_normal * 6.0f, wall_point - wall_normal * 6.0f);
 		//Ignore noncollidable
-		if (!CollisionCheck(0x10))
+		if (!CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0))
 			return false;
 		Restore();
 	}
@@ -2123,7 +2124,7 @@ bool Skater::CheckForWallpant()
 	// move to just outside the wall, insuring that there is no additional collision along the line to that point
 	SetRay(*GetHitPoint(), *GetHitPoint() + Physics_Wallplant_Distance_From_Wall * wall_normal);
 
-	if (CollisionCheck(0x10))
+	if (CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0))
 	{
 		*GetPosition() = *GetHitPoint() + 0.1f * wall_normal;
 	}
@@ -2145,6 +2146,7 @@ bool Skater::CheckForWallpant()
 	CScript pScript;
 	CStruct pStruct;
 	velocity->y = 0.0f;
+	//CallMemberFunction(Checksum("DoNextTrick"));
 
 	CallMemberFunction(Checksum("TurnToFaceVelocity"), &pStruct, &pScript);
 	FlagException("Wallplant");

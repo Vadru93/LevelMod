@@ -269,7 +269,7 @@ Wallplant_Trick =
 ]
 
 SCRIPT Wallplant
-
+printf "Testing reload"
   IF BailIsOn
     SetState Air
   ENDIF
@@ -368,7 +368,7 @@ SCRIPT WallRide
 ENDSCRIPT
 
 //Added WalliePlant
-WallrideTricks = [ { Trigger = { TapTwiceRelease Up X 500 } Scr = Trick_WallPlant } ]
+WallrideTricks = [ { Trigger = { TapOnceRelease Up X 500 } Scr = Trick_WallPlant } ]
 
 SCRIPT Trick_WallPlant
 	InAirExceptions
@@ -392,17 +392,19 @@ ENDSCRIPT
 
 SCRIPT Wallie
 	InAirExceptions
-	
 	//Added option here since this fix removed the ability to get boost plant
 	//Boost plant is a bug that exists in thps4+ that allows you to do multiply wallieplants
 	//If you press the wallieplant multiply times in air before you hit the wallride
-	IF #"Not" IsOptionOn LM_Control_bBoostPlant
+	//IF #"Not" IsOptionOn LM_Control_bBoostPlant
 	    //this is needed here to skip to wallieplant if it's in chain. else it awards 2 tricks.
 	    //can we let it be here with wallieplant disabled?
 	    IF IsOptionOn LM_Control_bWalliePlant	
+		begin
 		    DoNextTrick
+			waitonegameframe
+		repeat 200
 	    ENDIF
-	ENDIF
+	//ENDIF
 	Vibrate Actuator = 1 Percent = 50 Duration = 0.1
 	PlayAnim Anim = Ollie BlendPeriod = 0.0
 	SetTrickName "Wallie"

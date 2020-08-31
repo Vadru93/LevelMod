@@ -19,6 +19,8 @@ struct CScript;
 void EXTERN SetStructValues(CStructHeader* pStruct, CStructHeader* values);
 void EXTERN SetArrayValues(CArray* pArray, CStructHeader* values);
 
+bool TestReloadQB(CStruct* pStruct, CScript* pScript);
+
 EXTERN char* FindChecksumName(DWORD checksum);
 
 
@@ -44,6 +46,8 @@ namespace QScript
 		Table = 0x2B,
 	};
 
+	char* GetScriptDir();
+
 	struct CompressedNode
 	{
 		DWORD checksum;
@@ -61,8 +65,27 @@ namespace QScript
 		}
 	};
 
+	struct QBFile
+	{
+		DWORD checksum;
+		DWORD size;
+		char fileName[80];
+
+		QBFile(DWORD chc, char* file, DWORD fileSize)
+		{
+			checksum = chc;
+			size = fileSize;
+			strcpy(fileName, &file[5]);
+
+			_printf("QBFile: %s crc %X size %X\n", fileName, checksum, size);
+		}
+
+		bool ContentChanged();
+	};
+
 	extern std::vector<CompressedNode> compNodes;
 	extern std::vector<DWORD> qbKeys;
+	extern std::vector<QBFile> qbFiles;
 
 	struct QBScript
 	{

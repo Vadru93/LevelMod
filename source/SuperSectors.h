@@ -66,7 +66,7 @@ EXTERN struct SuperSector
 		_asm ret;
 	con:
 		_asm mov edx, checksum;
-		_asm and edx, 0x0000FFFF;
+		_asm and edx, 0x0000FFFF;//Added 1 byte more to reduce collision in list
 		_asm lea edx, [edx + edx * 2];
 		_asm lea ecx, [eax + edx * 4];
 		_asm mov pSectors, ecx;

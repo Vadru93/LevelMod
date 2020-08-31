@@ -2444,6 +2444,7 @@ const CompiledScript scripts[] =
 	{"SetOption", SetOption},
 	{"GetOptionText", GetOptionText},
 	{"LM_PrintInfo", GetInfoScript },
+	{"TestReloadQB", TestReloadQB},
 	/*{"SetMemoryPoolSize", SetMemoryPoolSize},
 	{"GetMemoryPoolSize", GetMemoryPoolSize},
 	{"GetMemoryPoolSizeText", GetMemoryPoolSizeText},*/
@@ -3062,7 +3063,7 @@ void TestForAcid()
 		skater->SetRay(*(D3DXVECTOR3*)&start, *(D3DXVECTOR3*)&end);
 
 
-		if (skater->CollisionCheck(0x8, false))
+		if (skater->CollisionCheck(Collision::Flags::Vert))
 		{
 			//
 			float height = skater->GetPosition()->y - skater->GetHitPoint()->y;
@@ -3079,6 +3080,7 @@ void TestForAcid()
 				if (fabsf(test) < 0.82f)
 				{
 					_printf("above\n");
+					skater->CallMemberFunction(Checksum("DoNextTrick"));
 					skater->FlagException("AcidDrop");
 					break;
 				}
