@@ -269,28 +269,24 @@ Wallplant_Trick =
 ]
 
 SCRIPT Wallplant
-printf "Testing reload"
   IF BailIsOn
     SetState Air
   ENDIF
   NollieOff
   InAirExceptions
   ClearException Ollied
-  NoSpin
   PlaySound footstep03
   Vibrate Actuator = 1 Percent = 100 Duration = 0.1
   PlayAnim Anim = Beanplant BlendPeriod = 0
   SetTrickName 'Wallplant'
   SetTrickScore 750
-  Display BlockSpin
-  NoSpin
+  Display
   begin
     IF WallplantTimeGreaterThan 180
 	    ClearEventBuffer Buttons = [ x ]
 	    SetException ex = Ollied scr = WallplantOllie CallInsteadofGoto
 		//SetQueueTricks Wallplantollie2
 		printf "Allowing ollie"
-		CanSpin
 		break
 	ENDIF
 	DoNextTrick

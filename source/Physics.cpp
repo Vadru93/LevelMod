@@ -2156,7 +2156,7 @@ bool Skater::CheckForWallpant()
 	velocity->x = 0.0f;
 	velocity->z = 0.0f;
 	Slerp::wallplant = true;
-	blockspin = true;
+	//blockspin = true;
 	autoturn = false;
 	_printf("returning true\n");
 	return true;
