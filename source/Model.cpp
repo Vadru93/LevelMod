@@ -74,8 +74,8 @@ void Obj_MoveToNode(Model* mdl, CStruct* pStruct)
 				_printf("Couldn't find SuperSector %s in " __FUNCTION__ "\n", FindChecksumName(collision->Data));
 			}
 		}
-		else
-			_printf("No Collision found %X?\n", node);
+		/*else
+			//_printf("No Collision found %X?\n", node);*/
 	}
 	else
 		_printf("Couldn't find NodeIndex %d in " __FUNCTION__ "\n", mdl->GetNodeIndex());

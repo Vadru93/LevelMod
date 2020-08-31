@@ -73,7 +73,7 @@ struct EXTERN CArray
 
 	char* GetString(int index)
 	{
-		_printf("ArrayType %d %p\n", Type, Items[index]);
+		//_printf("ArrayType %d %p\n", Type, Items[index]);
 		return (char*)Items[index];
 	}
 
@@ -185,7 +185,7 @@ struct Node
 	static CArray* GetNodeArray()
 	{
 		typedef CArray*(__cdecl* const pGetNodeArray)(DWORD checksum, DWORD param);
-		_printf("NodeArray %p\n", pGetNodeArray(0x00426590)(0xC472ECC5, 1));
+		//_printf("NodeArray %p\n", pGetNodeArray(0x00426590)(0xC472ECC5, 1));
 		return pGetNodeArray(0x00426590)(0xC472ECC5, 1);
 	}
 
