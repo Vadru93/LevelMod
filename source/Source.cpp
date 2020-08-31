@@ -2424,6 +2424,7 @@ const CompiledScript scripts[] =
 	{ "GotoStoredPos", SetSkaterPos },
 	{ "GetSkaterLook", GetSkaterLook },
 	{ "Not", NotScript },
+	{ "IsNot", NotScript },
 	{ "SubToGlobal", SubToGlobal },
 	{ "AddToGlobal", AddToGlobal },
 	{ "FreezeCamera", FreezeCamera },
