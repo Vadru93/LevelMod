@@ -99,6 +99,15 @@ Trick_Layout = { SCR_FLIP Params = { Name = 'Handspring Layout' UnlockFlag = SKA
 Trick_Berzerker = { SCR_FLIP Params = { Name = 'The Berzerker' UnlockFlag = SKATER_UNLOCKED_WOLVERINE Score = 2500 Anim = Berzerker IsSpecial Speed = 1.3 TrickSlack = 50 GrindSlack = 50 } }
 Trick_ClawPunch = { SCR_FLIP Params = { Name = 'Claw Punch' UnlockFlag = SKATER_UNLOCKED_WOLVERINE Score = 3000 Anim = ClawPunch IsSpecial Speed = 1.2 TrickSlack = 20 } }
 
+NewTrick_HeelFlipToJudo = { SCR_FLIP Params = { Name = 'Heelflip to Judo' Score = 1600 Anim = HeelFlipToJudo IsSpecial Speed = 1.1 TrickSlack = 20 RotateAfter } }
+NewTrick_DoubleHardFlip = { SCR_FLIP Params = { Name = 'Double Hardflip' Score = 1300 Anim = DoubleHardFlip IsSpecial TrickSlack = 20 BoardRotate } }
+NewTrick_WellHardFlip = { SCR_FLIP Params = { Name = 'Well HardFlip' Score = 1600 Anim = WellHardFlip IsSpecial Speed = 1.1 TrickSlack = 20 } }
+NewTrick_ShoveItRewind = { SCR_FLIP Params = { Name = 'Shove It Rewind' Score = 1600 Anim = ShoveItRewind IsSpecial Speed = 1.1 TrickSlack = 20  } }
+NewTrick_SomiSpin = { SCR_FLIP Params = { Name = 'SomiSpin' Score = 1300 Anim = SomiSpin IsSpecial TrickSlack = 20 } }
+NewTrick__360FliptoMute = { SCR_FLIP Params = { Name = '360 Flip to Mute' Score = 1600 Anim = _360FliptoMute IsSpecial Speed = 1.1 TrickSlack = 20 } }
+NewTrick_BackFootKickFliptoMute = { SCR_FLIP Params = { Name = 'Back Foot KickFlip to Mute' Score = 1300 Anim = BackFootKickFliptoMute IsSpecial TrickSlack = 20 } }
+
+
 Trick_KickflipUnderFlip = { SCR_FLIP Params = { TrickDef_KickflipUnderflip IsSpecial } }
 
 TrickDef_KickflipUnderflip = { 
@@ -121,6 +130,14 @@ Trick_SuperHandClap = { SCR_GRAB Params = { Name = 'Super Hand Clap' UnlockFlag 
 Trick_WorkForFood = { SCR_GRAB Params = { Name = 'Panhandling' UnlockFlag = SKATER_UNLOCKED_BUM Score = 2000 Anim = WorkForFood_Init Idle = WorkForFood_Idle IsSpecial ForceInit } }
 Trick_ACAir = { SCR_GRAB Params = { Name = 'AC Air' UnlockFlag = SKATER_UNLOCKED_DEMONESS Score = 666 Anim = ACAir_Init Idle = ACAir_Idle OutAnim = ACAir_Out IsSpecial ForceInit } }
 Trick_AssumePosition = { SCR_GRAB Params = { Name = 'Assume The Position II' UnlockFlag = SKATER_UNLOCKED_DICK Score = 1000 Anim = AssumePosition_Init Idle = AssumePosition_Idle IsSpecial ForceInit TrickSlack = 10 Speed = 1.3 } }
+
+NewTrick_DarkJedi = { SCR_GRAB Params = { Name = 'Dark Jedi' Score = 1000 Anim = DarkJedi_Init Idle = DarkJedi_Idle OutAnim = DarkJedi_Out IsSpecial ForceInit TrickSlack = 10 Speed = 1.3 } }
+NewTrick_Salute = { SCR_GRAB Params = { Name = 'Salute!!!' Score = 1000 Anim = Salute_Init Idle = Salute_Idle IsSpecial ForceInit TrickSlack = 10 Speed = 1.3 } }
+NewTrick_SummonerAir = { SCR_GRAB Params = { Name = 'Summoner Air' Score = 1000 Anim = DemonessIdle Idle = DemonessIdle IsSpecial ForceInit TrickSlack = 10 Speed = 1.3 } }
+NewTrick_Freefallin = { SCR_GRAB Params = { Name = 'Freefallin"' Score = 1000 Anim = StretchtoFlailingFall Idle = FlailingFall IsSpecial ForceInit TrickSlack = 10 Speed = 1.3 } }
+
+
+
 
 
 //======flip tricks======
@@ -633,7 +650,16 @@ TrickDef_Madonna = {
 	NewExtraTricks = ExtraJudo 
 }
 
-ExtraJudo = [ { EXTRA_GRAB Params = { TrickDef_Judo EXTRA_TRICK } } ]
+ExtraJudo = [ 
+	{ EXTRA_FLIP Params = { TrickDef_MadonnaFlip IsExtra } } 
+	{ EXTRA_GRAB Params = { TrickDef_Judo EXTRA_TRICK } } 
+]
+
+TrickDef_MadonnaFlip = { 
+	Name = 'Madonna Flip' 
+	Score = 1000 
+	Anim = _2KickMadonnaFlip_Out 
+}
 
 TrickDef_Judo = {
 	Name = 'Judo' 
@@ -861,7 +887,7 @@ TrickDef_Benihana = {
 
 BenihanaFingerflip = [ 
 	{ EXTRA_FLIP Params = { TrickDef_BeniFingerFlip IsExtra } }
-	{ EXTRA_GRAB Params = { TrickDef_Sacktap IsExtra } } 
+	{ EXTRA_GRAB Params = { TrickDef_Sacktap EXTRA_TRICK } } 
 ]
 
 TrickDef_BeniFingerFlip = { 
@@ -870,7 +896,7 @@ TrickDef_BeniFingerFlip = {
 	Anim = BenihanaFingerflip 
 }
 
-Trick_SackTap = { SCR_GRAB Params = TrickDef_Sacktap }
+Trick_SackTap = { SCR_GRAB Params = TrickDef_Sacktap IsSpecial }
 
 TrickDef_Sacktap = { 
 	Name = 'Sacktap' 
