@@ -287,7 +287,7 @@ TrickDef_VarialHeelflip = {
 	NewExtraTricks = ExtraVarialHeelflip
 } 
 
-ExtraVarialHeelflip = [ { EXTRA_FLIP Params = { TrickDef_360Heelflip EXTRA_TRICK Name = '360 Heelflip' Score = 500 Speed = 1.3 } } ]
+ExtraVarialHeelflip = [ { EXTRA_FLIP Params = { TrickDef_360Heelflip EXTRA_TRICK Name = '360 Heelflip' Score = 500 Speed = 1.2 } } ]
 
 Trick_LaserFlip = { SCR_FLIP Params = { TrickDef_360Heelflip IsSpecial } }
 
@@ -313,17 +313,16 @@ TrickDef_Hardflip = {
 	NewExtraTricks = Extra360Hardflip 
 }
 
-Extra360Hardflip = [ { EXTRA_FLIP Params = { TrickDef_360Hardflip EXTRA_TRICK } } ]
+Extra360Hardflip = [ { EXTRA_FLIP Params = { TrickDef_360Hardflip EXTRA_TRICK Speed = 1.3 Score = 500 } } ]
 
-Trick_360Hardflip = { SCR_FLIP Params = TrickDef_360Hardflip }
+Trick_360Hardflip = { SCR_FLIP Params = { TrickDef_360Hardflip IsSpecial } }
 
 TrickDef_360Hardflip = { 
 	Name = '360 Hardflip' 
-	Score = 500 
+	Score = 1350 
 	Anim = _360Hardflip 
-	TrickSlack = 20 
+	Speed = 1.1 
 }
-
 
 //===inward heelflip===
 //there is no 360 inward heelflip anim, so just link to self to avoid bails
