@@ -1,3 +1,5 @@
+*.bkp.q
+
 # Build results
 [Bb]in/
 [Oo]bj/
