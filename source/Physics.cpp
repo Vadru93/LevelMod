@@ -2015,7 +2015,18 @@ void MaybeAcid()
 				skater->FlagException("BankDrop");
 				break;
 			case SPINE:
-				skater->FlagException("SpineTransfer");
+				CStruct pStruct;
+				CScript pScript;
+
+				CStructHeader header;
+				header.Type = QBKeyHeader::LOCAL;
+				header.value.i = Checksum("SpineTransfer");
+				pStruct.head = &header;
+				pStruct.tail = &header;
+				
+				//skater->CallMemberFunction(Checksum("SpawnSkaterScript"), &pStruct, &pScript);
+				skater->AddTrick("Spine Transfer", 250, Skater::TrickType::Gap);
+				//skater->FlagException("SpineTransfer");
 				break;
 			}
 		}

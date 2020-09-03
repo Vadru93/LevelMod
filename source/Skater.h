@@ -167,9 +167,28 @@ private://0575a190
 	float un2;
 	//8814
 	float normallerp;
+	BYTE un[0xA50];
+	void* gapFont;//not sure?
 
 //#pragma pop(pack)
 public:
+
+	enum class TrickType : BYTE
+	{
+		Air = 0,
+		Lip = 2,
+		Ollie = 0x4,
+		Grind = 6,
+		Manual = 6,
+		Gap = 0x10,
+		Special = 0x20
+	};
+
+	typedef void(__thiscall* const pAddTrick)(void* pThis, char* trickName, DWORD trickScore, TrickType type);
+	void AddTrick(char* trickName, DWORD trickScore, TrickType type)
+	{
+		pAddTrick(0x00435550)(this->gapFont, trickName, trickScore, type);
+	}
 
 	typedef bool(__thiscall* const pQueryEvents)(Skater* pThis, CStruct* query, BYTE mask, BYTE ignore);
 	bool QueryEvents(CStruct* query, BYTE mask = 1, BYTE ignore = 0xFB)
