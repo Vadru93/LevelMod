@@ -185,7 +185,7 @@ SCRIPT StandIdle
 	BEGIN
 		PlayAnim Anim = StandIdle BlendPeriod = 0.0
 		WaitAnimFinished
-		PlayAnim random( @Anim = StandIdle @Anim = StandIdle @Anim = StandIdle @Anim = StandIdle @Anim = StandLeftRight @Anim = StandCheckBoard @Anim = StandShoulder  ) BlendPeriod = 0.0
+		PlayAnim Anim = random( @StandIdle @StandIdle @StandIdle @StandIdle @StandLeftRight @StandCheckBoard @StandShoulder ) BlendPeriod = 0.0
 		IF AnimEquals StandSwap
 			FlipAfter
 			BlendperiodOut 0.0
@@ -481,7 +481,7 @@ frontend_menu = {
 	x = 45.0 y = 90.0 w = 300.0 h = 400.0 
 	just_center_x just_center_y blue_top 
 	eventhandler = { Type = showeventhandler target = "frontend_menu_on_show" } 
-	children = frontend_menu_items 
+	children = frontend_menu_children
 }
 
 SCRIPT frontend_menu_on_show
@@ -496,7 +496,7 @@ SCRIPT frontend_menu_on_show
 ENDSCRIPT
 
 
-frontend_menu_items = [ 
+frontend_menu_children = [ 
 	{ Type = textmenuelement auto_id text = "Main Menu" static dont_gray drawer = title dont_gray }
 	{ Type = textmenuelement auto_id text = "Career" link = career_menu target = "SetCareerMode"  }
 	{ Type = textmenuelement auto_id text = "Single Session" link = single_session_menu target = "SetSingleSessionMode" }
@@ -652,6 +652,36 @@ single_session_menu_children =  [
 	{ Type = textmenuelement auto_id text = "Done" target = "go_back" params = { Id = single_session_menu } } 
 ] 
 
+
+free_skate_menu = { 
+	Type = verticalmenu 
+	Id = free_skate_menu 
+	parent = contain1
+	x = 45.0 y = 90.0 w = 300.0 h = 400.0 
+	just_center_x just_center_y blue_top 
+	eventhandlers = free_skate_menu_eventhandlers
+	children = free_skate_menu_children
+}
+
+free_skate_menu_eventhandlers = [ 
+	{ Type = backeventhandler target = "Player1ToMainMenuCamAnim" }
+	{ Type = showeventhandler target = "free_skate_menu_on_show" params = { name_menu_item = pro_current_name_free_skate } }
+	{ Type = hideeventhandler target = "SliderHide" } 
+] 
+
+free_skate_menu_children = [ 
+	{ Type = textmenuelement auto_id text = "Free Skate" static dont_gray drawer = title }
+	//{ Type = textmenuelement auto_id text = "Play Level" link = level_main_menu } //if istrue run_viewer
+	{ Type = textmenuelement auto_id text = "Play Level" link = cassette_menu target = "Player1ToLevelSelectCamAnim" }
+	{ Type = textmenuelement auto_id text = "Change Appearance" link = cas_menu_container target = "Player1ToChangeAppearance" }
+	{ Type = textmenuelement auto_id text = "Change Board" link = boardshop_menu target = "Player1ToBoardshop" }
+	{ Type = textmenuelement auto_id text = "Edit Tricks" link = trick_menu_container }
+	{ menuitem_separator }
+	{ Type = textmenuelement auto_id text = "Choose Skater" link = pro_menu }
+	{ Type = textmenuelement auto_id text = "Load Skater" target = "_FreeSkateLoadCAS" }
+	{ Type = textmenuelement auto_id text = "Done" target = "go_back" params = { Id = free_skate_menu } } 
+] 
+
 SCRIPT main_menu_create
 	CreateAndAttachMenu { frontend_menu	}
 	CreateAndAttachMenu { menuquitgame_yesno_menu }	
@@ -659,40 +689,38 @@ SCRIPT main_menu_create
 	CreateAndAttachMenu { player_two_menu }
 	CreateAndAttachMenu { career_menu }
 	CreateAndAttachMenu { single_session_menu }
+	CreateAndAttachMenu { free_skate_menu }
 
-	IF IsTrue run_viewer
-		CreateMenu { Type = verticalmenu Id = free_skate_menu x = 45.0 y = 90.0 w = 300.0 h = 400.0 just_center_x just_center_y blue_top eventhandlers = [ { Type = backeventhandler target = "Player1ToMainMenuCamAnim" }
-				{ Type = showeventhandler target = "update_pro_display_info" params = { name_menu_item = pro_current_name_free_skate } } ] children = [ { Type = textmenuelement auto_id text = "Free Skate" static dont_gray drawer = title }
-				{ Type = textmenuelement auto_id text = "Play Level" link = level_main_menu }
-				{ Type = textmenuelement auto_id text = "Change Appearance" link = cas_menu_container target = "Player1ToChangeAppearance" }
-				{ Type = textmenuelement auto_id text = "Change Board" link = boardshop_menu target = "Player1ToBoardshop" }
-				{ Type = textmenuelement auto_id text = "Edit Tricks" link = trick_menu_container }
-				{ menuitem_separator }
-				{ Type = textmenuelement auto_id text = "Choose Skater" link = pro_menu }
-				{ Type = textmenuelement auto_id text = "Load Skater" target = "_FreeSkateLoadCAS" }
-				{ Type = textmenuelement auto_id text = "Done" target = "go_back" params = { Id = free_skate_menu } } ] }
-	ELSE
-		CreateMenu { Type = verticalmenu Id = free_skate_menu x = 45.0 y = 90.0 w = 300.0 h = 400.0 just_center_x just_center_y blue_top eventhandlers = [ { Type = backeventhandler target = "Player1ToMainMenuCamAnim" }
-				{ Type = showeventhandler target = "free_skate_menu_on_show" params = { name_menu_item = pro_current_name_free_skate } }
-				{ Type = hideeventhandler target = "SliderHide" } ] children = [ { Type = textmenuelement auto_id text = "Free Skate" static dont_gray drawer = title }
-				{ Type = textmenuelement auto_id text = "Play Level" link = cassette_menu target = "Player1ToLevelSelectCamAnim" }
-				{ Type = textmenuelement auto_id text = "Change Appearance" link = cas_menu_container target = "Player1ToChangeAppearance" }
-				{ Type = textmenuelement auto_id text = "Change Board" link = boardshop_menu target = "Player1ToBoardshop" }
-				{ Type = textmenuelement auto_id text = "Edit Tricks" link = trick_menu_container }
-				{ menuitem_separator }
-				{ Type = textmenuelement auto_id text = "Choose Skater" link = pro_menu }
-				{ Type = textmenuelement auto_id text = "Load Skater" target = "_FreeSkateLoadCAS" }
-				{ Type = textmenuelement auto_id text = "Done" target = "go_back" params = { Id = free_skate_menu } } ] }
-	ENDIF
-	CreateMenu { Type = verticalmenu Id = load_career_menu x = 45.0 y = 90.0 w = 300.0 h = 400.0 just_center_x just_center_y blue_top children = [ { Type = textmenuelement auto_id text = "Load Skater" static dont_gray drawer = title }
+	//what's this?
+	CreateMenu { 
+		Type = verticalmenu 
+		Id = load_career_menu 
+		x = 45.0 y = 90.0 w = 300.0 h = 400.0 
+		just_center_x just_center_y blue_top 
+		children = [ 
+			{ Type = textmenuelement auto_id text = "Load Skater" static dont_gray drawer = title }
 			{ Type = textmenuelement auto_id text = "Tony Hawk 1" }
 			{ Type = textmenuelement auto_id text = "Tony Hawk 2" }
 			{ Type = textmenuelement auto_id text = "Rune Glifberg" }
 			{ Type = textmenuelement auto_id text = "Created 1" }
-			{ Type = textmenuelement auto_id text = "Created 2" } ] }
-	CreateMenu { Type = verticalmenu Id = career_info x = 45.0 y = 290.0 w = 300.0 h = 400.0 just_center_x just_center_y static dont_gray children = [ { Type = textmenuelement Id = career_info_line_1 text = "Poo poo pants" static dont_gray drawer = goals_text drawer = title_medium truncate_to_width }
+			{ Type = textmenuelement auto_id text = "Created 2" } 
+		] 
+	}
+	
+	CreateMenu {
+		Type = verticalmenu 
+		Id = career_info 
+		x = 45.0 y = 290.0 w = 300.0 h = 400.0 
+		just_center_x just_center_y static dont_gray 
+		children = [ 
+			{ Type = textmenuelement Id = career_info_line_1 text = "Poo poo pants" static dont_gray drawer = goals_text drawer = title_medium truncate_to_width }
 			{ Type = textmenuelement Id = career_info_line_2 text = "Goals: 12 of 35" static dont_gray drawer = goals_text }
-			{ Type = horizontalmenu Id = career_info_horizontal_menu static dont_gray children = [ { Type = textmenuelement Id = career_info_line_3 text = "Medals:" static dont_gray drawer = goals_text lock_layout x = 40 y = 8 }
+			{ 
+				Type = horizontalmenu 
+				Id = career_info_horizontal_menu 
+				static dont_gray 
+				children = [ 
+					{ Type = textmenuelement Id = career_info_line_3 text = "Medals:" static dont_gray drawer = goals_text lock_layout x = 40 y = 8 }
 					{ Type = iconmenuelement Id = career_info_rio_medal_1 image = "panelsprites\medal_1.png" rectScaleX = 1.3 lock_layout x = 120 y = 2 IconColor_Gold dontdrawrect static dont_gray }
 					{ Type = iconmenuelement Id = career_info_rio_medal_2 image = "panelsprites\medal_2.png" rectScaleX = 1.3 lock_layout x = 120 y = 2 IconColor_Silver dontdrawrect static dont_gray }
 					{ Type = iconmenuelement Id = career_info_rio_medal_3 image = "panelsprites\medal_3.png" rectScaleX = 1.3 lock_layout x = 120 y = 2 IconColor_Bronze dontdrawrect static dont_gray }
@@ -704,15 +732,29 @@ SCRIPT main_menu_create
 					{ Type = iconmenuelement Id = career_info_tokyo_medal_1 image = "panelsprites\medal_1.png" rectScaleX = 1.3 lock_layout x = 240 y = 2 IconColor_Gold dontdrawrect static dont_gray }
 					{ Type = iconmenuelement Id = career_info_tokyo_medal_2 image = "panelsprites\medal_2.png" rectScaleX = 1.3 lock_layout x = 240 y = 2 IconColor_Silver dontdrawrect static dont_gray }
 					{ Type = iconmenuelement Id = career_info_tokyo_medal_3 image = "panelsprites\medal_3.png" rectScaleX = 1.3 lock_layout x = 240 y = 2 IconColor_Bronze dontdrawrect static dont_gray }
-					{ Type = iconmenuelement Id = career_info_tokyo_medal_4 image = "panelsprites\medal_locked.png" rectScaleX = 1.3 lock_layout x = 240 y = 2 IconColor_NoMedal dontdrawrect static dont_gray } ] } ] }
-	CreateMenu { Type = verticalmenu Id = slider_info x = 45.0 y = 290.0 w = 300.0 h = 400.0 just_center_x just_center_y children = [ { Type = textmenuelement Id = slider_info_line_1 text = "Poo poo pants" static dont_gray drawer = goals_text drawer = title_medium truncate_to_width }
+					{ Type = iconmenuelement Id = career_info_tokyo_medal_4 image = "panelsprites\medal_locked.png" rectScaleX = 1.3 lock_layout x = 240 y = 2 IconColor_NoMedal dontdrawrect static dont_gray } 
+				] 
+			} 
+		] 
+	}
+	
+	CreateMenu { 
+		Type = verticalmenu 
+		Id = slider_info 
+		x = 45.0 y = 290.0 w = 300.0 h = 400.0 
+		just_center_x just_center_y 
+		children = [ 
+			{ Type = textmenuelement Id = slider_info_line_1 text = "Poo poo pants" static dont_gray drawer = goals_text drawer = title_medium truncate_to_width }
 			{ Type = textmenuelement Id = slider_info_line_2 text = "Trickstyle: Vert" static dont_gray drawer = goals_text }
-			{ Type = textmenuelement Id = slider_info_line_3 text = "Stance: Goofy" static dont_gray drawer = goals_text } ] }
+			{ Type = textmenuelement Id = slider_info_line_3 text = "Stance: Goofy" static dont_gray drawer = goals_text } 
+		] 
+	}
+	
 	CreateBoardShopMenu
 	CreateDeckMenu
 	CreateWheelColorMenu
 	pre_cas_menu_create
-	AttachChild parent = contain1 child = free_skate_menu
+	
 	AttachChild parent = contain1 child = load_career_menu
 	AttachChild parent = contain1 child = boardshop_menu
 	AttachChild parent = contain1 child = pre_cas_main_menu
@@ -720,6 +762,7 @@ SCRIPT main_menu_create
 	AttachChild parent = contain1 child = career_info
 	AttachChild parent = contain1 child = slider_info
 	AttachChild parent = contain1 child = wheel_color_menu
+	
 	helper_menu_create
 	pro_menu_create
 	cassette_menu_create
@@ -994,8 +1037,26 @@ ENDSCRIPT
 SCRIPT PositionStatPips
 	MoveMenu Id = cassette_menu_stat_points_pips x = 430 y = 80 w = 70 h = 23
 ENDSCRIPT
-CassetteMenuParams =
-{ SourceNodeName = TRG_Videxplode NumFramesToFanOut = 20 FanOutPause = 1 NumFramesToFanIn = 20 FanInPause = 1 NumVisible = 6 XSeparation = 90 NumFramesToMoveSideways = 10 YCoord = 330 UnselectedZ = 40 SelectedZ = 20 NumFramesToFlip = 50 BigX = 320 BigY = 240 BigZ = 5 NumFramesToGetBig = 20 }
+
+CassetteMenuParams = { 
+	SourceNodeName = TRG_Videxplode 
+	NumFramesToFanOut = 20 
+	FanOutPause = 1 
+	NumFramesToFanIn = 20 
+	FanInPause = 1 
+	NumVisible = 6 
+	XSeparation = 90 
+	NumFramesToMoveSideways = 10 
+	YCoord = 330 
+	UnselectedZ = 40 
+	SelectedZ = 20 
+	NumFramesToFlip = 50 
+	BigX = 320 
+	BigY = 240 
+	BigZ = 5 
+	NumFramesToGetBig = 20 
+}
+
 GoalInfoTopY = 60
 GoalInfoDY = 35
 
