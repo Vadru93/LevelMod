@@ -1269,6 +1269,26 @@ ENDSCRIPT
 
 //THPS4 TRAINING
 
+Def_Trn = { 
+	level_name = "Training" 
+	location = "unknown"
+	level_id = Trn_id 
+	levelnum = Levelnum_New
+
+	th4_level regular_level NoCareer OnlineModes
+
+	lev_bsp = "levels_th4\Trn\Trn.bsp" 
+	lev_sky = "levels_th4\Trn\Sch_sky.bsp" 
+	lev_qb = "levels_th4\Trn\Trn.qb" 
+	lev_amb = "ambience\thps4\Trn"
+	loadscr = "images\load\th4_trn.png"
+
+	r = 179 g = 184 b = 192 a = 0 
+	cnear = 12 cfar = 20000
+
+	load_script = Load_Trn
+} 
+
 SCRIPT Load_Trn
 	AddMusicTrack "ambience\thps4\trn"
 	SetUpRioDeJaneiroLights
@@ -1289,7 +1309,7 @@ Def_Sch = {
 	lev_bsp = "levels_th4\Sch\Sch.bsp" 
 	lev_sky = "levels_th4\Sch\Sch_sky.bsp" 
 	lev_qb = "levels_th4\Sch\Sch.qb" 
-	lev_amb = "ambience\thps4\sky"
+	lev_amb = "ambience\thps4\Sch"
 	loadscr = "images\load\th4_col.png"
 
 	r = 179 g = 184 b = 192 a = 0 
@@ -1354,8 +1374,7 @@ SCRIPT Load_Alc
 	Load_Level_Func { Def_Alc }
 ENDSCRIPT
 
-
-//THPS4 SAN FRANCISCO
+//THPS4 KONA USA
 
 Def_Kon = { 
 	level_name = "Kona USA" 
@@ -1381,46 +1400,160 @@ SCRIPT Load_Kon
 	Load_Level_Func { Def_Kon }
 ENDSCRIPT
 
-SCRIPT Load_Lon
-	AddMusicTrack "ambience\thps4\Lon"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "Levels_Th4\Lon\Lon.bsp" lev_sky = "Levels_Th4\Lon\Lon_Sky.bsp" lev_qb = "levels_TH4\Lon\Lon.qb" loadscr = "images\load\th4_lon.png"
-	PrepareLevelFog r = 165 g = 180 b = 202 a = 0 cnear = 12 cfar = 80000
-ENDSCRIPT
+//THPS4 SHIPYARD
 
-SCRIPT Load_Hof
-	AddMusicTrack "ambience\thps4\Hof"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "Levels_Th4\Hof\Hof.bsp" lev_sky = "Levels_Th4\Hof\Hof_Sky.bsp" lev_qb = "levels_TH4\Hof\Hof.qb" loadscr = "images\load\th4_hof.png"
-	PrepareLevelFog r = 165 g = 180 b = 202 a = 0 cnear = 12 cfar = 20000
-ENDSCRIPT
+Def_Jnk = { 
+	level_name = "Shipyard" 
+	location = "unknown"
+	level_id = jnk_id
+	levelnum = Levelnum_New
 
-SCRIPT Load_Mot
-	AddMusicTrack "ambience\thps4\Mot"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "Levels_Th4\Mot\Mot.bsp" lev_sky = "Levels_Th4\Mot\Mot_Sky.bsp" lev_qb = "levels_TH4\Mot\Mot.qb" loadscr = "images\load\th4_mot.png"
-	PrepareLevelFog r = 165 g = 180 b = 202 a = 0 cnear = 12 cfar = 20000
-ENDSCRIPT
+	th4_level regular_level NoCareer OnlineModes
+
+	lev_bsp = "levels_th4\Jnk\Jnk.bsp"
+	lev_sky = "levels_th4\Jnk\Jnk_sky.bsp"
+	lev_qb = "levels_th4\Jnk\Jnk.qb"
+	lev_amb = "ambience\thps4\Jnk"
+	loadscr = "images\load\th4_Jnk.png"
+
+	r = 179 g = 184 b = 192 a = 0 
+	cnear = 12 cfar = 20000
+
+	load_script = Load_Jnk
+}
 
 SCRIPT Load_Jnk
-	AddMusicTrack "ambience\thps4\Jnk"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "Levels_Th4\Jnk\Jnk.bsp" lev_sky = "Levels_Th4\Jnk\Jnk_Sky.bsp" lev_qb = "levels_TH4\Jnk\Jnk.qb" loadscr = "images\load\th4_jnk.png"
-	PrepareLevelFog r = 179 g = 184 b = 192 a = 0 cnear = 12 cfar = 20000
+	Load_Level_Func { Def_Jnk }
 ENDSCRIPT
+
+//THPS4 LONDON
+
+Def_Lon = { 
+	level_name = "London" 
+	location = "UK"
+	level_id = lon_id
+	levelnum = Levelnum_New
+
+	th4_level regular_level NoCareer OnlineModes
+
+	lev_bsp = "levels_th4\Lon\Lon.bsp"
+	lev_sky = "levels_th4\Lon\Lon_sky.bsp"
+	lev_qb = "levels_th4\Lon\Lon.qb"
+	lev_amb = "ambience\thps4\Lon"
+	loadscr = "images\load\th4_Lon.png"
+
+	r = 165 g = 180 b = 202 a = 0 
+	cnear = 12 cfar = 80000
+
+	load_script = Load_Lon
+}
+
+SCRIPT Load_Lon
+	Load_Level_Func { Def_Lon }
+ENDSCRIPT
+
+//THPS4 ZOO
+
+Def_Zoo = { 
+	level_name = "Zoo" 
+	location = "UK"
+	level_id = zoo_id
+	levelnum = Levelnum_New
+
+	th4_level regular_level NoCareer OnlineModes
+
+	lev_bsp = "levels_th4\Zoo\Zoo.bsp"
+	lev_sky = "levels_th4\Zoo\Zoo_sky.bsp"
+	lev_qb = "levels_th4\Zoo\Zoo.qb"
+	lev_amb = "ambience\thps4\Zoo"
+	loadscr = "images\load\th4_Zoo.png"
+
+	r = 179 g = 184 b = 192 a = 0 
+	cnear = 12 cfar = 20000
+
+	load_script = Load_Zoo
+}
 
 SCRIPT Load_Zoo
-	AddMusicTrack "ambience\thps4\zoo"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "Levels_Th4\Zoo\Zoo.bsp" lev_sky = "Levels_Th4\Zoo\Zoo_Sky.bsp" lev_qb = "levels_TH4\Zoo\Zoo.qb" loadscr = "images\load\th4_zoo.png"
-	PrepareLevelFog r = 179 g = 184 b = 192 a = 0 cnear = 12 cfar = 20000
+	Load_Level_Func { Def_Zoo }
 ENDSCRIPT
 
+//THPS4 CARNIVAL
+
+Def_Cnv = { 
+	level_name = "Carnival" 
+	location = "unknown (USA)"
+	level_id = cnv_id
+	levelnum = Levelnum_New
+
+	th4_level regular_level NoCareer OnlineModes
+
+	lev_bsp = "levels_th4\Cnv\Cnv.bsp"
+	lev_sky = "levels_th4\Cnv\Cnv_sky.bsp"
+	lev_qb = "levels_th4\Cnv\Cnv.qb"
+	lev_amb = "ambience\thps4\Cnv"
+	loadscr = "images\load\th4_Cnv.png"
+
+	r = 179 g = 184 b = 192 a = 0 
+	cnear = 12 cfar = 20000
+
+	load_script = Load_Cnv
+}
+
 SCRIPT Load_Cnv
-	AddMusicTrack "ambience\thps4\cnv"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "Levels_Th4\Cnv\Cnv.bsp" lev_sky = "Levels_Th4\Cnv\Cnv_Sky.bsp" lev_qb = "levels_TH4\Cnv\Cnv.qb" loadscr = "images\load\th4_cnv.png"
-	PrepareLevelFog r = 179 g = 184 b = 192 a = 0 cnear = 12 cfar = 20000
+	Load_Level_Func { Def_Cnv }
+ENDSCRIPT
+
+//THPS4 CHICAGO
+
+Def_Hof = { 
+	level_name = "Chicago" 
+	location = "Illinois"
+	level_id = hof_id
+	levelnum = Levelnum_New
+
+	th4_level regular_level NoCareer OnlineModes
+
+	lev_bsp = "levels_th4\Hof\Hof.bsp"
+	lev_sky = "levels_th4\Hof\Hof_sky.bsp"
+	lev_qb = "levels_th4\Hof\Hof.qb"
+	lev_amb = "ambience\thps4\Hof"
+	loadscr = "images\load\th4_Hof.png"
+
+	r = 165 g = 180 b = 202 a = 0 
+	cnear = 12 cfar = 20000
+
+	load_script = Load_Hof
+}
+
+SCRIPT Load_Hof
+	Load_Level_Func { Def_Hof }
+ENDSCRIPT
+
+//THPS4 MOTOX
+
+Def_Mot = { 
+	level_name = "MotoX" 
+	location = "unknown"
+	level_id = mot_id
+	levelnum = Levelnum_New
+
+	th4_level regular_level NoCareer OnlineModes
+
+	lev_bsp = "levels_th4\Mot\Mot.bsp"
+	lev_sky = "levels_th4\Mot\Mot_sky.bsp"
+	lev_qb = "levels_th4\Mot\Mot.qb"
+	lev_amb = "ambience\thps4\Mot"
+	loadscr = "images\load\th4_Mot.png"
+
+	r = 165 g = 180 b = 202 a = 0 
+	cnear = 12 cfar = 20000
+
+	load_script = Load_Mot
+}
+
+SCRIPT Load_Mot
+	Load_Level_Func { Def_Mot }
 ENDSCRIPT
 
 master_level_list = [
@@ -1451,17 +1584,7 @@ master_level_list = [
 	{ Def_Club } { Def_Cons } { Def_Tampa } { Def_Sway } { Def_Sky }
 
 	//THPS4	
-	{ level_name = "Training" load_script = Load_Trn level_id = training_id NoCareer regular_level th4_level supports_ctf supports_own supports_bball }
-	{ Def_Sch }
-	{ Def_Sf2 }
-	{ Def_Alc }
-	{ Def_Kon }
-	{ level_name = "Shipyard" load_script = Load_Jnk level_id = shipyard_id NoCareer regular_level th4_level supports_ctf supports_own supports_bball }
-	{ level_name = "London" load_script = Load_Lon level_id = london_id NoCareer regular_level th4_level supports_ctf supports_own supports_bball }
-	{ level_name = "Zoo" load_script = Load_Zoo level_id = zoo_id NoCareer regular_level th4_level supports_ctf supports_own supports_bball }
-	{ level_name = "Carnival" load_script = Load_Cnv level_id = carnival_id NoCareer regular_level th4_level supports_ctf supports_own supports_bball }
-	{ level_name = "Chicago" load_script = Load_Hof level_id = chicago_id NoCareer regular_level th4_level supports_ctf supports_own supports_bball }
-	{ level_name = "MotoX" load_script = Load_Mot level_id = motox_id NoCareer regular_level th4_level supports_ctf supports_own supports_bball }
+	{ Def_Trn } { Def_Sch } { Def_Sf2 } { Def_Alc } { Def_Kon } { Def_Jnk } { Def_Lon } { Def_Zoo } { Def_Cnv } { Def_Hof } { Def_Mot }
 
 	//THUG
 	{ level_name = "New Jersey" load_script = Load_NJ level_id = jersey_id NoCareer regular_level ug1_level supports_ctf supports_own supports_bball }
