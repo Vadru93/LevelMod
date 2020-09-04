@@ -252,17 +252,17 @@ namespace String
 		if ((LevelHeapTop+len) >= (LevelHeapBottom + (MAX_NUM_LEVEL * 80)))
 			MessageBox(0, "Level String Heap too small...", "CRITICAL ERROR", 0);
 
+		new_string = LevelHeapTop;
 		for (DWORD i = 0; i < len; i++)
 		{
-		    LevelHeapTop[i] = str[i];
+		    *LevelHeapTop = str[i];
+			LevelHeapTop++;
 		}
 
 		levelStrings[numLevelStrings].checksum = checksum;
-		levelStrings[numLevelStrings].pStr = LevelHeapTop;
+		levelStrings[numLevelStrings].pStr = new_string;
 		numLevelStrings++;
-		LevelHeapTop += len;
-
-		return LevelHeapTop;
+		return new_string;
 	}
 
 	char* AddString(DWORD checksum, const char* str)
