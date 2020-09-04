@@ -151,7 +151,7 @@ TrickSpeed trickSpeed[] = {
 
 bool IsOptionOn(CStruct* pStruct, CScript* pScript)
 {
-	CStructHeader* header = pStruct->head;
+	CStructHeader* header = pStruct->tail;
 
 	while (header)
 	{
@@ -169,7 +169,7 @@ bool IsOptionOn(CStruct* pStruct, CScript* pScript)
 
 bool IsOptionOff(CStruct* pStruct, CScript* pScript)
 {
-	CStructHeader* header = pStruct->head;
+	CStructHeader* header = pStruct->tail;
 
 	while (header)
 	{
@@ -462,7 +462,7 @@ void AddOption(char* name, int value, bool update)
 
 bool GetParamScript(CStruct* pStruct, CScript* pScript)
 {
-	CStructHeader* header = pStruct->head;
+	CStructHeader* header = pStruct->tail;
 	while (header)
 	{
 		if (header->Type == QBKeyHeader::LOCAL)
@@ -515,7 +515,7 @@ bool GetParamScript(CStruct* pStruct, CScript* pScript)
 
 bool LM_GotParamScript(CStruct* pStruct, CScript* pScript)
 {
-	CStructHeader* header = pStruct->head;
+	CStructHeader* header = pStruct->tail;
 	while (header)
 	{
 		if (header->Type == QBKeyHeader::LOCAL)
@@ -534,13 +534,13 @@ bool LM_GotParamScript(CStruct* pStruct, CScript* pScript)
 		}
 		header = header->NextHeader;
 	}
-	_printf("LM_GotParam returning false\n");
+	_printf("couldn't find param, LM_GotParam returning false\n");
 	return false;
 }
 
 bool SetOption(CStruct* pStruct, CScript* pScript)
 {
-	CStructHeader* header = pStruct->head;
+	CStructHeader* header = pStruct->tail;
 	while (header)
 	{
 		if (header->Type == QBKeyHeader::LOCAL)
@@ -590,7 +590,7 @@ bool SetOption(CStruct* pStruct, CScript* pScript)
 
 bool ToggleOption(CStruct* pStruct, CScript* pScript)
 {
-	CStructHeader* header = pStruct->head;
+	CStructHeader* header = pStruct->tail;
 	while (header)
 	{
 		if (header->Type == QBKeyHeader::LOCAL)
