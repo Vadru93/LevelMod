@@ -22,23 +22,24 @@ LevelModOptions = [
 	//4 = 20% faster
 	{ name = "LM_Control_AirTrickSpeed" Value = 0 }
 	{ name = "LM_Control_bXinput" value = 0 }
+	{ name = "LM_Control_bWalliePlant" Value = 1 }
+	{ name = "LM_Control_bButtSlap" value = 1 }
+	{ name = "LM_Control_bBoostPlant" value = 0 }
+	{ name = "LM_Control_bWallplant" value = 1 }	
 	{ name = "LM_GUI_bShowHud" Value = 1 StartGame Do = UpdateShowHUD }
 	{ name = "LM_GUI_bNewMenu" Value = 1 }
 	{ name = "LM_GUI_bShowGrafCounter" Value = 1 }
+	{ name = "LM_GUI_bTrickNotifications" Value = 1 }
+	{ name = "LM_GUI_bNetName" Value = 0 StartGame Do = UpdateNetName }	
 	{ name = "LM_BugFix_bTeleFix" Value = 1 }
 	{ name = "LM_BugFix_bSoundFix" Value = 1 }
 	{ name = "LM_GameOption_bLimitTags" Value = 0 }
 	{ name = "LM_GameOption_bGrass" Value = 1 StartGame Do = UpdateGrass }
 	{ name = "LM_GameOption_bExtraLayer" Value = 1 StartGame Do = UpdateExtraLayer }
 	{ name = "LM_GameOption_bNetSky" Value = 0 StartGame Do = UpdateNetSky }
-	{ name = "LM_DebugOption_bDebugMode" Value = 0 }
-	{ name = "LM_GUI_bTrickNotifications" Value = 1 }
-	{ name = "LM_Control_bWalliePlant" Value = 1 }
-	{ name = "LM_Control_bButtSlap" value = 1 }
-	{ name = "LM_Control_bBoostPlant" value = 0 }
-	{ name = "LM_Control_bWallplant" value = 1 }
-	{ name = "LM_Gameplay_bPedProps" value = 1 }
+	{ name = "LM_Gameplay_bPedProps" value = 1 } //change to gameoption
 	{ name = "LM_GameOption_b251Patch" value = 0 }
+	{ name = "LM_DebugOption_bDebugMode" Value = 0 }
 	{ name = "LM_LevelOption_TH4ProObjects" value = 0 StartGame Do = UpdateTH4ProObjects }
 	{ name = "LM_LevelOption_TH4CompObjects" value = 0 StartGame Do = UpdateTH4CompObjects }	
 ]
@@ -149,9 +150,16 @@ levelmod_menu_control_items = [
 	//Link to air options
 	{ Type = textmenuelement auto_id text = "Air" link = levelmod_menu_air }	
 	
+	//Link to wall options
+	{ Type = textmenuelement auto_id text = "Wall" link = levelmod_menu_wall }	
+
+
+	//toggles between classic tricks and double tap extensions + some new additions
+	{ LM_Menu_Shared_Bool id = LM_Control_bExtraTricks_id params = { name = LM_Control_bExtraTricks id = LM_Control_bExtraTricks_id on = "Extra tricks: on" off = "Extra tricks: off" } }
+	
 	//option to disable revert chain
 	{ LM_Menu_Shared_Bool id = LM_Control_bRevert_id params = { name = LM_Control_bRevert id = LM_Control_bRevert_id on = "Reverts: on" off = "Reverts: off" } }
-	
+
 	//enables XInput support, restart required for this option to apply
 	{ LM_Menu_Shared_Bool id = LM_Control_bXinput_id params = { name = LM_Control_bXinput id = LM_Control_bXinput_id on = "Xinput: on" off = "Xinput: off" } }
 
@@ -183,10 +191,13 @@ levelmod_menu_GUI_items = [
 	{ LM_Menu_Shared_Bool id = LM_GUI_bTrickNotifications_id params = { name = LM_GUI_bTrickNotifications id = LM_GUI_bTrickNotifications_id on = "Extra Messages: on" off = "Extra Messages: off" } } 
 	
 	//disables HUD completely, "pro" mode, "screenshot" mode
-	{ LM_Menu_Shared_Bool id = LM_GUI_bShowHud_id params = { name = LM_GUI_bShowHud id = LM_GUI_bShowHud_id on = "ShowHUD: on" off = "ShowHUD: off" } }
+	{ LM_Menu_Shared_Bool id = LM_GUI_bShowHud_id params = { name = LM_GUI_bShowHud id = LM_GUI_bShowHud_id on = "Show HUD: on" off = "Show HUD: off" action = UpdateShowHUD } }
+ 
+ 	//disables HUD completely, "pro" mode, "screenshot" mode
+	{ LM_Menu_Shared_Bool id = LM_GUI_bNetName_id params = { name = LM_GUI_bNetName id = LM_GUI_bNetName_id on = "Player names: on" off = "Player names: off" action = UpdateNetName } }
  
 	 //The new LevelMod menu when you press esc
-	{ LM_Menu_Shared_Bool id = LM_GUI_bNewMenu_id params = { name = LM_GUI_bNewMenu id = LM_GUI_bNewMenu_id on = "New Menu: on" off = "New Menu: off" } }
+	{ LM_Menu_Shared_Bool id = LM_GUI_bNewMenu_id params = { name = LM_GUI_bNewMenu id = LM_GUI_bNewMenu_id on = "New Net Menu: on" off = "New Net Menu: off" } }
 	
 	//This counts your tags
 	//currently only works correctly when you play alone
@@ -207,23 +218,24 @@ LevelMod_menu_GameOptions = {
 
 levelmod_menu_GameOptions_items = [
 	{ Type = textmenuelement auto_id text = "Game Options" static dont_gray drawer = title }
-	//This fixes Sk3_TeleportToNode
-	//So that skater will have same orientation when it leave the teleport
-	//As when it entered the teleport
-	{ LM_Menu_Shared_Bool id = LM_BugFix_bTeleFix_id params = { name = LM_BugFix_bTeleFix id = LM_BugFix_bTeleFix_id on = "TeleFix: on" off = "TeleFix: off" } }
+
+	//251 patch
+	{ LM_Menu_Shared_Bool id = LM_GameOption_b251Patch_id params = { name = LM_GameOption_b251Patch id = LM_GameOption_b251Patch_id on = "251x Patch: on" off = "251x Patch: off" } }
 	
 	//removes 32 tags limit
 	{ LM_Menu_Shared_Bool id = LM_GameOption_bLimitTags_id params = { name = LM_GameOption_bLimitTags id = LM_GameOption_bLimitTags_id off = "Unlimited Tags: on" on = "Unlimited Tags: off" } }
+
+	//This fixes Sk3_TeleportToNode
+	//So that skater will have same orientation when it leave the teleport
+	//As when it entered the teleport
+	{ LM_Menu_Shared_Bool id = LM_BugFix_bTeleFix_id params = { name = LM_BugFix_bTeleFix id = LM_BugFix_bTeleFix_id on = "Tele Stance Fix: on" off = "Tele Stance Fix: off" } }
 	
-	//251 patch
-	{ LM_Menu_Shared_Bool id = LM_GameOption_b251Patch_id params = { name = LM_GameOption_b251Patch id = LM_GameOption_b251Patch_id on = "251 Patch: on" off = "251 Patch: off" } }
-	
-	//removes ped props
+	//removes ped props (message and score bonus)
 	{ LM_Menu_Shared_Bool id = LM_Gameplay_bPedProps_id params = { name = LM_Gameplay_bPedProps id = LM_Gameplay_bPedProps_id on = "Ped Props: on" off = "Ped Props: off" } }
-	
+		
 	//enables debug console, restart required for this option to apply
-	{ LM_Menu_Shared_Bool id = LM_DebugOption_bDebugMode_id params = { name = LM_DebugOption_bDebugMode id = LM_DebugOption_bDebugMode_id on = "Debug Mode: on" off = "Debug Mode: off" } }
-	
+	{ LM_Menu_Shared_Bool id = LM_DebugOption_bDebugMode_id params = { name = LM_DebugOption_bDebugMode id = LM_DebugOption_bDebugMode_id on = "Debug Console: on" off = "Debug Console: off" } }
+		
 	//goes back to previous menu
 	{ LM_Menu_Shared_Back Params = { id = LevelMod_menu_GameOptions } } 
 ]
@@ -240,20 +252,8 @@ LevelMod_menu_air = {
 levelmod_menu_air_items = [
 	{ Type = textmenuelement auto_id text = "Air" static dont_gray drawer = title }
 	
-    //option to disable wallieplant chain
-	{ LM_Menu_Shared_Bool id = LM_Control_bWalliePlant_id params = { name = LM_Control_bWalliePlant id = LM_Control_bWalliePlant_id on = "Wallieplant: on" off = "Wallieplant: off" LinkedTo_id = LM_Control_bBoostPlant_id } }
-	
-	//option to disable wallieplant boostplant
-	{ LM_Menu_Shared_Bool id = LM_Control_bBoostPlant_id LinkedTo = LM_Control_bWalliePlant params = { name = LM_Control_bBoostPlant id = LM_Control_bBoostPlant_id on = "Boostplant: on" off = "Boostplant: off" } }
-	
-	//option to disable wallplant
-	{ LM_Menu_Shared_Bool id = LM_Control_bWallPlant_id params = { name = LM_Control_bWallPlant id = LM_Control_bWallPlant_id on = "Wallplant: on" off = "Wallplant: off" } }
-	
 	//option to disable buttslap
     { LM_Menu_Shared_Bool id = LM_Control_bButtSlap_id params = { name = LM_Control_bButtSlap id = LM_Control_bButtSlap_id on = "Buttslap: on" off = "Buttslap: off" } }
-	
-	//toggles between classic tricks and double tap extensions + some new additions
-	{ LM_Menu_Shared_Bool id = LM_Control_bExtraTricks_id params = { name = LM_Control_bExtraTricks id = LM_Control_bExtraTricks_id on = "Extra tricks: on" off = "Extra tricks: off" } }
 	
 	//Sets spine button
 	//0 = Revert
@@ -278,13 +278,37 @@ levelmod_menu_air_items = [
 	{ LM_Menu_Shared_Back Params = { id = LevelMod_menu_air } } 
 ]
 
+//Control->Air menu struct
+LevelMod_menu_wall = { 
+	LM_Menu_Shared_Vertical
+	id = LevelMod_menu_wall
+	eventhandler = { Type = showeventhandler target = "UpdateMenuText" params = LevelMod_menu_wall }
+	children = levelmod_menu_wall_items
+}
+
+levelmod_menu_wall_items = [
+	{ Type = textmenuelement auto_id text = "Wall" static dont_gray drawer = title }
+	
+	//option to disable wallieplant chain
+	{ LM_Menu_Shared_Bool id = LM_Control_bWalliePlant_id params = { name = LM_Control_bWalliePlant id = LM_Control_bWalliePlant_id on = "Wallieplant: on" off = "Wallieplant: off" LinkedTo_id = LM_Control_bBoostPlant_id } }
+	
+	//option to disable wallieplant boostplant
+	{ LM_Menu_Shared_Bool id = LM_Control_bBoostPlant_id LinkedTo = LM_Control_bWalliePlant params = { name = LM_Control_bBoostPlant id = LM_Control_bBoostPlant_id on = "Boostplant: on" off = "Boostplant: off" } }
+
+	//option to disable wallplant
+	{ LM_Menu_Shared_Bool id = LM_Control_bWallPlant_id params = { name = LM_Control_bWallPlant id = LM_Control_bWallPlant_id on = "Wallplant: on" off = "Wallplant: off" } }
+	
+	{ LM_Menu_Shared_Back Params = { id = LevelMod_menu_wall } } 
+]
+
 SCRIPT CreateLevelModMenus
 	//adds levelmod menus
-	CreateAndAttachMenu { Levelmod_menu_root }
+	CreateAndAttachMenu { Levelmod_menu_Root }
 	CreateAndAttachMenu { LevelMod_menu_Control }
 	CreateAndAttachMenu { LevelMod_menu_GUI }
 	CreateAndAttachMenu { LevelMod_menu_GameOptions }
-	CreateAndAttachMenu { LevelMod_menu_air }
+	CreateAndAttachMenu { LevelMod_menu_Air }
+	CreateAndAttachMenu { LevelMod_menu_Wall }
 	CreateAndAttachMenu { levelmod_menu_LevelOptions }
 
 	CreateMenu { 
@@ -324,6 +348,14 @@ SCRIPT UpdateExtraLayer
 	ELSE
 		
 		Kill prefix = "ExtraLayer"
+	ENDIF
+ENDSCRIPT
+
+SCRIPT UpdateNetName
+	IF IsOptionOn LM_GUI_bNetName
+		TogglePlayerNames 1
+	ELSE
+		TogglePlayerNames 0
 	ENDIF
 ENDSCRIPT
 

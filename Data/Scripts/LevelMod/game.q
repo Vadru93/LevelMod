@@ -223,84 +223,85 @@ ENDSCRIPT
 SCRIPT Leaveobsrv
 	LeaveObserveMode2
 ENDSCRIPT
-TH4CompDisabled = 1
 
-SCRIPT ToggleTH4Comp
-	IF IsTrue TH4CompDisabled
-		Change TH4CompDisabled = 0
-		UpdateTH4CompText
-		Create prefix = "G_Comp_"
-		Create prefix = "TRG_G_COMP_"
-		Kill prefix = "G_COMPNOT_"
-		Kill prefix = "TRG_G_COMPNOT_"
-	ELSE
-		Change TH4CompDisabled = 1
-		UpdateTH4CompText
-		Kill prefix = "G_Comp_"
-		Kill prefix = "TRG_G_COMP_"
-		Create prefix = "G_COMPNOT_"
-		Create prefix = "TRG_G_COMPNOT_"
-	ENDIF
-ENDSCRIPT
+//TH4CompDisabled = 1
 
-SCRIPT UpdateTH4CompText
-	IF IsTrue TH4CompDisabled
-		SetMenuElementText id = TH4Comp_Toggle "Competition objects: Off"
-	ELSE
-		SetMenuElementText id = TH4Comp_Toggle "Competition objects: On"
-	ENDIF
-ENDSCRIPT
-TH4ProDisabled = 1
+// SCRIPT ToggleTH4Comp
+	// IF IsTrue TH4CompDisabled
+		// Change TH4CompDisabled = 0
+		// UpdateTH4CompText
+		// Create prefix = "G_Comp_"
+		// Create prefix = "TRG_G_COMP_"
+		// Kill prefix = "G_COMPNOT_"
+		// Kill prefix = "TRG_G_COMPNOT_"
+	// ELSE
+		// Change TH4CompDisabled = 1
+		// UpdateTH4CompText
+		// Kill prefix = "G_Comp_"
+		// Kill prefix = "TRG_G_COMP_"
+		// Create prefix = "G_COMPNOT_"
+		// Create prefix = "TRG_G_COMPNOT_"
+	// ENDIF
+// ENDSCRIPT
 
-SCRIPT ToggleTH4Pro
-	IF IsTrue TH4ProDisabled
-		Change TH4ProDisabled = 0
-		UpdateTH4ProText
-		Create prefix = "Proset"
-		Create prefix = "TRG_Proset"
-		Kill prefix = "PROSET1NOT_"
-		Kill prefix = "PROSET2NOT_"
-		Kill prefix = "PROSET3NOT_"
-		Kill prefix = "PROSET4NOT_"
-		Kill prefix = "PROSET5NOT_"
-		Kill prefix = "PROSET6NOT_"
-		Kill prefix = "PROSET7NOT_"
-		Kill prefix = "TRG_PROSET1NOT_"
-		Kill prefix = "TRG_PROSET2NOT_"
-		Kill prefix = "TRG_PROSET3NOT_"
-		Kill prefix = "TRG_PROSET4NOT_"
-		Kill prefix = "TRG_PROSET5NOT_"
-		Kill prefix = "TRG_PROSET6NOT_"
-		Kill prefix = "TRG_PROSET7NOT_"
-	ELSE
-		Change TH4ProDisabled = 1
-		UpdateTH4ProText
-		Kill prefix = "Proset"
-		Kill prefix = "TRG_Proset"
-		Create prefix = "PROSET1NOT_"
-		Create prefix = "PROSET2NOT_"
-		Create prefix = "PROSET3NOT_"
-		Create prefix = "PROSET4NOT_"
-		Create prefix = "PROSET5NOT_"
-		Create prefix = "PROSET6NOT_"
-		Create prefix = "PROSET7NOT_"
-		Create prefix = "TRG_PROSET1NOT_"
-		Create prefix = "TRG_PROSET2NOT_"
-		Create prefix = "TRG_PROSET3NOT_"
-		Create prefix = "TRG_PROSET4NOT_"
-		Create prefix = "TRG_PROSET5NOT_"
-		Create prefix = "TRG_PROSET6NOT_"
-		Create prefix = "TRG_PROSET7NOT_"
-	ENDIF
-ENDSCRIPT
+// SCRIPT UpdateTH4CompText
+	// IF IsTrue TH4CompDisabled
+		// SetMenuElementText id = TH4Comp_Toggle "Competition objects: Off"
+	// ELSE
+		// SetMenuElementText id = TH4Comp_Toggle "Competition objects: On"
+	// ENDIF
+// ENDSCRIPT
+// TH4ProDisabled = 1
 
-SCRIPT UpdateTH4ProText
-	IF IsTrue TH4ProDisabled
-		SetMenuElementText id = TH4Pro_Toggle "Pro Trick objects: Off"
-	ELSE
-		SetMenuElementText id = TH4Pro_Toggle "Pro Trick objects: On"
-	ENDIF
-ENDSCRIPT
+// SCRIPT ToggleTH4Pro
+	// IF IsTrue TH4ProDisabled
+		// Change TH4ProDisabled = 0
+		// UpdateTH4ProText
+		// Create prefix = "Proset"
+		// Create prefix = "TRG_Proset"
+		// Kill prefix = "PROSET1NOT_"
+		// Kill prefix = "PROSET2NOT_"
+		// Kill prefix = "PROSET3NOT_"
+		// Kill prefix = "PROSET4NOT_"
+		// Kill prefix = "PROSET5NOT_"
+		// Kill prefix = "PROSET6NOT_"
+		// Kill prefix = "PROSET7NOT_"
+		// Kill prefix = "TRG_PROSET1NOT_"
+		// Kill prefix = "TRG_PROSET2NOT_"
+		// Kill prefix = "TRG_PROSET3NOT_"
+		// Kill prefix = "TRG_PROSET4NOT_"
+		// Kill prefix = "TRG_PROSET5NOT_"
+		// Kill prefix = "TRG_PROSET6NOT_"
+		// Kill prefix = "TRG_PROSET7NOT_"
+	// ELSE
+		// Change TH4ProDisabled = 1
+		// UpdateTH4ProText
+		// Kill prefix = "Proset"
+		// Kill prefix = "TRG_Proset"
+		// Create prefix = "PROSET1NOT_"
+		// Create prefix = "PROSET2NOT_"
+		// Create prefix = "PROSET3NOT_"
+		// Create prefix = "PROSET4NOT_"
+		// Create prefix = "PROSET5NOT_"
+		// Create prefix = "PROSET6NOT_"
+		// Create prefix = "PROSET7NOT_"
+		// Create prefix = "TRG_PROSET1NOT_"
+		// Create prefix = "TRG_PROSET2NOT_"
+		// Create prefix = "TRG_PROSET3NOT_"
+		// Create prefix = "TRG_PROSET4NOT_"
+		// Create prefix = "TRG_PROSET5NOT_"
+		// Create prefix = "TRG_PROSET6NOT_"
+		// Create prefix = "TRG_PROSET7NOT_"
+	// ENDIF
+// ENDSCRIPT
+
+// SCRIPT UpdateTH4ProText
+	// IF IsTrue TH4ProDisabled
+		// SetMenuElementText id = TH4Pro_Toggle "Pro Trick objects: Off"
+	// ELSE
+		// SetMenuElementText id = TH4Pro_Toggle "Pro Trick objects: On"
+	// ENDIF
+// ENDSCRIPT
 
 //SCRIPT ToggleSky
 //	IF IsTrue NetSkyIsOn
@@ -327,10 +328,10 @@ SCRIPT UpdateOptionsMenu
 	AddLine parent = new_net_options_menu Type = textmenuelement id = options_menu_edit_tricks_item text = "Edit Tricks" eventhandler = { Type = ChooseEventHandler link = trick_menu_container }
 	AddLine parent = new_net_options_menu Type = textmenuelement id = options_menu_sound_options_item text = "Sound Options" eventhandler = { Type = ChooseEventHandler link = sfx_menu_container }
 	AddLine parent = new_net_options_menu Type = textmenuelement id = options_menu_graf_pos_item text = "Tag counter options" eventhandler = { Type = ChooseEventHandler link = graf_counter_menu }
-	AddLine parent = new_net_options_menu id = NetName_Toggle text = "Player names: --" target = "ToggleNetName"
-	UpdateNetNameText
-	AddLine parent = new_net_options_menu id = HUD_Toggle text = "HUD: --" target = "ToggleHUD"
-	UpdateHUDText
+	//AddLine parent = new_net_options_menu id = NetName_Toggle text = "Player names: --" target = "ToggleNetName"
+	//UpdateNetNameText
+	//AddLine parent = new_net_options_menu id = HUD_Toggle text = "HUD: --" target = "ToggleHUD"
+	//UpdateHUDText
 	
 	//options moved to levelmod menu
 	//AddLine parent = new_net_options_menu id = Sky_Toggle text = "Sky: --" target = "ToggleSky"
