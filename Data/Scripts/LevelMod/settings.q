@@ -39,6 +39,8 @@ LevelModOptions = [
 	{ name = "LM_Control_bWallplant" value = 1 }
 	{ name = "LM_Gameplay_bPedProps" value = 1 }
 	{ name = "LM_GameOption_b251Patch" value = 0 }
+	{ name = "LM_LevelOption_TH4ProObjects" value = 0 StartGame Do = UpdateTH4ProObjects }
+	{ name = "LM_LevelOption_TH4CompObjects" value = 0 StartGame Do = UpdateTH4CompObjects }	
 ]
 
 
@@ -80,15 +82,57 @@ Levelmod_menu_root = {
 levelmod_menu_root_children = [
 	//title
 	{ Type = textmenuelement auto_id text = "LevelMod settings" static dont_gray drawer = title }
-	//Control options, like spine transfer, acid drop, etc
-	{ Type = textmenuelement auto_id text = "Control Options" link = levelmod_menu_control }	
+
+	//game options that affect gameplay
+	{ Type = textmenuelement auto_id text = "Game Options" link = LevelMod_menu_GameOptions }
+	
 	//GUI options, like Show HUD, show GrafCounter, etc
 	{ Type = textmenuelement auto_id text = "GUI Options" link = levelmod_menu_GUI	}
-	//Game Options, like bug fixes, limiting tags, etc
-	{ Type = textmenuelement auto_id text = "Game Options" link = LevelMod_menu_GameOptions }
+	
+	//Options that affect certain parts of th level
+	{ Type = textmenuelement auto_id text = "Level Options" link = levelmod_menu_LevelOptions }	
+		
+	//Control options, like spine transfer, acid drop, etc
+	{ Type = textmenuelement auto_id text = "Control Options" link = levelmod_menu_control }	
+			
 	//goes back to previous menu
 	{ LM_Menu_Shared_Back Params = { id = Levelmod_menu_root } } 
 ]
+
+
+//Level menu struct
+levelmod_menu_LevelOptions = { 
+	LM_Menu_Shared_Vertical
+	id = levelmod_menu_LevelOptions
+	eventhandler = { Type = showeventhandler target = "UpdateMenuText" params = levelmod_menu_LevelOptions }
+	children = levelmod_menu_LevelOptions_items
+}
+
+levelmod_menu_LevelOptions_items = [ 
+	{ Type = textmenuelement auto_id text = "Level Options" static dont_gray drawer = title }
+
+	//enables pseudo 3d layered grass in t2x and th4 levels
+	{ LM_Menu_Shared_Bool id = LM_GameOption_bGrass_id params = { name = LM_GameOption_bGrass id = LM_GameOption_bGrass_id on = "3D Grass: on" off = "3D Grass: off" action = UpdateGrass } }
+
+	//enables extra layers in th4+ levels
+	{ LM_Menu_Shared_Bool id = LM_GameOption_bExtraLayer_id params = { name = LM_GameOption_bExtraLayer id = LM_GameOption_bExtraLayer_id on = "Extra Layers: on" off = "Extra Layers: off" action = UpdateExtraLayer } }
+
+	//enables sky in network modes (an option cause of netname rendering bug) 
+	{ LM_Menu_Shared_Bool id = LM_GameOption_bNetSky_id params = { name = LM_GameOption_bNetSky id = LM_GameOption_bNetSky_id on = "Net sky: on" off = "Net sky: off" action = UpdateNetSky } }
+
+	//this one needs a better drawer here?
+	{ Type = textmenuelement auto_id text = "THPS4 levels" static dont_gray drawer = keyboard_property }
+
+	//enables proset objects in thps4 levels 
+	{ LM_Menu_Shared_Bool id = LM_LevelOption_TH4ProObjects_id params = { name = LM_LevelOption_TH4ProObjects id = LM_LevelOption_TH4ProObjects_id on = "Proset Objects: on" off = "Proset Objects: off" action = UpdateTH4ProObjects } }
+
+	//enables competition objects in thps4 levels 
+	{ LM_Menu_Shared_Bool id = LM_LevelOption_TH4CompObjects_id params = { name = LM_LevelOption_TH4CompObjects id = LM_LevelOption_TH4CompObjects_id on = "Comp Objects: on" off = "Comp Objects: off" action = UpdateTH4CompObjects } }
+
+	//goes back to previous menu
+	{ LM_Menu_Shared_Back Params = { id = levelmod_menu_LevelOptions } } 
+] 
+
 
 
 //Control menu struct
@@ -174,15 +218,6 @@ levelmod_menu_GameOptions_items = [
 	//251 patch
 	{ LM_Menu_Shared_Bool id = LM_GameOption_b251Patch_id params = { name = LM_GameOption_b251Patch id = LM_GameOption_b251Patch_id on = "251 Patch: on" off = "251 Patch: off" } }
 	
-	//enables pseudo 3d layered grass in t2x and th4 levels
-	{ LM_Menu_Shared_Bool id = LM_GameOption_bGrass_id params = { name = LM_GameOption_bGrass id = LM_GameOption_bGrass_id on = "3D Grass: on" off = "3D Grass: off" action = UpdateGrass } }
-	
-	//enables pseudo 3d layered grass in t2x and th4 levels
-	{ LM_Menu_Shared_Bool id = LM_GameOption_bExtraLayer_id params = { name = LM_GameOption_bExtraLayer id = LM_GameOption_bExtraLayer_id on = "Extra Layers: on" off = "Extra Layers: off" action = UpdateExtraLayer } }
-	
-	//enables pseudo 3d layered grass in t2x and th4 levels
-	{ LM_Menu_Shared_Bool id = LM_GameOption_bNetSky_id params = { name = LM_GameOption_bNetSky id = LM_GameOption_bNetSky_id on = "Net sky: on" off = "Net sky: off" action = UpdateNetSky } }
-	
 	//removes ped props
 	{ LM_Menu_Shared_Bool id = LM_Gameplay_bPedProps_id params = { name = LM_Gameplay_bPedProps id = LM_Gameplay_bPedProps_id on = "Ped Props: on" off = "Ped Props: off" } }
 	
@@ -250,6 +285,7 @@ SCRIPT CreateLevelModMenus
 	CreateAndAttachMenu { LevelMod_menu_GUI }
 	CreateAndAttachMenu { LevelMod_menu_GameOptions }
 	CreateAndAttachMenu { LevelMod_menu_air }
+	CreateAndAttachMenu { levelmod_menu_LevelOptions }
 
 	CreateMenu { 
 		Type = verticalmenu 
@@ -307,6 +343,62 @@ SCRIPT UpdateNetSky
 		LoadLevelGeometry sky = ""
 	ENDIF
 ENDSCRIPT
+
+
+SCRIPT UpdateTH4CompObjects
+	IF IsOptionOn LM_LevelOption_TH4CompObjects
+		Create prefix = "G_Comp_"
+		Create prefix = "TRG_G_COMP_"
+		Kill prefix = "G_COMPNOT_"
+		Kill prefix = "TRG_G_COMPNOT_"
+	ELSE
+		Kill prefix = "G_Comp_"
+		Kill prefix = "TRG_G_COMP_"
+		Create prefix = "G_COMPNOT_"
+		Create prefix = "TRG_G_COMPNOT_"
+	ENDIF
+ENDSCRIPT
+
+SCRIPT UpdateTH4ProObjects
+	IF IsOptionOn LM_LevelOption_TH4ProObjects
+		Create prefix = "Proset"
+		Create prefix = "TRG_Proset"
+		Kill prefix = "PROSET1NOT_"
+		Kill prefix = "PROSET2NOT_"
+		Kill prefix = "PROSET3NOT_"
+		Kill prefix = "PROSET4NOT_"
+		Kill prefix = "PROSET5NOT_"
+		Kill prefix = "PROSET6NOT_"
+		Kill prefix = "PROSET7NOT_"
+		Kill prefix = "TRG_PROSET1NOT_"
+		Kill prefix = "TRG_PROSET2NOT_"
+		Kill prefix = "TRG_PROSET3NOT_"
+		Kill prefix = "TRG_PROSET4NOT_"
+		Kill prefix = "TRG_PROSET5NOT_"
+		Kill prefix = "TRG_PROSET6NOT_"
+		Kill prefix = "TRG_PROSET7NOT_"
+	ELSE
+		Kill prefix = "Proset"
+		Kill prefix = "TRG_Proset"
+		Create prefix = "PROSET1NOT_"
+		Create prefix = "PROSET2NOT_"
+		Create prefix = "PROSET3NOT_"
+		Create prefix = "PROSET4NOT_"
+		Create prefix = "PROSET5NOT_"
+		Create prefix = "PROSET6NOT_"
+		Create prefix = "PROSET7NOT_"
+		Create prefix = "TRG_PROSET1NOT_"
+		Create prefix = "TRG_PROSET2NOT_"
+		Create prefix = "TRG_PROSET3NOT_"
+		Create prefix = "TRG_PROSET4NOT_"
+		Create prefix = "TRG_PROSET5NOT_"
+		Create prefix = "TRG_PROSET6NOT_"
+		Create prefix = "TRG_PROSET7NOT_"
+	ENDIF
+ENDSCRIPT
+
+
+
 
 SCRIPT LM_ToggleSky_Sub
 	//so this doesnt work for some reason
