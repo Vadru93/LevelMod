@@ -166,7 +166,24 @@ SCRIPT LM_SetOption
 		ENDIF
 		printf "DONE"
 	ENDIF
+
 ENDSCRIPT
+
+
+SCRIPT LM_ToggleSky
+	IF IsOptionOn LM_GameOption_bNetSky
+		ForEachIn master_level_list do = LM_ToggleSky_Sub params = { level = <load_script> sky = <lev_sky> }
+	ELSE
+		LoadLevelGeometry sky = ""
+	ENDIF
+ENDSCRIPT
+
+SCRIPT LM_ToggleSky_Sub
+	IF LevelIs <level>
+		LoadLevelGeometry sky = <sky>
+	ENDIF
+ENDSCRIPT
+
 
 //text too long. maybe should make menu wider
 LM_Control_AirTrickSpeed_Text = [
@@ -256,6 +273,10 @@ SCRIPT LM_ToggleOption
 				ENDIF
 		    ENDIF
 		ENDIF
+	ENDIF
+	
+	IF GotParam action
+		<action>
 	ENDIF
 ENDSCRIPT
 
@@ -375,10 +396,13 @@ levelmod_menu_GameOptions_items = [
 	{ LM_Menu_Shared_Bool id = LM_GameOption_b251Patch_id params = { name = LM_GameOption_b251Patch id = LM_GameOption_b251Patch_id on = "251 Patch: on" off = "251 Patch: off" } }
 	
 	//enables pseudo 3d layered grass in t2x and th4 levels
-	{ LM_Menu_Shared_Bool id = LM_GameOption_bGrass_id params = { name = LM_GameOption_bGrass id = LM_GameOption_bGrass_id on = "3D Grass: on" off = "3D Grass: off" } }
+	{ LM_Menu_Shared_Bool id = LM_GameOption_bGrass_id params = { name = LM_GameOption_bGrass id = LM_GameOption_bGrass_id on = "3D Grass: on" off = "3D Grass: off" action = UpdateGrass } }
 	
 	//enables pseudo 3d layered grass in t2x and th4 levels
-	{ LM_Menu_Shared_Bool id = LM_GameOption_bNetSky_id params = { name = LM_GameOption_bNetSky id = LM_GameOption_bNetSky_id on = "Net sky: on" off = "Net sky: off" } }
+	{ LM_Menu_Shared_Bool id = LM_GameOption_bExtraLayer_id params = { name = LM_GameOption_bExtraLayer id = LM_GameOption_bExtraLayer_id on = "Extra Layers: on" off = "Extra Layers: off" action = UpdateExtraLayer } }
+	
+	//enables pseudo 3d layered grass in t2x and th4 levels
+	{ LM_Menu_Shared_Bool id = LM_GameOption_bNetSky_id params = { name = LM_GameOption_bNetSky id = LM_GameOption_bNetSky_id on = "Net sky: on" off = "Net sky: off" action = LM_ToggleSky } }
 	
 	//removes ped props
 	{ LM_Menu_Shared_Bool id = LM_Gameplay_bPedProps_id params = { name = LM_Gameplay_bPedProps id = LM_Gameplay_bPedProps_id on = "Ped Props: on" off = "Ped Props: off" } }
@@ -402,7 +426,7 @@ levelmod_menu_GUI_items = [
 	{ LM_Menu_Shared_Bool id = LM_GUI_bNewMenu_id params = { name = LM_GUI_bNewMenu id = LM_GUI_bNewMenu_id on = "New Menu: on" off = "New Menu: off" } }
 	
 	//This counts your tags
-	//currently only works coreclty when you play alone
+	//currently only works correctly when you play alone
 	{ LM_Menu_Shared_Bool id = LM_GUI_bShowGrafCounter_id params = { name = LM_GUI_bShowGrafCounter id = LM_GUI_bShowGrafCounter_id on = "GrafCounter: on" off = "GrafCounter: off" } }
 	
 	//goes back to previous menu
@@ -413,6 +437,7 @@ levelmod_menu_air_items = [
 { Type = textmenuelement auto_id text = "Air" static dont_gray drawer = title }
     //option to disable wallieplant chain
 	{ LM_Menu_Shared_Bool id = LM_Control_bWalliePlant_id params = { name = LM_Control_bWalliePlant id = LM_Control_bWalliePlant_id on = "Wallieplant: on" off = "Wallieplant: off" LinkedTo_id = LM_Control_bBoostPlant_id } }
+	
 	//option to disable wallieplant boostplant
 	{ LM_Menu_Shared_Bool id = LM_Control_bBoostPlant_id LinkedTo = LM_Control_bWalliePlant params = { name = LM_Control_bBoostPlant id = LM_Control_bBoostPlant_id on = "Boostplant: on" off = "Boostplant: off" } }
 	
@@ -422,7 +447,7 @@ levelmod_menu_air_items = [
 	//option to disable buttslap
     { LM_Menu_Shared_Bool id = LM_Control_bButtSlap_id params = { name = LM_Control_bButtSlap id = LM_Control_bButtSlap_id on = "Buttslap: on" off = "Buttslap: off" } }
 	
-	//new tricks?
+	//toggles between classic tricks and double tap extensions + some new additions
 	{ LM_Menu_Shared_Bool id = LM_Control_bExtraTricks_id params = { name = LM_Control_bExtraTricks id = LM_Control_bExtraTricks_id on = "Extra tricks: on" off = "Extra tricks: off" } }
 	
 	//Sets spine button
