@@ -168,7 +168,7 @@ private://0575a190
 	//8814
 	float normallerp;
 	BYTE un[0xA50];
-	void* gapFont;//not sure?
+	void* trickFont;//not sure?
 
 //#pragma pop(pack)
 public:
@@ -187,7 +187,7 @@ public:
 	typedef void(__thiscall* const pAddTrick)(void* pThis, char* trickName, DWORD trickScore, TrickType type);
 	void AddTrick(char* trickName, DWORD trickScore, TrickType type)
 	{
-		pAddTrick(0x00435550)(this->gapFont, trickName, trickScore, type);
+		pAddTrick(0x00435550)(this->trickFont, trickName, trickScore, type);
 	}
 
 	typedef bool(__thiscall* const pQueryEvents)(Skater* pThis, CStruct* query, BYTE mask, BYTE ignore);

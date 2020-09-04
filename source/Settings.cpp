@@ -167,6 +167,23 @@ bool IsOptionOn(CStruct* pStruct, CScript* pScript)
 	return false;
 }
 
+bool IsOptionOff(CStruct* pStruct, CScript* pScript)
+{
+	CStructHeader* header = pStruct->head;
+
+	while (header)
+	{
+		if (header->Type == QBKeyHeader::LOCAL)
+		{
+			std::map<int, int>::iterator it = options.find(header->Data);
+			if (it != options.end())
+				return !it->second;
+		}
+		header = header->NextHeader;
+	}
+	_printf(__FUNCTION__" No Param?\n");
+	return false;
+}
 
 void SetAirTrickSpeed(DWORD speed)
 {

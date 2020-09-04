@@ -92,6 +92,7 @@ bool KillMovingObjectScript(CStruct* pStruct, CScript* pScript);
 bool MoveObjectScript(CStruct* pStruct, CScript* pScript);
 
 bool IsOptionOn(CStruct* pStruct, CScript* pScript);
+bool IsOptionOff(CStruct* pStruct, CScript* pScript);
 bool GetParamScript(CStruct* pStruct, CScript* pScript);
 bool LM_GotParamScript(CStruct* pStruct, CScript* pScript);
 bool SetOption(CStruct* pStruct, CScript* pScript);
