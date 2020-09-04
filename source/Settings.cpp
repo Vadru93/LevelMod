@@ -467,7 +467,7 @@ bool GetParamScript(CStruct* pStruct, CScript* pScript)
 	{
 		if (header->Type == QBKeyHeader::LOCAL)
 		{
-			_printf("GotParam %s(%X) Data %s(%X)\n", FindChecksumName(header->QBkey), header->QBkey, FindChecksumName(header->Data), header->Data);
+			_printf("Searching for: %s(%X)\n", FindChecksumName(header->Data), header->Data);
 			CStructHeader* param = pScript->GetParam(header->Data);
 			if (param)
 			{
@@ -500,7 +500,7 @@ bool GetParamScript(CStruct* pStruct, CScript* pScript)
 					param->Type = QBKeyHeader::LOCAL;
 					pParam->NextHeader = NULL;
 				}*/
-				_printf("Adding Param to pScript...\nName %s(%X) Data %s(%X) Type %s\n", FindChecksumName(param->QBkey), param->QBkey, param->Type == QBKeyHeader::STRING ? param->pStr : FindChecksumName(param->Data), param->Data, QScript::QBTypes[param->Type]);
+				_printf("Found it!!\nAdding Param to pScript...\nName %s(%X) Data %s(%X) Type %s\n", FindChecksumName(param->QBkey), param->QBkey, param->Type == QBKeyHeader::STRING ? param->pStr : FindChecksumName(param->Data), param->Data, QScript::QBTypes[param->Type]);
 				param->Data = 0;
 				param->QBkey = 0;
 				param->Type = QBKeyHeader::LOCAL;
