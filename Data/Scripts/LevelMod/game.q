@@ -183,34 +183,34 @@ SCRIPT UpdateNetNameText
 ENDSCRIPT
 //ExtraLayersDisabled = 0
 
-SCRIPT ToggleLayers
-	ToggleOption LM_GameOption_bExtraLayer
-	UpdateExtraLayer
-	UpdateLayersText
-ENDSCRIPT
+//SCRIPT ToggleLayers
+//	ToggleOption LM_GameOption_bExtraLayer
+//	UpdateExtraLayer
+//	UpdateLayersText
+//ENDSCRIPT
 
-SCRIPT UpdateLayersText
-	IF IsOptionOn LM_GameOption_bExtraLayer
-		SetMenuElementText id = Layers_Toggle "Layers: On"
-	ELSE
-		SetMenuElementText id = Layers_Toggle "Layers: Off"
-	ENDIF
-ENDSCRIPT
+//SCRIPT UpdateLayersText
+//	IF IsOptionOn LM_GameOption_bExtraLayer
+//		SetMenuElementText id = Layers_Toggle "Layers: On"
+//	ELSE
+//		SetMenuElementText id = Layers_Toggle "Layers: Off"
+//	ENDIF
+//ENDSCRIPT
 
 //This is an option and should use IsOptionOn
-SCRIPT ToggleGrass
-    ToggleOption LM_GameOption_bGrass
-	UpdateGrass
-	UpdateGrassText
-ENDSCRIPT
+//SCRIPT ToggleGrass
+//    ToggleOption LM_GameOption_bGrass
+//	UpdateGrass
+//	UpdateGrassText
+//ENDSCRIPT
 
-SCRIPT UpdateGrassText
-	IF IsOptionOn LM_GameOption_bGrass
-		SetMenuElementText id = Grass_Toggle "Grass: On"
-	ELSE
-		SetMenuElementText id = Grass_Toggle "Grass: Off"
-	ENDIF
-ENDSCRIPT
+//SCRIPT UpdateGrassText
+//	IF IsOptionOn LM_GameOption_bGrass
+//		SetMenuElementText id = Grass_Toggle "Grass: On"
+//	ELSE
+//		SetMenuElementText id = Grass_Toggle "Grass: Off"
+//	ENDIF
+//ENDSCRIPT
 
 SCRIPT nextobsrv
 	ObserveNext
@@ -302,28 +302,28 @@ SCRIPT UpdateTH4ProText
 	ENDIF
 ENDSCRIPT
 
-SCRIPT ToggleSky
-	IF IsTrue NetSkyIsOn
-		loadlevelgeometry level = <lev_bsp> Sky = ""
-		Change NetSkyIsOn = 0
-	ELSE
-		loadlevelgeometry level = <lev_bsp> Sky = lev_sky
-		Change NetSkyIsOn = 1
-	ENDIF
-	UpdateNetSkyText
-	//UpdateLevelModSettings
-ENDSCRIPT
+//SCRIPT ToggleSky
+//	IF IsTrue NetSkyIsOn
+//		loadlevelgeometry level = <lev_bsp> Sky = ""
+//		Change NetSkyIsOn = 0
+//	ELSE
+//		loadlevelgeometry level = <lev_bsp> Sky = lev_sky
+//		Change NetSkyIsOn = 1
+//	ENDIF
+//	UpdateNetSkyText
+//	//UpdateLevelModSettings
+//ENDSCRIPT
 
-SCRIPT UpdateNetSkyText
-	IF IsTrue NetSkyIsOn
-		SetMenuElementText id = Sky_Toggle "Sky: On"
-	ELSE
-		SetMenuElementText id = Sky_Toggle "Sky: Off"
-	ENDIF
-ENDSCRIPT
+//SCRIPT UpdateNetSkyText
+//	IF IsTrue NetSkyIsOn
+//		SetMenuElementText id = Sky_Toggle "Sky: On"
+//	ELSE
+//		SetMenuElementText id = Sky_Toggle "Sky: Off"
+//	ENDIF
+//ENDSCRIPT
 
 SCRIPT UpdateOptionsMenu
-    AddLine parent = new_net_options_menu Type = textmenuelement id = levelmod_settings_item text = "LevelMod Settings" eventhandler = { Type = ChooseEventHandler link = menu_levelmod_settings }
+    AddLine parent = new_net_options_menu Type = textmenuelement id = levelmod_settings_item text = "LevelMod Settings" eventhandler = { Type = ChooseEventHandler link = Levelmod_menu_root }
 	AddLine parent = new_net_options_menu Type = textmenuelement id = options_menu_edit_tricks_item text = "Edit Tricks" eventhandler = { Type = ChooseEventHandler link = trick_menu_container }
 	AddLine parent = new_net_options_menu Type = textmenuelement id = options_menu_sound_options_item text = "Sound Options" eventhandler = { Type = ChooseEventHandler link = sfx_menu_container }
 	AddLine parent = new_net_options_menu Type = textmenuelement id = options_menu_graf_pos_item text = "Tag counter options" eventhandler = { Type = ChooseEventHandler link = graf_counter_menu }
@@ -331,12 +331,15 @@ SCRIPT UpdateOptionsMenu
 	UpdateNetNameText
 	AddLine parent = new_net_options_menu id = HUD_Toggle text = "HUD: --" target = "ToggleHUD"
 	UpdateHUDText
-	AddLine parent = new_net_options_menu id = Sky_Toggle text = "Sky: --" target = "ToggleSky"
-	UpdateNetSkyText
-	AddLine parent = new_net_options_menu id = Layers_Toggle text = "Layers: --" target = "ToggleLayers"
-	UpdateLayersText
-	AddLine parent = new_net_options_menu id = Grass_Toggle text = "Grass: --" target = "ToggleGrass"
-	UpdateGrassText
+	
+	//options moved to levelmod menu
+	//AddLine parent = new_net_options_menu id = Sky_Toggle text = "Sky: --" target = "ToggleSky"
+	//UpdateNetSkyText
+	//AddLine parent = new_net_options_menu id = Layers_Toggle text = "Layers: --" target = "ToggleLayers"
+	//UpdateLayersText
+	//AddLine parent = new_net_options_menu id = Grass_Toggle text = "Grass: --" target = "ToggleGrass"
+	//UpdateGrassText
+	
 	AddLine parent = new_net_options_menu id = TH4Pro_Toggle text = "Pro Trick Objects: --" target = "ToggleTH4Pro"
 	UpdateTH4ProText
 	AddLine parent = new_net_options_menu id = TH4Comp_Toggle text = "Competition objects: --" target = "ToggleTH4Comp"

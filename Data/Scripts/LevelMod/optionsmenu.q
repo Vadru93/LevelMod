@@ -222,7 +222,7 @@ ENDSCRIPT
 SCRIPT options_menu_create
 	CreateMenu { Type = verticalmenu id = options_main_menu x = 170.0 y = 90.0 w = 300.0 h = 400.0 just_center_x just_center_y blue_top eventhandlers = [ { Type = backeventhandler target = "OptionsToMainMenuCamAnim" }
 			{ Type = showeventhandler target = "Options_ShowEvent" } ] children = [ { Type = textmenuelement auto_id text = "Options" static dont_gray drawer = title }
-			{ Type = textmenuelement auto_id text = "LevelMod Settings" link = menu_levelmod_settings }
+			{ Type = textmenuelement auto_id text = "LevelMod Settings" link = levelMod_menu_root }
 			{ Type = textmenuelement id = soundfx_menu text = "Sound Options" link = sfx_menu_container }
 			{ Type = textmenuelement auto_id text = "Movies" link = movies_menu }
 			{ Type = textmenuelement auto_id text = "Save Game" target = "OptionsMenuSave" }
