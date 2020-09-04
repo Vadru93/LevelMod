@@ -340,10 +340,10 @@ SCRIPT UpdateOptionsMenu
 	//AddLine parent = new_net_options_menu id = Grass_Toggle text = "Grass: --" target = "ToggleGrass"
 	//UpdateGrassText
 	
-	AddLine parent = new_net_options_menu id = TH4Pro_Toggle text = "Pro Trick Objects: --" target = "ToggleTH4Pro"
-	UpdateTH4ProText
-	AddLine parent = new_net_options_menu id = TH4Comp_Toggle text = "Competition objects: --" target = "ToggleTH4Comp"
-	UpdateTH4CompText
+	//AddLine parent = new_net_options_menu id = TH4Pro_Toggle text = "Pro Trick Objects: --" target = "ToggleTH4Pro"
+	//UpdateTH4ProText
+	//AddLine parent = new_net_options_menu id = TH4Comp_Toggle text = "Competition objects: --" target = "ToggleTH4Comp"
+	//UpdateTH4CompText
 	AddLine parent = new_net_options_menu id = options_menu_back_item text = "Back" target = "go_back" params = { id = new_net_options_menu }
 ENDSCRIPT
 
@@ -407,7 +407,7 @@ SCRIPT RefreshGameMenu
 			AddLine parent = game_menu id = backend_cheat_menu text = "Cheats" link = cheat_menu
 		ENDIF
 		AddLine parent = game_menu id = goto_restart_menu text = "Skip to Restart" link = restart_menu
-		AddLine parent = game_menu Type = textmenuelement id = levelmod_settings_item text = "LevelMod Settings" eventhandler = { Type = ChooseEventHandler link = menu_levelmod_settings }
+		AddLine parent = game_menu Type = textmenuelement id = levelmod_settings_item text = "LevelMod Settings" eventhandler = { Type = ChooseEventHandler link = Levelmod_menu_root }
 		AddLine parent = game_menu id = backend_end_run text = "End Run" target = "do_backend_end_run" kill_menu
 		IF IsCompetition
 			AddLine parent = game_menu id = end_comp text = "End Competition" target = "do_end_comp" kill_menu
