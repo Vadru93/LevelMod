@@ -196,17 +196,21 @@ void SetAirTrickSpeed(DWORD speed)
 			switch (speed)
 			{
 			case 0:
-				header->SetFloat(Checksums::Speed, trickSpeed[i].originalSpeed);
+				if (!header->SetFloat(Checksums::Speed, trickSpeed[i].originalSpeed))
+					_printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].trickName));
 				break;
 			case 1:
-				header->SetFloat(Checksums::Speed, trickSpeed[i].th4Speed);
+				if(!header->SetFloat(Checksums::Speed, trickSpeed[i].th4Speed))
+					_printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].trickName));
 				break;
 			case 2:
-				header->SetFloat(Checksums::Speed, trickSpeed[i].fastAir);
+				if(!header->SetFloat(Checksums::Speed, trickSpeed[i].fastAir))
+					_printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].trickName));
 				break;
 			case 3:
 			case 4:
-				header->SetFloat(Checksums::Speed, trickSpeed[i].originalSpeed * ((speed - 2) * 0.1f + 1.0f));
+				if(!header->SetFloat(Checksums::Speed, trickSpeed[i].originalSpeed * ((speed - 2) * 0.1f + 1.0f)))
+					_printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].trickName));
 				break;
 
 			default:

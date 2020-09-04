@@ -284,7 +284,7 @@ static BYTE test = 0;
 
 void NotGood(DWORD checksum, CScript* pScript)
 {
-	_printf("Called a function that doesn't exsits..\nName %s in function %s location %p\n", FindChecksumName(checksum), FindChecksumName(pScript->scriptChecksum), pScript->address);
+	_printf("Called a function that doesn't exsits..\nName %s(%X) in function %s(%X) location %p\n", FindChecksumName(checksum), checksum, FindChecksumName(pScript->scriptChecksum), pScript->scriptChecksum, pScript->address);
 	MessageBox(0, "This means your Scripts are trashed or old", "Called a function that don't exists", 0);
 }
 

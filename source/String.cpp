@@ -41,11 +41,12 @@ namespace String
 
 	void GetTopHeap(bool level = false)
 	{
-		if (level)
-			StringHeapTop = LevelHeapTop;
+		/*if (level)
+			StringHeapTop = LevelHeapTop;*/
 		if (outOfMemory)
 			StringHeapTop = PermanentHeapTop;
-		StringHeapTop = useExtraMemory ? ExtraMemoryTop : *(char**)0x008E1E0C;
+		else
+		    StringHeapTop = useExtraMemory ? ExtraMemoryTop : *(char**)0x008E1E0C;
 	}
 
     PermanentString* GetPermanentStringList()
@@ -123,12 +124,12 @@ namespace String
 	void IncreaseTopHeap(DWORD len, bool level = false)
 	{
 		//StringHeapTop += len;
-		if (level)
+		/*if (level)
 		{
 			if (LevelHeapTop >= (LevelHeapBottom + (MAX_NUM_LEVEL * 80)))
 				MessageBox(0, "Level String Heap too small...", "CRITICAL ERROR", 0);
 			LevelHeapTop += len;
-		}
+		}*/
 		if (!outOfMemory)
 		{
 			if (!useExtraMemory)
@@ -184,10 +185,14 @@ namespace String
 			if (strings[i].checksum == checksum)
 			{
 				_printf("Returning old String %s\n", strings[i].pStr);
+				if (stricmp(strings[i].pStr, str))
+					MessageBox(0, strings[i].pStr, str, 0);
 				return strings[i].pStr;
 			}
 			else if (crc32f(strings[i].pStr) == checksum_non_case)
 			{
+				if (stricmp(strings[i].pStr, str))
+					MessageBox(0, strings[i].pStr, str, 0);
 				return strings[i].pStr;
 			}
 		}
@@ -198,6 +203,8 @@ namespace String
 		{
 			if (permanentStrings[i].checksum == checksum)
 			{
+				if (stricmp(strings[i].pStr, str))
+					MessageBox(0, strings[i].pStr, str, 0);
 				_printf("Returning optimized string %s\n", strings[i].pStr);
 				return strings[i].pStr;
 			}
@@ -217,6 +224,8 @@ namespace String
 		{
 			if (levelStrings[i].checksum == checksum)
 			{
+				if (stricmp(levelStrings[i].pStr, str))
+					MessageBox(0, levelStrings[i].pStr, str, 0);
 				_printf("Returning optimized level string %s\n", levelStrings[i].pStr);
 				return levelStrings[i].pStr;
 			}
@@ -228,7 +237,7 @@ namespace String
 			return NULL;
 		}
 
-		GetTopHeap(true);
+		/*GetTopHeap(true);
 		DWORD len = strlen(str) + 1;
 
 
@@ -237,12 +246,23 @@ namespace String
 		for (DWORD i = 0; i < len; i++)
 		{
 			StringHeapTop[i] = str[i];
+		}*/
+		DWORD len = strlen(str) + 1;
+
+		if ((LevelHeapTop+len) >= (LevelHeapBottom + (MAX_NUM_LEVEL * 80)))
+			MessageBox(0, "Level String Heap too small...", "CRITICAL ERROR", 0);
+
+		for (DWORD i = 0; i < len; i++)
+		{
+		    LevelHeapTop[i] = str[i];
 		}
 
 		levelStrings[numLevelStrings].checksum = checksum;
-		levelStrings[numLevelStrings].pStr = StringHeapTop;
+		levelStrings[numLevelStrings].pStr = LevelHeapTop;
 		numLevelStrings++;
-		return StringHeapTop;
+		LevelHeapTop += len;
+
+		return LevelHeapTop;
 	}
 
 	char* AddString(DWORD checksum, const char* str)
@@ -255,11 +275,15 @@ namespace String
 		{
 			if (strings[i].checksum == checksum)
 			{
+				if (stricmp(strings[i].pStr, str))
+					MessageBox(0, strings[i].pStr, str, 0);
 				_printf("Returning old String %s\n", strings[i].pStr);
 				return strings[i].pStr;
 			}
 			else if (crc32f(strings[i].pStr) == checksum_non_case)
 			{
+				if (stricmp(strings[i].pStr, str))
+					MessageBox(0, strings[i].pStr, str, 0);
 				return strings[i].pStr;
 			}
 		}
@@ -270,6 +294,8 @@ namespace String
 		{
 			if (permanentStrings[i].checksum == checksum)
 			{
+				if (stricmp(strings[i].pStr, str))
+					MessageBox(0, strings[i].pStr, str, 0);
 				_printf("Returning optimized string %s\n", strings[i].pStr);
 				return strings[i].pStr;
 			}
