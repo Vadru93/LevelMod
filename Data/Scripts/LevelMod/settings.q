@@ -370,12 +370,21 @@ ENDSCRIPT
 
 SCRIPT UpdateNetSky
 	IF IsOptionOn LM_GameOption_bNetSky
-		ForEachIn master_level_list do = LM_ToggleSky_Sub params = { <...> }
+		ForEachIn master_level_list do = sUpdateNetSky params = { <...> }
 	ELSE
 		LoadLevelGeometry sky = ""
 	ENDIF
 ENDSCRIPT
 
+SCRIPT sUpdateNetSky
+	IF GotParam load_script
+		IF LevelIs <load_script>
+			IF GotParam lev_sky
+				LoadLevelGeometry sky = <lev_sky>
+			ENDIF
+		ENDIF
+	ENDIF
+ENDSCRIPT
 
 SCRIPT UpdateTH4CompObjects
 	IF IsOptionOn LM_LevelOption_TH4CompObjects
@@ -429,21 +438,6 @@ SCRIPT UpdateTH4ProObjects
 	ENDIF
 ENDSCRIPT
 
-
-
-
-SCRIPT LM_ToggleSky_Sub
-	//so this doesnt work for some reason
-	IF LM_GotParam load_script
-		GetParam load_script
-		IF LevelIs <load_script>
-			IF LM_GotParam lev_sky
-				GetParam lev_sky
-				LoadLevelGeometry sky = <lev_sky>
-			ENDIF
-		ENDIF
-	ENDIF
-ENDSCRIPT
 
 SCRIPT OptionsOnChangeLevel
    IF GotParam ChangeLevel
