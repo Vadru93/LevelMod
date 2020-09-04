@@ -1,6 +1,7 @@
 LevelMod\airtricks.qb
 LevelMod\bails.qb
 LevelMod\buttonscripts.qb
+LevelMod\framework.qb
 LevelMod\game.qb
 LevelMod\gameflow.qb
 LevelMod\gamemode.qb

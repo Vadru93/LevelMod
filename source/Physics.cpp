@@ -2613,7 +2613,13 @@ float	SmoothStep(float value)
 
 float Skater::GetAirGravity()
 {
+	//-1350.0 is from Physics_air_gravity
+	//we devide by Physics_vert_hang_Stat to get the final gravity
+	//when you have full stats the value is 1.1
+	//when stat is not full or you are king of the hill the stat is lower
 	float gravity = -1350.0f / this->GetScriptedStat("Physics_vert_hang_Stat");
+
+	//Check if moon gravity is on, if it's on multiply gravity by 0.5
 	/*if (CheatIsOn(GetCheat(crc32f((unsigned char*)"CHEAT_MOON"))))
 		gravity *= 0.5f;*/
 	return gravity;
