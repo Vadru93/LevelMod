@@ -21,7 +21,7 @@ LevelModOptions = [
 	//3 = 10% faster
 	//4 = 20% faster
 	{ name = "LM_Control_AirTrickSpeed" Value = 0 }
-	{ name = "LM_Control_bXinput", value = 0 }
+	{ name = "LM_Control_bXinput" value = 0 }
 	{ name = "LM_GUI_bShowHud" Value = 1 StartGame Do = UpdateShowHUD }
 	{ name = "LM_GUI_bNewMenu" Value = 1 }
 	{ name = "LM_GUI_bShowGrafCounter" Value = 1 }
