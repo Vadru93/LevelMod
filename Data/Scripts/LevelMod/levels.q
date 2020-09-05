@@ -581,7 +581,7 @@ Def_Sc1 = {
 	lev_amb = "ambience\thps1\sc1"
 	loadscr = "images\load\th1_sc1.png"
 
-	r = 145 g = 201 b = 242 a = 0 
+	r = 50 g = 84 b = 149 a = 0 
 	cnear = 12 cfar = 13000
 
 	load_script = Load_Sc1
@@ -633,8 +633,8 @@ Def_Vans = {
 	lev_amb = "ambience\thps1\vans"
 	loadscr = "images\load\th1_vans.png"
 
-	r = 165 g = 180 b = 202 a = 0 
-	cnear = 12 cfar = 10000
+	r = 191 g = 230 b = 255 a = 0 
+	cnear = 12 cfar = 5000
 
 	load_script = Load_Vans
 } 
@@ -702,7 +702,7 @@ ENDSCRIPT
 Def_Burn = { 
 	level_name = "Burnside" 
 	location = "Portland"
-	level_id = jam_id 
+	level_id = burnside_id 
 	levelnum = LevelNum_Burnside
 	unlock_flag = LEVEL_UNLOCKED_BURNSIDE
 
@@ -742,7 +742,7 @@ Def_SF1 = {
 	lev_amb = "ambience\thps1\sf1"
 	loadscr = "images\load\th1_sf1.png"
 
-	r = 165 g = 180 b = 16 a = 202 
+	r = 124 g = 149 b = 172 a = 0 
 	cnear = 12 cfar = 20000
 
 	load_script = Load_SF1
@@ -757,7 +757,7 @@ ENDSCRIPT
 Def_Ros = {
 	level_name = "Roswell" 
 	location = "New Mexico"
-	level_id = ros_id 
+	level_id = roswell_id 
 	levelnum = LevelNum_Roswell
 	unlock_flag = LEVEL_UNLOCKED_ROSWELL
 
