@@ -106,6 +106,12 @@ NewTrick_ShoveItRewind = { SCR_FLIP Params = { Name = 'Shove It Rewind' Score = 
 NewTrick_SomiSpin = { SCR_FLIP Params = { Name = 'SomiSpin' Score = 1300 Anim = SomiSpin IsSpecial TrickSlack = 20 } }
 NewTrick__360FliptoMute = { SCR_FLIP Params = { Name = '360 Flip to Mute' Score = 1600 Anim = _360FliptoMute IsSpecial Speed = 1.1 TrickSlack = 20 } }
 NewTrick_BackFootKickFliptoMute = { SCR_FLIP Params = { Name = 'Back Foot KickFlip to Mute' Score = 1300 Anim = BackFootKickFliptoMute IsSpecial TrickSlack = 20 } }
+NewTrick_PogoAir = { SCR_FLIP Params = { Name = 'Pogo Air' Score = 1300 Anim = PogoAir IsSpecial TrickSlack = 20 	
+		HoldFrame = 32 
+		ReleaseFrame = 36 
+		HoldSpeed = 0.25
+	} 
+}
 
 
 Trick_KickflipUnderFlip = { SCR_FLIP Params = { TrickDef_KickflipUnderflip IsSpecial } }
@@ -135,6 +141,7 @@ NewTrick_DarkJedi = { SCR_GRAB Params = { Name = 'Dark Jedi' Score = 1000 Anim =
 NewTrick_Salute = { SCR_GRAB Params = { Name = 'Salute!!!' Score = 1000 Anim = Salute_Init Idle = Salute_Idle IsSpecial ForceInit TrickSlack = 10 Speed = 1.3 } }
 NewTrick_SummonerAir = { SCR_GRAB Params = { Name = 'Summoner Air' Score = 1000 Anim = DemonessIdle Idle = DemonessIdle IsSpecial ForceInit TrickSlack = 10 Speed = 1.3 } }
 NewTrick_Freefallin = { SCR_GRAB Params = { Name = 'Freefallin"' Score = 1000 Anim = StretchtoFlailingFall Idle = FlailingFall IsSpecial ForceInit TrickSlack = 10 Speed = 1.3 } }
+
 
 
 
@@ -506,6 +513,10 @@ TrickDef_OllieNorth = {
 	Speed = 1.3 
 	TrickSlack = 15 
 	NewExtraTricks = ExtraOllieNorthBF 
+	
+	HoldFrame = 32 
+	ReleaseFrame = 36 
+	HoldSpeed = 0.25
 }
 
 ExtraOllieNorthBF = [ { EXTRA_FLIP Params = { TrickDef_OllieNorthBF EXTRA_TRICK } } ]
@@ -549,19 +560,22 @@ TrickDef_DoubleFingerFlip = {
 }
 
 
-Trick_Varial = { SCR_FLIP Params = TrickDef_Varial }
+Trick_Varial = { SCR_FLIP Params = TrickDef_Varial IsSpecial }
 
 TrickDef_Varial = { 
-	Name = 'Big Varial' 
+	Name = '360 Varial to Christ' 
 	Score = 900 
 	Anim = BigVarial 
 	BoardRotate 
 	TrickSlack = 25 
+	HoldFrame = 31
+	ReleaseFrame = 35
+	HoldSpeed = 0.25
 }
 
 
-Trick_OllieAirwalk = { SCR_FLIP Params = { Name = 'Ollie Airwalk' Score = 500 Speed = 1.3 Anim = OllieAirWalk NewExtraTricks = CSOllieairwalkshoveit } }
-CSOllieairwalkshoveit = [ { EXTRA_FLIP Params = { Name = 'Ollie Airwalk Late Shove-it' Score = 1000 Anim = OllieAirWalk Speed = 1.3 CSOllieairwalkshoveit IsExtra UseCurrent } } ]
+Trick_OllieAirwalk = { SCR_FLIP Params = { ShowName = 'Ollie Airwalk' Name = 'Ollie Airwalk / Late Shove-it' Score = 500 Speed = 1.3 Anim = OllieAirWalk NewExtraTricks = CSOllieairwalkshoveit } }
+CSOllieairwalkshoveit = [ { EXTRA_FLIP Params = { Name = 'Ollie Airwalk Late Shove-it' Score = 1000 Anim = OllieAirWalk Speed = 1.3  IsExtra UseCurrent BoardRotate Anim2 = PopShoveItBS Anim2Speed = 1.0 Anim2Wait = 30 Anim2From = 0 } } ]
 Trick_HFVarialLien = { SCR_FLIP Params = { Name = 'Heelflip Varial Lien' Score = 800 Anim = HeelflipVarialLien BoardRotate TrickSlack = 15 } }
 Trick_SalFlip = { SCR_FLIP Params = { Name = 'Sal Flip' Score = 900 Anim = SalFlip TrickSlack = 25 Speed = 1.3 } }
 
@@ -657,8 +671,11 @@ ExtraJudo = [
 
 TrickDef_MadonnaFlip = { 
 	Name = 'Madonna Flip' 
-	Score = 1000 
+	Score = 500 
 	Anim = _2KickMadonnaFlip_Out 
+	WaitFrames = 16
+	TrickSlack = 20
+	GrindSlack = 20
 }
 
 TrickDef_Judo = {
@@ -886,6 +903,7 @@ TrickDef_Benihana = {
 }
 
 BenihanaFingerflip = [ 
+	//note we don't use EXTRA_TRICK for beni fingerflip as we don't want usecurrent here
 	{ EXTRA_FLIP Params = { TrickDef_BeniFingerFlip IsExtra } }
 	{ EXTRA_GRAB Params = { TrickDef_Sacktap EXTRA_TRICK } } 
 ]
@@ -894,6 +912,10 @@ TrickDef_BeniFingerFlip = {
 	Name = 'Beni Fingerflip' 
 	Score = 1000 
 	Anim = BenihanaFingerflip 
+	WaitFrames = 15
+	Speed = 1.2
+	GrindSlack = 25
+	TrickSlack = 20
 }
 
 Trick_SackTap = { SCR_GRAB Params = TrickDef_Sacktap IsSpecial }
@@ -988,7 +1010,7 @@ TrickDef_KickflipToMelon = {
 CSKickfliptoMelon = { SCR_GRAB Params = TrickDef_KickflipToMelon }
 CSKickfliptoCrail = { SCR_GRAB Params = TrickDef_KickflipToCrail }
 CSKickfliptoIndy = { SCR_GRAB Params = TrickDef_KickflipToIndy }
-		
+
 
 
 
@@ -1008,13 +1030,46 @@ LugeTricks = [
 ]
 
 
+FLIP_COUNT = 0
+
+flip_line_props = { 
+	font = "trick.fnt"
+	just = (0, 0) 
+	dims = (322, 114) 
+	colors = [ { (128, 128, 128) alpha = 70 } ] 
+	key_points = [
+		{ pos = (320, 300) alpha = 0 scale = 0.15 time = 0 }
+		{ alpha = 128 scale = 0.52 time = 0.1 }
+		{ time = 2 }
+		{ alpha = 0 scale = 0.01 time = 2.1 }
+	]
+}
+
+//just for fun stuff, thug1 like flip stats
+//to work properly should reset it in land and bail functions. now resets automatically on retry and killskater.
+script flipCountInc	
+	Obj_VarInc var = FLIP_COUNT
+
+	if Obj_VarEq var = FLIP_COUNT value = 10
+		LaunchPanelMessage "10 flips!" id = flip_message properties = flip_line_props
+	endif
+
+	if Obj_VarEq var = FLIP_COUNT value = 20
+		LaunchPanelMessage "20 flips!" id = flip_message properties = flip_line_props
+	endif
+	
+	if Obj_VarEq var = FLIP_COUNT value = 50
+		LaunchPanelMessage "50 flips!" id = flip_message properties = flip_line_props
+	endif
+endscript
+
 
 script FlipTrick Speed = 1.0 TrickSlack = 10 GrindSlack = 25 Anim2From = 0 Anim2Wait = 0
 	ClearTricksFrom Jumptricks Jumptricks0 Jumptricks
 	CheckForOllie
 	KillExtraTricks
 	BailOn
-	
+
 	if GotParam NoSpin
 		NoSpin
 	endif
@@ -1024,6 +1079,11 @@ script FlipTrick Speed = 1.0 TrickSlack = 10 GrindSlack = 25 Anim2From = 0 Anim2
 	endif
 	if GotParam RevertBS
 		Obj_SetFlag FLAG_SKATER_REVERTBS
+	endif
+	
+	//this is here solely for madonna flip, but might be useful later
+	if GotParam WaitFrames
+		WaitAnim <WaitFrames> frames
 	endif
 
 	//if we're in nollie state
@@ -1055,10 +1115,6 @@ script FlipTrick Speed = 1.0 TrickSlack = 10 GrindSlack = 25 Anim2From = 0 Anim2
 	if GotParam Anim2
 		WaitAnim <Anim2Wait> frames
 		PlayAnim Anim = <Anim2> BlendPeriod = 0.3 Speed = <Anim2Speed> From = <Anim2From>
-	//	if GotParam BoardRotate
-	//		BlendperiodOut 0
-	//		BoardRotateAfter
-	//	endif
 	endif
 
 	if GotParam BoardRotate
@@ -1078,20 +1134,13 @@ script FlipTrick Speed = 1.0 TrickSlack = 10 GrindSlack = 25 Anim2From = 0 Anim2
 
 	Airtricks_SetExtraTricks <...>
 
-	//rewrite using Anim2	
-	if GotParam CSOllieairwalkshoveit
-		WaitAnim 30 frames
-		PlayAnim Anim = PopShoveItBS BlendPeriod = 0.3 Speed = <Speed> //1.3
-		BlendperiodOut 0
-		BoardRotateAfter
-	endif
-	
 	Wait 15 frames
 
 	//flips and rolls
 	//SetExtraTricks tricks = 0x1A191817
 	
 	Airtricks_ShowTrickName <...>
+	//flipCountInc	
 
 	if GotParam BloodFrame
 		Wait <BloodFrame> frames
@@ -1105,6 +1154,12 @@ script FlipTrick Speed = 1.0 TrickSlack = 10 GrindSlack = 25 Anim2From = 0 Anim2
 	if GotParam SpinSlack
 		WaitAnim <SpinSlack> frames fromend
 		CanSpin
+	endif
+
+	if IsOptionOn LM_Control_bExtraTricks
+		if GotParam HoldFrame
+			Airtricks_HoldAbleFlipTrick <...>
+		endif
 	endif
 	
 	if GotParam GrindSlack
@@ -1367,7 +1422,7 @@ script CalledOllie
 	if AirTimeGreaterThan Skater_Late_Jump_Slop
 		ClearException Ollied
 	else
-		#"Jump"
+		Jump
 		IF #"Not" IsOptionOn LM_Control_bButtSlap
 			ClearException Ollied
 		ENDIF
@@ -1411,3 +1466,65 @@ SCRIPT Airtricks_SetExtraTricks
 		ENDIF
 	ENDIF
 ENDSCRIPT
+
+
+FLAG_LOOP_ANIM_BACK = 0 
+
+script Airtricks_HoldAbleFliptrick HoldSpeed = 1.0
+		WaitAnim <HoldFrame> frames
+			
+		//is there more elegant way to get animfinished = true at this point?
+		PlayAnim Anim=<Anim> From=Current To=Current Blendperiod=0.0
+			
+		begin
+		
+			//did player release flip or grab?
+			If Released Circle
+				If Released Square
+					break
+				endif
+			endif
+
+			//if we got the release frame, loop through, else just hold 1 frame thug style 
+			if GotParam ReleaseFrame
+				if AnimFinished 	
+					if IsTrue FLAG_LOOP_ANIM_BACK
+						PlayAnim Anim=<Anim> From=Current To=<HoldFrame> Blendperiod=0.0 Speed = <HoldSpeed>
+						Change FLAG_LOOP_ANIM_BACK = 0
+					else
+						PlayAnim Anim=<Anim> From=Current To=<ReleaseFrame> Blendperiod=0.0 Speed = <HoldSpeed>
+						Change FLAG_LOOP_ANIM_BACK = 1
+					endif
+				endif
+			else
+				PlayAnim Anim=<Anim> From=Current To=Current Blendperiod=0.0 
+			endif
+			
+			WaitOneGameFrame
+			TweakTrick GRABTWEAK_MEDIUM
+		repeat
+
+		Change FLAG_LOOP_ANIM_BACK = 0	//make sure this won't affect next trick
+		
+		//play the remaining anim
+		PlayAnim Anim=<Anim> From=Current 
+		
+		
+		//not sure if we really need it here, as we're doing this in fliptrick anyways
+		
+		If GotParam BoardRotate	
+			BlendperiodOut 0
+			BoardRotateAfter
+		endif
+		
+		If GotParam RotateAfter
+			BlendperiodOut 0
+			RotateAfter
+		endif
+		
+		If GotParam FlipAfter
+			BlendperiodOut 0	
+			FlipAfter
+		endif		
+		
+endscript

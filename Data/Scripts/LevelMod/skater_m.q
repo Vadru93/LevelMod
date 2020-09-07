@@ -32,21 +32,20 @@ SCRIPT animload_skater_m_unused
 	LoadAnim name = "Anims\skater_m\skater_m_SomiSpin.ska" descChecksum = SomiSpin
 	LoadAnim name = "Anims\skater_m\skater_m__360FliptoMute.ska" descChecksum = _360FliptoMute
 	LoadAnim name = "Anims\skater_m\skater_m_BackFootKickFliptoMute.ska" descChecksum = BackFootKickFliptoMute
-	
+
 	//grabs
 	LoadAnim name = "Anims\skater_m\skater_m_DarkJedi_Idle.ska" descChecksum = DarkJedi_Idle
 	LoadAnim name = "Anims\skater_m\skater_m_DarkJedi_Init.ska" descChecksum = DarkJedi_Init
 	LoadAnim name = "Anims\skater_m\skater_m_DarkJedi_Out.ska" descChecksum = DarkJedi_Out
 	LoadAnim name = "Anims\skater_m\skater_m_Salute_Idle.ska" descChecksum = Salute_Idle
 	LoadAnim name = "Anims\skater_m\skater_m_Salute_Init.ska" descChecksum = Salute_Init
-
+	LoadAnim name = "Anims\skater_m\skater_m_PogoAir.ska" descChecksum = PogoAir
 
 	//LoadAnim name = "Anims\skater_m\skater_m_360Flip_Street.ska" descChecksum = unused_anim1
 	//LoadAnim name = "Anims\skater_m\skater_m_GymnastTest.ska" descChecksum = unused_anim18
 	//LoadAnim name = "Anims\skater_m\skater_m_HospitalFlip.ska" descChecksum = unused_anim29
 	//LoadAnim name = "Anims\skater_m\skater_m_MuteBackFlip.ska" descChecksum = unused_anim37
 
-	//LoadAnim name = "Anims\skater_m\skater_m_PogoAir.ska" descChecksum = unused_anim63
 	//LoadAnim name = "Anims\skater_m\skater_m_RacketAir.ska" descChecksum = unused_anim68
 	//LoadAnim name = "Anims\skater_m\skater_m_SpideyFlip.ska" descChecksum = unused_anim79
 	//LoadAnim name = "Anims\skater_m\skater_m_SpideyVarial.ska" descChecksum = unused_anim83
