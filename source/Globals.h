@@ -178,6 +178,9 @@ void OnGround_naked();
 //Gets executed when Vibration script is called
 //This is used to add vibration for XINPUT
 void __cdecl HookVibrate_naked();
+//Gets executed when engine sets VertexShader
+//This is used to add custom VertexShaders
+void SetVertexShader_naked();
 
 void Obj_MoveToNode_Naked();
 void Obj_FollowPathLinked_Naked();

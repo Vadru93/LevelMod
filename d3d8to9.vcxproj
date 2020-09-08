@@ -149,6 +149,7 @@
     <ClCompile Include="source\Source.cpp" />
     <ClCompile Include="source\String.cpp" />
     <ClCompile Include="source\SuperSectors.cpp" />
+    <ClCompile Include="source\VertexShader.cpp" />
     <ClCompile Include="source\zip\unzip.cpp" />
   </ItemGroup>
   <ItemGroup>

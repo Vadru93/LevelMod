@@ -4331,6 +4331,8 @@ void InitLevelMod()
 	//HookControls();
 	*(WORD*)0x00427A9B = 0x840F;//je
 	HookFunction(0x00427A9D, NotGood_naked);
+	HookFunction(0x004F42AA, SetVertexShader_naked);
+	MessageBox(0, 0, 0, 0);
 	*(DWORD*)0x00427AA3 = 0x90909090;//nop
 	*(WORD*)(0x00427AA3 + 4) = 0x9090;
     
