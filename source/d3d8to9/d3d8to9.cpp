@@ -195,6 +195,52 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 
 			VirtualProtect((void*)0x008E1DF8, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
 
+			
+			
+			VirtualProtect((void*)0x0042B0EF, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x0042B137, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x0042B153, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x0042BC7B, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x0042BCAF, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x0042BCE7, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x0042BC5E, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+
+			VirtualProtect((void*)0x0042B0FE, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x0042BBDE, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x0042BBF5, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x0042BC50, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x0042BC92, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x0042BC99, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x0042BCDB, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+
+			//VirtualProtect((void*)0x0042BFE2, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+
+			
+			/*VirtualProtect((void*)0x004FEE77, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x004FEEA4, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x004FEEAF, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x004FEEC6, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+			VirtualProtect((void*)0x004FF050, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);*/
+
+			*(DWORD*)0x0042B0EF = 0x04A1F60F;
+			*(DWORD*)0x0042B137 = 0x04A1F60F;
+			*(DWORD*)0x0042B153 = 0x04A1F60F;
+			*(DWORD*)0x0042BC7B = 0x04A1F60F;
+			*(DWORD*)0x0042BCAF = 0x04A1F60F;
+			*(DWORD*)0x0042BCE7 = 0x04A1F60F;
+			*(DWORD*)0x0042BC5E = 0x04A1F60F;
+
+			*(DWORD*)0x0042B0FE = 0x04A1F613;
+			*(DWORD*)0x0042BBDE = 0x04A1F613;
+			*(DWORD*)0x0042BBF5 = 0x04A1F613;
+			*(DWORD*)0x0042BC50 = 0x04A1F613;
+			*(DWORD*)0x0042BC92 = 0x04A1F613;
+			*(DWORD*)0x0042BC99 = 0x04A1F613;
+			*(DWORD*)0x0042BCDB = 0x04A1F613;
+
+			*(DWORD*)0x0042BFE2 = 0x008935CC;
+
+			
 	*(DWORD*)0x0042C114 = (DWORD)&triggers2;
 	*(DWORD*)0x0042C126 = (DWORD)&triggers2 + OTHER2_SIZE;
 
@@ -214,7 +260,7 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 	*(DWORD*)0x0042898E = (DWORD)&triggers2;
 	*(BYTE*)0x00428992 = 0x77;
 
-	*(DWORD*)0x0042BFE2 = 0x008B4B48-EXTRA_STRINGS;
+	//*(DWORD*)0x0042BFE2 = 0x008E1DF0 - 0x008920CC;//0x008B4B48-EXTRA_STRINGS;
 	*(DWORD*)0x0042BFE7 = /*0x1D4C0*/ EXTRA_STRINGS + *(DWORD*)0x0042BFE7;
 
 	*(DWORD*)0x0042BE4B = 0xFF00;

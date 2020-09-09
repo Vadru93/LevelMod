@@ -55,8 +55,10 @@ struct CSector
     }
 };
 
+//This is the material split
 struct Mesh
 {
+	//these two pointers changes, maybe because of draworder??
 	Mesh* prev;
 	Mesh* next;
 	DWORD flags;//Maybe??

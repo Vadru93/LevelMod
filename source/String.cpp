@@ -13,6 +13,7 @@ namespace String
 	DWORD numLevelStrings = 0;
 	DWORD numStrings = 0;
 	DWORD numNoExtraStrings = 0;
+	DWORD numExtraOriginal = 0;
 
 
 #define MAX_NUM_LEVEL 15000
@@ -24,11 +25,11 @@ namespace String
 	char* LevelHeapTop = LevelHeapBottom;
 
 
-#define MAX_NUM_EXTRA 35000
+#define MAX_NUM_EXTRA 30000
 
 	PermanentString permanentStrings[MAX_NUM_EXTRA] = { 0 };
 
-	char PermanentHeapBottom[MAX_NUM_EXTRA*80];
+	char PermanentHeapBottom[MAX_PERMANENT_STRINGS *80];
 	char* PermanentHeapTop = PermanentHeapBottom;
 	char* StringHeapTop = NULL;
 
@@ -74,11 +75,11 @@ namespace String
 		switch (heap)
 		{
 		case HEAP::ORIGINAL:
-			return GetNumStrings();
+			return numExtraOriginal;
 		case HEAP::NEW_NOEXTRA:
 			return numNoExtraStrings;
 		case HEAP::NEW_EXTRA:
-			return numExtraStrings - numNoExtraStrings;
+			return numExtraStrings - numNoExtraStrings- numExtraOriginal;
 		case HEAP::LEVEL:
 			return numLevelStrings;
 		}
@@ -89,7 +90,7 @@ namespace String
 		switch (heap)
 		{
 		case HEAP::ORIGINAL:
-			return *(DWORD*)0x008E1E0C-(0x008B4B48 - EXTRA_STRINGS);
+			return *(DWORD*)0x008E1E0C - 0x008935CC;
 		case HEAP::NEW_NOEXTRA:
 			return ExtraMemoryTop-ExtraMemoryBottom;
 		case HEAP::NEW_EXTRA:
@@ -104,8 +105,9 @@ namespace String
 		switch (heap)
 		{
 		case HEAP::ORIGINAL:
+			return 0x008E1DF0 - 0x008935CC;
 		case HEAP::NEW_NOEXTRA:
-			return GetHeapSize(heap);
+			return OLD_OTHER_SIZE;
 			
 		case HEAP::NEW_EXTRA:
 			return sizeof(PermanentHeapBottom);
@@ -143,10 +145,15 @@ namespace String
 					StringHeapTop = (char*)0x0087D8FC;
 					ExtraMemoryTop = StringHeapTop;
 					ExtraMemoryBottom = StringHeapTop;
+					//*(DWORD*)0x008E1E14 = ((*(DWORD*)0x008E1E14) + numExtraOriginal);
 					//MessageBox(0, "Out of memory in permanent heap...", "CRITICAL ERROR", 0);
 				}
 				else
+				{
 					*(DWORD*)0x008E1E0C += len;
+					numExtraOriginal++;
+					//*(DWORD*)0x008E1E14 = *(DWORD*)0x008E1E14 + 1;
+				}
 				return;
 			}
 
@@ -156,7 +163,7 @@ namespace String
 			{
 				_printf("Out of memory in permanent heap...\nGoing to use new heap\n");
 				PermanentHeapTop += len;
-				numNoExtraStrings = numExtraStrings;
+				numNoExtraStrings = numExtraStrings - numExtraOriginal;
 				outOfMemory = true;
 			}
 			else
@@ -166,7 +173,7 @@ namespace String
 		else
 		{
 			PermanentHeapTop += len;
-			if (PermanentHeapTop >= (PermanentHeapBottom + (MAX_NUM_EXTRA * 80)))
+			if (PermanentHeapTop >= (PermanentHeapBottom + (MAX_PERMANENT_STRINGS * 80)))
 				MessageBox(0, "Permanent String Heap too small...", "CRITICAL ERROR", 0);
 		}
 		

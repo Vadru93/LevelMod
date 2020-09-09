@@ -15,24 +15,24 @@ void FixRenderBugs()
 	//VirtualProtect((void*)0x004001be, sizeof(renderFix1), old, &old);
 
 	VirtualProtect((void*)0x004FEE77, 4, PAGE_EXECUTE_READWRITE, &old);
-	*(DWORD*)0x004FEE77 = 0x008A9000;// (DWORD)&RenderFix;
+	*(DWORD*)0x004FEE77 = 0x008920CC;// (DWORD)&RenderFix;
 	//VirtualProtect((void*)0x004FEE77, 4, old, &old);
 
 	VirtualProtect((void*)0x004FEEA4, 4, PAGE_EXECUTE_READWRITE, &old);
-	*(DWORD*)0x004FEEA4 = 0x008A9000;//(DWORD)&RenderFix;
+	*(DWORD*)0x004FEEA4 = 0x008920CC;//(DWORD)&RenderFix;
 	//VirtualProtect((void*)0x004FEEA4, 4, old, &old);
 
 
 	VirtualProtect((void*)0x004FEEAF, 4, PAGE_EXECUTE_READWRITE, &old);
-	*(DWORD*)0x004FEEAF = 0x008A9000;//(DWORD)&RenderFix;
+	*(DWORD*)0x004FEEAF = 0x008920CC;//(DWORD)&RenderFix;
 	//VirtualProtect((void*)0x004FEEAF, 4, old, &old);
 
 	VirtualProtect((void*)0x004FEEC6, 4, PAGE_EXECUTE_READWRITE, &old);
-	*(DWORD*)0x004FEEC6 = 0x008A9000;//(DWORD)&RenderFix;
+	*(DWORD*)0x004FEEC6 = 0x008920CC;//(DWORD)&RenderFix;
 	//VirtualProtect((void*)0x004FEEC6, 4, old, &old);
 
 	VirtualProtect((void*)0x004FF050, 4, PAGE_EXECUTE_READWRITE, &old);
-	*(DWORD*)0x004FF050 = 0x008A9000;//(DWORD)&RenderFix;
+	*(DWORD*)0x004FF050 = 0x008920CC;//(DWORD)&RenderFix;
 	//VirtualProtect((void*)0x004FF050, 4, old, &old);
 
 	/*DWORD Old = 0x0090b048;
