@@ -861,7 +861,7 @@ TrickDef_OneFootTail = {
 }
 
 
-//===airwalk/christ airwalk/christ
+//===airwalk/christ air
 
 Trick_Airwalk = { SCR_GRAB Params = TrickDef_Airwalk }
 
@@ -874,13 +874,13 @@ TrickDef_Airwalk = {
 	NewExtraTricks = ExtraAirwalk
 }
 
-ExtraAirwalk = [ { EXTRA_GRAB Params = { TrickDef_ChristAir EXTRA_TRICK } } ]
+ExtraAirwalk = [ { EXTRA_GRAB Params = { TrickDef_ChristAir EXTRA_TRICK Score = 600 } } ]
 
-Trick_ChristAir = { SCR_GRAB Params = TrickDef_ChristAir }
+Trick_ChristAir = { SCR_GRAB Params = { TrickDef_ChristAir IsSpecial } }
 
 TrickDef_ChristAir = {
 	Name = 'Christ Air'
-	Score = 500 
+	Score = 1000 
 	Anim = ChristAir_Init 
 	Idle = ChristAir_Range 
 	OutAnim = ChristAir_Out 
@@ -899,26 +899,30 @@ TrickDef_Benihana = {
 	Anim = Benihana
 	Idle = Benihana_Idle 
 	OutAnim = Benihana_Out 
-	NewExtraTricks = BenihanaFingerflip
+	ExtraTricks = BenihanaFingerflip
+	NewExtraTricks = BenihanaExtras
 }
 
-BenihanaFingerflip = [ 
+BenihanaFingerflip = [ { Trigger = { AirTrickLogic Square Up 500 } Scr = FlipTrick Params = { Name = 'Beni Fingerflip' Score = 1000 Anim = BenihanaFingerflip IsExtra } } ]
+
+BenihanaExtras = [ 
 	//note we don't use EXTRA_TRICK for beni fingerflip as we don't want usecurrent here
 	{ EXTRA_FLIP Params = { TrickDef_BeniFingerFlip IsExtra } }
-	{ EXTRA_GRAB Params = { TrickDef_Sacktap EXTRA_TRICK } } 
+	{ EXTRA_GRAB Params = { TrickDef_Sacktap EXTRA_TRICK Score = 600 Speed = 1.5 } } 
 ]
 
 TrickDef_BeniFingerFlip = { 
 	Name = 'Beni Fingerflip' 
-	Score = 1000 
-	Anim = BenihanaFingerflip 
-	WaitFrames = 15
+	Score = 500 
+	Anim = BenihanaFingerflip
+	//added stuff for better blending
 	Speed = 1.2
+	WaitFrames = 15
 	GrindSlack = 25
 	TrickSlack = 20
 }
 
-Trick_SackTap = { SCR_GRAB Params = TrickDef_Sacktap IsSpecial }
+Trick_SackTap = { SCR_GRAB Params = { TrickDef_Sacktap IsSpecial } }
 
 TrickDef_Sacktap = { 
 	Name = 'Sacktap' 
@@ -926,11 +930,10 @@ TrickDef_Sacktap = {
 	Anim = Sacktap_Init 
 	Idle = Sacktap_Range 
 	OutAnim = Sacktap_out 
-	Speed = 1.5 
+	ForceInit
+	Speed = 1.1
 	TrickSlack = 20 
 }
-
-
 
 
 //to fix
