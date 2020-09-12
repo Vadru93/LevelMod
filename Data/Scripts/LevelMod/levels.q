@@ -145,24 +145,7 @@ SCRIPT DistinguishLevels
 	SetCompetition LevelNum_Tokyo
 ENDSCRIPT
 
-SCRIPT Load_Ap
-	AddMusicTrack "ambience\ap"
-	SetUpAirportLights
-	Load_Level_Func {
-		levelnum = LevelNum_Airport 
-		lev_bsp = "Levels\ap\ap.bsp" 
-		lev_sky = "Levels\Ap_Sky\Ap_Sky.bsp" 
-		lev_qb = "Levels\ap\ap.qb" 
-		loadscr = "images\loadscrn_ap.png"
-		r = 151 
-		g = 180 
-		b = 214 
-		a = 0 
-		cnear = 13 
-		cfar = 20000
-	}
-	Ap_Startup
-ENDSCRIPT
+
 
 SCRIPT Load_La
 	AddMusicTrack "ambience\la"
@@ -193,16 +176,6 @@ SCRIPT Load_Si
 	PrepareLevelFog r = 158 g = 211 b = 255 a = 0 cnear = 13 cfar = 12000
 	LoadTerrain
 	Si_Startup
-ENDSCRIPT
-
-SCRIPT Load_Sub
-	AddMusicTrack "ambience\sub"
-	SetUpSuburbiaLights
-	Load_Level_Func lev_bsp = "Levels\sub\sub.bsp" lev_sky = "Levels\sub_Sky\sub_Sky.bsp" lev_qb = "Levels\sub\sub.qb" loadscr = "images\loadscrn_sub.png"
-	CareerStartLevel level = LevelNum_Suburbia
-	PrepareLevelFog r = 165 g = 180 b = 202 a = 0 cnear = 13 cfar = 13500
-	LoadTerrain
-	Sub_Startup
 ENDSCRIPT
 
 SCRIPT Load_Tok
@@ -463,17 +436,7 @@ SCRIPT Load_Level_Func
 	
 	LoadTerrain
 	
-	SetBackgroundColor <...>
-	
-	//basically PrepareLevelFog function
-	IF ClipPlaneEnabled
-		EnableFog
-		SetClippingDistances { near = 12 far = 2500 }
-		SetFogDistance { distance = 1250 }
-		SetFogColor <...>
-	ELSE
-		SetClippingDistances { near = <cnear> far = <cfar> }
-	ENDIF
+	PrepareLevelFog <...>
 	
 	//this should be uncommented when all def structs are fixed
 	LM_MaybeSetTh2Physics <...>
@@ -485,8 +448,10 @@ SCRIPT Load_Level_Func
 	printf "...finished loading."
 ENDSCRIPT
 
+
 DEFAULT_WALL_SKATABLE_ANGLE = 25
 LM_TH2_PHYSICS = 0
+
 
 SCRIPT LM_MaybeSetTh2Physics
 	//reset to default angle
@@ -517,10 +482,23 @@ SCRIPT LM_MaybeSetTh2Physics
 ENDSCRIPT
 
 SCRIPT PrepareLevelFog r = 128 b = 128 b = 128 a = 128 cnear = 12 cfar = 10000
-	IF ClipPlaneEnabled
-		SetupForClipPlane
+	//IF ClipPlaneEnabled
+	//	SetupForClipPlane
+	//ELSE
+	//	SetBackgroundColor <...>
+	//	SetClippingDistances { near = <cnear> far = <cfar> }
+	//ENDIF
+	
+	SetBackgroundColor <...>
+	
+	//IF ClipPlaneEnabled
+	IF IsOptionOn LM_GameOption_bFog
+		EnableFog
+		SetClippingDistances { near = 12 far = 2500 }
+		SetFogDistance { distance = 1250 }
+		SetFogColor <...>
 	ELSE
-		SetBackgroundColor <...>
+		DisableFog
 		SetClippingDistances { near = <cnear> far = <cfar> }
 	ENDIF
 ENDSCRIPT
@@ -1042,6 +1020,131 @@ SCRIPT Load_Drop
 	Load_Level_Func { Def_Drop }
 ENDSCRIPT
 
+
+//================THPS2X===================
+
+//THPS2X CONSTRUCTION SITE
+
+Def_Cons = { 
+	level_id = cons_id
+	levelnum = LevelNum_New
+	level_name = "Construction Site"
+	
+	NoCareer th2x_level regular_level OnlineModes
+	
+	lev_bsp = "levels_th2\cons\cons.bsp" 
+	lev_sky = "levels_th2\cons\cons_sky.bsp" 
+	lev_qb = "levels_th2\cons\cons.qb" 
+	lev_amb = "ambience\thps2\cons"
+	loadscr = "images\load\th2_cons.png"
+	
+	r = 106 g = 97 b = 72 a = 0 
+	cnear = 12 cfar = 20000
+	
+	load_script = Load_Cons 
+}
+
+SCRIPT Load_Cons
+	Load_Level_Func { Def_Cons }
+ENDSCRIPT
+
+//THPS2X CLUB
+
+Def_Club = { 
+	level_id = club_id 
+	levelnum = LevelNum_New
+	
+	level_name = "Club" 
+	location = "London"
+
+	lev_bsp = "levels_th2\Club\Club.bsp" 
+	lev_qb = "levels_th2\Club\Club.qb" 
+	lev_amb = "ambience\thps2\club"
+	loadscr = "images\load\th2_club.png"
+	
+	NoCareer th2x_level regular_level OnlineModes
+	
+	r = 0 g = 0 b = 0 a = 0 
+	cnear = 12 cfar = 20000 
+	
+	load_script = Load_Club 
+}
+
+SCRIPT Load_Club
+	Load_Level_Func { Def_Club }
+ENDSCRIPT
+
+//THPS2X SUBWAY
+
+Def_Sway = { 
+	level_name = "Subway" 
+	load_script = Load_Sway 
+	level_id = sway_id 
+	
+	lev_bsp = "levels_th2\Sway\Sway.bsp" 
+	lev_qb = "levels_th2\Sway\Sway.qb" 
+	lev_amb = "ambience\thps2\sway"
+	loadscr = "images\load\th2_sway.png"
+	
+	NoCareer th2x_level regular_level OnlineModes
+	
+	r = 0 g = 0 b = 0 a = 0 
+	cnear = 12 cfar = 20000 
+}
+
+SCRIPT Load_Sway
+	Load_Level_Func { Def_Sway }
+ENDSCRIPT
+
+//THPS2X TAMPA
+
+Def_Tampa = { 
+	level_name = "Skate Park Tampa"
+	load_script = Load_Tampa 
+	level_id = tampa_id 
+	
+	//unlock_flag = FIX_LEVELMOD_FLAG 
+	
+	lev_bsp = "levels_th2\flor\flor.bsp" 
+	lev_sky = "levels_th2\flor\flor_sky.bsp" 
+	lev_qb = "levels_th2\flor\flor.qb" 
+	lev_amb = "ambience\thps2\flor"
+	loadscr = "images\load\th2_flor.png"
+	
+	NoCareer th2x_level regular_level OnlineModes 
+	
+	r = 149 g = 192 b = 232 a = 0 
+	cnear = 12 cfar = 20000 
+}
+
+SCRIPT Load_Tampa
+	Load_Level_Func { Def_Tampa }
+ENDSCRIPT
+
+//THPS2X SKY LINES
+
+Def_Sky = { 
+	level_name = "Sky Lines" 
+	load_script = Load_Sky 
+	level_id = skylines_id 
+	
+	lev_bsp = "levels_th2\roof\roof.bsp" 
+	lev_sky = "levels_th2\roof\roof_sky.bsp" 
+	lev_qb = "levels_th2\roof\roof.qb" 
+	lev_amb = "ambience\thps2\sky"
+	loadscr = "images\load\th2_sky.png"
+	
+	NoCareer th2x_level regular_level OnlineModes
+
+	r = 32 g = 36 b = 63 a = 0 
+	cnear = 12 cfar = 20000 
+}
+
+SCRIPT Load_Sky
+	Load_Level_Func { Def_Sky }
+ENDSCRIPT
+
+
 //================THPS3===================
 
 //THPS3 FOUNDRY
@@ -1133,137 +1236,81 @@ Def_Rio = {
 	loadscr = "images\loadscrn_rio.png"
 	loadscr_comp = "images\loadscrn_rio_comp.png"
 
-	r = 145 g = 201 b = 242 a = 0 
+	r = 124 g = 158 b = 253 a = 0 
 	cnear = 13 cfar = 30000
 }
+
 SCRIPT Load_Rio
 	Load_Level_Func { Def_Rio }
 	SetMovementVelocity 2000
 	SetRotateVelocity 120
 ENDSCRIPT
 
-//================THPS2X===================
+//THPS3 SUBURBIA
 
-//THPS2X CONSTRUCTION SITE
+Def_Sub = {
+	level_id = suburbia_id 
+	levelnum = LevelNum_Suburbia 
+	level_name = "Suburbia"
+	location = "Jacksonville?"
+	unlock_flag = LEVEL_UNLOCKED_SUBURBIA 
+	
+	lev_lights = SetUpSuburbiaLights
+	
+	regular_level th3_level OnlineModes 
+	
+	once_on_startup = StartRunScript 
+	once_on_exit = EndRunScript 
+	load_script = Load_Sub
+	startup_func = Sub_Startup
 
-Def_Cons = { 
-	level_id = cons_id
-	levelnum = LevelNum_New
-	level_name = "Construction Site"
-	
-	NoCareer th2x_level regular_level OnlineModes
-	
-	lev_bsp = "levels_th2\cons\cons.bsp" 
-	lev_sky = "levels_th2\cons\cons_sky.bsp" 
-	lev_qb = "levels_th2\cons\cons.qb" 
-	lev_amb = "ambience\thps2\cons"
-	loadscr = "images\load\th2_cons.png"
-	
-	r = 106 g = 97 b = 72 a = 0 
-	cnear = 12 cfar = 20000
-	
-	load_script = Load_Cons 
+	lev_bsp = "Levels\sub\sub.bsp" 
+	lev_sky = "Levels\sub_Sky\sub_Sky.bsp" 
+	lev_qb = "Levels\sub\sub.qb" 
+	le_amb = "ambience\th3\sub"
+	loadscr = "images\loadscrn_sub.png"
+
+	r = 165 g = 180 b = 202 a = 0 
+	cnear = 13 cfar = 13500
 }
 
-SCRIPT Load_Cons
-	Load_Level_Func { Def_Cons }
+SCRIPT Load_Sub
+	Load_Level_Func { Def_Sub }
 ENDSCRIPT
 
-//THPS2X CLUB
+//THPS3 AIRPORT
 
-Def_Club = { 
-	level_id = club_id 
-	levelnum = LevelNum_New
+Def_Ap = {
+	level_id = airport_id 
+	levelnum = LevelNum_Airport
+	level_name = "Airport"
+	location = "Hawaii?"
+	unlock_flag = LEVEL_UNLOCKED_AIRPORT 
 	
-	level_name = "Club" 
-	location = "London"
+	lev_lights = SetUpAirportLights
+	
+	regular_level th3_level OnlineModes 
+	
+	once_on_startup = StartRunScript 
+	once_on_exit = EndRunScript 
+	load_script = Load_Ap
+	startup_func = Ap_Startup
 
-	lev_bsp = "levels_th2\Club\Club.bsp" 
-	lev_qb = "levels_th2\Club\Club.qb" 
-	lev_amb = "ambience\thps2\club"
-	loadscr = "images\load\th2_club.png"
-	
-	NoCareer th2x_level regular_level OnlineModes
-	
-	r = 0 g = 0 b = 0 a = 0 
-	cnear = 12 cfar = 20000 
-	
-	load_script = Load_Club 
+	lev_bsp = "Levels\ap\ap.bsp" 
+	lev_sky = "Levels\ap_Sky\ap_Sky.bsp" 
+	lev_qb = "Levels\ap\ap.qb" 
+	le_amb = "ambience\th3\ap"
+	loadscr = "images\loadscrn_ap.png"
+
+	r = 151 g = 180 b = 214 a = 0 
+	cnear = 13 
+	cfar = 20000
 }
 
-SCRIPT Load_Club
-	Load_Level_Func { Def_Club }
+SCRIPT Load_Ap
+	Load_Level_Func { Def_Ap }
 ENDSCRIPT
 
-//THPS2X SUBWAY
-
-Def_Sway = { 
-	level_name = "Subway" 
-	load_script = Load_Sway 
-	level_id = sway_id 
-	
-	lev_bsp = "levels_th2\Sway\Sway.bsp" 
-	lev_qb = "levels_th2\Sway\Sway.qb" 
-	lev_amb = "ambience\thps2\sway"
-	loadscr = "images\load\th2_sway.png"
-	
-	NoCareer th2x_level regular_level OnlineModes
-	
-	r = 0 g = 0 b = 0 a = 0 
-	cnear = 12 cfar = 20000 
-}
-
-SCRIPT Load_Sway
-	Load_Level_Func { Def_Sway }
-ENDSCRIPT
-
-//THPS2X TAMPA
-
-Def_Tampa = { 
-	level_name = "Skate Park Tampa"
-	load_script = Load_Tampa 
-	level_id = tampa_id 
-	
-	unlock_flag = FIX_LEVELMOD_FLAG 
-	
-	lev_bsp = "levels_th2\flor\flor.bsp" 
-	lev_sky = "levels_th2\flor\flor_sky.bsp" 
-	lev_qb = "levels_th2\flor\flor.qb" 
-	lev_amb = "ambience\thps2\flor"
-	loadscr = "images\load\th2_flor.png"
-	
-	NoCareer th2x_level regular_level OnlineModes 
-	
-	r = 149 g = 192 b = 232 a = 0 
-	cnear = 12 cfar = 20000 
-}
-
-SCRIPT Load_Tampa
-	Load_Level_Func { Def_Tampa }
-ENDSCRIPT
-
-//THPS2X SKY LINES
-
-Def_Sky = { 
-	level_name = "Sky Lines" 
-	load_script = Load_Sky 
-	level_id = skylines_id 
-	
-	lev_bsp = "levels_th2\roof\roof.bsp" 
-	lev_sky = "levels_th2\roof\roof_sky.bsp" 
-	lev_qb = "levels_th2\roof\roof.qb" 
-	lev_amb = "ambience\thps2\sky"
-	loadscr = "images\load\th2_sky.png"
-	
-	NoCareer th2x_level regular_level OnlineModes
-
-	r = 32 g = 36 b = 63 a = 0 
-	cnear = 12 cfar = 20000 
-}
-
-SCRIPT Load_Sky
-	Load_Level_Func { Def_Sky }
-ENDSCRIPT
 
 //================THPS4===================
 
@@ -1558,11 +1605,7 @@ ENDSCRIPT
 
 master_level_list = [
 	//THPS3
-	{ Def_Foun }
-	{ Def_Can }
-	{ Def_Rio }
-	{ level_name = "Suburbia" load_script = Load_Sub level_id = suburbia_id regular_level th3_level once_on_startup = StartRunScript once_on_exit = EndRunScript unlock_flag = LEVEL_UNLOCKED_SUBURBIA supports_ctf supports_own supports_bball }
-	{ level_name = "Airport" load_script = Load_Ap level_id = airport_id regular_level th3_level once_on_startup = StartRunScript once_on_exit = EndRunScript unlock_flag = LEVEL_UNLOCKED_AIRPORT supports_ctf supports_own supports_bball }
+	{ Def_Foun } { Def_Can } { Def_Rio } { Def_Sub } { Def_Ap }
 	{ level_name = "Skater Island" load_script = Load_Si level_id = skatersisland_id regular_level th3_level once_on_startup = StartRunScript once_on_exit = EndRunScript unlock_flag = LEVEL_UNLOCKED_SKATERISLAND supports_ctf supports_own supports_bball }
 	{ level_name = "Los Angeles" load_script = Load_La level_id = la_id regular_level th3_level once_on_startup = StartRunScript once_on_exit = EndRunScript unlock_flag = LEVEL_UNLOCKED_LOSANGELES supports_ctf supports_own supports_bball }
 	{ level_name = "Tokyo" load_script = Load_Tok level_id = tokyo_id regular_level th3_level once_on_startup = StartRunScript once_on_exit = EndRunScript unlock_flag = LEVEL_UNLOCKED_TOKYO supports_ctf supports_own supports_bball }
