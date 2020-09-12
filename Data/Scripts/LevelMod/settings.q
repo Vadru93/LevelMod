@@ -37,6 +37,7 @@ LevelModOptions = [
 	{ name = "LM_GameOption_bGrass" Value = 1 StartGame Do = UpdateGrass }
 	{ name = "LM_GameOption_bExtraLayer" Value = 1 StartGame Do = UpdateExtraLayer }
 	{ name = "LM_GameOption_bNetSky" Value = 0 StartGame Do = UpdateNetSky }
+	{ name = "LM_GameOption_bFog" Value = 0 }
 	{ name = "LM_Gameplay_bPedProps" value = 1 } //change to gameoption
 	{ name = "LM_GameOption_b251Patch" value = 0 }
 	{ name = "LM_DebugOption_bDebugMode" Value = 0 }
@@ -120,6 +121,9 @@ levelmod_menu_LevelOptions_items = [
 
 	//enables sky in network modes (an option cause of netname rendering bug) 
 	{ LM_Menu_Shared_Bool id = LM_GameOption_bNetSky_id params = { name = LM_GameOption_bNetSky id = LM_GameOption_bNetSky_id on = "Net sky: on" off = "Net sky: off" action = UpdateNetSky } }
+	
+	//enables fog
+	{ LM_Menu_Shared_Bool id = LM_GameOption_bFog_id params = { name = LM_GameOption_bFog id = LM_GameOption_bFog_id on = "Fog: on" off = "Fog: off" action = UpdateFog } }
 
 	//this one needs a better drawer here?
 	{ Type = textmenuelement auto_id text = "THPS4 levels" static dont_gray drawer = keyboard_property }
@@ -382,6 +386,18 @@ SCRIPT sUpdateNetSky
 			IF GotParam lev_sky
 				LoadLevelGeometry sky = <lev_sky>
 			ENDIF
+		ENDIF
+	ENDIF
+ENDSCRIPT
+
+SCRIPT UpdateFog
+	ForEachIn master_level_list do = sUpdateFog params = { <...> }
+ENDSCRIPT
+
+SCRIPT sUpdateFog
+	IF GotParam load_script
+		IF LevelIs <load_script>
+			PrepareLevelFog <...>
 		ENDIF
 	ENDIF
 ENDSCRIPT
