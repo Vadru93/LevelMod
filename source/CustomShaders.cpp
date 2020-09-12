@@ -78,12 +78,15 @@ void Gfx::LoadCustomShaders(char* path)
 				{
 					if (first)
 					{
-
-						while (!sector->mesh)
+						DWORD retries = 0;
+						while (!sector->mesh && retries < 50)
 						{
+							_printf("Waiting for matsplits to load %d(50)...\n", retries+1);
+							retries++;
 							Sleep(100);
 							if (GameState::GotSuperSectors == false)
 							{
+								_printf("Unloading shaders...\n");
 								UnloadShaders();
 								return;
 							}
@@ -175,6 +178,7 @@ void Gfx::LoadCustomShaders(char* path)
 
 			delete[] oldFile;
 			//Sleep(1000);
+			_printf("Finished loading shaders\n");
 			loadedShaders = true;
 		}
 	}
@@ -263,14 +267,15 @@ SKIP_SHADER:
 	_asm mov ebx, D3DRS_BLENDOP;
 	//Get old BLENDOP
 	_asm mov ecx, [ebx * 4 + 0x00971948];
-	_asm lea esi, [ebx * 4 + 0x00971948];
+	_asm lea esi, [ebx * 4 + 0x00971C18];
+	_asm mov[esi], eax;
 	_asm cmp eax, ecx;
 	//if old == new skip
 	_asm je SKIP_OP;
 	_asm push eax;
 	_asm push ebx;
 	_asm mov[esi], eax;
-	_asm lea esi, [ebx * 4 + 0x00971C18];
+	_asm lea esi, [ebx * 4 + 0x00971948];
 	_asm mov[esi], eax;
 	_asm mov ecx, [0x00970E48];
 	_asm mov ecx, [ecx];
@@ -286,14 +291,15 @@ SKIP_OP:
 	_asm mov ebx, D3DRS_SRCBLEND;
 	//Get old SRCBLEND
 	_asm mov ecx, [ebx * 4 + 0x00971948];
-	_asm lea esi, [ebx * 4 + 0x00971948];
+	_asm lea esi, [ebx * 4 + 0x00971C18];
+	_asm mov[esi], eax;
 	_asm cmp eax, ecx;
 	//if old == new skip
 	_asm je SKIP_SRC;
 	_asm push eax;
 	_asm push ebx;
 	_asm mov[esi], eax;
-	_asm lea esi, [ebx * 4 + 0x00971C18];
+	_asm lea esi, [ebx * 4 + 0x00971948];
 	_asm mov[esi], eax;
 	/*_asm lea esi, [ebx * 4 + 0x00971C18];
 	_asm mov[esi], eax;*/
@@ -311,14 +317,15 @@ SKIP_SRC:
 	_asm mov ebx, D3DRS_DESTBLEND;
 	//Get old DESTBLEND
 	_asm mov ecx, [ebx * 4 + 0x00971948];
-	_asm lea esi, [ebx * 4 + 0x00971948];
+	_asm lea esi, [ebx * 4 + 0x00971C18];
+	_asm mov[esi], eax;
 	_asm cmp eax, ecx;
 	//if old == new skip
 	_asm je SKIP_DEST;
 	_asm push eax;
 	_asm push ebx;
 	_asm mov[esi], eax;
-	_asm lea esi, [ebx * 4 + 0x00971C18];
+	_asm lea esi, [ebx * 4 + 0x00971948];
 	_asm mov[esi], eax;
 	/*_asm lea esi, [ebx * 4 + 0x00971C18];
 	_asm mov[esi], eax;*/
@@ -374,14 +381,15 @@ ADD_FIXEDALPHA:
 	_asm push esi;
 	//Get old DESTBLEND
 	_asm mov ecx, [ebx * 4 + 0x00971948];
-	_asm lea esi, [ebx * 4 + 0x00971948];
+	_asm lea esi, [ebx * 4 + 0x00971C18];
+	_asm mov[esi], eax;
 	_asm cmp eax, ecx;
 	//if old == new skip
 	_asm je FIXEDBLEND_SKIP;
 	_asm push eax;
 	_asm push ebx;
 	_asm mov[esi], eax;
-	_asm lea esi, [ebx * 4 + 0x00971C18];
+	_asm lea esi, [ebx * 4 + 0x00971948];
 	_asm mov[esi], eax;
 	_asm mov ecx, [0x00970E48];
 	_asm mov ecx, [ecx];
