@@ -79,6 +79,7 @@ constexpr DWORD checksumTable[256] =
 };
 
 unsigned long crc32f(const char* buf);
+unsigned long crc32f_file(const BYTE* buf, DWORD len);
 
 /*template<size_t idx>
 constexpr uint32_t crc32(const char* str)

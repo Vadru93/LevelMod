@@ -167,7 +167,6 @@
     <ClInclude Include="source\Debug.h" />
     <ClInclude Include="source\Defines.h" />
     <ClInclude Include="source\Extension.h" />
-    <ClInclude Include="source\FastCRC.h" />
     <ClInclude Include="source\framework.h" />
     <ClInclude Include="source\Globals.h" />
     <ClInclude Include="source\HTTPRequest.h" />

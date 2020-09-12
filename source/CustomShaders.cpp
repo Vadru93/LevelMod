@@ -41,11 +41,22 @@ void Gfx::UnloadShaders()
 		shaders = NULL;
 		numShaders = 0;
 	}
+	if (materials)
+	{
+		delete[] materials;
+		materials = NULL;
+		numMaterials = 0;
+		oldMaterial = NULL;
+	}
 }
 
+D3DMATERIAL9* NULL_MAT;
+D3DMATERIAL9 NULLMAT;
 
 void Gfx::LoadCustomShaders(char* path)
 {
+	NULL_MAT = &NULLMAT;
+	ZeroMemory(NULL_MAT, sizeof(D3DMATERIAL9));
 	loadingShaders = true;
 	_printf("OpenShader: %s\n", path);
 	FILE* f = fopen(path, "rb");
@@ -59,6 +70,20 @@ void Gfx::LoadCustomShaders(char* path)
 		fseek(f, 0, SEEK_SET);
 		fread(pFile, 1, size, f);
 		fclose(f);
+
+		DWORD numMats = ReadDWORD();
+		_printf("Number of Materials %d\n", numMats);
+		if (numMats)
+		{
+			materials = new D3DMATERIAL9[numMats];
+
+			for (DWORD i = 0; i < numMats; i++)
+			{
+				materials[numMaterials] = *(D3DMATERIAL9*)pFile;
+				pFile += sizeof(D3DMATERIAL9);
+				numMaterials++;
+			}
+		}
 
 		DWORD numShaderObjects = ReadDWORD();
 		_printf("numShaders %d\n", numShaderObjects);
@@ -100,6 +125,12 @@ void Gfx::LoadCustomShaders(char* path)
 					{
 						DWORD matIndex = ReadDWORD();
 						*(DWORD*)&shaders[numShaders].shaderId = ReadDWORD();
+						DWORD idx = *(DWORD*)pFile;
+						pFile += 4;
+						if (idx > numMaterials)
+							MessageBox(0, "Not good...", "TOO HIGH MATINDEX", 0);
+						shaders[numShaders].material = &materials[idx];
+						
 						shaders[numShaders].blend_op = ReadDWORD();
 						shaders[numShaders].src_blend = ReadDWORD();
 						shaders[numShaders].dest_blend = ReadDWORD();
@@ -110,9 +141,9 @@ void Gfx::LoadCustomShaders(char* path)
 						else
 						{
 							_printf("No Mesh? %p\n", &sector->mesh);
-							for (DWORD k = 0; k < 10; k++)
+							for (DWORD k = 0; k < 3; k++)
 							{
-								Sleep(5);
+								Sleep(2);
 								if (sector->mesh)
 								{
 									sector->mesh->AddShader(&shaders[numShaders], matIndex);
@@ -156,7 +187,7 @@ void Gfx::LoadCustomShaders(char* path)
 					_printf("Couldn't find sector %s %X\n", FindChecksumName(checksum), pFile);
 					for (DWORD j = 0; j < numSplits; j++)
 					{
-						pFile += 5 * 4;
+						pFile += 6 * 4;
 						DWORD numTextures = ReadDWORD();
 
 						if (numTextures)
@@ -187,6 +218,7 @@ void Gfx::LoadCustomShaders(char* path)
 
 bool reset = false;
 bool restore = false;
+bool restoreMaterial = false;
 
 __declspec(naked) void __cdecl SetVertexShader_naked()
 {
@@ -260,6 +292,22 @@ SKIP_SHADER:
 	//Store values on stack, maybe not needed?
 	_asm push ebx;
 	
+	_asm add edi, 4
+	_asm mov eax, [Gfx::oldMaterial];
+	_asm mov ebx, [edi];
+	/*_asm cmp ebx, eax;
+	_asm je SKIP_MATERIAL_MODULATION;*/
+	//_asm mov restoreMaterial, 1
+	_asm mov eax, [pDevice];
+	_asm push ebx;
+	_asm push eax;
+	_asm mov ecx, [eax];
+	//Device->SetMaterial
+	_asm mov [Gfx::oldMaterial], ebx;
+	_asm call dword ptr[ecx + 0xC4];
+
+SKIP_MATERIAL_MODULATION:
+
 	//First BLENDOP
 	_asm add edi, 4
 	_asm mov eax, [edi];
@@ -438,7 +486,19 @@ SKIP_NULL:*/
 
 
 
+	_asm mov al, restoreMaterial;
+	_asm test al, al
+	_asm je NO_RESTORE_MAT;
 
+	_asm mov eax, [pDevice];
+	_asm mov edi, NULL_MAT;
+	_asm push edi
+	_asm push eax;
+	_asm mov ecx, [eax];
+	//Device->SetMaterial
+	_asm mov[Gfx::oldMaterial], edi;
+	_asm call dword ptr[ecx + 0xC4];
+NO_RESTORE_MAT:
 
 	/*//Restore BLENDOP
 	_asm mov edi, D3DRS_BLENDOP;
@@ -478,6 +538,7 @@ SKIP_NULL:*/
 	//Device->SetTexture
 	_asm call dword ptr[esi + 0x00000104];*/
 	_asm xor eax, eax;
+	_asm mov restoreMaterial, al;
 	_asm mov reset, al;
 	_asm mov bl, restore;
 	_asm test bl, bl

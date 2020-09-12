@@ -44,9 +44,12 @@ float Slerp::speed = 0.0f;
 EXTERN bool GameState::GotSuperSectors = false;
 
 ShaderObject* Gfx::shaders = NULL;
+DWORD Gfx::numMaterials = 0;
+D3DMATERIAL9* Gfx::materials = NULL;
 DWORD Gfx::numShaders = 0;
 bool Gfx::loadingShaders = false;
 bool Gfx::loadedShaders = false;
+D3DMATERIAL9* Gfx::oldMaterial = NULL;
 
 EXTERN DWORD _GetCurrentTime()
 {

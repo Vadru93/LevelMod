@@ -31,7 +31,16 @@ EXTERN char* FindChecksumName(DWORD checksum)
 		return Not_Inited;
 }
 
-
+unsigned long crc32f_file(const BYTE* buf, DWORD len)
+{
+	unsigned long crc = 0xFFFFFFFF;
+	for (DWORD i = 0; i < len; i++)
+	{
+		crc = checksumTable[(unsigned char)((crc ^ *buf) & 0xFF)] ^ (crc >> 8);
+		buf++;
+	}
+	return crc;
+}
 
 unsigned long crc32f(const char* buf)
 {

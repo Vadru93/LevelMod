@@ -15,6 +15,7 @@ struct ShaderTexture
 struct ShaderObject
 {
 	DWORD shaderId;
+	D3DMATERIAL9* material;
 	DWORD blend_op;
 	DWORD src_blend;
 	DWORD dest_blend;
@@ -32,8 +33,11 @@ namespace Gfx
 {
 	extern bool loadingShaders;
 	extern bool loadedShaders;
+	extern DWORD numMaterials;
 	extern ShaderObject* shaders;
 	extern DWORD numShaders;
+	extern D3DMATERIAL9* materials;
+	extern D3DMATERIAL9* oldMaterial;
 	void LoadCustomShaders(char* file);
 	void UnloadShaders();
 };

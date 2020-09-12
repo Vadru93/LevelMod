@@ -4,8 +4,51 @@
 #include "Defines.h"
 #include "Node.h"
 #include "String.h"
-#include "FastCRC.h"
+//#include "FastCRC.h"
 
+namespace FileHandler
+{
+	BYTE* pFile = NULL;
+	const BYTE* oldFile = NULL;
+	DWORD size = 0;
+	bool OpenFile(char* path, char* mode)
+	{
+		pFile = NULL;
+		FILE* f = fopen(path, mode);
+		if (f)
+		{
+			fseek(f, 0, SEEK_END);
+			size = ftell(f);
+			fseek(f, 0, SEEK_SET);
+			pFile = new BYTE[size];
+			oldFile = pFile;
+			fread(pFile, size, 1, f);
+			fclose(f);
+			return true;
+		}
+		return false;
+	}
+
+	void CloseFile()
+	{
+		delete[] oldFile;
+		oldFile = NULL;
+		pFile = NULL;
+		size = 0;
+	}
+
+	bool CalculateCRC(DWORD& checksum, char* path)
+	{
+		if (OpenFile(path, "rb"))
+		{
+			checksum = crc32f_file(oldFile, size);
+			CloseFile();
+			return true;
+		}
+		return false;
+	}
+
+}
 
 char* QScript::QBTypes[] = {
 	 "None",//End of array / struct and used when parsing / calling scripts
@@ -610,14 +653,20 @@ bool QBFile::ContentChanged()
 	unsigned long crc;
 	if (newSize != size)
 	{
-		checksum = FastCRC::CFastCRC32::Calculate(&crc, dir);
+
+		//checksum = FastCRC::CFastCRC32::Calculate(&crc, dir);
+		if (FileHandler::CalculateCRC(crc, dir) == false)
+			MessageBox(0, "Error calculating checksum for file", fileName, 0);
+		checksum = crc;
 		return true;
 
 	}
 	//_printf("%s %s\n", path, fileName);
 
-	if (FastCRC::CFastCRC32::Calculate(&crc, dir) != 0)
-		MessageBox(0, "Error calculating checksum for file", dir, 0);
+	/*if (FastCRC::CFastCRC32::Calculate(&crc, dir) != 0)
+		MessageBox(0, "Error calculating checksum for file", dir, 0);*/
+	if (FileHandler::CalculateCRC(crc, dir) == false)
+		MessageBox(0, "Error calculating checksum for file", fileName, 0);
 
 	//delete[] path;
 
@@ -630,6 +679,7 @@ bool QBFile::ContentChanged()
 
 	return changed;
 }
+
 
 void QBScript::OpenScript(char* path, bool level)
 {
@@ -655,8 +705,11 @@ void QBScript::OpenScript(char* path, bool level)
 	if (!level)
 	{
 		unsigned long checksum;
-		if (FastCRC::CFastCRC32::Calculate(&checksum, path) != 0)
+		/*if (FastCRC::CFastCRC32::Calculate(&checksum, path) != 0)
+			MessageBox(0, "Error calculating checksum for file", fileName, 0);*/
+		if(FileHandler::CalculateCRC(checksum, path) == false)
 			MessageBox(0, "Error calculating checksum for file", fileName, 0);
+
 		qbFiles.push_back(QBFile(checksum, fileName, size));
 	}
 	/*}
@@ -796,9 +849,13 @@ bool TestReloadQB(CStruct* pStruct, CScript* pScript)
 		if (!FileExists(&dir[5]))
 		{
 			unsigned long checksum;
-			if (FastCRC::CFastCRC32::Calculate(&checksum, dir) != 0)
+			/*if (FastCRC::CFastCRC32::Calculate(&checksum, dir) != 0)
 				MessageBox(0, "Error calculating checksum for file", &dir[13], 0);
-			QScript::qbFiles.push_back(QBFile(checksum, dir, size));
+			*/
+			if (FileHandler::CalculateCRC(checksum, dir) == false)
+				MessageBox(0, "Error calculating checksum for file", &dir[13], 0);
+
+            QScript::qbFiles.push_back(QBFile(checksum, dir, size));
 
 			pLoadQB(0x0042B300)(&dir[5], false);
 		}

@@ -242,9 +242,6 @@
     <ClInclude Include="source\Collision.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
-    <ClInclude Include="source\FastCRC.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
     <ClInclude Include="source\CustomShaders.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>

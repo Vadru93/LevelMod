@@ -40,16 +40,6 @@ namespace String
 		return AddString(checksum, str);
 	}
 
-	void GetTopHeap(bool level = false)
-	{
-		/*if (level)
-			StringHeapTop = LevelHeapTop;*/
-		if (outOfMemory)
-			StringHeapTop = PermanentHeapTop;
-		else
-		    StringHeapTop = useExtraMemory ? ExtraMemoryTop : *(char**)0x008E1E0C;
-	}
-
     PermanentString* GetPermanentStringList()
 	{
 		return *(PermanentString**)0x008E1E10;
@@ -87,6 +77,8 @@ namespace String
 
 	DWORD GetHeapSize(HEAP heap)
 	{
+		if(!outOfMemory)
+		    numNoExtraStrings = numExtraStrings - numExtraOriginal;
 		switch (heap)
 		{
 		case HEAP::ORIGINAL:
@@ -138,12 +130,14 @@ namespace String
 			{
 				if ((*(DWORD*)0x008E1E0C + len) >= 0x008E1DF0)
 				{
+					*(DWORD*)0x008E1E0C += len;
 					char  msg[256] = "";
 					_printf(("ExtraMemory reached @ %d strings"), numStrings + numExtraStrings);
 					//MessageBox(0, msg, msg, 0);
 					useExtraMemory = true;
 					StringHeapTop = (char*)0x0087D8FC;
 					ExtraMemoryTop = StringHeapTop;
+					ExtraMemoryTop += len;
 					ExtraMemoryBottom = StringHeapTop;
 					//*(DWORD*)0x008E1E14 = ((*(DWORD*)0x008E1E14) + numExtraOriginal);
 					//MessageBox(0, "Out of memory in permanent heap...", "CRITICAL ERROR", 0);
@@ -161,6 +155,7 @@ namespace String
 
 			if ((ExtraMemoryTop + len) >= ExtraMemoryBottom + OLD_OTHER_SIZE)
 			{
+				ExtraMemoryTop += len;
 				_printf("Out of memory in permanent heap...\nGoing to use new heap\n");
 				PermanentHeapTop += len;
 				numNoExtraStrings = numExtraStrings - numExtraOriginal;
@@ -181,6 +176,28 @@ namespace String
 		
 	}
 
+
+	void GetTopHeap(bool level = false)
+	{
+		/*if (level)
+			StringHeapTop = LevelHeapTop;*/
+		if (outOfMemory)
+		{
+			StringHeapTop = PermanentHeapTop;
+		}
+		else
+		{
+			StringHeapTop = useExtraMemory ? ExtraMemoryTop : *(char**)0x008E1E0C;
+		}
+		DWORD len = strlen(StringHeapTop);
+		if (len)
+		{
+			_printf("Top heap error...%s\n", StringHeapTop);
+			StringHeapTop += len;
+			IncreaseTopHeap(len);
+		}
+	}
+
 	char* GetString(DWORD& checksum, const char* str)
 	{
 		DWORD checksum_non_case = crc32f(str);
@@ -192,14 +209,14 @@ namespace String
 			if (strings[i].checksum == checksum)
 			{
 				_printf("Returning old String %s\n", strings[i].pStr);
-				if (stricmp(strings[i].pStr, str))
-					MessageBox(0, strings[i].pStr, str, 0);
+				if (strcmp(strings[i].pStr, str))
+					_printf("String missmatch? %s %s\n", strings[i].pStr, str);
 				return strings[i].pStr;
 			}
 			else if (crc32f(strings[i].pStr) == checksum_non_case)
 			{
-				if (stricmp(strings[i].pStr, str))
-					MessageBox(0, strings[i].pStr, str, 0);
+				if (strcmp(strings[i].pStr, str))
+					_printf("String missmatch? %s %s\n", strings[i].pStr, str);
 				return strings[i].pStr;
 			}
 		}
@@ -282,15 +299,15 @@ namespace String
 		{
 			if (strings[i].checksum == checksum)
 			{
-				if (stricmp(strings[i].pStr, str))
-					MessageBox(0, strings[i].pStr, str, 0);
+				if (strcmp(strings[i].pStr, str))
+					_printf("String missmatch? %s %s\n", strings[i].pStr, str);
 				_printf("Returning old String %s\n", strings[i].pStr);
 				return strings[i].pStr;
 			}
 			else if (crc32f(strings[i].pStr) == checksum_non_case)
 			{
-				if (stricmp(strings[i].pStr, str))
-					MessageBox(0, strings[i].pStr, str, 0);
+				if (strcmp(strings[i].pStr, str))
+					_printf("String missmatch? %s %s\n", strings[i].pStr, str);
 				return strings[i].pStr;
 			}
 		}
@@ -301,8 +318,8 @@ namespace String
 		{
 			if (permanentStrings[i].checksum == checksum)
 			{
-				if (stricmp(strings[i].pStr, str))
-					MessageBox(0, strings[i].pStr, str, 0);
+				if (stricmp(permanentStrings[i].pStr, str))
+					MessageBox(0, permanentStrings[i].pStr, str, 0);
 				_printf("Returning optimized string %s\n", strings[i].pStr);
 				return strings[i].pStr;
 			}
@@ -372,9 +389,15 @@ namespace String
 			permanentStrings[numExtraStrings].pStr = new_string;
 			return new_string;
 		}*/
+		//_printf("TOP %p\n", StringHeapTop);
+		if (strlen(StringHeapTop))
+		{
+			MessageBox(0, StringHeapTop, "Not good..", 0);
+		}
 
 		for (DWORD i = 0; i < len; i++)
 		{
+			
 			StringHeapTop[i] = str[i];
 		}
 
