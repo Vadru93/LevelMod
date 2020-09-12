@@ -7,11 +7,11 @@ void FixRenderBugs()
 	const BYTE renderjmp1[] = { 0xE9, 0x10, 0xB6, 0xF0, 0xFF };
 	DWORD old;
 	VirtualProtect((void*)0x004f4ba9, sizeof(renderjmp1), PAGE_EXECUTE_READWRITE, &old);
-	memcpy((void*)0x004f4ba9, renderjmp1, sizeof(renderjmp1));
+	//memcpy((void*)0x004f4ba9, renderjmp1, sizeof(renderjmp1));
 	//VirtualProtect((void*)0x004f4ba9, sizeof(renderjmp1), old, &old);
 	const BYTE renderFix1[] = { 0x85, 0xD2, 0x0F, 0x84, 0x10, 0x4A, 0x0F, 0x00, 0x89, 0x0A, 0x8B, 0x48, 0x10, 0xE9, 0xDE, 0x49, 0x0F, 0x00 };
 	VirtualProtect((void*)0x004001be, sizeof(renderFix1), PAGE_EXECUTE_READWRITE, &old);
-	memcpy((void*)0x004001be, renderFix1, sizeof(renderFix1));
+	//memcpy((void*)0x004001be, renderFix1, sizeof(renderFix1));
 	//VirtualProtect((void*)0x004001be, sizeof(renderFix1), old, &old);
 
 	VirtualProtect((void*)0x004FEE77, 4, PAGE_EXECUTE_READWRITE, &old);

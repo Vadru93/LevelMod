@@ -2,6 +2,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "pch.h"
 #include "defines.h"
+#include "CustomShaders.h"
 
 
 bool Slerp::transfer = false;
@@ -41,6 +42,11 @@ D3DXVECTOR4 Slerp::target_normal = D3DXVECTOR4(0,0,0,0);
 float Slerp::speed = 0.0f;
 
 EXTERN bool GameState::GotSuperSectors = false;
+
+ShaderObject* Gfx::shaders = NULL;
+DWORD Gfx::numShaders = 0;
+bool Gfx::loadingShaders = false;
+bool Gfx::loadedShaders = false;
 
 EXTERN DWORD _GetCurrentTime()
 {

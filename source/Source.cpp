@@ -19,6 +19,7 @@
 #include "IniWriter.h"
 #include "Bugfixes.h"
 #include "String.h"
+#include "CustomShaders.h"
 
 
 /*//Game states
@@ -793,6 +794,9 @@ void DestroySuperSectors()
 	GameState::GotSuperSectors = false;
 	if (movingObjects.size())
 		movingObjects.clear();
+
+	if(!Gfx::loadingShaders)
+	    Gfx::UnloadShaders();
 }
 void CreateSuperSectors()
 {
@@ -2447,6 +2451,7 @@ const CompiledScript scripts[] =
 	{"GetOptionText", GetOptionText},
 	{"LM_PrintInfo", GetInfoScript },
 	{"TestReloadQB", TestReloadQB},
+	{"OnPostLevelLoad", OnPostLevelLoad},
 	/*{"SetMemoryPoolSize", SetMemoryPoolSize},
 	{"GetMemoryPoolSize", GetMemoryPoolSize},
 	{"GetMemoryPoolSizeText", GetMemoryPoolSizeText},*/
@@ -3227,9 +3232,11 @@ void AddCompressedNodes()
 
 	}
 }
-bool hookDone = true;
+bool hookDone = false;
 
 void AddFunctions();
+
+static char ShaderFile[128] = "";
 
 void HookedFopen(char* p)
 {
@@ -3237,10 +3244,10 @@ void HookedFopen(char* p)
 	{
 		if (p[strlen(p) - 1] == 'b' && p[strlen(p) - 2] == 'q' && p[strlen(p) - 3] == '.' && game)
 		{
-			if (hookDone)
+			if (!hookDone)
 			{
 				AddFunctions();
-				hookDone = false;
+				hookDone = true;
 			}
 			if (debugMode)
 			{
@@ -3253,8 +3260,32 @@ void HookedFopen(char* p)
 				if (debugMode)
 					QScript::Scripts->OpenScript(p, true);
 			}
+			
+
+			strcpy(ShaderFile, p);
+
+			ShaderFile[strlen(p) - 2] = 's';
+			ShaderFile[strlen(p) - 1] = 'h';
+			/*ShaderFile[strlen(p)] = 'h';
+			ShaderFile[strlen(p)+1] = 0x0;*/
+
+			//LoadCustomShaders(ShaderFile);
+			
+
 		}
 	}
+}
+
+void LoadCustomShaderThread()
+{
+	Gfx::LoadCustomShaders(ShaderFile);
+}
+
+bool OnPostLevelLoad(CStruct* pStruct, CScript* pScript)
+{
+	_printf("OnPostLevelLoad...\n");
+	CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)LoadCustomShaderThread, NULL, NULL, NULL);
+	return true;
 }
 
 /*__declspec(naked) void Fopen_naked()
@@ -4331,7 +4362,7 @@ void InitLevelMod()
 	//HookControls();
 	*(WORD*)0x00427A9B = 0x840F;//je
 	HookFunction(0x00427A9D, NotGood_naked);
-	//HookFunction(0x004F42AA, SetVertexShader_naked);
+	HookFunction(0x004F42AA, SetVertexShader_naked);
 	//MessageBox(0, 0, 0, 0);
 	*(DWORD*)0x00427AA3 = 0x90909090;//nop
 	*(WORD*)(0x00427AA3 + 4) = 0x9090;
@@ -4803,7 +4834,7 @@ EXTERN QBKeyHeader* GetQBKeyHeader(unsigned long QBKey)
 	return ((GetQBKeyHeaderFunc)(0x00426340))(QBKey);//didn't find header lets let game search through sub qbTables
 }
 
-LPDIRECT3DDEVICE9 pDevice = NULL;;
+LPDIRECT3DDEVICE9 pDevice = NULL;
 
 void DrawLines()
 {

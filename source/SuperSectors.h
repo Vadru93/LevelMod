@@ -86,7 +86,7 @@ EXTERN struct SuperSector
 			}
 			pSectors += 2;//skip 8 bytes to get next item in the list
 		}
-		MessageBox(0, "return NULL", "", 0);//Checksum is not in the list
+		//MessageBox(0, "return NULL", "", 0);//Checksum is not in the list
 		return NULL;
 	}
 

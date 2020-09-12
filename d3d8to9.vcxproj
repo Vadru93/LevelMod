@@ -149,7 +149,7 @@
     <ClCompile Include="source\Source.cpp" />
     <ClCompile Include="source\String.cpp" />
     <ClCompile Include="source\SuperSectors.cpp" />
-    <ClCompile Include="source\VertexShader.cpp" />
+    <ClCompile Include="source\CustomShaders.cpp" />
     <ClCompile Include="source\zip\unzip.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -158,6 +158,7 @@
     <ClInclude Include="source\Checksum.h" />
     <ClInclude Include="source\Collision.h" />
     <ClInclude Include="source\Commands.h" />
+    <ClInclude Include="source\CustomShaders.h" />
     <ClInclude Include="source\CXBOXController.h" />
     <ClInclude Include="source\d3d8to9\d3d8to9.hpp" />
     <ClInclude Include="source\d3d8to9\d3d8types.hpp" />
