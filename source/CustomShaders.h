@@ -15,6 +15,7 @@ struct ShaderTexture
 struct ShaderObject
 {
 	DWORD shaderId;
+	float env_tiling[2];
 	D3DMATERIAL9* material;
 	DWORD blend_op;
 	DWORD src_blend;

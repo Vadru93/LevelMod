@@ -263,7 +263,7 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 	//*(DWORD*)0x0042BFE2 = 0x008E1DF0 - 0x008920CC;//0x008B4B48-EXTRA_STRINGS;
 	*(DWORD*)0x0042BFE7 = /*0x1D4C0*/ EXTRA_STRINGS + *(DWORD*)0x0042BFE7;
 
-	*(DWORD*)0x0042BE4B = 0xFF00;
+	*(DWORD*)0x0042BE4B = MAX_NUM_STRINGS * 8;
 
 
 	//For debug...
@@ -489,7 +489,7 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 
 	if (!LOG.is_open())
 	{
-		LOG.open("d3d8.log", std::ios::trunc);
+		LOG.open("d3d8_2.log", std::ios::trunc);
 	}
 
 	if (!LOG.is_open() && LogMessageFlag)

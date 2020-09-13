@@ -15,6 +15,7 @@
 
 extern bool init3, debugMode, hooked;
 extern std::map<int, int> options;
+extern std::map<int, int> overrideOptions;
 
 extern CIniWriter* OptionWriter;
 extern CIniReader* OptionReader;

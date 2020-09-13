@@ -69,45 +69,6 @@ struct Mesh
 	DWORD* Obj;//SuperSector+0x1C
 	DWORD pMemberFunction;
 
-	void AddShader(ShaderObject* shader, DWORD matIndex)
-	{
-		//matIndex++;
-		DWORD pShader = (DWORD)this;
-		_printf("pShader %X inedx %d\n", pShader, matIndex);
-		pShader += 0x2C;//
-		if (matIndex)
-		{
-			pShader += matIndex * 0x30;
-		}
-		pShader = *(DWORD*)pShader;
-
-		if (!pShader)
-		{
-			MessageBox(0, "Wrong pointer in AddShader..", "", 0);
-			return;
-		}
-
-		DWORD retry = pShader;
-		pShader = *(DWORD*)pShader;
-
-		if (!pShader)
-		{
-			Sleep(1000);
-			pShader = *(DWORD*)retry;
-			if (!pShader)
-			{
-				_printf("Unloaded texture?\n");
-				return;
-			}
-		}
-
-		pShader += 0xF0;
-		/*if (*(DWORD*)pShader != 0 && *(DWORD*)((*(DWORD*)pShader)) != *(DWORD*)(((DWORD)shader)))
-		{
-			MessageBox(0, "shader missmatch", "", 0);
-			return;
-		}*/
-		*(DWORD*)pShader = (DWORD)shader;
-	}
+	void AddShader(ShaderObject* shader, DWORD matIndex);
 };
 #endif

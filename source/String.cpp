@@ -11,9 +11,11 @@ namespace String
 	DWORD *pNumStrings = (DWORD*)0x008E1E14;
 	DWORD numExtraStrings = 0;
 	DWORD numLevelStrings = 0;
-	DWORD numStrings = 0;
+	//DWORD numStrings = 0;
 	DWORD numNoExtraStrings = 0;
 	DWORD numExtraOriginal = 0;
+	DWORD numOriginalStrings = 0;
+	DWORD numExtraNewHeap = 0;
 
 
 #define MAX_NUM_LEVEL 15000
@@ -25,9 +27,9 @@ namespace String
 	char* LevelHeapTop = LevelHeapBottom;
 
 
-#define MAX_NUM_EXTRA 30000
+//#define MAX_NUM_EXTRA 30000
 
-	PermanentString permanentStrings[MAX_NUM_EXTRA] = { 0 };
+	//PermanentString permanentStrings[MAX_NUM_EXTRA] = { 0 };
 
 	char PermanentHeapBottom[MAX_PERMANENT_STRINGS *80];
 	char* PermanentHeapTop = PermanentHeapBottom;
@@ -45,19 +47,19 @@ namespace String
 		return *(PermanentString**)0x008E1E10;
 	}
 
+	DWORD GetNumStrings()
+	{
+		return *(DWORD*)0x008E1E14;
+	}
+
 	DWORD GetNumStringsTotal()
 	{
-		return numStrings + numExtraStrings;
+		return GetNumStrings();
 	}
 
 	DWORD GetNumMaxStringsTotal()
 	{
-		return MAX_PERMANENT_STRINGS + MAX_NUM_EXTRA;
-	}
-
-	DWORD GetNumStrings()
-	{
-		return *(DWORD*)0x008E1E14;
+		return MAX_NUM_STRINGS;// MAX_PERMANENT_STRINGS + MAX_NUM_EXTRA;
 	}
 
 	DWORD GetNumStrings(HEAP heap)
@@ -69,7 +71,7 @@ namespace String
 		case HEAP::NEW_NOEXTRA:
 			return numNoExtraStrings;
 		case HEAP::NEW_EXTRA:
-			return numExtraStrings - numNoExtraStrings- numExtraOriginal;
+			return numExtraNewHeap;
 		case HEAP::LEVEL:
 			return numLevelStrings;
 		}
@@ -77,8 +79,6 @@ namespace String
 
 	DWORD GetHeapSize(HEAP heap)
 	{
-		if(!outOfMemory)
-		    numNoExtraStrings = numExtraStrings - numExtraOriginal;
 		switch (heap)
 		{
 		case HEAP::ORIGINAL:
@@ -128,11 +128,10 @@ namespace String
 		{
 			if (!useExtraMemory)
 			{
-				if ((*(DWORD*)0x008E1E0C + len) >= 0x008E1DF0)
+				if ((*(DWORD*)0x008E1E0C + len) >= 0x008E1D00)//Actually F0, but we keep some memory just in case we will reload QB files etc
 				{
-					*(DWORD*)0x008E1E0C += len;
 					char  msg[256] = "";
-					_printf(("ExtraMemory reached @ %d strings"), numStrings + numExtraStrings);
+					_printf(("ExtraMemory reached @ %d strings"), GetNumStrings() + numExtraStrings);
 					//MessageBox(0, msg, msg, 0);
 					useExtraMemory = true;
 					StringHeapTop = (char*)0x0087D8FC;
@@ -144,6 +143,7 @@ namespace String
 				}
 				else
 				{
+					StringHeapTop = *(char**)0x008E1E0C;
 					*(DWORD*)0x008E1E0C += len;
 					numExtraOriginal++;
 					//*(DWORD*)0x008E1E14 = *(DWORD*)0x008E1E14 + 1;
@@ -155,18 +155,23 @@ namespace String
 
 			if ((ExtraMemoryTop + len) >= ExtraMemoryBottom + OLD_OTHER_SIZE)
 			{
-				ExtraMemoryTop += len;
 				_printf("Out of memory in permanent heap...\nGoing to use new heap\n");
 				PermanentHeapTop += len;
-				numNoExtraStrings = numExtraStrings - numExtraOriginal;
+				StringHeapTop = PermanentHeapBottom;
 				outOfMemory = true;
 			}
 			else
+			{
+				numNoExtraStrings++;
+				StringHeapTop = ExtraMemoryTop;
 				ExtraMemoryTop += len;
+			}
 			return;
 		}
 		else
 		{
+			numExtraNewHeap++;
+			StringHeapTop = PermanentHeapTop;
 			PermanentHeapTop += len;
 			if (PermanentHeapTop >= (PermanentHeapBottom + (MAX_PERMANENT_STRINGS * 80)))
 				MessageBox(0, "Permanent String Heap too small...", "CRITICAL ERROR", 0);
@@ -177,10 +182,8 @@ namespace String
 	}
 
 
-	void GetTopHeap(bool level = false)
+	/*void GetTopHeap(bool level = false)
 	{
-		/*if (level)
-			StringHeapTop = LevelHeapTop;*/
 		if (outOfMemory)
 		{
 			StringHeapTop = PermanentHeapTop;
@@ -192,11 +195,11 @@ namespace String
 		DWORD len = strlen(StringHeapTop);
 		if (len)
 		{
-			_printf("Top heap error...%s\n", StringHeapTop);
+			MessageBox(0, "Top heap error...", StringHeapTop, 0);
 			StringHeapTop += len;
 			IncreaseTopHeap(len);
 		}
-	}
+	}*/
 
 	char* GetString(DWORD& checksum, const char* str)
 	{
@@ -206,24 +209,26 @@ namespace String
 
 		for (DWORD i = 0; i < numStrings; i++)
 		{
-			if (strings[i].checksum == checksum)
+			if (i < numOriginalStrings)
 			{
-				_printf("Returning old String %s\n", strings[i].pStr);
-				if (strcmp(strings[i].pStr, str))
-					_printf("String missmatch? %s %s\n", strings[i].pStr, str);
-				return strings[i].pStr;
+				if (strings[i].checksum == checksum)
+				{
+					_printf("Returning old String %s\n", strings[i].pStr);
+					if (strcmp(strings[i].pStr, str))
+						_printf("String missmatch? %s %s\n", strings[i].pStr, str);
+					return strings[i].pStr;
+				}
 			}
-			else if (crc32f(strings[i].pStr) == checksum_non_case)
+			if (crc32f(strings[i].pStr) == checksum_non_case)
 			{
-				if (strcmp(strings[i].pStr, str))
+				if (stricmp(strings[i].pStr, str))
 					_printf("String missmatch? %s %s\n", strings[i].pStr, str);
 				return strings[i].pStr;
 			}
 		}
-
 		checksum = checksum_non_case;
 
-		for (DWORD i = 0; i < numExtraStrings; i++)
+		/*for (DWORD i = 0; i < numExtraStrings; i++)
 		{
 			if (permanentStrings[i].checksum == checksum)
 			{
@@ -232,7 +237,7 @@ namespace String
 				_printf("Returning optimized string %s\n", strings[i].pStr);
 				return strings[i].pStr;
 			}
-		}
+		}*/
 
 		return NULL;
 	}
@@ -291,11 +296,12 @@ namespace String
 
 	char* AddString(DWORD checksum, const char* str)
 	{
-		DWORD checksum_non_case = crc32f(str);
 		PermanentString* strings = GetPermanentStringList();
 		DWORD numStrings = GetNumStrings();
+		if (numOriginalStrings == 0)
+			numOriginalStrings = numStrings;
 
-		for (DWORD i = 0; i < numStrings; i++)
+		/*for (DWORD i = 0; i < numStrings; i++)
 		{
 			if (strings[i].checksum == checksum)
 			{
@@ -306,90 +312,29 @@ namespace String
 			}
 			else if (crc32f(strings[i].pStr) == checksum_non_case)
 			{
-				if (strcmp(strings[i].pStr, str))
+				if (stricmp(strings[i].pStr, str))
 					_printf("String missmatch? %s %s\n", strings[i].pStr, str);
 				return strings[i].pStr;
 			}
-		}
+		}*/
+		char* pStr = GetString(checksum, str);
+		if (pStr != NULL)
+			return pStr;
 
-		checksum = checksum_non_case;
-
-		for (DWORD i = 0; i < numExtraStrings; i++)
+		/*for (DWORD i = 0; i < numExtraStrings; i++)
 		{
 			if (permanentStrings[i].checksum == checksum)
 			{
 				if (stricmp(permanentStrings[i].pStr, str))
 					MessageBox(0, permanentStrings[i].pStr, str, 0);
-				_printf("Returning optimized string %s\n", strings[i].pStr);
+				_printf("Returning optimized string %s\n", permanentStrings[i].pStr);
 				return strings[i].pStr;
 			}
-		}
-		/*numStrings++;
-		*(DWORD*)0x008E1E14 = numStrings;*/
-
-
-		//useExtraMemory? _printf("Adding new String[new] %s\n", str),  numExtraStrings++ : _printf("Adding new String %s\n", str);
-		
-		/*numStrings++;
-		*(DWORD*)0x008E1E14 = numStrings;*/
-
-		/*if (useExtraMemory)
-		{*/
-			numExtraStrings++;
-			(*pNumExtraStrings)++;
-		/*}
-		else
-		{
-			numStrings++;
-			*(DWORD*)0x008E1E14 = numStrings;
 		}*/
 
-		if (numExtraStrings >= MAX_NUM_EXTRA)
-		{
-			MessageBox(0, "Please increase it", "Maximum number of permanent strings reached...", 0);
-			return NULL;
-		}
-
-		GetTopHeap();
 		DWORD len = strlen(str)+1;
-
-
 		IncreaseTopHeap(len);
 
-		/*if (!outOfMemory)
-		{
-			if (!useExtraMemory)
-			{
-				if ((DWORD)StringHeapTop >= 0x008E1DF0)
-				{
-					char  msg[256] = "";
-					_printf("ExtraMemory reached @ %d strings", numStrings+numExtraStrings);
-					useExtraMemory = true;
-					StringHeapTop = (char*)0x0087D8FC;
-					ExtraMemoryTop = StringHeapTop;
-					ExtraMemoryBottom = StringHeapTop;
-					//MessageBox(0, "Out of memory in permanent heap...", "CRITICAL ERROR", 0);
-				}
-			}
-
-			
-
-			if (ExtraMemoryTop >= ExtraMemoryBottom + OLD_OTHER_SIZE)
-			{
-				_printf("Out of memory in permanent heap..." "CRITICAL ERROR");
-				outOfMemory = true;
-			}
-		}
-		else
-		{
-			char* new_string = (char*)mallocx(strlen(str) + 1);
-
-			strcpy(new_string, str);
-			permanentStrings[numExtraStrings].checksum = checksum;
-			permanentStrings[numExtraStrings].pStr = new_string;
-			return new_string;
-		}*/
-		//_printf("TOP %p\n", StringHeapTop);
 		if (strlen(StringHeapTop))
 		{
 			MessageBox(0, StringHeapTop, "Not good..", 0);
@@ -397,27 +342,28 @@ namespace String
 
 		for (DWORD i = 0; i < len; i++)
 		{
-			
+
 			StringHeapTop[i] = str[i];
 		}
 
-		/*if (useExtraMemory)
-		{*/
-			permanentStrings[numExtraStrings].checksum = checksum;
-			permanentStrings[numExtraStrings].pStr = StringHeapTop;
-		/*}
-		else
+		strings[numStrings].checksum = checksum;
+		strings[numStrings].pStr = StringHeapTop;
+
+		numExtraStrings++;
+		(*pNumStrings)++;
+
+		if (numStrings >= MAX_NUM_STRINGS)//numExtraStrings >= MAX_NUM_EXTRA)
 		{
-			strings[numStrings].checksum = checksum;
-			strings[numStrings].pStr = StringHeapTop;
-		}*/
+			MessageBox(0, "Please increase it", "Maximum number of permanent strings reached...", 0);
+			return NULL;
+		}
 
 		return StringHeapTop;
 	}
 
 	DWORD CaseSenseChecksum(const char* str)
 	{
-		typedef DWORD (__cdecl* pCaseSenseChecksum)(const char* string, DWORD len);
+		typedef DWORD(__cdecl* pCaseSenseChecksum)(const char* string, DWORD len);
 
 		return pCaseSenseChecksum(0x00411030)(str, strlen(str));
 	}

@@ -1567,6 +1567,8 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateVertexShader(const DWORD *pDecl
 			const DWORD ShaderMagic = reinterpret_cast<DWORD>(ShaderInfo) >> 1;
 
 			*pHandle = ShaderMagic | 0x80000000;
+
+			LOG << "Shader id"  << std::hex << *pHandle << std::endl;
 		}
 		else
 		{
@@ -1582,7 +1584,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateVertexShader(const DWORD *pDecl
 	}
 	else
 	{
-#ifndef D3D8TO9NOLOG
+#ifndef D3D8TO9N
 		LOG << "> 'IDirect3DDevice9::CreateVertexShader' failed with error code " << std::hex << hr << std::dec << "!" << std::endl;
 #endif
 	}

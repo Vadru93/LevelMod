@@ -53,6 +53,57 @@ void Gfx::UnloadShaders()
 D3DMATERIAL9* NULL_MAT;
 D3DMATERIAL9 NULLMAT;
 
+void Mesh::AddShader(ShaderObject* shader, DWORD matIndex)
+{
+	//matIndex++;
+	DWORD pShader = (DWORD)this;
+	_printf("pShader %X inedx %d\n", pShader, matIndex);
+	pShader += 0x2C;//
+	if (matIndex)
+	{
+		pShader += matIndex * 0x30;
+	}
+	DWORD pVertexShader = pShader + 4;
+	pShader = *(DWORD*)pShader;
+
+	if (!pShader)
+	{
+		MessageBox(0, "Wrong pointer in AddShader..", "", 0);
+		return;
+	}
+
+	DWORD retry = pShader;
+	pShader = *(DWORD*)pShader;
+
+	if (!pShader)
+	{
+		Sleep(1000);
+		pShader = *(DWORD*)retry;
+		if (!pShader)
+		{
+			_printf("Unloaded texture?\n");
+			return;
+		}
+	}
+	char* pTexName = (char*)(pShader + 4 * 4);
+	pShader += 0xF0;
+	/*if (*(DWORD*)pShader != 0 && *(DWORD*)((*(DWORD*)pShader)) != *(DWORD*)(((DWORD)shader)))
+	{
+		MessageBox(0, "shader missmatch", "", 0);
+		return;
+	}*/
+	*(DWORD*)pShader = (DWORD)shader;
+	if (shader->env_tiling[0])
+	{
+		char msg[256] = "";
+		sprintf(msg, "MatSplit %p Tedxture %s\n%s\n", this, pTexName, this->sector ? FindChecksumName(this->sector->name) : "No SuperSector");
+		MessageBox(0, msg, "EnvMap", 0);
+		*(DWORD*)pVertexShader = 0x152;
+	}
+
+
+}
+
 void Gfx::LoadCustomShaders(char* path)
 {
 	NULL_MAT = &NULLMAT;
@@ -125,6 +176,8 @@ void Gfx::LoadCustomShaders(char* path)
 					{
 						DWORD matIndex = ReadDWORD();
 						*(DWORD*)&shaders[numShaders].shaderId = ReadDWORD();
+						*(DWORD*)&shaders[numShaders].env_tiling[0] = ReadDWORD();
+						*(DWORD*)&shaders[numShaders].env_tiling[1] = ReadDWORD();
 						DWORD idx = *(DWORD*)pFile;
 						pFile += 4;
 						if (idx > numMaterials)
@@ -187,7 +240,7 @@ void Gfx::LoadCustomShaders(char* path)
 					_printf("Couldn't find sector %s %X\n", FindChecksumName(checksum), pFile);
 					for (DWORD j = 0; j < numSplits; j++)
 					{
-						pFile += 6 * 4;
+						pFile += 8 * 4;
 						DWORD numTextures = ReadDWORD();
 
 						if (numTextures)
@@ -219,12 +272,20 @@ void Gfx::LoadCustomShaders(char* path)
 bool reset = false;
 bool restore = false;
 bool restoreMaterial = false;
+bool restore_env = false;
+
 
 __declspec(naked) void __cdecl SetVertexShader_naked()
 {
 	static DWORD oldShader = 0x005CEDB4;
 	static DWORD pReturn = 0x00550DC0;
 	static DWORD ShaderTextureSkip = (sizeof(ShaderTexture) - 4);
+	static D3DMATRIX env_mat = { 0.5f,  0.0f, 0.0f, 0.0f,
+								 0.0f, -0.5f, 0.0f, 0.0f,
+								 0.0f,  0.0f, 0.0f,	0.0f,
+								 0.5f,  0.5f, 0.0f, 0.0f };
+
+	static D3DMATRIX* p_env_mat  = &env_mat;
 
 	//Store old esi value onto the stack
 	_asm push edi;
@@ -291,7 +352,61 @@ SKIP_SHADER:
 	//Now we need to set BlendModes
 	//Store values on stack, maybe not needed?
 	_asm push ebx;
-	
+
+
+	_asm add edi, 4
+	_asm mov eax, [edi];
+	_asm add edi, 4
+	_asm test eax, eax;
+	_asm je SKIP_ENVMAP;
+	_asm mov [env_mat], eax
+	_asm mov eax, [edi];
+	_asm mov[env_mat+20], eax;
+
+
+	_asm mov restore_env, 1
+	_asm mov edx, [pDevice];
+	_asm push p_env_mat;
+	_asm push D3DTS_TEXTURE0;
+	_asm push edx;
+	_asm mov eax, [edx];
+	_asm call dword ptr[eax + 0x000000B0];
+
+	_asm mov edx, [pDevice];
+	_asm push D3DTTFF_COUNT2;
+	_asm push D3DTSS_TEXTURETRANSFORMFLAGS;
+	_asm push 0;
+	_asm push edx;
+	_asm mov eax, [edx];
+	_asm call dword ptr[eax + 0x0000010C]
+
+	_asm mov edx, [pDevice];
+	_asm push D3DTSS_TCI_CAMERASPACEREFLECTIONVECTOR | 0;
+	_asm push D3DTSS_TEXCOORDINDEX
+	_asm push 0;
+	_asm push edx;
+	_asm mov eax, [edx];
+	_asm call dword ptr[eax + 0x0000010C]
+		_asm jmp NO_SKIP_ENVMAP;
+SKIP_ENVMAP:
+	_asm mov restore_env, 0
+	_asm mov edx, [pDevice];
+	_asm push D3DTTFF_DISABLE;
+	_asm push D3DTSS_TEXTURETRANSFORMFLAGS;
+	_asm push 0;
+	_asm push edx;
+	_asm mov eax, [edx];
+	_asm call dword ptr[eax + 0x0000010C];
+
+	_asm mov edx, [pDevice];
+	_asm push D3DTSS_TCI_PASSTHRU | 0;
+	_asm push D3DTSS_TEXCOORDINDEX
+	_asm push 0;
+	_asm push edx;
+	_asm mov eax, [edx];
+	_asm call dword ptr[eax + 0x0000010C];
+NO_SKIP_ENVMAP:
+
 	_asm add edi, 4
 	_asm mov eax, [Gfx::oldMaterial];
 	_asm mov ebx, [edi];
@@ -414,8 +529,8 @@ ADD_TEXTURE:
 ADD_FIXEDALPHA:
 	_asm add edi, 4;
 	_asm mov eax, [edi];
-	_asm test eax, eax
-	_asm je NO_FIXEDALPHA;
+	//_asm test eax, eax
+	_asm jmp NO_FIXEDALPHA;
 	_asm mov restore, 1
 	_asm mov eax, [pDevice];
 	_asm push 0x0E;
@@ -427,7 +542,7 @@ ADD_FIXEDALPHA:
 	_asm mov ebx, D3DRS_TEXTUREFACTOR
 	_asm push ecx;
 	_asm push esi;
-	//Get old DESTBLEND
+	//Get old TEXTUREFFACTOR
 	_asm mov ecx, [ebx * 4 + 0x00971948];
 	_asm lea esi, [ebx * 4 + 0x00971C18];
 	_asm mov[esi], eax;
@@ -443,7 +558,7 @@ ADD_FIXEDALPHA:
 	_asm mov ecx, [ecx];
 	_asm push ecx;
 	_asm mov ecx, [ecx];
-	//Device->SetRenderState
+	//Device->SetRenderStageState
 	_asm call dword ptr[ecx + 0xC8];
 FIXEDBLEND_SKIP:
 	_asm pop esi;
@@ -484,7 +599,25 @@ SKIP_NULL:*/
 	_asm test al, al
 	_asm je NO_RESET;
 
+	_asm mov al, restore_env;
+	_asm test al, al;
+	_asm je NO_RESTORE_ENV
+	_asm mov edx, [pDevice];
+	_asm push D3DTTFF_DISABLE;
+	_asm push D3DTSS_TEXTURETRANSFORMFLAGS;
+	_asm push 0;
+	_asm push edx;
+	_asm mov eax, [edx];
+	_asm call dword ptr[eax + 0x0000010C];
 
+	_asm mov edx, [pDevice];
+	_asm push D3DTSS_TCI_PASSTHRU | 0;
+	_asm push D3DTSS_TEXCOORDINDEX
+	_asm push 0;
+	_asm push edx;
+	_asm mov eax, [edx];
+	_asm call dword ptr[eax + 0x0000010C];
+NO_RESTORE_ENV:
 
 	_asm mov al, restoreMaterial;
 	_asm test al, al
@@ -540,6 +673,7 @@ NO_RESTORE_MAT:
 	_asm xor eax, eax;
 	_asm mov restoreMaterial, al;
 	_asm mov reset, al;
+	_asm mov restore_env, al;
 	_asm mov bl, restore;
 	_asm test bl, bl
 	_asm je NO_RESET;
