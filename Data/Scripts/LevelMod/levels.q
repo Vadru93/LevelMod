@@ -665,7 +665,7 @@ Def_Jam = {
 	loadscr = "images\load\th1_jam.png"
 	lev_lights = SetUpSuburbiaLights
 
-	r = 165 g = 180 b = 202 a = 0 
+	r = 121 g = 118 b = 140 a = 0 
 	cnear = 12 cfar = 15000
 
 	load_script = Load_Jam
@@ -1201,7 +1201,7 @@ Def_Can = {
 	lev_amb = "ambience\th3\can"
 	loadscr = "images\loadscrn_can.png"
 	
-	r = 168 g = 176 b = 198 a = 0 
+	r = 157 g = 170 b = 190 a = 0 
 	cnear = 13 cfar = 16000
 }
 
@@ -1270,7 +1270,7 @@ Def_Sub = {
 	le_amb = "ambience\th3\sub"
 	loadscr = "images\loadscrn_sub.png"
 
-	r = 165 g = 180 b = 202 a = 0 
+	r = 121 g = 118 b = 140 a = 0 
 	cnear = 13 cfar = 13500
 }
 
@@ -1302,7 +1302,7 @@ Def_Ap = {
 	le_amb = "ambience\th3\ap"
 	loadscr = "images\loadscrn_ap.png"
 
-	r = 151 g = 180 b = 214 a = 0 
+	r = 134 g = 168 b = 190 a = 0 
 	cnear = 13 
 	cfar = 20000
 }
@@ -1325,10 +1325,10 @@ Def_Trn = {
 	th4_level regular_level NoCareer OnlineModes
 
 	lev_bsp = "levels_th4\Trn\Trn.bsp" 
-	lev_sky = "levels_th4\Trn\Sch_sky.bsp" 
+	lev_sky = "levels_th4\Trn\Trn_sky.bsp" 
 	lev_qb = "levels_th4\Trn\Trn.qb" 
 	lev_amb = "ambience\thps4\Trn"
-	loadscr = "images\load\th4_trn.png"
+	loadscr = "images\load\th4_mot.png"
 
 	r = 179 g = 184 b = 192 a = 0 
 	cnear = 12 cfar = 20000
@@ -1337,10 +1337,7 @@ Def_Trn = {
 } 
 
 SCRIPT Load_Trn
-	AddMusicTrack "ambience\thps4\trn"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "Levels_Th4\Trn\Trn.bsp" lev_sky = "Levels_Th4\Trn\Trn_Sky.bsp" lev_qb = "levels_TH4\Trn\Trn.qb" loadscr = "images\load\th4_mot.png"
-	PrepareLevelFog r = 179 g = 184 b = 192 a = 0 cnear = 12 cfar = 15000
+	Load_Level_Func { Def_Trn }
 ENDSCRIPT
 
 //THPS4 COLLEGE
@@ -1359,7 +1356,7 @@ Def_Sch = {
 	lev_amb = "ambience\thps4\Sch"
 	loadscr = "images\load\th4_col.png"
 
-	r = 179 g = 184 b = 192 a = 0 
+	r = 140 g = 168 b = 228 a = 0 
 	cnear = 12 cfar = 20000
 
 	load_script = Load_Sch
@@ -1437,7 +1434,7 @@ Def_Kon = {
 	lev_amb = "ambience\thps4\Kon"
 	loadscr = "images\load\th4_Kon.png"
 
-	r = 165 g = 180 b = 202 a = 0 
+	r = 137 g = 163 b = 186 a = 0 
 	cnear = 12 cfar = 80000
 
 	load_script = Load_Kon
