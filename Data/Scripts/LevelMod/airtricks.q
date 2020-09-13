@@ -859,9 +859,11 @@ ExtraOneFootTail = [ { EXTRA_GRAB Params = { TrickDef_OneFootTail EXTRA_TRICK } 
 TrickDef_OneFootTail = { 
 	Name = 'One Foot Tailgrab' 
 	Score = 500 
-	Anim = KickflipOneFootTail_Range 
+	InitBackwards
+	Anim = KickflipOneFootTail_Out 
 	Idle = KickflipOneFootTail_Range 
 	OutAnim = KickflipOneFootTail_Out 
+	Speed = 0.8
 }
 
 
@@ -1192,12 +1194,16 @@ script GrabTrick Speed = 1.0 x = -180 Duration = 1.0 GrabTweak = GRABTWEAK_MEDIU
 	ClearExtraGrindTrick
 	BailOn
 	
-	if GotParam IsExtra
-		PlayAnim Anim = <Anim> BlendPeriod = 0.3 From = Current to = End Speed = <Speed>
-	else
-		PlayAnim Anim = <Anim> BlendPeriod = 0.3 Speed = <Speed>
-	endif
-	
+	IF GotParam InitBackwards
+		PlayAnim Anim = <Anim> Backwards BlendPeriod = 0.3 Speed = <Speed>
+	ELSE
+		if GotParam IsExtra
+			PlayAnim Anim = <Anim> BlendPeriod = 0.3 From = Current to = End Speed = <Speed>
+		else
+			PlayAnim Anim = <Anim> BlendPeriod = 0.3 Speed = <Speed>
+		endif
+	ENDIF
+
 	if AnimEquals DarkJedi_init
 		SpawnSkaterScript MaulSFX
 	endif
