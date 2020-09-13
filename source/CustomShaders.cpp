@@ -96,9 +96,9 @@ void Mesh::AddShader(ShaderObject* shader, DWORD matIndex)
 	if (shader->env_tiling[0])
 	{
 		char msg[256] = "";
-		sprintf(msg, "MatSplit %p Tedxture %s\n%s\n", this, pTexName, this->sector ? FindChecksumName(this->sector->name) : "No SuperSector");
-		MessageBox(0, msg, "EnvMap", 0);
-		*(DWORD*)pVertexShader = 0x152;
+		sprintf(msg, "MatSplit %p Tedxture %s\n%s %X\n", this, pTexName, this->sector ? FindChecksumName(this->sector->name) : "No SuperSector", *(DWORD*)pVertexShader);
+		//MessageBox(0, msg, "EnvMap", 0);
+		*(DWORD*)pVertexShader = 0x252;
 	}
 
 
