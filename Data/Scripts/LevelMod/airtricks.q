@@ -394,9 +394,11 @@ TrickDef_360ShoveIt = {
 	Anim = _360ShoveIt 
 	Nollie = Nollie360ShoveIt
 	ExtraTricks = Extra540ShoveIt 
+	NewExtraTricks = NewExtra540ShoveIt 
 }
 
 Extra540ShoveIt = [ { EXTRA_FLIP Params = { TrickDef_540ShoveIt EXTRA_TRICK } } ]
+NewExtra540ShoveIt = [ { EXTRA_FLIP Params = { TrickDef_540ShoveIt EXTRA_TRICK Speed = 1.3 Score = 700 } } ]
 
 TrickDef_540ShoveIt = {
 	Name = '540 Shove-It' 
@@ -429,9 +431,11 @@ TrickDef_FS360ShoveIt = {
 	Score = 500 
 	Anim = FS360ShoveIt 
 	ExtraTricks = ExtraFS540ShoveIt
+	NewExtraTricks = NewExtraFS540ShoveIt
 }
 
 ExtraFS540ShoveIt = [ { EXTRA_FLIP Params = { TrickDef_FS540ShoveIt EXTRA_TRICK } } ]
+NewExtraFS540ShoveIt = [ { EXTRA_FLIP Params = { TrickDef_FS540ShoveIt EXTRA_TRICK Speed = 1.3 Score = 700 } } ]
 
 TrickDef_FS540ShoveIt = {
 	Name = '540 FS Shove-It'
@@ -855,9 +859,11 @@ ExtraOneFootTail = [ { EXTRA_GRAB Params = { TrickDef_OneFootTail EXTRA_TRICK } 
 TrickDef_OneFootTail = { 
 	Name = 'One Foot Tailgrab' 
 	Score = 500 
-	Anim = KickflipOneFootTail_Range 
+	InitBackwards
+	Anim = KickflipOneFootTail_Out 
 	Idle = KickflipOneFootTail_Range 
 	OutAnim = KickflipOneFootTail_Out 
+	Speed = 0.8
 }
 
 
@@ -1188,12 +1194,16 @@ script GrabTrick Speed = 1.0 x = -180 Duration = 1.0 GrabTweak = GRABTWEAK_MEDIU
 	ClearExtraGrindTrick
 	BailOn
 	
-	if GotParam IsExtra
-		PlayAnim Anim = <Anim> BlendPeriod = 0.3 From = Current to = End Speed = <Speed>
-	else
-		PlayAnim Anim = <Anim> BlendPeriod = 0.3 Speed = <Speed>
-	endif
-	
+	IF GotParam InitBackwards
+		PlayAnim Anim = <Anim> Backwards BlendPeriod = 0.3 Speed = <Speed>
+	ELSE
+		if GotParam IsExtra
+			PlayAnim Anim = <Anim> BlendPeriod = 0.3 From = Current to = End Speed = <Speed>
+		else
+			PlayAnim Anim = <Anim> BlendPeriod = 0.3 Speed = <Speed>
+		endif
+	ENDIF
+
 	if AnimEquals DarkJedi_init
 		SpawnSkaterScript MaulSFX
 	endif
@@ -1511,23 +1521,5 @@ script Airtricks_HoldAbleFliptrick HoldSpeed = 1.0
 		
 		//play the remaining anim
 		PlayAnim Anim=<Anim> From=Current 
-		
-		
-		//not sure if we really need it here, as we're doing this in fliptrick anyways
-		
-		If GotParam BoardRotate	
-			BlendperiodOut 0
-			BoardRotateAfter
-		endif
-		
-		If GotParam RotateAfter
-			BlendperiodOut 0
-			RotateAfter
-		endif
-		
-		If GotParam FlipAfter
-			BlendperiodOut 0	
-			FlipAfter
-		endif		
-		
+
 endscript
