@@ -1,4 +1,87 @@
 
+//Options in this list will get added autmatically
+//These options will override the original option
+//If no connection is found the client will use the Value parameter
+LM_HostOptions = [
+	{ name = "LM_HostOption_bAllowSpine" Value = 1 option = LM_Control_bSpine override_true }
+	{ name = "LM_HostOption_bLimitTags" Value = 0 option = LM_GameOption_bLimitTags override_false }
+	{ name = "LM_HostOption_bExtraTricks" Value = 1 option = LM_Control_bExtraTricks override_true }
+	{ name = "LM_HostOption_bWalliePlant" Value = 1 option = LM_Control_bWalliePlant override_true }
+	{ name = "LM_HostOption_bWallplant" Value = 1 option = LM_Control_bWallplant override_true }
+	{ name = "LM_HostOption_b251Patch" Value = 1 option = LM_GameOption_b251Patch override_true }
+	//This would be an option that's nice to have in tournaments
+	//Since in pro torunaments auto-kick off is disallowed, because it gives you speed adventage
+	{ name = "LM_HostOption_bAllowAKOFF" Value = 1 }
+]
+
+BlendModes = [
+    //Oringial th4+ blendmodes, in order 0-15
+	
+	// ( 0 - 0 ) * 0 + Src
+	//DIFFUSE = { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_ONE dest_blend = D3DBLEND_ZERO }
+	
+	// ( Src - 0 ) * Src + Dst
+	//ADD = { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_SRCALPHA dest_blend = D3DBLEND_ONE }
+	
+	// ( Src - 0 ) * Fixed + Dst
+	//ADD_FIXED = { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_CONSTANTALPHA dest_blend = D3DBLEND_ONE }
+	
+    // ( 0 - Src ) * Src + Dst
+	//SUBTRACT = { blend_op = D3DBLENDOP_REVSUBTRACT src_blend = D3DBLEND_SRCALPHA dest_blend = D3DBLEND_ONE }
+	
+	// ( 0 - Src ) * Fixed + Dst
+	//SUB_FIXED = { blend_op = D3DBLENDOP_REVSUBTRACT src_blend = D3DBLEND_CONSTANTALPHA dest_blend = D3DBLEND_ONE }
+	
+	// ( Src - Dst ) * Src + Dst	
+	//BLEND = { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_SRCALPHA dest_blend = D3DBLEND_INVSRCALPHA }
+	
+	// ( Src - Dst ) * Fixed + Dst
+	//BLEND_FIXED= { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_CONSTANTALPHA dest_blend = D3DBLEND_INVCONSTANTALPHA }
+	
+	// ( Dst - 0 ) * Src + 0
+	//MODULATE = { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_ZERO dest_blend = D3DBLEND_SRCALPHA }
+	
+	// ( Dst - 0 ) * Fixed + 0
+	//MODULATE_FIXED = { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_ZERO dest_blend = D3DBLEND_CONSTANTALPHA }
+	
+	// ( Dst - 0 ) * Src + Dst
+	//BRIGHTEN = { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_DESTCOLOR dest_blend = D3DBLEND_ONE }
+	
+	// ( Dst - 0 ) * Fixed + Dst
+	//BRIGHTEN_FIXED = { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_DESTCOLOR dest_blend = D3DBLEND_CONSTANTALPHA }
+	
+	// Treat as diffuse for now.
+	//GLOSS_MAP = { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_ONE dest_blend = D3DBLEND_ZERO }
+	
+	// ( Dst - 0 ) * Src(col) + 0 - specially for the shadow.
+	//MODULATE_COLOR = { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_ZERO dest_blend = D3DBLEND_SRCCOLOR }
+	
+	// Meaningless unless destination alpha is enabled.
+	//BLEND_PREVIOUS_MASK = { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_DESTALPHA dest_blend = D3DBLEND_INVDESTALPHA }
+				
+	// Meaningless unless destination alpha is enabled.
+    //BLEND_INVERSE_PREVIOUS_MASK = { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_INVDESTALPHA dest_blend = D3DBLEND_DESTALPHA }
+							
+	//ONE_INV_SRC_ALPHA = { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_ONE dest_blend = D3DBLEND_INVSRCALPHA }
+	
+	
+	//TODO Add your own blendmodes here
+	//Engine will automatically assign a value based on the index in the list
+	//Starting from value 16 since the first 15 values are reserved for th4+ blendmodes
+	//To set a custom vertex- or pixelshader use vertex_shader = "filename" and/or pixel_shader = "filename"
+	
+	//For example WATEREFFECT = { blendmode = BLEND vertex_shader = "WaterEffect.vsh" pixel_shader = "WaterEffect.psh" }
+	//Now WATEREFFECT will have blendmode 16 and I was thinking to use that "000000000" part of the texture like I had idea before
+	//But since the game don't read this data, I will just read it directly from the file and assign accordingly
+	//So 4 bytes will be blendmode and 4 bytes will be flags, like mipmaps animation, env map, etc
+	//I also had the idea to use material extension, but not sure how game will like this, guess we can try and see
+	
+	
+]
+
+
+
+
 //I was thinking if we have a list of options
 //Then we can have things like UpdateOn = ChangeLevel/StartGame etc
 //Then in ChangeLevel function we can have ForEachIn and update grass etc

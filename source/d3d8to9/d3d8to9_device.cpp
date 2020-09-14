@@ -1034,6 +1034,10 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::GetTextureStageState(DWORD Stage, D3D
 }
 HRESULT STDMETHODCALLTYPE Direct3DDevice8::SetTextureStageState(DWORD Stage, D3DTEXTURESTAGESTATETYPE Type, DWORD Value)
 {
+	if (Type == D3DTSS_TEXCOORDINDEX)
+	{
+		MessageBox(0, "TEXOOOCRDINDX", "", 0);
+	}
 	switch (static_cast<DWORD>(Type))
 	{
 		case D3DTSS_ADDRESSU:
@@ -1673,6 +1677,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::DeleteVertexShader(DWORD Handle)
 }
 HRESULT STDMETHODCALLTYPE Direct3DDevice8::SetVertexShaderConstant(DWORD Register, const void *pConstantData, DWORD ConstantCount)
 {
+	MessageBox(0, "VERTEXSHADERCONSTANT", "VERTEXSHADERCONSTANT", 0);
 	return ProxyInterface->SetVertexShaderConstantF(Register, static_cast<const float *>(pConstantData), ConstantCount);
 }
 HRESULT STDMETHODCALLTYPE Direct3DDevice8::GetVertexShaderConstant(DWORD Register, void *pConstantData, DWORD ConstantCount)
