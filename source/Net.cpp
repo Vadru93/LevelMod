@@ -1,18 +1,31 @@
 #include "pch.h"
 #include "Net.h"
+#include "Settings.h"
+
+using namespace LevelModSettings;
+extern std::map<int, OverrideOption> overrideOptions;
 
 
 namespace Network
 {
 	struct HostOptionData
 	{
-		DWORD name;
-		DWORD value;
+		int option;
+		int value;
 	};
 
-	void HostOption_Changed(MsgHandlerContext* context)
+	int HostOption_Changed(MsgHandlerContext* context)
 	{
 		HostOptionData* data = (HostOptionData*)context->pData;
+		auto it = LevelModSettings::overrideOptions.find(data->option);
+		if (it != LevelModSettings::overrideOptions.end())
+		{
+			it->second.value = data->value;
+		}
+		else
+			_printf("Couldn't find HostOption %s...\n", data->option);
+
+		return HANDLER_CONTINUE;
 	}
 
 
@@ -24,7 +37,7 @@ namespace Network
 
 		//When host change an option that is linked to an override object the host will send out a message
 		//When the client gets the message HostOption_Changed callback will be called
-		AddMessage(MSG_ID_LM_HOSTOPTION_CHANGED, HostOption_Changed, LATE, pNet);
+		AddMessage(MSG_ID_LM_HOSTOPTION_CHANGED, HostOption_Changed, HANDLER_LATE, pNet);
 	}
 
 	//Messages sent by clients

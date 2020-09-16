@@ -33,6 +33,21 @@ namespace LevelModSettings
 	void ToggleSoundFix();
 
 	void FixTele();
+
+	struct OverrideOption
+	{
+		enum class Type : unsigned char
+		{
+			OVERRIDE_TRUE,
+			OVERRIDE_FALSE,
+			OVERRIDE,
+		};
+		Type type;
+		int value;
+		
+	};
+
+	extern std::map<int, OverrideOption> overrideOptions;
 };
 
 void SetAirTrickSpeed(DWORD speed);

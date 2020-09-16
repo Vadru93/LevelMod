@@ -7,15 +7,17 @@
 #include "IniWriter.h"
 #include "Node.h"
 #include "String.h"
+#include "Net.h"
 
 #define NO_EXTRA_INCLUDE
 #include "Extension.h"
 #include "Extension.h"
 
+using namespace LevelModSettings;
+
 
 extern bool init3, debugMode, hooked;
 extern std::map<int, int> options;
-extern std::map<int, int> overrideOptions;
 
 extern CIniWriter* OptionWriter;
 extern CIniReader* OptionReader;
@@ -39,6 +41,7 @@ bool LevelModSettings::TeleFix = true;
 bool LevelModSettings::grafCounter = true;
 DWORD LevelModSettings::MemorySize = 0xFA000;
 bool LevelModSettings::HookedControls = false;
+std::map<int, OverrideOption> LevelModSettings::overrideOptions;
 
 
 int LevelModSettings::SpineButton = 7;
@@ -158,9 +161,29 @@ bool IsOptionOn(CStruct* pStruct, CScript* pScript)
 	{
 		if (header->Type == QBKeyHeader::LOCAL)
 		{
-			std::map<int, int>::iterator it = options.find(header->Data);
-			if (it != options.end())
-				return it->second;
+			auto override = overrideOptions.find(header->Data);
+
+			if (override == overrideOptions.end() || //Not an override option
+				(override->second.type == OverrideOption::Type::OVERRIDE_TRUE && override->second.value == 0) || //Only true is overriden
+				(override->second.type == OverrideOption::Type::OVERRIDE_FALSE && override->second.value != 0)) //Only false is overriden
+			{
+				auto it = options.find(header->Data);
+				if (it != options.end())
+				{
+					//Option is not overriden, so return original value
+					return it->second;
+				}
+				else
+				{
+					//Should not happen
+					_printf(__FUNCTION__ " Couldn't find option %s\nRemember to add the option the the list\nCheck settings.q for more info\n", header->Data);
+				}
+			}
+			else
+			{
+				return override->second.value;//Option is overriden, so return the overriden value
+			}
+
 		}
 		header = header->NextHeader;
 	}
@@ -170,20 +193,7 @@ bool IsOptionOn(CStruct* pStruct, CScript* pScript)
 
 bool IsOptionOff(CStruct* pStruct, CScript* pScript)
 {
-	CStructHeader* header = pStruct->head;
-
-	while (header)
-	{
-		if (header->Type == QBKeyHeader::LOCAL)
-		{
-			std::map<int, int>::iterator it = options.find(header->Data);
-			if (it != options.end())
-				return !it->second;
-		}
-		header = header->NextHeader;
-	}
-	_printf(__FUNCTION__" No Param?\n");
-	return false;
+	return !IsOptionOn(pStruct, pScript);
 }
 
 void SetAirTrickSpeed(DWORD speed)
