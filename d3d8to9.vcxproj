@@ -137,6 +137,7 @@
     <ClCompile Include="source\math.cpp" />
     <ClCompile Include="source\Memory.cpp" />
     <ClCompile Include="source\Model.cpp" />
+    <ClCompile Include="source\Net.cpp" />
     <ClCompile Include="source\Node.cpp" />
     <ClCompile Include="source\Observe.cpp" />
     <ClCompile Include="source\pch.cpp">
@@ -176,6 +177,7 @@
     <ClInclude Include="source\Memory.h" />
     <ClInclude Include="source\Mesh.h" />
     <ClInclude Include="source\Model.h" />
+    <ClInclude Include="source\Net.h" />
     <ClInclude Include="source\Node.h" />
     <ClInclude Include="source\Observe.h" />
     <ClInclude Include="source\pch.h" />

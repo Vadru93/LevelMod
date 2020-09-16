@@ -138,6 +138,9 @@
     <ClCompile Include="source\CustomShaders.cpp">
       <Filter>LevelMod\Source</Filter>
     </ClCompile>
+    <ClCompile Include="source\Net.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="res\resource.h">
@@ -243,6 +246,9 @@
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
     <ClInclude Include="source\CustomShaders.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Net.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
   </ItemGroup>

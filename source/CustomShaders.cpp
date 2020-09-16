@@ -287,9 +287,10 @@ __declspec(naked) void __cdecl SetVertexShader_naked()
 
 	static D3DMATRIX* p_env_mat  = &env_mat;
 
-	//Store old esi value onto the stack
+	//Store esi and edi'
 	_asm push edi;
 	_asm push esi;
+	//loadedShaders is false until shaders are fully loaded.
 	_asm mov al, loadedShaders;
 	_asm test al, al;
 	_asm je SKIP;
@@ -309,18 +310,18 @@ __declspec(naked) void __cdecl SetVertexShader_naked()
 	_asm test esi, esi;
 	_asm je SKIP;
 
-	//Custom shader byte is is now 17 bytes from here
+	//Custom shader pointer is is now 240 bytes from here
 	_asm add esi, 0xF0;
 	_asm mov edi, [esi];
 
-	//Check if custom shader byte is on
+	//Check if pointer is NULL
 	_asm test edi, edi
 	_asm je SKIP;
 
 	//Tell the engine we wanna reset textures next call
 	reset = true;
 
-	//Store ecx value, probably not needed?
+	//Store ecx, probably not needed?
 	_asm push ecx;
 
 	//Get old pixelshader
@@ -331,7 +332,9 @@ __declspec(naked) void __cdecl SetVertexShader_naked()
 
 	//Compare old shader to new shader
 	//_asm cmp esi, ecx;
-	//If same, then skip shader
+	//If same, then skip pixelshader
+	//je SKIP_SHADER
+	//For now always skip pixelshader
 	_asm jmp SKIP_SHADER;
 
 	//Move the shader into old location
@@ -350,7 +353,7 @@ __declspec(naked) void __cdecl SetVertexShader_naked()
 SKIP_SHADER:
 
 	//Now we need to set BlendModes
-	//Store values on stack, maybe not needed?
+	//Store ebx
 	_asm push ebx;
 
 
@@ -358,7 +361,7 @@ SKIP_SHADER:
 	_asm mov eax, [edi];
 	_asm add edi, 4
 	_asm test eax, eax;
-	_asm je SKIP_ENVMAP;
+	_asm je DISABLE_ENVMAP;
 	_asm mov [env_mat], eax
 	_asm mov eax, [edi];
 	_asm mov[env_mat+20], eax;
@@ -381,14 +384,14 @@ SKIP_SHADER:
 	_asm call dword ptr[eax + 0x0000010C]
 
 	_asm mov edx, [pDevice];
-	_asm push D3DTSS_TCI_CAMERASPACEREFLECTIONVECTOR | 0;
+	_asm push D3DTSS_TCI_CAMERASPACEREFLECTIONVECTOR;
 	_asm push D3DTSS_TEXCOORDINDEX
 	_asm push 0;
 	_asm push edx;
 	_asm mov eax, [edx];
 	_asm call dword ptr[eax + 0x0000010C]
-		_asm jmp NO_SKIP_ENVMAP;
-SKIP_ENVMAP:
+	_asm jmp SKIP_DISABLE_ENVMAP;
+DISABLE_ENVMAP:
 	_asm mov restore_env, 0
 	_asm mov edx, [pDevice];
 	_asm push D3DTTFF_DISABLE;
@@ -399,13 +402,13 @@ SKIP_ENVMAP:
 	_asm call dword ptr[eax + 0x0000010C];
 
 	_asm mov edx, [pDevice];
-	_asm push D3DTSS_TCI_PASSTHRU | 0;
+	_asm push D3DTSS_TCI_PASSTHRU;
 	_asm push D3DTSS_TEXCOORDINDEX
 	_asm push 0;
 	_asm push edx;
 	_asm mov eax, [edx];
 	_asm call dword ptr[eax + 0x0000010C];
-NO_SKIP_ENVMAP:
+SKIP_DISABLE_ENVMAP:
 
 	_asm add edi, 4
 	_asm mov eax, [Gfx::oldMaterial];
@@ -611,7 +614,7 @@ SKIP_NULL:*/
 	_asm call dword ptr[eax + 0x0000010C];
 
 	_asm mov edx, [pDevice];
-	_asm push D3DTSS_TCI_PASSTHRU | 0;
+	_asm push D3DTSS_TCI_PASSTHRU;
 	_asm push D3DTSS_TEXCOORDINDEX
 	_asm push 0;
 	_asm push edx;
