@@ -27,7 +27,7 @@ bool CXBOXController::IsConnected()
     // Get the state
     DWORD Result = XInputGetState(_controllerNum, &_controllerState);
 
-    if(Result == ERROR_SUCCESS)
+    if (Result == ERROR_SUCCESS)
     {
         return true;
     }

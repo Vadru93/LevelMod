@@ -4,46 +4,46 @@
 namespace String
 {
 
-	extern DWORD numLevelStrings;
-	extern char LevelHeapBottom[];
-	extern char* LevelHeapTop;
+    extern DWORD numLevelStrings;
+    extern char LevelHeapBottom[];
+    extern char* LevelHeapTop;
 
-	struct PermanentString
-	{
-		DWORD checksum;
-		char* pStr;
-	};
-
-
-	enum class STRING_HEAP : bool
-	{
-		PERMANENT = true,
-		TEMP = false
-	};
-
-	enum class HEAP
-	{
-		ORIGINAL,
-		NEW_NOEXTRA,
-		NEW_EXTRA,
-		LEVEL
-	};
-
-	DWORD GetNumStringsTotal();
-	DWORD GetNumMaxStringsTotal();
-	DWORD GetNumStrings(HEAP heap);
-	DWORD GetHeapSize(HEAP heap);
-	DWORD GeHeapMaxSize(HEAP heap);
+    struct PermanentString
+    {
+        DWORD checksum;
+        char* pStr;
+    };
 
 
-	char* AddString(DWORD checksum, const char* str);
-	char* AddString(const char* str);
-	char* AddLevelString(const char* str);
+    enum class STRING_HEAP : bool
+    {
+        PERMANENT = true,
+        TEMP = false
+    };
 
-	void RemoveLevelStrings();
+    enum class HEAP
+    {
+        ORIGINAL,
+        NEW_NOEXTRA,
+        NEW_EXTRA,
+        LEVEL
+    };
 
-	unsigned long CaseSenseChecksum(const char* str);
+    DWORD GetNumStringsTotal();
+    DWORD GetNumMaxStringsTotal();
+    DWORD GetNumStrings(HEAP heap);
+    DWORD GetHeapSize(HEAP heap);
+    DWORD GeHeapMaxSize(HEAP heap);
 
-	char* CreateString(const char* str, STRING_HEAP heap = STRING_HEAP::TEMP);
+
+    char* AddString(DWORD checksum, const char* str);
+    char* AddString(const char* str);
+    char* AddLevelString(const char* str);
+
+    void RemoveLevelStrings();
+
+    unsigned long CaseSenseChecksum(const char* str);
+
+    char* CreateString(const char* str, STRING_HEAP heap = STRING_HEAP::TEMP);
 };
 #endif

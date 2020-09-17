@@ -9,62 +9,62 @@
 //--------Spine and Acid--------
 enum TransferType
 {
-	ACID, BANK, SPINE
+    ACID, BANK, SPINE
 };
 namespace Slerp
 {
-	extern bool transfer;
-	extern bool landing;
-	extern bool m_began_frame_in_transfer;
-	extern bool slerping;
-	extern Matrix start;
-	extern Matrix end;
-	extern Matrix old;
-	extern float duration;
-	extern float radians;
-	extern float timer;
-	extern D3DXVECTOR3 axis;
-	extern Vertex vel;
-	extern Vertex facing;
-	extern float height;
-	extern Vertex goal;
-	//
-	extern Vertex last;
-	extern float lerp;
-	extern bool inAcid;
-	extern bool vert;
-	extern bool addedvel;
-	extern bool landed;
-	extern bool OnGround;
-	extern bool OnGrind;
-	extern bool done;
-	extern bool trying;
-	extern float value;
-	extern bool wallplant;
-	extern DWORD m_last_wallplant_time_stamp;
-	extern Vertex realVelocity;
-	extern TransferType type;
-	extern Vertex targetNormal;
-	extern D3DXVECTOR4 target_normal;
+    extern bool transfer;
+    extern bool landing;
+    extern bool m_began_frame_in_transfer;
+    extern bool slerping;
+    extern Matrix start;
+    extern Matrix end;
+    extern Matrix old;
+    extern float duration;
+    extern float radians;
+    extern float timer;
+    extern D3DXVECTOR3 axis;
+    extern Vertex vel;
+    extern Vertex facing;
+    extern float height;
+    extern Vertex goal;
+    //
+    extern Vertex last;
+    extern float lerp;
+    extern bool inAcid;
+    extern bool vert;
+    extern bool addedvel;
+    extern bool landed;
+    extern bool OnGround;
+    extern bool OnGrind;
+    extern bool done;
+    extern bool trying;
+    extern float value;
+    extern bool wallplant;
+    extern DWORD m_last_wallplant_time_stamp;
+    extern Vertex realVelocity;
+    extern TransferType type;
+    extern Vertex targetNormal;
+    extern D3DXVECTOR4 target_normal;
 
-	extern float speed;
+    extern float speed;
 };
 //--------Spine and Acid--------
 
 //--------XINPUT--------
 namespace XINPUT
 {
-	extern bool vibrating;
-	extern XINPUT_VIBRATION vibration;
-	extern DWORD vibrationFrames;
-	extern CXBOXController* Player1;
+    extern bool vibrating;
+    extern XINPUT_VIBRATION vibration;
+    extern DWORD vibrationFrames;
+    extern CXBOXController* Player1;
 };
 //--------XINPUT--------
 
 //--------Game States--------
 namespace GameState
 {
-	EXTERN extern bool GotSuperSectors;
+    EXTERN extern bool GotSuperSectors;
 };
 //--------Game States--------
 

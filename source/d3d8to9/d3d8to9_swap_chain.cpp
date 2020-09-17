@@ -6,79 +6,79 @@
 #define NO_DEFINES
 #define PCH_H
 
-//#include "..\pch.h"
+ //#include "..\pch.h"
 #include "d3d8to9.hpp"
 
 // IDirect3DSwapChain8
-Direct3DSwapChain8::Direct3DSwapChain8(Direct3DDevice8 *Device, IDirect3DSwapChain9 *ProxyInterface) :
-	Device(Device), ProxyInterface(ProxyInterface)
+Direct3DSwapChain8::Direct3DSwapChain8(Direct3DDevice8* Device, IDirect3DSwapChain9* ProxyInterface) :
+    Device(Device), ProxyInterface(ProxyInterface)
 {
-	Device->ProxyAddressLookupTable->SaveAddress(this, ProxyInterface);
+    Device->ProxyAddressLookupTable->SaveAddress(this, ProxyInterface);
 }
 Direct3DSwapChain8::~Direct3DSwapChain8()
 {
 }
 
-HRESULT STDMETHODCALLTYPE Direct3DSwapChain8::QueryInterface(REFIID riid, void **ppvObj)
+HRESULT STDMETHODCALLTYPE Direct3DSwapChain8::QueryInterface(REFIID riid, void** ppvObj)
 {
-	if (ppvObj == nullptr)
-	{
-		return E_POINTER;
-	}
+    if (ppvObj == nullptr)
+    {
+        return E_POINTER;
+    }
 
-	if (riid == __uuidof(this) ||
-		riid == __uuidof(IUnknown))
-	{
-		AddRef();
+    if (riid == __uuidof(this) ||
+        riid == __uuidof(IUnknown))
+    {
+        AddRef();
 
-		*ppvObj = this;
+        *ppvObj = this;
 
-		return S_OK;
-	}
+        return S_OK;
+    }
 
-	HRESULT hr = ProxyInterface->QueryInterface(ConvertREFIID(riid), ppvObj);
+    HRESULT hr = ProxyInterface->QueryInterface(ConvertREFIID(riid), ppvObj);
 
-	if (SUCCEEDED(hr))
-	{
-		genericQueryInterface(riid, ppvObj, Device);
-	}
+    if (SUCCEEDED(hr))
+    {
+        genericQueryInterface(riid, ppvObj, Device);
+    }
 
-	return hr;
+    return hr;
 }
 ULONG STDMETHODCALLTYPE Direct3DSwapChain8::AddRef()
 {
-	return ProxyInterface->AddRef();
+    return ProxyInterface->AddRef();
 }
 ULONG STDMETHODCALLTYPE Direct3DSwapChain8::Release()
 {
-	return ProxyInterface->Release();
+    return ProxyInterface->Release();
 }
 
-HRESULT STDMETHODCALLTYPE Direct3DSwapChain8::Present(const RECT *pSourceRect, const RECT *pDestRect, HWND hDestWindowOverride, const RGNDATA *pDirtyRegion)
+HRESULT STDMETHODCALLTYPE Direct3DSwapChain8::Present(const RECT* pSourceRect, const RECT* pDestRect, HWND hDestWindowOverride, const RGNDATA* pDirtyRegion)
 {
-	UNREFERENCED_PARAMETER(pDirtyRegion);
+    UNREFERENCED_PARAMETER(pDirtyRegion);
 
-	return ProxyInterface->Present(pSourceRect, pDestRect, hDestWindowOverride, nullptr, 0);
+    return ProxyInterface->Present(pSourceRect, pDestRect, hDestWindowOverride, nullptr, 0);
 }
-HRESULT STDMETHODCALLTYPE Direct3DSwapChain8::GetBackBuffer(UINT iBackBuffer, D3DBACKBUFFER_TYPE Type, Direct3DSurface8 **ppBackBuffer)
+HRESULT STDMETHODCALLTYPE Direct3DSwapChain8::GetBackBuffer(UINT iBackBuffer, D3DBACKBUFFER_TYPE Type, Direct3DSurface8** ppBackBuffer)
 {
-	if (ppBackBuffer == nullptr)
-	{
-		return D3DERR_INVALIDCALL;
-	}
+    if (ppBackBuffer == nullptr)
+    {
+        return D3DERR_INVALIDCALL;
+    }
 
-	*ppBackBuffer = nullptr;
+    *ppBackBuffer = nullptr;
 
-	IDirect3DSurface9 *SurfaceInterface = nullptr;
+    IDirect3DSurface9* SurfaceInterface = nullptr;
 
-	const HRESULT hr = ProxyInterface->GetBackBuffer(iBackBuffer, Type, &SurfaceInterface);
+    const HRESULT hr = ProxyInterface->GetBackBuffer(iBackBuffer, Type, &SurfaceInterface);
 
-	if (FAILED(hr))
-	{
-		return hr;
-	}
+    if (FAILED(hr))
+    {
+        return hr;
+    }
 
-	*ppBackBuffer = Device->ProxyAddressLookupTable->FindAddress<Direct3DSurface8>(SurfaceInterface);
+    *ppBackBuffer = Device->ProxyAddressLookupTable->FindAddress<Direct3DSurface8>(SurfaceInterface);
 
-	return D3D_OK;
+    return D3D_OK;
 }

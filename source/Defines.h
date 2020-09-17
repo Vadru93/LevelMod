@@ -16,18 +16,18 @@ bool EXTERN InvalidReadPtr(const void* const __restrict ptr);
 
 enum enum_matrix
 {
-	RIGHT=0,
-	UP,
-	AT,
-	POS,
+    RIGHT = 0,
+    UP,
+    AT,
+    POS,
 };
 
 enum enum_vertex
 {
-	X=0,
-	Y,
-	Z,
-	W
+    X = 0,
+    Y,
+    Z,
+    W
 };
 
 #define _T(x) x

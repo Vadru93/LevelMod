@@ -6,22 +6,22 @@
 
 struct Model
 {
-	DWORD** memberFunctions;
-	DWORD pNULL;
-	DWORD unk1;//0x14
-	DWORD unk2;//0x2
-	DWORD pNULL2;
-	DWORD frameCount;
-	Vertex pos;
-	BYTE unk3[0x18];
-	DWORD nodeIndex;
-	BYTE unk4[0x314];
-	D3DXMATRIX rotation;
+    DWORD** memberFunctions;
+    DWORD pNULL;
+    DWORD unk1;//0x14
+    DWORD unk2;//0x2
+    DWORD pNULL2;
+    DWORD frameCount;
+    Vertex pos;
+    BYTE unk3[0x18];
+    DWORD nodeIndex;
+    BYTE unk4[0x314];
+    D3DXMATRIX rotation;
 
-	DWORD GetNodeIndex()
-	{
-		return nodeIndex;
-	}
+    DWORD GetNodeIndex()
+    {
+        return nodeIndex;
+    }
 
 };
 

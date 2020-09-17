@@ -33,18 +33,18 @@ inline void SetElementText(int id, char* text);
 //Menu Element
 struct Element
 {
-	BYTE unk[256];//not yet disambled
-	typedef Element* (__thiscall* const pGetElement)(Element* pThis, DWORD name, DWORD id);
+    BYTE unk[256];//not yet disambled
+    typedef Element* (__thiscall* const pGetElement)(Element* pThis, DWORD name, DWORD id);
 
-	Element* GetElement(DWORD name, DWORD id = 1)
-	{
-		return pGetElement(0x004D23B0)(this, name, id);
-	}
-	DWORD GetValue()
-	{
-		typedef DWORD(__thiscall* const GetElementValue)(Element* pThis);
-		return GetElementValue(0x004D54B0)(this);
-	}
+    Element* GetElement(DWORD name, DWORD id = 1)
+    {
+        return pGetElement(0x004D23B0)(this, name, id);
+    }
+    DWORD GetValue()
+    {
+        typedef DWORD(__thiscall* const GetElementValue)(Element* pThis);
+        return GetElementValue(0x004D54B0)(this);
+    }
 };
 
 DWORD GetElementSliderValue(DWORD name);

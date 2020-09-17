@@ -6,117 +6,117 @@
 #define NO_DEFINES
 #define PCH_H
 
-//#include "..\pch.h"
+ //#include "..\pch.h"
 #include "d3d8to9.hpp"
 
 // IDirect3DVertexBuffer8
-Direct3DVertexBuffer8::Direct3DVertexBuffer8(Direct3DDevice8 *Device, IDirect3DVertexBuffer9 *ProxyInterface) :
-	Device(Device), ProxyInterface(ProxyInterface)
+Direct3DVertexBuffer8::Direct3DVertexBuffer8(Direct3DDevice8* Device, IDirect3DVertexBuffer9* ProxyInterface) :
+    Device(Device), ProxyInterface(ProxyInterface)
 {
-	Device->ProxyAddressLookupTable->SaveAddress(this, ProxyInterface);
+    Device->ProxyAddressLookupTable->SaveAddress(this, ProxyInterface);
 }
 Direct3DVertexBuffer8::~Direct3DVertexBuffer8()
 {
 }
 
-HRESULT STDMETHODCALLTYPE Direct3DVertexBuffer8::QueryInterface(REFIID riid, void **ppvObj)
+HRESULT STDMETHODCALLTYPE Direct3DVertexBuffer8::QueryInterface(REFIID riid, void** ppvObj)
 {
-	if (ppvObj == nullptr)
-	{
-		return E_POINTER;
-	}
+    if (ppvObj == nullptr)
+    {
+        return E_POINTER;
+    }
 
-	if (riid == __uuidof(this) ||
-		riid == __uuidof(IUnknown) ||
-		riid == __uuidof(Direct3DResource8))
-	{
-		AddRef();
+    if (riid == __uuidof(this) ||
+        riid == __uuidof(IUnknown) ||
+        riid == __uuidof(Direct3DResource8))
+    {
+        AddRef();
 
-		*ppvObj = this;
+        *ppvObj = this;
 
-		return S_OK;
-	}
+        return S_OK;
+    }
 
-	HRESULT hr = ProxyInterface->QueryInterface(ConvertREFIID(riid), ppvObj);
+    HRESULT hr = ProxyInterface->QueryInterface(ConvertREFIID(riid), ppvObj);
 
-	if (SUCCEEDED(hr))
-	{
-		genericQueryInterface(riid, ppvObj, Device);
-	}
+    if (SUCCEEDED(hr))
+    {
+        genericQueryInterface(riid, ppvObj, Device);
+    }
 
-	return hr;
+    return hr;
 }
 ULONG STDMETHODCALLTYPE Direct3DVertexBuffer8::AddRef()
 {
-	return ProxyInterface->AddRef();
+    return ProxyInterface->AddRef();
 }
 ULONG STDMETHODCALLTYPE Direct3DVertexBuffer8::Release()
 {
-	return ProxyInterface->Release();
+    return ProxyInterface->Release();
 }
 
-HRESULT STDMETHODCALLTYPE Direct3DVertexBuffer8::GetDevice(Direct3DDevice8 **ppDevice)
+HRESULT STDMETHODCALLTYPE Direct3DVertexBuffer8::GetDevice(Direct3DDevice8** ppDevice)
 {
-	if (ppDevice == nullptr)
-	{
-		return D3DERR_INVALIDCALL;
-	}
+    if (ppDevice == nullptr)
+    {
+        return D3DERR_INVALIDCALL;
+    }
 
-	Device->AddRef();
+    Device->AddRef();
 
-	*ppDevice = Device;
+    *ppDevice = Device;
 
-	return D3D_OK;
+    return D3D_OK;
 }
-HRESULT STDMETHODCALLTYPE Direct3DVertexBuffer8::SetPrivateData(REFGUID refguid, const void *pData, DWORD SizeOfData, DWORD Flags)
+HRESULT STDMETHODCALLTYPE Direct3DVertexBuffer8::SetPrivateData(REFGUID refguid, const void* pData, DWORD SizeOfData, DWORD Flags)
 {
-	return ProxyInterface->SetPrivateData(refguid, pData, SizeOfData, Flags);
+    return ProxyInterface->SetPrivateData(refguid, pData, SizeOfData, Flags);
 }
-HRESULT STDMETHODCALLTYPE Direct3DVertexBuffer8::GetPrivateData(REFGUID refguid, void *pData, DWORD *pSizeOfData)
+HRESULT STDMETHODCALLTYPE Direct3DVertexBuffer8::GetPrivateData(REFGUID refguid, void* pData, DWORD* pSizeOfData)
 {
-	return ProxyInterface->GetPrivateData(refguid, pData, pSizeOfData);
+    return ProxyInterface->GetPrivateData(refguid, pData, pSizeOfData);
 }
 HRESULT STDMETHODCALLTYPE Direct3DVertexBuffer8::FreePrivateData(REFGUID refguid)
 {
-	return ProxyInterface->FreePrivateData(refguid);
+    return ProxyInterface->FreePrivateData(refguid);
 }
 DWORD STDMETHODCALLTYPE Direct3DVertexBuffer8::SetPriority(DWORD PriorityNew)
 {
-	return ProxyInterface->SetPriority(PriorityNew);
+    return ProxyInterface->SetPriority(PriorityNew);
 }
 DWORD STDMETHODCALLTYPE Direct3DVertexBuffer8::GetPriority()
 {
-	return ProxyInterface->GetPriority();
+    return ProxyInterface->GetPriority();
 }
 void STDMETHODCALLTYPE Direct3DVertexBuffer8::PreLoad()
 {
-	ProxyInterface->PreLoad();
+    ProxyInterface->PreLoad();
 }
 D3DRESOURCETYPE STDMETHODCALLTYPE Direct3DVertexBuffer8::GetType()
 {
-	return D3DRTYPE_VERTEXBUFFER;
+    return D3DRTYPE_VERTEXBUFFER;
 }
 
-HRESULT STDMETHODCALLTYPE Direct3DVertexBuffer8::Lock(UINT OffsetToLock, UINT SizeToLock, BYTE **ppbData, DWORD Flags)
+HRESULT STDMETHODCALLTYPE Direct3DVertexBuffer8::Lock(UINT OffsetToLock, UINT SizeToLock, BYTE** ppbData, DWORD Flags)
 {
-	if ((Flags & D3DLOCK_DISCARD) != 0)
-	{
-		D3DVERTEXBUFFER_DESC desc;
-		ProxyInterface->GetDesc(&desc);
+    if ((Flags & D3DLOCK_DISCARD) != 0)
+    {
+        D3DVERTEXBUFFER_DESC desc;
+        ProxyInterface->GetDesc(&desc);
 
-		if ((desc.Usage & D3DUSAGE_DYNAMIC) == 0 || (desc.Usage & D3DUSAGE_WRITEONLY) == 0)
-		{
-			Flags ^= D3DLOCK_DISCARD;
-		}
-	}
+        if ((desc.Usage & D3DUSAGE_DYNAMIC) == 0 || (desc.Usage & D3DUSAGE_WRITEONLY) == 0)
+        {
+            Flags ^= D3DLOCK_DISCARD;
+        }
+    }
 
-	return ProxyInterface->Lock(OffsetToLock, SizeToLock, reinterpret_cast<void **>(ppbData), Flags);
+    return ProxyInterface->Lock(OffsetToLock, SizeToLock, reinterpret_cast<void**>(ppbData), Flags);
 }
 HRESULT STDMETHODCALLTYPE Direct3DVertexBuffer8::Unlock()
 {
-	return ProxyInterface->Unlock();
+    return ProxyInterface->Unlock();
 }
-HRESULT STDMETHODCALLTYPE Direct3DVertexBuffer8::GetDesc(D3DVERTEXBUFFER_DESC *pDesc)
+HRESULT STDMETHODCALLTYPE Direct3DVertexBuffer8::GetDesc(D3DVERTEXBUFFER_DESC* pDesc)
 {
-	return ProxyInterface->GetDesc(pDesc);
+    return ProxyInterface->GetDesc(pDesc);
 }

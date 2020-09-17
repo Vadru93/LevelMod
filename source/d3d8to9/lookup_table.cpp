@@ -6,22 +6,22 @@
 #define NO_DEFINES
 #define PCH_H
 
-//#include "..\pch.h"
+ //#include "..\pch.h"
 #include "d3d8to9.hpp"
 #include <assert.h>
 
-AddressLookupTable::AddressLookupTable(Direct3DDevice8 *Device) :
-	Device(Device)
+AddressLookupTable::AddressLookupTable(Direct3DDevice8* Device) :
+    Device(Device)
 {
-	// Do nothing
+    // Do nothing
 }
 AddressLookupTable::~AddressLookupTable()
 {
-	for (const auto& cache : AddressCache)
-	{
-		for (const auto& entry : cache)
-		{
-			entry.second->DeleteMe();
-		}
-	}
+    for (const auto& cache : AddressCache)
+    {
+        for (const auto& entry : cache)
+        {
+            entry.second->DeleteMe();
+        }
+    }
 }

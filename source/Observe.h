@@ -6,99 +6,99 @@
 
 struct ObserveMode
 {
-	//PlayerInfo: 0x008E2498; + 0x13C;
-	float cameraAngle;
-	Skater* skater;
-	//Vertex* pos;
-	Vertex* camera;
-	D3DXVECTOR3 currentDistance;
-	//Vertex* velocity;
+    //PlayerInfo: 0x008E2498; + 0x13C;
+    float cameraAngle;
+    Skater* skater;
+    //Vertex* pos;
+    Vertex* camera;
+    D3DXVECTOR3 currentDistance;
+    //Vertex* velocity;
 
-	void* current;
-	void* first;
-	void* last;
-	char name[64];
-	DWORD timeNext;
-	bool observing;
+    void* current;
+    void* first;
+    void* last;
+    char name[64];
+    DWORD timeNext;
+    bool observing;
 
-	ObserveMode()
-	{
-		//get data
-		UpdateInfo(true);
-	}
+    ObserveMode()
+    {
+        //get data
+        UpdateInfo(true);
+    }
 
-	void Enter();
+    void Enter();
 
-	void Leave()
-	{
-		observing = false;
-	}
+    void Leave()
+    {
+        observing = false;
+    }
 
-	static Vertex* GetCamera()
-	{
-		static const DWORD ptr = 0x008E1E78;
-		if (InvalidReadPtr(((void*)ptr)))
-			return NULL;
-		DWORD pCamera = *(DWORD*)ptr + 0x84;
-		if (InvalidReadPtr(((void*)pCamera)))
-			return NULL;
-		pCamera = *(DWORD*)pCamera + 0xB0;
-		if (InvalidReadPtr(((void*)pCamera)))
-			return NULL;
-		pCamera = *(DWORD*)pCamera + 0x320;
-		if (InvalidReadPtr(((void*)pCamera)))
-			return NULL;
-		pCamera = *(DWORD*)pCamera + 0x20C;
-		if (InvalidReadPtr(((void*)pCamera)))
-			return NULL;
-		return (Vertex*)(*(DWORD*)pCamera + 0x40);
-	}
+    static Vertex* GetCamera()
+    {
+        static const DWORD ptr = 0x008E1E78;
+        if (InvalidReadPtr(((void*)ptr)))
+            return NULL;
+        DWORD pCamera = *(DWORD*)ptr + 0x84;
+        if (InvalidReadPtr(((void*)pCamera)))
+            return NULL;
+        pCamera = *(DWORD*)pCamera + 0xB0;
+        if (InvalidReadPtr(((void*)pCamera)))
+            return NULL;
+        pCamera = *(DWORD*)pCamera + 0x320;
+        if (InvalidReadPtr(((void*)pCamera)))
+            return NULL;
+        pCamera = *(DWORD*)pCamera + 0x20C;
+        if (InvalidReadPtr(((void*)pCamera)))
+            return NULL;
+        return (Vertex*)(*(DWORD*)pCamera + 0x40);
+    }
 
-	DWORD GetCamModeAddress()
-	{
-		_printf("Getting camera addr ");
-		DWORD addr = *(DWORD*)((DWORD)first + 0x14);
-		_printf("%p\n", addr);
-		addr += 0x882C;
-		return addr;
-	}
+    DWORD GetCamModeAddress()
+    {
+        _printf("Getting camera addr ");
+        DWORD addr = *(DWORD*)((DWORD)first + 0x14);
+        _printf("%p\n", addr);
+        addr += 0x882C;
+        return addr;
+    }
 
-	//check if player exist and pointers work
-	bool PlayerExist()
-	{
-		if (current && !InvalidReadPtr(current) && *(DWORD*)current == 0x0058E504 && *(DWORD*)((DWORD)current + 4) != 0xFFFFFFFF && skater)
-		{
-			_printf("wtf no exist\n");
-			return true;
-		}
-		
-		first = (void*)*(DWORD*)(*(DWORD*)0x008E2498 + 0x13C);
-		last = (void*)*(DWORD*)(*(DWORD*)0x008E2498 + 0x140);
-		current = first;
-		while (current != last && current && !InvalidReadPtr(current) && *(DWORD*)current == 0x0058E504 && *(DWORD*)((DWORD)current + 4) != 0xFFFFFFFF && skater)
-		{
-			if (!strcmp(name, (char*)((DWORD)current + 32)))
-				return true;
-			current = *(void**)((DWORD)current + 12);
-			if (!current)
-				current = first;
-		}
-		UpdateInfo();
-		return false;
-	}
+    //check if player exist and pointers work
+    bool PlayerExist()
+    {
+        if (current && !InvalidReadPtr(current) && *(DWORD*)current == 0x0058E504 && *(DWORD*)((DWORD)current + 4) != 0xFFFFFFFF && skater)
+        {
+            _printf("wtf no exist\n");
+            return true;
+        }
 
-	//update all pointers and information
-	void UpdateInfo(bool firstTime = false);
+        first = (void*)*(DWORD*)(*(DWORD*)0x008E2498 + 0x13C);
+        last = (void*)*(DWORD*)(*(DWORD*)0x008E2498 + 0x140);
+        current = first;
+        while (current != last && current && !InvalidReadPtr(current) && *(DWORD*)current == 0x0058E504 && *(DWORD*)((DWORD)current + 4) != 0xFFFFFFFF && skater)
+        {
+            if (!strcmp(name, (char*)((DWORD)current + 32)))
+                return true;
+            current = *(void**)((DWORD)current + 12);
+            if (!current)
+                current = first;
+        }
+        UpdateInfo();
+        return false;
+    }
 
-	//follow next player
-	void Next(DWORD time = 0);//curr +12
+    //update all pointers and information
+    void UpdateInfo(bool firstTime = false);
 
-	//Old code
-	void InterpolateCamera();
+    //follow next player
+    void Next(DWORD time = 0);//curr +12
 
-	//called each frame, update camera pos
-	void Update();
-	
+    //Old code
+    void InterpolateCamera();
+
+    //called each frame, update camera pos
+    void Update();
+
 
 };
 
