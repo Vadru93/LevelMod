@@ -103,6 +103,15 @@ struct TrickSpeed
 };
 
 
+void SendHostOptionChanged(int option, int value)
+{
+	using namespace Network;
+
+	NetHandler* net_handler = NetHandler::GetNetHandler();
+	net_handler->SendMessageToClients(MSG_ID_LM_HOSTOPTION_CHANGED, 8, &option);
+	net_handler->Release();
+}
+
 
 TrickSpeed trickSpeed[] = {
 	{TrickSpeed(Checksums::Trick_The900,  1.3f, 1.4f, 1.3f)},
@@ -211,16 +220,16 @@ void SetAirTrickSpeed(DWORD speed)
 					_printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].trickName));
 				break;
 			case 1:
-				if(!header->SetFloat(Checksums::Speed, trickSpeed[i].th4Speed))
+				if (!header->SetFloat(Checksums::Speed, trickSpeed[i].th4Speed))
 					_printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].trickName));
 				break;
 			case 2:
-				if(!header->SetFloat(Checksums::Speed, trickSpeed[i].fastAir))
+				if (!header->SetFloat(Checksums::Speed, trickSpeed[i].fastAir))
 					_printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].trickName));
 				break;
 			case 3:
 			case 4:
-				if(!header->SetFloat(Checksums::Speed, trickSpeed[i].originalSpeed * ((speed - 2) * 0.1f + 1.0f)))
+				if (!header->SetFloat(Checksums::Speed, trickSpeed[i].originalSpeed * ((speed - 2) * 0.1f + 1.0f)))
 					_printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].trickName));
 				break;
 
@@ -435,6 +444,11 @@ void UpdateOption(DWORD checksum, int value)
 		}
 		break;
 	}
+}
+
+bool ToggleHostOption(CStruct* pStruct, CScript* pScript)
+{
+	SendHostOptionChanged(Checksums::LM_Control_bSpine, FALSE);
 }
 
 void AddOption(char* name, int value, bool update)

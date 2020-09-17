@@ -44,7 +44,7 @@ namespace LevelModSettings
 		};
 		Type type;
 		int value;
-		
+
 	};
 
 	extern std::map<int, OverrideOption> overrideOptions;

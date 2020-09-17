@@ -1,6 +1,8 @@
 #pragma once
 #ifndef NET_H
 #define NET_H
+#include "Skater.h"
+
 
 namespace Network
 {
@@ -102,38 +104,15 @@ namespace Network
 		MSG_ID_REQUEST_CHANGE_TEAM,             //	= 100 : C->S Request to change teams
 		MSG_ID_OWNZONE,					        //	= 101 : S->C Send own zone messages
 		MSG_ID_XFER_BEGIN_REQ,                  //  = 102 : S->C 
-		MSG_ID_UNK6,                       //  = 103 : C->S This calls MSG_ID 104
-		MSG_ID_UNK7,		                //	= 104 : S->C Something about game?
-		MSG_ID_SEND_PARK_DATA,                  //	= 105 : S->C CAP Data
-		MSG_ID_RECV_PARK_DATA,					//	= 106 : C->S Cap Data
-
-		//To make sure we don't overlap messages with unknown ID we add padding
-		MSG_ID_PADDING1,
-		MSG_ID_PADDING2,
-		MSG_ID_PADDING3,
-		MSG_ID_PADDING4,
-		MSG_ID_PADDING5,
-		MSG_ID_PADDING6,
-		MSG_ID_PADDING7,
-		MSG_ID_PADDING8,
-		MSG_ID_PADDING9,
-		MSG_ID_PADDING10,
-		MSG_ID_PADDING11,
-		MSG_ID_PADDING12,
-		MSG_ID_PADDING13,
-		MSG_ID_PADDING14,
-		MSG_ID_PADDING15,
-		MSG_ID_PADDING16,
-		MSG_ID_PADDING17,
-		MSG_ID_PADDING18,
-		MSG_ID_PADDING19,
-		MSG_ID_PADDING20,
-		MSG_ID_PADDING21,
-		MSG_ID_PADDING22,
+		MSG_ID_UNK6,                            //  = 103 : C->S This calls MSG_ID 104
+		MSG_ID_UNK7,		                    //	= 104 : S->C Something about game?
+		MSG_ID_PARK_DATA,                       //	= 105 : S->C CAP Data
+		MSG_ID_PARK_DATA_REQ,					//	= 106 : C->S Cap Data
 
 
-		//LM Specific ID
-		MSG_ID_LM_HOSTOPTION_CHANGED,	//  = 130 : S->C Host option changed
+		//LM Specific IDs
+		//To make sure we don't overlap messages with unknown IDs we skip a few numbers
+		MSG_ID_LM_HOSTOPTION_CHANGED = 140,	//  = 140 : S->C Host option changed
 	};
 
 	enum
@@ -159,10 +138,102 @@ namespace Network
 		HANDLER_CRC_MISMATCH = 0x0004,
 	};
 
-
-	struct Net
+	enum
 	{
-		//Not yet dissambled
+		SEQ_GROUP_PLAYER_MSGS = 8,				// Messages about new players & quitting players
+		SEQ_GROUP_FACE_MSGS,					// Face download messages
+	};
+
+	enum
+	{
+		QUEUE_DEFAULT,
+		QUEUE_IMPORTANT,
+		QUEUE_SEQUENCED
+
+	};
+	struct Player;
+
+	struct PlayerInfo
+	{
+		static PlayerInfo* GetPlayerInfo()
+		{
+			return (PlayerInfo*)0x0058DB60;
+		}
+	};
+
+	
+	
+	struct Player
+	{
+		DWORD** memberFunctions;
+		BYTE unk1[0x10];
+		Skater* skater;
+		void* connection;
+
+		void* GetConnection()
+		{
+			return connection;
+		}
+	};
+
+
+
+	struct Server
+	{
+		typedef bool(__thiscall* const pEnqueuetMessage)(Server* pThis, void* connection, unsigned char msg_id, DWORD len, void* data, int prio, int queue, int flag1, int flag2);
+		void EnqueueMessage(void* connection, unsigned char msg_id, DWORD len, void* data, int prio = NORMAL_PRIO, int queue = QUEUE_DEFAULT, int flag1 = 0, int flag2 = 0)
+		{
+			pEnqueuetMessage(0x004DB4A0)(this, connection, msg_id, len, data, prio, queue, flag1, flag2);
+		}
+	};
+
+
+	struct NetHandler
+	{
+		Server* server;
+
+		static NetHandler* GetNetHandler(bool create = false)//Increase VP Count
+		{
+			typedef NetHandler* (__cdecl* const pGetNetHandler)(bool create);
+			return pGetNetHandler(0x00471C60)(create);
+		}
+
+		Server* GetServer()
+		{
+			server;
+		}
+
+
+		void Release()//Decrease VP Count
+		{
+			typedef void (__cdecl* const pRelease)();
+			pRelease(0x00471CB0)();
+		}
+
+		Player* FirstPlayerInfo(PlayerInfo* PlayerInfoList, bool include_observers = false)
+		{
+			typedef Player* (__thiscall* const pFirstPlayerInfo)(NetHandler* pThis, PlayerInfo* PlayerInfoList, bool include_observers);
+			return pFirstPlayerInfo(0x004769D0)(this, PlayerInfoList, include_observers);
+		}
+
+		Player* NextPlayerInfo(PlayerInfo* PlayerInfoList, bool include_observers = false)
+		{
+			typedef Player* (__thiscall* const pNextPlayerInfo)(NetHandler* pThis, PlayerInfo* PlayerInfoList, bool include_observers);
+			pNextPlayerInfo(0x00476A30)(this, PlayerInfoList, include_observers);
+		}
+
+		void SendMessageToClients(unsigned char msg_id, DWORD len, void* data, int prio = NORMAL_PRIO, int queue = QUEUE_DEFAULT, int flag1 = 0, int flag2 = 0, bool include_observers = false)
+		{
+			Server* server = GetServer();
+			PlayerInfo *PlayerInfoList = PlayerInfo::GetPlayerInfo();
+
+
+			for (Player* player = FirstPlayerInfo(PlayerInfoList, include_observers); player; player = NextPlayerInfo(PlayerInfoList, include_observers))
+			{
+				server->EnqueueMessage(player->GetConnection(), msg_id, len, data, prio, queue, flag1, flag2);
+			}
+		}
+
 	};
 
 	struct MsgHandlerContext
@@ -179,14 +250,14 @@ namespace Network
 	struct MessageHandler
 	{
 
-		typedef bool(__thiscall* const pAddMessage)(MessageHandler* pThis, unsigned char msg_id, void* pCallback, int flags, Net* pNet, int prio);
-		void AddMessage(unsigned char msg_id, void* pCallback, int flags, Net* pNet, int prio = NORMAL_PRIO)
+		typedef bool(__thiscall* const pAddMessage)(MessageHandler* pThis, unsigned char msg_id, void* pCallback, int flags, NetHandler* net_handler, int prio);
+		void AddMessage(unsigned char msg_id, void* pCallback, int flags, NetHandler* net_handler, int prio = NORMAL_PRIO)
 		{
-			pAddMessage(0x004D9090)(this, msg_id, pCallback, flags, pNet, prio);
+			pAddMessage(0x004D9090)(this, msg_id, pCallback, flags, net_handler, prio);
 		}
 
-		void AddClientMessages(unsigned char msg_id, void* pCallback, int flags, Net* pNet, int prio);
-		void AddServerMessages(unsigned char msg_id, void* pCallback, int flags, Net* pNet, int prio);
+		void AddClientMessages(unsigned char msg_id, void* pCallback, int flags, NetHandler* net_handler, int prio);
+		void AddServerMessages(unsigned char msg_id, void* pCallback, int flags, NetHandler* net_handler, int prio);
 	};
 };
 

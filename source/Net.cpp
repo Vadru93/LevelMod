@@ -14,7 +14,9 @@ namespace Network
 		int value;
 	};
 
-	int HostOption_Changed(MsgHandlerContext* context)
+
+
+	int Handle_HostOption_Changed(MsgHandlerContext* context)
 	{
 		HostOptionData* data = (HostOptionData*)context->pData;
 		auto it = LevelModSettings::overrideOptions.find(data->option);
@@ -30,22 +32,24 @@ namespace Network
 
 
 	//Messages sent by host
-	void MessageHandler::AddServerMessages(unsigned char msg_id, void* pCallback, int flags, Net* pNet, int prio)
+	void MessageHandler::AddServerMessages(unsigned char msg_id, void* pCallback, int flags, NetHandler* net_handler, int prio)
 	{
 		//Add the original message that we have replaced with our hook
-		AddMessage(msg_id, pCallback, flags, pNet, prio);
+		AddMessage(msg_id, pCallback, flags, net_handler, prio);
 
-		//When host change an option that is linked to an override object the host will send out a message
-		//When the client gets the message HostOption_Changed callback will be called
-		AddMessage(MSG_ID_LM_HOSTOPTION_CHANGED, HostOption_Changed, HANDLER_LATE, pNet);
+		//When host change a HostOption the host will send out a message
+		//When the client gets the message the option linked to the HostOption should get overriden
+		//It's possible to override only true, only false, or both
+		//To add a new HostOption, add them to the struct in settings.q
+		AddMessage(MSG_ID_LM_HOSTOPTION_CHANGED, Handle_HostOption_Changed, HANDLER_LATE, net_handler);
 	}
 
 	//Messages sent by clients
-	void MessageHandler::AddClientMessages(unsigned char msg_id, void* pCallback, int flags, Net* pNet, int prio)
+	void MessageHandler::AddClientMessages(unsigned char msg_id, void* pCallback, int flags, NetHandler* net_handler, int prio)
 	{
 		//Add the original message that we have replaced with our hook
-		AddMessage(msg_id, pCallback, flags, pNet, prio);
-		
+		AddMessage(msg_id, pCallback, flags, net_handler, prio);
+
 		//TODO add new client messages here
 	}
 };
