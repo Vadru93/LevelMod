@@ -1,4 +1,4 @@
-_#undef NO_DEFINES
+#undef NO_DEFINES
 #define _CRT_SECURE_NO_WARNINGS
 #include "pch.h"
 #include "_math.h"

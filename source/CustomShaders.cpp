@@ -505,7 +505,7 @@ SKIP_DEST:
 
 
     //Now get numTextures
-    _asmxor esi, esi;
+    _asm xor esi, esi;
     _asm mov ecx, [edi];
     _asm test ecx, ecx
     _asm je ADD_FIXEDALPHA;
@@ -673,7 +673,7 @@ NO_RESTORE_MAT:
     _asm mov esi, [edi];
     //Device->SetTexture
     _asm call dword ptr[esi + 0x00000104];*/
-    _asmxor eax, eax;
+    _asm xor eax, eax;
     _asm mov restoreMaterial, al;
     _asm mov reset, al;
     _asm mov restore_env, al;
