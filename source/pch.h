@@ -13,5 +13,6 @@
 #include "Globals.h"
 #include "debug.h"
 #include "Memory.h"
+#include "Net.h"
 
 #endif //PCH_H

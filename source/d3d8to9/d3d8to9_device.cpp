@@ -1606,8 +1606,8 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::SetVertexShader(DWORD Handle)
     HRESULT hr;
 
     //252 152
-    if (Handle != 0x142 && Handle != 0x242 && Handle != 0x141 && Handle != 0x144 && Handle != 0x112 && Handle != 0x252 && Handle != 0x152)
-        printf("Shader %X\n", Handle);
+    /*if (Handle != 0x142 && Handle != 0x242 && Handle != 0x141 && Handle != 0x144 && Handle != 0x112 && Handle != 0x252 && Handle != 0x152)
+        printf("Shader %X\n", Handle);*/
 
     if ((Handle & 0x80000000) == 0)
     {

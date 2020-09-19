@@ -112,6 +112,7 @@ namespace Network
         //LM Specific IDs
         //To make sure we don't overlap messages with unknown IDs we skip a few numbers
         MSG_ID_LM_HOSTOPTION_CHANGED = 140,	//  = 140 : S->C Host option changed
+        MSG_ID_LM_TEST,
     };
 
     enum
@@ -154,9 +155,14 @@ namespace Network
 
     struct PlayerInfo
     {
-        static PlayerInfo* GetPlayerInfo()
+        DWORD* ptr;
+        DWORD temp1;
+        DWORD temp2;
+        PlayerInfo()
         {
-            return (PlayerInfo*)0x0058DB60;
+            ptr = (DWORD*)0x0058DB60;
+            temp1 = 0;
+            temp2 = 0;
         }
     };
 
@@ -171,6 +177,7 @@ namespace Network
 
         void* GetConnection()
         {
+            _printf("Connection %p Skater? %p\n", connection, skater);
             return connection;
         }
     };
@@ -189,8 +196,6 @@ namespace Network
 
     struct NetHandler
     {
-        Server* server;
-
         static NetHandler* GetNetHandler(bool create = false)//Increase VP Count
         {
             typedef NetHandler* (__cdecl* const pGetNetHandler)(bool create);
@@ -199,15 +204,28 @@ namespace Network
 
         Server* GetServer()
         {
-            server;
+            return server;
         }
-
 
         void Release()//Decrease VP Count
         {
             typedef void(__cdecl* const pRelease)();
             pRelease(0x00471CB0)();
         }
+
+        void SendMessageToClients(unsigned char msg_id, DWORD len, void* data, int prio = NORMAL_PRIO, int queue = QUEUE_DEFAULT, int flag1 = 0, int flag2 = 0, bool include_observers = false)
+        {
+            Server* server = GetServer();
+            PlayerInfo PlayerInfoList = PlayerInfo();
+
+            for (Player* player = FirstPlayerInfo(&PlayerInfoList, include_observers); player; player = NextPlayerInfo(&PlayerInfoList, include_observers))
+            {
+                server->EnqueueMessage(player->GetConnection(), msg_id, len, data, prio, queue, flag1, flag2);
+            }
+        }
+
+    private:
+        Server* server;
 
         Player* FirstPlayerInfo(PlayerInfo* PlayerInfoList, bool include_observers = false)
         {
@@ -218,22 +236,14 @@ namespace Network
         Player* NextPlayerInfo(PlayerInfo* PlayerInfoList, bool include_observers = false)
         {
             typedef Player* (__thiscall* const pNextPlayerInfo)(NetHandler* pThis, PlayerInfo* PlayerInfoList, bool include_observers);
-            pNextPlayerInfo(0x00476A30)(this, PlayerInfoList, include_observers);
-        }
-
-        void SendMessageToClients(unsigned char msg_id, DWORD len, void* data, int prio = NORMAL_PRIO, int queue = QUEUE_DEFAULT, int flag1 = 0, int flag2 = 0, bool include_observers = false)
-        {
-            Server* server = GetServer();
-            PlayerInfo* PlayerInfoList = PlayerInfo::GetPlayerInfo();
-
-
-            for (Player* player = FirstPlayerInfo(PlayerInfoList, include_observers); player; player = NextPlayerInfo(PlayerInfoList, include_observers))
-            {
-                server->EnqueueMessage(player->GetConnection(), msg_id, len, data, prio, queue, flag1, flag2);
-            }
+            return pNextPlayerInfo(0x00476A30)(this, PlayerInfoList, include_observers);
         }
 
     };
+
+    bool OnServer();
+
+    void SendMessageToClients(unsigned char msg_id, DWORD len, void* data, int prio = NORMAL_PRIO, int queue = QUEUE_DEFAULT, int flag1 = 0, int flag2 = 0, bool include_observers = false);
 
     struct MsgHandlerContext
     {
@@ -255,8 +265,10 @@ namespace Network
             pAddMessage(0x004D9090)(this, msg_id, pCallback, flags, net_handler, prio);
         }
 
-        void AddClientMessages(unsigned char msg_id, void* pCallback, int flags, NetHandler* net_handler, int prio);
-        void AddServerMessages(unsigned char msg_id, void* pCallback, int flags, NetHandler* net_handler, int prio);
+
+
+        static void __stdcall AddClientMessages(unsigned char msg_id, void* pCallback, int flags, NetHandler* net_handler, int prio);
+        static void __stdcall AddServerMessages(unsigned char msg_id, void* pCallback, int flags, NetHandler* net_handler, int prio);
     };
 };
 

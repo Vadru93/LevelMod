@@ -97,6 +97,7 @@ bool GetParamScript(CStruct* pStruct, CScript* pScript);
 bool LM_GotParamScript(CStruct* pStruct, CScript* pScript);
 bool SetOption(CStruct* pStruct, CScript* pScript);
 bool ToggleOption(CStruct* pStruct, CScript* pScript);
+bool ToggleHostOption(CStruct* pStruct, CScript* pScript);
 bool GetOptionText(CStruct* pStruct, CScript* pScript);
 bool AddOption(CStruct* pStruct, CScript* pScript);
 

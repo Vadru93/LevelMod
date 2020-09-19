@@ -335,10 +335,10 @@ namespace String
         DWORD len = strlen(str) + 1;
         IncreaseTopHeap(len);
 
-        if (strlen(StringHeapTop))
+        /*if (strlen(StringHeapTop))
         {
             MessageBox(0, StringHeapTop, "Not good..", 0);
-        }
+        }*/
 
         for (DWORD i = 0; i < len; i++)
         {

@@ -32,6 +32,7 @@ void CommandBan(const char* message)
 void CommandShowCommands(const char* message);
 void CommandGetInfo(const char* message)
 {
+
     extern QBKeyHeader triggers[MAX_TRIGGERS];
     DWORD numQBKeyHeaders = 0, numInts = 0, numUndef = 0, undefSize = 0, intSize = 0,
         totalSize = 0, floatSize = 0, numFloats = 0, numArrays = 0, arraySize = 0,
@@ -145,6 +146,10 @@ void CommandGetInfo(const char* message)
     _printf("Level specific strings: \n");
     _printf("LevelPermanentHeap %d %X(MAX %X)\n\n", String::GetNumStrings(String::HEAP::LEVEL), String::GetHeapSize(String::HEAP::LEVEL), String::GeHeapMaxSize(String::HEAP::LEVEL));
     //MessageBox(0, 0, 0, 0);
+
+    using namespace Network;
+    char test[128] = "Test Message";
+    SendMessageToClients(MSG_ID_LM_TEST, 128, &test);
 
 
 }

@@ -2087,8 +2087,6 @@ void ExecuteQBThread()
     delete[] funcParam;
 }
 
-std::map<int, int> options;
-
 
 EXTERN bool QBKeyHeader::SetFloat(DWORD checksum, float value)
 {
@@ -2445,6 +2443,7 @@ const CompiledScript scripts[] =
 {"IsOptionOff", IsOptionOff},
 {"AddOption", AddOption},
 {"ToggleOption", ToggleOption},
+{"ToggleHostOption", ToggleHostOption},
     {"LM_GotParam", LM_GotParamScript },
     {"GetParam", GetParamScript},
     {"SetOption", SetOption},
@@ -4369,6 +4368,9 @@ void InitLevelMod()
 
     HookFunction(0x0048E036, Obj_MoveToNode_Naked, 0xE9);
     HookFunction(0x0048DA53, Obj_FollowPathLinked_Naked, 0xE9);
+    //Network::MessageHandler handler;
+    HookFunction(0x00474D08, Network::MessageHandler::AddClientMessages);
+    HookFunction(0x004751EA, Network::MessageHandler::AddServerMessages);
 
     //HookFunction(0x0058D0B1, Fopen_naked, 0xE9);
 
@@ -4747,11 +4749,70 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
         return true;
 
     }
-    else
+    else if (!init3)
     {
+    //MessageBox(0, "GOING TO ADD HOSTOPTIONS", "", 0);
+        using namespace LevelModSettings;
         _printf("Already inited\n");
 
         init3 = true;
+
+        QBKeyHeader* header = GetQBKeyHeader(crc32f("LM_HostOptions"));
+
+        if (header)
+        {
+            for (DWORD i = 0; i < header->pArray->GetNumItems(); i++)
+            {
+                CStructHeader* HostOption = header->pArray->GetCStruct(i, __FUNCTION__);
+
+                CStructHeader* Name;
+                if (HostOption->GetStruct(Checksums::Name, &Name))
+                {
+                    CStructHeader* Value;
+                    if (HostOption->GetStruct(Checksums::Value, &Value))
+                    {
+
+                        CStructHeader* override;
+                        if (HostOption->GetStruct(crc32f("OVERRIDE_TRUE"), &override))
+                        {
+                            overrideOptions.insert(std::pair<DWORD, OverrideOption>(crc32f(Name->pStr), OverrideOption(OverrideOption::Type::OVERRIDE_TRUE, Value->value.i, override->Data)));
+                        }
+                        else if (HostOption->GetStruct(crc32f("OVERRIDE_FALSE"), &override))
+                        {
+                            overrideOptions.insert(std::pair<DWORD, OverrideOption>(crc32f(Name->pStr), OverrideOption(OverrideOption::Type::OVERRIDE_FALSE, Value->value.i, override->Data)));
+                        }
+                        else if (HostOption->GetStruct(crc32f("OVERRIDE"), &override))
+                        {
+                            overrideOptions.insert(std::pair<DWORD, OverrideOption>(crc32f(Name->pStr), OverrideOption(OverrideOption::Type::OVERRIDE, Value->value.i, override->Data)));
+                        }
+                        else
+                        {
+                            _printf("Need param #OVERRIDE/#OVERRIDE_FALSE/#OVERRIDE_TRUE in HostOption %s\n", Name->pStr);
+                            return true;
+                        }
+                        AddOption(Name->pStr, Value->value.i, false, override->Data);
+                    }
+                    else
+                    {
+                        _printf("Need param #Value in HostOption %s\n", Name->pStr);
+                    }
+                }
+
+            }
+
+            for (auto override = overrideOptions.begin(); override != overrideOptions.end(); override++)
+            {
+                auto it = options.find(override->second.option);
+                if (it != options.end())
+                {
+                    it->second.override = &override->second;
+                }
+                else
+                    _printf("Option %s not found in HostOption %s\n", override->second.option, override->first);
+            }
+        }
+        else
+            _printf("Couldn't find HostOptions\n");
     }
     /*int id = -255;
     pStruct->GetScript("id", &id);

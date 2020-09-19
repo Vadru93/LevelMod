@@ -44,15 +44,36 @@ namespace LevelModSettings
         };
         Type type;
         int value;
+        DWORD option;
+
+        OverrideOption(Type t, int v, DWORD o)
+        {
+            type = t;
+            value = v;
+            option = o;
+        }
 
     };
 
-    extern std::map<int, OverrideOption> overrideOptions;
+    struct Option
+    {   
+        OverrideOption* override;
+        int value;
+
+        Option(int Value)
+        {
+            override = NULL;
+            value = Value;
+        }
+    };
+
+    extern std::map<DWORD, OverrideOption> overrideOptions;
+    extern std::map<DWORD, Option> options;
 };
 
 void SetAirTrickSpeed(DWORD speed);
 
-void UpdateOption(DWORD checksum, int value);
+void UpdateOption(DWORD checksum, int value, bool HostOption = false);
 
-void AddOption(char* name, int value, bool update = false);
+int AddOption(char* name, int value, bool update = false, DWORD = 0);
 #endif

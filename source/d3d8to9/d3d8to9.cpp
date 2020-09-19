@@ -213,6 +213,10 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
     VirtualProtect((void*)0x0042BC99, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((void*)0x0042BCDB, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
 
+    VirtualProtect((void*)0x00438031, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+
+    *(DWORD*)0x00438031 *= 2;//testing compressed strings
+
     //VirtualProtect((void*)0x0042BFE2, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
 
 
