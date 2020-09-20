@@ -121,6 +121,7 @@ LevelModOptions = [
 	{ name = "LM_GameOption_bFog" Value = 0 }
 	{ name = "LM_Gameplay_bPedProps" value = 1 } //change to gameoption
 	{ name = "LM_GameOption_b251Patch" value = 0 }
+	{ name = "LM_GameOption_bFixBWManual" Value = 1 }
 	{ name = "LM_DebugOption_bDebugMode" Value = 0 }
 	{ name = "LM_LevelOption_TH4ProObjects" value = 0 StartGame Do = UpdateTH4ProObjects }
 	{ name = "LM_LevelOption_TH4CompObjects" value = 0 StartGame Do = UpdateTH4CompObjects }	
@@ -306,6 +307,9 @@ levelmod_menu_GameOptions_items = [
 
 	//251 patch
 	{ LM_Menu_Shared_Bool id = LM_GameOption_b251Patch_id params = { name = LM_GameOption_b251Patch id = LM_GameOption_b251Patch_id on = "251x Patch: on" off = "251x Patch: off" } }
+	
+	//BW Manual Fix
+	{ LM_Menu_Shared_Bool id = LM_GameOption_bFixBWManual_id params = { name = LM_GameOption_bFixBWManual id = LM_GameOption_bFixBWManual_id on = "No BW Manual: on" off = "No BW Manual: off" } }
 	
 	//removes 32 tags limit
 	{ LM_Menu_Shared_Bool id = LM_GameOption_bLimitTags_id params = { name = LM_GameOption_bLimitTags id = LM_GameOption_bLimitTags_id off = "Unlimited Tags: on" on = "Unlimited Tags: off" } }

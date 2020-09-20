@@ -291,6 +291,8 @@ namespace Checksums
 
         LM_GameOption_b251Patch = COMPILE_CRC32("lm_gameoption_b251patch"),
 
+        LM_GameOption_bFixBWManual = COMPILE_CRC32("lm_gameoption_bfixbwmanual"),
+
         //Trick_KFBackflip = 0xF7B4E0CB
 
 

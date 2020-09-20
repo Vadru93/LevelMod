@@ -1588,6 +1588,9 @@ void FixTagLimitProtections()
     //251patch
     VirtualProtect((void*)0x004355AD, 1, PAGE_EXECUTE_READWRITE, &old);
 
+    //BW Manual Fix
+    VirtualProtect((void*)0x0049D7C5, 8, PAGE_EXECUTE_READWRITE, &old);
+
 
     *(DWORD*)0x004BFCD3 = 0x0F39A2E9;
     *(WORD*)0x004BFCD7 = 0x9000;

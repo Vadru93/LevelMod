@@ -275,6 +275,19 @@ void UpdateOption(DWORD checksum, int value, bool HostOption)
 
     switch (checksum)
     {
+    case Checksums::LM_GameOption_bFixBWManual:
+        if (value)
+        {
+            *(DWORD*)0x0049D7C5 = 0x90909090;
+            *(DWORD*)0x0049D7C9 = 0x90909090;
+        }
+        else
+        {
+            *(DWORD*)0x0049D7C5 = 0x850FC084;
+            *(DWORD*)0x0049D7C9 = 0x00000156;
+        }
+        break;
+
     case Checksums::LM_GameOption_b251Patch:
         if (value)
             *(BYTE*)0x004355AD = 0xEB;
