@@ -574,66 +574,101 @@ SCRIPT Client_Select_No
 	helper_select_choose_back_centered
 ENDSCRIPT
 
-SCRIPT pop_th1
-	DepopulateMenu id = ChangeLevelMenuList
-	ForEachIn master_level_list do = add_level_menu_item params = { mask = th1_level target_script = "change_level" parent_menu = ChangeLevelMenuList }
+
+SCRIPT LM_PopulateLevelMenu mask = th3_level menu = ChangeLevelMenuList
+	printf "populating level menu"
+	DepopulateMenu id = <menu>
+	ForEachIn master_level_list do = add_level_menu_item params = { mask = <mask> target_script = "change_level" parent_menu = <menu> }
 ENDSCRIPT
 
-SCRIPT pop_th2
-	DepopulateMenu id = ChangeLevelMenuList
-	ForEachIn master_level_list do = add_level_menu_item params = { mask = th2_level target_script = "change_level" parent_menu = ChangeLevelMenuList }
+
+GameChangeLevelMenu = { 
+	Type = verticalmenu 
+	id = GameChangeLevelMenu 
+	x = 40.0 y = 100.0 w = 560.0 h = 224.0 
+	blue_top 
+	children = [ 
+		{ Type = textmenuelement auto_id text = "Change Level" static dont_gray drawer = title }
+		{ Type = menucontainer id = level_menu_container show_all_children eventhandler = { Type = leftrightcontroller Left = lmc_level_menu_container Right = rmc_level_menu_container } } 
+	]
+	parent = contain1 
+}
+
+lmc_level_menu_container = {
+	id = lmc_level_menu_container 
+	parent = level_menu_container 
+	Type = menucontainer 
+}
+
+rmc_level_menu_container = {
+	id = rmc_level_menu_container 
+	parent = level_menu_container 
+	Type = menucontainer 
+}
+
+
+gamelist_shared_options = {
+	Type = textmenuelement 
+	auto_id 
+	target = "LM_PopulateLevelMenu" 
+	link = ChangeLevelMenuList 
+	no_visit
+}
+
+SCRIPT CreateNewChangeLevelMenu
+	CreateAndAttachMenu GameChangeLevelMenu
+	CreateAndAttachMenu lmc_level_menu_container
+	CreateAndAttachMenu rmc_level_menu_container
+	
+	CreateMenu { 
+		Type = verticalmenu 
+		id = GameList 
+		x = 0.0 y = 0.0 w = 280.0 h = 224.0 
+		not_rounded 
+		children = [ 
+			{ gamelist_shared_options text = "THPS1" params = { mask = th1_level } }
+			{ gamelist_shared_options text = "THPS2" params = { mask = th2_level } }
+			{ gamelist_shared_options text = "THPS2x" params = { mask = th2x_level } }
+			{ gamelist_shared_options text = "THPS3" params = { mask = th3_level } }
+			{ gamelist_shared_options text = "THPS4" params = { mask = th4_level } }
+			{ gamelist_shared_options text = "THUG" params = { mask = ug1_level } }
+			{ gamelist_shared_options text = "THUG2" params = { mask = ug2_level } } 
+		] 
+	}
+	AttachChild parent = lmc_level_menu_container child = GameList
+	
+	CreateMenu { Type = verticalmenu id = ChangeLevelMenuList x = 280.0 y = 0.0 w = 280.0 h = 224.0 not_rounded right_side_icon children = [ ] }
+	AttachChild parent = rmc_level_menu_container child = ChangeLevelMenuList
+	
+	LM_PopulateLevelMenu
 ENDSCRIPT
 
-SCRIPT pop_th2x
-	DepopulateMenu id = ChangeLevelMenuList
-	ForEachIn master_level_list do = add_level_menu_item params = { mask = th2x_level target_script = "change_level" parent_menu = ChangeLevelMenuList }
-ENDSCRIPT
-
-SCRIPT pop_th3
-	DepopulateMenu id = ChangeLevelMenuList
-	ForEachIn master_level_list do = add_level_menu_item params = { mask = th3_level target_script = "change_level" parent_menu = ChangeLevelMenuList }
-ENDSCRIPT
-
-SCRIPT pop_th4
-	DepopulateMenu id = ChangeLevelMenuList
-	ForEachIn master_level_list do = add_level_menu_item params = { mask = th4_level target_script = "change_level" parent_menu = ChangeLevelMenuList }
-ENDSCRIPT
-
-SCRIPT pop_ug1
-	DepopulateMenu id = ChangeLevelMenuList
-	ForEachIn master_level_list do = add_level_menu_item params = { mask = ug1_level target_script = "change_level" parent_menu = ChangeLevelMenuList }
-ENDSCRIPT
-
-SCRIPT pop_ug2
-	DepopulateMenu id = ChangeLevelMenuList
-	ForEachIn master_level_list do = add_level_menu_item params = { mask = ug2_level target_script = "change_level" parent_menu = ChangeLevelMenuList }
-ENDSCRIPT
 
 SCRIPT setup_backend_menu
 	setdefaultproperty Type = textdrawer name = main
 	CreateMenu { Type = menucontainer id = contain1 dynamic_children = [ { id = sfx_menu_container target_script = sfx_menu_create }
 			{ id = trick_menu_container target_script = trick_menu_create } ] }
-	createandattachmenu { Type = verticalmenu id = game_menu game_menu_properties blue_top eventhandlers = [ { Type = showeventhandler target = "RefreshGameMenu" }
+	CreateAndAttachMenu { Type = verticalmenu id = game_menu game_menu_properties blue_top eventhandlers = [ { Type = showeventhandler target = "RefreshGameMenu" }
 			{ Type = backeventhandler target = "front_end_set_inactive" } ] children = [ { Type = textmenuelement auto_id text = "paused" static dont_gray drawer = title } ] parent = contain1 }
-	createandattachmenu { Type = scrollingmenu id = restart_menu num_visible = 14 x = 100.0 y = 70.0 w = 410.0 h = 224.0 parent = contain1 }
-	createandattachmenu { Type = verticalmenu id = savegame_yesno_menu x = 170.0 y = 150.0 w = 300.0 h = 336.0 just_center_x just_center_y blue_top eventhandler = { Type = showeventhandler target = "EndofRun_helper" } parent = contain1 children = [ { Type = textmenuelement auto_id text = "Save Game" static dont_gray drawer = title }
+	CreateAndAttachMenu { Type = scrollingmenu id = restart_menu num_visible = 14 x = 100.0 y = 70.0 w = 410.0 h = 224.0 parent = contain1 }
+	CreateAndAttachMenu { Type = verticalmenu id = savegame_yesno_menu x = 170.0 y = 150.0 w = 300.0 h = 336.0 just_center_x just_center_y blue_top eventhandler = { Type = showeventhandler target = "EndofRun_helper" } parent = contain1 children = [ { Type = textmenuelement auto_id text = "Save Game" static dont_gray drawer = title }
 			{ Type = textmenuelement id = savegame_yes text = "Yes" target = "InGameSave" }
 			{ Type = textmenuelement id = savegame_no text = "No" target = "Continue_to_endofrun" kill_menu } ] }
-	createandattachmenu { Type = verticalmenu id = quitgame_yesno_menu x = 170.0 y = 150.0 w = 300.0 h = 336.0 just_center_x just_center_y blue_top eventhandler = { Type = showeventhandler target = "Select_no" } parent = contain1 children = [ { Type = textmenuelement auto_id text = "Quit?" static dont_gray drawer = title }
+	CreateAndAttachMenu { Type = verticalmenu id = quitgame_yesno_menu x = 170.0 y = 150.0 w = 300.0 h = 336.0 just_center_x just_center_y blue_top eventhandler = { Type = showeventhandler target = "Select_no" } parent = contain1 children = [ { Type = textmenuelement auto_id text = "Quit?" static dont_gray drawer = title }
 			{ Type = textmenuelement id = quit_yes text = "Yes" target = "chosen_leave_server" kill_menu }
 			{ Type = textmenuelement id = quit_no text = "No" link = end_run_menu } ] }
 	IF ENGLISH
-		createandattachmenu { Type = verticalmenu id = end_run_menu game_menu_properties blue_top eventhandler = { Type = showeventhandler target = "Refresh_EndofRunMenu" } children = [ { Type = textmenuelement auto_id text = "end of run" static dont_gray drawer = title } ] parent = contain1 }
+		CreateAndAttachMenu { Type = verticalmenu id = end_run_menu game_menu_properties blue_top eventhandler = { Type = showeventhandler target = "Refresh_EndofRunMenu" } children = [ { Type = textmenuelement auto_id text = "end of run" static dont_gray drawer = title } ] parent = contain1 }
 	ELSE
-		createandattachmenu { Type = verticalmenu id = end_run_menu game_menu_properties w = 340 x = 150 blue_top eventhandler = { Type = showeventhandler target = "Refresh_EndofRunMenu" } children = [ { Type = textmenuelement auto_id text = "end of run" static dont_gray drawer = title } ] parent = contain1 }
+		CreateAndAttachMenu { Type = verticalmenu id = end_run_menu game_menu_properties w = 340 x = 150 blue_top eventhandler = { Type = showeventhandler target = "Refresh_EndofRunMenu" } children = [ { Type = textmenuelement auto_id text = "end of run" static dont_gray drawer = title } ] parent = contain1 }
 	ENDIF
-	createandattachmenu { Type = verticalmenu id = victorycondition_menu x = 120.0 y = 70.0 w = 420.0 h = 336.0 just_center_x just_center_y blue_top children = [ { Type = textmenuelement auto_id text = "set victory" static dont_gray drawer = title }
+	CreateAndAttachMenu { Type = verticalmenu id = victorycondition_menu x = 120.0 y = 70.0 w = 420.0 h = 336.0 just_center_x just_center_y blue_top children = [ { Type = textmenuelement auto_id text = "set victory" static dont_gray drawer = title }
 			{ Type = textmenuelement id = victorycondition_highestscore text = "Highest Score Wins" target = "do_victorycondition_highestscore" adds_task }
 			{ Type = textmenuelement id = victorycondition_target10000 text = "First Skater to 10000 Wins" target = "do_victorycondition_target10000" adds_task }
 			{ Type = textmenuelement id = victorycondition_target50000 text = "First Skater to 50000 Wins" target = "do_victorycondition_target50000" adds_task } ] parent = contain1 }
-	createandattachmenu { Type = verticalmenu id = gameoptions_menu x = 120.0 y = 70.0 w = 400.0 h = 336.0 just_center_x just_center_y blue_top children = [ { Type = textmenuelement auto_id text = "game options" static dont_gray drawer = title }
+	CreateAndAttachMenu { Type = verticalmenu id = gameoptions_menu x = 120.0 y = 70.0 w = 400.0 h = 336.0 just_center_x just_center_y blue_top children = [ { Type = textmenuelement auto_id text = "game options" static dont_gray drawer = title }
 			{ Type = textmenuelement id = gameoptions_victorycondition text = "Set Victory Conditions" link = victorycondition_menu } ] parent = contain1 }
-	createandattachmenu { Type = verticalmenu id = trickset_menu game_menu_properties blue_top children = [ { Type = textmenuelement auto_id text = "trickset" static dont_gray drawer = title }
+	CreateAndAttachMenu { Type = verticalmenu id = trickset_menu game_menu_properties blue_top children = [ { Type = textmenuelement auto_id text = "trickset" static dont_gray drawer = title }
 			{ Type = textmenuelement id = airtricks1 text = "Left+Circle" target = "change_airtricks1" kill_menu }
 			{ Type = textmenuelement id = airtricks2 text = "Right+Circle" target = "change_airtricks2" kill_menu } ] parent = contain1 }
 	create_splitscreen_menu
@@ -645,60 +680,48 @@ SCRIPT setup_backend_menu
 	create_and_attach_generic_array_menu { menu_id = network_end_game_cond_ctf array_name = choices_capture_limit field = game_end_cond title = "Game End Condition" prefs = network x = 170.0 y = 90.0 w = 300.0 h = 400.0 }
 	create_and_attach_generic_array_menu { menu_id = network_end_game_other array_name = choices_endgame_other field = game_end_type title = "Game End Type" prefs = network x = 170.0 y = 90.0 w = 300.0 h = 400.0 }
 	create_and_attach_generic_array_menu { menu_id = network_end_game_cond_other array_name = choices_score_limit field = game_end_cond title = "Game End Condition" prefs = network x = 170.0 y = 90.0 w = 300.0 h = 400.0 }
-	createandattachmenu { Type = verticalmenu id = GameChangeLevelMenu x = 40.0 y = 100.0 w = 560.0 h = 224.0 blue_top children = [ { Type = textmenuelement auto_id text = "Change Level" static dont_gray drawer = title }
-			{ Type = menucontainer id = level_menu_container show_all_children eventhandler = { Type = leftrightcontroller Left = lmc_level_menu_container Right = rmc_level_menu_container } } ] parent = contain1 }
-	CreateMenu { Type = menucontainer id = lmc_level_menu_container }
-	attachchild parent = level_menu_container child = lmc_level_menu_container
-	CreateMenu { Type = menucontainer id = rmc_level_menu_container }
-	attachchild parent = level_menu_container child = rmc_level_menu_container
-	CreateMenu { Type = verticalmenu id = GameList x = 0.0 y = 0.0 w = 280.0 h = 224.0 not_rounded children = [ { Type = textmenuelement auto_id text = "THPS1" target = "pop_th1" link = ChangeLevelMenuList no_visit }
-			{ Type = textmenuelement auto_id text = "THPS2" target = "pop_th2" link = ChangeLevelMenuList no_visit }
-			{ Type = textmenuelement auto_id text = "THPS2x" target = "pop_th2x" link = ChangeLevelMenuList no_visit }
-			{ Type = textmenuelement auto_id text = "THPS3" target = "pop_th3" link = ChangeLevelMenuList no_visit }
-			{ Type = textmenuelement auto_id text = "THPS4" target = "pop_th4" link = ChangeLevelMenuList no_visit }
-			{ Type = textmenuelement auto_id text = "THUG" target = "pop_ug1" link = ChangeLevelMenuList no_visit }
-			{ Type = textmenuelement auto_id text = "THUG 2" target = "pop_ug2" link = ChangeLevelMenuList no_visit } ] }
-	attachchild parent = lmc_level_menu_container child = GameList
-	CreateMenu { Type = verticalmenu id = ChangeLevelMenuList x = 280.0 y = 0.0 w = 280.0 h = 224.0 not_rounded right_side_icon children = [ ] }
-	attachchild parent = rmc_level_menu_container child = ChangeLevelMenuList
-	ForEachIn master_level_list do = add_level_menu_item params = { mask = th3_level target_script = "change_level" parent_menu = ChangeLevelMenuList }
-	createandattachmenu { Type = verticalmenu id = server_pause_menu x = 120.0 y = 80.0 w = 400.0 h = 336.0 eventhandlers = [ { Type = showeventhandler target = "AddGameEndOptions" } ] blue_top children = [ { Type = textmenuelement auto_id text = "Start Game" static dont_gray drawer = title }
+	
+	
+	CreateNewChangeLevelMenu
+	
+	
+	CreateAndAttachMenu { Type = verticalmenu id = server_pause_menu x = 120.0 y = 80.0 w = 400.0 h = 336.0 eventhandlers = [ { Type = showeventhandler target = "AddGameEndOptions" } ] blue_top children = [ { Type = textmenuelement auto_id text = "Start Game" static dont_gray drawer = title }
 			{ Type = textmenuelement id = server_pause_menu_start_game_item text = "Ready" eventhandler = { Type = ChooseEventHandler } }
 			{ Type = textmenuelement auto_id text = "Game Type" eventhandler = { Type = ChooseEventHandler link = opts_net_game_type_menu } }
 			{ Type = textmenuelement auto_id text = "Current Game" static dont_gray drawer = keyboard_property eventhandler = { Type = showeventhandler target = "set_ui_from_preferences" params = { prefs = network field = "game_type" } } }
 			{ Type = textmenuelement auto_id text = "Time Limit" link = network_time_limit_menu }
 			{ Type = textmenuelement auto_id text = "Current Time Limit" static dont_gray drawer = keyboard_property eventhandler = { Type = showeventhandler target = "set_ui_from_preferences" params = { prefs = network field = "time_limit" } } } ] parent = contain1 }
-	createandattachmenu { Type = verticalmenu id = Start_game_menu game_menu_properties just_center_x just_center_y blue_top eventhandler = { Type = backeventhandler target = "front_end_set_inactive" } children = [ { Type = textmenuelement auto_id text = "Start game" static dont_gray drawer = title }
+	CreateAndAttachMenu { Type = verticalmenu id = Start_game_menu game_menu_properties just_center_x just_center_y blue_top eventhandler = { Type = backeventhandler target = "front_end_set_inactive" } children = [ { Type = textmenuelement auto_id text = "Start game" static dont_gray drawer = title }
 			{ Type = textmenuelement auto_id text = "Ready" target = "GameFlow_StartRun" kill_menu }
 			{ Type = textmenuelement auto_id text = "Game Type" eventhandler = { Type = ChooseEventHandler link = opts_net_game_type_menu } }
 			{ Type = textmenuelement auto_id text = "Current Game" static dont_gray drawer = keyboard_property eventhandler = { Type = showeventhandler target = "set_ui_from_preferences" params = { prefs = network field = "game_type" } } }
 			{ Type = textmenuelement auto_id text = "Time Limit" link = network_time_limit_menu }
 			{ Type = textmenuelement auto_id text = "Current Time Limit" static dont_gray drawer = keyboard_property eventhandler = { Type = showeventhandler target = "set_ui_from_preferences" params = { prefs = network field = "time_limit" } } } ] parent = contain1 }
-	createandattachmenu { Type = verticalmenu id = new_net_options_menu game_menu_properties just_center_x just_center_y blue_top eventhandlers = [ { Type = showeventhandler target = "UpdateOptionsMenu" } ] children = [ { Type = textmenuelement auto_id text = "Options" static dont_gray drawer = title } ] parent = contain1 }
-	createandattachmenu { Type = verticalmenu id = graf_counter_menu game_menu_properties just_center_x just_center_y blue_top eventhandlers = [ { Type = showeventhandler target = "UpdateGrafCounterMenu" }
+	CreateAndAttachMenu { Type = verticalmenu id = new_net_options_menu game_menu_properties just_center_x just_center_y blue_top eventhandlers = [ { Type = showeventhandler target = "UpdateOptionsMenu" } ] children = [ { Type = textmenuelement auto_id text = "Options" static dont_gray drawer = title } ] parent = contain1 }
+	CreateAndAttachMenu { Type = verticalmenu id = graf_counter_menu game_menu_properties just_center_x just_center_y blue_top eventhandlers = [ { Type = showeventhandler target = "UpdateGrafCounterMenu" }
 			{ Type = backeventhandler target = "RemoveGrafCounterPreview" } ] children = [ { Type = textmenuelement auto_id text = "Tag counter options" static dont_gray drawer = title }
 			{ Type = textmenuelement id = graf_toggle_item text = "Count tags: on/off" target = "sToggleGrafCounter" }
 			{ Type = slidermenuelement id = CounterPosX text = "Counter Pos X:" lower = 0 upper = 600 delta = 1 start = 547 wrap = 0 right_side_w = 80 eventhandlers = [ { Type = ContentsChangedEventHandler target = "PreviewCounter" } ] }
 			{ Type = slidermenuelement id = CounterPosY text = "Counter Pos Y:" lower = 0 upper = 600 delta = 1 start = 286 wrap = 0 right_side_w = 80 eventhandlers = [ { Type = ContentsChangedEventHandler target = "PreviewCounter" } ] }
 			{ Type = textmenuelement id = reset_graf_pos_item text = "Reset position" target = "ResetGrafCounterPos" }
 			{ Type = textmenuelement auto_id text = "Back" target = "go_back" params = { id = graf_counter_menu } } ] parent = contain1 }
-	createandattachmenu { Type = verticalmenu id = game_menu_choose_team_menu x = 170.0 y = 80.0 w = 300.0 h = 400.0 just_center_x just_center_y blue_top children = [ { Type = textmenuelement auto_id text = "Choose Team" static dont_gray drawer = title }
+	CreateAndAttachMenu { Type = verticalmenu id = game_menu_choose_team_menu x = 170.0 y = 80.0 w = 300.0 h = 400.0 just_center_x just_center_y blue_top children = [ { Type = textmenuelement auto_id text = "Choose Team" static dont_gray drawer = title }
 			{ Type = textmenuelement auto_id text = "Automatic" eventhandler = { Type = ChooseEventHandler link = game_menu target = "do_choose_team" params = { automatic } } }
 			{ Type = textmenuelement auto_id text = "Blue" eventhandler = { Type = ChooseEventHandler link = game_menu target = "do_choose_team" params = { blue } } }
 			{ Type = textmenuelement auto_id text = "Red" eventhandler = { Type = ChooseEventHandler link = game_menu target = "do_choose_team" params = { red } } } ] parent = contain1 }
-	createandattachmenu { Type = verticalmenu id = server_choose_team_menu x = 170.0 y = 80.0 w = 300.0 h = 400.0 just_center_x just_center_y blue_top children = [ { Type = textmenuelement auto_id text = "Choose Team" static dont_gray drawer = title }
+	CreateAndAttachMenu { Type = verticalmenu id = server_choose_team_menu x = 170.0 y = 80.0 w = 300.0 h = 400.0 just_center_x just_center_y blue_top children = [ { Type = textmenuelement auto_id text = "Choose Team" static dont_gray drawer = title }
 			{ Type = textmenuelement auto_id text = "Automatic" eventhandler = { Type = ChooseEventHandler link = server_pause_menu target = "do_choose_team" params = { automatic } } }
 			{ Type = textmenuelement auto_id text = "Blue" eventhandler = { Type = ChooseEventHandler link = server_pause_menu target = "do_choose_team" params = { blue } } }
 			{ Type = textmenuelement auto_id text = "Red" eventhandler = { Type = ChooseEventHandler link = server_pause_menu target = "do_choose_team" params = { red } } } ] parent = contain1 }
-	createandattachmenu { Type = verticalmenu id = client_choose_team_menu x = 170.0 y = 80.0 w = 300.0 h = 400.0 just_center_x just_center_y blue_top children = [ { Type = textmenuelement auto_id text = "Choose Team" static dont_gray drawer = title }
+	CreateAndAttachMenu { Type = verticalmenu id = client_choose_team_menu x = 170.0 y = 80.0 w = 300.0 h = 400.0 just_center_x just_center_y blue_top children = [ { Type = textmenuelement auto_id text = "Choose Team" static dont_gray drawer = title }
 			{ Type = textmenuelement auto_id text = "Automatic" eventhandler = { Type = ChooseEventHandler link = server_pause_menu target = "do_choose_team" params = { automatic } } }
 			{ Type = textmenuelement auto_id text = "Blue" eventhandler = { Type = ChooseEventHandler link = server_pause_menu target = "do_choose_team" params = { blue } } }
 			{ Type = textmenuelement auto_id text = "Red" eventhandler = { Type = ChooseEventHandler link = server_pause_menu target = "do_choose_team" params = { red } } } ] parent = contain1 }
-	createandattachmenu { Type = scrollingmenu id = net_level_menu_th4 num_visible = 15 x = 170.0 y = 80.0 w = 300.0 h = 400.0 just_center_x just_center_y blue_top eventhandlers = [ { Type = showeventhandler target = "populate_level_menu_th4" params = { choose_script = "change_level" parent_menu = net_level_menu_th4 } } ] children = [ { Type = textmenuelement auto_id text = "Levels" static dont_gray drawer = title }
+	CreateAndAttachMenu { Type = scrollingmenu id = net_level_menu_th4 num_visible = 15 x = 170.0 y = 80.0 w = 300.0 h = 400.0 just_center_x just_center_y blue_top eventhandlers = [ { Type = showeventhandler target = "populate_level_menu_th4" params = { choose_script = "change_level" parent_menu = net_level_menu_th4 } } ] children = [ { Type = textmenuelement auto_id text = "Levels" static dont_gray drawer = title }
 			{ Type = textmenuelement auto_id text = "Play Custom Park" target = "_NetMenuParkEditorLoad" } ] parent = contain1 }
-	createandattachmenu { Type = scrollingmenu id = net_level_menu num_visible = 15 x = 170.0 y = 80.0 w = 300.0 h = 400.0 just_center_x just_center_y blue_top eventhandlers = [ { Type = showeventhandler target = "populate_level_menu" params = { choose_script = "change_level" parent_menu = net_level_menu } } ] children = [ { Type = textmenuelement auto_id text = "Levels" static dont_gray drawer = title }
+	CreateAndAttachMenu { Type = scrollingmenu id = net_level_menu num_visible = 15 x = 170.0 y = 80.0 w = 300.0 h = 400.0 just_center_x just_center_y blue_top eventhandlers = [ { Type = showeventhandler target = "populate_level_menu" params = { choose_script = "change_level" parent_menu = net_level_menu } } ] children = [ { Type = textmenuelement auto_id text = "Levels" static dont_gray drawer = title }
 			{ Type = textmenuelement auto_id text = "Play Custom Park" target = "_NetMenuParkEditorLoad" } ] parent = contain1 }
-	createandattachmenu { Type = verticalmenu id = client_pause_menu x = 120.0 y = 80.0 w = 400.0 h = 336.0 blue_top eventhandler = { Type = backeventhandler target = "front_end_set_inactive" } children = [ { Type = textmenuelement auto_id text = "Client Pause" static dont_gray drawer = title }
+	CreateAndAttachMenu { Type = verticalmenu id = client_pause_menu x = 120.0 y = 80.0 w = 400.0 h = 336.0 blue_top eventhandler = { Type = backeventhandler target = "front_end_set_inactive" } children = [ { Type = textmenuelement auto_id text = "Client Pause" static dont_gray drawer = title }
 			{ Type = textmenuelement auto_id text = "Settings (TEMP)" eventhandler = { kill_menu Type = ChooseEventHandler target = "invokeUIScreen" params = { screen = ss_main_window } } }
 			{ Type = textmenuelement id = client_pause_menu_continue_item text = "Continue" eventhandler = { Type = ChooseEventHandler } }
 			{ Type = textmenuelement id = client_choose_team_item text = "Choose Team" eventhandlers = [ { Type = ChooseEventHandler link = client_choose_team_menu } ] }
@@ -707,19 +730,19 @@ SCRIPT setup_backend_menu
 			{ Type = textmenuelement id = client_pause_menu_chat_item text = "Enter Chat Message" eventhandler = { Type = ChooseEventHandler link = chat_message_control } }
 			{ Type = textmenuelement id = client_pause_sound_options text = "Sound Options" eventhandler = { Type = ChooseEventHandler link = sfx_menu_container } }
 			{ Type = textmenuelement id = client_pause_menu_quit_item text = "Quit" eventhandler = { Type = ChooseEventHandler link = client_quitgame_yesno_menu } } ] parent = contain1 }
-	createandattachmenu { Type = verticalmenu id = server_quitgame_yesno_menu x = 170.0 y = 150.0 w = 300.0 h = 336.0 just_center_x just_center_y blue_top eventhandler = { Type = showeventhandler target = "Server_Select_No" } parent = contain1 children = [ { Type = textmenuelement auto_id text = "Quit?" static dont_gray drawer = title }
+	CreateAndAttachMenu { Type = verticalmenu id = server_quitgame_yesno_menu x = 170.0 y = 150.0 w = 300.0 h = 336.0 just_center_x just_center_y blue_top eventhandler = { Type = showeventhandler target = "Server_Select_No" } parent = contain1 children = [ { Type = textmenuelement auto_id text = "Quit?" static dont_gray drawer = title }
 			{ Type = textmenuelement id = server_quit_yes text = "Yes" target = "chosen_leave_server" }
 			{ Type = textmenuelement id = server_quit_no text = "No" link = game_menu } ] }
-	createandattachmenu { Type = verticalmenu id = client_quitgame_yesno_menu x = 170.0 y = 150.0 w = 300.0 h = 336.0 just_center_x just_center_y blue_top eventhandler = { Type = showeventhandler target = "Client_Select_No" } parent = contain1 children = [ { Type = textmenuelement auto_id text = "Quit?" static dont_gray drawer = title }
+	CreateAndAttachMenu { Type = verticalmenu id = client_quitgame_yesno_menu x = 170.0 y = 150.0 w = 300.0 h = 336.0 just_center_x just_center_y blue_top eventhandler = { Type = showeventhandler target = "Client_Select_No" } parent = contain1 children = [ { Type = textmenuelement auto_id text = "Quit?" static dont_gray drawer = title }
 			{ Type = textmenuelement id = client_quit_yes text = "Yes" target = "chosen_leave_server" }
 			{ Type = textmenuelement id = client_quit_no text = "No" link = client_pause_menu } ] }
-	createandattachmenu { Type = keyboardcontrol id = chat_message_control x = 160.0 y = 56.0 w = 320.0 h = 336.0 just_center_x just_center_y num_columns = 13 standard_charset allow_uppercase allow_lowercase min_chars = 0 max_chars = 150 title_string = "Enter chat message:" default_string = "" eventhandlers = [ { Type = showeventhandler target = "clear_keyboard_string" params = { control_id = chat_message_control } }
+	CreateAndAttachMenu { Type = keyboardcontrol id = chat_message_control x = 160.0 y = 56.0 w = 320.0 h = 336.0 just_center_x just_center_y num_columns = 13 standard_charset allow_uppercase allow_lowercase min_chars = 0 max_chars = 150 title_string = "Enter chat message:" default_string = "" eventhandlers = [ { Type = showeventhandler target = "clear_keyboard_string" params = { control_id = chat_message_control } }
 			{ Type = ContentsChangedEventHandler target = "send_chat_message" }
 			{ Type = showeventhandler target = "helper_on_keyboard_control" } ] kill_on_close parent = contain1 }
-	createandattachmenu { Type = keyboardcontrol id = kb_chat_message_control x = 160.0 y = 56.0 w = 320.0 h = 336.0 just_center_x just_center_y num_columns = 13 no_gui allow_uppercase allow_lowercase allow_slashes min_chars = 0 max_chars = 150 title_string = "Enter chat message:" default_string = "" eventhandlers = [ { Type = showeventhandler target = "clear_keyboard_string" params = { control_id = kb_chat_message_control } }
+	CreateAndAttachMenu { Type = keyboardcontrol id = kb_chat_message_control x = 160.0 y = 56.0 w = 320.0 h = 336.0 just_center_x just_center_y num_columns = 13 no_gui allow_uppercase allow_lowercase allow_slashes min_chars = 0 max_chars = 150 title_string = "Enter chat message:" default_string = "" eventhandlers = [ { Type = showeventhandler target = "clear_keyboard_string" params = { control_id = kb_chat_message_control } }
 			{ Type = ContentsChangedEventHandler target = "send_chat_message" }
 			{ Type = showeventhandler target = "helper_on_keyboard_control_no_gui" } ] kill_on_close parent = contain1 }
-	createandattachmenu { Type = verticalmenu id = net_game_options_menu game_menu_properties just_center_x just_center_y blue_top eventhandler = { Type = showeventhandler target = "UpdateSlapText" } children = [ { Type = textmenuelement auto_id text = "Host Options" static dont_gray drawer = title }
+	CreateAndAttachMenu { Type = verticalmenu id = net_game_options_menu game_menu_properties just_center_x just_center_y blue_top eventhandler = { Type = showeventhandler target = "UpdateSlapText" } children = [ { Type = textmenuelement auto_id text = "Host Options" static dont_gray drawer = title }
 			{ Type = textmenuelement auto_id text = "Server Name" eventhandler = { Type = ChooseEventHandler link = opts_net_server_name_control } }
 			{ Type = textmenuelement auto_id text = "Current Server Name" static dont_gray drawer = keyboard_property eventhandler = { Type = showeventhandler target = "set_ui_from_preferences" params = { prefs = network field = "server_name" } } }
 			{ Type = textmenuelement auto_id text = "Password" eventhandler = { Type = ChooseEventHandler link = opts_net_password_control } }
@@ -731,25 +754,25 @@ SCRIPT setup_backend_menu
 			{ Type = textmenuelement id = slap_toggle text = "Slap: --" target = "ToggleSlap" }
 			{ Type = textmenuelement id = new_menu_ban text = "Ban Player..." eventhandler = { Type = ChooseEventHandler link = ban_player_menu } }
 			{ Type = textmenuelement auto_id text = "Back" target = "go_back" params = { id = net_game_options_menu } } ] parent = contain1 }
-	createandattachmenu { Type = verticalmenu id = net_game_options_menu x = 160.0 y = 56.0 w = 320.0 h = 336.0 just_center_x just_center_y id = ban_player_menu blue_top children = [ { Type = textmenuelement auto_id text = "Ban Player" static dont_gray drawer = title } ] parent = contain1 }
+	CreateAndAttachMenu { Type = verticalmenu id = net_game_options_menu x = 160.0 y = 56.0 w = 320.0 h = 336.0 just_center_x just_center_y id = ban_player_menu blue_top children = [ { Type = textmenuelement auto_id text = "Ban Player" static dont_gray drawer = title } ] parent = contain1 }
 	create_and_attach_generic_array_menu { menu_id = opts_net_num_players_menu array_name = num_players_info field = num_players title = "Number of Players" prefs = network validationscript = "validate_player_option" x = 140.0 y = 120.0 w = 360.0 h = 400.0 }
 	create_and_attach_generic_array_menu { menu_id = opts_net_num_obs_menu array_name = num_observers_info field = num_observers title = "Number of Observers" prefs = network x = 120.0 y = 120.0 w = 400.0 h = 400.0 }
 	create_and_attach_generic_array_menu { menu_id = opts_net_game_type_menu array_name = game_type_info field = game_type title = "Game Type" prefs = network x = 170.0 y = 120.0 w = 300.0 h = 400.0 }
-	createandattachmenu { Type = keyboardcontrol id = opts_net_password_control x = 160.0 y = 56.0 w = 320.0 h = 336.0 just_center_x just_center_y num_columns = 13 standard_charset min_chars = 0 max_chars = 60 title_string = "Enter password:" eventhandlers = [ { Type = showeventhandler target = "set_ui_from_preferences" params = { prefs = network field = "password" } }
+	CreateAndAttachMenu { Type = keyboardcontrol id = opts_net_password_control x = 160.0 y = 56.0 w = 320.0 h = 336.0 just_center_x just_center_y num_columns = 13 standard_charset min_chars = 0 max_chars = 60 title_string = "Enter password:" eventhandlers = [ { Type = showeventhandler target = "set_ui_from_preferences" params = { prefs = network field = "password" } }
 			{ Type = ContentsChangedEventHandler target = "set_preferences_from_ui" params = { prefs = network field = "password" } }
 			{ Type = showeventhandler target = "helper_on_keyboard_control" } ] parent = contain1 }
-	createandattachmenu { Type = keyboardcontrol id = opts_net_server_name_control x = 160.0 y = 56.0 w = 320.0 h = 336.0 just_center_x just_center_y num_columns = 13 standard_charset min_chars = 0 max_chars = 60 title_string = "Enter server name:" eventhandlers = [ { Type = showeventhandler target = "set_ui_from_preferences" params = { prefs = network field = "server_name" } }
+	CreateAndAttachMenu { Type = keyboardcontrol id = opts_net_server_name_control x = 160.0 y = 56.0 w = 320.0 h = 336.0 just_center_x just_center_y num_columns = 13 standard_charset min_chars = 0 max_chars = 60 title_string = "Enter server name:" eventhandlers = [ { Type = showeventhandler target = "set_ui_from_preferences" params = { prefs = network field = "server_name" } }
 			{ Type = ContentsChangedEventHandler target = "set_preferences_from_ui" params = { prefs = network field = "server_name" } }
 			{ Type = showeventhandler target = "helper_on_keyboard_control" } ] parent = contain1 }
-	createandattachmenu { Type = scrollingmenu id = change_level_menu num_visible = 15 x = 160.0 y = 70.0 w = 300.0 h = 400.0 just_center_x just_center_y eventhandler = { Type = showeventhandler target = "populate_level_menu_th3" params = { choose_script = "change_level" parent_menu = change_level_menu } } children = [ ] parent = contain1 }
-	createandattachmenu { Type = verticalmenu id = career_change_level_menu x = 140.0 y = 90.0 w = 360.0 h = 400.0 just_center_x just_center_y blue_top eventhandler = { Type = showeventhandler target = "populate_level_menu" params = { choose_script = "change_level" parent_menu = career_level_names } } children = [ { Type = textmenuelement auto_id text = "Levels" static dont_gray drawer = title }
+	CreateAndAttachMenu { Type = scrollingmenu id = change_level_menu num_visible = 15 x = 160.0 y = 70.0 w = 300.0 h = 400.0 just_center_x just_center_y eventhandler = { Type = showeventhandler target = "populate_level_menu_th3" params = { choose_script = "change_level" parent_menu = change_level_menu } } children = [ ] parent = contain1 }
+	CreateAndAttachMenu { Type = verticalmenu id = career_change_level_menu x = 140.0 y = 90.0 w = 360.0 h = 400.0 just_center_x just_center_y blue_top eventhandler = { Type = showeventhandler target = "populate_level_menu" params = { choose_script = "change_level" parent_menu = career_level_names } } children = [ { Type = textmenuelement auto_id text = "Levels" static dont_gray drawer = title }
 			{ Type = menucontainer id = career_levels_multi_container show_all_children } ] parent = contain1 }
 	DestroyElement id = career_level_names
 	DestroyElement id = career_level_goals
 	CreateMenu { Type = verticalmenu id = career_level_names x = 0.0 y = 0.0 w = 280.0 h = 336.0 just_center_x just_center_y not_rounded children = [ { Type = textmenuelement auto_id text = "Name" static drawer = main_smaller } ] }
 	CreateMenu { Type = verticalmenu id = career_level_goals x = 280.0 y = 0.0 w = 80.0 h = 336.0 just_center_x just_center_y not_rounded static eventhandler = { Type = showeventhandler target = "populate_goals_menu" } children = [ { Type = textmenuelement auto_id text = "Goals" static drawer = main_smaller } ] }
-	attachchild parent = career_levels_multi_container child = career_level_names
-	attachchild parent = career_levels_multi_container child = career_level_goals
+	AttachChild parent = career_levels_multi_container child = career_level_names
+	AttachChild parent = career_levels_multi_container child = career_level_goals
 
 	printf "Going through master level list... regular change level"
 	attach_new_stats_menu { menu_id = stats_menu container_id = contain1 points_available_id = ingame_cas_points_available left_container_id = stats_left_container right_container_id = stats_right_container }
@@ -770,7 +793,7 @@ ENDSCRIPT
 
 SCRIPT grafcounter_create
 	CreateMenu { Type = menucontainer id = grafcounter_container }
-	createandattachmenu { Type = textmenuelement id = grafcounter x = 90.0 y = 350.0 w = 150.0 h = 250.0 just_center_x just_center_y text = "ЎўЈ¤Ґ¦§Ё©Є«¬" static dont_gray drawer = helper_text parent = grafcounter_container dontdrawrect }
+	CreateAndAttachMenu { Type = textmenuelement id = grafcounter x = 90.0 y = 350.0 w = 150.0 h = 250.0 just_center_x just_center_y text = "ЎўЈ¤Ґ¦§Ё©Є«¬" static dont_gray drawer = helper_text parent = grafcounter_container dontdrawrect }
 ENDSCRIPT
 exist = 1
 
@@ -1103,17 +1126,17 @@ SCRIPT attach_new_stats_menu stats_left_width = 150 stats_right_width = 160
 	VerifyParam param = container_id func = attach_new_stats_menu <...>
 	VerifyParam param = left_container_id func = attach_new_stats_menu <...>
 	VerifyParam param = right_container_id func = attach_new_stats_menu <...>
-	createandattachmenu { Type = verticalmenu id = <menu_id> parent = <container_id> game_menu_properties blue_top eventhandlers = [ { Type = showeventhandler target = "update_stats_elements" } ] }
+	CreateAndAttachMenu { Type = verticalmenu id = <menu_id> parent = <container_id> game_menu_properties blue_top eventhandlers = [ { Type = showeventhandler target = "update_stats_elements" } ] }
 	IF GotParam is_pro_menu
 	ELSE
-		createandattachmenu { Type = textmenuelement auto_id parent = <menu_id> text = "edit stats" static dont_gray drawer = title }
+		CreateAndAttachMenu { Type = textmenuelement auto_id parent = <menu_id> text = "edit stats" static dont_gray drawer = title }
 	ENDIF
-	createandattachmenu { Type = menucontainer auto_id show_all_children parent = <menu_id> eventhandler = { Type = leftrightcontroller Left = <left_container_id> Right = <right_container_id> } children = [ { Type = verticalmenu cas_right_menu_properties y = 0.0 x = <stats_left_width> w = <stats_right_width> id = <right_container_id> }
+	CreateAndAttachMenu { Type = menucontainer auto_id show_all_children parent = <menu_id> eventhandler = { Type = leftrightcontroller Left = <left_container_id> Right = <right_container_id> } children = [ { Type = verticalmenu cas_right_menu_properties y = 0.0 x = <stats_left_width> w = <stats_right_width> id = <right_container_id> }
 			{ Type = verticalmenu cas_left_menu_properties y = 0.0 w = <stats_left_width> id = <left_container_id> } ] }
 	IF GotParam is_pro_menu
 	ELSE
 		VerifyParam param = points_available_id func = attach_new_stats_menu <...>
-		createandattachmenu { Type = textmenuelement id = <points_available_id> parent = <menu_id> text = "current points" static dont_gray drawer = points_available_property lock_layout y = 222.0 }
+		CreateAndAttachMenu { Type = textmenuelement id = <points_available_id> parent = <menu_id> text = "current points" static dont_gray drawer = points_available_property lock_layout y = 222.0 }
 	ENDIF
 	IF GotParam is_pro_menu
 		ForEachIn cas_stats_display_children do = attach_new_right_stats_menu_item params = { container_id = <right_container_id> is_pro_menu stats_right_width = <stats_right_width> }
@@ -1140,9 +1163,9 @@ stats_right_menu_properties = { x = 150.0 y = 0.0 w = 200.0 h = 400.0 just_cente
 
 SCRIPT attach_new_left_stats_menu_item
 	IF GotParam is_pro_menu
-		createandattachmenu { <...> parent = <container_id> y = 0.0 w = 140.0 }
+		CreateAndAttachMenu { <...> parent = <container_id> y = 0.0 w = 140.0 }
 	ELSE
-		createandattachmenu { <...> parent = <container_id> y = 0.0 }
+		CreateAndAttachMenu { <...> parent = <container_id> y = 0.0 }
 	ENDIF
 ENDSCRIPT
 
@@ -1150,9 +1173,9 @@ SCRIPT attach_new_right_stats_menu_item
 	IF GotParam is_pro_menu
 		VerifyParam param = pro_id func = attach_new_right_stats_menu_item <...>
 		VerifyParam param = stats_right_width func = attach_new_right_stats_menu_item <...>
-		createandattachmenu { <...> id = <pro_id> parent = <container_id> y = 0.0 w = <stats_right_width> static dont_gray r = 100 g = 65 b = 0 a = 115 }
+		CreateAndAttachMenu { <...> id = <pro_id> parent = <container_id> y = 0.0 w = <stats_right_width> static dont_gray r = 100 g = 65 b = 0 a = 115 }
 	ELSE
-		createandattachmenu { <...> parent = <container_id> y = 0.0 w = 170.0 }
+		CreateAndAttachMenu { <...> parent = <container_id> y = 0.0 w = 170.0 }
 		AttachEventHandler { Type = ChooseEventHandler object = <id> target = "go_back" params = { id = <container_id> } }
 	ENDIF
 ENDSCRIPT
