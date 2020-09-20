@@ -1,13 +1,10 @@
-
-Dpad = [ Up Down Left Right Upright UpLeft DownRight DownLeft ]
+TRICK_PRELOAD_TIME = 160
+ROTATEY_TRIGGER_TIME = 300
 
 NoTricks = [ ]
+Dpad = [ Up Down Left Right Upright UpLeft DownRight DownLeft ]
 
-TRICK_PRELOAD_TIME = 160
-
-ROTATEY_TRIGGER_TIME = 300
 TRIGGER_MANUAL_BRANCHFLIP = { InOrder Square Square 200 }
-
 EXTRA_BRANCHFLIP = { Trigger = TRIGGER_MANUAL_BRANCHFLIP Scr = ManualLink }
 
 //changed taunts to dpad, cause original layout doesn't make any sense anyway. 
@@ -238,6 +235,7 @@ TrickDef_CasperFlip = {
 	OutAnim = Casper_out 
 	Trickslack = 0 
 	BoardRotate  
+	Parent = 'Casper'
 	Casper_Branchlinks
 }
 
@@ -276,6 +274,7 @@ TrickDef_Handflip = {
 	BalanceAnim = HandstandHandFlip_Range 
 	OutAnim = HandstandHandFlip_out
 	Trickslack = 0 
+	Parent = 'HandStand'
 	Handstand_Branchlinks
 }
 
@@ -313,6 +312,7 @@ TrickDef_RailFlip = {
 	Anim = RailFlip 
 	BalanceAnim = Primo_Range 
 	Trickslack = 0 
+	Parent = 'To Rail'
 	ToRail_Branchlinks
 }
 
@@ -359,6 +359,7 @@ TrickDef_TruckstandFlip = {
 	NewExtraTricks = NewFlatlandBranches 
 	ExtraTricks2 = TruckstandBranches 
 	Trickslack = 0 
+	Parent = 'Truckstand'
 	Truckstand_BranchLinks
 }
 
@@ -497,7 +498,7 @@ SCRIPT Manual BlendPeriod = 0.3
 		ENDIF
 	ENDIF
 	
-	GroundTricks_AddExtraManualTricks <...>
+	GroundTricks_AddExtraManualTricks ignore = <Name> <...>
 	
 	IF AnimEquals WorkForFood_Init
 		SpawnSkaterScript Ollie_Signage
@@ -680,7 +681,7 @@ SCRIPT ManualLink grindslack = 25 Trickslack = 10 displaypercent = 50 Extraperce
 	
 	WaitAnim <Extrapercent> Percent
 
-	GroundTricks_AddExtraManualTricks <...>
+	GroundTricks_AddExtraManualTricks ignore = <Parent> <...>
 	
 	WaitAnim <grindslack> frames fromend
 	Bailoff
@@ -706,9 +707,9 @@ ENDSCRIPT
 SCRIPT GroundTricks_AddExtraManualTricks 
 	IF GotParam ExtraTricks
 		IF GotParam ExtraTricks2
-			SetExtraTricks <ExtraTricks2> <ExtraTricks>
+			SetExtraTricks <ExtraTricks2> <ExtraTricks> ignore = <ignore>
 		ELSE
-			SetExtraTricks <ExtraTricks>
+			SetExtraTricks <ExtraTricks> ignore = <ignore>
 		ENDIF
 	ENDIF
 
@@ -719,9 +720,9 @@ SCRIPT GroundTricks_AddExtraManualTricks
 	IF IsOptionOn LM_Control_bExtraTricks
 		IF GotParam NewExtraTricks
 			IF GotParam NewExtraTricks2
-				SetExtraTricks <NewExtraTricks2> <NewExtraTricks>
+				SetExtraTricks <NewExtraTricks2> <NewExtraTricks> ignore = <ignore>
 			ELSE
-				SetExtraTricks <NewExtraTricks>
+				SetExtraTricks <NewExtraTricks> ignore = <ignore>
 			ENDIF
 		ENDIF
 	ENDIF
@@ -734,7 +735,9 @@ SCRIPT Revert FSName = 'FS Revert' BSName = 'BS Revert' FSAnim = RevertFS BSAnim
 	SetTrickScore 100
 	IF InSplitScreenGame
 	ELSE
-		LaunchPanelMessage "Landing Trick" properties = panelcombo
+		IF IsOptionOn LM_GUI_bTrickNotifications
+			LaunchPanelMessage "Landing Trick" properties = panelcombo
+		ENDIF
 	ENDIF
 	OnGroundExceptions_NoEndRun
 	SetQueueTricks NoTricks
