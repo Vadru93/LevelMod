@@ -3,15 +3,16 @@
 //These options will override the original option
 //If no connection is found the client will use the Value parameter
 LM_HostOptions = [
-	{ name = "LM_HostOption_bAllowSpine" Value = 1 option = LM_Control_bSpine override_true }
-	{ name = "LM_HostOption_bLimitTags" Value = 0 option = LM_GameOption_bLimitTags override_false }
-	{ name = "LM_HostOption_bExtraTricks" Value = 1 option = LM_Control_bExtraTricks override_true }
-	{ name = "LM_HostOption_bWalliePlant" Value = 1 option = LM_Control_bWalliePlant override_true }
-	{ name = "LM_HostOption_bWallplant" Value = 1 option = LM_Control_bWallplant override_true }
-	{ name = "LM_HostOption_b251Patch" Value = 1 option = LM_GameOption_b251Patch override_true }
+	{ name = "LM_HostOption_bSpine" id = LM_0_id Value = 1 override_true = LM_Control_bSpine on = "Spine: Allowed" }
+	{ name = "LM_HostOption_bLimitTags" id = LM_1_id Value = 0 override_false = LM_GameOption_bLimitTags on = "Spine: Allowed" }//on = "Tags: Allowed" off = "Tags: Allowed" }
+	{ name = "LM_HostOption_bExtraTricks" id = LM_2_id Value = 1 override_true = LM_Control_bExtraTricks  on = "Spine: Allowed" }//on = "Extra Tricks: On" off = "Extra Tricks: Disallowed" }
+	{ name = "LM_HostOption_bWalliePlant" id = LM_3_id Value = 1 override_true = LM_Control_bWalliePlant  on = "Spine: Allowed" }//on = "WalliePlant: Allowed" off = "WalliePlant: Disallowed" }
+	{ name = "LM_HostOption_bWallplant" id = LM_4_id Value = 1 override_true = LM_Control_bWallplant  on = "Spine: Allowed" }//on = "Wallplant: Allowed" off = "Wallplant: Disallowed" }
+	{ name = "LM_HostOption_b251Patch" id = LM_5_id Value = 1 override_true = LM_GameOption_b251Patch  on = "Spine: Allowed" }
 	//This would be an option that's nice to have in tournaments
 	//Since in pro torunaments auto-kick off is disallowed, because it gives you speed adventage
-	{ name = "LM_HostOption_bAllowAKOFF" Value = 1 }
+	{ name = "LM_HostOption_bAllowAKOFF" id = LM_HostOption_bAllowAKOFF_id Value = 1 on = "Spine: Allowed" }
+
 ]
 
 BlendModes = [
@@ -388,6 +389,30 @@ levelmod_menu_wall_items = [
 	{ LM_Menu_Shared_Back Params = { id = LevelMod_menu_wall } } 
 ]
 
+levelmod_HostOptions_root = {
+LM_Menu_Shared_Vertical 
+	id = levelmod_HostOptions_root
+	eventhandler =  { Type = showeventhandler target = "UpdateHostOptions" }  
+	children = [ { Type = textmenuelement auto_id text = "LevelMod HostOptions" static dont_gray drawer = title } ]
+}
+
+SCRIPT AddHostOption
+    printf "Adding HostOption"
+    IF GotParam On
+        AddLine parent = levelmod_HostOptions_root id = <id> text = <On>
+	ELSE
+	    GetParam On
+		GetParam id
+	    AddLine parent = levelmod_HostOptions_root id = <id> text = <On>
+	ENDIF
+ENDSCRIPT
+
+SCRIPT UpdateHostOptions
+    printf "OnShow"
+    ForEachIn LM_HostOptions do = AddHostOption params = { <...> }
+ENDSCRIPT
+
+
 SCRIPT CreateLevelModMenus
 	//adds levelmod menus
 	CreateAndAttachMenu { Levelmod_menu_Root }
@@ -397,6 +422,8 @@ SCRIPT CreateLevelModMenus
 	CreateAndAttachMenu { LevelMod_menu_Air }
 	CreateAndAttachMenu { LevelMod_menu_Wall }
 	CreateAndAttachMenu { levelmod_menu_LevelOptions }
+	
+	CreateAndAttachMenu { levelmod_HostOptions_root }
 
 	CreateMenu { 
 		Type = verticalmenu 
