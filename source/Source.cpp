@@ -4774,55 +4774,72 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
 
         if (header)
         {
-            for (DWORD i = 0; i < header->pArray->GetNumItems(); i++)
+            for (DWORD i = 1; i < header->pArray->GetNumItems(); i++)
             {
                 CStructHeader* HostOption = header->pArray->GetCStruct(i, __FUNCTION__);
 
-                CStructHeader* Name;
-                if (HostOption->GetStruct(Checksums::Name, &Name))
+                if (HostOption)
                 {
-                    CStructHeader* Value;
-                    if (HostOption->GetStruct(Checksums::Value, &Value))
+                    CStructHeader* Name;
+                    if (HostOption->GetStruct(Checksums::Name, &Name))
                     {
+                        char OptionName[256] = "";
+                        char* pName = FindChecksumName(Name->Data);
+                        memcpy(OptionName, pName, strlen(pName) + 1);
 
-                        CStructHeader* override;
-                        if (HostOption->GetStruct(crc32f("OVERRIDE_TRUE"), &override))
+                        CStructHeader* Value;
+                        if (HostOption->GetStruct(Checksums::Value, &Value))
                         {
-                            overrideOptions.insert(std::pair<DWORD, OverrideOption>(crc32f(Name->pStr), OverrideOption(OverrideOption::Type::OVERRIDE_TRUE, Value->value.i, override->Data)));
-                        }
-                        else if (HostOption->GetStruct(crc32f("OVERRIDE_FALSE"), &override))
-                        {
-                            overrideOptions.insert(std::pair<DWORD, OverrideOption>(crc32f(Name->pStr), OverrideOption(OverrideOption::Type::OVERRIDE_FALSE, Value->value.i, override->Data)));
-                        }
-                        else if (HostOption->GetStruct(crc32f("OVERRIDE"), &override))
-                        {
-                            overrideOptions.insert(std::pair<DWORD, OverrideOption>(crc32f(Name->pStr), OverrideOption(OverrideOption::Type::OVERRIDE, Value->value.i, override->Data)));
+                            OverrideOption::Type type;
+                            CStructHeader* override;
+                            if (HostOption->GetStruct(crc32f("OVERRIDE_TRUE"), &override))
+                            {
+                                type = OverrideOption::Type::OVERRIDE_TRUE;
+                                _printf("OVERRIDE TRUE ");
+                            }
+                            else if (HostOption->GetStruct(crc32f("OVERRIDE_FALSE"), &override))
+                            {
+                                type = OverrideOption::Type::OVERRIDE_FALSE;
+                                _printf("OVERRIDE FALSE ");
+
+                            }
+                            else if (HostOption->GetStruct(crc32f("OVERRIDE"), &override))
+                            {
+                                type = OverrideOption::Type::OVERRIDE;
+                                _printf("OVERRIDE ");
+                            }
+                            else
+                            {
+                                _printf("Need param #OVERRIDE/#OVERRIDE_FALSE/#OVERRIDE_TRUE in HostOption %s\n", OptionName);
+                                return true;
+                            }
+                            _printf("%s\n", FindChecksumName(override->Data));
+                            AddOption(OptionName, Value->value.i, false, override->Data, (BYTE)type);
+
                         }
                         else
                         {
-                            _printf("Need param #OVERRIDE/#OVERRIDE_FALSE/#OVERRIDE_TRUE in HostOption %s\n", Name->pStr);
-                            return true;
+                            _printf("Need param #Value in HostOption %s\n", OptionName);
                         }
-                        AddOption(Name->pStr, Value->value.i, false, override->Data);
-                    }
-                    else
-                    {
-                        _printf("Need param #Value in HostOption %s\n", Name->pStr);
                     }
                 }
 
             }
 
-            for (auto override = overrideOptions.begin(); override != overrideOptions.end(); override++)
+            _printf("Going to Store OverrideData\n");
+            for (auto override = overrideOptions.begin(); override != overrideOptions.end(); ++override)
             {
+                _printf("OK\n");
                 auto it = options.find(override->second.option);
                 if (it != options.end())
                 {
+                    _printf("OK2\n");
                     it->second.override = &override->second;
                 }
                 else
-                    _printf("Option %s not found in HostOption %s\n", override->second.option, override->first);
+                    _printf("Option %s not found in HostOption %s\n", FindChecksumName(override->second.option), FindChecksumName(override->first));
             }
+            _printf("Finished storing OverrideData\n");
         }
         else
             _printf("Couldn't find HostOptions\n");

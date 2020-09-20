@@ -145,13 +145,13 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
     VirtualProtect((void*)0x005C94C8, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((void*)0x0042B171, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
 
-    /*FixMemoryProtection();
+    FixMemoryProtection();
 
-    *(DWORD*)0x0042C18D = 0x20AA00;
-    *(DWORD*)0x0042C1C7 = 0x20A9F0;
-    *(DWORD*)0x0042C1D5 = 0x20A9F0;
-    *(DWORD*)0x0042C1E1 = 0x20A9F8;
-    *(DWORD*)0x0042C1EC = 0x20A9FC;*/
+    *(DWORD*)0x0042C18D = 0x20AA00*2;
+    *(DWORD*)0x0042C1C7 = *(DWORD*)0x0042C18D - 0x10;//0x20A9F0;
+    *(DWORD*)0x0042C1D5 = *(DWORD*)0x0042C18D - 0x10;//0x20A9F0;
+    *(DWORD*)0x0042C1E1 = *(DWORD*)0x0042C18D - 0x10+8;//0x20A9F8;
+    *(DWORD*)0x0042C1EC = *(DWORD*)0x0042C18D - 0x10+0xC;//0x20A9FC;
 
 
     VirtualProtect((void*)0x0042BFE2, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);

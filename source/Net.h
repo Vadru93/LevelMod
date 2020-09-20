@@ -6,6 +6,16 @@
 
 namespace Network
 {
+    struct HostOptionMsg
+    {
+        int option;
+        int value;
+    };
+
+    struct TestMsg
+    {
+        char test[128];
+    };
 
     enum
     {
@@ -216,6 +226,18 @@ namespace Network
             return server;
         }
 
+        bool OnServer()
+        {
+            //_printf("Flags %p %X OnServer %d\n", (DWORD)this + 0x000001A8,  *(DWORD*)((DWORD)this + 0x000001A8), *(DWORD*)((DWORD)this + 0x000001A8) & 1);
+            return *(BYTE*)((DWORD)this + 0x000001A8) & 1;
+        }
+
+        bool InNetGame()
+        {
+            //_printf("Flags %p %X InNetGame %d\n", (DWORD)this + 0x000001A8 , *(DWORD*)((DWORD)this + 0x000001A8), (*(DWORD*)((DWORD)this + 0x000001A8) & 0xC));
+            return (*(BYTE*)((DWORD)this + 0x000001A8) & 0xC);
+        }
+
         void Release()//Decrease VP Count
         {
             typedef void(__cdecl* const pRelease)();
@@ -260,7 +282,7 @@ namespace Network
 
     void SendMessageToClients(unsigned char msg_id, DWORD len, void* data, int prio = NORMAL_PRIO, int queue = QUEUE_DEFAULT, int flag1 = 0, int flag2 = 0, bool include_observers = false);
 
-    struct MsgHandlerContext
+    /*struct MsgHandlerContext
     {
         char* msg;
         BYTE id;
@@ -269,7 +291,7 @@ namespace Network
         void* connection;
         int flags;
         void* pData;
-    };
+    };*/
 
     struct MessageHandler
     {

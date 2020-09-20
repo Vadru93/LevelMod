@@ -102,10 +102,13 @@ struct TrickSpeed
 };
 
 
-void SendHostOptionChanged(int option, int value)
+void __stdcall SendHostOptionChanged(int option, int value)
 {
     using namespace Network;
-    SendMessageToClients(MSG_ID_LM_HOSTOPTION_CHANGED, 8, &option);
+    HostOptionMsg msg;
+    msg.option = option;
+    msg.value = value;
+    SendMessageToClients(MSG_ID_LM_HOSTOPTION_CHANGED, 8, &msg);
 }
 
 
@@ -258,7 +261,7 @@ void UpdateOption(DWORD checksum, int value, bool HostOption)
         if (it->second.override)
         {
             OverrideOption* override = it->second.override;
- 
+
             if (override->type == OverrideOption::Type::OVERRIDE //Override both true and false
                 || (value && override->type == OverrideOption::Type::OVERRIDE_TRUE) //Override true
                 || (!value && override->type == OverrideOption::Type::OVERRIDE_FALSE)) //Override false
@@ -468,7 +471,7 @@ void UpdateOption(DWORD checksum, int value, bool HostOption)
 }
 
 
-int AddOption(char* name, int value, bool update, DWORD HostOption)
+int AddOption(char* name, int value, bool update, DWORD HostOption, BYTE type)
 {
     DWORD checksum = crc32f(name);
     if (update)
@@ -490,39 +493,64 @@ int AddOption(char* name, int value, bool update, DWORD HostOption)
             options.insert(std::pair<DWORD, Option>(checksum, Option(value)));
         else
             MessageBox(0, "Added an option that already exists...", "Check settings.qb you dummy!!", 0);
+        if (HostOption)
+        {
+            if(overrideOptions.find(checksum) == overrideOptions.end())
+                overrideOptions.insert(std::pair<DWORD, OverrideOption>(checksum, OverrideOption((OverrideOption::Type)type, value, HostOption)));
+            else
+                MessageBox(0, "Added an HostOption that already exists...", "Check settings.qb you dummy!!", 0);
+        }
 
         if (!QScript::Scripts)
+        {
             QScript::Scripts = new QScript::QBScript(false);
+        }
 
         //_printf("Adding to QBTable %s\n");
         /*char* tempName = new char[strlen(name) + 1];
         memcpy(tempName, name, strlen(name) + 1);*/
 
-        QScript::Scripts->qbTable.insert(std::pair<int, char*>(checksum, String::AddString(name)));
+        if (QScript::Scripts->qbTable.find(checksum) == QScript::Scripts->qbTable.end())
+            QScript::Scripts->qbTable.insert(std::pair<int, char*>(checksum, String::AddString(name)));
+        else
+            _printf("This string already exists..\n");
         //MessageBox(0, FindChecksumName(checksum), "", 0);
 
     }
-    if(!HostOption)
+    if (HostOption == 0)
+    {
         UpdateOption(checksum, value);
+    }
     else
     {
         if (GameState::GotSuperSectors)
         {
-            if (Network::OnServer())
-                SendHostOptionChanged(checksum, value);
+            _printf("Going to update HostOption %d\n", value);
+            SendHostOptionChanged(checksum, value);
+            _printf("Sent message\n");
 
             auto it = options.find(HostOption);
+            if (it == options.end())
+            {
+                MessageBox(0, "This is not good", "", 0);
+            }
 
             if (it->second.value != value)
             {
+                _printf("New Value\n");
                 auto override = it->second.override;
-
+                if (!override)
+                {
+                    override = &overrideOptions.find(checksum)->second;
+                }
                 if (override->type == OverrideOption::Type::OVERRIDE
                     || override->type == OverrideOption::Type::OVERRIDE_TRUE && override->value != 0
                     || override->type == OverrideOption::Type::OVERRIDE_FALSE && override->value == 0)
                 {
+                    _printf("Now we updating..\n");
                     UpdateOption(HostOption, value, true);
                 }
+
             }
         }
     }
@@ -669,11 +697,16 @@ bool ToggleHostOption(CStruct* pStruct, CScript* pScript)
             auto override = overrideOptions.find(header->Data);
             if (override != overrideOptions.end())
             {
+                auto it = options.find(header->Data);
+                if (it != options.end())
+                    it->second.value = !it->second.value;
+                else
+                    _printf("couldn't find option %s\nMake Sure to add the option first\n", FindChecksumName(header->Data));
                 override->second.value = !override->second.value;
                 char* ok = FindChecksumName(header->Data);
                 static char tempChar[MAX_PATH + 1] = "";
                 memcpy(tempChar, ok, strlen(ok) + 1);
-                _printf("Toggling HostOption %s(%X)\n", tempChar, header->Data);
+                _printf("Toggling HostOption %s(%X) %d\n", tempChar, header->Data, override->second.value);
                 AddOption(tempChar, override->second.value, true, override->second.option);
                 return true;
             }

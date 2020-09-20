@@ -7,16 +7,6 @@ extern std::map<int, OverrideOption> overrideOptions;
 
 namespace Network
 {
-    struct HostOptionMsg
-    {
-        int option;
-        int value;
-    };
-
-    struct TestMsg
-    {
-        char test[128];
-    };
 
     bool OnServer()
     {
@@ -26,33 +16,32 @@ namespace Network
 
     void SendMessageToClients(unsigned char msg_id, DWORD len, void* data, int prio, int queue, int flag1, int flag2, bool include_observers)
     {
-        if (OnServer())
-        {
-            NetHandler * net_handler = NetHandler::Instance();
+        NetHandler* net_handler = NetHandler::Instance();
 
+        if (net_handler->InNetGame() && net_handler->OnServer())
+        {
             net_handler->SendMessageToClients(msg_id, len, data);
         }
     }
 
 
-    int Handle_HostOption_Changed(MsgHandlerContext* context)
+    int Handle_HostOption_Changed(HostOptionMsg* msg)
     {
-        HostOptionMsg* msg = (HostOptionMsg*)context->msg;
         auto it = LevelModSettings::overrideOptions.find(msg->option);
         if (it != LevelModSettings::overrideOptions.end())
         {
+            _printf("Host changed HostOption %s %d\n", FindChecksumName(msg->option), msg->value);
             it->second.value = msg->value;
         }
         else
-            _printf("Couldn't find HostOption %s...\n", msg->option);
+            _printf("Couldn't find HostOption %s...\n", FindChecksumName(msg->option));
 
         return HANDLER_CONTINUE;
     }
 
-    int Handle_Test(MsgHandlerContext* context)
+    int Handle_Test(TestMsg* msg)
     {
-        TestMsg* msg = (TestMsg*)context;
-        MessageBox(0, msg->test, "Host sent test msg", 0);
+        _printf("Host sent testmsg %s\n", msg->test);
         return HANDLER_CONTINUE;
     }
 

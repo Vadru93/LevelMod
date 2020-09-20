@@ -75,5 +75,5 @@ void SetAirTrickSpeed(DWORD speed);
 
 void UpdateOption(DWORD checksum, int value, bool HostOption = false);
 
-int AddOption(char* name, int value, bool update = false, DWORD = 0);
+int AddOption(char* name, int value, bool update = false, DWORD HostOption = 0,  BYTE type = 0);
 #endif

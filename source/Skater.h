@@ -203,7 +203,7 @@ public:
 
     bool IsHost()
     {
-        return *(bool*)(this + 0x84CC);
+        return *(bool*)((DWORD)this + 0x84CC);
     }
     DWORD GetCurrentTime()
     {
