@@ -30,6 +30,7 @@ Also Skate3.exe is no longer needed, because d3d8.dll is loaded earlier so I cha
 4. Remember to add the scripts and the latest built d3d8.dll to not make your game crash.
 
 ### Links
+* [Legacy THPS Discord](https://discord.gg/vTWucHS)
 * [Latest LevelMod release](https://github.com/Vadru93/LevelMod/releases/latest)
 * [LevelMod wiki](https://github.com/Vadru93/LevelMod/wiki)
 * [Original LevelMod thread at Chapter-3.net](http://chapter-3.net/thps3/v2/showthread.php?tid=3141)
