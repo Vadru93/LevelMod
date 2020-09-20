@@ -2,16 +2,13 @@
 //Options in this list will get added autmatically
 //These options will override the original option
 //If no connection is found the client will use the Value parameter
+
+LM_HostOption_MenuItem = { Type = textmenuelement text = "Foo" target = "LM_ToggleHostOption" }
+
 LM_HostOptions = [
-	{ name = "LM_HostOption_bSpine" id = LM_0_id Value = 1 override_true = LM_Control_bSpine on = "Spine: Allowed" }
-	{ name = "LM_HostOption_bLimitTags" id = LM_1_id Value = 0 override_false = LM_GameOption_bLimitTags on = "Spine: Allowed" }//on = "Tags: Allowed" off = "Tags: Allowed" }
-	{ name = "LM_HostOption_bExtraTricks" id = LM_2_id Value = 1 override_true = LM_Control_bExtraTricks  on = "Spine: Allowed" }//on = "Extra Tricks: On" off = "Extra Tricks: Disallowed" }
-	{ name = "LM_HostOption_bWalliePlant" id = LM_3_id Value = 1 override_true = LM_Control_bWalliePlant  on = "Spine: Allowed" }//on = "WalliePlant: Allowed" off = "WalliePlant: Disallowed" }
-	{ name = "LM_HostOption_bWallplant" id = LM_4_id Value = 1 override_true = LM_Control_bWallplant  on = "Spine: Allowed" }//on = "Wallplant: Allowed" off = "Wallplant: Disallowed" }
-	{ name = "LM_HostOption_b251Patch" id = LM_5_id Value = 1 override_true = LM_GameOption_b251Patch  on = "Spine: Allowed" }
-	//This would be an option that's nice to have in tournaments
-	//Since in pro torunaments auto-kick off is disallowed, because it gives you speed adventage
-	{ name = "LM_HostOption_bAllowAKOFF" id = LM_HostOption_bAllowAKOFF_id Value = 1 on = "Spine: Allowed" }
+    { Type = textmenuelement auto_id text = "LevelMod HostOptions" static dont_gray drawer = title }
+	{ LM_HostOption_MenuItem  name = LM_HostOption_bSpine Value = 1 id = LM_HostOption_bSpine_id override_true = LM_Control_bSpine params = { name = LM_HostOption_bSpine id = LM_HostOption_bSpine_id on = "Spine: Allowed" off = "Spine: Disallowed" } }
+	{ LM_HostOption_MenuItem  name = LM_HostOption_bLimitTags Value = 0 id = LM_HostOption_bLimitTags_id override_false = LM_GameOption_bLimitTags  params = { name = LM_HostOption_bLimitTags id = LM_HostOption_bLimitTags_id off = "32 TagFix: Allowed" on = "32 TagFix: Disallowed" } }
 
 ]
 
@@ -392,18 +389,18 @@ levelmod_menu_wall_items = [
 levelmod_HostOptions_root = {
 LM_Menu_Shared_Vertical 
 	id = levelmod_HostOptions_root
-	eventhandler =  { Type = showeventhandler target = "UpdateHostOptions" }  
-	children = [ { Type = textmenuelement auto_id text = "LevelMod HostOptions" static dont_gray drawer = title } ]
+	eventhandler = { Type = showeventhandler target = "UpdateMenuText" params = levelmod_HostOptions_root }
+	children = LM_HostOptions
 }
 
 SCRIPT AddHostOption
     printf "Adding HostOption"
     IF GotParam On
-        AddLine parent = levelmod_HostOptions_root id = <id> text = <On>
+        AddLine parent = levelmod_HostOptions_root Type = textmenuelement id = <id> text = <On>
 	ELSE
 	    GetParam On
 		GetParam id
-	    AddLine parent = levelmod_HostOptions_root id = <id> text = <On>
+	    AddLine parent = levelmod_HostOptions_root Type = textmenuelement id = <id> text = <On>
 	ENDIF
 ENDSCRIPT
 
@@ -652,6 +649,83 @@ LM_Control_SpineButton_Text = [
 	"Revert+Nollie"
 	"SpinLeft+SpinRight"
 ]
+
+SCRIPT LM_ToggleHostOption 
+	//Check if this is the top item
+	IF LM_GotParam auto_id
+	 printf "LM_ToggleHost"
+	ELSE
+	
+		//Is this a special menu?
+		IF LM_GotParam link
+			//Todo handle linked menus
+			printf "Link"
+			
+		ELSE
+			printf "called LM_ToggleHostOption"
+		
+			//give textonly param if we only want to update text
+			IF #"Not" GotParam TextOnly
+				printf "Toggle"
+				ToggleHostOption <name>
+			ENDIF
+			
+			//update text if we have item id
+			//We need to use LM_GotParam because our param is inside a struct
+			//And the normal GotParam function can't find it
+			IF LM_GotParam id
+			
+				//GetParam will move the param from the struct to the script stack
+				GetParam id
+				IF LM_GotParam name
+				    GetParam name
+				ENDIF
+				IF LM_GotParam TextFromValue
+					printf "Updating TextFromValue"
+					GetParam TextFromValue
+					IF LM_GotParam option
+					    GetParam option
+					    GetOptionText option = <option> text = <TextFromValue>
+					ELSE
+					    GetOptionText option = <name> text = <TextFromValue>
+					ENDIF
+					SetMenuElementText id = <id> <text>
+				ELSE
+					IF IsOptionOn <name>
+						GetParam on
+						SetMenuElementText id = <id> <on>
+						printf "on"
+					ELSE
+						GetParam off
+						SetMenuElementText id = <id> <off>
+						printf "off"
+					ENDIF
+				ENDIF
+			ELSE
+				printf "without menu id!"
+			ENDIF
+		ENDIF
+		IF GotParam LinkedTo
+		    IF #"Not" IsOptionOn <LinkedTo>
+		        DestroyElement id = <id>
+			ENDIF
+		ELSE
+		    IF LM_GotParam LinkedTo_id
+		        GetParam LinkedTo
+				IF GotParam Name
+		            IF #"Not" IsOptionOn <name>
+			            DestroyElement id = <LinkedTo_id>
+			        ENDIF
+				ENDIF
+		    ENDIF
+		ENDIF
+	ENDIF
+	
+	IF GotParam action
+		<action>
+	ENDIF
+	printf "Done"
+ENDSCRIPT
 
 //a generic toggle func to take option, item id and on off text
 SCRIPT LM_ToggleOption 
