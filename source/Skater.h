@@ -319,7 +319,26 @@ public:
         return framelength;
     }
 
-    static Skater* GetSkater()
+    static Skater* Instance()
+    {
+        /*static const DWORD ptr = 0x005D06C0;
+        //VALIDATE_PTR((void*)ptr);
+        DWORD pSkater = *(DWORD*)ptr + 0x580;
+        //VALIDATE_PTR((void*)pSkater);
+        pSkater = *(DWORD*)pSkater + 0x4;
+        //VALIDATE_PTR((void*)pSkater);
+        pSkater = *(DWORD*)pSkater + 0x2C;
+        //VALIDATE_PTR((void*)pSkater);
+        pSkater = *(DWORD*)pSkater + 0x48;
+        if((void*)pSkater == NULL);
+        return NULL;
+        pSkater = *(DWORD*)pSkater;
+        //VALIDATE_DATA((Skater*)pSkater, sizeof(Skater));
+        return (Skater*)pSkater;*/
+        return Game::skater;
+    }
+
+    static Skater* UpdateSkater()
     {
         static const DWORD ptr = 0x005D06C0;
         VALIDATE_PTR((void*)ptr);
@@ -330,7 +349,6 @@ public:
         pSkater = *(DWORD*)pSkater + 0x2C;
         VALIDATE_PTR((void*)pSkater);
         pSkater = *(DWORD*)pSkater + 0x48;
-        VALIDATE_PTR((void*)pSkater);
         pSkater = *(DWORD*)pSkater;
         VALIDATE_DATA((Skater*)pSkater, sizeof(Skater));
         return (Skater*)pSkater;

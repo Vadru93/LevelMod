@@ -155,7 +155,7 @@ bool look_for_transfer_target(const D3DXVECTOR3& search_dir, const Vertex& start
     // or perhaps more flexibly, each "feeler" could have a set of objects
     // that it deals with (defaulting to the set of all objects)
 
-    Skater* skater = Skater::GetSkater();
+    Skater* skater = Skater::Instance();
 
 
     for (float step = 10.0f; step < 650.0f; step += 5.0f)
@@ -1128,7 +1128,7 @@ bool TestForClearPath(Vertex& target, Vertex& vel, Vertex& pos, Skater* skater)
 bool maybe_acid(bool skated_off_edge, const Vertex& pos, const Vertex& old_pos, Vertex& vel, SAcidDropData& acid_drop_data)
 {
 
-    Skater* skater = Skater::GetSkater();
+    Skater* skater = Skater::Instance();
     // horizontal direction in which a drop would occur
     Vertex drop_direction = vel;
     drop_direction.y = 0.0f;
@@ -1333,7 +1333,7 @@ void EnterAcid(const SAcidDropData& data)
 {
     DEBUGSTART()
     {
-        Skater* skater = Skater::GetSkater();
+        Skater* skater = Skater::Instance();
         _printf("EnterAcid\n");
 
         //Slerp::done = false;
@@ -1455,7 +1455,7 @@ bool TestForAcid(CStruct* pParams, CScript* pScript)
         return false;
     Slerp::landed = false;
     SAcidDropData acid_drop_data;
-    Skater* skater = Skater::GetSkater();
+    Skater* skater = Skater::Instance();
     skater->Store();
     if (LevelModSettings::AllowNewTricks & LevelModSettings::ALLOW_SPINE && skater->InVert())
     {
@@ -1973,7 +1973,7 @@ void MaybeAcid()
 {
     if (Slerp::wallplant)
     {
-        Skater* skater = Skater::GetSkater();
+        Skater* skater = Skater::Instance();
         if ((_GetCurrentTime() - Slerp::m_last_wallplant_time_stamp) > Physics_Wallplant_Duration)
         {
             _printf("Wallplant wait time done - Applying velocity\n");
@@ -1987,7 +1987,7 @@ void MaybeAcid()
         return;
 
     SAcidDropData acid_drop_data;
-    Skater* skater = Skater::GetSkater();
+    Skater* skater = Skater::Instance();
     if (skater == NULL) [[unlikely]]
         return;
     skater->Store();
@@ -2313,7 +2313,7 @@ void OnGround()
     {
         Slerp::transfer = false;
 
-        Skater* skater = Skater::GetSkater();
+        Skater* skater = Skater::Instance();
         if (skater == NULL)
             return;
         _printf("landed from transfer 2\n");
@@ -2390,7 +2390,7 @@ DWORD GrindParamHook(char* str, int unk)
     if ((Slerp::transfer || Slerp::landing)) [[unlikely]]
     {
         Slerp::OnGround = false;
-        Skater* skater = Skater::GetSkater();
+        Skater* skater = Skater::Instance();
         if (skater)
         {
             _printf("OnGrind while inside transfer\nReseting transfer...\n");

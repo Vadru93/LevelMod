@@ -802,6 +802,7 @@ void CreateSuperSectors()
 {
     _printf("Going to create MovingObjects\n");
     GameState::GotSuperSectors = true;
+    Game::skater = Skater::UpdateSkater();
 }
 FILE* logFile;
 void __cdecl add_log(const char* string, ...)
@@ -3045,7 +3046,7 @@ void FixClampBugs()
 
 void TestForAcid()
 {
-    Skater* skater = Skater::GetSkater();
+    Skater* skater = Skater::Instance();
     skater->Store();
 
     Vertex pos = *(Vertex*)skater->GetPosition();
@@ -3275,14 +3276,23 @@ void HookedFopen(char* p)
     }
 }
 
+Skater* oldSkater;
+
 void LoadCustomShaderThread()
 {
     Gfx::LoadCustomShaders(ShaderFile);
+    /*Sleep(3000);
+    while (Game::skater == oldSkater)
+    {*/
+        Game::skater = Skater::UpdateSkater();
+        /*Sleep(100);
+    }*/
 }
 
 bool OnPostLevelLoad(CStruct* pStruct, CScript* pScript)
 {
     _printf("OnPostLevelLoad...\n");
+    oldSkater = Game::skater;
     CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)LoadCustomShaderThread, NULL, NULL, NULL);
     return true;
 }
@@ -4369,6 +4379,9 @@ void InitLevelMod()
     HookFunction(0x0048E036, Obj_MoveToNode_Naked, 0xE9);
     HookFunction(0x0048DA53, Obj_FollowPathLinked_Naked, 0xE9);
     //Network::MessageHandler handler;
+    /*DWORD old;
+    VirtualProtect((LPVOID)0x004C02C5, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+    *(DWORD*)0x004C02C5 += 12 * NUM_EXTRA_IDS;*/
     HookFunction(0x00474D08, Network::MessageHandler::AddClientMessages);
     HookFunction(0x004751EA, Network::MessageHandler::AddServerMessages);
 
@@ -4982,7 +4995,7 @@ void DrawFrame()
 
         if (GameState::GotSuperSectors) [[likely]]
         {
-            Skater * skater = Skater::GetSkater();
+            Skater * skater = Skater::Instance();
             if (skater) [[likely]]
             {
                 if (XINPUT::Player1->IsConnected())
@@ -5022,7 +5035,7 @@ void DrawFrame()
         }
             if (observe && observe->observing) [[unlikely]]
             {
-                Skater * skater = Skater::GetSkater();
+                Skater * skater = Skater::Instance();
                 if (skater)
                 {
                     KeyState* ollie = skater->GetKeyState(KeyState::OLLIE);

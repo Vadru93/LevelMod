@@ -68,6 +68,14 @@ namespace GameState
 };
 //--------Game States--------
 
+struct Skater;
+//--------Game--------
+namespace Game
+{
+    extern Skater* skater;
+};
+//--------Game--------
+
 //--------Functions callable from script--------
 bool NotScript(CStruct* pStruct, CScript* pScript);
 bool GetZAngle(CStruct* pParams, CScript* pScript);

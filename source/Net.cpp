@@ -7,13 +7,13 @@ extern std::map<int, OverrideOption> overrideOptions;
 
 namespace Network
 {
-    struct HostOptionData
+    struct HostOptionMsg
     {
         int option;
         int value;
     };
 
-    struct TestData
+    struct TestMsg
     {
         char test[128];
     };
@@ -28,30 +28,31 @@ namespace Network
     {
         if (OnServer())
         {
-            NetHandler* net_handler = NetHandler::GetNetHandler();
+            NetHandler * net_handler = NetHandler::Instance();
+
             net_handler->SendMessageToClients(msg_id, len, data);
-            net_handler->Release();
         }
     }
 
 
     int Handle_HostOption_Changed(MsgHandlerContext* context)
     {
-        HostOptionData* data = (HostOptionData*)context->pData;
-        auto it = LevelModSettings::overrideOptions.find(data->option);
+        HostOptionMsg* msg = (HostOptionMsg*)context->msg;
+        auto it = LevelModSettings::overrideOptions.find(msg->option);
         if (it != LevelModSettings::overrideOptions.end())
         {
-            it->second.value = data->value;
+            it->second.value = msg->value;
         }
         else
-            _printf("Couldn't find HostOption %s...\n", data->option);
+            _printf("Couldn't find HostOption %s...\n", msg->option);
 
         return HANDLER_CONTINUE;
     }
 
     int Handle_Test(MsgHandlerContext* context)
     {
-        MessageBox(0, ((TestData*)context)->test, "Host sent test msg", 0);
+        TestMsg* msg = (TestMsg*)context;
+        MessageBox(0, msg->test, "Host sent test msg", 0);
         return HANDLER_CONTINUE;
     }
 
@@ -63,7 +64,6 @@ namespace Network
         _asm mov handler, ecx;
         //Add the original message that we have replaced with our hook
         handler->AddMessage(msg_id, pCallback, flags, net_handler, prio);
-
         //When host change a HostOption the host will send out a message
         //When the client gets the message the option linked to the HostOption should get overriden
         //It's possible to override only true, only false, or both

@@ -111,9 +111,13 @@ namespace Network
 
         //LM Specific IDs
         //To make sure we don't overlap messages with unknown IDs we skip a few numbers
-        MSG_ID_LM_HOSTOPTION_CHANGED = 140,	//  = 140 : S->C Host option changed
+        NUM_ORIGINAL_IDS = 139,                     //Number of original IDS    
+        MSG_ID_LM_HOSTOPTION_CHANGED,           //  = 140 : S->C Host option changed
         MSG_ID_LM_TEST,
+        TOTAL_IDS,
     };
+
+#define NUM_EXTRA_IDS Network::TOTAL_IDS - Network::NUM_ORIGINAL_IDS
 
     enum
     {
@@ -202,12 +206,23 @@ namespace Network
             return pGetNetHandler(0x00471C60)(create);
         }
 
+        static NetHandler* Instance()
+        {
+            return *(NetHandler**)0x008E2498;
+        }
+
         Server* GetServer()
         {
             return server;
         }
 
         void Release()//Decrease VP Count
+        {
+            typedef void(__cdecl* const pRelease)();
+            pRelease(0x00471CB0)();
+        }
+
+        ~NetHandler()
         {
             typedef void(__cdecl* const pRelease)();
             pRelease(0x00471CB0)();
@@ -258,7 +273,7 @@ namespace Network
 
     struct MessageHandler
     {
-
+        DWORD unk[3];
         typedef bool(__thiscall* const pAddMessage)(MessageHandler* pThis, unsigned char msg_id, void* pCallback, int flags, NetHandler* net_handler, int prio);
         void AddMessage(unsigned char msg_id, void* pCallback, int flags, NetHandler* net_handler, int prio = NORMAL_PRIO)
         {

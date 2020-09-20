@@ -42,6 +42,7 @@ D3DXVECTOR4 Slerp::target_normal = D3DXVECTOR4(0, 0, 0, 0);
 float Slerp::speed = 0.0f;
 
 EXTERN bool GameState::GotSuperSectors = false;
+Skater* Game::skater = NULL;
 
 ShaderObject* Gfx::shaders = NULL;
 DWORD Gfx::numMaterials = 0;

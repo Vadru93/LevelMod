@@ -261,7 +261,7 @@ BYTE UpdateKeyState2(DWORD button, BYTE pressed)
             _printf("Unhandled keypress %d pressed %d\n", button, pressed);
         return pressed;
     }
-    Skater* skater = Skater::GetSkater();
+    Skater* skater = Skater::Instance();
 
     switch (button)
     {
