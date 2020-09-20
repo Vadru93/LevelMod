@@ -1,5 +1,7 @@
 LevelMod\airtricks.qb
 LevelMod\bails.qb
+LevelMod\bird_c.qb
+LevelMod\bird_c_resting.qb
 LevelMod\buttonscripts.qb
 LevelMod\framework.qb
 LevelMod\game.qb
@@ -11,6 +13,8 @@ LevelMod\js_oil.qb
 LevelMod\mainmenu.qb
 LevelMod\levels.qb
 LevelMod\gspymenu.qb
+LevelMod\groundtricks.qb
+LevelMod\looptricks.qb
 LevelMod\netmenu.qb
 LevelMod\netmessages.qb
 LevelMod\optionsmenu.qb
@@ -18,8 +22,6 @@ LevelMod\ped_oil.qb
 LevelMod\sk3_scripts.qb
 LevelMod\skater_m.qb
 LevelMod\tricks.qb
-LevelMod\bird_c.qb
-LevelMod\bird_c_resting.qb
 LevelMod\settings.qb
 LevelMod\skater_sfx.qb
 
@@ -70,7 +72,6 @@ girl_a.qb
 goal_scripts.qb
 grindlist.qb
 grindscripts.qb
-groundtricks.qb
 horse.qb
 iniskater.qb
 iniskater_exceptions.qb
