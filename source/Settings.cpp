@@ -181,8 +181,8 @@ bool IsOptionOn(CStruct* pStruct, CScript* pScript)
                 {
                     auto override = it->second.override;
 
-                    if ((override->type == OverrideOption::Type::OVERRIDE_TRUE && override->value == 0) //Only true is overriden
-                        || (override->type == OverrideOption::Type::OVERRIDE_FALSE && override->value != 0)) //Only false is overriden
+                    if ((override->type == OverrideOption::Type::OVERRIDE_TRUE && override->value != 0) //Only true is overriden
+                        || (override->type == OverrideOption::Type::OVERRIDE_FALSE && override->value == 0)) //Only false is overriden
                     {
                         return it->second.value;
                     }
@@ -250,12 +250,12 @@ void SetAirTrickSpeed(DWORD speed)
 }
 
 
-void UpdateOption(DWORD checksum, int value, bool HostOption)
+void UpdateOption(DWORD checksum, int value)//, bool HostOption)
 {
     DWORD old = 0;//used for VirtualProtect
     _printf("Updating Option %s %d\n", FindChecksumName(checksum), value);
 
-    if (!HostOption)
+    /*if (!HostOption)
     {
         auto it = options.find(checksum);
         if (it->second.override)
@@ -271,7 +271,7 @@ void UpdateOption(DWORD checksum, int value, bool HostOption)
                 value = override->value;
             }
         }
-    }
+    }*/
 
     switch (checksum)
     {
@@ -524,7 +524,7 @@ int AddOption(char* name, int value, bool update, DWORD HostOption, BYTE type)
         memcpy(tempName, name, strlen(name) + 1);*/
 
         if (QScript::Scripts->qbTable.find(checksum) == QScript::Scripts->qbTable.end())
-            QScript::Scripts->qbTable.insert(std::pair<int, char*>(checksum, String::AddString(name)));
+            QScript::Scripts->qbTable.insert(std::pair<DWORD, char*>(checksum, String::AddString(name)));
         else
             _printf("This string already exists..\n");
         //MessageBox(0, FindChecksumName(checksum), "", 0);
@@ -548,22 +548,17 @@ int AddOption(char* name, int value, bool update, DWORD HostOption, BYTE type)
                 MessageBox(0, "This is not good", "", 0);
             }
 
-            if (it->second.value != value)
+            auto override = it->second.override;
+            if (!override)
             {
-                _printf("New Value\n");
-                auto override = it->second.override;
-                if (!override)
-                {
-                    override = &overrideOptions.find(checksum)->second;
-                }
-                if (override->type == OverrideOption::Type::OVERRIDE
-                    || override->type == OverrideOption::Type::OVERRIDE_TRUE && override->value != 0
-                    || override->type == OverrideOption::Type::OVERRIDE_FALSE && override->value == 0)
-                {
-                    _printf("Now we updating..\n");
-                    UpdateOption(HostOption, value, true);
-                }
-
+                override = &overrideOptions.find(checksum)->second;
+            }
+            if (override->type == OverrideOption::Type::OVERRIDE
+                || (override->type == OverrideOption::Type::OVERRIDE_TRUE && override->value == 0 || override->value ==  it->second.value)
+                || (override->type == OverrideOption::Type::OVERRIDE_FALSE && override->value != 0 || override->value == it->second.value))
+            {
+                _printf("Now we updating..\n");
+                UpdateOption(HostOption, value);
             }
         }
     }
@@ -663,9 +658,12 @@ bool SetOption(CStruct* pStruct, CScript* pScript)
                 if (pStruct->GetStruct(Checksum("value"), &value))
                 {
                     char* ok = FindChecksumName(header->Data);
-                    it->second = value->value.i;
-                    _printf("Setting option %s to %d\n", ok, header->Data, it->second);
-                    AddOption(ok, it->second.value, true);
+                    it->second.value = value->value.i;
+                    _printf("Setting option %s to %d\n", ok, header->Data, it->second.value);
+                    if (!it->second.override || (it->second.override->type == OverrideOption::Type::OVERRIDE_TRUE && it->second.override->value) || (it->second.override->type == OverrideOption::Type::OVERRIDE_FALSE && !it->second.override->value))
+                        AddOption(ok, it->second.value, true);
+                    else
+                        _printf("Option is overriden\n");
                     return true;
                 }
                 else
@@ -678,9 +676,12 @@ bool SetOption(CStruct* pStruct, CScript* pScript)
                     DWORD value = GetElementSliderValue(crc32f(id));
                     if (value != 0xFFFFFFFF)
                     {
-                        it->second = value;//header->NextHeader->value.i;
+                        it->second.value = value;//header->NextHeader->value.i;
                         _printf("Setting option %s to %d\n", ok, header->Data, it->second);
-                        AddOption(ok, it->second.value, true);
+                        if (!it->second.override || (it->second.override->type == OverrideOption::Type::OVERRIDE_TRUE && it->second.override->value) || (it->second.override->type == OverrideOption::Type::OVERRIDE_FALSE && !it->second.override->value))
+                            AddOption(ok, it->second.value, true);
+                        else
+                            _printf("Option is overriden\n");
                         return true;
                     }
                     else
@@ -720,7 +721,10 @@ bool ToggleHostOption(CStruct* pStruct, CScript* pScript)
                 static char tempChar[MAX_PATH + 1] = "";
                 memcpy(tempChar, ok, strlen(ok) + 1);
                 _printf("Toggling HostOption %s(%X) %d\n", tempChar, header->Data, override->second.value);
-                AddOption(tempChar, override->second.value, true, override->second.option);
+                if (!it->second.override || (it->second.override->type == OverrideOption::Type::OVERRIDE_TRUE && it->second.override->value) || (it->second.override->type == OverrideOption::Type::OVERRIDE_FALSE && !it->second.override->value))
+                    AddOption(tempChar, override->second.value, true, override->second.option);
+                else
+                    _printf("Option is overriden\n");
                 return true;
             }
             else
@@ -749,7 +753,10 @@ bool ToggleOption(CStruct* pStruct, CScript* pScript)
                 static char tempChar[MAX_PATH + 1] = "";
                 memcpy(tempChar, ok, strlen(ok) + 1);
                 _printf("Toggling option %s(%X)\n", tempChar, header->Data);
-                AddOption(tempChar, it->second.value, true);
+                if (!it->second.override || (it->second.override->type == OverrideOption::Type::OVERRIDE_TRUE && it->second.override->value) || (it->second.override->type == OverrideOption::Type::OVERRIDE_FALSE && !it->second.override->value))
+                    AddOption(ok, it->second.value, true);
+                else
+                    _printf("Option is overriden\n");
                 return true;
             }
             else

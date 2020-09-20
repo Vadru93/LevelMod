@@ -3320,7 +3320,7 @@ void AddChecksum(int key, char* name, void* retAddr)
     lastQB = name;
     if (name && !InvalidReadPtr(name) && strlen(name) > 1)
     {
-        std::map<int, char*>::iterator it = QScript::Scripts->qbTable.find(key);
+        std::map<DWORD, char*>::iterator it = QScript::Scripts->qbTable.find(key);
         if (it == QScript::Scripts->qbTable.end())
         {
             /*FILE* debugFile = fopen("debug.txt", "r+t");
@@ -3329,7 +3329,7 @@ void AddChecksum(int key, char* name, void* retAddr)
             printf("AddingKey %s %X, CalledFrom %p\r\n", name, key, retAddr);
             fclose(debugFile);*/
             //_printf("AddChecksum %s 0x%X\n", name, key);
-            QScript::Scripts->qbTable.insert(std::pair<int, char*>(key, String::AddString(name)));
+            QScript::Scripts->qbTable.insert(std::pair<DWORD, char*>(key, String::AddString(name)));
             QScript::qbKeys.push_back(key);
         }
         /*else if (_stricmp(it->second, name))
@@ -3344,7 +3344,7 @@ void AddChecksum(int key, char* name, void* retAddr)
     }
     else
     {
-        std::map<int, char*>::iterator it = QScript::Scripts->qbTable.find(key);
+        std::map<DWORD, char*>::iterator it = QScript::Scripts->qbTable.find(key);
         if (it == QScript::Scripts->qbTable.end())
         {
             /*FILE* debugFile = fopen("debug.txt", "r+t");
@@ -4374,7 +4374,7 @@ void InitLevelMod()
     //HookControls();
     *(WORD*)0x00427A9B = 0x840F;//je
     HookFunction(0x00427A9D, NotGood_naked);
-    HookFunction(0x004F42AA, SetVertexShader_naked);
+    HookFunction(0x004F42AA, SetVertexShader_hook);
     //MessageBox(0, 0, 0, 0);
     *(DWORD*)0x00427AA3 = 0x90909090;//nop
     *(WORD*)(0x00427AA3 + 4) = 0x9090;
@@ -4832,7 +4832,6 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
             _printf("Going to Store OverrideData\n");
             for (auto override = overrideOptions.begin(); override != overrideOptions.end(); ++override)
             {
-                _printf("OK\n");
                 auto it = options.find(override->second.option);
                 if (it != options.end())
                 {
@@ -4843,6 +4842,16 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
                     _printf("Option %s not found in HostOption %s\n", FindChecksumName(override->second.option), FindChecksumName(override->first));
             }
             _printf("Finished storing OverrideData\n");
+
+            _printf("Truncating IniFile %s\n", IniPath);
+            FILE* f = fopen(IniPath, "w");
+            fclose(f);
+            for (auto it = options.begin(); it != options.end(); ++it)
+            {
+                char* name = FindChecksumName(it->first);
+                _printf("Adding Option to Ini %s\n", name);
+                OptionWriter->WriteInt("Script_Settings", name, it->second.value);
+            }
         }
         else
             _printf("Couldn't find HostOptions\n");

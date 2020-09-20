@@ -24,7 +24,7 @@ struct ShaderObject
     union
     {
         ShaderTexture* textures;
-        DWORD fixedAlpha;
+        DWORD alphaRef;
     };
 };
 

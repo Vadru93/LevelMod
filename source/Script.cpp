@@ -480,7 +480,7 @@ void QBScript::CreateQBTable(BYTE* table, bool level)
         memcpy(name, (char*)table, len);
 
         //_printf("QbAllocated %s\n", name);
-        map<int, char*>::iterator it = qbTable.find(key);
+        map<DWORD, char*>::iterator it = qbTable.find(key);
 
         if (it == qbTable.end())
         {
@@ -492,7 +492,7 @@ void QBScript::CreateQBTable(BYTE* table, bool level)
             //_printf("AddChecksum %s 0x%X\n", name, key);
             if (!level)
             {
-                qbTable.insert(pair<int, char*>(key, String::AddString(name)));
+                qbTable.insert(pair<DWORD, char*>(key, String::AddString(name)));
                 qbKeys.push_back(key);
             }
             else
@@ -500,7 +500,7 @@ void QBScript::CreateQBTable(BYTE* table, bool level)
                 it = levelTable.find(key);
                 if (it == levelTable.end())
                 {
-                    levelTable.insert(pair<int, char*>(key, String::AddLevelString(name)));
+                    levelTable.insert(pair<DWORD, char*>(key, String::AddLevelString(name)));
                     qbKeys.push_back(key);
                 }
             }
@@ -571,7 +571,7 @@ char* QBScript::GetQBKeyName(int checksum)
 {
     if (qbTable.size())
     {
-        std::map<int, char*>::iterator it;
+        std::map<DWORD, char*>::iterator it;
 
         it = qbTable.find(checksum);
 

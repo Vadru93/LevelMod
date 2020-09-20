@@ -92,8 +92,8 @@ namespace QScript
     struct QBScript
     {
         char* fileName;
-        std::map<int, char*> qbTable;
-        std::map<int, char*> levelTable;
+        std::map<DWORD, char*> qbTable;
+        std::map<DWORD, char*> levelTable;
 
         void CreateQBTable(BYTE* table, bool level = false);
 

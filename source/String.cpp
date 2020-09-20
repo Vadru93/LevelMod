@@ -128,7 +128,7 @@ namespace String
         {
             if (!useExtraMemory)
             {
-                if ((*(DWORD*)0x008E1E0C + len) >= 0x008E1D00)//Actually F0, but we keep some memory just in case we will reload QB files etc
+                if ((*(DWORD*)0x008E1E0C + len) >= 0x008E1DF0)//Actually F0, but we keep some memory just in case we will reload QB files etc
                 {
                     char  msg[256] = "";
                     _printf(("ExtraMemory reached @ %d strings"), GetNumStrings() + numExtraStrings);

@@ -171,7 +171,8 @@ void Gfx::LoadCustomShaders(char* path)
                         first = false;
                     }
                     _printf("Found sector numSplits %d\n", numSplits);
-                    __assume(numSplits < 5);
+
+                    __assume(numSplits < 5);//To prevent warnings
                     for (DWORD j = 0; j < numSplits; j++)
                     {
                         DWORD matIndex = ReadDWORD();
@@ -228,8 +229,7 @@ void Gfx::LoadCustomShaders(char* path)
                         else
                         {
                             _printf("fixed alpha? %X\n", pFile);
-                            shaders[numShaders].fixedAlpha = ReadDWORD();
-                            shaders[numShaders].fixedAlpha = 0;
+                            shaders[numShaders].alphaRef = ReadDWORD();
                         }
                         numShaders++;
                     }
@@ -273,6 +273,148 @@ bool reset = false;
 bool restore = false;
 bool restoreMaterial = false;
 bool restore_env = false;
+
+void __stdcall SetVertexShader_hook()
+{
+    static DWORD oldShader = 0x005CEDB4;
+    static DWORD pReturn = 0x00550DC0;
+    static DWORD ShaderTextureSkip = (sizeof(ShaderTexture) - 4);
+    static D3DMATRIX env_mat = { 0.5f,  0.0f, 0.0f, 0.0f,
+                                 0.0f, -0.5f, 0.0f, 0.0f,
+                                 0.0f,  0.0f, 0.0f,	0.0f,
+                                 0.5f,  0.5f, 0.0f, 0.0f };
+
+    static ShaderObject* pShader = NULL;
+
+    //loadedShaders is false until shaders are fully loaded.
+    if (loadedShaders)
+    {
+        //skip 10 bytes to get pointer to our matsplit
+        _asm add esi, 0x10
+        _asm mov esi, [esi]
+
+            //Check for NULL
+            _asm test esi, esi
+        _asm je SKIP;
+
+        //Get pointer to material
+        _asm mov esi, [esi];
+
+        //Check for NULL
+        _asm test esi, esi;
+        _asm je SKIP;
+
+        //Custom shader pointer is is now 240 bytes from here
+        _asm add esi, 0xF0;
+        _asm mov edi, [esi];
+
+        //Check if pointer is NULL
+        _asm test edi, edi
+        _asm je SKIP;
+
+        //Tell the engine we wanna reset textures next call
+        reset = true;
+
+
+        //Get old pixelshader
+        DWORD oldPixelShader = *(DWORD*)0x005CEDB4;
+
+        _asm mov pShader, edi;
+
+        if (false && pShader->shaderId != oldPixelShader)
+        {
+            //Move the shader into old location
+            *(DWORD*)0x005CEDB4 = pShader->shaderId;
+
+            //pDevice->SetPixelShader(pShader->shaderId);
+        }
+    
+        /*if (pShader->env_tiling[0])
+        {
+            restore_env = true;
+            env_mat.m[0][0] = pShader->env_tiling[0];
+            env_mat.m[1][1] = pShader->env_tiling[1];
+            pDevice->SetTransform(D3DTS_TEXTURE0, &env_mat);
+            pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
+            pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_CAMERASPACEREFLECTIONVECTOR);
+        }
+        else if(restore_env)
+        {
+            restore_env = false;
+            pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+            pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
+        }*/
+
+        pDevice->SetMaterial(pShader->material);
+
+
+        //Get old blend_op
+        DWORD old_blend = *(DWORD*)(D3DRS_BLENDOP * 4 + 0x00971948);
+        //Set wanted blend_op
+        *(DWORD*)(D3DRS_BLENDOP * 4 + 0x00971C18) = pShader->blend_op;
+        if (old_blend != pShader->blend_op)
+        {
+            //Set old blend_op
+            *(DWORD*)(D3DRS_BLENDOP * 4 + 0x00971948) = pShader->blend_op;
+            pDevice->SetRenderState(D3DRS_BLENDOP, pShader->blend_op);
+        }
+
+        old_blend = *(DWORD*)(D3DRS_SRCBLEND * 4 + 0x00971948);
+        //Set wanted src_blend
+        *(DWORD*)(D3DRS_SRCBLEND * 4 + 0x00971C18) = pShader->src_blend;
+        if (old_blend != pShader->src_blend)
+        {
+            //Set old src_blend
+            *(DWORD*)(D3DRS_SRCBLEND * 4 + 0x00971948) = pShader->src_blend;
+            pDevice->SetRenderState(D3DRS_SRCBLEND, pShader->src_blend);
+        }
+
+        old_blend = *(DWORD*)(D3DRS_DESTBLEND * 4 + 0x00971948);
+        //Set wanted dest_blend
+        *(DWORD*)(D3DRS_DESTBLEND * 4 + 0x00971C18) = pShader->dest_blend;
+        if (old_blend != pShader->dest_blend)
+        {
+            //Set old blend_op
+            *(DWORD*)(D3DRS_DESTBLEND * 4 + 0x00971948) = pShader->dest_blend;
+            pDevice->SetRenderState(D3DRS_DESTBLEND, pShader->dest_blend);
+        }
+
+        old_blend = *(DWORD*)(D3DRS_ALPHAREF*4 + 0x00971948);
+        *(DWORD*)(D3DRS_ALPHAREF * 4 + 0x00971C18) = pShader->alphaRef;
+        if (old_blend != pShader->alphaRef)
+        {
+            *(DWORD*)(D3DRS_ALPHAREF * 4 + 0x00971948) = pShader->alphaRef;
+            pDevice->SetRenderState(D3DRS_ALPHAREF, pShader->alphaRef);
+        }
+        _asm pop edi
+        _asm pop esi
+        _asm mov esp, ebp
+        _asm pop ebp
+        _asm jmp[pReturn];
+
+    SKIP:
+
+        //Reset extralayer textures to NULL
+        //Maybe also need to reset blendmodes???
+        if (reset)
+        {
+
+            if (restore_env)
+            {
+                restore_env = false;
+                pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+                pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
+            }
+      
+        }
+
+    }
+    _asm pop edi
+    _asm pop esi
+    _asm mov esp, ebp
+    _asm pop ebp
+    _asm jmp[pReturn];
+}
 
 
 __declspec(naked) void __cdecl SetVertexShader_naked()

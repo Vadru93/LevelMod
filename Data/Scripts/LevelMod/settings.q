@@ -9,7 +9,8 @@ LM_HostOptions = [
     { Type = textmenuelement auto_id text = "LevelMod HostOptions" static dont_gray drawer = title }
 	{ LM_HostOption_MenuItem  name = LM_HostOption_bSpine Value = 1 id = LM_HostOption_bSpine_id override_true = LM_Control_bSpine params = { name = LM_HostOption_bSpine id = LM_HostOption_bSpine_id on = "Spine: Allowed" off = "Spine: Disallowed" } }
 	{ LM_HostOption_MenuItem  name = LM_HostOption_bLimitTags Value = 0 id = LM_HostOption_bLimitTags_id override_false = LM_GameOption_bLimitTags  params = { name = LM_HostOption_bLimitTags id = LM_HostOption_bLimitTags_id off = "32 TagFix: Allowed" on = "32 TagFix: Disallowed" } }
-
+	{ LM_HostOption_MenuItem  name = LM_HostOption_bWallplant Value = 1 id = LM_HostOption_bWallplant_id override_true = LM_Control_bWallplant  params = { name = LM_HostOption_bWallplant id = LM_HostOption_bWallplant_id on = "Wallplant: Allowed" off = "Wallplant: Disallowed" } }
+    //{ LM_HostOption_MenuItem  name = LM_HostOption_bWalliePlant Value = 1 id = LM_HostOption_bWalliePlant_id override_true = LM_Control_bWalliePlant  params = { name = LM_HostOption_bWalliePlant id = LM_HostOption_bWalliePlant_id on = "Wallieplant: Allowed" off = "Wallieplant: Disallowed" } }
 ]
 
 BlendModes = [

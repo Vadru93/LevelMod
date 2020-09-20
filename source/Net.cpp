@@ -2,7 +2,7 @@
 #include "Settings.h"
 
 using namespace LevelModSettings;
-extern std::map<int, OverrideOption> overrideOptions;
+extern std::map<DWORD, OverrideOption> overrideOptions;
 
 
 namespace Network
