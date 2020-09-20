@@ -147,9 +147,9 @@ void CommandGetInfo(const char* message)
     _printf("LevelPermanentHeap %d %X(MAX %X)\n\n", String::GetNumStrings(String::HEAP::LEVEL), String::GetHeapSize(String::HEAP::LEVEL), String::GeHeapMaxSize(String::HEAP::LEVEL));
     //MessageBox(0, 0, 0, 0);
 
-    using namespace Network;
+    /*using namespace Network;
     char test[128] = "Test Message";
-    SendMessageToClients(MSG_ID_LM_TEST, 128, &test);
+    SendMessageToClients(MSG_ID_LM_TEST, 128, &test);*/
 
 
 }
