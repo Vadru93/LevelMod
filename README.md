@@ -16,7 +16,7 @@ LevelMod features:
 You also need the 1.01 patch found here https://community.pcgamingwiki.com/files/file/339-tony-hawks-pro-skater-3-patch/ 
 1. Make sure you have the last LevelMod Full release installed from chapter-3.net thread
 2. Look for Levelmod.flt file and remove it if found
-3. Download latest realease
+3. Download latest realease from https://github.com/Vadru93/LevelMod/releases
 4. Copy to your game folder and replace all the files if asked. However, for the first install it shouldn't replace any existing files
 5. Make sure you have Visual Studio Redist x86 2019 https://aka.ms/vs/16/release/vc_redist.x86.exe
 6. For people with windows 10, make sure you set full rights to the thps3 folder to(aka remove read-only property) and run game as admin.
