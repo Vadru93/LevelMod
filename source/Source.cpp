@@ -3283,13 +3283,24 @@ Skater* oldSkater;
 
 void LoadCustomShaderThread()
 {
+    //We have started a new game
+
+    //First update skater pointer
+    Game::skater = Skater::UpdateSkater();
+
+    //Then check if we are host and if we are, send the HostOptions to clients
+    Network::NetHandler* net_handler = Network::NetHandler::Instance();
+
+    if (net_handler->InNetGame() && net_handler->OnServer())
+    {
+        for (auto it = LevelModSettings::overrideOptions.begin(); it != LevelModSettings::overrideOptions.end(); ++it)
+        {
+            SendHostOptionChanged(it->first, it->second.value);
+        }
+    }
+
+    //Then update shaders
     Gfx::LoadCustomShaders(ShaderFile);
-    /*Sleep(3000);
-    while (Game::skater == oldSkater)
-    {*/
-        Game::skater = Skater::UpdateSkater();
-        /*Sleep(100);
-    }*/
 }
 
 bool OnPostLevelLoad(CStruct* pStruct, CScript* pScript)
