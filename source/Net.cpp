@@ -64,11 +64,14 @@ namespace Network
         _asm mov handler, ecx;
         //Add the original message that we have replaced with our hook
         handler->AddMessage(msg_id, pCallback, flags, net_handler, prio);
+        Manager* net_man = Manager::Instance();
         //When host change a HostOption the host will send out a message
         //When the client gets the message the option linked to the HostOption should get overriden
         //It's possible to override only true, only false, or both
         //To add a new HostOption, add them to the struct in settings.q
+        net_man->SetMessageDesc(MSG_ID_LM_HOSTOPTION_CHANGED, "LM - HostOption Update");
         handler->AddMessage(MSG_ID_LM_HOSTOPTION_CHANGED, Handle_HostOption_Changed, HANDLER_LATE, net_handler);
+        net_man->SetMessageDesc(MSG_ID_LM_TEST, "LM - Test Message");
         handler->AddMessage(MSG_ID_LM_TEST, Handle_Test, HANDLER_LATE, net_handler);
     }
 
