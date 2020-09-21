@@ -13,8 +13,9 @@ LevelMod features:
 
 ### How to install
 1. Make sure you have the last LevelMod Full release installed from chapter-3.net thread
-2. Download latest realease
-3. Copy to your game folder and replace all the files if asked. However, for the first install it shouldn't replace any existing files
+2. Look for Levelmod.flt file and remove it if found
+3. Download latest realease
+4. Copy to your game folder and replace all the files if asked. However, for the first install it shouldn't replace any existing files
 
 If you want for some reason to play the original game, you can just rename d3d8.dll and the game becomes vanilla untouched. All the mod scripts are now stored in a LevelMod subfolder.
 
