@@ -4937,7 +4937,7 @@ EXTERN QBKeyHeader* GetQBKeyHeader(unsigned long QBKey)
     return ((GetQBKeyHeaderFunc)(0x00426340))(QBKey);//didn't find header lets let game search through sub qbTables
 }
 
-LPDIRECT3DDEVICE9 pDevice = NULL;
+__restrict LPDIRECT3DDEVICE9 pDevice = NULL;
 
 void DrawLines()
 {

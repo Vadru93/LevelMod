@@ -27,15 +27,22 @@ namespace Network
 
     int Handle_HostOption_Changed(HostOptionMsg* msg)
     {
-        auto it = LevelModSettings::overrideOptions.find(msg->option);
-        if (it != LevelModSettings::overrideOptions.end())
+        NetHandler* net_handler = NetHandler::Instance();
+        if (!net_handler->OnServer())
         {
-            _printf("Host changed HostOption %s %d\n", FindChecksumName(msg->option), msg->value);
-            it->second.value = msg->value;
+            auto it = LevelModSettings::overrideOptions.find(msg->option);
+            if (it != LevelModSettings::overrideOptions.end())
+            {
+                _printf("Host changed HostOption %s %d\n", FindChecksumName(msg->option), msg->value);
+                it->second.value = msg->value;
+                if (it->second.type == OverrideOption::Type::OVERRIDE ||
+                    (it->second.type == OverrideOption::Type::OVERRIDE_TRUE && !it->second.value) ||
+                    (it->second.type == OverrideOption::Type::OVERRIDE_FALSE && it->second.value))
+                    UpdateOption(it->second.option, it->second.value);
+            }
+            else
+                _printf("Couldn't find HostOption %s...\n", FindChecksumName(msg->option));
         }
-        else
-            _printf("Couldn't find HostOption %s...\n", FindChecksumName(msg->option));
-
         return HANDLER_CONTINUE;
     }
 

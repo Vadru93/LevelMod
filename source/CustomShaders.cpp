@@ -5,7 +5,7 @@
 
 #define ReadDWORD() *(DWORD*)pFile; pFile+=4
 
-extern LPDIRECT3DDEVICE9 pDevice;
+extern __restrict LPDIRECT3DDEVICE9 pDevice;
 
 
 /*ShaderObject* shaders = NULL;
@@ -379,13 +379,13 @@ void __stdcall SetVertexShader_hook()
             pDevice->SetRenderState(D3DRS_DESTBLEND, pShader->dest_blend);
         }
 
-        old_blend = *(DWORD*)(D3DRS_ALPHAREF*4 + 0x00971948);
+       /* old_blend = *(DWORD*)(D3DRS_ALPHAREF*4 + 0x00971948);
         *(DWORD*)(D3DRS_ALPHAREF * 4 + 0x00971C18) = pShader->alphaRef;
         if (old_blend != pShader->alphaRef)
         {
             *(DWORD*)(D3DRS_ALPHAREF * 4 + 0x00971948) = pShader->alphaRef;
             pDevice->SetRenderState(D3DRS_ALPHAREF, pShader->alphaRef);
-        }
+        }*/
         _asm pop edi
         _asm pop esi
         _asm mov esp, ebp

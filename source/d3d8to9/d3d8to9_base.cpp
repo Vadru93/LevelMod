@@ -221,7 +221,7 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
     IDirect3DDevice9* DeviceInterface = nullptr;
 
     HRESULT hr = ProxyInterface->CreateDevice(Adapter, DeviceType, hFocusWindow, BehaviorFlags, &PresentParams, &DeviceInterface);
-    extern LPDIRECT3DDEVICE9 pDevice;
+    extern __restrict LPDIRECT3DDEVICE9 pDevice;
     pDevice = DeviceInterface;
 
     if (FAILED(hr))
