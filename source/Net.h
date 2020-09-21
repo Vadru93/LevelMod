@@ -209,6 +209,30 @@ namespace Network
         }
     };
 
+    struct Manager
+    {
+
+        static Manager* Instance()
+        {
+            return *(Manager**)0x008F0D10;
+        }
+        char* GetMessageDesc(BYTE msg_id)
+        {
+            char* desc = (char*)this;
+            desc += 0x28;
+            _printf("this %p desc %p %p\n", this, desc, &desc[32 * msg_id]);
+            return &desc[32 * msg_id];
+        }
+
+        void SetMessageDesc(BYTE msg_id, char* desc)
+        {
+            if (strlen(desc) > 31)
+            {
+                MessageBox(0, "Too long MessageDesc", "Maximum is 31 bytes", 0);
+            }
+            strncpy(GetMessageDesc(msg_id), desc, 31);
+        }
+    };
 
     struct NetHandler
     {
