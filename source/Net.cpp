@@ -64,6 +64,7 @@ namespace Network
         //When the client gets the message the option linked to the HostOption should get overriden
         //It's possible to override only true, only false, or both
         //To add a new HostOption, add them to the struct in settings.q
+        MessageBox(0, 0, 0, 0);
         handler->AddMessage(MSG_ID_LM_HOSTOPTION_CHANGED, Handle_HostOption_Changed, HANDLER_LATE, net_handler);
         handler->AddMessage(MSG_ID_LM_TEST, Handle_Test, HANDLER_LATE, net_handler);
     }

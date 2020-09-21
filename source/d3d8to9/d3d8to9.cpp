@@ -147,6 +147,7 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 
     VirtualProtect((void*)0x004DC7C9, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((void*)0x004DC635, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+    VirtualProtect((void*)0x000F4241, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
 
     /*FixMemoryProtection();
 
@@ -159,9 +160,11 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
     //*(DWORD*)0x0041134F *= 2;
 
     //MessageHandler
-    *(DWORD*)0x004DC7C9 *= 2;
+    *(DWORD*)0x004DC7C9 *= 4;
     //NetHandler
-    *(DWORD*)0x004DC635 *= 2;
+    *(DWORD*)0x004DC635 *= 4;
+    //Unk
+    //*(DWORD*)0x000F4241 *= 2;
 
 
     VirtualProtect((void*)0x0042BFE2, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);

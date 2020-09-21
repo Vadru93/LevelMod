@@ -121,8 +121,8 @@ namespace Network
 
         //LM Specific IDs
         //To make sure we don't overlap messages with unknown IDs we skip a few numbers
-        NUM_ORIGINAL_IDS = 139,                     //Number of original IDS    
-        MSG_ID_LM_HOSTOPTION_CHANGED,           //  = 140 : S->C Host option changed
+        NUM_ORIGINAL_IDS = 110,                     //Number of original IDS    
+        MSG_ID_LM_HOSTOPTION_CHANGED,           //  = 111 : S->C Host option changed
         MSG_ID_LM_TEST,
         TOTAL_IDS,
     };
