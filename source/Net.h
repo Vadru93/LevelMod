@@ -189,10 +189,12 @@ namespace Network
         Skater* skater;
         void* connection;
 
-        void* GetConnection()
+        void* GetConnectionHandler()
         {
-            _printf("Connection %p Skater? %p\n", connection, skater);
-            return connection;
+            _printf("Connection %p %p Skater? %p\n", connection, (void*)(*(DWORD*)connection + 0x3C), skater);
+            if (connection)
+                return (void*)(*(DWORD*)connection + 0x3C);
+            return NULL;
         }
     };
 
@@ -257,7 +259,7 @@ namespace Network
 
             for (Player* player = FirstPlayerInfo(&PlayerInfoList, include_observers); player; player = NextPlayerInfo(&PlayerInfoList, include_observers))
             {
-                server->EnqueueMessage(player->GetConnection(), msg_id, len, data, prio, queue, flag1, flag2);
+                server->EnqueueMessage(player->GetConnectionHandler(), msg_id, len, data, prio, queue, flag1, flag2);
             }
         }
 
