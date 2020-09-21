@@ -14,12 +14,8 @@ doc: |
   - speedup reading, webide is super slow for some reason
   
 seq:
-  - id: unk1
-    type: u4
-  - id: unk2
-    type: u4
-  - id: unk3
-    type: u4
+  - id: versions
+    type: version
   - id: num_materials
     type: u4
   - id: materials
@@ -34,18 +30,26 @@ seq:
     repeat-expr: num_meshes
     
 types:
+  version:
+    seq:
+      - id: materials
+        type: u4
+      - id: meshes
+        type: u4
+      - id: vertices
+        type: u4
   material:
     seq:
       - id: checkum
         type: u4
       - id: num_passes
         type: u4
-      - id: unk1
+      - id: alpha_cutoff
         type: u4     
-      - id: unk2
+      - id: sorted
         type: u1
       - id: draw_order
-        type: f4  
+        type: f4
       - id: double_sided
         type: u1  
       - id: has_grass
@@ -159,16 +163,9 @@ types:
       - id: num_passes
         type: u4
       - id: uv_pass
-        type: uv
-        repeat: expr
-        repeat-expr: num_passes
+        size: num_passes * _parent.num_verts * 8
 
-  uv:
-    seq:
-      - id: entry
-        type: vector2f
-        repeat: expr
-        repeat-expr: _parent._parent.num_verts
+
 
   mat_split:
     seq:
