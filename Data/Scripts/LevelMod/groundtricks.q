@@ -128,7 +128,7 @@ TrickDef_NoseManual = {
 	Nollie 
 	OffMeterTop = ManualLand 
 	OffMeterBottom = NoseManualBail 
-	NoseManual_Branchlinks
+	Manual_Branchlinks
 } 
 	
 Trick_NoseManual = { SCR_MANUAL Params = TrickDef_NoseManual }
@@ -174,7 +174,7 @@ TrickDef_Pivot = {
 	SpeedMult = 1.2 
 	OffMeterTop = ManualLand 
 	OffMeterBottom = NoseManualBail 
-	NoseManual_Branchlinks
+	Manual_Branchlinks
 } 
 
 Trick_Gturn2 = { Trigger = { Press R2 200 } Scr = ManualLink Params = TrickDef_Pivot }
@@ -185,11 +185,7 @@ Manual_Branchlinks = {
 	NewExtraTricks2 = NewFlatlandBranches 
 }
 
-NoseManual_Branchlinks = {
-	ExtraTricks = NoseManualBranches 
-	NewExtraTricks = NoseManualBranches 
-	NewExtraTricks2 = NewFlatlandBranches 
-}
+
 
 TrickDef_AntiCasper = { 
 	Name = 'Anti Casper' 
