@@ -13,12 +13,12 @@ LevelMod features:
 
 ### How to install
 **Important!** The mod requires original game to be installed on your computer. You cannot play the mod without original files.
-You also need the 1.01 patch [.Links](#links)
+You also need the 1.01 patch [Links](#links)
 1. Make sure you have the last LevelMod Full release installed from chapter-3.net thread
 2. Look for Levelmod.flt file and remove it if found
-3. Download latest realease [.Links](#links)
+3. Download latest realease [Links](#links)
 4. Copy to your game folder and replace all the files if asked. However, for the first install it shouldn't replace any existing files
-5. Make sure you have Visual Studio Redist x86 2019 [.Links](#links)
+5. Make sure you have Visual Studio Redist x86 2019 [Links](#links)
 6. For people with windows 10, make sure you set full rights to the thps3 folder to(aka remove read-only property) and run game as admin.
 
 If you want for some reason to play the original game, you can just rename d3d8.dll and the game becomes vanilla untouched. All the mod scripts are now stored in a LevelMod subfolder.
