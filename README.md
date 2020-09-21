@@ -12,6 +12,7 @@ LevelMod features:
 - intergrated patches like 251x or 32 tag counter limit.
 
 ### How to install
+**Important!** The mod requires original game to be installed on your computer. You cannot play the mod without original files.
 1. Make sure you have the last LevelMod Full release installed from chapter-3.net thread
 2. Look for Levelmod.flt file and remove it if found
 3. Download latest realease
