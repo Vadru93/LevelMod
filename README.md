@@ -19,6 +19,7 @@ You also need the 1.01 patch found here https://community.pcgamingwiki.com/files
 3. Download latest realease
 4. Copy to your game folder and replace all the files if asked. However, for the first install it shouldn't replace any existing files
 5. Make sure you have Visual Studio Redist x86 2019 https://aka.ms/vs/16/release/vc_redist.x86.exe
+6. For people with windows 10, make sure you set full rights to the thps3 folder to(aka remove read-only property) and run game as admin.
 
 If you want for some reason to play the original game, you can just rename d3d8.dll and the game becomes vanilla untouched. All the mod scripts are now stored in a LevelMod subfolder.
 
