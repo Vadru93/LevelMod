@@ -211,26 +211,24 @@ namespace Network
 
     struct Manager
     {
-
+        BYTE unk[0x28];
+        char msg_names[255 * 32];//number of messages*32(max size of message name is 31 + null termination
         static Manager* Instance()
         {
             return *(Manager**)0x008F0D10;
         }
-        char* GetMessageDesc(BYTE msg_id)
+        char* GetMessageName(BYTE msg_id)
         {
-            char* desc = (char*)this;
-            desc += 0x28;
-            _printf("this %p desc %p %p\n", this, desc, &desc[32 * msg_id]);
-            return &desc[32 * msg_id];
+            return &msg_names[32 * msg_id];
         }
 
-        void SetMessageDesc(BYTE msg_id, char* desc)
+        void SetMessageName(BYTE msg_id, char* name)
         {
-            if (strlen(desc) > 31)
+            if (strlen(name) > 31)
             {
-                MessageBox(0, "Too long MessageDesc", "Maximum is 31 bytes", 0);
+                MessageBox(0, "Too long Message Name", "Maximum is 31 bytes", 0);
             }
-            strncpy(GetMessageDesc(msg_id), desc, 31);
+            strncpy(GetMessageName(msg_id), name, 31);
         }
     };
 
