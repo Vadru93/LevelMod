@@ -50,9 +50,9 @@ namespace Network
         return HANDLER_CONTINUE;
     }
 
-    int Handle_Test(TestMsg* msg)
+    int Handle_Test(NetMessage* msg)
     {
-        _printf("Host sent testmsg %s\n", msg->test);
+        _printf("Host sent testmsg %s\nApp %p Conn %p %X %X\n%X %X\n", msg->msg, msg->app, msg->conn, msg->id, msg->flags, msg->client, msg->retAddr);
         return HANDLER_CONTINUE;
     }
 

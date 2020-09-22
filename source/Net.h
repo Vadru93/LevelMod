@@ -4,6 +4,11 @@
 #include "Skater.h"
 
 
+//004367E0 mdl::skate::instance aka Engine
+//0046FF60 GetGameMode
+//0046FF67 GetNameChecksum
+//00438B60 GetProfile
+
 namespace Network
 {
     struct HostOptionMsg
@@ -180,32 +185,105 @@ namespace Network
         }
     };
 
+    struct Connection
+    {
 
+        //Status is 0x5C
+        enum Status
+        {
+            mSTATUS_READY = 0x0001,
+            mSTATUS_BUSY = 0x0002,
+            mSTATUS_INVALID = 0x0004,
+            mSTATUS_DISCONNECTING = 0x0008
+        };
+
+        enum
+        {
+            mLOCAL = 0x01,	// local connection: i.e. on this machine
+            mREMOTE = 0x02,	// remote connection: i.e. on another machine
+            mFOREIGN = 0x04,	// foreign connection: i.e. one we don't recognize
+        };
+
+        enum
+        {
+            vHANDLE_INVALID = 0,
+            vHANDLE_FIRST = 1,
+        };
+
+        void* GetHandler()
+        {
+            _printf("Connection %p %p\n", this, (void*)(*(DWORD*)this + 0x3C));
+             return (void*)(*(DWORD*)this + 0x3C);
+        }
+
+        void Invalidate()
+        {
+            typedef void(__thiscall* const pInvalidate)(Connection* pThis);
+            pInvalidate(0x004DD9F0);
+        }
+
+        bool IsLocal()
+        {
+            typedef void(__thiscall* const pIsLocal)(Connection* pThis);
+            pIsLocal(0x004DDA30)(this);
+        }
+    };
 
     struct Player
     {
         DWORD** memberFunctions;
         BYTE unk1[0x10];
         Skater* skater;
-        void* connection;
+        Connection* conn;
 
-        void* GetConnectionHandler()
+        void* GetConnHandler()
         {
-            _printf("Connection %p %p Skater? %p\n", connection, (void*)(*(DWORD*)connection + 0x3C), skater);
-            if (connection)
-                return (void*)(*(DWORD*)connection + 0x3C);
-            return NULL;
+            _printf("Skater? %p\n", skater);
+            if (conn)
+                return conn->GetHandler();
+            else
+                return NULL;
         }
     };
 
 
 
-    struct Server
+    struct App
     {
-        typedef bool(__thiscall* const pEnqueuetMessage)(Server* pThis, void* connection, unsigned char msg_id, DWORD len, void* data, int prio, int queue, int flag1, int flag2);
+        typedef bool(__thiscall* const pEnqueuetMessage)(App* pThis, void* connection, unsigned char msg_id, DWORD len, void* data, int prio, int queue, int flag1, int flag2);
         void EnqueueMessage(void* connection, unsigned char msg_id, DWORD len, void* data, int prio = NORMAL_PRIO, int queue = QUEUE_DEFAULT, int flag1 = 0, int flag2 = 0)
         {
             pEnqueuetMessage(0x004DB4A0)(this, connection, msg_id, len, data, prio, queue, flag1, flag2);
+        }
+
+        bool SendMessageTo(BYTE msg_id, void* msg, int ip, WORD port, int flags = 0)
+        {
+            typedef void(__thiscall* const pSendMessageTo)(App* pThis, BYTE msg_id, bool some_flag, void* msg, int ip, WORD port, int flags);
+            pSendMessageTo(0x004DBE80)(this, msg_id, true, msg, ip, port, flags);
+        }
+
+        bool AcceptsForeignConnections()
+        {
+            typedef void(__thiscall* const pAcceptsForeignConnections)(App* pThis);
+            pAcceptsForeignConnections(0x004DC2D0)(this);
+        }
+
+        Connection* NewConnection(int ip, WORD port, int flags = Connection::mREMOTE)
+        {
+            typedef void(__thiscall* const pNewConnection)(App* pThis, int ip, WORD port, int flags);
+            pNewConnection(0x004DAA20)(this, ip, port, flags);
+        }
+
+    };
+
+    struct GameNetManager
+    {
+        //0046FFFA DeferredNewPlayer
+        //0046FF32 GetNextPlayerObjectId
+        //Instance 004367E0
+        bool GameIsOver()
+        {
+            //call 00478E30
         }
     };
 
@@ -245,9 +323,9 @@ namespace Network
             return *(NetHandler**)0x008E2498;
         }
 
-        Server* GetServer()
+        App* GetNetApp()
         {
-            return server;
+            return app;
         }
 
         bool OnServer()
@@ -276,17 +354,17 @@ namespace Network
 
         void SendMessageToClients(unsigned char msg_id, DWORD len, void* data, int prio = NORMAL_PRIO, int queue = QUEUE_DEFAULT, int flag1 = 0, int flag2 = 0, bool include_observers = false)
         {
-            Server* server = GetServer();
+            App* net_app = GetNetApp();
             PlayerInfo PlayerInfoList = PlayerInfo();
 
             for (Player* player = FirstPlayerInfo(&PlayerInfoList, include_observers); player; player = NextPlayerInfo(&PlayerInfoList, include_observers))
             {
-                server->EnqueueMessage(player->GetConnectionHandler(), msg_id, len, data, prio, queue, flag1, flag2);
+                net_app->EnqueueMessage(player->GetConnHandler(), msg_id, len, data, prio, queue, flag1, flag2);
             }
         }
 
     private:
-        Server* server;
+        App* app;
 
         Player* FirstPlayerInfo(PlayerInfo* PlayerInfoList, bool include_observers = false)
         {
@@ -305,6 +383,31 @@ namespace Network
     bool OnServer();
 
     void SendMessageToClients(unsigned char msg_id, DWORD len, void* data, int prio = NORMAL_PRIO, int queue = QUEUE_DEFAULT, int flag1 = 0, int flag2 = 0, bool include_observers = false);
+
+    struct NetMessage
+    {
+        char msg[4096];
+        union
+        {
+            BYTE id;//Message id
+            int packet_flags;//socket flags?
+        };
+        App* app;//NetApp
+        Connection* conn;//The senders Connection info
+        int flags;//HANDLE_FORIEGEN etc
+        void* client;
+        DWORD retAddr;//Actually not part of NetMessage, but added for debug and maybe some future usage
+
+        void* GetConnHandler()
+        {
+            if (conn)
+                return conn->GetHandler();
+            else
+                return NULL;
+        }
+
+        
+    };
 
     /*struct MsgHandlerContext
     {
