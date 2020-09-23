@@ -14,5 +14,7 @@
 #include "debug.h"
 #include "Memory.h"
 #include "Net.h"
+#include "GameMode.h"
+#include "SkateModule.h"
 
 #endif //PCH_H

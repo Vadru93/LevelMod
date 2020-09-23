@@ -130,6 +130,7 @@
     <ClCompile Include="source\debug.cpp" />
     <ClCompile Include="source\Defines.cpp" />
     <ClCompile Include="source\Extension.cpp" />
+    <ClCompile Include="source\GameMode.cpp" />
     <ClCompile Include="source\Globals.cpp" />
     <ClCompile Include="source\IniReader.cpp" />
     <ClCompile Include="source\IniWriter.cpp" />
@@ -169,6 +170,7 @@
     <ClInclude Include="source\Defines.h" />
     <ClInclude Include="source\Extension.h" />
     <ClInclude Include="source\framework.h" />
+    <ClInclude Include="source\GameMode.h" />
     <ClInclude Include="source\Globals.h" />
     <ClInclude Include="source\HTTPRequest.h" />
     <ClInclude Include="source\IniReader.h" />
@@ -185,6 +187,7 @@
     <ClInclude Include="source\QBKey.h" />
     <ClInclude Include="source\Script.h" />
     <ClInclude Include="source\Settings.h" />
+    <ClInclude Include="source\SkateModule.h" />
     <ClInclude Include="source\Skater.h" />
     <ClInclude Include="source\String.h" />
     <ClInclude Include="source\SuperSectors.h" />

@@ -4,10 +4,7 @@
 #include "Skater.h"
 
 
-//004367E0 mdl::skate::instance aka Engine
-//0046FF60 GetGameMode
-//0046FF67 GetNameChecksum
-//00438B60 GetProfile
+
 
 namespace Network
 {
@@ -224,8 +221,8 @@ namespace Network
 
         bool IsLocal()
         {
-            typedef void(__thiscall* const pIsLocal)(Connection* pThis);
-            pIsLocal(0x004DDA30)(this);
+            typedef bool(__thiscall* const pIsLocal)(Connection* pThis);
+            return pIsLocal(0x004DDA30)(this);
         }
     };
 
@@ -403,7 +400,7 @@ namespace Network
             if (conn)
                 return conn->GetHandler();
             else
-                return NULL;
+                return conn;//optimization instead of NULL
         }
 
         
