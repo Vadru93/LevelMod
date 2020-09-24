@@ -2444,6 +2444,7 @@ const CompiledScript scripts[] =
 { "KillMovingObject", KillMovingObjectScript},
 {"ChangeParamToUnnamed", ChangeParamToUnnamedScript},
 {"IsOptionOn", IsOptionOn},
+{"IsOptionOverriden", IsOptionOverriden},
 {"IsOptionOff", IsOptionOff},
 {"AddOption", AddOption},
 {"ToggleOption", ToggleOption},

@@ -618,6 +618,15 @@ SCRIPT LM_SetOption
 			GetOptionText option = <name> text = <TextFromValue>
 			printf "setting menu element text"
 			SetMenuElementText id = <id> <text>
+			
+			IF IsOptionOverriden <name>
+				printf "Overriden option"
+				MakeTextMenuElementStatic <option_id>
+			ELSE
+				IF GotParam option_id
+					MakeTextMenuElementStatic <option_id> nonstatic = 1
+				ENDIF
+			ENDIF
 		ELSE
 		    IF LM_GotParam Value
 			    GetParam Value
@@ -757,7 +766,24 @@ SCRIPT LM_ToggleOption
 			IF #"Not" GotParam TextOnly
 				printf "Toggle"
 				ToggleOption <name>
-			ENDIF
+				
+				IF GotParam TextFromValue
+				    printf "Updating TextFromValue"
+					IF GotParam option
+					    GetOptionText option = <option> text = <TextFromValue>
+					ELSE
+					    GetOptionText option = <name> text = <TextFromValue>
+				    ENDIF
+					SetMenuElementText id = <id> <text>
+				ELSE
+				    IF IsOptionOn <name>
+					    SetMenuElementText id = <id> <on>
+						printf "on"
+					ELSE
+					    SetMenuElementText id = <id> <off>
+					ENDIF
+				ENDIF
+			ELSE
 			
 			//update text if we have item id
 			//We need to use LM_GotParam because our param is inside a struct
@@ -780,18 +806,29 @@ SCRIPT LM_ToggleOption
 					ENDIF
 					SetMenuElementText id = <id> <text>
 				ELSE
-					IF IsOptionOn <name>
-						GetParam on
-						SetMenuElementText id = <id> <on>
-						printf "on"
-					ELSE
-						GetParam off
-						SetMenuElementText id = <id> <off>
-						printf "off"
+				    IF GotParam name
+					    IF IsOptionOn <name>
+						    GetParam on
+						    SetMenuElementText id = <id> <on>
+						    printf "on"
+					    ELSE
+						    GetParam off
+						    SetMenuElementText id = <id> <off>
+						    printf "off"
+					    ENDIF
+					ENDIF
+				ENDIF
+				IF IsOptionOverriden <name>
+				    printf "Overriden option"
+				    MakeTextMenuElementStatic <option_id>
+				ELSE
+				    IF GotParam option_id
+					    MakeTextMenuElementStatic <option_id> nonstatic = 1
 					ENDIF
 				ENDIF
 			ELSE
 				printf "without menu id!"
+			ENDIF
 			ENDIF
 		ENDIF
 		IF GotParam LinkedTo

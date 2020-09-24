@@ -161,6 +161,78 @@ TrickSpeed trickSpeed[] = {
 
 };
 
+bool IsOptionOverriden(CStruct* pStruct, CScript* pScript)
+{
+    CStructHeader* header = pStruct->head;
+
+    while (header)
+    {
+        if (header->Type == QBKeyHeader::LOCAL)
+        {
+            auto it = options.find(header->Data);
+            if (it != options.end())
+            {
+                if (it->second.override == 0)
+                {
+                    //Option is not linked to an HostOption, so return original value   
+                    return false;
+                }
+                else
+                {
+                    //Add the option_id
+                    CStructHeader* pParam = pScript->params->AllocateCStruct();
+                    if (!pParam)
+                    {
+                        _printf(__FUNCTION__ "couldn't Allocate CStruct...\n");
+                        return false;
+                    }
+
+                    if (pScript->params->head)
+                    {
+                        pScript->params->tail->NextHeader = pParam;
+                        pScript->params->tail = pParam;
+                    }
+                    else
+                    {
+                        pScript->params->head = pParam;
+                        pScript->params->tail = pParam;
+                    }
+                    pParam->Type = QBKeyHeader::QBKeyType::LOCAL;
+                    pParam->QBkey = Checksum("option_id");
+                    char name[128] = "";
+                    sprintf(name, "%s_id", FindChecksumName(header->Data));
+                    pParam->Data = Checksum(name);
+                    pParam->NextHeader = NULL;
+
+                    auto override = it->second.override;
+
+                    if ((override->type == OverrideOption::Type::OVERRIDE_TRUE && override->value != 0) //Only true is overriden
+                        || (override->type == OverrideOption::Type::OVERRIDE_FALSE && override->value == 0)) //Only false is overriden
+                    {
+                        //Option is not overriden
+                        return false;
+                    }
+                    else
+                    {
+                        //Option is overriden
+                        return true;
+                    }
+
+                }
+            }
+            else
+            {
+                //Should not happen
+                _printf(__FUNCTION__ " Couldn't find option %s\nRemember to add the option the the list\nCheck settings.q for more info\n", header->Data);
+            }
+
+        }
+        header = header->NextHeader;
+    }
+    _printf(__FUNCTION__" No Param? %s\n", FindChecksumName(pScript->scriptChecksum));
+    return false;
+}
+
 bool IsOptionOn(CStruct* pStruct, CScript* pScript)
 {
     CStructHeader* header = pStruct->head;
@@ -202,7 +274,7 @@ bool IsOptionOn(CStruct* pStruct, CScript* pScript)
         }
         header = header->NextHeader;
     }
-    _printf(__FUNCTION__" No Param?\n");
+    _printf(__FUNCTION__" No Param? %s\n", FindChecksumName(pScript->scriptChecksum));
     return false;
 }
 
