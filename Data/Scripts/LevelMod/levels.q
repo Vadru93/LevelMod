@@ -262,71 +262,6 @@ SCRIPT Load_Foo
 ENDSCRIPT
 
 
-//=========================================THUG1===============================================
-
-SCRIPT Load_NJ
-	AddMusicTrack "ambience\thug1\nj"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug1\nj\nj.bsp" lev_sky = "levels_ug1\nj\nj_sky.bsp" lev_qb = "levels_ug1\nj\nj.qb" loadscr = "images\load\ug1_nj.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_NY
-	AddMusicTrack "ambience\thug1\ny"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug1\ny\ny.bsp" lev_sky = "levels_ug1\ny\ny_sky.bsp" lev_qb = "levels_ug1\ny\ny.qb" loadscr = "images\load\ug1_ny.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_FL
-	AddMusicTrack "ambience\thug1\fl"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug1\fl\fl.bsp" lev_sky = "levels_ug1\fl\fl_sky.bsp" lev_qb = "levels_ug1\fl\fl.qb" loadscr = "images\load\ug1_fl.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_SD
-	AddMusicTrack "ambience\thug1\sd"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug1\sd\sd.bsp" lev_sky = "levels_ug1\sd\sd_sky.bsp" lev_qb = "levels_ug1\sd\sd.qb" loadscr = "images\load\ug1_sd.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_HI
-	AddMusicTrack "ambience\thug1\hi"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug1\hi\hi.bsp" lev_sky = "levels_ug1\hi\hi_sky.bsp" lev_qb = "levels_ug1\hi\hi.qb" loadscr = "images\load\ug1_hi.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_VC
-	AddMusicTrack "ambience\thug1\vc"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug1\vc\vc.bsp" lev_sky = "levels_ug1\vc\vc_sky.bsp" lev_qb = "levels_ug1\vc\vc.qb" loadscr = "images\load\ug1_vc.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_SJ
-	AddMusicTrack "ambience\thug1\sj"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug1\sj\sj.bsp" lev_sky = "levels_ug1\sj\sj_sky.bsp" lev_qb = "levels_ug1\sj\sj.qb" loadscr = "images\load\ug1_sj.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_RU
-	AddMusicTrack "ambience\thug1\ru"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug1\ru\ru.bsp" lev_sky = "levels_ug1\ru\ru_sky.bsp" lev_qb = "levels_ug1\ru\ru.qb" loadscr = "images\load\ug1_ru.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_SE
-	AddMusicTrack "ambience\thug1\se"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug1\se\se.bsp" lev_sky = "levels_ug1\se\se_sky.bsp" lev_qb = "levels_ug1\se\se.qb" loadscr = "images\load\ug1_se.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
-ENDSCRIPT
-
 //=========================================THUG2===============================================
 
 SCRIPT Load_AU_ug2
@@ -1098,10 +1033,10 @@ ENDSCRIPT
 
 //THPS2X TAMPA
 
-Def_Tampa = { 
+Def_Flor = { 
 	level_name = "Skate Park Tampa"
-	load_script = Load_Tampa 
-	level_id = tampa_id 
+	load_script = Load_Flor 
+	level_id = flor_id 
 	
 	//unlock_flag = FIX_LEVELMOD_FLAG 
 	
@@ -1117,8 +1052,8 @@ Def_Tampa = {
 	cnear = 12 cfar = 20000 
 }
 
-SCRIPT Load_Tampa
-	Load_Level_Func { Def_Tampa }
+SCRIPT Load_Flor
+	Load_Level_Func { Def_Flor }
 ENDSCRIPT
 
 //THPS2X SKY LINES
@@ -1345,7 +1280,7 @@ ENDSCRIPT
 Def_Sch = { 
 	level_name = "College" 
 	location = "California"
-	level_id = Sch_id 
+	level_id = college_id 
 	levelnum = Levelnum_New
 
 	th4_level regular_level NoCareer OnlineModes
@@ -1371,7 +1306,7 @@ ENDSCRIPT
 Def_SF2 = { 
 	level_name = "San Francisco" 
 	location = "California"
-	level_id = Sf2_id
+	level_id = sanfran2_id
 	levelnum = Levelnum_New
 
 	th4_level regular_level NoCareer OnlineModes
@@ -1397,7 +1332,7 @@ ENDSCRIPT
 Def_Alc = { 
 	level_name = "Alcatraz" 
 	location = "California Bay"
-	level_id = Alc_id
+	level_id = alcatraz_id
 	levelnum = Levelnum_New
 
 	th4_level regular_level NoCareer OnlineModes
@@ -1423,7 +1358,7 @@ ENDSCRIPT
 Def_Kon = { 
 	level_name = "Kona USA" 
 	location = "Jacksonville"
-	level_id = kon_id
+	level_id = kona_id
 	levelnum = Levelnum_New
 
 	th4_level regular_level NoCareer OnlineModes
@@ -1449,7 +1384,7 @@ ENDSCRIPT
 Def_Jnk = { 
 	level_name = "Shipyard" 
 	location = "unknown"
-	level_id = jnk_id
+	level_id = shipyard_id
 	levelnum = Levelnum_New
 
 	th4_level regular_level NoCareer OnlineModes
@@ -1474,8 +1409,8 @@ ENDSCRIPT
 
 Def_Lon = { 
 	level_name = "London" 
-	location = "UK"
-	level_id = lon_id
+	location = "United Kingdom"
+	level_id = london_id
 	levelnum = Levelnum_New
 
 	th4_level regular_level NoCareer OnlineModes
@@ -1500,7 +1435,7 @@ ENDSCRIPT
 
 Def_Zoo = { 
 	level_name = "Zoo" 
-	location = "UK"
+	location = "United Kingdom"
 	level_id = zoo_id
 	levelnum = Levelnum_New
 
@@ -1527,7 +1462,7 @@ ENDSCRIPT
 Def_Cnv = { 
 	level_name = "Carnival" 
 	location = "unknown (USA)"
-	level_id = cnv_id
+	level_id = carnival_id
 	levelnum = Levelnum_New
 
 	th4_level regular_level NoCareer OnlineModes
@@ -1553,7 +1488,7 @@ ENDSCRIPT
 Def_Hof = { 
 	level_name = "Chicago" 
 	location = "Illinois"
-	level_id = hof_id
+	level_id = hoffman_id
 	levelnum = Levelnum_New
 
 	th4_level regular_level NoCareer OnlineModes
@@ -1579,7 +1514,7 @@ ENDSCRIPT
 Def_Mot = { 
 	level_name = "MotoX" 
 	location = "unknown"
-	level_id = mot_id
+	level_id = motox_id
 	levelnum = Levelnum_New
 
 	th4_level regular_level NoCareer OnlineModes
@@ -1599,6 +1534,150 @@ Def_Mot = {
 SCRIPT Load_Mot
 	Load_Level_Func { Def_Mot }
 ENDSCRIPT
+
+
+
+//=========================================THUG1===============================================
+
+//THUG1 NEW JERSEY
+
+Def_NJ = { 
+	level_name = "New Jersey" 
+	location = "Trenton"
+	level_id = jersey_id
+	levelnum = Levelnum_New
+
+	ug1_level regular_level NoCareer OnlineModes
+
+	lev_bsp = "levels_ug1\nj\nj.bsp" 
+	lev_sky = "levels_ug1\nj\nj_sky.bsp" 
+	lev_qb = "levels_ug1\nj\nj.qb" 
+	lev_amb = "ambience\thug1\nj"
+	loadscr = "images\load\ug1_nj.png"
+
+	r = 165 g = 180 b = 202 a = 0 
+	cnear = 12 cfar = 20000
+
+	load_script = Load_NJ
+}
+
+SCRIPT Load_NJ
+	Load_Level_Func { Def_NJ }
+ENDSCRIPT
+
+//THUG1 MANHATTAN
+
+Def_NY = { 
+	level_name = "Manhattan" 
+	location = "New York"
+	level_id = manhattan_id
+	levelnum = Levelnum_New
+
+	ug1_level regular_level NoCareer OnlineModes
+
+	lev_bsp = "levels_ug1\ny\ny.bsp" 
+	lev_sky = "levels_ug1\ny\ny_sky.bsp" 
+	lev_qb = "levels_ug1\ny\ny.qb" 
+	lev_amb = "ambience\thug1\ny"
+	loadscr = "images\load\ug1_ny.png"
+
+	r = 165 g = 180 b = 202 a = 0 
+	cnear = 12 cfar = 20000
+
+	load_script = Load_NY
+}
+
+SCRIPT Load_NY
+	Load_Level_Func { Def_NY }
+ENDSCRIPT
+
+//THUG1 TAMPA
+
+Def_FL = { 
+	level_name = "Tampa" 
+	location = "Florida"
+	level_id = tampa_id
+	levelnum = Levelnum_New
+
+	ug1_level regular_level NoCareer OnlineModes
+
+	lev_bsp = "levels_ug1\fl\fl.bsp" 
+	lev_sky = "levels_ug1\fl\fl_sky.bsp" 
+	lev_qb = "levels_ug1\fl\fl.qb" 
+	lev_amb = "ambience\thug1\fl"
+	loadscr = "images\load\ug1_fl.png"
+
+	r = 165 g = 180 b = 202 a = 0 
+	cnear = 12 cfar = 20000
+
+	load_script = Load_FL
+}
+
+SCRIPT Load_FL
+	Load_Level_Func { Def_FL }
+ENDSCRIPT
+
+//THUG1 SAN DIEGO
+
+Def_SD = { 
+	level_name = "San Diego" 
+	location = "USA"
+	level_id = sandiego_id
+	levelnum = Levelnum_New
+
+	ug1_level regular_level NoCareer OnlineModes
+
+	lev_bsp = "levels_ug1\sd\sd.bsp" 
+	lev_sky = "levels_ug1\sd\sd_sky.bsp" 
+	lev_qb = "levels_ug1\sd\sd.qb" 
+	lev_amb = "ambience\thug1\sd"
+	loadscr = "images\load\ug1_sd.png"
+
+	r = 165 g = 180 b = 202 a = 0 
+	cnear = 12 cfar = 20000
+
+	load_script = Load_SD
+}
+SCRIPT Load_SD
+	Load_Level_Func { Def_SD }
+ENDSCRIPT
+
+SCRIPT Load_HI
+	AddMusicTrack "ambience\thug1\hi"
+	SetUpRioDeJaneiroLights
+	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug1\hi\hi.bsp" lev_sky = "levels_ug1\hi\hi_sky.bsp" lev_qb = "levels_ug1\hi\hi.qb" loadscr = "images\load\ug1_hi.png"
+	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
+ENDSCRIPT
+
+SCRIPT Load_VC
+	AddMusicTrack "ambience\thug1\vc"
+	SetUpRioDeJaneiroLights
+	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug1\vc\vc.bsp" lev_sky = "levels_ug1\vc\vc_sky.bsp" lev_qb = "levels_ug1\vc\vc.qb" loadscr = "images\load\ug1_vc.png"
+	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
+ENDSCRIPT
+
+SCRIPT Load_SJ
+	AddMusicTrack "ambience\thug1\sj"
+	SetUpRioDeJaneiroLights
+	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug1\sj\sj.bsp" lev_sky = "levels_ug1\sj\sj_sky.bsp" lev_qb = "levels_ug1\sj\sj.qb" loadscr = "images\load\ug1_sj.png"
+	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
+ENDSCRIPT
+
+SCRIPT Load_RU
+	AddMusicTrack "ambience\thug1\ru"
+	SetUpRioDeJaneiroLights
+	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug1\ru\ru.bsp" lev_sky = "levels_ug1\ru\ru_sky.bsp" lev_qb = "levels_ug1\ru\ru.qb" loadscr = "images\load\ug1_ru.png"
+	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
+ENDSCRIPT
+
+SCRIPT Load_SE
+	AddMusicTrack "ambience\thug1\se"
+	SetUpRioDeJaneiroLights
+	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug1\se\se.bsp" lev_sky = "levels_ug1\se\se_sky.bsp" lev_qb = "levels_ug1\se\se.qb" loadscr = "images\load\ug1_se.png"
+	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
+ENDSCRIPT
+
+
 
 master_level_list = [
 	//THPS3
@@ -1621,16 +1700,13 @@ master_level_list = [
 	{ Def_Han } { Def_Sc2 } { Def_Mar } { Def_NY1 } { Def_Ven } { Def_Ssv } { Def_Ph } { Def_Bul } { Def_Drop } { Def_Hvn }
 
 	//THPS2X
-	{ Def_Club } { Def_Cons } { Def_Tampa } { Def_Sway } { Def_Sky }
+	{ Def_Club } { Def_Cons } { Def_Flor } { Def_Sway } { Def_Sky }
 
 	//THPS4	
 	{ Def_Trn } { Def_Sch } { Def_Sf2 } { Def_Alc } { Def_Kon } { Def_Jnk } { Def_Lon } { Def_Zoo } { Def_Cnv } { Def_Hof } { Def_Mot }
 
 	//THUG
-	{ level_name = "New Jersey" load_script = Load_NJ level_id = jersey_id NoCareer regular_level ug1_level supports_ctf supports_own supports_bball }
-	{ level_name = "Manhattan" load_script = Load_NY level_id = manhattan_id NoCareer regular_level ug1_level supports_ctf supports_own supports_bball }
-	{ level_name = "Tampa" load_script = Load_FL level_id = tampa_id NoCareer regular_level ug1_level supports_ctf supports_own supports_bball }
-	{ level_name = "San Diego" load_script = Load_SD level_id = sandiego_id NoCareer regular_level ug1_level supports_ctf supports_own supports_bball }
+	{ Def_NJ } { Def_NY } { Def_FL } { Def_SD }
 	{ level_name = "Hawaii" load_script = Load_HI level_id = hawaii_id NoCareer regular_level ug1_level supports_ctf supports_own supports_bball }
 	{ level_name = "Vancouver" load_script = Load_VC level_id = vancouver_id NoCareer regular_level ug1_level supports_ctf supports_own supports_bball }
 	{ level_name = "Slam City Jam" load_script = Load_SJ level_id = slam_id NoCareer regular_level ug1_level supports_ctf supports_own supports_bball }
