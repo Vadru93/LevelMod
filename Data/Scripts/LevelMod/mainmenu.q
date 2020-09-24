@@ -642,7 +642,8 @@ single_session_menu_eventhandlers = [
 single_session_menu_children =  [ 
 	{ Type = textmenuelement auto_id text = "Session" static dont_gray drawer = title }
 	//{ Type = textmenuelement auto_id text = "Play Level" link = level_main_menu } //originally IF IsTrue run_viewer this would be used
-	{ Type = textmenuelement auto_id text = "Play Level" link = cassette_menu target = "Player1ToLevelSelectCamAnim" }
+	//{ Type = textmenuelement auto_id text = "Play Level" link = cassette_menu target = "Player1ToLevelSelectCamAnim" }
+	{ Type = textmenuelement auto_id text = "Play Level" link = GameChangeLevelMenu }
 	{ Type = textmenuelement auto_id text = "Change Appearance" link = cas_menu_container target = "Player1ToChangeAppearance" }
 	{ Type = textmenuelement auto_id text = "Change Board" link = boardshop_menu target = "Player1ToBoardshop" }
 	{ Type = textmenuelement auto_id text = "Edit Tricks" link = trick_menu_container }
@@ -672,7 +673,8 @@ free_skate_menu_eventhandlers = [
 free_skate_menu_children = [ 
 	{ Type = textmenuelement auto_id text = "Free Skate" static dont_gray drawer = title }
 	//{ Type = textmenuelement auto_id text = "Play Level" link = level_main_menu } //if istrue run_viewer
-	{ Type = textmenuelement auto_id text = "Play Level" link = cassette_menu target = "Player1ToLevelSelectCamAnim" }
+	//{ Type = textmenuelement auto_id text = "Play Level" link = cassette_menu target = "Player1ToLevelSelectCamAnim" }
+	{ Type = textmenuelement auto_id text = "Play Level" link = GameChangeLevelMenu }
 	{ Type = textmenuelement auto_id text = "Change Appearance" link = cas_menu_container target = "Player1ToChangeAppearance" }
 	{ Type = textmenuelement auto_id text = "Change Board" link = boardshop_menu target = "Player1ToBoardshop" }
 	{ Type = textmenuelement auto_id text = "Edit Tricks" link = trick_menu_container }
@@ -754,6 +756,7 @@ SCRIPT main_menu_create
 	CreateDeckMenu
 	CreateWheelColorMenu
 	pre_cas_menu_create
+	CreateNewChangeLevelMenu
 	
 	AttachChild parent = contain1 child = load_career_menu
 	AttachChild parent = contain1 child = boardshop_menu
