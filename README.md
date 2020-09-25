@@ -12,24 +12,25 @@ LevelMod features:
 - intergrated patches like 251x or 32 tag counter limit.
 
 ### How to install
-**Important!** The mod requires original game to be installed on your computer. You cannot play the mod without original files.
-You also need the [1.01 patch](#links)
+**Important!** *The mod requires original game to be installed on your computer. You cannot play the mod without original files. You also need the [1.01 patch](#links)*
 1. Make sure you have the last LevelMod Full release installed from [Chapter-3.net thread](#links)
 2. Look for Levelmod.flt file and remove it if found
-3. Download [latest realease](#links)
-4. Copy to your game folder and replace all the files if asked. However, for the first install it shouldn't replace any existing files
-5. Make sure you have [Visual Studio Redist x86 2019](#links)
-6. For people with windows 10, make sure you set full rights to the thps3 folder to(aka remove read-only property) and run game as admin.
+3. Download [latest release](#links)
+4. Extract to your game folder and replace all the files if asked. However, for the first install it shouldn't require to replace any existing files
+5. Make sure you have [Visual Studio Redist x86 2019](#links) installed
+6. For people with enabled UAC, run as admin, or make sure you have write permissions for THPS3 folder and folder is not set to read-only
 
-If you want for some reason to play the original game, you can just rename d3d8.dll and the game becomes vanilla untouched. All the mod scripts are now stored in a LevelMod subfolder.
+* *If you want to restore the original game, you can just rename d3d8.dll and the game becomes vanilla untouched. All the mod scripts are now stored in a LevelMod subfolder.*
+* *If you want to use latest commit, you can do so by downloading d3d8.dll and scripts folder directly from the repo.*
 
-If you want to use latest commit, you can do so by downloading d3d8.dll and scripts folder directly from the repo.
+**Recommended additional downloads**
+1. [Widescreen patch by thirteenAG](#links) - adds custom resolutions and proper widescreen support
+2. [X360CE For DirectInput gamepads](#links) - converts DirectInput calls to XInput, ensuring proper L2-R2 separation
 
 ### DLL code changes
-LevelMod.flt is now deprecated. Now you only need d3d8.dll and you should remove all instances of levelmod.flt including copies. If game finds flt file in same folder as skate3.exe or data/MILES, it will try to load it and since it's already loaded inside d3d8.dll it will crash.
+Additional code used to be loaded in LevelMod.flt by integrated MSS plugin system, but this method is deprecated now. Now you only need d3d8.dll, hence you must remove all instances of legacy levelmod.flt, including copies/backups. If the game finds flt file in same folder as skate3.exe or data/MILES, it will try to load it and since it's already loaded inside d3d8.dll it will crash the game. This also means you don't need a custom game executable anymore, since all the patches were moved to d3d8.dll.
 
-Also Skate3.exe is no longer needed, because d3d8.dll is loaded earlier so I change everything in memory instead.
-
+**DLL Compilation notes**
 1. Include Extension.h and add the d3d8.lib to your project.
 2. If you use VS you need to set USE MULTI BYTE CHARSET.
 3. Set Export target to .flt instead of .dll and add your flt file to data/MILES folder.
@@ -42,5 +43,7 @@ Also Skate3.exe is no longer needed, because d3d8.dll is loaded earlier so I cha
 * [Original LevelMod thread at Chapter-3.net](http://chapter-3.net/thps3/v2/showthread.php?tid=3141)
 * [Visual Studio Redist x86 2019](https://aka.ms/vs/16/release/vc_redist.x86.exe)
 * [Official 1.01 patch](https://community.pcgamingwiki.com/files/file/339-tony-hawks-pro-skater-3-patch/)
+* [THPS3 Widescreen patch by thirteenAG](https://github.com/ThirteenAG/WidescreenFixesPack/releases/tag/thps3)
+* [X360CE For DirectInput gamepads](https://github.com/x360ce/x360ce/releases/latest)
 
 2011-2020, DCxDemo* and Vadru'Qc.
