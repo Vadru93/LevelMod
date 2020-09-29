@@ -1589,7 +1589,7 @@ void FixTagLimitProtections()
     VirtualProtect((void*)0x004355AD, 1, PAGE_EXECUTE_READWRITE, &old);
 
     //BW Manual Fix
-    VirtualProtect((void*)0x0049D7C5, 8, PAGE_EXECUTE_READWRITE, &old);
+    VirtualProtect((void*)0x0049D7BE, 11, PAGE_EXECUTE_READWRITE, &old);
 
 
     *(DWORD*)0x004BFCD3 = 0x0F39A2E9;
@@ -2431,6 +2431,7 @@ const CompiledScript scripts[] =
     { "GetSkaterLook", GetSkaterLook },
     { "Not", NotScript },
     { "IsNot", NotScript },
+    { "NotTrue", NotScript},
     { "SubToGlobal", SubToGlobal },
     { "AddToGlobal", AddToGlobal },
     { "FreezeCamera", FreezeCamera },

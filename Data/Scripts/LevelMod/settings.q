@@ -19,6 +19,9 @@ LM_HostOptions = [
 	
 ]
 
+
+//maybe move to shader.q, when enough code for shaders??
+
 BlendModes = [
     //Oringial th4+ blendmodes, in order 0-15
 	
@@ -175,16 +178,19 @@ levelmod_menu_root_children = [
 	{ Type = textmenuelement auto_id text = "LevelMod settings" static dont_gray drawer = title }
 
 	//game options that affect gameplay
-	{ Type = textmenuelement auto_id text = "Game Options" link = LevelMod_menu_GameOptions }
+	{ Type = textmenuelement auto_id text = "Game Options" link = newSettingsMenu  
+	target = "populate_game_options" params = { mask = cat_game items = game_menu_items } }
 	
 	//GUI options, like Show HUD, show GrafCounter, etc
-	{ Type = textmenuelement auto_id text = "GUI Options" link = levelmod_menu_GUI	}
+	{ Type = textmenuelement auto_id text = "GUI Options" link = newSettingsMenu  
+	target = "populate_game_options" params = { mask = cat_gui items = game_menu_items } }
 	
 	//Options that affect certain parts of th level
 	{ Type = textmenuelement auto_id text = "Level Options" link = levelmod_menu_LevelOptions }	
 		
 	//Control options, like spine transfer, acid drop, etc
-	{ Type = textmenuelement auto_id text = "Control Options" link = levelmod_menu_control }	
+	{ Type = textmenuelement auto_id text = "Control Options" link = newSettingsMenu  
+	target = "populate_game_options" params = { mask = cat_control items = game_menu_items } }
 			
 	//goes back to previous menu
 	{ LM_Menu_Shared_Back Params = { id = Levelmod_menu_root } } 
@@ -226,115 +232,6 @@ levelmod_menu_LevelOptions_items = [
 	//goes back to previous menu
 	{ LM_Menu_Shared_Back Params = { id = levelmod_menu_LevelOptions } } 
 ] 
-
-
-
-//Control menu struct
-LevelMod_menu_control = { 
-	LM_Menu_Shared_Vertical
-	id = LevelMod_menu_control
-	eventhandler = { Type = showeventhandler target = "UpdateMenuText" params = LevelMod_menu_control }
-	children = levelmod_menu_control_items
-}
-
-levelmod_menu_control_items = [ 
-	{ Type = textmenuelement auto_id text = "Control Options" static dont_gray drawer = title }
-	
-	//Link to air options
-	{ Type = textmenuelement auto_id text = "Air" link = levelmod_menu_air }	
-	
-	//Link to wall options
-	{ Type = textmenuelement auto_id text = "Wall" link = levelmod_menu_wall }	
-
-
-	//toggles between classic tricks and double tap extensions + some new additions
-	{ LM_Menu_Shared_Bool id = LM_Control_bExtraTricks_id params = { name = LM_Control_bExtraTricks id = LM_Control_bExtraTricks_id on = "Extra tricks: on" off = "Extra tricks: off" } }
-	
-	//option to disable revert chain
-	{ LM_Menu_Shared_Bool id = LM_Control_bRevert_id params = { name = LM_Control_bRevert id = LM_Control_bRevert_id on = "Reverts: on" off = "Reverts: off" } }
-
-	//enables XInput support, restart required for this option to apply
-	{ LM_Menu_Shared_Bool id = LM_Control_bXinput_id params = { name = LM_Control_bXinput id = LM_Control_bXinput_id on = "Xinput: on" off = "Xinput: off" } }
-
-	//goes back to previous menu
-	{ LM_Menu_Shared_Back Params = { id = LevelMod_menu_control } } 
-	
-	//old options
-	//{ Type = textmenuelement id = tele_fix text = "Foo" target = "sToggleTeleFix" }
-	//{ Type = textmenuelement id = sound_fix text = "Foo" target = "sToggleSoundFix" }
-	//{ Type = textmenuelement id = tag_fix text = "Foo" target = "sToggleTagLimit" }
-	//{ Type = textmenuelement id = grass_3d text = "Foo" target = "sToggle3DGrass" }
-	//{ Type = textmenuelement id = print_debug text = "Foo" target = sTogglePrintDebug }
-	//{ Type = textmenuelement id = show_console text = "Foo" target = sToggleShowConsole }
-	//{ Type = textmenuelement id = spine_button text = "Spine Button" link = spine_button_menu } 
-] 
-
-
-//GameOptions menu struct
-LevelMod_menu_GUI = { 
-	LM_Menu_Shared_Vertical
-	id = LevelMod_menu_GUI
-	eventhandler = { Type = showeventhandler target = "UpdateMenuText" params = LevelMod_menu_GUI }
-	children = levelmod_menu_GUI_items
-}
-
-levelmod_menu_GUI_items = [
-	{ Type = textmenuelement auto_id text = "GUI Options" static dont_gray drawer = title }
- 	//option to remove annoying messages
-	{ LM_Menu_Shared_Bool id = LM_GUI_bTrickNotifications_id params = { name = LM_GUI_bTrickNotifications id = LM_GUI_bTrickNotifications_id on = "Extra Messages: on" off = "Extra Messages: off" } } 
-	
-	//disables HUD completely, "pro" mode, "screenshot" mode
-	{ LM_Menu_Shared_Bool id = LM_GUI_bShowHud_id params = { name = LM_GUI_bShowHud id = LM_GUI_bShowHud_id on = "Show HUD: on" off = "Show HUD: off" action = UpdateShowHUD } }
- 
- 	//disables HUD completely, "pro" mode, "screenshot" mode
-	{ LM_Menu_Shared_Bool id = LM_GUI_bNetName_id params = { name = LM_GUI_bNetName id = LM_GUI_bNetName_id on = "Player names: on" off = "Player names: off" action = UpdateNetName } }
- 
-	 //The new LevelMod menu when you press esc
-	{ LM_Menu_Shared_Bool id = LM_GUI_bNewMenu_id params = { name = LM_GUI_bNewMenu id = LM_GUI_bNewMenu_id on = "New Net Menu: on" off = "New Net Menu: off" } }
-	
-	//This counts your tags
-	//currently only works correctly when you play alone
-	{ LM_Menu_Shared_Bool id = LM_GUI_bShowGrafCounter_id params = { name = LM_GUI_bShowGrafCounter id = LM_GUI_bShowGrafCounter_id on = "GrafCounter: on" off = "GrafCounter: off" } }
-	
-	//goes back to previous menu
-	{ LM_Menu_Shared_Back Params = { id = LevelMod_menu_GUI } } 
-]
-
-
-//GameOptions menu struct
-LevelMod_menu_GameOptions = { 
-	LM_Menu_Shared_Vertical
-	id = LevelMod_menu_GameOptions
-	eventhandler = { Type = showeventhandler target = "UpdateMenuText" params = LevelMod_menu_GameOptions }
-	children = levelmod_menu_GameOptions_items
-}
-
-levelmod_menu_GameOptions_items = [
-	{ Type = textmenuelement auto_id text = "Game Options" static dont_gray drawer = title }
-
-	//251 patch
-	{ LM_Menu_Shared_Bool id = LM_GameOption_b251Patch_id params = { name = LM_GameOption_b251Patch id = LM_GameOption_b251Patch_id on = "251x Patch: on" off = "251x Patch: off" } }
-	
-	//BW Manual Fix
-	{ LM_Menu_Shared_Bool id = LM_GameOption_bFixBWManual_id params = { name = LM_GameOption_bFixBWManual id = LM_GameOption_bFixBWManual_id on = "No BW Manual: on" off = "No BW Manual: off" } }
-	
-	//removes 32 tags limit
-	{ LM_Menu_Shared_Bool id = LM_GameOption_bLimitTags_id params = { name = LM_GameOption_bLimitTags id = LM_GameOption_bLimitTags_id off = "Unlimited Tags: on" on = "Unlimited Tags: off" } }
-
-	//This fixes Sk3_TeleportToNode
-	//So that skater will have same orientation when it leave the teleport
-	//As when it entered the teleport
-	{ LM_Menu_Shared_Bool id = LM_BugFix_bTeleFix_id params = { name = LM_BugFix_bTeleFix id = LM_BugFix_bTeleFix_id on = "Tele Stance Fix: on" off = "Tele Stance Fix: off" } }
-	
-	//removes ped props (message and score bonus)
-	{ LM_Menu_Shared_Bool id = LM_Gameplay_bPedProps_id params = { name = LM_Gameplay_bPedProps id = LM_Gameplay_bPedProps_id on = "Ped Props: on" off = "Ped Props: off" } }
-		
-	//enables debug console, restart required for this option to apply
-	{ LM_Menu_Shared_Bool id = LM_DebugOption_bDebugMode_id params = { name = LM_DebugOption_bDebugMode id = LM_DebugOption_bDebugMode_id on = "Debug Console: on" off = "Debug Console: off" } }
-		
-	//goes back to previous menu
-	{ LM_Menu_Shared_Back Params = { id = LevelMod_menu_GameOptions } } 
-]
 
 
 //Control->Air menu struct
@@ -397,8 +294,10 @@ levelmod_menu_wall_items = [
 	{ LM_Menu_Shared_Back Params = { id = LevelMod_menu_wall } } 
 ]
 
+
+
 levelmod_HostOptions_root = {
-LM_Menu_Shared_Vertical 
+	LM_Menu_Shared_Vertical 
 	id = levelmod_HostOptions_root
 	eventhandler = { Type = showeventhandler target = "UpdateMenuText" params = levelmod_HostOptions_root }
 	children = LM_HostOptions
@@ -422,11 +321,14 @@ ENDSCRIPT
 
 
 SCRIPT CreateLevelModMenus
+	Settings_CreateOptionsMenu //items = game_menu_items
+
+	
 	//adds levelmod menus
 	CreateAndAttachMenu { Levelmod_menu_Root }
-	CreateAndAttachMenu { LevelMod_menu_Control }
-	CreateAndAttachMenu { LevelMod_menu_GUI }
-	CreateAndAttachMenu { LevelMod_menu_GameOptions }
+	//CreateAndAttachMenu { LevelMod_menu_Control }
+	//CreateAndAttachMenu { LevelMod_menu_GUI }
+	//CreateAndAttachMenu { LevelMod_menu_GameOptions }
 	CreateAndAttachMenu { LevelMod_menu_Air }
 	CreateAndAttachMenu { LevelMod_menu_Wall }
 	CreateAndAttachMenu { levelmod_menu_LevelOptions }
@@ -490,15 +392,16 @@ SCRIPT UpdateShowHUD
 	ENDIF
 ENDSCRIPT
 
+
 SCRIPT UpdateNetSky
 	IF IsOptionOn LM_GameOption_bNetSky
-		ForEachIn master_level_list do = sUpdateNetSky params = { <...> }
+		ForEachIn master_level_list do = Settings_UpdateNetSky params = { <...> }
 	ELSE
 		LoadLevelGeometry sky = ""
 	ENDIF
 ENDSCRIPT
 
-SCRIPT sUpdateNetSky
+SCRIPT Settings_UpdateNetSky
 	IF GotParam load_script
 		IF LevelIs <load_script>
 			IF GotParam lev_sky
@@ -509,16 +412,17 @@ SCRIPT sUpdateNetSky
 ENDSCRIPT
 
 SCRIPT UpdateFog
-	ForEachIn master_level_list do = sUpdateFog params = { <...> }
+	ForEachIn master_level_list do = Settings_UpdateLevelFog params = { <...> }
 ENDSCRIPT
 
-SCRIPT sUpdateFog
+SCRIPT Settings_UpdateLevelFog
 	IF GotParam load_script
 		IF LevelIs <load_script>
 			PrepareLevelFog <...>
 		ENDIF
 	ENDIF
 ENDSCRIPT
+
 
 SCRIPT UpdateTH4CompObjects
 	IF IsOptionOn LM_LevelOption_TH4CompObjects
@@ -604,7 +508,7 @@ SCRIPT sAddOption
 ENDSCRIPT
 
 SCRIPT AddOptions
- ForEachIn LevelModOptions do = sAddOption params =  <...>
+	ForEachIn LevelModOptions do = sAddOption params =  <...>
 ENDSCRIPT
  
 SCRIPT LM_SetOption
@@ -619,14 +523,7 @@ SCRIPT LM_SetOption
 			printf "setting menu element text"
 			SetMenuElementText id = <id> <text>
 			
-			IF IsOptionOverriden <name>
-				printf "Overriden option"
-				MakeTextMenuElementStatic <option_id>
-			ELSE
-				IF GotParam option_id
-					MakeTextMenuElementStatic <option_id> nonstatic = 1
-				ENDIF
-			ENDIF
+			LM_MaybeMakeStatic option = <name>
 		ELSE
 		    IF LM_GotParam Value
 			    GetParam Value
@@ -669,6 +566,18 @@ LM_Control_SpineButton_Text = [
 	"Revert+Nollie"
 	"SpinLeft+SpinRight"
 ]
+
+SCRIPT LM_MaybeMakeStatic
+//IsOptionOverriden will auto-generate an option_id if none is found
+//It will generate it using syntax "[OptionName]_id"
+    IF IsOptionOverriden <option>
+	    MakeTextMenuElementStatic <option_id>
+	ELSE
+	    IF GotParam option_id
+		    MakeTextMenuElementStatic <option_id> nonstatic = 1
+		ENDIF
+	ENDIF
+ENDSCRIPT
 
 SCRIPT LM_ToggleHostOption 
 	//Check if this is the top item
@@ -818,14 +727,7 @@ SCRIPT LM_ToggleOption
 					    ENDIF
 					ENDIF
 				ENDIF
-				IF IsOptionOverriden <name>
-				    printf "Overriden option"
-				    MakeTextMenuElementStatic <option_id>
-				ELSE
-				    IF GotParam option_id
-					    MakeTextMenuElementStatic <option_id> nonstatic = 1
-					ENDIF
-				ENDIF
+				LM_MaybeMakeStatic option = <name>
 			ELSE
 				printf "without menu id!"
 			ENDIF
@@ -857,3 +759,154 @@ SCRIPT UpdateMenuText
 	ForEachIn <children> do = LM_ToggleOption params = { <...> TextOnly }
 	printf "menu text init done"
 ENDSCRIPT
+
+
+
+
+
+//******************************
+// NEW SETTINGS CODE STARTS HERE
+//******************************
+
+back_menu_item = {
+	text = "Back"						
+	option_id = back_item
+	toggle_id = back_item_toggle 
+	link = Levelmod_menu_root
+}
+
+game_menu_items = [
+	{ IsBool text = "251x Patch" 		option_id = item1	option = LM_GameOption_b251Patch 		toggle_id = item1_toggle cat_game }
+	{ IsBool text = "No BW Manual"		option_id = item2	option = LM_GameOption_bFixBWManual 	toggle_id = item2_toggle cat_game }
+	{ IsBool text = "Unlimited Tags" 	option_id = item3	option = LM_GameOption_bLimitTags 		toggle_id = item3_toggle cat_game }
+	{ IsBool text = "Tele Stance Fix" 	option_id = item4	option = LM_BugFix_bTeleFix 			toggle_id = item4_toggle cat_game }
+	{ IsBool text = "Ped Props"			option_id = item5	option = LM_Gameplay_bPedProps 			toggle_id = item5_toggle cat_game }
+	{ IsBool text = "Debug Console" 	option_id = item6	option = LM_DebugOption_bDebugMode 		toggle_id = item6_toggle cat_game }
+//]
+
+//control_menu_items = [
+	{ 		 text = "Air"			option_id = item11 link = levelmod_menu_air toggle_id = item1_toggle  cat_control }	
+	{ 		 text = "Wall"			option_id = item12 link = levelmod_menu_wall toggle_id = item2_toggle cat_control }	
+	{ IsBool text = "Reverts" 		option_id = item13	option = LM_Control_bRevert 		toggle_id = item3_toggle cat_control }
+	{ IsBool text = "Extra tricks"	option_id = item14	option = LM_Control_bExtraTricks 	toggle_id = item4_toggle cat_control }
+	{ IsBool text = "XInput" 		option_id = item15	option = LM_Control_bXinput 		toggle_id = item5_toggle cat_control }
+//]
+
+//gui_menu_items = [
+	{ IsBool text = "Extra Messages" option_id = item21 option = LM_GUI_bTrickNotifications toggle_id = item1_toggle cat_gui } 
+	{ IsBool text = "Show HUD" option_id = item22 option = LM_GUI_bShowHud toggle_id = item2_toggle cat_gui } 
+	{ IsBool text = "Player names" option_id = item23 option = LM_GUI_bNetName toggle_id = item3_toggle cat_gui } 
+	{ IsBool text = "New Net Menu" option_id = item24 option = LM_GUI_bNewMenu toggle_id = item4_toggle cat_gui } 
+	{ IsBool text = "GrafCounter" option_id = item25 option = LM_GUI_bShowGrafCounter toggle_id = item5_toggle cat_gui } 
+]
+
+
+
+
+script Settings_CreateOptionsMenu
+
+	CreateAndAttachMenu { 
+		type = verticalmenu 
+		Id = newSettingsMenu
+		parent = contain1 
+		x = 170.0 y = 90.0 w = 300.0
+		just_center_x just_center_y blue_top 
+		//eventhandler = { type = showeventhandler target = "populate_game_options" params = { mask = <cat> items = <items> } }
+		children = [ 
+			{ type = textmenuelement auto_id text = "test" static dont_gray drawer = title }
+			{ type = menucontainer Id = options_multi_container show_all_children }
+		]
+	}
+	
+	CreateAndAttachMenu { 
+		type = verticalmenu 
+		Id = game_options_names_menu 
+		parent = options_multi_container 
+		x = 0.0 y = 0.0 w = 240.0
+		//num_visible = 12 
+		just_center_x just_center_y not_rounded 
+	}
+	
+	CreateAndAttachMenu { 
+		type = verticalmenu 
+		Id = game_options_on_off_menu 
+		//follow_menu = game_options_names_menu 
+		parent = options_multi_container 
+		x = 240.0 y = 0.0 w = 60.0
+		//num_visible = 12 
+		just_center_x just_center_y not_rounded static dont_gray 
+	}
+endscript
+
+script populate_game_options
+	DepopulateMenu id = game_options_names_menu
+	DepopulateMenu id = game_options_on_off_menu
+
+	ForeachIn <items> do = Settings_AddLine params = { <...> }
+	Settings_AddLine back_menu_item
+endscript
+
+script Settings_AddLine
+if GotParam <mask>
+	if GotParam link
+		AddLine { 
+			parent = game_options_names_menu 
+			Type = textmenuelement 
+			id = <option_id>
+			text = <text>
+			link = <link>
+		}
+	else
+		AddLine { 
+			parent = game_options_names_menu 
+			Type = textmenuelement 
+			id = <option_id>
+			text = <text>
+		}
+	endif
+	
+	if GotParam toggle_id
+		AddLine {
+			parent = game_options_on_off_menu 
+			Type = textmenuelement 
+			id = <toggle_id>
+			text = " "
+		}
+		if GotParam option
+	        LM_MaybeMakeStatic option = <option> option_id = <toggle_id>
+	    endif
+	else
+		AddLine {
+			parent = game_options_on_off_menu 
+			Type = textmenuelement 
+			auto_id
+			text = " "
+		}
+	endif
+	
+	if GotParam option
+	    LM_MaybeMakeStatic option = <option> option_id = <option_id>
+	endif
+
+	if GotParam IsBool
+		AttachEventHandler { Type = ChooseEventHandler object = <option_id> target = "Settings_ToggleOption" params = { option = <option> toggle_id = <toggle_id> } }
+		Settings_UpdateBoolText { option = <option> toggle_id = <toggle_id> }
+	endif
+endif
+endscript
+
+script Settings_ToggleOption
+	ToggleOption <option>
+	Settings_UpdateBoolText <...>
+	if GotParam do
+		GoTo <do>
+	endif
+endscript
+
+script Settings_UpdateBoolText
+	if IsOptionOn <option>
+		SetMenuElementText "On" id = <toggle_id> 
+	else
+		SetMenuElementText "Off" id = <toggle_id> 
+	endif
+endscript

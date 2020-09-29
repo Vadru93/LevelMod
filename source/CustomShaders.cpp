@@ -11,6 +11,13 @@ extern __restrict LPDIRECT3DDEVICE9 pDevice;
 /*ShaderObject* shaders = NULL;
 DWORD numShaders = 0;*/
 
+enum MaterialEffects
+{
+    NONE = 0,
+    ENV_MAP = 1,
+    UV_ANIM = 2,
+};
+
 static DWORD PixelShaderTable[8];
 //bool loadedShaders = false;
 using namespace Gfx;
@@ -47,6 +54,12 @@ void Gfx::UnloadShaders()
         materials = NULL;
         numMaterials = 0;
         oldMaterial = NULL;
+    }
+    if (animations)
+    {
+        delete[]animations;
+        animations = NULL;
+        numAnimations = 0;
     }
 }
 
@@ -136,6 +149,21 @@ void Gfx::LoadCustomShaders(char* path)
             }
         }
 
+        DWORD numAnims = ReadDWORD();
+        _printf("Number of Animations %d\n", numAnims);
+        if (numMaterials)
+        {
+            animations = new Animation[numAnims];
+
+            for (DWORD i = 0; i < numAnims; i++)
+            {
+                animations[numAnimations] = *(Animation*)pFile;
+                pFile += sizeof(Animation);
+                numAnimations++;
+            }
+        }
+
+
         DWORD numShaderObjects = ReadDWORD();
         _printf("numShaders %d\n", numShaderObjects);
         if (numShaderObjects)
@@ -177,8 +205,15 @@ void Gfx::LoadCustomShaders(char* path)
                     {
                         DWORD matIndex = ReadDWORD();
                         *(DWORD*)&shaders[numShaders].shaderId = ReadDWORD();
-                        *(DWORD*)&shaders[numShaders].env_tiling[0] = ReadDWORD();
+                        *(DWORD*)&shaders[numShaders].flags = ReadDWORD();
+
+                        DWORD temp = ReadDWORD();
+                        if (*(DWORD*)&shaders[numShaders].flags == ENV_MAP)
+                            *(DWORD*)&shaders[numShaders].env_tiling[0] = temp;
+                        else 
+                            shaders[numShaders].anim = &animations[temp];
                         *(DWORD*)&shaders[numShaders].env_tiling[1] = ReadDWORD();
+
                         DWORD idx = *(DWORD*)pFile;
                         pFile += 4;
                         if (idx > numMaterials)
@@ -240,7 +275,7 @@ void Gfx::LoadCustomShaders(char* path)
                     _printf("Couldn't find sector %s %X\n", FindChecksumName(checksum), pFile);
                     for (DWORD j = 0; j < numSplits; j++)
                     {
-                        pFile += 8 * 4;
+                        pFile += 9 * 4;
                         DWORD numTextures = ReadDWORD();
 
                         if (numTextures)
@@ -272,7 +307,7 @@ void Gfx::LoadCustomShaders(char* path)
 bool reset = false;
 bool restore = false;
 bool restoreMaterial = false;
-bool restore_env = false;
+bool restore_matrix = false;
 
 void __stdcall SetVertexShader_hook()
 {
@@ -283,6 +318,10 @@ void __stdcall SetVertexShader_hook()
                                  0.0f, -0.5f, 0.0f, 0.0f,
                                  0.0f,  0.0f, 0.0f,	0.0f,
                                  0.5f,  0.5f, 0.0f, 0.0f };
+    static D3DMATRIX uv_mat = { 1.0f, 0.0f, 0.0f, 0.0f,
+                              0.0f, 1.0f, 0.0f, 0.0f,
+                              0.0f, 0.0f, 0.0f, 0.0f,
+                              0.0f, 0.0f, 0.0f, 0.0f };
 
     static ShaderObject* pShader = NULL;
 
@@ -329,21 +368,55 @@ void __stdcall SetVertexShader_hook()
             //pDevice->SetPixelShader(pShader->shaderId);
         }
     
-        /*if (pShader->env_tiling[0])
+        if (pShader->flags == ENV_MAP)
         {
-            restore_env = true;
-            env_mat.m[0][0] = pShader->env_tiling[0];
-            env_mat.m[1][1] = pShader->env_tiling[1];
+            if (!restore_matrix)
+            {
+                restore_matrix = true;
+                pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
+            }
+
+            /*env_mat.m[0][0] = pShader->env_tiling[0]*0.5f;
+            env_mat.m[1][1] = pShader->env_tiling[1]*0.5f;*/
+
             pDevice->SetTransform(D3DTS_TEXTURE0, &env_mat);
-            pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
-            pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_CAMERASPACEREFLECTIONVECTOR);
+            pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_CAMERASPACEPOSITION);
         }
-        else if(restore_env)
+        else if (pShader->flags == UV_ANIM)
         {
-            restore_env = false;
+            if (!restore_matrix)
+            {
+                restore_matrix = true;
+                pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
+            }
+            else
+                pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
+
+            float t = Game::skater->GetFrameLength();
+            float uoff = (t * pShader->anim->UVel) + (pShader->anim->UAmplitude * sinf(pShader->anim->UFrequency * t + pShader->anim->UPhase));
+            float voff = (t * pShader->anim->VVel) + (pShader->anim->VAmplitude * sinf(pShader->anim->VFrequency * t + pShader->anim->VPhase));
+
+            // Reduce offset mod 16 and put it in the range -8 to +8.
+            /*uoff	+= 8.0f;
+            uoff	-= (float)(( (int)uoff >> 4 ) << 4 );
+            voff	+= 8.0f;
+            voff	-= (float)(( (int)voff >> 4 ) << 4 );*/
+            uoff -= (float)(int)uoff;
+            voff -= (float)(int)voff;
+
+
+            uv_mat._31 = uoff;//( uoff < 0.0f ) ? ( uoff + 8.0f ) : ( uoff - 8.0f );
+            uv_mat._32 = voff;//( voff < 0.0f ) ? ( voff + 8.0f ) : ( voff - 8.0f );
+
+            pDevice->SetTransform(D3DTS_TEXTURE0, &uv_mat);
+            
+        }
+        else if(restore_matrix)
+        {
+            restore_matrix = false;
             pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
             pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
-        }*/
+        }
 
         pDevice->SetMaterial(pShader->material);
 
@@ -399,9 +472,9 @@ void __stdcall SetVertexShader_hook()
         if (reset)
         {
 
-            if (restore_env)
+            if (restore_matrix)
             {
-                restore_env = false;
+                restore_matrix = false;
                 pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
                 pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
             }
@@ -509,7 +582,7 @@ SKIP_SHADER:
     _asm mov[env_mat + 20], eax;
 
 
-    _asm mov restore_env, 1
+    _asm mov restore_matrix, 1
     _asm mov edx, [pDevice];
     _asm push p_env_mat;
     _asm push D3DTS_TEXTURE0;
@@ -534,7 +607,7 @@ SKIP_SHADER:
     _asm call dword ptr[eax + 0x0000010C]
         _asm jmp SKIP_DISABLE_ENVMAP;
 DISABLE_ENVMAP:
-    _asm mov restore_env, 0
+    _asm mov restore_matrix, 0
     _asm mov edx, [pDevice];
     _asm push D3DTTFF_DISABLE;
     _asm push D3DTSS_TEXTURETRANSFORMFLAGS;
@@ -744,7 +817,7 @@ SKIP:
     _asm test al, al
     _asm je NO_RESET;
 
-    _asm mov al, restore_env;
+    _asm mov al, restore_matrix;
     _asm test al, al;
     _asm je NO_RESTORE_ENV
     _asm mov edx, [pDevice];
@@ -818,7 +891,7 @@ NO_RESTORE_MAT:
     _asm xor eax, eax;
     _asm mov restoreMaterial, al;
     _asm mov reset, al;
-    _asm mov restore_env, al;
+    _asm mov restore_matrix, al;
     _asm mov bl, restore;
     _asm test bl, bl
     _asm je NO_RESET;

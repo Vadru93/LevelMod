@@ -65,6 +65,15 @@ namespace LevelModSettings
             override = NULL;
             value = Value;
         }
+
+        bool Overriden()
+        {
+            if ((override->type == OverrideOption::Type::OVERRIDE_TRUE && override->value != 0) //Only true is overriden
+                || (override->type == OverrideOption::Type::OVERRIDE_FALSE && override->value == 0)) //Only false is overriden
+                return false;
+            else
+                return true;
+        }
     };
 
     extern std::map<DWORD, OverrideOption> overrideOptions;
