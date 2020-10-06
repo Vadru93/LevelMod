@@ -73,16 +73,24 @@ namespace QScript
         DWORD size;
         char fileName[80];
 
-        QBFile(DWORD chc, char* file, DWORD fileSize)
+        QBFile()
+        {
+            ZeroMemory(this, sizeof(QBFile));
+        }
+
+        QBFile(DWORD chc, char* file, DWORD fileSize, bool level = false)
         {
             checksum = chc;
             size = fileSize;
-            strcpy(fileName, &file[5]);
+            if (!level)
+                strcpy(fileName, &file[5]);
+            else
+                strcpy(fileName, file);
 
             _printf("QBFile: %s crc %X size %X\n", fileName, checksum, size);
         }
 
-        bool ContentChanged();
+        bool ContentChanged(bool level = false);
     };
 
     extern std::vector<CompressedNode> compNodes;

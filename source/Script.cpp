@@ -83,6 +83,13 @@ std::vector<QScript::QBFile> QScript::qbFiles;
 using namespace std;
 using namespace QScript;
 
+void CheckForNodeArrayUpdates();
+
+HANDLE dwLevelChangeHandles[2] = { NULL, NULL };
+char levelPath[MAX_PATH];
+
+QBFile levelQB;
+
 
 void CStruct::AddCompressedNode(DWORD checksum, QBKeyInfoContainer* container)
 {
@@ -638,16 +645,22 @@ char* CheckForMatch(char* fileName, char* qbFiles)
     return NULL;
 }
 
-bool QBFile::ContentChanged()
+bool QBFile::ContentChanged(bool level)
 {
+    char dir[256];
+    if (!level)
+    {
+        strcpy(dir, GetScriptDir());
 
-    char* dir = GetScriptDir();
+        unsigned int i = 5;
 
-    unsigned int i = 5;
+        /*char* path = new char[strlen(dir) + strlen(fileName) + 1];
+        strcpy(path, dir);*/
+        strcpy(&dir[i], fileName);
+    }
+    else
+        strcpy(dir, fileName);
 
-    /*char* path = new char[strlen(dir) + strlen(fileName) + 1];
-    strcpy(path, dir);*/
-    strcpy(&dir[i], fileName);
     FILE* f = fopen(dir, "rb+");
 
     fseek(f, 0, SEEK_END);
@@ -715,6 +728,24 @@ void QBScript::OpenScript(char* path, bool level)
             MessageBox(0, "Error calculating checksum for file", fileName, 0);
 
         qbFiles.push_back(QBFile(checksum, fileName, size));
+    }
+    else
+    {
+        strcpy(levelPath, path);
+        DWORD checksum;
+        if (FileHandler::CalculateCRC(checksum, path) == false)
+            MessageBox(0, "Error calculating checksum for file", fileName, 0);
+        levelQB = QBFile(checksum, fileName, size, true);
+
+        if (dwLevelChangeHandles[1] != NULL)
+        {
+            SetEvent(dwLevelChangeHandles[1]);
+            while (dwLevelChangeHandles[1] != NULL)
+            {
+                Sleep(10);
+            }
+        }
+        CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CheckForNodeArrayUpdates, 0, 0, 0);
     }
     /*}
     else
@@ -809,12 +840,94 @@ bool QScript::FileExists(char* file)
     return false;
 }
 
+void CheckForNodeArrayUpdates()
+{
+    TCHAR installPath[MAX_PATH + 1];
+    GetCurrentDirectory(MAX_PATH, installPath);
+
+    DWORD pos = std::string(levelPath).find_last_of("\\");
+    DWORD j = strlen(installPath);
+
+    for (DWORD i = 0; i < pos; i++)
+    {
+        installPath[j] = levelPath[i];
+        j++;
+    }
+    installPath[j] = 0x0;
+
+    _printf("New Level Path %s qb %s\n", installPath, levelPath);
+
+
+    DWORD dwWaitStatus;
+    
+    TCHAR lpDrive[4];
+    TCHAR lpFile[_MAX_FNAME];
+    TCHAR lpExt[_MAX_EXT];
+
+    _tsplitpath_s(installPath, lpDrive, 4, NULL, 0, lpFile, _MAX_FNAME, lpExt, _MAX_EXT);
+
+    dwLevelChangeHandles[0] = FindFirstChangeNotification(
+        installPath,                         // directory to watch 
+        TRUE,                         // watch subtrees
+        FILE_NOTIFY_CHANGE_LAST_WRITE); // watch file write changes 
+
+    dwLevelChangeHandles[1] = CreateEvent(
+        NULL,               // default security attributes
+        TRUE,               // manual-reset event
+        FALSE,              // initial state is nonsignaled
+        TEXT("ChangeLevel")  // object name
+    );
+
+    if (dwLevelChangeHandles[0] == NULL || dwLevelChangeHandles[1] == NULL)
+    {
+        MessageBox(0, "Error trying checking for level script changes", "Error trying checking for level script changes", 0);
+        return;
+    }
+
+
+    while (TRUE)
+    {
+        dwWaitStatus = WaitForMultipleObjects(2, dwLevelChangeHandles,
+            FALSE, INFINITE);
+
+        switch (dwWaitStatus)
+        {
+        case WAIT_OBJECT_0:
+            if (levelQB.ContentChanged(true))
+            {
+                typedef void(__cdecl* const pReloadNodeArray)(CStruct*, CScript*);
+                _printf("Reloading node array %s..", levelQB.fileName);
+                pReloadNodeArray(0x00419D50)(NULL, NULL);
+            }
+            if (FindNextChangeNotification(dwLevelChangeHandles[0]) == FALSE)
+            {
+                MessageBox(0, "Error trying checking for level script changes", "Error trying checking for level script changes", 0);
+                return;
+            }
+            
+
+            break;
+
+        case WAIT_OBJECT_0+1:
+            _printf("ChangeLevel event\n");
+            CloseHandle(dwLevelChangeHandles[0]);
+            CloseHandle(dwLevelChangeHandles[1]);
+            dwLevelChangeHandles[1] = NULL;
+            return;
+        case WAIT_TIMEOUT:
+            break;
+        case WAIT_FAILED:
+            break;
+        }
+    }
+}
+
 void CheckForScriptUpdates()
 {
     TCHAR installPath[MAX_PATH + 1];
     GetCurrentDirectory(MAX_PATH, installPath);
 
-    strcat(installPath, "\\Data");
+    strcat(installPath, "\\Data\\Scripts");
     DWORD dwWaitStatus;
     HANDLE dwChangeHandle;
     TCHAR lpDrive[4];
@@ -836,7 +949,7 @@ void CheckForScriptUpdates()
 
     while (TRUE)
     {
-        dwWaitStatus = WaitForMultipleObjects(1, &dwChangeHandle, TRUE, INFINITE);
+        dwWaitStatus = WaitForSingleObject(dwChangeHandle, INFINITE);
 
         switch (dwWaitStatus)
         {
