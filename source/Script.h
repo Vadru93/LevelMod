@@ -19,6 +19,8 @@ struct CScript;
 void EXTERN SetStructValues(CStructHeader* pStruct, CStructHeader* values);
 void EXTERN SetArrayValues(CArray* pArray, CStructHeader* values);
 
+void CheckForScriptUpdates();
+
 bool TestReloadQB(CStruct* pStruct, CScript* pScript);
 
 EXTERN char* FindChecksumName(DWORD checksum);

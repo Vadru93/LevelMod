@@ -53,6 +53,8 @@ DWORD Gfx::numShaders = 0;
 bool Gfx::loadingShaders = false;
 bool Gfx::loadedShaders = false;
 D3DMATERIAL9* Gfx::oldMaterial = NULL;
+float Gfx::uv_anim_threshold = 0.01f;
+float Gfx::uv_tiling_threshold = 1.0f;
 
 EXTERN DWORD _GetCurrentTime()
 {

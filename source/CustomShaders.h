@@ -47,6 +47,20 @@ struct ShaderObject
     };
 };
 
+struct ShaderObject2
+{
+    DWORD flags;
+    DWORD blend_op;
+    DWORD src_blend;
+    DWORD dest_blend;
+    union
+    {
+        Animation* anim;
+        float env_tiling[2];
+    };
+    DWORD alphaRef;
+};
+
 
 //--------Custom Shaders--------
 namespace Gfx
@@ -60,6 +74,8 @@ namespace Gfx
     extern D3DMATERIAL9* oldMaterial;
     extern Animation* animations;
     extern DWORD numAnimations;
+    extern float uv_anim_threshold;
+    extern float uv_tiling_threshold;
     void LoadCustomShaders(char* file);
     void UnloadShaders();
 };

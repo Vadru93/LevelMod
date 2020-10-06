@@ -1269,7 +1269,7 @@ void StartedGraf(StructScript* pStructScript)
                     {
                         _printf("connected to client: %d.%d.%d.%d!!\n", ((BYTE*)&clientInfo.sin_addr)[0], ((BYTE*)&clientInfo.sin_addr)[1], ((BYTE*)&clientInfo.sin_addr)[2], ((BYTE*)&clientInfo.sin_addr)[3]);
                         Message msg(connectionSocket, (const char*)&LevelModSettings::UnlimitedGraf, 1, clientInfo.sin_addr);
-                        HANDLE hRequestThread = ::CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)SendMessage, (LPVOID)&msg, 0/*CREATE_SUSPENDED*/, NULL);
+                        HANDLE hRequestThread = ::CreateThread(NULL, 4, (LPTHREAD_START_ROUTINE)SendMessage, (LPVOID)&msg, 0/*CREATE_SUSPENDED*/, NULL);
                     }
                     else
                     {
@@ -4781,12 +4781,29 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
     else if (!init3)
     {
     //MessageBox(0, "GOING TO ADD HOSTOPTIONS", "", 0);
+    CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CheckForScriptUpdates, NULL, 0/*CREATE_SUSPENDED*/, NULL);
         using namespace LevelModSettings;
         _printf("Already inited\n");
 
         init3 = true;
 
-        QBKeyHeader* header = GetQBKeyHeader(crc32f("LM_HostOptions"));
+        QBKeyHeader* header = GetQBKeyHeader(Checksum("uv_anim_threshold"));
+        if (header)
+        {
+            Gfx::uv_anim_threshold = header->value.f;
+        }
+        else
+            MessageBox(0, "couldn't find uv_anim_threshold", "", 0);
+
+        header = GetQBKeyHeader(Checksum("uv_tiling_threshold"));
+        if (header)
+        {
+            Gfx::uv_tiling_threshold = header->value.f;
+        }
+        else
+            MessageBox(0, "couldn't find uv_tiling_threshold", "", 0);
+
+        header = GetQBKeyHeader(crc32f("LM_HostOptions"));
 
         if (header)
         {

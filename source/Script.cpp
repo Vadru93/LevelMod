@@ -4,6 +4,10 @@
 #include "Defines.h"
 #include "Node.h"
 #include "String.h"
+#include "CustomShaders.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <tchar.h>
 //#include "FastCRC.h"
 
 namespace FileHandler
@@ -805,6 +809,53 @@ bool QScript::FileExists(char* file)
     return false;
 }
 
+void CheckForScriptUpdates()
+{
+    TCHAR installPath[MAX_PATH + 1];
+    GetCurrentDirectory(MAX_PATH, installPath);
+
+    strcat(installPath, "\\Data");
+    DWORD dwWaitStatus;
+    HANDLE dwChangeHandle;
+    TCHAR lpDrive[4];
+    TCHAR lpFile[_MAX_FNAME];
+    TCHAR lpExt[_MAX_EXT];
+
+    _tsplitpath_s(installPath, lpDrive, 4, NULL, 0, lpFile, _MAX_FNAME, lpExt, _MAX_EXT);
+
+    dwChangeHandle = FindFirstChangeNotification(
+        installPath,                         // directory to watch 
+        TRUE,                         // watch subtrees
+        FILE_NOTIFY_CHANGE_LAST_WRITE); // watch file write changes 
+
+    if (dwChangeHandle == NULL)
+    {
+        MessageBox(0, "Error trying checking for script changes", "Error trying checking for script changes", 0);
+        return;
+    }
+
+    while (TRUE)
+    {
+        dwWaitStatus = WaitForMultipleObjects(1, &dwChangeHandle, TRUE, INFINITE);
+
+        switch (dwWaitStatus)
+        {
+        case WAIT_OBJECT_0:
+            if (FindNextChangeNotification(dwChangeHandle) == FALSE)
+            {
+                MessageBox(0, "Error trying checking for script changes", "Error trying checking for script changes", 0);
+                return;
+            }
+            TestReloadQB(NULL, NULL);
+            break;
+        case WAIT_TIMEOUT:
+            break;
+        case WAIT_FAILED:
+            break;
+        }
+    }
+}
+
 bool TestReloadQB(CStruct* pStruct, CScript* pScript)
 {
 
@@ -865,6 +916,22 @@ bool TestReloadQB(CStruct* pStruct, CScript* pScript)
             pFile++;
     }
     delete[] oldData;
+
+    QBKeyHeader* header = GetQBKeyHeader(Checksum("uv_anim_threshold"));
+    if (header)
+    {
+        Gfx::uv_anim_threshold = header->value.f;
+    }
+    else
+        MessageBox(0, "couldn't find uv_anim_threshold", "", 0);
+
+    header = GetQBKeyHeader(Checksum("uv_tiling_threshold"));
+    if (header)
+    {
+        Gfx::uv_tiling_threshold = header->value.f;
+    }
+    else
+        MessageBox(0, "couldn't find uv_tiling_threshold", "", 0);
 
     return true;
 }
