@@ -74,7 +74,7 @@ void BouncyObj_Go(Model* mdl)
             SuperSector* sector = SuperSector::GetSuperSector(collide->Data);
             if (sector)
             {
-                _printf("Killing Shadow %s\n", collide->Data);
+                _printf("Killing Shadow %s\n", FindChecksumName(collide->Data));
                 sector->SetState(MeshState::kill);
             }
             else
