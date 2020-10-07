@@ -4817,6 +4817,10 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
         else
             MessageBox(0, "couldn't find uv_anim_threshold", "", 0);
 
+        header = GetQBKeyHeader(Checksum("PlaySound"));
+        if (header)
+            Game::PlaySound = header->pFunction;
+
         header = GetQBKeyHeader(Checksum("uv_tiling_threshold"));
         if (header)
         {

@@ -561,6 +561,12 @@ struct EXTERN CStruct
     }
 
 
+    CStruct(QBKeyHeader::QBKeyType type, int value)
+    {
+        head = &CStructHeader(type, value);
+        tail = head;
+    }
+
     void RemoveParam(DWORD name);
 
 

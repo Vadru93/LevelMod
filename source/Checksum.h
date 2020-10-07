@@ -297,6 +297,7 @@ namespace Checksums
         CollideScript = COMPILE_CRC32("collidescript"),
         BounceScript = COMPILE_CRC32("bouncescript"),
         Shadow = COMPILE_CRC32("shadow"),
+        BounceSound = COMPILE_CRC32("bouncesound"),
 
         //Trick_KFBackflip = 0xF7B4E0CB
 

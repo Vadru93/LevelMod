@@ -73,6 +73,7 @@ struct Skater;
 namespace Game
 {
     extern Skater* skater;
+    extern bool(*PlaySound)(CStruct*, CScript*);// = NULL; 00417bd0
 };
 //--------Game--------
 

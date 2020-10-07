@@ -43,6 +43,7 @@ float Slerp::speed = 0.0f;
 
 EXTERN bool GameState::GotSuperSectors = false;
 Skater* Game::skater = NULL;
+bool(*Game::PlaySound)(CStruct*, CScript*) = NULL;
 
 ShaderObject* Gfx::shaders = NULL;
 DWORD Gfx::numMaterials = 0;

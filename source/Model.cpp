@@ -68,8 +68,10 @@ __declspec(naked) void BouncyObj_OnBounce_Naked()
     static DWORD pOldEBP;
     static BYTE flags;
     static Model* pModel;
-    _asm mov pOldESP, esp;
-    _asm mov pOldEBP, ebp;
+    /*_asm mov pOldESP, esp;
+    _asm mov pOldEBP, ebp;*/
+    _asm pushad;
+    _asm pushfd;
     _asm mov al, [esp + 0x100];
     _asm mov flags, al;
  
@@ -81,8 +83,12 @@ __declspec(naked) void BouncyObj_OnBounce_Naked()
     else//Hollow, set model to NULL
         pModel = NULL;
     BouncyObj_OnBounce(pModel);
-    _asm mov esp, pOldESP;
+    /*_asm mov esp, pOldESP;
     _asm mov ebp, pOldEBP;
+    _asm xor eax, eax
+    _asm mov al, [esp + 0x100];*/
+    _asm popfd;
+    _asm popad;
     _asm jmp pJmp;
     
 }
@@ -105,6 +111,17 @@ void BouncyObj_OnBounce(Model* mdl)
                 _printf("Going to spawn BounceScript %s\n", FindChecksumName(BounceScript->Data));
                 QScript::SpawnScript(BounceScript->Data, 0, mdl->GetNodeIndex());
             }
+
+            CStructHeader* BounceSound;
+
+            if (node->GetStruct(Checksums::BounceSound, &BounceSound) && BounceSound->Data)
+            {
+                _printf("BounceSound %s\n", FindChecksumName(BounceSound->Data));
+                CScript script;
+                CStruct params(QBKeyHeader::LOCAL, BounceSound->Data);
+                Game::PlaySound(&params, &script);
+                
+            }
         }
     }
 
@@ -123,8 +140,87 @@ void BouncyObj_OnBounce(Model* mdl)
             CStructHeader* TriggerScript;
             if (node->GetStruct(Checksums::TriggerScript, &TriggerScript))//The Node has TriggerScript, let's spawn it!
             {
-                _printf("Going to spawn TriggerScript %s\n", FindChecksumName(TriggerScript->Data));
-                QScript::SpawnScript(TriggerScript->Data, 0, index);
+                QBKeyHeader* header = GetQBKeyHeader(TriggerScript->Data);
+                if (header && header->type == QBKeyHeader::QBKeyType::SCRIPTED_FUNCTION)
+                {
+                    BYTE* pScript = (BYTE*)header->pStr;
+
+                    char opcode = *pScript;
+
+                    while (opcode != 0x24)
+                    {
+                        pScript++;
+                        switch (opcode)
+                        {
+
+                  
+                        case 0x49:
+                        case 0x48:
+                        case 0x47:
+                            pScript += 2;
+                            break;
+                        case 0x1C:
+                        case 0x1B:
+                            pScript += *(DWORD*)pScript + 4;
+                            break;
+                            //case 0x18:
+                        case 0x17:
+                        case 0x1A:
+                        case 0x2E:
+                        case 2:
+                            pScript += 4;
+                            break;
+                        case 1:
+                        case 0x3:
+                        case 0x4:
+                        case 5:
+                        case 6:
+                        case 7:
+                        case 9:
+                        case 0x23:
+                        case 0x25:
+
+                        case 0x26:
+
+                        case 0x28:
+
+                        case 0x2D:
+                        case 0x18:
+                        case 0x0E:
+                        case 0x0F:
+                        case 0x39:
+                        case 0x30:
+                            break;
+                        case 0x16:
+                            if (*(DWORD*)pScript == trigger)
+                            {
+                                _printf("Going to spawn TriggerScript %s\n", FindChecksumName(TriggerScript->Data));
+                                QScript::SpawnScript(TriggerScript->Data, 0, index);
+                                return;
+                            }
+                            pScript += 4;
+                            break;
+                        case 0x1F:
+                            pScript += 8;
+                            break;
+
+                        case 0x1E:
+                            pScript += 12;
+                            break;
+                        case 0x40:
+                        case 0x2F:
+                        case 0x37:
+                            pScript += *(DWORD*)pScript * 4 + 4;
+                            break;
+                            default:
+                                _printf("%X @ %p\n", opcode, pScript);
+                                MessageBox(0, "Unhandled opcode...", "", 0);
+                                break;
+                        }
+                        opcode = *pScript;
+                    }
+                    
+                }
             }
 
 
