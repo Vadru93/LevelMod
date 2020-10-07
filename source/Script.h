@@ -67,6 +67,8 @@ namespace QScript
         }
     };
 
+    void SpawnScript(DWORD checksum, CStruct* params = NULL, DWORD node = 0xFFFFFFFF, DWORD callback = 0, CStruct* callback_params = NULL, bool AbsentInNetGames = false, bool NetEnabled = true, bool Permanent = true);
+
     struct QBFile
     {
         DWORD checksum;

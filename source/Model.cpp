@@ -63,20 +63,28 @@ __declspec(naked) void BouncyObj_Go_Naked()
 
 void BouncyObj_Go(Model* mdl)
 {
+    _printf("Model %p\n", mdl->memberFunctions);
     CStructHeader* node = Node::GetNodeStructByIndex(mdl->GetNodeIndex());
 
     if (node)
     {
-        CStructHeader* shadow;
-        if(node->GetStruct(Checksum("Shadow"), &shadow))
+        CStructHeader* collide;
+        if(node->GetStruct(Checksum("Shadow"), &collide))
         {
-            SuperSector* sector = SuperSector::GetSuperSector(shadow->Data);
+            SuperSector* sector = SuperSector::GetSuperSector(collide->Data);
             if (sector)
             {
+                _printf("Killing Shadow %s\n", collide->Data);
                 sector->SetState(MeshState::kill);
             }
             else
-                _printf("Couldn't find sector %s\n", FindChecksumName(shadow->Data));
+                _printf("Couldn't find sector %s\n", FindChecksumName(collide->Data));
+        }
+
+        if (node->GetStruct(Checksum("CollideScript"), &collide))
+        {
+            _printf("Going to spawn script %s\n", FindChecksumName(collide->Data));
+            QScript::SpawnScript(collide->Data, NULL, mdl->GetNodeIndex());
         }
     }
     else

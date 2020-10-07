@@ -91,6 +91,12 @@ char levelPath[MAX_PATH];
 QBFile levelQB;
 
 
+void QScript::SpawnScript(DWORD checksum, CStruct* params, DWORD node, DWORD callback, CStruct* callback_params, bool AbsentInNetGames, bool NetEnabled, bool Permanent)
+{
+    typedef DWORD(__cdecl* const pSpawnScript)(DWORD checksum, CStruct* params, DWORD callback, CStruct* callback_params, DWORD node, bool AbsentInNetGames, bool NetEnabled, bool Permanent);
+    pSpawnScript(0x00428510)(checksum, params, callback, callback_params, node, AbsentInNetGames, NetEnabled, Permanent);
+}
+
 void CStruct::AddCompressedNode(DWORD checksum, QBKeyInfoContainer* container)
 {
 
