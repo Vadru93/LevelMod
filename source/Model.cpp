@@ -44,6 +44,45 @@ __declspec(naked) void Obj_FollowPathLinked_Naked()
     _asm jmp pJmp;
 }
 
+__declspec(naked) void BouncyObj_Go_Naked()
+{
+    static Model* pModel;
+    static CStruct* pStruct;
+    static DWORD pOldESP;
+    static DWORD pOldEBP;
+    static DWORD pJmp = 0x004842A0;
+    _asm mov pModel, ecx;
+    _asm mov pOldESP, esp;
+    _asm mov pOldEBP, ebp;
+    BouncyObj_Go(pModel);
+    _asm mov ecx, pModel;
+    _asm mov esp, pOldESP;
+    _asm mov ebp, pOldEBP;
+    _asm jmp pJmp;
+}
+
+void BouncyObj_Go(Model* mdl)
+{
+    CStructHeader* node = Node::GetNodeStructByIndex(mdl->GetNodeIndex());
+
+    if (node)
+    {
+        CStructHeader* shadow;
+        if(node->GetStruct(Checksum("Shadow"), &shadow))
+        {
+            SuperSector* sector = SuperSector::GetSuperSector(shadow->Data);
+            if (sector)
+            {
+                sector->SetState(MeshState::kill);
+            }
+            else
+                _printf("Couldn't find sector %s\n", FindChecksumName(shadow->Data));
+        }
+    }
+    else
+        _printf(__FUNCTION__ ": Couldn't find Node[%d]\n", mdl->GetNodeIndex());
+}
+
 
 
 std::map<DWORD, DWORD> movableObjects;

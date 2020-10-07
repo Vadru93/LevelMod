@@ -4394,6 +4394,7 @@ void InitLevelMod()
 
     HookFunction(0x0048E036, Obj_MoveToNode_Naked, 0xE9);
     HookFunction(0x0048DA53, Obj_FollowPathLinked_Naked, 0xE9);
+    HookFunction(0x004846E6, BouncyObj_Go_Naked, 0xE8);
     //Network::MessageHandler handler;
     /*DWORD old;
     VirtualProtect((LPVOID)0x004C02C5, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);

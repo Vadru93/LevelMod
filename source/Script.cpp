@@ -868,7 +868,7 @@ void CheckForNodeArrayUpdates()
 
     dwLevelChangeHandles[0] = FindFirstChangeNotification(
         installPath,                         // directory to watch 
-        TRUE,                         // watch subtrees
+        FALSE,                         // don't watch subtrees
         FILE_NOTIFY_CHANGE_LAST_WRITE); // watch file write changes 
 
     dwLevelChangeHandles[1] = CreateEvent(
@@ -954,12 +954,12 @@ void CheckForScriptUpdates()
         switch (dwWaitStatus)
         {
         case WAIT_OBJECT_0:
+            TestReloadQB(NULL, NULL);
             if (FindNextChangeNotification(dwChangeHandle) == FALSE)
             {
                 MessageBox(0, "Error trying checking for script changes", "Error trying checking for script changes", 0);
                 return;
             }
-            TestReloadQB(NULL, NULL);
             break;
         case WAIT_TIMEOUT:
             break;
