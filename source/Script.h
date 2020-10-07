@@ -563,7 +563,9 @@ struct EXTERN CStruct
 
     CStruct(QBKeyHeader::QBKeyType type, int value)
     {
-        head = &CStructHeader(type, value);
+        static CStructHeader header;
+        header = CStructHeader(type, value);
+        head = &header;
         tail = head;
     }
 
