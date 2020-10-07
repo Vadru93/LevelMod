@@ -66,19 +66,19 @@ __declspec(naked) void BouncyObj_OnBounce_Naked()
     static DWORD pJmp = 0x004003BE;
     static DWORD pOldESP;
     static DWORD pOldEBP;
-    static BYTE collFlag;
+    static BYTE flags;
     static Model* pModel;
     _asm mov pOldESP, esp;
     _asm mov pOldEBP, ebp;
     _asm mov al, [esp + 0x100];
-    _asm mov collFlag, al;
+    _asm mov flags, al;
  
- 
-    if (!(collFlag & 0x10))//collidable
+    //Check if our Collision was Hollow or not
+    if (!(flags & (BYTE)Collision::Flags::Hollow))//Collidable
     {
         _asm mov pModel, esi;
     }
-    else
+    else//Hollow, set model to NULL
         pModel = NULL;
     BouncyObj_OnBounce(pModel);
     _asm mov esp, pOldESP;
@@ -91,15 +91,18 @@ __declspec(naked) void BouncyObj_OnBounce_Naked()
 
 void BouncyObj_OnBounce(Model* mdl)
 {
-    if(mdl)
+    if(mdl)//We have collided, so let's check if BounceScript exists on this model
     {
         CStructHeader* node = Node::GetNodeStructByIndex(mdl->GetNodeIndex());
 
         if (node)
         {
+            CStructHeader* name;
+            if (node->GetStruct(Checksum("Name"), &name))
+                _printf("BouncyObj_OnBounce: %s\n", FindChecksumName(name->Data));
             CStructHeader* BounceScript;
 
-            if (node->GetStruct(Checksum("BounceScript"), &BounceScript))
+            if (node->GetStruct(Checksum("BounceScript"), &BounceScript))//BounceScript exists, let's spawn it!
             {
                 _printf("Going to spawn BounceScript %s\n", FindChecksumName(BounceScript->Data));
                 QScript::SpawnScript(BounceScript->Data, 0, mdl->GetNodeIndex());
@@ -108,16 +111,19 @@ void BouncyObj_OnBounce(Model* mdl)
     }
 
     DWORD trigger = *(DWORD*)0x004003CB;
-    if (trigger)
+    if (trigger)//We have hit a trigger poly
     {
-        *(DWORD*)0x004003CB = 0;
+        _printf("BouncyObj has hit a trigger poly\n");
+        *(DWORD*)0x004003CB = 0;//Reset the trigger checksum so we only trigger once
         DWORD index = 0;
+
+        //Now we need to check if the Node has a TriggerScript
         CStructHeader* node = Node::GetNodeStructAndIndex(trigger, index);
 
         if (node)
         {
             CStructHeader* TriggerScript;
-            if (node->GetStruct(Checksum("TriggerScript"), &TriggerScript))
+            if (node->GetStruct(Checksum("TriggerScript"), &TriggerScript))//The Node has TriggerScript, let's spawn it!
             {
                 _printf("Going to spawn TriggerScript %s\n", FindChecksumName(TriggerScript->Data));
                 QScript::SpawnScript(TriggerScript->Data, 0, index);
@@ -132,6 +138,8 @@ void BouncyObj_OnBounce(Model* mdl)
 void BouncyObj_Go(Model* mdl)
 {
     _printf("Model %p\n", mdl);
+    //A BouncyObject has been hit by a skater
+    //Now we need to check if there are any scripts to be called, or shadows to be removed
     CStructHeader* node = Node::GetNodeStructByIndex(mdl->GetNodeIndex());
 
     if (node)
@@ -139,6 +147,8 @@ void BouncyObj_Go(Model* mdl)
         CStructHeader* collide;
         if(node->GetStruct(Checksum("Shadow"), &collide))
         {
+            //Found Shadow
+            //Now we need to try and get the SuperSector to be able to kill the shadow
             SuperSector* sector = SuperSector::GetSuperSector(collide->Data);
             if (sector)
             {
@@ -152,7 +162,7 @@ void BouncyObj_Go(Model* mdl)
         if (node->GetStruct(Checksum("CollideScript"), &collide))
         {
             _printf("Going to spawn script %s\n", FindChecksumName(collide->Data));
-            QScript::SpawnScript(collide->Data, NULL, mdl->GetNodeIndex());
+            QScript::SpawnScript(collide->Data, NULL, mdl->GetNodeIndex());//Found a CollideScript, let's spawn it!
         }
     }
     else
