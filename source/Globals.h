@@ -198,6 +198,7 @@ void __stdcall SetVertexShader_hook();
 void Obj_MoveToNode_Naked();
 void Obj_FollowPathLinked_Naked();
 void BouncyObj_Go_Naked();
+void BouncyObj_OnBounce_Naked();
 
 //depricated
 void TestForAcid_naked();

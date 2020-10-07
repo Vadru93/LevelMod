@@ -28,4 +28,5 @@ struct Model
 void Obj_MoveToNode(Model* mdl, CStruct* pStruct);
 void Obj_FollowPathLinked(Model* mdl, CStruct* pStruct);
 void BouncyObj_Go(Model* mdl);
+void BouncyObj_OnBounce(Model* mdl);
 #endif

@@ -61,9 +61,77 @@ __declspec(naked) void BouncyObj_Go_Naked()
     _asm jmp pJmp;
 }
 
+__declspec(naked) void BouncyObj_OnBounce_Naked()
+{
+    static DWORD pJmp = 0x004003BE;
+    static DWORD pOldESP;
+    static DWORD pOldEBP;
+    static BYTE collFlag;
+    static Model* pModel;
+    _asm mov pOldESP, esp;
+    _asm mov pOldEBP, ebp;
+    _asm mov al, [esp + 0x100];
+    _asm mov collFlag, al;
+ 
+ 
+    if (!(collFlag & 0x10))//collidable
+    {
+        _asm mov pModel, esi;
+    }
+    else
+        pModel = NULL;
+    BouncyObj_OnBounce(pModel);
+    _asm mov esp, pOldESP;
+    _asm mov ebp, pOldEBP;
+    _asm xor eax, eax;
+    _asm mov al, [esp + 0x100];
+    _asm jmp pJmp;
+    
+}
+
+void BouncyObj_OnBounce(Model* mdl)
+{
+    if(mdl)
+    {
+        CStructHeader* node = Node::GetNodeStructByIndex(mdl->GetNodeIndex());
+
+        if (node)
+        {
+            CStructHeader* BounceScript;
+
+            if (node->GetStruct(Checksum("BounceScript"), &BounceScript))
+            {
+                _printf("Going to spawn BounceScript %s\n", FindChecksumName(BounceScript->Data));
+                QScript::SpawnScript(BounceScript->Data, 0, mdl->GetNodeIndex());
+            }
+        }
+    }
+
+    DWORD trigger = *(DWORD*)0x004003CB;
+    if (trigger)
+    {
+        *(DWORD*)0x004003CB = 0;
+        DWORD index = 0;
+        CStructHeader* node = Node::GetNodeStructAndIndex(trigger, index);
+
+        if (node)
+        {
+            CStructHeader* TriggerScript;
+            if (node->GetStruct(Checksum("TriggerScript"), &TriggerScript))
+            {
+                _printf("Going to spawn TriggerScript %s\n", FindChecksumName(TriggerScript->Data));
+                QScript::SpawnScript(TriggerScript->Data, 0, index);
+            }
+
+
+        }
+
+    }
+}
+
 void BouncyObj_Go(Model* mdl)
 {
-    _printf("Model %p\n", mdl->memberFunctions);
+    _printf("Model %p\n", mdl);
     CStructHeader* node = Node::GetNodeStructByIndex(mdl->GetNodeIndex());
 
     if (node)
