@@ -293,6 +293,11 @@ namespace Checksums
 
         LM_GameOption_bFixBWManual = COMPILE_CRC32("lm_gameoption_bfixbwmanual"),
 
+        TriggerScript = COMPILE_CRC32("triggerscript"),
+        CollideScript = COMPILE_CRC32("collidescript"),
+        BounceScript = COMPILE_CRC32("bouncescript"),
+        Shadow = COMPILE_CRC32("shadow"),
+
         //Trick_KFBackflip = 0xF7B4E0CB
 
 
