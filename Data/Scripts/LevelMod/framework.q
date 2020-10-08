@@ -124,16 +124,6 @@ SCRIPT Sch_BB_Defense_Shooter
 	REPEAT
 ENDSCRIPT
 
-SCRIPT CPF_AutoAccel
-	Obj_AdjustSound carloop volumePercent = 100 volumeStep = 0.7 pitchPercent = 100 pitchStep = 0.7
-	Obj_SetPathVelocity 50 mph
-ENDSCRIPT
-
-SCRIPT CPF_AutoDecel
-	Obj_AdjustSound carloop volumePercent = 80 volumeStep = 2 pitchPercent = 50 pitchStep = 1
-	Obj_SetPathVelocity 25
-ENDSCRIPT
-
 SCRIPT CPF_ChaseCarCheckDistance
 	Wait 10 gameframes
 	IF Obj_ObjectInRect dist = 40 Name = TRG_Looter_Car
