@@ -263,7 +263,11 @@ ENDSCRIPT
 SCRIPT Car_Generic01 TurnDist = 20
 	Obj_StickToGround off
 	Obj_SetGroundOffset 0.1
-	Obj_SetPathVelocity 45 mph
+	IF GotParam DefaultSpeed
+	    Obj_SetPathVelocity <DefaultSpeed> mph
+	ELSE
+	    Obj_SetPathVelocity 45 mph
+	ENDIF
 	Obj_SetPathTurnDist <TurnDist>
 	Obj_FollowPathLinked
 	Obj_SetPathAcceleration 30 mphps
