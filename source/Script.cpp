@@ -708,6 +708,8 @@ bool QBFile::ContentChanged(bool level)
 
 void QBScript::OpenScript(char* path, bool level)
 {
+    if (FileHandler::reloading)
+        level = true;
     fileName = path;
     _printf("OpenScript: %s\n", path);//MessageBox(0, "OpenScript", path, 0);
     FILE* f = fopen(path, "rb+");
@@ -727,7 +729,7 @@ void QBScript::OpenScript(char* path, bool level)
     if (match)
     {*/
     //MessageBox(0, 0, 0, 0);
-    if (!level && !FileHandler::reloading)
+    if (!level)
     {
         unsigned long checksum;
         /*if (FastCRC::CFastCRC32::Calculate(&checksum, path) != 0)
