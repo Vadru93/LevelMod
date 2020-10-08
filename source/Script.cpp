@@ -998,9 +998,11 @@ bool TestReloadQB(CStruct* pStruct, CScript* pScript)
 
     for (DWORD i = 0; i < qbFiles.size(); i++)
     {
-        FileHandler::reloading = RELOAD_SCRIPT;
         if (qbFiles[i].ContentChanged())
+        {
+            FileHandler::reloading = RELOAD_SCRIPT;
             pLoadQB(0x0042B300)(qbFiles[i].fileName, false);
+        }
     }
     char* qbFiles = *(char**)0x008A8B48;
 

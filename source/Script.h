@@ -85,11 +85,16 @@ namespace QScript
             checksum = chc;
             size = fileSize;
             if (!level)
-                strcpy(fileName, &file[5]);
+            {
+                if(*file == '.')
+                    strcpy(fileName, &file[7]);
+                else
+                    strcpy(fileName, &file[5]);
+            }
             else
                 strcpy(fileName, file);
 
-            _printf("QBFile: %s crc %X size %X\n", fileName, checksum, size);
+            _printf("[%d]QBFile: %s crc %X size %X\n", level, fileName, checksum, size);
         }
 
         bool ContentChanged(bool level = false);
