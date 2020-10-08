@@ -193,7 +193,9 @@ void BouncyObj_OnBounce(Model* mdl)
                             break;
 
                         case 0x16:
-                            if (*(DWORD*)pScript == trigger)
+                            DWORD key;
+                            key = *(DWORD*)pScript;
+                            if (key == Checksums::Shatter || key == Checksums::ShatterAndDie || key == trigger)
                             {
                                 //NodeName Match, let's spawn the TriggerScript
                                 _printf("Going to spawn TriggerScript %s\n", FindChecksumName(TriggerScript->Data));
