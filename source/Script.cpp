@@ -10,9 +10,12 @@
 #include <tchar.h>
 //#include "FastCRC.h"
 
+#define RELOAD_LEVEL 1
+#define RELOAD_SCRIPT 2
+
 namespace FileHandler
 {
-    bool reloading = false;
+    BYTE reloading = false;
 
     BYTE* pFile = NULL;
     const BYTE* oldFile = NULL;
@@ -709,7 +712,7 @@ bool QBFile::ContentChanged(bool level)
 void QBScript::OpenScript(char* path, bool level)
 {
     if (FileHandler::reloading)
-        level = true;
+        level = FileHandler::reloading == RELOAD_LEVEL;
     fileName = path;
     _printf("OpenScript: %s\n", path);//MessageBox(0, "OpenScript", path, 0);
     FILE* f = fopen(path, "rb+");
@@ -829,11 +832,11 @@ done:
     CreateQBTable(pFile, level);
     _printf("END OpenScript\n");
     delete[] oldData;
-    if (FileHandler::reloading)
+    if (FileHandler::reloading == RELOAD_LEVEL)
     {
         SpawnScript(Checksum("UnPauseSkaters_Script"));
-        FileHandler::reloading = false;
     }
+    FileHandler::reloading = false;
 }
 
 void QBScript::ClearMap()
@@ -915,7 +918,7 @@ void CheckForNodeArrayUpdates()
                 typedef void(__cdecl* const pReloadNodeArray)(CStruct*, CScript*);
                 _printf("Reloading node array %s..", levelQB.fileName);
                 //pReloadNodeArray(0x00419D50)(NULL, NULL);
-                FileHandler::reloading = true;
+                FileHandler::reloading = RELOAD_LEVEL;
                 SpawnScript(Checksum("ReloadNodeArray_Script"));
             }
             if (FindNextChangeNotification(dwLevelChangeHandles[0]) == FALSE)
@@ -995,6 +998,7 @@ bool TestReloadQB(CStruct* pStruct, CScript* pScript)
 
     for (DWORD i = 0; i < qbFiles.size(); i++)
     {
+        FileHandler::reloading = RELOAD_SCRIPT;
         if (qbFiles[i].ContentChanged())
             pLoadQB(0x0042B300)(qbFiles[i].fileName, false);
     }

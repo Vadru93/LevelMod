@@ -2457,6 +2457,7 @@ const CompiledScript scripts[] =
     {"LM_PrintInfo", GetInfoScript },
     {"TestReloadQB", TestReloadQB},
     {"OnPostLevelLoad", OnPostLevelLoad},
+    {"Change_Local", ChangeLocalScript}
     /*{"SetMemoryPoolSize", SetMemoryPoolSize},
     {"GetMemoryPoolSize", GetMemoryPoolSize},
     {"GetMemoryPoolSizeText", GetMemoryPoolSizeText},*/
@@ -3311,6 +3312,27 @@ bool OnPostLevelLoad(CStruct* pStruct, CScript* pScript)
     oldSkater = Game::skater;
     CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)LoadCustomShaderThread, NULL, NULL, NULL);
     return true;
+}
+
+bool ChangeLocalScript(CStruct* pStruct, CScript* pScript)
+{
+    CStructHeader* header = pStruct->head;
+    if (header)
+    {
+        CStructHeader* param = pScript->GetParam(header->QBkey);
+        if (param)
+        {
+            _printf("param %s value %d header %s value %d\n", FindChecksumName(param->QBkey), param->value.i, FindChecksumName(header->QBkey), header->value.i);
+            _printf("param_type %s header_type %s\n", QScript::QBTypes[param->Type], QScript::QBTypes[header->Type]);
+            param->Data = header->Data;
+            return true;
+        }
+        else
+            _printf(__FUNCTION__ "Couldn't find %s in script %s\n", FindChecksumName(header->QBkey), FindChecksumName(pScript->scriptChecksum));
+    }
+
+    _printf("No param passed to Local_Param? in script %s\n", FindChecksumName(pScript->scriptChecksum));
+    return false;
 }
 
 /*__declspec(naked) void Fopen_naked()

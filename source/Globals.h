@@ -114,6 +114,7 @@ bool GetOptionText(CStruct* pStruct, CScript* pScript);
 bool AddOption(CStruct* pStruct, CScript* pScript);
 
 bool OnPostLevelLoad(CStruct* pStruct, CScript* pScript);
+bool ChangeLocalScript(CStruct* pStruct, CScript* pScript);
 //--------Functions callable from script--------
 
 //--------Functions NOT callable from script--------
