@@ -74,7 +74,7 @@ __declspec(naked) void BouncyObj_OnBounce_Naked()
     _asm pushfd;
     _asm mov al, [esp + 0x100];
     _asm mov flags, al;
- 
+
     //Check if our Collision was Hollow or not
     if (!(flags & (BYTE)Collision::Flags::Hollow))//Collidable
     {
@@ -90,12 +90,12 @@ __declspec(naked) void BouncyObj_OnBounce_Naked()
     _asm popfd;
     _asm popad;
     _asm jmp pJmp;
-    
+
 }
 
 void BouncyObj_OnBounce(Model* mdl)
 {
-    if(mdl)//We have collided, so let's check if BounceScript exists on this Node
+    if (mdl)//We have collided, so let's check if BounceScript exists on this Node
     {
         CStructHeader* node = Node::GetNodeStructByIndex(mdl->GetNodeIndex());
 
@@ -120,7 +120,7 @@ void BouncyObj_OnBounce(Model* mdl)
                 CScript script;
                 CStruct params(QBKeyHeader::LOCAL, BounceSound->Data);
                 Game::PlaySound(&params, &script);
-                
+
             }
         }
     }
@@ -138,11 +138,14 @@ void BouncyObj_OnBounce(Model* mdl)
         if (node)
         {
             CStructHeader* TriggerScript;
-            if (node->GetStruct(Checksums::TriggerScript, &TriggerScript))//The Node has TriggerScript, let's spawn it!
+            if (node->GetStruct(Checksums::TriggerScript, &TriggerScript))//The Node has TriggerScript, now we need to check if we should spawn it...
             {
                 QBKeyHeader* header = GetQBKeyHeader(TriggerScript->Data);
                 if (header && header->type == QBKeyHeader::QBKeyType::SCRIPTED_FUNCTION)
                 {
+                    //This is a hacky test to see if the NodeName exists in the script
+                    //This means that probably Shatter is called with this Node
+
                     BYTE* pScript = (BYTE*)header->pStr;
 
                     char opcode = *pScript;
@@ -152,24 +155,24 @@ void BouncyObj_OnBounce(Model* mdl)
                         pScript++;
                         switch (opcode)
                         {
-
-                  
                         case 0x49:
                         case 0x48:
                         case 0x47:
                             pScript += 2;
                             break;
+
                         case 0x1C:
                         case 0x1B:
                             pScript += *(DWORD*)pScript + 4;
                             break;
-                            //case 0x18:
+
                         case 0x17:
                         case 0x1A:
                         case 0x2E:
                         case 2:
                             pScript += 4;
                             break;
+
                         case 1:
                         case 0x3:
                         case 0x4:
@@ -179,11 +182,8 @@ void BouncyObj_OnBounce(Model* mdl)
                         case 9:
                         case 0x23:
                         case 0x25:
-
                         case 0x26:
-
                         case 0x28:
-
                         case 0x2D:
                         case 0x18:
                         case 0x0E:
@@ -191,15 +191,18 @@ void BouncyObj_OnBounce(Model* mdl)
                         case 0x39:
                         case 0x30:
                             break;
+
                         case 0x16:
                             if (*(DWORD*)pScript == trigger)
                             {
+                                //NodeName Match, let's spawn the TriggerScript
                                 _printf("Going to spawn TriggerScript %s\n", FindChecksumName(TriggerScript->Data));
                                 QScript::SpawnScript(TriggerScript->Data, 0, index);
                                 return;
                             }
                             pScript += 4;
                             break;
+
                         case 0x1F:
                             pScript += 8;
                             break;
@@ -207,19 +210,22 @@ void BouncyObj_OnBounce(Model* mdl)
                         case 0x1E:
                             pScript += 12;
                             break;
+
                         case 0x40:
                         case 0x2F:
                         case 0x37:
                             pScript += *(DWORD*)pScript * 4 + 4;
                             break;
-                            default:
-                                _printf("%X @ %p\n", opcode, pScript);
-                                MessageBox(0, "Unhandled opcode...", "", 0);
-                                break;
+
+                        default:
+                            //Should add all the unhandled opcodes to prevent crashing and other issues
+                            _printf("%X @ %p\n", opcode, pScript);
+                            MessageBox(0, "Unhandled opcode...", __FUNCTION__, 0);
+                            break;
                         }
                         opcode = *pScript;
                     }
-                    
+
                 }
             }
 
@@ -239,7 +245,7 @@ void BouncyObj_Go(Model* mdl)
     if (node)
     {
         CStructHeader* collide;
-        if(node->GetStruct(Checksums::Shadow, &collide))//Found Shadow
+        if (node->GetStruct(Checksums::Shadow, &collide))//Found Shadow
         {
             //Now we need to try and get the SuperSector to be able to kill the shadow
             SuperSector* sector = SuperSector::GetSuperSector(collide->Data);

@@ -88,7 +88,7 @@ Vertex GetNormal(Vertex* v)
 
 D3DXVECTOR3& Transform(D3DXVECTOR3& V, D3DXMATRIX& M)
 {
-    D3DXVECTOR3 Out;
+    static D3DXVECTOR3 Out;
     float x = V.x * M._11 + V.y * M._21 + V.z * M._31 + M._41;
     float y = V.x * M._12 + V.y * M._22 + V.z * M._32 + M._42;
     float z = V.x * M._13 + V.y * M._23 + V.z * M._33 + M._43;
