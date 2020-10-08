@@ -76,7 +76,7 @@ __declspec(naked) void BouncyObj_OnBounce_Naked()
     _asm mov flags, al;
 
     //Check if our Collision was Hollow or not
-    if (!(flags & (BYTE)Collision::Flags::Hollow))//Collidable
+    if (!(flags & (BYTE)Collision::Flags::Hollow))//Collidable. get the model pointer
     {
         _asm mov pModel, esi;
     }
@@ -125,11 +125,11 @@ void BouncyObj_OnBounce(Model* mdl)
         }
     }
 
-    DWORD trigger = *(DWORD*)0x004003CB;
+    DWORD trigger = p_trigger_node;
     if (trigger)//We have hit a trigger poly
     {
         _printf("BouncyObj has hit a trigger poly\n");
-        *(DWORD*)0x004003CB = 0;//Reset the trigger checksum so we only trigger once
+        p_trigger_node = 0;//Reset the trigger checksum so we only trigger once
         DWORD index = 0;
 
         //Now we need to check if the Node has a TriggerScript
@@ -143,10 +143,8 @@ void BouncyObj_OnBounce(Model* mdl)
                 QBKeyHeader* header = GetQBKeyHeader(TriggerScript->Data);
                 if (header && header->type == QBKeyHeader::QBKeyType::SCRIPTED_FUNCTION)
                 {
-                    //This is a hacky test to see if the NodeName exists in the script
-                    //This means that probably Shatter is called with this Node
-
-                    BYTE* pScript = (BYTE*)header->pStr;
+                    //This is a hacky test to see if the Script will Shatter something
+                    char* pScript = header->pStr;
 
                     char opcode = *pScript;
 
@@ -180,16 +178,16 @@ void BouncyObj_OnBounce(Model* mdl)
                         case 6:
                         case 7:
                         case 9:
+                        case 0x0E:
+                        case 0x0F:
+                        case 0x18:
                         case 0x23:
                         case 0x25:
                         case 0x26:
                         case 0x28:
                         case 0x2D:
-                        case 0x18:
-                        case 0x0E:
-                        case 0x0F:
-                        case 0x39:
                         case 0x30:
+                        case 0x39:
                             break;
 
                         case 0x16:
@@ -197,7 +195,7 @@ void BouncyObj_OnBounce(Model* mdl)
                             key = *(DWORD*)pScript;
                             if (key == Checksums::Shatter || key == Checksums::ShatterAndDie || key == trigger)
                             {
-                                //NodeName Match, let's spawn the TriggerScript
+                                //This is probably going to Shatter something, let's spawn the TriggerScript
                                 _printf("Going to spawn TriggerScript %s\n", FindChecksumName(TriggerScript->Data));
                                 QScript::SpawnScript(TriggerScript->Data, 0, index);
                                 return;
@@ -233,6 +231,8 @@ void BouncyObj_OnBounce(Model* mdl)
 
 
         }
+        else
+            _printf("Couldn't find Node %s\n", trigger);
 
     }
 }

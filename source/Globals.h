@@ -6,6 +6,8 @@
 #include "CXBOXController.h"
 #include "_Math.h"
 
+#define p_trigger_node *(DWORD*)0x004003CB
+
 //--------Spine and Acid--------
 enum TransferType
 {

@@ -6,7 +6,15 @@ Script KillSafely
     ENDIF
 EndScript
 
+Script UnPauseSkaters_Script
+UnPauseSkaters
+printf "Finished reloading NodeArray"
+EndScript
 
+Script ReloadNodeArray_Script
+  PauseSkaters
+  ReloadNodeArray
+EndScript
 
 //Render customization values
 uv_anim_threshold = 0.02

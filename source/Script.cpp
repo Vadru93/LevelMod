@@ -12,6 +12,8 @@
 
 namespace FileHandler
 {
+    bool reloading = false;
+
     BYTE* pFile = NULL;
     const BYTE* oldFile = NULL;
     DWORD size = 0;
@@ -725,7 +727,7 @@ void QBScript::OpenScript(char* path, bool level)
     if (match)
     {*/
     //MessageBox(0, 0, 0, 0);
-    if (!level)
+    if (!level && !FileHandler::reloading)
     {
         unsigned long checksum;
         /*if (FastCRC::CFastCRC32::Calculate(&checksum, path) != 0)
@@ -743,15 +745,18 @@ void QBScript::OpenScript(char* path, bool level)
             MessageBox(0, "Error calculating checksum for file", fileName, 0);
         levelQB = QBFile(checksum, fileName, size, true);
 
-        if (dwLevelChangeHandles[1] != NULL)
+        if (!FileHandler::reloading)
         {
-            SetEvent(dwLevelChangeHandles[1]);
-            while (dwLevelChangeHandles[1] != NULL)
+            if (dwLevelChangeHandles[1] != NULL)
             {
-                Sleep(10);
+                SetEvent(dwLevelChangeHandles[1]);
+                while (dwLevelChangeHandles[1] != NULL)
+                {
+                    Sleep(10);
+                }
             }
+            CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CheckForNodeArrayUpdates, 0, 0, 0);
         }
-        CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CheckForNodeArrayUpdates, 0, 0, 0);
     }
     /*}
     else
@@ -822,7 +827,11 @@ done:
     CreateQBTable(pFile, level);
     _printf("END OpenScript\n");
     delete[] oldData;
-
+    if (FileHandler::reloading)
+    {
+        SpawnScript(Checksum("UnPauseSkaters_Script"));
+        FileHandler::reloading = false;
+    }
 }
 
 void QBScript::ClearMap()
@@ -903,7 +912,9 @@ void CheckForNodeArrayUpdates()
             {
                 typedef void(__cdecl* const pReloadNodeArray)(CStruct*, CScript*);
                 _printf("Reloading node array %s..", levelQB.fileName);
-                pReloadNodeArray(0x00419D50)(NULL, NULL);
+                //pReloadNodeArray(0x00419D50)(NULL, NULL);
+                FileHandler::reloading = true;
+                SpawnScript(Checksum("ReloadNodeArray_Script"));
             }
             if (FindNextChangeNotification(dwLevelChangeHandles[0]) == FALSE)
             {
