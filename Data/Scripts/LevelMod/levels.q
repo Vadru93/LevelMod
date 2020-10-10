@@ -1292,7 +1292,7 @@ Def_Sch = {
 	loadscr = "images\load\th4_col.png"
 
 	r = 140 g = 168 b = 228 a = 0 
-	cnear = 12 cfar = 20000
+	cnear = 12 cfar = 30000
 
 	load_script = Load_Sch
 } 
@@ -1318,7 +1318,7 @@ Def_SF2 = {
 	loadscr = "images\load\th4_sf2.png"
 
 	r = 179 g = 184 b = 192 a = 0 
-	cnear = 12 cfar = 20000
+	cnear = 12 cfar = 30000
 
 	load_script = Load_SF2
 }
@@ -1344,7 +1344,7 @@ Def_Alc = {
 	loadscr = "images\load\th4_alc.png"
 
 	r = 179 g = 184 b = 192 a = 0 
-	cnear = 12 cfar = 20000
+	cnear = 12 cfar = 30000
 
 	load_script = Load_Alc
 }
@@ -1370,7 +1370,7 @@ Def_Kon = {
 	loadscr = "images\load\th4_Kon.png"
 
 	r = 137 g = 163 b = 186 a = 0 
-	cnear = 12 cfar = 80000
+	cnear = 12 cfar = 30000
 
 	load_script = Load_Kon
 }
@@ -1395,8 +1395,8 @@ Def_Jnk = {
 	lev_amb = "ambience\thps4\Jnk"
 	loadscr = "images\load\th4_Jnk.png"
 
-	r = 179 g = 184 b = 192 a = 0 
-	cnear = 12 cfar = 20000
+	r = 112 g = 145 b = 172 a = 0 
+	cnear = 12 cfar = 30000
 
 	load_script = Load_Jnk
 }
@@ -1421,8 +1421,8 @@ Def_Lon = {
 	lev_amb = "ambience\thps4\Lon"
 	loadscr = "images\load\th4_Lon.png"
 
-	r = 165 g = 180 b = 202 a = 0 
-	cnear = 12 cfar = 80000
+	r = 130 g = 154 b = 182 a = 0 
+	cnear = 12 cfar = 30000
 
 	load_script = Load_Lon
 }
@@ -1447,8 +1447,8 @@ Def_Zoo = {
 	lev_amb = "ambience\thps4\Zoo"
 	loadscr = "images\load\th4_Zoo.png"
 
-	r = 179 g = 184 b = 192 a = 0 
-	cnear = 12 cfar = 20000
+	r = 130 g = 154 b = 182 a = 0 
+	cnear = 12 cfar = 30000
 
 	load_script = Load_Zoo
 }
@@ -1473,8 +1473,8 @@ Def_Cnv = {
 	lev_amb = "ambience\thps4\Cnv"
 	loadscr = "images\load\th4_Cnv.png"
 
-	r = 179 g = 184 b = 192 a = 0 
-	cnear = 12 cfar = 20000
+	r = 180 g = 146 b = 119 a = 0 
+	cnear = 12 cfar = 30000
 
 	load_script = Load_Cnv
 }
@@ -1500,7 +1500,7 @@ Def_Hof = {
 	loadscr = "images\load\th4_Hof.png"
 
 	r = 165 g = 180 b = 202 a = 0 
-	cnear = 12 cfar = 20000
+	cnear = 12 cfar = 30000
 
 	load_script = Load_Hof
 }
@@ -1526,7 +1526,7 @@ Def_Mot = {
 	loadscr = "images\load\th4_Mot.png"
 
 	r = 165 g = 180 b = 202 a = 0 
-	cnear = 12 cfar = 20000
+	cnear = 12 cfar = 30000
 
 	load_script = Load_Mot
 }
