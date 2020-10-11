@@ -243,10 +243,9 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
 
     // Setup presentation parameters
     D3DPRESENT_PARAMETERS d3dpp;
-    CopyMemory(&d3dpp, pPresentationParameters, sizeof(D3DPRESENT_PARAMETERS));
+    CopyMemory(&d3dpp,&PresentParams, sizeof(D3DPRESENT_PARAMETERS));
 
     // Check for AntiAliasing
-    bool MultiSampleFlag = false;
     if (Gfx::AntiAliasing != 0)
     {
         DWORD QualityLevels = 0;
@@ -270,7 +269,6 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
                 // Check if device was created successfully
                 if (SUCCEEDED(hr))
                 {
-                    MultiSampleFlag = true;
                     DeviceMultiSampleType = (D3DMULTISAMPLE_TYPE)x;
                     DeviceInterface->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
                     //LOG_LIMIT(3, "Setting MultiSample " << d3dpp.MultiSampleType << " Quality " << d3dpp.MultiSampleQuality);
@@ -286,7 +284,8 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
 
         if (FAILED(hr))
         {
-            //MessageBox(0, " Failed to enable AntiAliasing!", 0,0);
+            MessageBox(0, " Failed to enable AntiAliasing!", 0,0);
+            printf("Failed to enable AntiAliasing");
         }
     }
 
