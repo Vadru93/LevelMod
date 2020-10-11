@@ -140,8 +140,8 @@ LevelModOptions = [
 	{ name = "LM_LevelOption_TH4ProObjects" value = 0 StartGame Do = UpdateTH4ProObjects }
 	{ name = "LM_LevelOption_TH4CompObjects" value = 0 StartGame Do = UpdateTH4CompObjects }
 
-	{ name = "LM_GFX_eBuffering" value = 2 }
-	{ name = "LM_GFX_eAntiAlias" value = 1 }
+	{ name = "LM_GFX_eBuffering" value = 2 } //"Off" "Double" "Triple"
+	{ name = "LM_GFX_eAntiAlias" value = 4 } //"Off" "auto" "2x" "4x" "8x"
 	{ name = "LM_GFX_bFiltering" value = 1 }
 	{ name = "LM_GFX_bFixStutter" value = 1 }
 ]
@@ -179,7 +179,8 @@ SCRIPT MaybeAddHostOption
     IF OnServer
 	    AddLine parent = Levelmod_menu_root Type = textmenuelement id = lm_hostoption_id text = "Host Options" link = levelmod_HostOptions_root
 	ENDIF
-	AddLine parent = Levelmod_menu_root Type = textmenuelement id = back_id text = "Back" target = "go_pack" Params = { id = Levelmod_menu_root } 
+
+	AddLine parent = Levelmod_menu_root Type = textmenuelement id = back_id text = "Back" target = "go_back" Params = { id = Levelmod_menu_root } 
 ENDSCRIPT
 
 //levelmod settings root menu struct
@@ -809,15 +810,15 @@ game_menu_items = [
 	{ IsBool text = "XInput" 		option_id = item15	option = LM_Control_bXinput 		toggle_id = item5_toggle cat_control }
 
 	{ IsBool text = "Extra Messages" 	option_id = item21 option = LM_GUI_bTrickNotifications 	toggle_id = item1_toggle cat_gui } 
-	{ IsBool text = "Show HUD" 			option_id = item22 option = LM_GUI_bShowHud 			toggle_id = item2_toggle cat_gui } 
-	{ IsBool text = "Player names" 		option_id = item23 option = LM_GUI_bNetName 			toggle_id = item3_toggle cat_gui } 
+	{ IsBool text = "Show HUD" 			option_id = item22 option = LM_GUI_bShowHud 			toggle_id = item2_toggle cat_gui Do = UpdateShowHUD } 
+	{ IsBool text = "Player names" 		option_id = item23 option = LM_GUI_bNetName 			toggle_id = item3_toggle cat_gui Do = UpdateNetName } 
 	{ IsBool text = "New Net Menu" 		option_id = item24 option = LM_GUI_bNewMenu 			toggle_id = item4_toggle cat_gui } 
 	{ IsBool text = "GrafCounter" 		option_id = item25 option = LM_GUI_bShowGrafCounter 	toggle_id = item5_toggle cat_gui } 
 	
-	{ IsEnum text = "Buffering" 	option_id = item211 option = LM_GFX_eBuffering 	toggle_id = item1_toggle cat_gfx TextValues = [ "Off" "Double" "Triple" ] } 
-	{ IsEnum text = "MSAA Level" 	option_id = item214 option = LM_GFX_eAntiAlias 	toggle_id = item4_toggle cat_gfx TextValues = [ "Off" "auto" "2x" "4x" "8x" ] } 
-	{ IsBool text = "Texture Filtering" 		option_id = item215 option = LM_GFX_bFiltering 			toggle_id = item5_toggle cat_gfx } 
-	{ IsBool text = "Fix Stuttering" 		option_id = item216 option = LM_GFX_bFixStutter 			toggle_id = item6_toggle cat_gfx } 
+	{ IsEnum text = "Buffering" 		option_id = item211 option = LM_GFX_eBuffering 	toggle_id = item1_toggle cat_gfx TextValues = [ "Off" "Double" "Triple" ] } 
+	{ IsEnum text = "MSAA Level" 		option_id = item214 option = LM_GFX_eAntiAlias 	toggle_id = item4_toggle cat_gfx TextValues = [ "Off" "auto" "2x" "4x" "8x" ] } 
+	{ IsBool text = "Texture Filtering" option_id = item215 option = LM_GFX_bFiltering 			toggle_id = item5_toggle cat_gfx } 
+	{ IsBool text = "Fix Stuttering" 	option_id = item216 option = LM_GFX_bFixStutter 			toggle_id = item6_toggle cat_gfx } 
 ]
 
 
@@ -866,7 +867,7 @@ script populate_game_options
 	SetMenuElementText <title> id = game_options_title
 	
 	ForeachIn <items> do = Settings_AddLine params = { <...> }
-	Settings_AddLine back_menu_item
+	Settings_AddLine back_menu_item target = "go_back" Params = { id = game_options_names_menu } 
 endscript
 
 
@@ -881,7 +882,8 @@ script Settings_AddLine
 				Type = textmenuelement 
 				id = <option_id>
 				text = <text>
-				link = <link>
+				target = <target>
+				params = <params>
 				w = 300.0
 			}
 		else
@@ -924,7 +926,7 @@ script Settings_AddLine
 		endif
 
 		if GotParam IsBool
-			AttachEventHandler { Type = ChooseEventHandler object = <option_id> target = "Settings_ToggleOption" params = { option = <option> toggle_id = <toggle_id> } }
+			AttachEventHandler { Type = ChooseEventHandler object = <option_id> target = "Settings_ToggleOption" params = { option = <option> toggle_id = <toggle_id> <...> } }
 			Settings_UpdateBoolText { option = <option> toggle_id = <toggle_id> }
 		endif
 	endif
