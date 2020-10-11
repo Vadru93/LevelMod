@@ -845,6 +845,9 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::BeginScene()
     {
         ProxyInterface->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
         ProxyInterface->SetRenderState(D3DRS_ANTIALIASEDLINEENABLE, TRUE);
+    }
+    if(Gfx::filtering)
+    {
         if (MaxAnisotropy)
         {
             ProxyInterface->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, MaxAnisotropy);
@@ -1193,7 +1196,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::SetTextureStageState(DWORD Stage, D3D
     case D3DTSS_BORDERCOLOR:
         return ProxyInterface->SetSamplerState(Stage, D3DSAMP_BORDERCOLOR, Value);
     case D3DTSS_MAGFILTER:
-        if (DeviceMultiSampleType)
+        if (Gfx::filtering)
         {
             if (MaxAnisotropy)
                 Value = D3DTEXF_ANISOTROPIC;
@@ -1202,7 +1205,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::SetTextureStageState(DWORD Stage, D3D
         }
         return ProxyInterface->SetSamplerState(Stage, D3DSAMP_MAGFILTER, Value);
     case D3DTSS_MINFILTER:
-        if (DeviceMultiSampleType)
+        if (Gfx::filtering)
         {
             if (MaxAnisotropy)
                 Value = D3DTEXF_ANISOTROPIC;
@@ -1211,7 +1214,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::SetTextureStageState(DWORD Stage, D3D
         }
         return ProxyInterface->SetSamplerState(Stage, D3DSAMP_MINFILTER, Value);
     case D3DTSS_MIPFILTER:
-        if (DeviceMultiSampleType)
+        if (Gfx::filtering)
         {
             Value = D3DTEXF_LINEAR;
         }
@@ -1221,7 +1224,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::SetTextureStageState(DWORD Stage, D3D
     case D3DTSS_MAXMIPLEVEL:
         return ProxyInterface->SetSamplerState(Stage, D3DSAMP_MAXMIPLEVEL, Value);
     case D3DTSS_MAXANISOTROPY:
-        if (DeviceMultiSampleType)
+        if (Gfx::filtering)
         {
             Value = MaxAnisotropy;
         }
