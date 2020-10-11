@@ -14,7 +14,7 @@ LM_HostOptions = [
 	{ LM_HostOption_MenuItem  name = LM_HostOption_bLimitTags Value = 0 id = LM_HostOption_bLimitTags_id override_false = LM_GameOption_bLimitTags  params = { name = LM_HostOption_bLimitTags id = LM_HostOption_bLimitTags_id off = "32 TagFix: Allowed" on = "32 TagFix: Disallowed" } }
 	{ LM_HostOption_MenuItem  name = LM_HostOption_bWallplant Value = 1 id = LM_HostOption_bWallplant_id override_true = LM_Control_bWallplant  params = { name = LM_HostOption_bWallplant id = LM_HostOption_bWallplant_id on = "Wallplant: Allowed" off = "Wallplant: Disallowed" } }
     { LM_HostOption_MenuItem  name = LM_HostOption_bWalliePlant Value = 1 id = LM_HostOption_bWalliePlant_id override_true = LM_Control_bWalliePlant  params = { name = LM_HostOption_bWalliePlant id = LM_HostOption_bWalliePlant_id on = "Wallieplant: Allowed" off = "Wallieplant: Disallowed" } }
-	{ LM_HostOption_MenuItem  name = LM_HostOption_bBoostPlant Value = 1 id = LM_HostOption_bBoostPlant_idf override_true = LM_Control_bBoostPlant  params = { name = LM_HostOption_bBoostPlant id = LM_HostOption_bBoostPlant_id on = "Boostplant: Allowed" off = "Boostplant: Disallowed" } }
+	{ LM_HostOption_MenuItem  name = LM_HostOption_bBoostPlant Value = 1 id = LM_HostOption_bBoostPlant_id override_true = LM_Control_bBoostPlant  params = { name = LM_HostOption_bBoostPlant id = LM_HostOption_bBoostPlant_id on = "Boostplant: Allowed" off = "Boostplant: Disallowed" } }
 	{ LM_HostOption_MenuItem  name = LM_HostOption_bButtSlap Value = 1 id = LM_HostOption_bButtSlap_id override_true = LM_Control_bButtSlap  params = { name = LM_HostOption_bButtSlap id = LM_HostOption_bButtSlap_id on = "Buttslap: Allowed" off = "Buttslap: Disallowed" } }
 	
 ]
@@ -136,9 +136,9 @@ LevelModOptions = [
 	{ name = "LM_LevelOption_TH4ProObjects" value = 0 StartGame Do = UpdateTH4ProObjects }
 	{ name = "LM_LevelOption_TH4CompObjects" value = 0 StartGame Do = UpdateTH4CompObjects }
 
-	{ name = "LM_GFX_eBuffering" value = 2 } 
-	{ name = "LM_GFX_eAntiAlias" value = 1 } 
-	{ name = "LM_GFX_bFiltering" value = 1 } 	
+	{ name = "LM_GFX_eBuffering" value = 2 }
+	{ name = "LM_GFX_eAntiAlias" value = 1 }
+	{ name = "LM_GFX_bFiltering" value = 1 }
 	{ name = "LM_GFX_bFixStutter" value = 1 }
 ]
 
@@ -192,15 +192,15 @@ levelmod_menu_root_children = [
 
 	//game options that affect gameplay
 	{ Type = textmenuelement auto_id text = "Game Options" link = newSettingsMenu  
-	target = "populate_game_options" params = { mask = cat_game items = game_menu_items } }
+	target = "populate_game_options" params = { mask = cat_game items = game_menu_items title = "Game Options" } }
 	
 	//GUI options, like Show HUD, show GrafCounter, etc
 	{ Type = textmenuelement auto_id text = "GUI Options" link = newSettingsMenu  
-	target = "populate_game_options" params = { mask = cat_gui items = game_menu_items } }
+	target = "populate_game_options" params = { mask = cat_gui items = game_menu_items title = "GUI Options" } }
 	
 	//hardware graphics options (AA, filtering, 
 	{ Type = textmenuelement auto_id text = "Graphics Options" link = newSettingsMenu  
-	target = "populate_game_options" params = { mask = cat_gfx items = game_menu_items } }
+	target = "populate_game_options" params = { mask = cat_gfx items = game_menu_items title = "Graphics Options" } }
 	
 	
 	//Options that affect certain parts of th level
@@ -208,7 +208,7 @@ levelmod_menu_root_children = [
 		
 	//Control options, like spine transfer, acid drop, etc
 	{ Type = textmenuelement auto_id text = "Control Options" link = newSettingsMenu  
-	target = "populate_game_options" params = { mask = cat_control items = game_menu_items } }
+	target = "populate_game_options" params = { mask = cat_control items = game_menu_items title = "Control Options" } }
 ]
 
 
@@ -826,7 +826,7 @@ script Settings_CreateOptionsMenu
 		just_center_x just_center_y blue_top 
 		//eventhandler = { type = showeventhandler target = "populate_game_options" params = { mask = <cat> items = <items> } }
 		children = [ 
-			{ type = textmenuelement auto_id text = "test" static dont_gray drawer = title }
+			{ type = textmenuelement id = game_options_title text = "test" static dont_gray drawer = title }
 			{ type = menucontainer Id = options_multi_container show_all_children }
 		]
 	}
@@ -855,6 +855,8 @@ script populate_game_options
 	DepopulateMenu id = game_options_names_menu
 	DepopulateMenu id = game_options_on_off_menu
 
+	SetMenuElementText <title> id = game_options_title
+	
 	ForeachIn <items> do = Settings_AddLine params = { <...> }
 	Settings_AddLine back_menu_item
 endscript
