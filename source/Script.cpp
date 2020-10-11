@@ -80,7 +80,7 @@ char* QScript::QBTypes[] = {
      "Unknown",
      "Unknown"
 };
-QScript::QBScript* QScript::Scripts;
+QScript::QBScript* QScript::Scripts=NULL;
 std::vector<QScript::CompressedNode> QScript::compNodes;
 std::vector<DWORD> QScript::qbKeys;
 std::vector<QScript::QBFile> QScript::qbFiles;
@@ -501,6 +501,7 @@ void QBScript::CreateQBTable(BYTE* table, bool level)
             MessageBox(0, "nooo", "", 0);
         memcpy(name, (char*)table, len);
 
+
         //_printf("QbAllocated %s\n", name);
         map<DWORD, char*>::iterator it = qbTable.find(key);
 
@@ -541,14 +542,23 @@ void QBScript::CreateQBTable(BYTE* table, bool level)
     }
 }
 
-char* QScript::GetScriptDir()
+char* QScript::GetScriptDir(bool second)
 {
     char* qdir = (char*)0x5BBAF8;
-    static char dir[256] = "data\\";
-    DWORD len = strlen(qdir) + 1;
-    memcpy(&dir[5], qdir, len);
+    if (!second)
+    {
+        static char dir[256] = "data\\";
+        DWORD len = strlen(qdir) + 1;
+        memcpy(&dir[5], qdir, len);
 
-    return dir;
+        return dir;
+    }
+
+        static char dir2[256] = ".\\data\\";
+        DWORD len = strlen(qdir) + 1;
+        memcpy(&dir2[5], qdir, len);
+
+        return dir2;
 }
 
 void QBScript::AddScripts()
@@ -714,9 +724,13 @@ void QBScript::OpenScript(char* path, bool level)
     if (FileHandler::reloading)
         level = FileHandler::reloading == RELOAD_LEVEL;
     fileName = path;
-    _printf("OpenScript: %s\n", path);//MessageBox(0, "OpenScript", path, 0);
+    _printf("OpenScript: %s\n", path);
     FILE* f = fopen(path, "rb+");
-
+    if (!f)
+    {
+        MessageBox(0, "error opening script...", path, 0);
+        return;
+    }
     fseek(f, 0, SEEK_END);
     DWORD size = ftell(f);
 
@@ -740,7 +754,20 @@ void QBScript::OpenScript(char* path, bool level)
         if (FileHandler::CalculateCRC(checksum, path) == false)
             MessageBox(0, "Error calculating checksum for file", fileName, 0);
 
-        qbFiles.push_back(QBFile(checksum, fileName, size));
+        QBFile qbFile = QBFile(checksum, fileName, size);
+        bool found = false;
+        for (DWORD i = 0; i < qbFiles.size(); i++)
+        {
+            if (stricmp(qbFiles[i].fileName, qbFile.fileName))
+            {
+                qbFiles[i].checksum = checksum;
+                qbFiles[i].size = size;
+                found = true;
+                break;
+            }
+        }
+        if(!found)
+            qbFiles.push_back(qbFile);
     }
     else
     {

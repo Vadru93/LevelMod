@@ -48,7 +48,7 @@ namespace QScript
         Table = 0x2B,
     };
 
-    char* GetScriptDir();
+    char* GetScriptDir(bool second = false);
 
     struct CompressedNode
     {
@@ -131,6 +131,7 @@ namespace QScript
 
         QBScript()
         {
+            MessageBox(0, "Going to add", "", 0);
             AddScripts();
         }
         char unkString[256] = "";

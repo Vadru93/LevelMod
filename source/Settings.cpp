@@ -381,7 +381,24 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
                 return;
         }
         if (debugMode || !value)//If we are already debugMode or value is false just return
+        {
+            char* dir = QScript::GetScriptDir();
+            unsigned int i = 13;
+            char* settings = "LevelMod\\Settings.qb";
+            while (*settings != 0x00)
+            {
+                dir[i] = *settings;
+                dir[i + 1] = 0;
+                i++;
+                settings++;
+            }
+
+            dir[i] = 0;
+            if (!QScript::Scripts)
+                QScript::Scripts = new QScript::QBScript(false);
+            QScript::Scripts->OpenScript(dir);
             return;
+        }
 
         CreateConsole();
         _printf("Welcome to DebugMode\n");

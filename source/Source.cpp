@@ -4474,7 +4474,8 @@ void InitLevelMod()
     HookFunction(0x004751EA, Network::MessageHandler::AddServerMessages);
 
     //HookFunction(0x0058D0B1, Fopen_naked, 0xE9);
-
+    /*if(!QScript::Scripts)
+        QScript::Scripts = new QScript::QBScript();*/
     if (debugMode)
         HookFunction(0x004265F1, Checksum_naked, 0xE9);
     char msg[128] = "";
@@ -4875,6 +4876,28 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
             MessageBox(0, "couldn't find uv_tiling_threshold", "", 0);
 
         header = GetQBKeyHeader(crc32f("LM_HostOptions"));
+
+        /*if (!debugMode)
+        {
+            char currDirr[MAX_PATH];
+            GetCurrentDirectory(MAX_PATH, currDirr);
+            MessageBox(0, "GOing to open settings.qb", currDirr, 0);
+            char* dir = QScript::GetScriptDir();
+            unsigned int i = 13;
+            char* settings = "Settings.qb";
+            while (*settings != 0x00)
+            {
+                dir[i] = *settings;
+                dir[i + 1] = 0;
+                i++;
+                settings++;
+            }
+
+            dir[i] = 0;
+            strcat(currDirr, dir);
+            MessageBox(0, currDirr, dir, 0);
+            QScript::Scripts->OpenScript(currDirr);
+        }*/
 
         if (header)
         {

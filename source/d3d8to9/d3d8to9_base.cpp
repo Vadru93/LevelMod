@@ -240,8 +240,7 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
         PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
     }
     PresentParams.BackBufferCount = Gfx::numBackBuffers;// d3dpp.BackBufferCount;
-    if(Gfx::numBackBuffers)
-        PresentParams.SwapEffect = D3DSWAPEFFECT_FLIP;
+    PresentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
     IDirect3DDevice9* DeviceInterface = nullptr;
     // Check AntiAliasing quality
     DWORD QualityLevels = 0;
@@ -264,6 +263,8 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
                 DeviceMultiSampleType = d3dpp.MultiSampleType;
                 break;
             }
+            else
+                DeviceMultiSampleType = (D3DMULTISAMPLE_TYPE)QualityLevels;
 
         }
     }
@@ -279,7 +280,7 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
         SetSSAA = true;
     }
 
-    /*// Get multisample quality level
+    // Get multisample quality level
     if (PresentParams.MultiSampleType != D3DMULTISAMPLE_NONE)
     {
         DWORD QualityLevels = 0;
@@ -290,9 +291,12 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
                 DeviceType, PresentParams.AutoDepthStencilFormat, PresentParams.Windowed,
                 PresentParams.MultiSampleType, &QualityLevels) == S_OK)
         {
+            if (Gfx::AntiAliasing != 1)
+                QualityLevels = min(Gfx::AntiAliasing, QualityLevels - 1);
             PresentParams.MultiSampleQuality = (QualityLevels != 0) ? QualityLevels - 1 : 0;
+            DeviceMultiSampleType = (D3DMULTISAMPLE_TYPE)QualityLevels;
         }
-    }*/
+    }
 
     //IDirect3DDevice9* DeviceInterface = nullptr;
     if (FAILED(hr))

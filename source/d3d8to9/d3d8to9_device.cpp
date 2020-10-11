@@ -172,6 +172,22 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateAdditionalSwapChain(D3DPRESENT_
     D3DPRESENT_PARAMETERS PresentParams;
     ConvertPresentParameters(*pPresentationParameters, PresentParams);
 
+    D3DPRESENT_PARAMETERS d3dpp;
+    CopyMemory(&d3dpp, pPresentationParameters, sizeof(D3DPRESENT_PARAMETERS));
+    // Update Present Parameter for Multisample
+    UpdatePresentParameterForMultisample(&d3dpp, DeviceMultiSampleType);
+
+    d3dpp.BackBufferCount = Gfx::numBackBuffers; //(d3dpp.BackBufferCount) ? d3dpp.BackBufferCount : 1;
+    if (Gfx::fps_fix)
+    {
+        d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+        d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+        PresentParams.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+        PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+    }
+    PresentParams.BackBufferCount = Gfx::numBackBuffers;// d3dpp.BackBufferCount;
+    PresentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
+
     // Get multisample quality level
     if (PresentParams.MultiSampleType != D3DMULTISAMPLE_NONE)
     {
@@ -186,7 +202,13 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateAdditionalSwapChain(D3DPRESENT_
                 CreationParams.DeviceType, PresentParams.AutoDepthStencilFormat, PresentParams.Windowed,
                 PresentParams.MultiSampleType, &QualityLevels) == S_OK)
         {
+            if (Gfx::AntiAliasing != 1)
+            {
+                QualityLevels = (D3DMULTISAMPLE_TYPE)min(Gfx::AntiAliasing, QualityLevels - 1);
+            }
             PresentParams.MultiSampleQuality = (QualityLevels != 0) ? QualityLevels - 1 : 0;
+            d3dpp.MultiSampleQuality = (QualityLevels != 0) ? QualityLevels - 1 : 0;
+            DeviceMultiSampleType = (D3DMULTISAMPLE_TYPE)QualityLevels;
         }
     }
 
@@ -240,14 +262,48 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::Reset(D3DPRESENT_PARAMETERS8* pPresen
         }
     }*/
 
+    D3DPRESENT_PARAMETERS d3dpp;
+    CopyMemory(&d3dpp, pPresentationParameters, sizeof(D3DPRESENT_PARAMETERS));
+    // Update Present Parameter for Multisample
+    UpdatePresentParameterForMultisample(&d3dpp, DeviceMultiSampleType);
+
+    d3dpp.BackBufferCount = Gfx::numBackBuffers; //(d3dpp.BackBufferCount) ? d3dpp.BackBufferCount : 1;
+    if (Gfx::fps_fix)
+    {
+        d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+        d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+        PresentParams.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+        PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+    }
+    PresentParams.BackBufferCount = Gfx::numBackBuffers;// d3dpp.BackBufferCount;
+    PresentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
+
+    // Get multisample quality level
+    if (PresentParams.MultiSampleType != D3DMULTISAMPLE_NONE)
+    {
+        DWORD QualityLevels = 0;
+        D3DDEVICE_CREATION_PARAMETERS CreationParams;
+        ProxyInterface->GetCreationParameters(&CreationParams);
+
+        if (D3D->GetProxyInterface()->CheckDeviceMultiSampleType(CreationParams.AdapterOrdinal,
+            CreationParams.DeviceType, PresentParams.BackBufferFormat, PresentParams.Windowed,
+            PresentParams.MultiSampleType, &QualityLevels) == S_OK &&
+            D3D->GetProxyInterface()->CheckDeviceMultiSampleType(CreationParams.AdapterOrdinal,
+                CreationParams.DeviceType, PresentParams.AutoDepthStencilFormat, PresentParams.Windowed,
+                PresentParams.MultiSampleType, &QualityLevels) == S_OK)
+        {
+            if (Gfx::AntiAliasing != 1)
+            {
+                QualityLevels = (D3DMULTISAMPLE_TYPE)min(Gfx::AntiAliasing, QualityLevels - 1);
+            }
+            d3dpp.MultiSampleQuality = (QualityLevels != 0) ? QualityLevels - 1 : 0;
+            DeviceMultiSampleType = (D3DMULTISAMPLE_TYPE)QualityLevels;
+        }
+    }
+
     if (DeviceMultiSampleType)
     {
-        D3DPRESENT_PARAMETERS d3dpp;
-        CopyMemory(&d3dpp, pPresentationParameters, sizeof(D3DPRESENT_PARAMETERS));
-        d3dpp.BackBufferCount = (d3dpp.BackBufferCount) ? d3dpp.BackBufferCount : 1;
 
-        // Update Present Parameter for Multisample
-        UpdatePresentParameterForMultisample(&d3dpp, DeviceMultiSampleType);
 
         // Reset device
         if (SUCCEEDED(ProxyInterface->Reset(&d3dpp)))
@@ -774,6 +830,10 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::BeginScene()
             ProxyInterface->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
         }
         ProxyInterface->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
+    }
+    if (SetSSAA)
+    {
+        ProxyInterface->SetRenderState((D3DRENDERSTATETYPE)D3DRS_ADAPTIVETESS_Y, MAKEFOURCC('S', 'S', 'A', 'A'));
     }
     
     /*DrawLines();
