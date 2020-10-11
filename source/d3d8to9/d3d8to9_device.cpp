@@ -478,8 +478,6 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateDepthStencilSurface(UINT Width,
         return D3DERR_INVALIDCALL;
     }
 
-    MessageBox(0, "Depth", 0,0);
-
     *ppSurface = nullptr;
 
     DWORD QualityLevels = 0;
