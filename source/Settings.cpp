@@ -855,41 +855,48 @@ bool GetOptionText(CStruct* pStruct, CScript* pScript)
     {
         if (pStruct->GetStruct(Checksums::text, &text))
         {
-            CArray* pArray = GetQBKeyHeader(text->Data)->pArray;
+            CArray* pArray = NULL;
+            if (text->Type == QBKeyHeader::QBKeyType::ARRAY)
+                pArray = text->pArray;
+            else
+                pArray = GetQBKeyHeader(text->Data)->pArray;
 
-            auto it = options.find(option->Data);
-            if (it != options.end())
+            if (pArray)
             {
-                char* pText = pArray->GetString(it->second.value);
-                _printf("Got Option Text %p ", pText);
-                _printf("%s\n", pText);
-                //MessageBox(0, pText, pText, 0);
-                CStructHeader* pParam = pScript->params->AllocateCStruct();
-                if (!pParam)
+                auto it = options.find(option->Data);
+                if (it != options.end())
                 {
-                    _printf(__FUNCTION__ "couldn't Allocate CStruct...\n");
-                    return false;
-                }
+                    char* pText = pArray->GetString(it->second.value);
+                    _printf("Got Option Text %p ", pText);
+                    _printf("%s\n", pText);
+                    //MessageBox(0, pText, pText, 0);
+                    CStructHeader* pParam = pScript->params->AllocateCStruct();
+                    if (!pParam)
+                    {
+                        _printf(__FUNCTION__ "couldn't Allocate CStruct...\n");
+                        return false;
+                    }
 
-                if (pScript->params->head)
-                {
-                    pScript->params->tail->NextHeader = pParam;
-                    pScript->params->tail = pParam;
+                    if (pScript->params->head)
+                    {
+                        pScript->params->tail->NextHeader = pParam;
+                        pScript->params->tail = pParam;
+                    }
+                    else
+                    {
+                        pScript->params->head = pParam;
+                        pScript->params->tail = pParam;
+                    }
+                    _printf("Going to Add String\n");
+                    pParam->Type = QBKeyHeader::STRING;
+                    pParam->QBkey = Checksums::text;
+                    _printf("Going to MALLOCX\n");
+                    pParam->pStr = (char*)mallocx(strlen(pText) + 1);
+                    memcpy(pParam->pStr, pText, strlen(pText) + 1);
+                    pParam->NextHeader = NULL;
+                    _printf(__FUNCTION__ " Returning true\n");
+                    return true;
                 }
-                else
-                {
-                    pScript->params->head = pParam;
-                    pScript->params->tail = pParam;
-                }
-                _printf("Going to Add String\n");
-                pParam->Type = QBKeyHeader::STRING;
-                pParam->QBkey = Checksums::text;
-                _printf("Going to MALLOCX\n");
-                pParam->pStr = (char*)mallocx(strlen(pText) + 1);
-                memcpy(pParam->pStr, pText, strlen(pText) + 1);
-                pParam->NextHeader = NULL;
-                _printf(__FUNCTION__ " Returning true\n");
-                return true;
             }
             else
                 _printf("Couldn't find option %s\nRemember to add the option first, check settings.qb\n");

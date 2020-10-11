@@ -134,7 +134,11 @@ LevelModOptions = [
 	{ name = "LM_GameOption_bFixBWManual" Value = 1 }
 	{ name = "LM_DebugOption_bDebugMode" Value = 0 }
 	{ name = "LM_LevelOption_TH4ProObjects" value = 0 StartGame Do = UpdateTH4ProObjects }
-	{ name = "LM_LevelOption_TH4CompObjects" value = 0 StartGame Do = UpdateTH4CompObjects }	
+	{ name = "LM_LevelOption_TH4CompObjects" value = 0 StartGame Do = UpdateTH4CompObjects }
+
+	{ name = "LM_GFX_eBuffering" value = 2 } 
+	{ name = "LM_GFX_eAntiAlias" value = 1 } 
+	{ name = "LM_GFX_bFiltering" value = 1 } 	
 ]
 
 
@@ -166,11 +170,19 @@ LM_Menu_Shared_Back = {
 
 //=======================levelmod settings menus============================
 
+SCRIPT MaybeAddHostOption
+    IF OnServer
+	    AddLine parent = Levelmod_menu_root Type = textmenuelement id = lm_hostoption_id text = "Host Options" link = levelmod_HostOptions_root
+	ENDIF
+	AddLine parent = Levelmod_menu_root Type = textmenuelement id = back_id text = "Back" target = "go_pack" Params = { id = Levelmod_menu_root } 
+ENDSCRIPT
+
 //levelmod settings root menu struct
 Levelmod_menu_root = { 
 	LM_Menu_Shared_Vertical
 	id = Levelmod_menu_root
 	children = levelmod_menu_root_children
+	eventhandler = { type = showeventhandler target = "MaybeAddHostOption" }
 }
 
 levelmod_menu_root_children = [
@@ -185,15 +197,17 @@ levelmod_menu_root_children = [
 	{ Type = textmenuelement auto_id text = "GUI Options" link = newSettingsMenu  
 	target = "populate_game_options" params = { mask = cat_gui items = game_menu_items } }
 	
+	//hardware graphics options (AA, filtering, 
+	{ Type = textmenuelement auto_id text = "Graphics Options" link = newSettingsMenu  
+	target = "populate_game_options" params = { mask = cat_gfx items = game_menu_items } }
+	
+	
 	//Options that affect certain parts of th level
 	{ Type = textmenuelement auto_id text = "Level Options" link = levelmod_menu_LevelOptions }	
 		
 	//Control options, like spine transfer, acid drop, etc
 	{ Type = textmenuelement auto_id text = "Control Options" link = newSettingsMenu  
 	target = "populate_game_options" params = { mask = cat_control items = game_menu_items } }
-			
-	//goes back to previous menu
-	{ LM_Menu_Shared_Back Params = { id = Levelmod_menu_root } } 
 ]
 
 
@@ -782,26 +796,23 @@ game_menu_items = [
 	{ IsBool text = "Tele Stance Fix" 	option_id = item4	option = LM_BugFix_bTeleFix 			toggle_id = item4_toggle cat_game }
 	{ IsBool text = "Ped Props"			option_id = item5	option = LM_Gameplay_bPedProps 			toggle_id = item5_toggle cat_game }
 	{ IsBool text = "Debug Console" 	option_id = item6	option = LM_DebugOption_bDebugMode 		toggle_id = item6_toggle cat_game }
-//]
 
-//control_menu_items = [
 	{ 		 text = "Air"			option_id = item11 link = levelmod_menu_air toggle_id = item1_toggle  cat_control }	
 	{ 		 text = "Wall"			option_id = item12 link = levelmod_menu_wall toggle_id = item2_toggle cat_control }	
 	{ IsBool text = "Reverts" 		option_id = item13	option = LM_Control_bRevert 		toggle_id = item3_toggle cat_control }
 	{ IsBool text = "Extra tricks"	option_id = item14	option = LM_Control_bExtraTricks 	toggle_id = item4_toggle cat_control }
 	{ IsBool text = "XInput" 		option_id = item15	option = LM_Control_bXinput 		toggle_id = item5_toggle cat_control }
-//]
 
-//gui_menu_items = [
-	{ IsBool text = "Extra Messages" option_id = item21 option = LM_GUI_bTrickNotifications toggle_id = item1_toggle cat_gui } 
-	{ IsBool text = "Show HUD" option_id = item22 option = LM_GUI_bShowHud toggle_id = item2_toggle cat_gui } 
-	{ IsBool text = "Player names" option_id = item23 option = LM_GUI_bNetName toggle_id = item3_toggle cat_gui } 
-	{ IsBool text = "New Net Menu" option_id = item24 option = LM_GUI_bNewMenu toggle_id = item4_toggle cat_gui } 
-	{ IsBool text = "GrafCounter" option_id = item25 option = LM_GUI_bShowGrafCounter toggle_id = item5_toggle cat_gui } 
+	{ IsBool text = "Extra Messages" 	option_id = item21 option = LM_GUI_bTrickNotifications 	toggle_id = item1_toggle cat_gui } 
+	{ IsBool text = "Show HUD" 			option_id = item22 option = LM_GUI_bShowHud 			toggle_id = item2_toggle cat_gui } 
+	{ IsBool text = "Player names" 		option_id = item23 option = LM_GUI_bNetName 			toggle_id = item3_toggle cat_gui } 
+	{ IsBool text = "New Net Menu" 		option_id = item24 option = LM_GUI_bNewMenu 			toggle_id = item4_toggle cat_gui } 
+	{ IsBool text = "GrafCounter" 		option_id = item25 option = LM_GUI_bShowGrafCounter 	toggle_id = item5_toggle cat_gui } 
+	
+	{ IsEnum text = "Buffering" 	option_id = item211 option = LM_GFX_eBuffering 	toggle_id = item1_toggle cat_gfx TextValues = [ "Off" "Double" "Triple" ] } 
+	{ IsEnum text = "MSAA Level" 	option_id = item214 option = LM_GFX_eAntiAlias 	toggle_id = item4_toggle cat_gfx TextValues = [ "Off" "auto" "2x" "4x" "8x" ] } 
+	{ IsBool text = "Texture Filtering" 		option_id = item215 option = LM_GFX_bFiltering 			toggle_id = item5_toggle cat_gfx } 
 ]
-
-
-
 
 script Settings_CreateOptionsMenu
 
@@ -846,53 +857,71 @@ script populate_game_options
 	Settings_AddLine back_menu_item
 endscript
 
-script Settings_AddLine
-if GotParam <mask>
-	if GotParam link
-		AddLine { 
-			parent = game_options_names_menu 
-			Type = textmenuelement 
-			id = <option_id>
-			text = <text>
-			link = <link>
-		}
-	else
-		AddLine { 
-			parent = game_options_names_menu 
-			Type = textmenuelement 
-			id = <option_id>
-			text = <text>
-		}
-	endif
-	
-	if GotParam toggle_id
-		AddLine {
-			parent = game_options_on_off_menu 
-			Type = textmenuelement 
-			id = <toggle_id>
-			text = " "
-		}
-		if GotParam option
-	        LM_MaybeMakeStatic option = <option> option_id = <toggle_id>
-	    endif
-	else
-		AddLine {
-			parent = game_options_on_off_menu 
-			Type = textmenuelement 
-			auto_id
-			text = " "
-		}
-	endif
-	
-	if GotParam option
-	    LM_MaybeMakeStatic option = <option> option_id = <option_id>
-	endif
 
-	if GotParam IsBool
-		AttachEventHandler { Type = ChooseEventHandler object = <option_id> target = "Settings_ToggleOption" params = { option = <option> toggle_id = <toggle_id> } }
-		Settings_UpdateBoolText { option = <option> toggle_id = <toggle_id> }
+//to avoid multiple nested IFs
+//should rewrite this func in switch-case-ish logic
+//like if isEnum call enum func, if IsBool call bool func etc.
+
+script Settings_AddLine
+	if GotParam <mask>
+
+		if GotParam link
+			AddLine { 
+				parent = game_options_names_menu 
+				Type = textmenuelement 
+				id = <option_id>
+				text = <text>
+				link = <link>
+				w = 300.0
+			}
+		else
+			AddLine { 
+				parent = game_options_names_menu 
+				Type = textmenuelement 
+				id = <option_id>
+				text = <text>
+			}
+		endif
+		
+		if GotParam toggle_id
+			if GotParam IsEnum
+				AddLine {
+					parent = game_options_on_off_menu 
+					Type = textmenuelement 
+					id = <toggle_id>
+				}
+				GetOptionText option = <option> text = <TextValues>
+				SetMenuElementText id = <toggle_id> <text>
+			else
+			
+				AddLine {
+					parent = game_options_on_off_menu 
+					Type = textmenuelement 
+					id = <toggle_id>
+					text = " "
+				}
+				if GotParam option
+					LM_MaybeMakeStatic option = <option> option_id = <toggle_id>
+				endif
+			endif
+		else
+				AddLine {
+					parent = game_options_on_off_menu 
+					Type = textmenuelement 
+					auto_id
+					text = " "
+				}
+		endif
+		
+		if GotParam option
+			LM_MaybeMakeStatic option = <option> option_id = <option_id>
+		endif
+
+		if GotParam IsBool
+			AttachEventHandler { Type = ChooseEventHandler object = <option_id> target = "Settings_ToggleOption" params = { option = <option> toggle_id = <toggle_id> } }
+			Settings_UpdateBoolText { option = <option> toggle_id = <toggle_id> }
+		endif
 	endif
-endif
 endscript
 
 script Settings_ToggleOption

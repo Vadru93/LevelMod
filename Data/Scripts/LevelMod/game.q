@@ -325,9 +325,9 @@ ENDSCRIPT
 
 SCRIPT UpdateOptionsMenu
     AddLine parent = new_net_options_menu Type = textmenuelement id = levelmod_settings_item text = "LevelMod Settings" eventhandler = { Type = ChooseEventHandler link = Levelmod_menu_root }
-	IF OnServer
-	    AddLine parent = new_net_options_menu Type = textmenuelement id = levelmod_host_item text = "LevelMod Host Options" eventhandler = { Type = ChooseEventHandler link = levelmod_HostOptions_root }
-	ENDIF
+	//IF OnServer
+	    //AddLine parent = new_net_options_menu Type = textmenuelement id = levelmod_host_item text = "LevelMod Host Options" eventhandler = { Type = ChooseEventHandler link = levelmod_HostOptions_root }
+	//ENDIF
 	AddLine parent = new_net_options_menu Type = textmenuelement id = options_menu_edit_tricks_item text = "Edit Tricks" eventhandler = { Type = ChooseEventHandler link = trick_menu_container }
 	AddLine parent = new_net_options_menu Type = textmenuelement id = options_menu_sound_options_item text = "Sound Options" eventhandler = { Type = ChooseEventHandler link = sfx_menu_container }
 	AddLine parent = new_net_options_menu Type = textmenuelement id = options_menu_graf_pos_item text = "Tag counter options" eventhandler = { Type = ChooseEventHandler link = graf_counter_menu }
