@@ -12,6 +12,13 @@
 #include <regex>
 #include <assert.h>
 
+extern D3DMULTISAMPLE_TYPE DeviceMultiSampleType;
+extern bool CopyRenderTarget;
+extern bool SetSSAA;
+extern DWORD MaxAnisotropy;
+
+extern void UpdatePresentParameterForMultisample(D3DPRESENT_PARAMETERS* pPresentationParameters, D3DMULTISAMPLE_TYPE MultiSampleType);
+
 struct VertexShaderInfo
 {
     IDirect3DVertexShader9* Shader;
@@ -214,7 +221,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::Reset(D3DPRESENT_PARAMETERS8* pPresen
     D3DPRESENT_PARAMETERS PresentParams;
     ConvertPresentParameters(*pPresentationParameters, PresentParams);
 
-    // Get multisample quality level
+    /*// Get multisample quality level
     if (PresentParams.MultiSampleType != D3DMULTISAMPLE_NONE)
     {
         DWORD QualityLevels = 0;
@@ -230,7 +237,27 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::Reset(D3DPRESENT_PARAMETERS8* pPresen
         {
             PresentParams.MultiSampleQuality = (QualityLevels != 0) ? QualityLevels - 1 : 0;
         }
+    }*/
+
+    if (DeviceMultiSampleType)
+    {
+        D3DPRESENT_PARAMETERS d3dpp;
+        CopyMemory(&d3dpp, pPresentationParameters, sizeof(D3DPRESENT_PARAMETERS));
+        d3dpp.BackBufferCount = (d3dpp.BackBufferCount) ? d3dpp.BackBufferCount : 1;
+
+        // Update Present Parameter for Multisample
+        UpdatePresentParameterForMultisample(&d3dpp, DeviceMultiSampleType);
+
+        // Reset device
+        if (SUCCEEDED(ProxyInterface->Reset(&d3dpp)))
+        {
+            return D3D_OK;
+        }
+
+        // If failed
+        DeviceMultiSampleType = D3DMULTISAMPLE_NONE;
     }
+
 
 
     OnLost();
@@ -282,6 +309,8 @@ void STDMETHODCALLTYPE Direct3DDevice8::GetGammaRamp(D3DGAMMARAMP* pRamp)
 }
 HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateTexture(UINT Width, UINT Height, UINT Levels, DWORD Usage, D3DFORMAT Format, D3DPOOL Pool, Direct3DTexture8** ppTexture)
 {
+    Levels = 0;
+    Usage |= D3DUSAGE_AUTOGENMIPMAP;
     if (ppTexture == nullptr)
     {
         return D3DERR_INVALIDCALL;
@@ -305,7 +334,9 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateTexture(UINT Width, UINT Height
         }
     }
 
+
     IDirect3DTexture9* TextureInterface = nullptr;
+
 
     const HRESULT hr = ProxyInterface->CreateTexture(Width, Height, Levels, Usage, Format, Pool, &TextureInterface, nullptr);
 
@@ -446,6 +477,8 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateDepthStencilSurface(UINT Width,
     {
         return D3DERR_INVALIDCALL;
     }
+
+    MessageBox(0, "Depth", 0,0);
 
     *ppSurface = nullptr;
 
@@ -724,6 +757,20 @@ extern void DrawLines();
 HRESULT STDMETHODCALLTYPE Direct3DDevice8::BeginScene()
 {
     HRESULT hres = ProxyInterface->BeginScene();
+    ProxyInterface->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
+    if (MaxAnisotropy)
+    {
+        ProxyInterface->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, MaxAnisotropy);
+        ProxyInterface->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC);
+        ProxyInterface->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC);
+    }
+    else
+    {
+        ProxyInterface->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+        ProxyInterface->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+    }
+    ProxyInterface->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
+    
     /*DrawLines();
     DrawFrame2();*/
     return hres;
@@ -733,6 +780,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::EndScene()
     HRESULT hres = ProxyInterface->EndScene();
     /*DrawLines();
     DrawFrame2();*/
+    ///MessageBox(0, "END", "", 0);
     return hres;
 }
 HRESULT STDMETHODCALLTYPE Direct3DDevice8::Clear(DWORD Count, const D3DRECT* pRects, DWORD Flags, D3DCOLOR Color, float Z, DWORD Stencil)
@@ -834,6 +882,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::SetRenderState(D3DRENDERSTATETYPE Sta
         Value = *reinterpret_cast<const DWORD*>(&Biased);
         State = D3DRS_DEPTHBIAS;
     default:
+
         return ProxyInterface->SetRenderState(State, Value);
     }
 }
@@ -1049,16 +1098,38 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::SetTextureStageState(DWORD Stage, D3D
     case D3DTSS_BORDERCOLOR:
         return ProxyInterface->SetSamplerState(Stage, D3DSAMP_BORDERCOLOR, Value);
     case D3DTSS_MAGFILTER:
+        if (DeviceMultiSampleType)
+        {
+            if (MaxAnisotropy)
+                Value = D3DTEXF_ANISOTROPIC;
+            else
+                Value = D3DTEXF_LINEAR;
+        }
         return ProxyInterface->SetSamplerState(Stage, D3DSAMP_MAGFILTER, Value);
     case D3DTSS_MINFILTER:
+        if (DeviceMultiSampleType)
+        {
+            if (MaxAnisotropy)
+                Value = D3DTEXF_ANISOTROPIC;
+            else
+                Value = D3DTEXF_LINEAR;
+        }
         return ProxyInterface->SetSamplerState(Stage, D3DSAMP_MINFILTER, Value);
     case D3DTSS_MIPFILTER:
+        if (DeviceMultiSampleType)
+        {
+            Value = D3DTEXF_LINEAR;
+        }
         return ProxyInterface->SetSamplerState(Stage, D3DSAMP_MIPFILTER, Value);
     case D3DTSS_MIPMAPLODBIAS:
         return ProxyInterface->SetSamplerState(Stage, D3DSAMP_MIPMAPLODBIAS, Value);
     case D3DTSS_MAXMIPLEVEL:
         return ProxyInterface->SetSamplerState(Stage, D3DSAMP_MAXMIPLEVEL, Value);
     case D3DTSS_MAXANISOTROPY:
+        if (DeviceMultiSampleType)
+        {
+            Value = MaxAnisotropy;
+        }
         return ProxyInterface->SetSamplerState(Stage, D3DSAMP_MAXANISOTROPY, Value);
     default:
         return ProxyInterface->SetTextureStageState(Stage, Type, Value);

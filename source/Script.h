@@ -67,6 +67,7 @@ namespace QScript
         }
     };
 
+    //I'm not sure about the AbsentInNetGames, but the function calling this function did AbsentInNetGames = !NetEnabled, could be something else...
     void SpawnScript(DWORD checksum, CStruct* params = NULL, DWORD node = 0xFFFFFFFF, DWORD callback = 0, CStruct* callback_params = NULL, bool AbsentInNetGames = false, bool NetEnabled = true, bool Permanent = true);
 
     struct QBFile

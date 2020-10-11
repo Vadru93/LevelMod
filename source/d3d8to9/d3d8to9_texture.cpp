@@ -71,6 +71,7 @@ HRESULT STDMETHODCALLTYPE Direct3DTexture8::GetDevice(Direct3DDevice8** ppDevice
 }
 HRESULT STDMETHODCALLTYPE Direct3DTexture8::SetPrivateData(REFGUID refguid, const void* pData, DWORD SizeOfData, DWORD Flags)
 {
+    MessageBox(0, 0, "data", 0);
     return ProxyInterface->SetPrivateData(refguid, pData, SizeOfData, Flags);
 }
 HRESULT STDMETHODCALLTYPE Direct3DTexture8::GetPrivateData(REFGUID refguid, void* pData, DWORD* pSizeOfData)
@@ -151,10 +152,13 @@ HRESULT STDMETHODCALLTYPE Direct3DTexture8::GetSurfaceLevel(UINT Level, Direct3D
 
     *ppSurfaceLevel = Device->ProxyAddressLookupTable->FindAddress<Direct3DSurface8>(SurfaceInterface);
 
+    //MessageBox(0, 0, 0, 0);
+
     return D3D_OK;
 }
 HRESULT STDMETHODCALLTYPE Direct3DTexture8::LockRect(UINT Level, D3DLOCKED_RECT* pLockedRect, const RECT* pRect, DWORD Flags)
 {
+    MessageBox(0, "LOCK", 0, 0);
     return ProxyInterface->LockRect(Level, pLockedRect, pRect, Flags);
 }
 HRESULT STDMETHODCALLTYPE Direct3DTexture8::UnlockRect(UINT Level)

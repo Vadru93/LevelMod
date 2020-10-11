@@ -469,6 +469,7 @@ void __stdcall SetVertexShader_hook()
 
     SKIP:
 
+
         //Reset extralayer textures to NULL
         //Maybe also need to reset blendmodes???
         if (reset)

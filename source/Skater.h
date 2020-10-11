@@ -148,7 +148,13 @@ private://0575a190
     //86B4
     DWORD collFlags;
     //86B8
-    BYTE unk5[0x118];
+    BYTE unk5[0x10];
+    //86C8
+    DWORD checksumName;
+    //86CC
+    DWORD nodeIndex;
+    //86D0
+    BYTE unk6[0x100];
     //87D0
     float height;//relative to ground
     //87D4

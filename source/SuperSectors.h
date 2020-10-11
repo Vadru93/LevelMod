@@ -12,7 +12,8 @@ struct MovingObject;
 struct Model;
 extern void RemoveMovingObject(SuperSector* sector);
 extern bool updatingObjects;
-
+//00491820
+//0051E060
 
 EXTERN struct SuperSector
 {

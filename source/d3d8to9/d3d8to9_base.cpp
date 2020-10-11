@@ -9,6 +9,11 @@
  //#include "..\pch.h"
 #include "d3d8to9.hpp"
 
+D3DMULTISAMPLE_TYPE DeviceMultiSampleType = D3DMULTISAMPLE_NONE;
+bool CopyRenderTarget = false;
+bool SetSSAA = false;
+DWORD MaxAnisotropy = 0;
+
 static const D3DFORMAT AdapterFormats[] = {
     D3DFMT_A8R8G8B8,
     D3DFMT_X8R8G8B8,
@@ -187,6 +192,24 @@ HMONITOR STDMETHODCALLTYPE Direct3D8::GetAdapterMonitor(UINT Adapter)
 {
     return ProxyInterface->GetAdapterMonitor(Adapter);
 }
+void UpdatePresentParameterForMultisample(D3DPRESENT_PARAMETERS* pPresentationParameters, D3DMULTISAMPLE_TYPE MultiSampleType)
+{
+    if (!pPresentationParameters)
+    {
+        return;
+    }
+
+    pPresentationParameters->MultiSampleType = MultiSampleType;
+
+    pPresentationParameters->Flags &= ~D3DPRESENTFLAG_LOCKABLE_BACKBUFFER;
+    pPresentationParameters->SwapEffect = D3DSWAPEFFECT_DISCARD;// D3DSWAPEFFECT_FLIP;// 
+
+    if (!pPresentationParameters->EnableAutoDepthStencil)
+    {
+        pPresentationParameters->EnableAutoDepthStencil = true;
+        pPresentationParameters->AutoDepthStencilFormat = D3DFMT_D24S8;
+    }
+}
 HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags, D3DPRESENT_PARAMETERS8* pPresentationParameters, Direct3DDevice8** ppReturnedDeviceInterface)
 {
 #ifndef D3D8TO9NOLOG
@@ -200,10 +223,59 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
 
     *ppReturnedDeviceInterface = nullptr;
 
+    if (DeviceMultiSampleType)
+    {
+        CopyRenderTarget = true;
+    }
+
+    if (DeviceMultiSampleType &&
+        (ProxyInterface->CheckDeviceFormat(Adapter, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE, (D3DFORMAT)MAKEFOURCC('S', 'S', 'A', 'A')) == S_OK))
+    {
+        SetSSAA = true;
+    }
+
     D3DPRESENT_PARAMETERS PresentParams;
     ConvertPresentParameters(*pPresentationParameters, PresentParams);
 
-    // Get multisample quality level
+    D3DPRESENT_PARAMETERS d3dpp;
+    HRESULT hr = D3DERR_INVALIDCALL;
+
+    CopyMemory(&d3dpp, pPresentationParameters, sizeof(D3DPRESENT_PARAMETERS));
+    d3dpp.BackBufferCount = (d3dpp.BackBufferCount) ? d3dpp.BackBufferCount : 1;
+    d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+    d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+    PresentParams.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+    PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+    PresentParams.BackBufferCount = 2;// d3dpp.BackBufferCount;
+    PresentParams.SwapEffect = D3DSWAPEFFECT_FLIP;
+    int AntiAliasing = 1;
+    IDirect3DDevice9* DeviceInterface = nullptr;
+    // Check AntiAliasing quality
+    DWORD QualityLevels = 0;
+    for (int x = min((AntiAliasing == 1 ? 16 : AntiAliasing), 16); x > 0; x--)
+    {
+        if (SUCCEEDED(ProxyInterface->CheckDeviceMultiSampleType(Adapter,
+            DeviceType, (d3dpp.BackBufferFormat) ? d3dpp.BackBufferFormat : D3DFMT_A8R8G8B8, d3dpp.Windowed,
+            (D3DMULTISAMPLE_TYPE)x, &QualityLevels)))
+        {
+            // Update Present Parameters for Multisample
+            UpdatePresentParameterForMultisample(&d3dpp, (D3DMULTISAMPLE_TYPE)x);
+
+
+            // Create Device
+            hr = ProxyInterface->CreateDevice(Adapter, DeviceType, hFocusWindow, BehaviorFlags, &d3dpp, &DeviceInterface);
+
+            // Check if device was created successfully
+            if (SUCCEEDED(hr))
+            {
+                DeviceMultiSampleType = d3dpp.MultiSampleType;
+                break;
+            }
+
+        }
+    }
+
+    /*// Get multisample quality level
     if (PresentParams.MultiSampleType != D3DMULTISAMPLE_NONE)
     {
         DWORD QualityLevels = 0;
@@ -216,11 +288,14 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
         {
             PresentParams.MultiSampleQuality = (QualityLevels != 0) ? QualityLevels - 1 : 0;
         }
+    }*/
+
+    //IDirect3DDevice9* DeviceInterface = nullptr;
+    if (FAILED(hr))
+    {
+        hr = ProxyInterface->CreateDevice(Adapter, DeviceType, hFocusWindow, BehaviorFlags, &PresentParams, &DeviceInterface);
     }
 
-    IDirect3DDevice9* DeviceInterface = nullptr;
-
-    HRESULT hr = ProxyInterface->CreateDevice(Adapter, DeviceType, hFocusWindow, BehaviorFlags, &PresentParams, &DeviceInterface);
     extern __restrict LPDIRECT3DDEVICE9 pDevice;
     pDevice = DeviceInterface;
 
@@ -228,6 +303,10 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
     {
         return hr;
     }
+
+    D3DCAPS9 caps;
+    ProxyInterface->GetDeviceCaps(Adapter, DeviceType, &caps);
+    MaxAnisotropy = caps.MaxAnisotropy;
 
     *ppReturnedDeviceInterface = new Direct3DDevice8(this, DeviceInterface, (PresentParams.Flags & D3DPRESENTFLAG_DISCARD_DEPTHSTENCIL) != 0);
 

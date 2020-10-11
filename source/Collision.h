@@ -1,5 +1,7 @@
 namespace Collision
 {
+
+    //Collision chache: 0085A4C4
     enum
     {
         IGNORE0 = true,

@@ -4419,6 +4419,8 @@ void InitLevelMod()
     VirtualProtect((LPVOID)0x00483DD0, 1, PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((LPVOID)0x00483DD1, 7, PAGE_EXECUTE_READWRITE, &old);
 
+    *(DWORD*)0x005CEC78 *= 4;
+
     *(BYTE*)0x00483D55 = 0x0;
     *(BYTE*)0x00483DD0 = 0xE9;
     *(DWORD*)0x00483DD1 = 0xFFF7C5BD;

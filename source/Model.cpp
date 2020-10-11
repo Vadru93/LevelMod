@@ -112,7 +112,7 @@ void BouncyObj_OnBounce(Model* mdl)
                 QScript::SpawnScript(BounceScript->Data, 0, mdl->GetNodeIndex());
             }
 
-            CStructHeader* BounceSound;
+            /*CStructHeader* BounceSound;
 
             if (node->GetStruct(Checksums::BounceSound, &BounceSound) && BounceSound->Data)
             {
@@ -121,7 +121,7 @@ void BouncyObj_OnBounce(Model* mdl)
                 CStruct params(QBKeyHeader::LOCAL, BounceSound->Data);
                 Game::PlaySound(&params, &script);
 
-            }
+            }*/
         }
     }
 
