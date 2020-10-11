@@ -286,7 +286,7 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
 
         if (FAILED(hr))
         {
-            MessageBox(0, " Failed to enable AntiAliasing!", 0,0);
+            //MessageBox(0, " Failed to enable AntiAliasing!", 0,0);
         }
     }
 
