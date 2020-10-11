@@ -227,7 +227,7 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
     D3DPRESENT_PARAMETERS PresentParams;
     ConvertPresentParameters(*pPresentationParameters, PresentParams);
 
-    D3DPRESENT_PARAMETERS d3dpp;
+    /*D3DPRESENT_PARAMETERS d3dpp;
     HRESULT hr = D3DERR_INVALIDCALL;
 
     CopyMemory(&d3dpp, pPresentationParameters, sizeof(D3DPRESENT_PARAMETERS));
@@ -240,19 +240,20 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
         PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
     }
     PresentParams.BackBufferCount = Gfx::numBackBuffers;// d3dpp.BackBufferCount;
-    PresentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
+    PresentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;*/
     IDirect3DDevice9* DeviceInterface = nullptr;
     // Check AntiAliasing quality
-    DWORD QualityLevels = 0;
+    /*DWORD QualityLevels = 0;
     for (int x = min((Gfx::AntiAliasing == 1 ? 16 : Gfx::AntiAliasing), 16); x > 0; x--)
     {
         if (SUCCEEDED(ProxyInterface->CheckDeviceMultiSampleType(Adapter,
             DeviceType, (d3dpp.BackBufferFormat) ? d3dpp.BackBufferFormat : D3DFMT_A8R8G8B8, d3dpp.Windowed,
             (D3DMULTISAMPLE_TYPE)x, &QualityLevels)))
         {
+            d3dpp.MultiSampleQuality = (QualityLevels != 0) ? QualityLevels - 1 : 0;
+
             // Update Present Parameters for Multisample
             UpdatePresentParameterForMultisample(&d3dpp, (D3DMULTISAMPLE_TYPE)x);
-
 
             // Create Device
             hr = ProxyInterface->CreateDevice(Adapter, DeviceType, hFocusWindow, BehaviorFlags, &d3dpp, &DeviceInterface);
@@ -264,7 +265,7 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
                 break;
             }
             else
-                DeviceMultiSampleType = (D3DMULTISAMPLE_TYPE)QualityLevels;
+                DeviceMultiSampleType = (D3DMULTISAMPLE_TYPE)Gfx::AntiAliasing;
 
         }
     }
@@ -280,35 +281,126 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
         SetSSAA = true;
     }
 
+    DeviceMultiSampleType = (D3DMULTISAMPLE_TYPE)0;
     // Get multisample quality level
-    if (PresentParams.MultiSampleType != D3DMULTISAMPLE_NONE)
+    for (int x = min((Gfx::AntiAliasing == 1 ? 16 : Gfx::AntiAliasing), 16); x > 0; x--)
     {
-        DWORD QualityLevels = 0;
-        if (ProxyInterface->CheckDeviceMultiSampleType(Adapter,
-            DeviceType, PresentParams.BackBufferFormat, PresentParams.Windowed,
-            PresentParams.MultiSampleType, &QualityLevels) == S_OK &&
-            ProxyInterface->CheckDeviceMultiSampleType(Adapter,
-                DeviceType, PresentParams.AutoDepthStencilFormat, PresentParams.Windowed,
-                PresentParams.MultiSampleType, &QualityLevels) == S_OK)
-        {
-            if (Gfx::AntiAliasing != 1)
-                QualityLevels = min(Gfx::AntiAliasing, QualityLevels - 1);
-            PresentParams.MultiSampleQuality = (QualityLevels != 0) ? QualityLevels - 1 : 0;
-            DeviceMultiSampleType = (D3DMULTISAMPLE_TYPE)QualityLevels;
-        }
+        PresentParams.MultiSampleType = (D3DMULTISAMPLE_TYPE)x;
+            DWORD QualityLevels = 0;
+            if (ProxyInterface->CheckDeviceMultiSampleType(Adapter,
+                DeviceType, PresentParams.BackBufferFormat, PresentParams.Windowed,
+                PresentParams.MultiSampleType, &QualityLevels) == S_OK &&
+                ProxyInterface->CheckDeviceMultiSampleType(Adapter,
+                    DeviceType, PresentParams.AutoDepthStencilFormat, PresentParams.Windowed,
+                    PresentParams.MultiSampleType, &QualityLevels) == S_OK)
+            {
+                DeviceMultiSampleType = PresentParams.MultiSampleType;
+                PresentParams.MultiSampleQuality = (QualityLevels != 0) ? QualityLevels - 1 : 0;
+            }
     }
 
     //IDirect3DDevice9* DeviceInterface = nullptr;
     if (FAILED(hr))
     {
         hr = ProxyInterface->CreateDevice(Adapter, DeviceType, hFocusWindow, BehaviorFlags, &PresentParams, &DeviceInterface);
+    }*/
+
+    // Get multisample quality level
+    /*PresentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
+    PresentParams.MultiSampleType = D3DMULTISAMPLE_2_SAMPLES;
+    */
+    /*if (Gfx::AntiAliasing)
+    {
+        for (int x = min((Gfx::AntiAliasing == 1 ? 2 : Gfx::AntiAliasing), 2); x > 0; x--)
+        {
+            MessageBox(0, "Maybe", "", 0);
+            PresentParams.MultiSampleType = (D3DMULTISAMPLE_TYPE)x;
+            DWORD QualityLevels = 0;
+            if (ProxyInterface->CheckDeviceMultiSampleType(Adapter,
+                DeviceType, PresentParams.BackBufferFormat, PresentParams.Windowed,
+                PresentParams.MultiSampleType, &QualityLevels) == S_OK &&
+                ProxyInterface->CheckDeviceMultiSampleType(Adapter,
+                    DeviceType, PresentParams.AutoDepthStencilFormat, PresentParams.Windowed,
+                    PresentParams.MultiSampleType, &QualityLevels) == S_OK)
+            {
+                MessageBox(0, "Yeah", "", 0);
+                PresentParams.MultiSampleQuality = (QualityLevels != 0) ? QualityLevels - 1 : 0;
+                break;
+            }
+        }
+    }*/
+
+    if (Gfx::fps_fix)
+    {
+        PresentParams.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+        PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
     }
+    PresentParams.BackBufferCount = Gfx::numBackBuffers;// d3dpp.BackBufferCount;
+    PresentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
+
+
+    // Create new d3d9 device
+    HRESULT hr = D3DERR_INVALIDCALL;
+
+    // Setup presentation parameters
+    D3DPRESENT_PARAMETERS d3dpp;
+    CopyMemory(&d3dpp, pPresentationParameters, sizeof(D3DPRESENT_PARAMETERS));
+
+    // Check for AntiAliasing
+    bool MultiSampleFlag = false;
+    if (Gfx::AntiAliasing != 0)
+    {
+        DWORD QualityLevels = 0;
+
+        // Check AntiAliasing quality
+        for (int x = min(16, Gfx::AntiAliasing); x > 0; x--)
+        {
+            if (SUCCEEDED(ProxyInterface->CheckDeviceMultiSampleType(Adapter,
+                DeviceType, (d3dpp.BackBufferFormat) ? d3dpp.BackBufferFormat : D3DFMT_A8R8G8B8, d3dpp.Windowed,
+                (D3DMULTISAMPLE_TYPE)x, &QualityLevels)) ||
+                SUCCEEDED(ProxyInterface->CheckDeviceMultiSampleType(Adapter,
+                    DeviceType, d3dpp.AutoDepthStencilFormat, d3dpp.Windowed,
+                    (D3DMULTISAMPLE_TYPE)x, &QualityLevels)))
+            {
+                // Update Present Parameter for Multisample
+                UpdatePresentParameterForMultisample(&d3dpp, (D3DMULTISAMPLE_TYPE)x, (QualityLevels > 0) ? QualityLevels - 1 : 0);
+
+                // Create Device
+                hr = ProxyInterface->CreateDevice(Adapter, DeviceType, hFocusWindow, BehaviorFlags, &d3dpp, &DeviceInterface);
+
+                // Check if device was created successfully
+                if (SUCCEEDED(hr))
+                {
+                    MultiSampleFlag = true;
+                    DeviceInterface->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
+                    //LOG_LIMIT(3, "Setting MultiSample " << d3dpp.MultiSampleType << " Quality " << d3dpp.MultiSampleQuality);
+                    break;
+                }
+            }
+        }
+        if (FAILED(hr))
+        {
+            MessageBox(0, " Failed to enable AntiAliasing!", 0,0);
+        }
+    }
+
+    // Create Device
+    if (FAILED(hr))
+    {
+        // Update presentation parameters
+        // Create Device
+        hr = ProxyInterface->CreateDevice(Adapter, DeviceType, hFocusWindow, BehaviorFlags, &PresentParams, &DeviceInterface);
+    }
+
 
     extern __restrict LPDIRECT3DDEVICE9 pDevice;
     pDevice = DeviceInterface;
 
+    //const HRESULT hr = ProxyInterface->CreateDevice(Adapter, DeviceType, hFocusWindow, BehaviorFlags, &PresentParams, &DeviceInterface);
+
     if (FAILED(hr))
     {
+        MessageBox(0, "failed", "", 0);
         return hr;
     }
 

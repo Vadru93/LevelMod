@@ -107,6 +107,29 @@ void ConvertSurfaceDesc(D3DSURFACE_DESC& Input, D3DSURFACE_DESC8& Output)
     Output.Width = Input.Width;
     Output.Height = Input.Height;
 }
+
+// Set Presentation Parameters for Multisample
+void UpdatePresentParameterForMultisample(D3DPRESENT_PARAMETERS* pPresentationParameters, D3DMULTISAMPLE_TYPE MultiSampleType, DWORD MultiSampleQuality)
+{
+    if (!pPresentationParameters)
+    {
+        return;
+    }
+
+    pPresentationParameters->MultiSampleType = MultiSampleType;
+    pPresentationParameters->MultiSampleQuality = MultiSampleQuality;
+
+    pPresentationParameters->Flags &= ~D3DPRESENTFLAG_LOCKABLE_BACKBUFFER;
+    pPresentationParameters->SwapEffect = D3DSWAPEFFECT_DISCARD;
+
+    if (!pPresentationParameters->EnableAutoDepthStencil)
+    {
+        pPresentationParameters->EnableAutoDepthStencil = true;
+        pPresentationParameters->AutoDepthStencilFormat = D3DFMT_D24S8;
+    }
+
+    pPresentationParameters->BackBufferCount = (pPresentationParameters->BackBufferCount) ? pPresentationParameters->BackBufferCount : 1;
+}
 void ConvertPresentParameters(D3DPRESENT_PARAMETERS8& Input, D3DPRESENT_PARAMETERS& Output)
 {
     Output.BackBufferWidth = Input.BackBufferWidth;

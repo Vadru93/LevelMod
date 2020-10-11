@@ -160,3 +160,5 @@ void ConvertSurfaceDesc(D3DSURFACE_DESC& input, D3DSURFACE_DESC8& output);
 void ConvertPresentParameters(D3DPRESENT_PARAMETERS8& input, D3DPRESENT_PARAMETERS& output);
 void ConvertAdapterIdentifier(D3DADAPTER_IDENTIFIER9& input, D3DADAPTER_IDENTIFIER8& output);
 bool SupportsPalettes();
+void UpdatePresentParameter(D3DPRESENT_PARAMETERS* pPresentationParameters, HWND hFocusWindow, bool SetWindow);
+void UpdatePresentParameterForMultisample(D3DPRESENT_PARAMETERS* pPresentationParameters, D3DMULTISAMPLE_TYPE MultiSampleType, DWORD MultiSampleQuality);

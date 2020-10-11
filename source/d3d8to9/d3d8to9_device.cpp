@@ -189,26 +189,30 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateAdditionalSwapChain(D3DPRESENT_
     PresentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
 
     // Get multisample quality level
-    if (PresentParams.MultiSampleType != D3DMULTISAMPLE_NONE)
+    if (DeviceMultiSampleType)
     {
+        DeviceMultiSampleType = (D3DMULTISAMPLE_TYPE)0;
         DWORD QualityLevels = 0;
         D3DDEVICE_CREATION_PARAMETERS CreationParams;
         ProxyInterface->GetCreationParameters(&CreationParams);
 
-        if (D3D->GetProxyInterface()->CheckDeviceMultiSampleType(CreationParams.AdapterOrdinal,
-            CreationParams.DeviceType, PresentParams.BackBufferFormat, PresentParams.Windowed,
-            PresentParams.MultiSampleType, &QualityLevels) == S_OK &&
-            D3D->GetProxyInterface()->CheckDeviceMultiSampleType(CreationParams.AdapterOrdinal,
-                CreationParams.DeviceType, PresentParams.AutoDepthStencilFormat, PresentParams.Windowed,
-                PresentParams.MultiSampleType, &QualityLevels) == S_OK)
+        for (int x = min((Gfx::AntiAliasing == 1 ? 16 : Gfx::AntiAliasing), 16); x > 0; x--)
         {
-            if (Gfx::AntiAliasing != 1)
+            PresentParams.MultiSampleType = (D3DMULTISAMPLE_TYPE)x;
+            d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)x;
+            DWORD QualityLevels = 0;
+            if (D3D->GetProxyInterface()->CheckDeviceMultiSampleType(CreationParams.AdapterOrdinal,
+                CreationParams.DeviceType, PresentParams.BackBufferFormat, PresentParams.Windowed,
+                PresentParams.MultiSampleType, &QualityLevels) == S_OK &&
+                D3D->GetProxyInterface()->CheckDeviceMultiSampleType(CreationParams.AdapterOrdinal,
+                    CreationParams.DeviceType, PresentParams.AutoDepthStencilFormat, PresentParams.Windowed,
+                    PresentParams.MultiSampleType, &QualityLevels) == S_OK)
             {
-                QualityLevels = (D3DMULTISAMPLE_TYPE)min(Gfx::AntiAliasing, QualityLevels - 1);
+
+                DeviceMultiSampleType = PresentParams.MultiSampleType;
+                d3dpp.MultiSampleQuality = (QualityLevels != 0) ? QualityLevels - 1 : 0;
+                PresentParams.MultiSampleQuality = (QualityLevels != 0) ? QualityLevels - 1 : 0;
             }
-            PresentParams.MultiSampleQuality = (QualityLevels != 0) ? QualityLevels - 1 : 0;
-            d3dpp.MultiSampleQuality = (QualityLevels != 0) ? QualityLevels - 1 : 0;
-            DeviceMultiSampleType = (D3DMULTISAMPLE_TYPE)QualityLevels;
         }
     }
 
@@ -279,26 +283,33 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::Reset(D3DPRESENT_PARAMETERS8* pPresen
     PresentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
 
     // Get multisample quality level
-    if (PresentParams.MultiSampleType != D3DMULTISAMPLE_NONE)
+    if (DeviceMultiSampleType)
     {
+        DeviceMultiSampleType = (D3DMULTISAMPLE_TYPE)0;
         DWORD QualityLevels = 0;
         D3DDEVICE_CREATION_PARAMETERS CreationParams;
         ProxyInterface->GetCreationParameters(&CreationParams);
 
-        if (D3D->GetProxyInterface()->CheckDeviceMultiSampleType(CreationParams.AdapterOrdinal,
-            CreationParams.DeviceType, PresentParams.BackBufferFormat, PresentParams.Windowed,
-            PresentParams.MultiSampleType, &QualityLevels) == S_OK &&
-            D3D->GetProxyInterface()->CheckDeviceMultiSampleType(CreationParams.AdapterOrdinal,
-                CreationParams.DeviceType, PresentParams.AutoDepthStencilFormat, PresentParams.Windowed,
-                PresentParams.MultiSampleType, &QualityLevels) == S_OK)
+        for (int x = min((Gfx::AntiAliasing == 1 ? 16 : Gfx::AntiAliasing), 16); x > 0; x--)
         {
-            if (Gfx::AntiAliasing != 1)
+            PresentParams.MultiSampleType = (D3DMULTISAMPLE_TYPE)x;
+            d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)x;
+            DWORD QualityLevels = 0;
+            if (D3D->GetProxyInterface()->CheckDeviceMultiSampleType(CreationParams.AdapterOrdinal,
+                CreationParams.DeviceType, PresentParams.BackBufferFormat, PresentParams.Windowed,
+                PresentParams.MultiSampleType, &QualityLevels) == S_OK &&
+                D3D->GetProxyInterface()->CheckDeviceMultiSampleType(CreationParams.AdapterOrdinal,
+                    CreationParams.DeviceType, PresentParams.AutoDepthStencilFormat, PresentParams.Windowed,
+                    PresentParams.MultiSampleType, &QualityLevels) == S_OK)
             {
-                QualityLevels = (D3DMULTISAMPLE_TYPE)min(Gfx::AntiAliasing, QualityLevels - 1);
+
+                DeviceMultiSampleType = PresentParams.MultiSampleType;
+                d3dpp.MultiSampleQuality = (QualityLevels != 0) ? QualityLevels - 1 : 0;
+                PresentParams.MultiSampleQuality = (QualityLevels != 0) ? QualityLevels - 1 : 0;
             }
-            d3dpp.MultiSampleQuality = (QualityLevels != 0) ? QualityLevels - 1 : 0;
-            DeviceMultiSampleType = (D3DMULTISAMPLE_TYPE)QualityLevels;
         }
+
+        
     }
 
     if (DeviceMultiSampleType)
@@ -368,8 +379,23 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateTexture(UINT Width, UINT Height
 {
     if (Gfx::filtering)
     {
-        Levels = 0;
-        Usage |= D3DUSAGE_AUTOGENMIPMAP;
+        /*if (Width <= 64 || Height <= 64)
+        {
+            Levels = 1;
+        }
+        else
+        {*/
+        //ppTexture->
+            Levels = 0;
+            Usage |= D3DUSAGE_AUTOGENMIPMAP;
+            /*DWORD target = min(Width, Height);
+
+            while (target > 16)
+            {
+                target /= 2;
+                Levels++;
+            }*/
+        //}
     }
     if (ppTexture == nullptr)
     {
@@ -818,6 +844,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::BeginScene()
     if (Gfx::AntiAliasing)
     {
         ProxyInterface->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
+        ProxyInterface->SetRenderState(D3DRS_ANTIALIASEDLINEENABLE, TRUE);
         if (MaxAnisotropy)
         {
             ProxyInterface->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, MaxAnisotropy);
@@ -924,6 +951,9 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::SetRenderState(D3DRENDERSTATETYPE Sta
 {
     FLOAT Biased;
     HRESULT hr;
+
+    if (State == D3DRS_MULTISAMPLEANTIALIAS)
+        Value = TRUE;
 
     switch (static_cast<DWORD>(State))
     {
