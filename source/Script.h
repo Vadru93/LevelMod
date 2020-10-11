@@ -400,7 +400,7 @@ struct CStructHeader
         }
 
         CStructHeader* pThis = NextHeader;
-        while (pThis && !InvalidReadPtr(pThis) && !InvalidReadPtr(pThis, sizeof(CStructHeader)))
+        while (pThis)
         {
             if (pThis->QBkey == checksum)
             {
@@ -420,7 +420,7 @@ struct CStructHeader
         }
 
         CStructHeader* pThis = NextHeader;
-        while (pThis && !InvalidReadPtr(pThis) && !InvalidReadPtr(pThis, sizeof(CStructHeader)))
+        while (pThis)
         {
             if (pThis->QBkey == checksum)
             {

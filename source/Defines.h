@@ -31,11 +31,11 @@ enum enum_vertex
 };
 
 #define _T(x) x
-
+extern bool init3, debugMode, hooked;
 //where p = pointer to data
 #define VALIDATE_PTR(p) \
 { \
-if (InvalidReadPtr(p)) \
+if (debugMode && InvalidReadPtr(p)) \
 { \
   _printf( _T("Parameter ") _T(#p) \
   _T(" is not a valid read pointer\r\n") \
@@ -46,7 +46,7 @@ if (InvalidReadPtr(p)) \
 //where p = pointer to data s = size of data
 #define VALIDATE_DATA(p, s) \
 { \
-if (InvalidReadPtr(p, s)) \
+if (debugMode && InvalidReadPtr(p, s)) \
 { \
   _printf( _T("Parameter ") _T(#p) \
   _T(" is not a valid read area\r\n") \

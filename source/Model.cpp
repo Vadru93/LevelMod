@@ -12,14 +12,18 @@ __declspec(naked) void Obj_MoveToNode_Naked()
     static DWORD pOldEBP;
     static DWORD pCall = 0x0048B6E0;
     static DWORD pJmp = 0x0048E03A;
+    _asm pushad;
+    _asm pushfd;
     _asm mov pModel, ecx;
     _asm mov pStruct, eax;
-    _asm mov pOldESP, esp;
-    _asm mov pOldEBP, ebp;
+    /*_asm mov pOldESP, esp;
+    _asm mov pOldEBP, ebp;*/
     Obj_MoveToNode(pModel, pStruct);
     _asm mov ecx, pModel;
-    _asm mov esp, pOldESP;
-    _asm mov ebp, pOldEBP;
+    /*_asm mov esp, pOldESP;
+    _asm mov ebp, pOldEBP;*/
+    _asm popfd;
+    _asm popad;
     _asm call[pCall];
     _asm jmp pJmp;
 }
@@ -32,14 +36,18 @@ __declspec(naked) void Obj_FollowPathLinked_Naked()
     static DWORD pOldEBP;
     static DWORD pCall = 0x0048B500;
     static DWORD pJmp = 0x0048DA57;
+    _asm pushad;
+    _asm pushfd;
     _asm mov pModel, ecx;
     _asm mov pStruct, eax;
-    _asm mov pOldESP, esp;
-    _asm mov pOldEBP, ebp;
+    /*_asm mov pOldESP, esp;
+    _asm mov pOldEBP, ebp;*/
     Obj_FollowPathLinked(pModel, pStruct);
     _asm mov ecx, pModel;
-    _asm mov esp, pOldESP;
-    _asm mov ebp, pOldEBP;
+    /*_asm mov esp, pOldESP;
+    _asm mov ebp, pOldEBP;*/
+    _asm popfd;
+    _asm popad;
     _asm call[pCall];
     _asm jmp pJmp;
 }
@@ -48,16 +56,20 @@ __declspec(naked) void BouncyObj_Go_Naked()
 {
     static Model* pModel;
     static CStruct* pStruct;
-    static DWORD pOldESP;
-    static DWORD pOldEBP;
+    /*static DWORD pOldESP;
+    static DWORD pOldEBP;*/
+    _asm pushad;
+    _asm pushfd;
     static DWORD pJmp = 0x004842A0;
     _asm mov pModel, ecx;
-    _asm mov pOldESP, esp;
-    _asm mov pOldEBP, ebp;
+    /*_asm mov pOldESP, esp;
+    _asm mov pOldEBP, ebp;*/
     BouncyObj_Go(pModel);
     _asm mov ecx, pModel;
-    _asm mov esp, pOldESP;
-    _asm mov ebp, pOldEBP;
+    /*_asm mov esp, pOldESP;
+    _asm mov ebp, pOldEBP;*/
+    _asm popfd;
+    _asm popad;
     _asm jmp pJmp;
 }
 

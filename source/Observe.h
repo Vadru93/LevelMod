@@ -37,19 +37,19 @@ struct ObserveMode
     static Vertex* GetCamera()
     {
         static const DWORD ptr = 0x008E1E78;
-        if (InvalidReadPtr(((void*)ptr)))
+        if (debugMode && InvalidReadPtr(((void*)ptr)))
             return NULL;
         DWORD pCamera = *(DWORD*)ptr + 0x84;
-        if (InvalidReadPtr(((void*)pCamera)))
+        if (debugMode && InvalidReadPtr(((void*)pCamera)))
             return NULL;
         pCamera = *(DWORD*)pCamera + 0xB0;
-        if (InvalidReadPtr(((void*)pCamera)))
+        if (debugMode && InvalidReadPtr(((void*)pCamera)))
             return NULL;
         pCamera = *(DWORD*)pCamera + 0x320;
-        if (InvalidReadPtr(((void*)pCamera)))
+        if (debugMode && InvalidReadPtr(((void*)pCamera)))
             return NULL;
         pCamera = *(DWORD*)pCamera + 0x20C;
-        if (InvalidReadPtr(((void*)pCamera)))
+        if (debugMode && InvalidReadPtr(((void*)pCamera)))
             return NULL;
         return (Vertex*)(*(DWORD*)pCamera + 0x40);
     }
@@ -66,7 +66,7 @@ struct ObserveMode
     //check if player exist and pointers work
     bool PlayerExist()
     {
-        if (current && !InvalidReadPtr(current) && *(DWORD*)current == 0x0058E504 && *(DWORD*)((DWORD)current + 4) != 0xFFFFFFFF && skater)
+        if (current && (!debugMode || !InvalidReadPtr(current)) && *(DWORD*)current == 0x0058E504 && *(DWORD*)((DWORD)current + 4) != 0xFFFFFFFF && skater)
         {
             _printf("wtf no exist\n");
             return true;
@@ -75,7 +75,7 @@ struct ObserveMode
         first = (void*)*(DWORD*)(*(DWORD*)0x008E2498 + 0x13C);
         last = (void*)*(DWORD*)(*(DWORD*)0x008E2498 + 0x140);
         current = first;
-        while (current != last && current && !InvalidReadPtr(current) && *(DWORD*)current == 0x0058E504 && *(DWORD*)((DWORD)current + 4) != 0xFFFFFFFF && skater)
+        while (current != last && current && (!debugMode || !InvalidReadPtr(current)) && *(DWORD*)current == 0x0058E504 && *(DWORD*)((DWORD)current + 4) != 0xFFFFFFFF && skater)
         {
             if (!strcmp(name, (char*)((DWORD)current + 32)))
                 return true;

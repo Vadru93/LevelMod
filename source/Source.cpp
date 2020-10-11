@@ -3379,7 +3379,7 @@ bool ChangeLocalScript(CStruct* pStruct, CScript* pScript)
 void AddChecksum(int key, char* name, void* retAddr)
 {
     lastQB = name;
-    if (name && !InvalidReadPtr(name) && strlen(name) > 1)
+    if (name && strlen(name) > 1)
     {
         std::map<DWORD, char*>::iterator it = QScript::Scripts->qbTable.find(key);
         if (it == QScript::Scripts->qbTable.end())
@@ -4463,8 +4463,8 @@ void InitLevelMod()
     *(DWORD*)0x00427AA3 = 0x90909090;//nop
     *(WORD*)(0x00427AA3 + 4) = 0x9090;
 
-    HookFunction(0x0048E036, Obj_MoveToNode_Naked, 0xE9);
-    HookFunction(0x0048DA53, Obj_FollowPathLinked_Naked, 0xE9);
+    //HookFunction(0x0048E036, Obj_MoveToNode_Naked, 0xE9);
+    //HookFunction(0x0048DA53, Obj_FollowPathLinked_Naked, 0xE9);
     HookFunction(0x004846E6, BouncyObj_Go_Naked, 0xE8);
     //Network::MessageHandler handler;
     /*DWORD old;
