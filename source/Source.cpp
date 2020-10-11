@@ -1524,6 +1524,32 @@ bool ToggleHookDebugMessages(CStruct* pStruct, CScript* pScript)
     return true;
 }
 
+void ReadFirstOptions()
+{
+    char temp[MAX_PATH] = "";
+    GetCurrentDirectory(MAX_PATH, temp);
+    sprintf(IniPath, "%s/LevelMod.ini", temp);
+    OptionWriter = new CIniWriter(IniPath);
+    OptionReader = new CIniReader(IniPath);
+
+
+    _printf("Reading from ini file %s, default %d ", "LM_GFX_eBuffering", Gfx::numBackBuffers);
+    Gfx::numBackBuffers = OptionReader->ReadInt("Script_Settings", "LM_GFX_eBuffering", Gfx::numBackBuffers);
+    _printf("value %d\n", Gfx::numBackBuffers);
+
+    _printf("Reading from ini file %s, default %d ", "LM_GFX_eAntiAlias", Gfx::AntiAliasing);
+    Gfx::AntiAliasing = OptionReader->ReadInt("Script_Settings", "LM_GFX_eAntiAlias", Gfx::AntiAliasing);
+    _printf("value %d\n", Gfx::AntiAliasing);
+
+    _printf("Reading from ini file %s, default %d ", "LM_GFX_bFiltering", Gfx::filtering);
+    Gfx::filtering = OptionReader->ReadInt("Script_Settings", "LM_GFX_bFiltering", Gfx::filtering);
+    _printf("value %d\n", Gfx::filtering);
+
+    _printf("Reading from ini file %s, default %d ", "LM_GFX_bFixStutter", Gfx::fps_fix);
+    Gfx::fps_fix = OptionReader->ReadInt("Script_Settings", "LM_GFX_bFixStutter", Gfx::fps_fix);
+    _printf("value %d\n", Gfx::fps_fix);
+}
+
 void FixTagLimitProtections()
 {
     DWORD old;
@@ -4787,11 +4813,6 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
 
         if (size == 0)//file was empty
         {*/
-        char temp[MAX_PATH] = "";
-        GetCurrentDirectory(MAX_PATH, temp);
-        sprintf(IniPath, "%s/LevelMod.ini", temp);
-        OptionWriter = new CIniWriter(IniPath);
-        OptionReader = new CIniReader(IniPath);
 
         /*}
         else

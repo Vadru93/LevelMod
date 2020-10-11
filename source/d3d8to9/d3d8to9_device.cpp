@@ -11,6 +11,7 @@
 #include "d3d8to9.hpp"
 #include <regex>
 #include <assert.h>
+#include "..\CustomShaders.h"
 
 extern D3DMULTISAMPLE_TYPE DeviceMultiSampleType;
 extern bool CopyRenderTarget;
@@ -309,8 +310,11 @@ void STDMETHODCALLTYPE Direct3DDevice8::GetGammaRamp(D3DGAMMARAMP* pRamp)
 }
 HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateTexture(UINT Width, UINT Height, UINT Levels, DWORD Usage, D3DFORMAT Format, D3DPOOL Pool, Direct3DTexture8** ppTexture)
 {
-    Levels = 0;
-    Usage |= D3DUSAGE_AUTOGENMIPMAP;
+    if (Gfx::filtering)
+    {
+        Levels = 0;
+        Usage |= D3DUSAGE_AUTOGENMIPMAP;
+    }
     if (ppTexture == nullptr)
     {
         return D3DERR_INVALIDCALL;
@@ -755,19 +759,22 @@ extern void DrawLines();
 HRESULT STDMETHODCALLTYPE Direct3DDevice8::BeginScene()
 {
     HRESULT hres = ProxyInterface->BeginScene();
-    ProxyInterface->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
-    if (MaxAnisotropy)
+    if (Gfx::AntiAliasing)
     {
-        ProxyInterface->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, MaxAnisotropy);
-        ProxyInterface->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC);
-        ProxyInterface->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC);
+        ProxyInterface->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
+        if (MaxAnisotropy)
+        {
+            ProxyInterface->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, MaxAnisotropy);
+            ProxyInterface->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_ANISOTROPIC);
+            ProxyInterface->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_ANISOTROPIC);
+        }
+        else
+        {
+            ProxyInterface->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+            ProxyInterface->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+        }
+        ProxyInterface->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
     }
-    else
-    {
-        ProxyInterface->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-        ProxyInterface->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-    }
-    ProxyInterface->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
     
     /*DrawLines();
     DrawFrame2();*/

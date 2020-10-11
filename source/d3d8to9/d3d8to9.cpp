@@ -9,6 +9,7 @@
 #include "d3dx9.hpp"
 #include "d3d8to9.hpp"
 #include "..\QBKey.h"
+#include "..\CustomShaders.h"
 
 #define pRANDOM_SIZE 0x32000
 
@@ -56,6 +57,7 @@ extern void AddMessageHook();
 extern void AddFunctions();
 extern void FixSpineFlag();
 extern void FixMemoryProtection();
+extern void ReadFirstOptions();
 
 PFN_D3DXAssembleShader D3DXAssembleShader = nullptr;
 PFN_D3DXDisassembleShader D3DXDisassembleShader = nullptr;
@@ -70,6 +72,8 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 {
     //MessageBox(0, 0, 0, 0);
     memcpy((char*)0x5BBAF8, "Scripts\\qdir_lm.txt", 20);
+
+    ReadFirstOptions();
     DWORD old;
     VirtualProtect((void*)0x0042B247, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((void*)0x0042B250, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
@@ -237,8 +241,11 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 
     VirtualProtect((void*)0x004c050c, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((void*)0x004c067b, sizeof(BYTE), PAGE_EXECUTE_READWRITE, &old);
-    *(DWORD*)0x004c050c = 0x3E80;// 16000;
-    *(BYTE*)0x004c067b = 0x10;
+    if (Gfx::fps_fix)
+    {
+        *(DWORD*)0x004c050c = 0x3E80;// 16000;
+        *(BYTE*)0x004c067b = 0x10;
+    }
 
     BYTE CodeCave_AddAnimation[] = { 0x8D, 0x54, 0x29, 0x30, 0x8B, 0x03, 0x52, 0x85, 0xC0, 0x0F, 0x84, 0xFE, 0xD1, 0x4B, 0x00, 0x05,
         0x20, 0x01, 0x00, 0x00, 0x89, 0x15, 0x23, 0x0D, 0x04, 0x00, 0x8B, 0x10, 0x81, 0xFA, 0x30, 0x30, 0x30, 0x30, 0x75, 0x09,

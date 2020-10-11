@@ -1,6 +1,7 @@
 #pragma once
 #ifndef CUSTOM_SHADERS_H
 #define CUSTOM_SHADERS_H
+#ifndef NO_DEFINES
 #include "d3d9.h"
 
 
@@ -60,11 +61,13 @@ struct ShaderObject2
     };
     DWORD alphaRef;
 };
+#endif
 
 
 //--------Custom Shaders--------
 namespace Gfx
 {
+#ifndef NO_DEFINES
     extern bool loadingShaders;
     extern bool loadedShaders;
     extern DWORD numMaterials;
@@ -78,6 +81,11 @@ namespace Gfx
     extern float uv_tiling_threshold;
     void LoadCustomShaders(char* file);
     void UnloadShaders();
+#endif
+    extern DWORD numBackBuffers;
+    extern DWORD AntiAliasing;
+    extern bool filtering;
+    extern bool fps_fix;
 };
 //--------Custom Shaders--------
 

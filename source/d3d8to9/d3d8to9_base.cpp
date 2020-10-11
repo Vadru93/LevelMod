@@ -8,6 +8,7 @@
 
  //#include "..\pch.h"
 #include "d3d8to9.hpp"
+#include "..\CustomShaders.h"
 
 D3DMULTISAMPLE_TYPE DeviceMultiSampleType = D3DMULTISAMPLE_NONE;
 bool CopyRenderTarget = false;
@@ -223,17 +224,6 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
 
     *ppReturnedDeviceInterface = nullptr;
 
-    if (DeviceMultiSampleType)
-    {
-        CopyRenderTarget = true;
-    }
-
-    if (DeviceMultiSampleType &&
-        (ProxyInterface->CheckDeviceFormat(Adapter, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE, (D3DFORMAT)MAKEFOURCC('S', 'S', 'A', 'A')) == S_OK))
-    {
-        SetSSAA = true;
-    }
-
     D3DPRESENT_PARAMETERS PresentParams;
     ConvertPresentParameters(*pPresentationParameters, PresentParams);
 
@@ -241,18 +231,21 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
     HRESULT hr = D3DERR_INVALIDCALL;
 
     CopyMemory(&d3dpp, pPresentationParameters, sizeof(D3DPRESENT_PARAMETERS));
-    d3dpp.BackBufferCount = (d3dpp.BackBufferCount) ? d3dpp.BackBufferCount : 1;
-    d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-    d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
-    PresentParams.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-    PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
-    PresentParams.BackBufferCount = 2;// d3dpp.BackBufferCount;
-    PresentParams.SwapEffect = D3DSWAPEFFECT_FLIP;
-    int AntiAliasing = 1;
+    d3dpp.BackBufferCount = Gfx::numBackBuffers;//(d3dpp.BackBufferCount) ? d3dpp.BackBufferCount : 1;
+    if (Gfx::fps_fix)
+    {
+        d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+        d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+        PresentParams.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+        PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+    }
+    PresentParams.BackBufferCount = Gfx::numBackBuffers;// d3dpp.BackBufferCount;
+    if(Gfx::numBackBuffers)
+        PresentParams.SwapEffect = D3DSWAPEFFECT_FLIP;
     IDirect3DDevice9* DeviceInterface = nullptr;
     // Check AntiAliasing quality
     DWORD QualityLevels = 0;
-    for (int x = min((AntiAliasing == 1 ? 16 : AntiAliasing), 16); x > 0; x--)
+    for (int x = min((Gfx::AntiAliasing == 1 ? 16 : Gfx::AntiAliasing), 16); x > 0; x--)
     {
         if (SUCCEEDED(ProxyInterface->CheckDeviceMultiSampleType(Adapter,
             DeviceType, (d3dpp.BackBufferFormat) ? d3dpp.BackBufferFormat : D3DFMT_A8R8G8B8, d3dpp.Windowed,
@@ -273,6 +266,17 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
             }
 
         }
+    }
+
+    if (DeviceMultiSampleType)
+    {
+        CopyRenderTarget = true;
+    }
+
+    if (DeviceMultiSampleType &&
+        (ProxyInterface->CheckDeviceFormat(Adapter, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 0, D3DRTYPE_SURFACE, (D3DFORMAT)MAKEFOURCC('S', 'S', 'A', 'A')) == S_OK))
+    {
+        SetSSAA = true;
     }
 
     /*// Get multisample quality level
