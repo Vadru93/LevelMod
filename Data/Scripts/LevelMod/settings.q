@@ -116,23 +116,27 @@ LevelModOptions = [
 	{ name = "LM_Control_bWalliePlant" Value = 1 }
 	{ name = "LM_Control_bButtSlap" value = 1 }
 	{ name = "LM_Control_bBoostPlant" value = 0 }
-	{ name = "LM_Control_bWallplant" value = 1 }	
+	{ name = "LM_Control_bWallplant" value = 1 }
+
 	{ name = "LM_GUI_bShowHud" Value = 1 StartGame Do = UpdateShowHUD }
 	{ name = "LM_GUI_bNewMenu" Value = 1 }
 	{ name = "LM_GUI_bShowGrafCounter" Value = 1 }
 	{ name = "LM_GUI_bTrickNotifications" Value = 1 }
-	{ name = "LM_GUI_bNetName" Value = 0 StartGame Do = UpdateNetName }	
+	{ name = "LM_GUI_bNetName" Value = 0 StartGame Do = UpdateNetName }
+	
 	{ name = "LM_BugFix_bTeleFix" Value = 1 }
 	{ name = "LM_BugFix_bSoundFix" Value = 1 }
+	
 	{ name = "LM_GameOption_bLimitTags" Value = 0 }
 	{ name = "LM_GameOption_bGrass" Value = 1 StartGame Do = UpdateGrass }
 	{ name = "LM_GameOption_bExtraLayer" Value = 1 StartGame Do = UpdateExtraLayer }
 	{ name = "LM_GameOption_bNetSky" Value = 0 StartGame Do = UpdateNetSky }
 	{ name = "LM_GameOption_bFog" Value = 0 }
 	{ name = "LM_Gameplay_bPedProps" value = 1 } //change to gameoption
-	{ name = "LM_GameOption_b251Patch" value = 0 }
-	{ name = "LM_GameOption_bFixBWManual" Value = 1 }
+	{ name = "LM_GameOption_b251Patch" value = 0 } //bugfix?
+	{ name = "LM_GameOption_bFixBWManual" Value = 1 } //bugfix?
 	{ name = "LM_DebugOption_bDebugMode" Value = 0 }
+	
 	{ name = "LM_LevelOption_TH4ProObjects" value = 0 StartGame Do = UpdateTH4ProObjects }
 	{ name = "LM_LevelOption_TH4CompObjects" value = 0 StartGame Do = UpdateTH4CompObjects }
 
@@ -816,8 +820,10 @@ game_menu_items = [
 	{ IsBool text = "Fix Stuttering" 		option_id = item216 option = LM_GFX_bFixStutter 			toggle_id = item6_toggle cat_gfx } 
 ]
 
+
 script Settings_CreateOptionsMenu
 
+	//game options shared container
 	CreateAndAttachMenu { 
 		type = verticalmenu 
 		Id = newSettingsMenu
@@ -831,6 +837,7 @@ script Settings_CreateOptionsMenu
 		]
 	}
 	
+	//column for menu items
 	CreateAndAttachMenu { 
 		type = verticalmenu 
 		Id = game_options_names_menu 
@@ -840,6 +847,7 @@ script Settings_CreateOptionsMenu
 		just_center_x just_center_y not_rounded 
 	}
 	
+	//column for setting state or enum values
 	CreateAndAttachMenu { 
 		type = verticalmenu 
 		Id = game_options_on_off_menu 
@@ -865,10 +873,8 @@ endscript
 //to avoid multiple nested IFs
 //should rewrite this func in switch-case-ish logic
 //like if isEnum call enum func, if IsBool call bool func etc.
-
 script Settings_AddLine
 	if GotParam <mask>
-
 		if GotParam link
 			AddLine { 
 				parent = game_options_names_menu 
@@ -897,16 +903,12 @@ script Settings_AddLine
 				GetOptionText option = <option> text = <TextValues>
 				SetMenuElementText id = <toggle_id> <text>
 			else
-			
 				AddLine {
 					parent = game_options_on_off_menu 
 					Type = textmenuelement 
 					id = <toggle_id>
 					text = " "
 				}
-				if GotParam option
-					LM_MaybeMakeStatic option = <option> option_id = <toggle_id>
-				endif
 			endif
 		else
 				AddLine {
