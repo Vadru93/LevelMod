@@ -20,7 +20,20 @@
 #include "Bugfixes.h"
 #include "String.h"
 #include "CustomShaders.h"
+/*0
+004F9B9E < -non semi
+    8
+    004F9BFB < --semi transparent
 
+
+
+
+
+
+    1 = models
+    2 = skater
+    4 = particles ?
+    call 004F9C80*/
 
 /*//Game states
 extern bool GotSuperSectors;
@@ -792,6 +805,7 @@ void DestroySuperSectors()
     QScript::Scripts->ClearLevelTable();
     _printf("Going to remove MovingObjects\n");
     GameState::GotSuperSectors = false;
+    *(bool*)0x00040D22 = false;
     if (movingObjects.size())
         movingObjects.clear();
 
@@ -802,6 +816,7 @@ void CreateSuperSectors()
 {
     _printf("Going to create MovingObjects\n");
     GameState::GotSuperSectors = true;
+    *(bool*)0x00040D22 = true;
     Game::skater = Skater::UpdateSkater();
 }
 FILE* logFile;

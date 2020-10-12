@@ -4,7 +4,7 @@
 #include "d3d9.h"
 
 #define ReadDWORD() *(DWORD*)pFile; pFile+=4
-#define p_loaded_shaders *(bool*)0x00040D22
+#define p_render_shaders *(bool*)0x00040D22
 
 extern __restrict LPDIRECT3DDEVICE9 pDevice;
 
@@ -336,7 +336,7 @@ void __stdcall SetVertexShader_hook()
     static ShaderObject2* pShader = NULL;
 
     //p_loaded_shaders is false until shaders are fully loaded.
-    if (p_loaded_shaders)
+    if (p_render_shaders)
     {
         //skip 10 bytes to get pointer to our matsplit
         _asm add esi, 0x10
@@ -357,20 +357,26 @@ void __stdcall SetVertexShader_hook()
         _asm add esi, 288;
         //_asm mov edi, [esi];
 
-        //Check if pointer is NULL
-        _asm cmp [esi], 0x30303030
+        /*//Check if pointer is NULL
+        _asm cmp[esi], 0x30303030;
         _asm je SKIP;
 
-        //Tell the engine we wanna reset textures next call
+        
         reset = true;
 
-
+        */
         //Get old pixelshader
         DWORD oldPixelShader = *(DWORD*)0x005CEDB4;
 
         _asm mov pShader, esi;
 
-        if (pShader->flags == ENV_MAP)
+        if (pShader->flags == 0x30303030)
+            goto SKIP;
+
+        //Tell the engine we wanna reset textures next call
+        reset = true;
+
+        if (pShader->flags & ENV_MAP)
         {
             if (!restore_matrix)
             {
@@ -384,7 +390,7 @@ void __stdcall SetVertexShader_hook()
             pDevice->SetTransform(D3DTS_TEXTURE0, &env_mat);
             pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_CAMERASPACEPOSITION);
         }
-        else if (pShader->flags == UV_ANIM)
+        else if (pShader->flags & UV_ANIM)
         {
             if (!restore_matrix)
             {
