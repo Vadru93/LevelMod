@@ -193,7 +193,7 @@ ENDSCRIPT
 SCRIPT Load_Oil
 	AddMusicTrack "ambience\oil"
 	SetUpOilLights
-	Load_Level_Func lev_bsp = "Levels\oil\oil.bsp" lev_sky = "Levels\oil_Sky\oil_Sky.bsp" lev_qb = "Levels\oil\oil.qb" loadscr = "images\loadscrn_oil.png"
+	Load_Level_Func lev_bsp = "Levels\oil\oil.bsp" lev_sky = "Levels\oil\oil_Sky.bsp" lev_qb = "Levels\oil\oil.qb" loadscr = "images\loadscrn_oil.png"
 	CareerStartLevel level = LevelNum_Oil
 	PrepareLevelFog r = 190 g = 205 b = 238 a = 0 cnear = 13 cfar = 30000
 	SetMovementVelocity 1000
