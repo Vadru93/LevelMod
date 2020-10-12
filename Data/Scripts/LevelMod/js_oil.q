@@ -1,5 +1,15 @@
+part_a_lo = "Oil_Part_Pipe_A_Valve_00_Lo"
+part_a_hi = "Oil_Part_Pipe_A_Valve_00_Hi"
+part_b_lo = "Oil_Part_Pipe_B_Valve_00_Lo"
+part_b_hi = "Oil_Part_Pipe_B_Valve_00_Hi"
+part_c_lo = "Oil_Part_Pipe_C_Valve_00_Lo"
+part_c_hi = "Oil_Part_Pipe_C_Valve_00_Hi"
+part_e_lo = "Oil_Part_Pipe_E_Valve_00_Lo"
+part_e_hi = "Oil_Part_Pipe_E_Valve_00_Hi"
+part_f_lo = "Oil_Part_Pipe_F_Valve_00_Lo"
+part_f_hi = "Oil_Part_Pipe_F_Valve_00_Hi"
 
-SCRIPT Oil_Startup
+SCRIPT LoadSounds
 	LoadStreamHeader "streams\oil\streams"
 	LoadSound "Shared\GlassPane2X" vol = 100 dropoff = 100 pitch = 100 posupdateWithDoppler
 	LoadSound "Shared\FallWater" vol = 100 pitch = 100
@@ -25,22 +35,25 @@ SCRIPT Oil_Startup
 	LoadSound "Oil\Can_Bird1" vol = 100 dropoff = 50 pitch = 100 posupdate
 	LoadSound "Oil\Can_Bird2" vol = 100 dropoff = 50 pitch = 100 posupdate
 	LoadSound "Ap\helicopter15" vol = 1000 dropoff = 300 pitch = 120 posupdate
+ENDSCRIPT
+
+SCRIPT Oil_ResetParticles
 	SetParticleSysVisibility system = "Oil_Part_BlowerUpper_00" visible = 0
 	SetParticleSysVisibility system = "Oil_Part_BlowerUpper_01" visible = 0
 	SetParticleSysVisibility system = "Oil_Part_BlowerUpper_02" visible = 0
 	SetParticleSysVisibility system = "Oil_Part_BlowerUpper_03" visible = 0
 	SetParticleSysVisibility system = "Oil_Part_Fire" visible = 1
 	SetParticleSysVisibility system = "Oil_Part_FireBlower" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_Pipe_A_Valve_00_Lo" visible = 1
-	SetParticleSysVisibility system = "Oil_Part_Pipe_A_Valve_00_Hi" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_Pipe_B_Valve_00_Lo" visible = 1
-	SetParticleSysVisibility system = "Oil_Part_Pipe_B_Valve_00_Hi" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_Pipe_C_Valve_00_Lo" visible = 1
-	SetParticleSysVisibility system = "Oil_Part_Pipe_C_Valve_00_Hi" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_Pipe_E_Valve_00_Lo" visible = 1
-	SetParticleSysVisibility system = "Oil_Part_Pipe_E_Valve_00_Hi" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_Pipe_F_Valve_00_Lo" visible = 1
-	SetParticleSysVisibility system = "Oil_Part_Pipe_F_Valve_00_Hi" visible = 0
+	SetParticleSysVisibility system = part_a_lo visible = 1
+	SetParticleSysVisibility system = part_a_hi visible = 0
+	SetParticleSysVisibility system = part_b_lo visible = 1
+	SetParticleSysVisibility system = part_b_hi visible = 0
+	SetParticleSysVisibility system = part_c_lo visible = 1
+	SetParticleSysVisibility system = part_c_hi visible = 0
+	SetParticleSysVisibility system = part_e_lo visible = 1
+	SetParticleSysVisibility system = part_e_hi visible = 0
+	SetParticleSysVisibility system = part_f_lo visible = 1
+	SetParticleSysVisibility system = part_f_hi visible = 0
 	SetParticleSysVisibility system = "Oil_Part_HeliBlast_00" visible = 0
 	SetParticleSysVisibility system = "Oil_Part_HeliBlast_01" visible = 0
 	SetParticleSysVisibility system = "Oil_Part_HeliBlast_02" visible = 0
@@ -52,38 +65,17 @@ SCRIPT Oil_Startup
 	SetParticleSysVisibility system = "Oil_Part_Steam_02" visible = 1
 	SetParticleSysVisibility system = "Oil_Part_Steam_03" visible = 1
 	SetParticleSysVisibility system = "Oil_Part_Tank_00" visible = 1
+ENDSCRIPT
+
+SCRIPT Oil_Startup
+	LoadSounds
+	Oil_ResetParticles
 	SpawnScript Oil_NetGame
 ENDSCRIPT
 
 SCRIPT JS_Oil_Retry
 	LaunchConsoleMessage "firing reset"
-	SetParticleSysVisibility system = "Oil_Part_BlowerUpper_00" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_BlowerUpper_01" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_BlowerUpper_02" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_BlowerUpper_03" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_Fire" visible = 1
-	SetParticleSysVisibility system = "Oil_Part_FireBlower" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_Pipe_A_Valve_00_Lo" visible = 1
-	SetParticleSysVisibility system = "Oil_Part_Pipe_A_Valve_00_Hi" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_Pipe_B_Valve_00_Lo" visible = 1
-	SetParticleSysVisibility system = "Oil_Part_Pipe_B_Valve_00_Hi" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_Pipe_C_Valve_00_Lo" visible = 1
-	SetParticleSysVisibility system = "Oil_Part_Pipe_C_Valve_00_Hi" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_Pipe_E_Valve_00_Lo" visible = 1
-	SetParticleSysVisibility system = "Oil_Part_Pipe_E_Valve_00_Hi" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_Pipe_F_Valve_00_Lo" visible = 1
-	SetParticleSysVisibility system = "Oil_Part_Pipe_F_Valve_00_Hi" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_HeliBlast_00" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_HeliBlast_01" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_HeliBlast_02" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_HeliBlast_03" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_HeliBlast_04" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_HeliBlast_05" visible = 0
-	SetParticleSysVisibility system = "Oil_Part_Steam_00" visible = 1
-	SetParticleSysVisibility system = "Oil_Part_Steam_01" visible = 1
-	SetParticleSysVisibility system = "Oil_Part_Steam_02" visible = 1
-	SetParticleSysVisibility system = "Oil_Part_Steam_03" visible = 1
-	SetParticleSysVisibility system = "Oil_Part_Tank_00" visible = 1
+	Oil_ResetParticles
 ENDSCRIPT
 
 SCRIPT Oil_NetGame
@@ -94,16 +86,16 @@ SCRIPT Oil_NetGame
 		SetParticleSysVisibility system = "Oil_Part_BlowerUpper_03" visible = 0
 		SetParticleSysVisibility system = "Oil_Part_Fire" visible = 0
 		SetParticleSysVisibility system = "Oil_Part_FireBlower" visible = 0
-		SetParticleSysVisibility system = "Oil_Part_Pipe_A_Valve_00_Lo" visible = 0
-		SetParticleSysVisibility system = "Oil_Part_Pipe_A_Valve_00_Hi" visible = 0
-		SetParticleSysVisibility system = "Oil_Part_Pipe_B_Valve_00_Lo" visible = 0
-		SetParticleSysVisibility system = "Oil_Part_Pipe_B_Valve_00_Hi" visible = 0
-		SetParticleSysVisibility system = "Oil_Part_Pipe_C_Valve_00_Lo" visible = 0
-		SetParticleSysVisibility system = "Oil_Part_Pipe_C_Valve_00_Hi" visible = 0
-		SetParticleSysVisibility system = "Oil_Part_Pipe_E_Valve_00_Lo" visible = 0
-		SetParticleSysVisibility system = "Oil_Part_Pipe_E_Valve_00_Hi" visible = 0
-		SetParticleSysVisibility system = "Oil_Part_Pipe_F_Valve_00_Lo" visible = 0
-		SetParticleSysVisibility system = "Oil_Part_Pipe_F_Valve_00_Hi" visible = 0
+		SetParticleSysVisibility system = part_a_lo visible = 0
+		SetParticleSysVisibility system = part_a_hi visible = 0
+		SetParticleSysVisibility system = part_b_lo visible = 0
+		SetParticleSysVisibility system = part_b_hi visible = 0
+		SetParticleSysVisibility system = part_c_lo visible = 0
+		SetParticleSysVisibility system = part_c_hi visible = 0
+		SetParticleSysVisibility system = part_e_lo visible = 0
+		SetParticleSysVisibility system = part_e_hi visible = 0
+		SetParticleSysVisibility system = part_f_lo visible = 0
+		SetParticleSysVisibility system = part_f_hi visible = 0
 		SetParticleSysVisibility system = "Oil_Part_HeliBlast_00" visible = 0
 		SetParticleSysVisibility system = "Oil_Part_HeliBlast_01" visible = 0
 		SetParticleSysVisibility system = "Oil_Part_HeliBlast_02" visible = 0
@@ -232,21 +224,18 @@ SCRIPT JS_Gap_BlowerUpperTriggerC
 ENDSCRIPT
 
 SCRIPT JS_BlowerUpperTrigger
-	IF InMultiplayerGame
-		Create Name = TrP_BlowerUpper
-		Create prefix = "TRG_BlowerWheel"
-		Kill prefix = "TRG_BlowerTrigger"
-		SpawnScript JS_Klaxon
-	ELSE
-		Create Name = TrP_BlowerUpper
-		Create prefix = "TRG_BlowerWheel"
-		Kill prefix = "TRG_BlowerTrigger"
+	printf "JS_BlowerUpperTrigger"
+
+	Create Name = TrP_BlowerUpper
+	Create prefix = "TRG_BlowerWheel"
+	Kill prefix = "TRG_BlowerTrigger"
+	IF #"Not" InMultiplayerGame
 		SetParticleSysVisibility system = "Oil_Part_Fire" visible = 0
 		SetParticleSysVisibility system = "Oil_Part_FireBlower" visible = 1
 		Kill Name = TRG_SFX_Pyre_Fire_On
 		Create Name = TRG_SFX_Pyre_Fire_Off
-		SpawnScript JS_Klaxon
 	ENDIF
+	SpawnScript JS_Klaxon
 ENDSCRIPT
 
 SCRIPT JS_Klaxon
@@ -257,64 +246,44 @@ SCRIPT JS_Klaxon
 ENDSCRIPT
 
 SCRIPT JS_BlowerUpper
-	IF InMultiplayerGame
-		Obj_PlaySound Oil_Flame2
-		Wait 0.5 seconds
-		Obj_PlaySound Oil_explode
-		SpawnScript JS_PipeBurster
-		Wait 0.5 seconds
-		Kill prefix = "TrP_BlowerUpper"
-		Kill prefix = "Oil_DOb_BlowerUpper_00_NW"
-		Shatter Name = Oil_DOb_BlowerUpper_00_NW area = 100000.0 variance = 0.6 vel_x = 0.0 vel_y = 200.0 vel_z = 0.0 spread = 2.0
-		Kill prefix = "Oil_DOb_BlowerUpper_00_SW"
-		Shatter Name = Oil_DOb_BlowerUpper_00_SW area = 100000.0 variance = 0.6 vel_x = 0.0 vel_y = 200.0 vel_z = 0.0 spread = 2.0
-		Kill prefix = "Oil_DOb_BlowerUpper_06"
-		Create prefix = "TRG_OilPipe"
-		Create prefix = "TRG_OilBowl"
-		Kill prefix = "TRG_OilBloUp"
-		Wait 0.5 seconds
-		Kill prefix = "Oil_DOb_BlowerUpper_00_N"
-		Shatter Name = Oil_DOb_BlowerUpper_00_N area = 100000.0 variance = 0.6 vel_x = 0.0 vel_y = 200.0 vel_z = 0.0 spread = 2.0
-		Kill prefix = "Oil_DOb_BlowerUpper_00_W"
-		Shatter Name = Oil_DOb_BlowerUpper_00_W area = 100000.0 variance = 0.6 vel_x = 0.0 vel_y = 200.0 vel_z = 0.0 spread = 2.0
-		Kill prefix = "Oil_DOb_BlowerUpper_01"
-		Kill prefix = "Oil_DOb_BlowerUpper_03"
-		Shatter Name = Oil_DOb_BlowerUpper_03 area = 100000.0 variance = 0.6 vel_x = 0.0 vel_y = 200.0 vel_z = 0.0 spread = 2.0
-		Kill prefix = "Oil_DOb_BlowerUpper_04"
-		Wait 1.5 second
-		Kill prefix = "Oil_DOb_BlowerUpper_02"
-		Kill prefix = "Oil_DOb_BlowerUpper_05"
-	ELSE
-		Obj_PlaySound Oil_Flame2
-		Wait 0.5 seconds
-		Obj_PlaySound Oil_explode
-		SpawnScript JS_PipeBurster
-		Wait 0.5 seconds
-		Kill prefix = "TrP_BlowerUpper"
-		Kill prefix = "Oil_DOb_BlowerUpper_00_NW"
-		Shatter Name = Oil_DOb_BlowerUpper_00_NW area = 100000.0 variance = 0.6 vel_x = 0.0 vel_y = 200.0 vel_z = 0.0 spread = 2.0
-		Kill prefix = "Oil_DOb_BlowerUpper_00_SW"
-		Shatter Name = Oil_DOb_BlowerUpper_00_SW area = 100000.0 variance = 0.6 vel_x = 0.0 vel_y = 200.0 vel_z = 0.0 spread = 2.0
-		Kill prefix = "Oil_DOb_BlowerUpper_06"
+	printf "JS_BlowerUpper"
+	
+	Obj_PlaySound Oil_Flame2
+	Wait 0.5 seconds
+	Obj_PlaySound Oil_explode
+	SpawnScript JS_PipeBurster
+	Wait 0.5 seconds
+	Kill prefix = "TrP_BlowerUpper"
+	Kill prefix = "Oil_DOb_BlowerUpper_00_NW"
+	Shatter Name = Oil_DOb_BlowerUpper_00_NW area = 100000.0 variance = 0.6 vel_x = 0.0 vel_y = 200.0 vel_z = 0.0 spread = 2.0
+	Kill prefix = "Oil_DOb_BlowerUpper_00_SW"
+	Shatter Name = Oil_DOb_BlowerUpper_00_SW area = 100000.0 variance = 0.6 vel_x = 0.0 vel_y = 200.0 vel_z = 0.0 spread = 2.0
+	Kill prefix = "Oil_DOb_BlowerUpper_06"
+
+	IF #"Not" InMultiplayerGame
 		SetParticleSysVisibility system = "Oil_Part_BlowerUpper_00" visible = 1
 		SetParticleSysVisibility system = "Oil_Part_BlowerUpper_01" visible = 1
 		SetParticleSysVisibility system = "Oil_Part_BlowerUpper_02" visible = 1
 		SetParticleSysVisibility system = "Oil_Part_BlowerUpper_03" visible = 1
-		Create prefix = "TRG_OilPipe"
-		Create prefix = "TRG_OilBowl"
-		Kill prefix = "TRG_OilBloUp"
-		Wait 0.5 seconds
-		Kill prefix = "Oil_DOb_BlowerUpper_00_N"
-		Shatter Name = Oil_DOb_BlowerUpper_00_N area = 100000.0 variance = 0.6 vel_x = 0.0 vel_y = 200.0 vel_z = 0.0 spread = 2.0
-		Kill prefix = "Oil_DOb_BlowerUpper_00_W"
-		Shatter Name = Oil_DOb_BlowerUpper_00_W area = 100000.0 variance = 0.6 vel_x = 0.0 vel_y = 200.0 vel_z = 0.0 spread = 2.0
-		Kill prefix = "Oil_DOb_BlowerUpper_01"
-		Kill prefix = "Oil_DOb_BlowerUpper_03"
-		Shatter Name = Oil_DOb_BlowerUpper_03 area = 100000.0 variance = 0.6 vel_x = 0.0 vel_y = 200.0 vel_z = 0.0 spread = 2.0
-		Kill prefix = "Oil_DOb_BlowerUpper_04"
-		Wait 1.5 second
-		Kill prefix = "Oil_DOb_BlowerUpper_02"
-		Kill prefix = "Oil_DOb_BlowerUpper_05"
+	ENDIF
+
+	Create prefix = "TRG_OilPipe"
+	Create prefix = "TRG_OilBowl"
+	Kill prefix = "TRG_OilBloUp"
+	Wait 0.5 seconds
+	Kill prefix = "Oil_DOb_BlowerUpper_00_N"
+	Shatter Name = Oil_DOb_BlowerUpper_00_N area = 100000.0 variance = 0.6 vel_x = 0.0 vel_y = 200.0 vel_z = 0.0 spread = 2.0
+	Kill prefix = "Oil_DOb_BlowerUpper_00_W"
+	Shatter Name = Oil_DOb_BlowerUpper_00_W area = 100000.0 variance = 0.6 vel_x = 0.0 vel_y = 200.0 vel_z = 0.0 spread = 2.0
+	Kill prefix = "Oil_DOb_BlowerUpper_01"
+	Kill prefix = "Oil_DOb_BlowerUpper_03"
+	Shatter Name = Oil_DOb_BlowerUpper_03 area = 100000.0 variance = 0.6 vel_x = 0.0 vel_y = 200.0 vel_z = 0.0 spread = 2.0
+	Kill prefix = "Oil_DOb_BlowerUpper_04"
+	Wait 1.5 second
+	Kill prefix = "Oil_DOb_BlowerUpper_02"
+	Kill prefix = "Oil_DOb_BlowerUpper_05"
+	
+	IF #"Not" InMultiplayerGame
 		SetParticleSysVisibility system = "Oil_Part_BlowerUpper_01" visible = 0
 		Wait 0.5 seconds
 		SetParticleSysVisibility system = "Oil_Part_BlowerUpper_02" visible = 0
@@ -353,188 +322,118 @@ SCRIPT JS_PipeBurster
 	Wait 0.05 seconds
 	Kill prefix = "Oil_Pipe_Burster_08"
 ENDSCRIPT
+
 EX_VALVE_BUSTED = 1
 
 SCRIPT JS_HeliValve_A_00
-	IF InMultiplayerGame
-		SendException EX_VALVE_BUSTED Name = TRG_HeliValveCounter
-		Kill Name = Oil_Pipe_A_Valve_00
-		Kill Name = TrP_Pipe_A_Valve_00
-		Kill Name = Oil_Pipe_A_BreakA
-		Kill Name = TRG_SFX_Pipe_A_Valve_On
-		Create Name = Oil_Pipe_A_BreakB
-		Create Name = TRG_SFX_Pipe_A_Valve_Off
-		Shatter Name = Oil_Pipe_A_Valve_00 area = 100 variance = 0.6 vel_x = 0.0 vel_y = 100 vel_z = 0.0 spread = 2
-		Create prefix = "Oil_Pipe_A_BreakC"
-		Shatter prefix = "Oil_Pipe_A_BreakC" area = 500 variance = 1 vel_x = 0 vel_y = 100 vel_z = 0 spread = 2
-		Kill prefix = "Oil_Pipe_A_BreakC"
-		Obj_PlaySound GlassPane2X
-		Wait 0.5 seconds
-		Kill Name = TRG_Pipe_A_Node_00
-	ELSE
-		SendException EX_VALVE_BUSTED Name = TRG_HeliValveCounter
-		Kill Name = Oil_Pipe_A_Valve_00
-		Kill Name = TrP_Pipe_A_Valve_00
-		Kill Name = Oil_Pipe_A_BreakA
-		Kill Name = TRG_SFX_Pipe_A_Valve_On
-		Create Name = Oil_Pipe_A_BreakB
-		Create Name = TRG_SFX_Pipe_A_Valve_Off
-		Shatter Name = Oil_Pipe_A_Valve_00 area = 100 variance = 0.6 vel_x = 0.0 vel_y = 100 vel_z = 0.0 spread = 2
-		Create prefix = "Oil_Pipe_A_BreakC"
-		Shatter prefix = "Oil_Pipe_A_BreakC" area = 500 variance = 1 vel_x = 0 vel_y = 100 vel_z = 0 spread = 2
-		Kill prefix = "Oil_Pipe_A_BreakC"
-		Obj_PlaySound GlassPane2X
-		SetParticleSysVisibility system = "Oil_Part_Pipe_A_Valve_00_Lo" visible = 0
-		SetParticleSysVisibility system = "Oil_Part_Pipe_A_Valve_00_Hi" visible = 1
-		Wait 0.5 seconds
-		Kill Name = TRG_Pipe_A_Node_00
-	ENDIF
+	JS_HeliValve_Blowup Oil_Valve_A
 ENDSCRIPT
 
 SCRIPT JS_HeliValve_B_00
-	IF InMultiplayerGame
-		SendException EX_VALVE_BUSTED Name = TRG_HeliValveCounter
-		Kill Name = Oil_Pipe_B_Valve_00
-		Kill Name = TrP_Pipe_B_Valve_00
-		Kill Name = Oil_Pipe_B_BreakA
-		Kill Name = TRG_SFX_Pipe_B_Valve_On
-		Create Name = Oil_Pipe_B_BreakB
-		Create Name = TRG_SFX_Pipe_B_Valve_Off
-		Shatter Name = Oil_Pipe_B_Valve_00 area = 100 variance = 0.6 vel_x = 0.0 vel_y = 100 vel_z = 0.0 spread = 2
-		Create prefix = "Oil_Pipe_B_BreakC"
-		Shatter prefix = "Oil_Pipe_B_BreakC" area = 500 variance = 1 vel_x = 0 vel_y = 100 vel_z = 0 spread = 2
-		Kill prefix = "Oil_Pipe_B_BreakC"
-		Obj_PlaySound GlassPane2X
-		Wait 0.5 seconds
-		Kill Name = TRG_Pipe_B_Node_00
-	ELSE
-		SendException EX_VALVE_BUSTED Name = TRG_HeliValveCounter
-		Kill Name = Oil_Pipe_B_Valve_00
-		Kill Name = TrP_Pipe_B_Valve_00
-		Kill Name = Oil_Pipe_B_BreakA
-		Kill Name = TRG_SFX_Pipe_B_Valve_On
-		Create Name = Oil_Pipe_B_BreakB
-		Create Name = TRG_SFX_Pipe_B_Valve_Off
-		Shatter Name = Oil_Pipe_B_Valve_00 area = 100 variance = 0.6 vel_x = 0.0 vel_y = 100 vel_z = 0.0 spread = 2
-		Create prefix = "Oil_Pipe_B_BreakC"
-		Shatter prefix = "Oil_Pipe_B_BreakC" area = 500 variance = 1 vel_x = 0 vel_y = 100 vel_z = 0 spread = 2
-		Kill prefix = "Oil_Pipe_B_BreakC"
-		Obj_PlaySound GlassPane2X
-		SetParticleSysVisibility system = "Oil_Part_Pipe_B_Valve_00_Lo" visible = 0
-		SetParticleSysVisibility system = "Oil_Part_Pipe_B_Valve_00_Hi" visible = 1
-		Wait 0.5 seconds
-		Kill Name = TRG_Pipe_B_Node_00
-	ENDIF
+	JS_HeliValve_Blowup Oil_Valve_B
 ENDSCRIPT
 
 SCRIPT JS_HeliValve_C_00
-	IF InMultiplayerGame
-		SendException EX_VALVE_BUSTED Name = TRG_HeliValveCounter
-		Kill Name = Oil_Pipe_C_Valve_00
-		Kill Name = TrP_Pipe_C_Valve_00
-		Kill Name = Oil_Pipe_C_BreakA
-		Kill Name = TRG_SFX_Pipe_C_Valve_On
-		Create Name = Oil_Pipe_C_BreakB
-		Create Name = TRG_SFX_Pipe_C_Valve_Off
-		Shatter Name = Oil_Pipe_C_Valve_00 area = 100 variance = 0.6 vel_x = 0.0 vel_y = 100 vel_z = 0.0 spread = 2
-		Create prefix = "Oil_Pipe_C_BreakC"
-		Shatter prefix = "Oil_Pipe_C_BreakC" area = 500 variance = 1 vel_x = 0 vel_y = 100 vel_z = 0 spread = 2
-		Kill prefix = "Oil_Pipe_C_BreakC"
-		Obj_PlaySound GlassPane2X
-		Wait 0.5 seconds
-		Kill prefix = "TRG_Pipe_C_Node_00"
-	ELSE
-		SendException EX_VALVE_BUSTED Name = TRG_HeliValveCounter
-		Kill Name = Oil_Pipe_C_Valve_00
-		Kill Name = TrP_Pipe_C_Valve_00
-		Kill Name = Oil_Pipe_C_BreakA
-		Kill Name = TRG_SFX_Pipe_C_Valve_On
-		Create Name = Oil_Pipe_C_BreakB
-		Create Name = TRG_SFX_Pipe_C_Valve_Off
-		Shatter Name = Oil_Pipe_C_Valve_00 area = 100 variance = 0.6 vel_x = 0.0 vel_y = 100 vel_z = 0.0 spread = 2
-		Create prefix = "Oil_Pipe_C_BreakC"
-		Shatter prefix = "Oil_Pipe_C_BreakC" area = 500 variance = 1 vel_x = 0 vel_y = 100 vel_z = 0 spread = 2
-		Kill prefix = "Oil_Pipe_C_BreakC"
-		Obj_PlaySound GlassPane2X
-		SetParticleSysVisibility system = "Oil_Part_Pipe_C_Valve_00_Lo" visible = 0
-		SetParticleSysVisibility system = "Oil_Part_Pipe_C_Valve_00_Hi" visible = 1
-		Wait 0.5 seconds
-		Kill prefix = "TRG_Pipe_C_Node_00"
-	ENDIF
+	JS_HeliValve_Blowup Oil_Valve_C
 ENDSCRIPT
 
 SCRIPT JS_HeliValve_E_00
-	IF InMultiplayerGame
-		SendException EX_VALVE_BUSTED Name = TRG_HeliValveCounter
-		Kill Name = Oil_Pipe_E_Valve_00
-		Kill Name = TrP_Pipe_E_Valve_00
-		Kill Name = Oil_Pipe_E_BreakA
-		Kill Name = TRG_SFX_Pipe_E_Valve_On
-		Create Name = Oil_Pipe_E_BreakB
-		Create Name = TRG_SFX_Pipe_E_Valve_Off
-		Shatter Name = Oil_Pipe_E_Valve_00 area = 100 variance = 0.6 vel_x = 0.0 vel_y = 100 vel_z = 0.0 spread = 2
-		Create prefix = "Oil_Pipe_E_BreakC"
-		Shatter prefix = "Oil_Pipe_E_BreakC" area = 500 variance = 1 vel_x = 0 vel_y = 100 vel_z = 0 spread = 2
-		Kill prefix = "Oil_Pipe_E_BreakC"
-		Obj_PlaySound GlassPane2X
-		Wait 0.5 seconds
-		Kill Name = TRG_Pipe_E_Node_00
-	ELSE
-		SendException EX_VALVE_BUSTED Name = TRG_HeliValveCounter
-		Kill Name = Oil_Pipe_E_Valve_00
-		Kill Name = TrP_Pipe_E_Valve_00
-		Kill Name = Oil_Pipe_E_BreakA
-		Kill Name = TRG_SFX_Pipe_E_Valve_On
-		Create Name = Oil_Pipe_E_BreakB
-		Create Name = TRG_SFX_Pipe_E_Valve_Off
-		Shatter Name = Oil_Pipe_E_Valve_00 area = 100 variance = 0.6 vel_x = 0.0 vel_y = 100 vel_z = 0.0 spread = 2
-		Create prefix = "Oil_Pipe_E_BreakC"
-		Shatter prefix = "Oil_Pipe_E_BreakC" area = 500 variance = 1 vel_x = 0 vel_y = 100 vel_z = 0 spread = 2
-		Kill prefix = "Oil_Pipe_E_BreakC"
-		Obj_PlaySound GlassPane2X
-		SetParticleSysVisibility system = "Oil_Part_Pipe_E_Valve_00_Lo" visible = 0
-		SetParticleSysVisibility system = "Oil_Part_Pipe_E_Valve_00_Hi" visible = 1
-		Wait 0.5 seconds
-		Kill Name = TRG_Pipe_E_Node_00
-	ENDIF
+	JS_HeliValve_Blowup Oil_Valve_E
 ENDSCRIPT
 
 SCRIPT JS_HeliValve_F_00
-	IF InMultiplayerGame
-		SendException EX_VALVE_BUSTED Name = TRG_HeliValveCounter
-		Kill Name = Oil_Pipe_F_Valve_00
-		Kill Name = TrP_Pipe_F_Valve_00
-		Kill Name = Oil_Pipe_F_BreakA
-		Kill Name = TRG_SFX_Pipe_F_Valve_On
-		Create Name = Oil_Pipe_F_BreakB
-		Create Name = TRG_SFX_Pipe_F_Valve_Off
-		Shatter Name = Oil_Pipe_F_Valve_00 area = 100 variance = 0.6 vel_x = 0.0 vel_y = 100 vel_z = 0.0 spread = 2
-		Create prefix = "Oil_Pipe_F_BreakC"
-		Shatter prefix = "Oil_Pipe_F_BreakC" area = 500 variance = 1 vel_x = 0 vel_y = 100 vel_z = 0 spread = 2
-		Kill prefix = "Oil_Pipe_F_BreakC"
-		Obj_PlaySound GlassPane2X
-		Wait 0.5 seconds
-		Kill Name = TRG_Pipe_F_Node_00
-	ELSE
-		SendException EX_VALVE_BUSTED Name = TRG_HeliValveCounter
-		Kill Name = Oil_Pipe_F_Valve_00
-		Kill Name = TrP_Pipe_F_Valve_00
-		Kill Name = Oil_Pipe_F_BreakA
-		Kill Name = TRG_SFX_Pipe_F_Valve_On
-		Create Name = Oil_Pipe_F_BreakB
-		Create Name = TRG_SFX_Pipe_F_Valve_Off
-		Shatter Name = Oil_Pipe_F_Valve_00 area = 100 variance = 0.6 vel_x = 0.0 vel_y = 100 vel_z = 0.0 spread = 2
-		Create prefix = "Oil_Pipe_F_BreakC"
-		Shatter prefix = "Oil_Pipe_F_BreakC" area = 500 variance = 1 vel_x = 0 vel_y = 100 vel_z = 0 spread = 2
-		Kill prefix = "Oil_Pipe_F_BreakC"
-		Obj_PlaySound GlassPane2X
-		SetParticleSysVisibility system = "Oil_Part_Pipe_F_Valve_00_Lo" visible = 0
-		SetParticleSysVisibility system = "Oil_Part_Pipe_F_Valve_00_Hi" visible = 1
-		Wait 0.5 seconds
-		Kill Name = TRG_Pipe_F_Node_00
-	ENDIF
+	JS_HeliValve_Blowup Oil_Valve_F
 ENDSCRIPT
 
+
+Oil_Valve_A = {
+	obj1 = Oil_Pipe_A_Valve_00
+	obj2 = TrP_Pipe_A_Valve_00
+	obj3 = Oil_Pipe_A_BreakA
+	obj4 = TRG_SFX_Pipe_A_Valve_On
+	obj5 = Oil_Pipe_A_BreakB
+	obj6 = TRG_SFX_Pipe_A_Valve_Off
+	obj7 = "Oil_Pipe_A_BreakC"
+	obj8 = part_a_lo
+	obj9 = part_a_hi
+	obj10 = TRG_Pipe_A_Node_00
+}
+
+Oil_Valve_B = {
+	obj1 = Oil_Pipe_B_Valve_00
+	obj2 = TrP_Pipe_B_Valve_00
+	obj3 = Oil_Pipe_B_BreakA
+	obj4 = TRG_SFX_Pipe_B_Valve_On
+	obj5 = Oil_Pipe_B_BreakB
+	obj6 = TRG_SFX_Pipe_B_Valve_Off
+	obj7 = "Oil_Pipe_B_BreakC"
+	obj8 = part_b_lo
+	obj9 = part_b_hi
+	obj10 = TRG_Pipe_B_Node_00
+}
+
+Oil_Valve_C = {
+	obj1 = Oil_Pipe_C_Valve_00
+	obj2 = TrP_Pipe_C_Valve_00
+	obj3 = Oil_Pipe_C_BreakA
+	obj4 = TRG_SFX_Pipe_C_Valve_On
+	obj5 = Oil_Pipe_C_BreakB
+	obj6 = TRG_SFX_Pipe_C_Valve_Off
+	obj7 = "Oil_Pipe_C_BreakC"
+	obj8 = part_c_lo
+	obj9 = part_c_hi
+	obj10 = TRG_Pipe_C_Node_00
+}
+
+Oil_Valve_E = {
+	obj1 = Oil_Pipe_E_Valve_00
+	obj2 = TrP_Pipe_E_Valve_00
+	obj3 = Oil_Pipe_E_BreakA
+	obj4 = TRG_SFX_Pipe_E_Valve_On
+	obj5 = Oil_Pipe_E_BreakB
+	obj6 = TRG_SFX_Pipe_E_Valve_Off
+	obj7 = "Oil_Pipe_E_BreakC"
+	obj8 = part_e_lo
+	obj9 = part_e_hi
+	obj10 = TRG_Pipe_E_Node_00
+}
+
+Oil_Valve_F = {
+	obj1 = Oil_Pipe_F_Valve_00
+	obj2 = TrP_Pipe_F_Valve_00
+	obj3 = Oil_Pipe_F_BreakA
+	obj4 = TRG_SFX_Pipe_F_Valve_On
+	obj5 = Oil_Pipe_F_BreakB
+	obj6 = TRG_SFX_Pipe_F_Valve_Off
+	obj7 = "Oil_Pipe_F_BreakC"
+	obj8 = part_f_lo
+	obj9 = part_f_hi
+	obj10 = TRG_Pipe_F_Node_00
+}
+
+SCRIPT JS_HeliValve_Blowup
+	SendException EX_VALVE_BUSTED Name = TRG_HeliValveCounter
+	Kill Name = <obj1>
+	Kill Name = <obj2>
+	Kill Name = <obj3>
+	Kill Name = <obj4>
+	Create Name = <obj5>
+	Create Name = <obj6>
+	Shatter Name = <obj1> area = 100 variance = 0.6 vel_x = 0 vel_y = 100 vel_z = 0 spread = 2
+	Create prefix = <obj7>
+	Shatter prefix = <obj7> area = 500 variance = 1 vel_x = 0 vel_y = 100 vel_z = 0 spread = 2
+	Kill prefix = <obj7>
+	Obj_PlaySound GlassPane2X
+		
+	IF #"Not" InMultiplayerGame
+		SetParticleSysVisibility system = <obj8> visible = 0
+		SetParticleSysVisibility system = <obj9> visible = 1
+	ENDIF
+	
+	Wait 0.5 seconds
+	Kill Name = <obj>
+ENDSCRIPT
+	
 SCRIPT JS_HeliValveCounter
 	Obj_ClearExceptions
 	Obj_SetException Ex = EX_VALVE_BUSTED Scr = JS_HeliValveCounter_Hit
@@ -573,25 +472,20 @@ SCRIPT JS_HeliBlaster_HeliCamSFX
 ENDSCRIPT
 
 SCRIPT JS_HeliBlaster
-	IF InMultiplayerGame
-		Create Name = Oil_L1_NE_HeliPad_Blaster
-		Shatter Name = Oil_L1_NE_HeliPad_Blaster area = 10000.0 variance = 0.6 vel_x = 0.0 vel_y = -100.0 vel_z = 0.0 spread = -2.0 life = 7
-		Shatter Name = Oil_L1_NE_HeliPad_Blaster area = 10000.0 variance = 0.6 vel_x = 0.0 vel_y = -300.0 vel_z = 0.0 spread = -1.5 life = 7
-		Kill Name = Oil_L1_NE_HeliPad_Blaster
-		Kill prefix = "Oil_L1_NE_HeliPad_Alpha"
-		Kill prefix = "Oil_HJ_Stain06"
-		Create prefix = "Oil_L1_NE_HeliPad_Beta"
-	ELSE
+	printf "JS_HeliBlaster"
+
+	IF #"Not" InMultiplayerGame
 		SpawnScript JS_HeliBlaster_CopterCam
 		SpawnScript JS_HeliBlaster_Smoke
-		Create Name = Oil_L1_NE_HeliPad_Blaster
-		Shatter Name = Oil_L1_NE_HeliPad_Blaster area = 10000.0 variance = 0.6 vel_x = 0.0 vel_y = -100.0 vel_z = 0.0 spread = -2.0 life = 7
-		Shatter Name = Oil_L1_NE_HeliPad_Blaster area = 10000.0 variance = 0.6 vel_x = 0.0 vel_y = -300.0 vel_z = 0.0 spread = -1.5 life = 7
-		Kill Name = Oil_L1_NE_HeliPad_Blaster
-		Kill prefix = "Oil_L1_NE_HeliPad_Alpha"
-		Kill prefix = "Oil_HJ_Stain06"
-		Create prefix = "Oil_L1_NE_HeliPad_Beta"
 	ENDIF
+	
+	Create Name = Oil_L1_NE_HeliPad_Blaster
+	Shatter Name = Oil_L1_NE_HeliPad_Blaster area = 10000.0 variance = 0.6 vel_x = 0.0 vel_y = -100.0 vel_z = 0.0 spread = -2.0 life = 7
+	Shatter Name = Oil_L1_NE_HeliPad_Blaster area = 10000.0 variance = 0.6 vel_x = 0.0 vel_y = -300.0 vel_z = 0.0 spread = -1.5 life = 7
+	Kill Name = Oil_L1_NE_HeliPad_Blaster
+	Kill prefix = "Oil_L1_NE_HeliPad_Alpha"
+	Kill prefix = "Oil_HJ_Stain06"
+	Create prefix = "Oil_L1_NE_HeliPad_Beta"
 ENDSCRIPT
 
 SCRIPT JS_HeliBlaster_CopterCam
@@ -612,6 +506,9 @@ SCRIPT JS_HeliBlaster_CopterCam
 		Kill prefix = "TRG_SFX_HeliBlaster"
 	ENDIF
 ENDSCRIPT
+
+
+
 
 SCRIPT JS_HeliBlaster_Smoke
 	SetParticleSysVisibility system = "Oil_Part_HeliBlast_00" visible = 1
@@ -680,33 +577,17 @@ SCRIPT JS_DrillRoomPiston_DwnUp
 	REPEAT
 ENDSCRIPT
 
+//scripts to move helicopter
+
 SCRIPT JS_Oil_Heli_MainRotor
 	Obj_Rotz Speed = 3000 flag_max_coords
 	Obj_PlaySound helicopter15
-	BEGIN
-		Obj_MoveToRelPos (0, 0, 20) Time = 2 deceleration = 1200 flag_max_coords
-		Obj_WaitMove
-		Obj_MoveToRelPos (0, 0, -20) Time = 2 acceleration = 1200 flag_max_coords
-		Obj_WaitMove
-		Obj_MoveToRelPos (0, 0, -20) Time = 2 deceleration = 1200 flag_max_coords
-		Obj_WaitMove
-		Obj_MoveToRelPos (0, 0, 20) Time = 2 acceleration = 1200 flag_max_coords
-		Obj_WaitMove
-	REPEAT
+	Obj_SpawnScript JS_Oil_Heli_Hover
 ENDSCRIPT
 
 SCRIPT JS_Oil_Heli_TailRotor
 	Obj_Rotz Speed = 3000 flag_max_coords
-	BEGIN
-		Obj_MoveToRelPos (0, 0, 20) Time = 2 deceleration = 1200 flag_max_coords
-		Obj_WaitMove
-		Obj_MoveToRelPos (0, 0, -20) Time = 2 acceleration = 1200 flag_max_coords
-		Obj_WaitMove
-		Obj_MoveToRelPos (0, 0, -20) Time = 2 deceleration = 1200 flag_max_coords
-		Obj_WaitMove
-		Obj_MoveToRelPos (0, 0, 20) Time = 2 acceleration = 1200 flag_max_coords
-		Obj_WaitMove
-	REPEAT
+	Obj_SpawnScript JS_Oil_Heli_Hover
 ENDSCRIPT
 
 SCRIPT JS_Oil_Heli_Chassis
@@ -731,13 +612,22 @@ SCRIPT JS_Oil_Heli_Hover
 	REPEAT
 ENDSCRIPT
 
+
+
+
+
+//=======================GAPS START HERE==========================
+
+GapFlags_Cancel_All_But_Rail = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+GapFlags_Cancel_All = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+
 SCRIPT JS_OilG_MPipe2MPipe_W
-	StartGap GapID = JS_MPipe2MPipeW flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_MPipe2MPipeW flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_MPipe2MPipeE Gapscript = JS_OilS_MPipe2MPipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_MPipe2MPipe_E
-	StartGap GapID = JS_MPipe2MPipeE flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_MPipe2MPipeE flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_MPipe2MPipeW Gapscript = JS_OilS_MPipe2MPipe
 ENDSCRIPT
 
@@ -749,12 +639,12 @@ SCRIPT JS_OilS_MPipe2MPipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_SPipe2Rail
-	StartGap GapID = JS_SPipeRail flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_SPipeRail flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_Rail2SPipe Gapscript = JS_OilS_SPipe2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2SPipe
-	StartGap GapID = JS_Rail2SPipe flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_Rail2SPipe flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_SPipeRail Gapscript = JS_OilS_SPipe2Rail
 ENDSCRIPT
 
@@ -766,12 +656,12 @@ SCRIPT JS_OilS_SPipe2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_SiloBaseGap_01
-	StartGap GapID = JS_SiloBaseGap01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_SiloBaseGap01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_SiloBaseGap02 Gapscript = JS_OilS_SiloBaseGap
 ENDSCRIPT
 
 SCRIPT JS_OilG_SiloBaseGap_02
-	StartGap GapID = JS_SiloBaseGap02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_SiloBaseGap02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_SiloBaseGap01 Gapscript = JS_OilS_SiloBaseGap
 ENDSCRIPT
 
@@ -800,12 +690,12 @@ SCRIPT JS_OilS_Base2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2SiloRailDrop_01
-	StartGap GapID = JS_Rail2SiloRailDrop01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Rail2SiloRailDrop01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_Rail2SiloRailDrop02 Gapscript = JS_OilS_Rail2SiloRailDrop
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2SiloRailDrop_02
-	StartGap GapID = JS_Rail2SiloRailDrop02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Rail2SiloRailDrop02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_Rail2SiloRailDrop01 Gapscript = JS_OilS_Rail2SiloRailDrop
 ENDSCRIPT
 
@@ -817,12 +707,12 @@ SCRIPT JS_OilS_Rail2SiloRailDrop
 ENDSCRIPT
 
 SCRIPT JS_OilG_SiloRail2Rail_01
-	StartGap GapID = JS_SiloRail2Rail01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_SiloRail2Rail01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_SiloRail2Rail02 Gapscript = JS_OilS_SiloRail2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_SiloRail2Rail_02
-	StartGap GapID = JS_SiloRail2Rail02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_SiloRail2Rail02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_SiloRail2Rail01 Gapscript = JS_OilS_SiloRail2Rail
 ENDSCRIPT
 
@@ -834,7 +724,7 @@ SCRIPT JS_OilS_SiloRail2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_RampRail2SiloRail_01
-	StartGap GapID = JS_RampRail2SiloRail flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_RampRail2SiloRail flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_RampRail2SiloRail_02
@@ -849,7 +739,7 @@ SCRIPT JS_OilS_RampRail2SiloRail
 ENDSCRIPT
 
 SCRIPT JS_OilG_SiloRail2RailDrop_01
-	StartGap GapID = JS_SiloRail2RailDrop flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_SiloRail2RailDrop flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_SiloRail2RailDrop_02
@@ -864,7 +754,7 @@ SCRIPT JS_OilS_SiloRail2RailDrop
 ENDSCRIPT
 
 SCRIPT JS_OilG_SiloRail2PipeLowDrop_01
-	StartGap GapID = JS_SiloRail2PipeLowDrop flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_SiloRail2PipeLowDrop flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_SiloRail2PipeLowDrop_02
@@ -879,7 +769,7 @@ SCRIPT JS_OilS_SiloRail2PipeLowDrop
 ENDSCRIPT
 
 SCRIPT JS_OilG_SiloRail2PipeHighDrop_01
-	StartGap GapID = JS_SiloRail2PipeHighDrop flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_SiloRail2PipeHighDrop flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_SiloRail2PipeHighDrop_02
@@ -894,12 +784,12 @@ SCRIPT JS_OilS_SiloRail2PipeHighDrop
 ENDSCRIPT
 
 SCRIPT JS_OilG_SiloRailHop_01
-	StartGap GapID = JS_SiloRailHop01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_SiloRailHop01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_SiloRailHop02 Gapscript = JS_OilS_SiloRailHop
 ENDSCRIPT
 
 SCRIPT JS_OilG_SiloRailHop_02
-	StartGap GapID = JS_SiloRailHop02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_SiloRailHop02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_SiloRailHop01 Gapscript = JS_OilS_SiloRailHop
 ENDSCRIPT
 
@@ -928,12 +818,12 @@ SCRIPT JS_OilS_SiloRailCRailLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_RailCRailLinkup_01
-	StartGap GapID = JS_RailCRailLinkup01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_RailCRailLinkup01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_RailCRailLinkup02 Gapscript = JS_OilS_RailCRailLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_RailCRailLinkup_02
-	StartGap GapID = JS_RailCRailLinkup02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_RailCRailLinkup02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_RailCRailLinkup01 Gapscript = JS_OilS_RailCRailLinkup
 ENDSCRIPT
 
@@ -945,7 +835,7 @@ SCRIPT JS_OilS_RailCRailLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_CRailPipeDrop_01
-	StartGap GapID = JS_CRailPipeDrop01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_CRailPipeDrop01 flags = GapFlags_Cancel_All
 ENDSCRIPT
 
 SCRIPT JS_OilG_CRailPipeDrop_02
@@ -960,7 +850,7 @@ SCRIPT JS_OilS_CRailPipeDrop
 ENDSCRIPT
 
 SCRIPT JS_OilG_RampRail2Pipe_01
-	StartGap GapID = JS_RampRail2Pipe flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_RampRail2Pipe flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_RampRail2Pipe_02
@@ -975,22 +865,22 @@ SCRIPT JS_OilS_RampRail2Pipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_SWPipe2Rail
-	StartGap GapID = JS_SWPipe2Rail flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_SWPipe2Rail flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_Rail2SWPipe Gapscript = JS_OilS_NESWPipe2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2SWPipe
-	StartGap GapID = JS_Rail2SWPipe flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_Rail2SWPipe flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_SWPipe2Rail Gapscript = JS_OilS_NESWPipe2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_NEPipe2Rail
-	StartGap GapID = JS_NEPipe2Rail flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_NEPipe2Rail flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_Rail2NEPipe Gapscript = JS_OilS_NESWPipe2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2NEPipe
-	StartGap GapID = JS_Rail2NEPipe flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_Rail2NEPipe flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_NEPipe2Rail Gapscript = JS_OilS_NESWPipe2Rail
 ENDSCRIPT
 
@@ -1002,7 +892,7 @@ SCRIPT JS_OilS_NESWPipe2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_SPipe2RailDrop_01
-	StartGap GapID = JS_SPipe2RailDrop flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_SPipe2RailDrop flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_SPipe2RailDrop_02
@@ -1017,12 +907,12 @@ SCRIPT JS_OilG_SPipe2RailDrop
 ENDSCRIPT
 
 SCRIPT JS_OilG_LoPipe2Rail
-	StartGap GapID = JS_LoPipe2Rail flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_LoPipe2Rail flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_LoRail2Pipe Gapscript = JS_OilS_LoPipe2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_LoRail2Pipe
-	StartGap GapID = JS_LoRail2Pipe flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_LoRail2Pipe flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_LoPipe2Rail Gapscript = JS_OilS_LoPipe2Rail
 ENDSCRIPT
 
@@ -1034,12 +924,12 @@ SCRIPT JS_OilS_LoPipe2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_LoPipe2LoPipe_01
-	StartGap GapID = JS_LoPipe2LoPipe01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_LoPipe2LoPipe01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_LoPipe2LoPipe02 Gapscript = JS_OilS_LoPipe2LoPipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_LoPipe2LoPipe_02
-	StartGap GapID = JS_LoPipe2LoPipe02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_LoPipe2LoPipe02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_LoPipe2LoPipe01 Gapscript = JS_OilS_LoPipe2LoPipe
 ENDSCRIPT
 
@@ -1051,22 +941,22 @@ SCRIPT JS_OilS_LoPipe2LoPipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_LoPipe2PipeXOver_01
-	StartGap GapID = JS_LoPipe2PipeXOver01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_LoPipe2PipeXOver01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_LoPipe2PipeXOver02 Gapscript = JS_OilS_LoPipe2PipeXOver
 ENDSCRIPT
 
 SCRIPT JS_OilG_LoPipe2PipeXOver_02
-	StartGap GapID = JS_LoPipe2PipeXOver02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_LoPipe2PipeXOver02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_LoPipe2PipeXOver01 Gapscript = JS_OilS_LoPipe2PipeXOver
 ENDSCRIPT
 
 SCRIPT JS_OilG_LoPipe2PipeXOver_03
-	StartGap GapID = JS_LoPipe2PipeXOver03 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_LoPipe2PipeXOver03 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_LoPipe2PipeXOver04 Gapscript = JS_OilS_LoPipe2PipeXOver
 ENDSCRIPT
 
 SCRIPT JS_OilG_LoPipe2PipeXOver_04
-	StartGap GapID = JS_LoPipe2PipeXOver04 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_LoPipe2PipeXOver04 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_LoPipe2PipeXOver03 Gapscript = JS_OilS_LoPipe2PipeXOver
 ENDSCRIPT
 
@@ -1078,12 +968,12 @@ SCRIPT JS_OilS_LoPipe2PipeXOver
 ENDSCRIPT
 
 SCRIPT JS_OilG_ShortPipeRailLinkup_01
-	StartGap GapID = JS_ShortPipeRailLinkup01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_ShortPipeRailLinkup01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_ShortPipeRailLinkup02 Gapscript = JS_OilS_ShortPipeRailLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_ShortPipeRailLinkup_02
-	StartGap GapID = JS_ShortPipeRailLinkup02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_ShortPipeRailLinkup02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_ShortPipeRailLinkup01 Gapscript = JS_OilS_ShortPipeRailLinkup
 ENDSCRIPT
 
@@ -1095,12 +985,12 @@ SCRIPT JS_OilS_ShortPipeRailLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_ShortPipe2ShortPipe_01
-	StartGap GapID = JS_ShortPipe2ShortPipe01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_ShortPipe2ShortPipe01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_ShortPipe2ShortPipe02 Gapscript = JS_OilS_ShortPipe2ShortPipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_ShortPipe2ShortPipe_02
-	StartGap GapID = JS_ShortPipe2ShortPipe02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_ShortPipe2ShortPipe02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_ShortPipe2ShortPipe01 Gapscript = JS_OilS_ShortPipe2ShortPipe
 ENDSCRIPT
 
@@ -1112,12 +1002,12 @@ SCRIPT JS_OilS_ShortPipe2ShortPipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_ShortPipeBowlLinkup_01
-	StartGap GapID = JS_ShortPipeBowlLinkup01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_ShortPipeBowlLinkup01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_ShortPipeBowlLinkup02 Gapscript = JS_OilS_ShortPipeBowlLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_ShortPipeBowlLinkup_02
-	StartGap GapID = JS_ShortPipeBowlLinkup02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_ShortPipeBowlLinkup02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_ShortPipeBowlLinkup01 Gapscript = JS_OilS_ShortPipeBowlLinkup
 ENDSCRIPT
 
@@ -1129,12 +1019,12 @@ SCRIPT JS_OilS_ShortPipeBowlLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_CrankedPipeRailLinkup_01
-	StartGap GapID = JS_CrankedPipeRailLinkup01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_CrankedPipeRailLinkup01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_CrankedPipeRailLinkup02 Gapscript = JS_OilS_CrankedPipeRailLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_CrankedPipeRailLinkup_02
-	StartGap GapID = JS_CrankedPipeRailLinkup02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_CrankedPipeRailLinkup02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_CrankedPipeRailLinkup01 Gapscript = JS_OilS_CrankedPipeRailLinkup
 ENDSCRIPT
 
@@ -1146,7 +1036,7 @@ SCRIPT JS_OilS_CrankedPipeRailLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_CrankedPipeRail2SiloBase_01
-	StartGap GapID = JS_CrankedPipeRail2SiloBase01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_CrankedPipeRail2SiloBase01 flags = GapFlags_Cancel_All
 ENDSCRIPT
 
 SCRIPT JS_OilG_CrankedPipeRail2SiloBase_02
@@ -1161,12 +1051,12 @@ SCRIPT JS_OilS_CrankedPipeRail2SiloBase
 ENDSCRIPT
 
 SCRIPT JS_OilG_Beam2Beam_01
-	StartGap GapID = JS_Beam2Beam01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_Beam2Beam01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_Beam2Beam02 Gapscript = JS_OilS_Beam2Beam
 ENDSCRIPT
 
 SCRIPT JS_OilG_Beam2Beam_02
-	StartGap GapID = JS_Beam2Beam02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_Beam2Beam02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_Beam2Beam01 Gapscript = JS_OilS_Beam2Beam
 ENDSCRIPT
 
@@ -1178,12 +1068,12 @@ SCRIPT JS_OilS_Beam2Beam
 ENDSCRIPT
 
 SCRIPT JS_OilG_LongBeam2LongBeam_01
-	StartGap GapID = JS_LongBeam2LongBeam01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_LongBeam2LongBeam01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_LongBeam2LongBeam02 Gapscript = JS_OilS_LongBeam2LongBeam
 ENDSCRIPT
 
 SCRIPT JS_OilG_LongBeam2LongBeam_02
-	StartGap GapID = JS_LongBeam2LongBeam02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_LongBeam2LongBeam02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_LongBeam2LongBeam01 Gapscript = JS_OilS_LongBeam2LongBeam
 ENDSCRIPT
 
@@ -1195,7 +1085,7 @@ SCRIPT JS_OilS_LongBeam2LongBeam
 ENDSCRIPT
 
 SCRIPT JS_OilG_LongBeam_01
-	StartGap GapID = JS_LongBeam01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_LongBeam01 flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_LongBeam_02
@@ -1203,7 +1093,7 @@ SCRIPT JS_OilG_LongBeam_02
 ENDSCRIPT
 
 SCRIPT JS_OilG_LongBeam_03
-	StartGap GapID = JS_LongBeam02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_LongBeam02 flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_LongBeam_04
@@ -1218,12 +1108,12 @@ SCRIPT JS_OilS_LongBeam
 ENDSCRIPT
 
 SCRIPT JS_OilG_RigLongBeamLinkup_01
-	StartGap GapID = JS_RigLongBeamLinkup01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_RigLongBeamLinkup01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_RigLongBeamLinkup02 Gapscript = JS_OilS_RigLongBeamLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_RigLongBeamLinkup_02
-	StartGap GapID = JS_RigLongBeamLinkup02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_RigLongBeamLinkup02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_RigLongBeamLinkup01 Gapscript = JS_OilS_RigLongBeamLinkup
 ENDSCRIPT
 
@@ -1235,12 +1125,12 @@ SCRIPT JS_OilS_RigLongBeamLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_CrookedPipeRailLinkup_01
-	StartGap GapID = JS_CrookedPipeRailLinkup01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_CrookedPipeRailLinkup01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_CrookedPipeRailLinkup02 Gapscript = JS_OilS_CrookedPipeRailLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_CrookedPipeRailLinkup_02
-	StartGap GapID = JS_CrookedPipeRailLinkup02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_CrookedPipeRailLinkup02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_CrookedPipeRailLinkup01 Gapscript = JS_OilS_CrookedPipeRailLinkup
 ENDSCRIPT
 
@@ -1252,22 +1142,22 @@ SCRIPT JS_OilS_CrookedPipeRailLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_CrookedPipe2Pipe_01
-	StartGap GapID = JS_CrookedPipe2Pipe01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_CrookedPipe2Pipe01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_CrookedPipe2Pipe02 Gapscript = JS_OilS_CrookedPipe2Pipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_CrookedPipe2Pipe_02
-	StartGap GapID = JS_CrookedPipe2Pipe02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_CrookedPipe2Pipe02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_CrookedPipe2Pipe01 Gapscript = JS_OilS_CrookedPipe2Pipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_CrookedPipe2Pipe_03
-	StartGap GapID = JS_CrookedPipe2Pipe03 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_CrookedPipe2Pipe03 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_CrookedPipe2Pipe04 Gapscript = JS_OilS_CrookedPipe2Pipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_CrookedPipe2Pipe_04
-	StartGap GapID = JS_CrookedPipe2Pipe04 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_CrookedPipe2Pipe04 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_CrookedPipe2Pipe03 Gapscript = JS_OilS_CrookedPipe2Pipe
 ENDSCRIPT
 
@@ -1279,12 +1169,12 @@ SCRIPT JS_OilS_CrookedPipe2Pipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_CrookedLedgeRailLinkup_01
-	StartGap GapID = JS_CrookedLedgeRailLinkup01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_CrookedLedgeRailLinkup01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_CrookedLedgeRailLinkup02 Gapscript = JS_OilS_CrookedLedgeRailLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_CrookedLedgeRailLinkup_02
-	StartGap GapID = JS_CrookedLedgeRailLinkup02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_CrookedLedgeRailLinkup02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_CrookedLedgeRailLinkup01 Gapscript = JS_OilS_CrookedLedgeRailLinkup
 ENDSCRIPT
 
@@ -1296,22 +1186,22 @@ SCRIPT JS_OilS_CrookedLedgeRailLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2Rail_01
-	StartGap GapID = JS_Rail2Rail01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Rail2Rail01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_Rail2Rail02 Gapscript = JS_OilS_Rail2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2Rail_02
-	StartGap GapID = JS_Rail2Rail02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Rail2Rail02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_Rail2Rail01 Gapscript = JS_OilS_Rail2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2Rail_03
-	StartGap GapID = JS_Rail2Rail03 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Rail2Rail03 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_Rail2Rail04 Gapscript = JS_OilS_Rail2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2Rail_04
-	StartGap GapID = JS_Rail2Rail04 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Rail2Rail04 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_Rail2Rail03 Gapscript = JS_OilS_Rail2Rail
 ENDSCRIPT
 
@@ -1323,22 +1213,22 @@ SCRIPT JS_OilS_Rail2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2RailXOver_01
-	StartGap GapID = JS_Rail2RailXOver01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_Rail2RailXOver01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_Rail2RailXOver02 Gapscript = JS_OilS_Rail2RailXOver
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2RailXOver_02
-	StartGap GapID = JS_Rail2RailXOver02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_Rail2RailXOver02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_Rail2RailXOver01 Gapscript = JS_OilS_Rail2RailXOver
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2RailXOver_03
-	StartGap GapID = JS_Rail2RailXOver03 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_Rail2RailXOver03 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_Rail2RailXOver04 Gapscript = JS_OilS_Rail2RailXOver
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2RailXOver_04
-	StartGap GapID = JS_Rail2RailXOver04 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_Rail2RailXOver04 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_Rail2RailXOver03 Gapscript = JS_OilS_Rail2RailXOver
 ENDSCRIPT
 
@@ -1350,7 +1240,7 @@ SCRIPT JS_OilS_Rail2RailXOver
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2RailDrop_01
-	StartGap GapID = JS_Rail2RailDrop01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_Rail2RailDrop01 flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2RailDrop_02
@@ -1358,7 +1248,7 @@ SCRIPT JS_OilG_Rail2RailDrop_02
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2RailDrop_03
-	StartGap GapID = JS_Rail2RailDrop03 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_Rail2RailDrop03 flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2RailDrop_04
@@ -1373,7 +1263,7 @@ SCRIPT JS_OilS_Rail2RailDrop
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2RailCrossDrop_01
-	StartGap GapID = JS_Rail2RailCrossDrop01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_Rail2RailCrossDrop01 flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2RailCrossDrop_02
@@ -1388,12 +1278,12 @@ SCRIPT JS_OilS_Rail2RailCrossDrop
 ENDSCRIPT
 
 SCRIPT JS_OilG_RailOverRail_01
-	StartGap GapID = JS_RailOverRail01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_RailOverRail01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_RailOverRail02 Gapscript = JS_OilS_RailOverRail
 ENDSCRIPT
 
 SCRIPT JS_OilG_RailOverRail_02
-	StartGap GapID = JS_RailOverRail02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_RailOverRail02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_RailOverRail01 Gapscript = JS_OilS_RailOverRail
 ENDSCRIPT
 
@@ -1405,12 +1295,12 @@ SCRIPT JS_OilS_RailOverRail
 ENDSCRIPT
 
 SCRIPT JS_OilG_RailLedgeHop_01
-	StartGap GapID = JS_RailLedgeHop01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_RailLedgeHop01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_RailLedgeHop02 Gapscript = JS_OilS_RailLedgeHop
 ENDSCRIPT
 
 SCRIPT JS_OilG_RailLedgeHop_02
-	StartGap GapID = JS_RailLedgeHop02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_RailLedgeHop02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_RailLedgeHop01 Gapscript = JS_OilS_RailLedgeHop
 ENDSCRIPT
 
@@ -1422,12 +1312,12 @@ SCRIPT JS_OilS_RailLedgeHop
 ENDSCRIPT
 
 SCRIPT JS_OilG_RailLedgeXover_01
-	StartGap GapID = JS_RailLedgeXover01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_RailLedgeXover01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_RailLedgeXover02 Gapscript = JS_OilS_RailLedgeXover
 ENDSCRIPT
 
 SCRIPT JS_OilG_RailLedgeXover_02
-	StartGap GapID = JS_RailLedgeXover02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_RailLedgeXover02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_RailLedgeXover01 Gapscript = JS_OilS_RailLedgeXover
 ENDSCRIPT
 
@@ -1439,7 +1329,7 @@ SCRIPT JS_OilS_RailLedgeXover
 ENDSCRIPT
 
 SCRIPT JS_OilG_RailLedge2Pipe_01
-	StartGap GapID = JS_RailLedge2Pipe01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_RailLedge2Pipe01 flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_RailLedge2Pipe_02
@@ -1454,7 +1344,7 @@ SCRIPT JS_OilS_RailLedge2Pipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_RailLaunch2Rail_01
-	StartGap GapID = JS_RailLaunch2Rail01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_RailLaunch2Rail01 flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_RailLaunch2Rail_02
@@ -1469,7 +1359,7 @@ SCRIPT JS_OilS_RailLaunch2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_RailLaunch2Pipe_01
-	StartGap GapID = JS_RailLaunch2Pipe01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_RailLaunch2Pipe01 flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_RailLaunch2Pipe_02
@@ -1484,12 +1374,12 @@ SCRIPT JS_OilS_RailLaunch2Pipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_BowlRailLedgeHop_01
-	StartGap GapID = JS_BowlRailLedgeHop01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BowlRailLedgeHop01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BowlRailLedgeHop02 Gapscript = JS_OilS_BowlRailLedgeHop
 ENDSCRIPT
 
 SCRIPT JS_OilG_BowlRailLedgeHop_02
-	StartGap GapID = JS_BowlRailLedgeHop02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BowlRailLedgeHop02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BowlRailLedgeHop01 Gapscript = JS_OilS_BowlRailLedgeHop
 ENDSCRIPT
 
@@ -1501,7 +1391,7 @@ SCRIPT JS_OilS_BowlRailLedgeHop
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2BowlRailDrop_01
-	StartGap GapID = JS_Rail2BowlRailDrop01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Rail2BowlRailDrop01 flags = GapFlags_Cancel_All
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2BowlRailDrop_02
@@ -1516,12 +1406,12 @@ SCRIPT JS_OilS_Rail2BowlRailDrop
 ENDSCRIPT
 
 SCRIPT JS_OilG_BowlRailLinkup_01
-	StartGap GapID = JS_BowlRailLinkup01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BowlRailLinkup01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BowlRailLinkup02 Gapscript = JS_OilS_BowlRailLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_BowlRailLinkup_02
-	StartGap GapID = JS_BowlRailLinkup02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BowlRailLinkup02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BowlRailLinkup01 Gapscript = JS_OilS_BowlRailLinkup
 ENDSCRIPT
 
@@ -1533,12 +1423,12 @@ SCRIPT JS_OilS_BowlRailLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_Bowl2Bowl_01
-	StartGap GapID = JS_Bowl2Bowl01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Bowl2Bowl01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_Bowl2Bowl02 Gapscript = JS_OilS_Bowl2Bowl
 ENDSCRIPT
 
 SCRIPT JS_OilG_Bowl2Bowl_02
-	StartGap GapID = JS_Bowl2Bowl02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Bowl2Bowl02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_Bowl2Bowl01 Gapscript = JS_OilS_Bowl2Bowl
 ENDSCRIPT
 
@@ -1550,12 +1440,12 @@ SCRIPT JS_OilS_Bowl2Bowl
 ENDSCRIPT
 
 SCRIPT JS_OilG_BowlRailXover_01
-	StartGap GapID = JS_BowlRailXover01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BowlRailXover01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BowlRailXover02 Gapscript = JS_OilS_BowlRailXover
 ENDSCRIPT
 
 SCRIPT JS_OilG_BowlRailXover_02
-	StartGap GapID = JS_BowlRailXover02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BowlRailXover02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BowlRailXover01 Gapscript = JS_OilS_BowlRailXover
 ENDSCRIPT
 
@@ -1567,12 +1457,12 @@ SCRIPT JS_OilS_BowlRailXover
 ENDSCRIPT
 
 SCRIPT JS_OilG_BowlOverRailXover_01
-	StartGap GapID = JS_BowlOverRailXover01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BowlOverRailXover01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BowlOverRailXover02 Gapscript = JS_OilS_BowlOverRailXover
 ENDSCRIPT
 
 SCRIPT JS_OilG_BowlOverRailXover_02
-	StartGap GapID = JS_BowlOverRailXover02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BowlOverRailXover02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BowlOverRailXover01 Gapscript = JS_OilS_BowlOverRailXover
 ENDSCRIPT
 
@@ -1584,12 +1474,12 @@ SCRIPT JS_OilS_BowlOverRailXover
 ENDSCRIPT
 
 SCRIPT JS_OilG_RailTankRailLinkup_01
-	StartGap GapID = JS_RailTankRailLinkup01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_RailTankRailLinkup01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_RailTankRailLinkup02 Gapscript = JS_OilS_RailTankRailLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_RailTankRailLinkup_02
-	StartGap GapID = JS_RailTankRailLinkup02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_RailTankRailLinkup02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_RailTankRailLinkup01 Gapscript = JS_OilS_RailTankRailLinkup
 ENDSCRIPT
 
@@ -1601,22 +1491,22 @@ SCRIPT JS_OilS_RailTankRailLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_TankRail2Rail_01
-	StartGap GapID = JS_TankRail2Rail01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_TankRail2Rail01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_TankRail2Rail02 Gapscript = JS_OilS_TankRail2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_TankRail2Rail_02
-	StartGap GapID = JS_TankRail2Rail02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_TankRail2Rail02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_TankRail2Rail01 Gapscript = JS_OilS_TankRail2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_TankRail2Rail_03
-	StartGap GapID = JS_TankRail2Rail03 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_TankRail2Rail03 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_TankRail2Rail04 Gapscript = JS_OilS_TankRail2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_TankRail2Rail_04
-	StartGap GapID = JS_TankRail2Rail04 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_TankRail2Rail04 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_TankRail2Rail03 Gapscript = JS_OilS_TankRail2Rail
 ENDSCRIPT
 
@@ -1628,22 +1518,22 @@ SCRIPT JS_OilS_TankRail2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_TankRailXOver_01
-	StartGap GapID = JS_TankRailXOver01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_TankRailXOver01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_TankRailXOver02 Gapscript = JS_OilS_TankRailXOver
 ENDSCRIPT
 
 SCRIPT JS_OilG_TankRailXOver_02
-	StartGap GapID = JS_TankRailXOver02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_TankRailXOver02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_TankRailXOver01 Gapscript = JS_OilS_TankRailXOver
 ENDSCRIPT
 
 SCRIPT JS_OilG_TankRailXOver_03
-	StartGap GapID = JS_TankRailXOver03 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_TankRailXOver03 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_TankRailXOver04 Gapscript = JS_OilS_TankRailXOver
 ENDSCRIPT
 
 SCRIPT JS_OilG_TankRailXOver_04
-	StartGap GapID = JS_TankRailXOver04 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_TankRailXOver04 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_TankRailXOver03 Gapscript = JS_OilS_TankRailXOver
 ENDSCRIPT
 
@@ -1655,12 +1545,12 @@ SCRIPT JS_OilS_TankRailXOver
 ENDSCRIPT
 
 SCRIPT JS_OilG_LedgeHop_01
-	StartGap GapID = JS_LedgeHop01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_LedgeHop01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_LedgeHop02 Gapscript = JS_OilS_LedgeHop
 ENDSCRIPT
 
 SCRIPT JS_OilG_LedgeHop_02
-	StartGap GapID = JS_LedgeHop02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_LedgeHop02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_LedgeHop01 Gapscript = JS_OilS_LedgeHop
 ENDSCRIPT
 
@@ -1672,12 +1562,12 @@ SCRIPT JS_OilS_LedgeHop
 ENDSCRIPT
 
 SCRIPT JS_OilG_SlantPipeRailLinkup_01
-	StartGap GapID = JS_SlantPipeRailLinkup01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_SlantPipeRailLinkup01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_SlantPipeRailLinkup2 Gapscript = JS_OilS_SlantPipeRailLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_SlantPipeRailLinkup_02
-	StartGap GapID = JS_SlantPipeRailLinkup2 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_SlantPipeRailLinkup2 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_SlantPipeRailLinkup01 Gapscript = JS_OilS_SlantPipeRailLinkup
 ENDSCRIPT
 
@@ -1689,22 +1579,22 @@ SCRIPT JS_OilS_SlantPipeRailLinkup
 ENDSCRIPT
 
 SCRIPT JS_OilG_SlantPipe2SlantPipe_01
-	StartGap GapID = JS_SlantPipe2SlantPipe01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_SlantPipe2SlantPipe01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_SlantPipe2SlantPipe02 Gapscript = JS_OilS_SlantPipe2SlantPipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_SlantPipe2SlantPipe_02
-	StartGap GapID = JS_SlantPipe2SlantPipe02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_SlantPipe2SlantPipe02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_SlantPipe2SlantPipe01 Gapscript = JS_OilS_SlantPipe2SlantPipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_SlantPipe2SlantPipe_03
-	StartGap GapID = JS_SlantPipe2SlantPipe03 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_SlantPipe2SlantPipe03 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_SlantPipe2SlantPipe04 Gapscript = JS_OilS_SlantPipe2SlantPipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_SlantPipe2SlantPipe_04
-	StartGap GapID = JS_SlantPipe2SlantPipe04 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_SlantPipe2SlantPipe04 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_SlantPipe2SlantPipe03 Gapscript = JS_OilS_SlantPipe2SlantPipe
 ENDSCRIPT
 
@@ -1716,12 +1606,12 @@ SCRIPT JS_OilS_SlantPipe2SlantPipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_SlantPipeOverSlant_01
-	StartGap GapID = JS_SlantPipeOverSlant01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_SlantPipeOverSlant01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_SlantPipeOverSlant2 Gapscript = JS_OilS_SlantPipeOverSlant
 ENDSCRIPT
 
 SCRIPT JS_OilG_SlantPipeOverSlant_02
-	StartGap GapID = JS_SlantPipeOverSlant2 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_SlantPipeOverSlant2 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_SlantPipeOverSlant01 Gapscript = JS_OilS_SlantPipeOverSlant
 ENDSCRIPT
 
@@ -1733,7 +1623,7 @@ SCRIPT JS_OilS_SlantPipeOverSlant
 ENDSCRIPT
 
 SCRIPT JS_OilG_SlantPipe2OverPipe_01
-	StartGap GapID = JS_SlantPipe2OverPipe flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_SlantPipe2OverPipe flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_SlantPipe2OverPipe_02
@@ -1748,7 +1638,7 @@ SCRIPT JS_OilS_SlantPipe2OverPipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_OverPipe2SlantPipe_01
-	StartGap GapID = JS_OverPipe2SlantPipe flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_OverPipe2SlantPipe flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_OverPipe2SlantPipe_02
@@ -1763,12 +1653,12 @@ SCRIPT JS_OilS_OverPipe2SlantPipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_FatPipe2Rail
-	StartGap GapID = JS_FatPipe2Rail flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_FatPipe2Rail flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_Rail2FatPipe Gapscript = JS_OilS_FatPipe2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2FatPipe
-	StartGap GapID = JS_Rail2FatPipe flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_Rail2FatPipe flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_FatPipe2Rail Gapscript = JS_OilS_FatPipe2Rail
 ENDSCRIPT
 
@@ -1780,12 +1670,12 @@ SCRIPT JS_OilS_FatPipe2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_RailOverFatPipe_01
-	StartGap GapID = JS_RailOverFatPipe01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_RailOverFatPipe01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_RailOverFatPipe02 Gapscript = JS_OilS_RailOverFatPipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_RailOverFatPipe_02
-	StartGap GapID = JS_RailOverFatPipe02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_RailOverFatPipe02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_RailOverFatPipe01 Gapscript = JS_OilS_RailOverFatPipe
 ENDSCRIPT
 
@@ -1797,7 +1687,7 @@ SCRIPT JS_OilS_RailOverFatPipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_FatPipe2RailDrop_01
-	StartGap GapID = JS_FatPipe2RailDrop flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_FatPipe2RailDrop flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_FatPipe2RailDrop_02
@@ -1812,7 +1702,7 @@ SCRIPT JS_OilG_FatPipe2RailDrop
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2FatPipeDrop_01
-	StartGap GapID = JS_Rail2FatPipeDrop flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_Rail2FatPipeDrop flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_Rail2FatPipeDrop_02
@@ -1827,12 +1717,12 @@ SCRIPT JS_OilG_Rail2FatPipeDrop
 ENDSCRIPT
 
 SCRIPT JS_OilG_FatPipeSlantPipeXOver_01
-	StartGap GapID = JS_FatPipeSlantPipeXOver01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_FatPipeSlantPipeXOver01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_FatPipeSlantPipeXOver02 Gapscript = JS_OilS_FatPipeSlantPipeXOver
 ENDSCRIPT
 
 SCRIPT JS_OilG_FatPipeSlantPipeXOver_02
-	StartGap GapID = JS_FatPipeSlantPipeXOver02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_FatPipeSlantPipeXOver02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_FatPipeSlantPipeXOver01 Gapscript = JS_OilS_FatPipeSlantPipeXOver
 ENDSCRIPT
 
@@ -1844,12 +1734,12 @@ SCRIPT JS_OilS_FatPipeSlantPipeXOver
 ENDSCRIPT
 
 SCRIPT JS_OilG_OverPipeFatPipeXfer_01
-	StartGap GapID = JS_OverPipeFatPipeXfer01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_OverPipeFatPipeXfer01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_OverPipeFatPipeXfer02 Gapscript = JS_OilS_OverPipeFatPipeXfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_OverPipeFatPipeXfer_02
-	StartGap GapID = JS_OverPipeFatPipeXfer02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_OverPipeFatPipeXfer02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_OverPipeFatPipeXfer01 Gapscript = JS_OilS_OverPipeFatPipeXfer
 ENDSCRIPT
 
@@ -1861,12 +1751,12 @@ SCRIPT JS_OilS_OverPipeFatPipeXfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_WharfRailGap_01
-	StartGap GapID = JS_WharfRailGap01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_WharfRailGap01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_WharfRailGap02 Gapscript = JS_OilS_WharfRailGap
 ENDSCRIPT
 
 SCRIPT JS_OilG_WharfRailGap_02
-	StartGap GapID = JS_WharfRailGap02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_WharfRailGap02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_WharfRailGap01 Gapscript = JS_OilS_WharfRailGap
 ENDSCRIPT
 
@@ -1878,12 +1768,12 @@ SCRIPT JS_OilS_WharfRailGap
 ENDSCRIPT
 
 SCRIPT JS_OilG_WharfRailXOver_01
-	StartGap GapID = JS_WharfRailXOver01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_WharfRailXOver01 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_WharfRailXOver02 Gapscript = JS_OilS_WharfRailXOver
 ENDSCRIPT
 
 SCRIPT JS_OilG_WharfRailXOver_02
-	StartGap GapID = JS_WharfRailXOver02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_WharfRailXOver02 flags = GapFlags_Cancel_All_But_Rail
 	EndGap GapID = JS_WharfRailXOver01 Gapscript = JS_OilS_WharfRailXOver
 ENDSCRIPT
 
@@ -1895,12 +1785,12 @@ SCRIPT JS_OilS_WharfRailXOver
 ENDSCRIPT
 
 SCRIPT JS_OilG_Wharf2Wharf_01
-	StartGap GapID = JS_Wharf2Wharf01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Wharf2Wharf01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_Wharf2Wharf02 Gapscript = JS_OilS_Wharf2Wharf
 ENDSCRIPT
 
 SCRIPT JS_OilG_Wharf2Wharf_02
-	StartGap GapID = JS_Wharf2Wharf02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Wharf2Wharf02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_Wharf2Wharf01 Gapscript = JS_OilS_Wharf2Wharf
 ENDSCRIPT
 
@@ -1912,12 +1802,12 @@ SCRIPT JS_OilS_Wharf2Wharf
 ENDSCRIPT
 
 SCRIPT JS_OilG_BargeRailGap_01
-	StartGap GapID = JS_BargeRailGap01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BargeRailGap01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BargeRailGap02 Gapscript = JS_OilS_BargeRailGap
 ENDSCRIPT
 
 SCRIPT JS_OilG_BargeRailGap_02
-	StartGap GapID = JS_BargeRailGap02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BargeRailGap02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BargeRailGap01 Gapscript = JS_OilS_BargeRailGap
 ENDSCRIPT
 
@@ -1929,12 +1819,12 @@ SCRIPT JS_OilS_BargeRailGap
 ENDSCRIPT
 
 SCRIPT JS_OilG_BargeBridgeGap_01
-	StartGap GapID = JS_BargeBridgeGap01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BargeBridgeGap01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BargeBridgeGap02 Gapscript = JS_OilS_BargeBridgeGap
 ENDSCRIPT
 
 SCRIPT JS_OilG_BargeBridgeGap_02
-	StartGap GapID = JS_BargeBridgeGap02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BargeBridgeGap02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BargeBridgeGap01 Gapscript = JS_OilS_BargeBridgeGap
 ENDSCRIPT
 
@@ -1946,7 +1836,7 @@ SCRIPT JS_OilS_BargeBridgeGap
 ENDSCRIPT
 
 SCRIPT JS_OilG_Barge2WharfRail_01
-	StartGap GapID = JS_Barge2WharfRail01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Barge2WharfRail01 flags = GapFlags_Cancel_All
 ENDSCRIPT
 
 SCRIPT JS_OilG_Barge2WharfRail_02
@@ -1961,12 +1851,12 @@ SCRIPT JS_OilS_Barge2WharfRail
 ENDSCRIPT
 
 SCRIPT JS_OilG_Barge2WharfEdge_01
-	StartGap GapID = JS_Barge2WharfEdge01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Barge2WharfEdge01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_Barge2WharfEdge02 Gapscript = JS_OilS_Barge2WharfEdge
 ENDSCRIPT
 
 SCRIPT JS_OilG_Barge2WharfEdge_02
-	StartGap GapID = JS_Barge2WharfEdge02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Barge2WharfEdge02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_Barge2WharfEdge01 Gapscript = JS_OilS_Barge2WharfEdge
 ENDSCRIPT
 
@@ -1978,12 +1868,12 @@ SCRIPT JS_OilS_Barge2WharfEdge
 ENDSCRIPT
 
 SCRIPT JS_OilG_PipeAGap_01
-	StartGap GapID = JS_PipeAGap01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_PipeAGap01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_PipeAGap02 Gapscript = JS_OilS_PipeAGap
 ENDSCRIPT
 
 SCRIPT JS_OilG_PipeAGap_02
-	StartGap GapID = JS_PipeAGap02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_PipeAGap02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_PipeAGap01 Gapscript = JS_OilS_PipeAGap
 ENDSCRIPT
 
@@ -1995,12 +1885,12 @@ SCRIPT JS_OilS_PipeAGap
 ENDSCRIPT
 
 SCRIPT JS_OilG_PipeBGap_01
-	StartGap GapID = JS_PipeBGap01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_PipeBGap01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_PipeBGap02 Gapscript = JS_OilS_PipeBGap
 ENDSCRIPT
 
 SCRIPT JS_OilG_PipeBGap_02
-	StartGap GapID = JS_PipeBGap02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_PipeBGap02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_PipeBGap01 Gapscript = JS_OilS_PipeBGap
 ENDSCRIPT
 
@@ -2012,12 +1902,12 @@ SCRIPT JS_OilS_PipeBGap
 ENDSCRIPT
 
 SCRIPT JS_OilG_PipeCGap_01
-	StartGap GapID = JS_PipeCGap01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_PipeCGap01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_PipeCGap02 Gapscript = JS_OilS_PipeCGap
 ENDSCRIPT
 
 SCRIPT JS_OilG_PipeCGap_02
-	StartGap GapID = JS_PipeCGap02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_PipeCGap02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_PipeCGap01 Gapscript = JS_OilS_PipeCGap
 ENDSCRIPT
 
@@ -2029,12 +1919,12 @@ SCRIPT JS_OilS_PipeCGap
 ENDSCRIPT
 
 SCRIPT JS_OilG_PipeEGap_01
-	StartGap GapID = JS_PipeEGap01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_PipeEGap01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_PipeEGap02 Gapscript = JS_OilS_PipeEGap
 ENDSCRIPT
 
 SCRIPT JS_OilG_PipeEGap_02
-	StartGap GapID = JS_PipeEGap02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_PipeEGap02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_PipeEGap01 Gapscript = JS_OilS_PipeEGap
 ENDSCRIPT
 
@@ -2046,12 +1936,12 @@ SCRIPT JS_OilS_PipeEGap
 ENDSCRIPT
 
 SCRIPT JS_OilG_PipeFGap_01
-	StartGap GapID = JS_PipeFGap01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_PipeFGap01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_PipeFGap02 Gapscript = JS_OilS_PipeFGap
 ENDSCRIPT
 
 SCRIPT JS_OilG_PipeFGap_02
-	StartGap GapID = JS_PipeFGap02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_PipeFGap02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_PipeFGap01 Gapscript = JS_OilS_PipeFGap
 ENDSCRIPT
 
@@ -2080,12 +1970,12 @@ SCRIPT JS_OilS_Walkway2CRail
 ENDSCRIPT
 
 SCRIPT JS_OilG_CraneRail2Rail_01
-	StartGap GapID = JS_CraneRail2Rail01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_CraneRail2Rail01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_CraneRail2Rail02 Gapscript = JS_OilS_CraneRail2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_CraneRail2Rail_02
-	StartGap GapID = JS_CraneRail2Rail02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_CraneRail2Rail02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_CraneRail2Rail01 Gapscript = JS_OilS_CraneRail2Rail
 ENDSCRIPT
 
@@ -2097,12 +1987,12 @@ SCRIPT JS_OilS_CraneRail2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_FanRail2BargeRail_01
-	StartGap GapID = JS_FanRail2BargeRail01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_FanRail2BargeRail01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_FanRail2BargeRail02 Gapscript = JS_OilS_FanRail2BargeRail
 ENDSCRIPT
 
 SCRIPT JS_OilG_FanRail2BargeRail_02
-	StartGap GapID = JS_FanRail2BargeRail02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_FanRail2BargeRail02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_FanRail2BargeRail01 Gapscript = JS_OilS_FanRail2BargeRail
 ENDSCRIPT
 
@@ -2114,12 +2004,12 @@ SCRIPT JS_OilS_FanRail2BargeRail
 ENDSCRIPT
 
 SCRIPT JS_OilG_FanRail2Rail_01
-	StartGap GapID = JS_FanRail2Rail01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_FanRail2Rail01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_FanRail2Rail02 Gapscript = JS_OilS_FanRail2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_FanRail2Rail_02
-	StartGap GapID = JS_FanRail2Rail02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_FanRail2Rail02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_FanRail2Rail01 Gapscript = JS_OilS_FanRail2Rail
 ENDSCRIPT
 
@@ -2131,7 +2021,7 @@ SCRIPT JS_OilS_FanRail2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_Crane2Pipes_01
-	StartGap GapID = JS_Crane2Pipes flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_Crane2Pipes flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_Crane2Pipes_02
@@ -2146,7 +2036,7 @@ SCRIPT JS_OilS_Crane2Pipes
 ENDSCRIPT
 
 SCRIPT JS_OilG_Up2Crane_01
-	StartGap GapID = JS_Up2Crane flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Up2Crane flags = GapFlags_Cancel_All
 ENDSCRIPT
 
 SCRIPT JS_OilG_Up2Crane_02
@@ -2161,7 +2051,7 @@ SCRIPT JS_OilS_Up2Crane
 ENDSCRIPT
 
 SCRIPT JS_OilG_Up2CraneRail_01
-	StartGap GapID = JS_Up2CraneRail flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_WALL ]
+	StartGap GapID = JS_Up2CraneRail flags = GapFlags_Cancel_All_But_Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_Up2CraneRail_02
@@ -2176,12 +2066,12 @@ SCRIPT JS_OilS_Up2CraneRail
 ENDSCRIPT
 
 SCRIPT JS_OilG_Bowl2BowlTransfer_01
-	StartGap GapID = JS_Bowl2BowlTransfer01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Bowl2BowlTransfer01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_Bowl2BowlTransfer02 Gapscript = JS_OilS_Bowl2BowlTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_Bowl2BowlTransfer_02
-	StartGap GapID = JS_Bowl2BowlTransfer02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Bowl2BowlTransfer02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_Bowl2BowlTransfer01 Gapscript = JS_OilS_Bowl2BowlTransfer
 ENDSCRIPT
 
@@ -2193,12 +2083,12 @@ SCRIPT JS_OilS_Bowl2BowlTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_BowlTransfer_01
-	StartGap GapID = JS_BowlTransfer01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BowlTransfer01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BowlTransfer02 Gapscript = JS_OilS_BowlTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_BowlTransfer_02
-	StartGap GapID = JS_BowlTransfer02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BowlTransfer02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BowlTransfer01 Gapscript = JS_OilS_BowlTransfer
 ENDSCRIPT
 
@@ -2210,12 +2100,12 @@ SCRIPT JS_OilS_BowlTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_Quarter2BowlTransfer_01
-	StartGap GapID = JS_Quarter2BowlTransfer01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Quarter2BowlTransfer01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_Quarter2BowlTransfer02 Gapscript = JS_OilS_Quarter2BowlTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_Quarter2BowlTransfer_02
-	StartGap GapID = JS_Quarter2BowlTransfer02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Quarter2BowlTransfer02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_Quarter2BowlTransfer01 Gapscript = JS_OilS_Quarter2BowlTransfer
 ENDSCRIPT
 
@@ -2227,7 +2117,7 @@ SCRIPT JS_OilS_Quarter2BowlTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_Bank2Rail_01
-	StartGap GapID = JS_Bank2Rail01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Bank2Rail01 flags = GapFlags_Cancel_All
 ENDSCRIPT
 
 SCRIPT JS_OilG_Bank2Rail_02
@@ -2242,12 +2132,12 @@ SCRIPT JS_OilS_Bank2Rail
 ENDSCRIPT
 
 SCRIPT JS_OilG_OverPipesTransfer_01
-	StartGap GapID = JS_OverPipesTransfer01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_OverPipesTransfer01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_OverPipesTransfer02 Gapscript = JS_OilS_OverPipesTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_OverPipesTransfer_02
-	StartGap GapID = JS_OverPipesTransfer02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_OverPipesTransfer02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_OverPipesTransfer01 Gapscript = JS_OilS_OverPipesTransfer
 ENDSCRIPT
 
@@ -2259,7 +2149,7 @@ SCRIPT JS_OilS_OverPipesTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_SlantPipeOverPipe_01
-	StartGap GapID = JS_SlantPipeOverPipe flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_SlantPipeOverPipe flags = GapFlags_Cancel_All
 ENDSCRIPT
 
 SCRIPT JS_OilG_SlantPipeOverPipe_02
@@ -2274,22 +2164,22 @@ SCRIPT JS_OilS_SlantPipeOverPipe
 ENDSCRIPT
 
 SCRIPT JS_OilG_SmallFanTransfer_01
-	StartGap GapID = JS_SmallFanTransfer01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_SmallFanTransfer01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_SmallFanTransfer02 Gapscript = JS_OilS_SmallFanTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_SmallFanTransfer_02
-	StartGap GapID = JS_SmallFanTransfer02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_SmallFanTransfer02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_SmallFanTransfer01 Gapscript = JS_OilS_SmallFanTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_SmallFanTransfer_03
-	StartGap GapID = JS_SmallFanTransfer03 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_SmallFanTransfer03 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_SmallFanTransfer04 Gapscript = JS_OilS_SmallFanTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_SmallFanTransfer_04
-	StartGap GapID = JS_SmallFanTransfer04 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_SmallFanTransfer04 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_SmallFanTransfer03 Gapscript = JS_OilS_SmallFanTransfer
 ENDSCRIPT
 
@@ -2301,12 +2191,12 @@ SCRIPT JS_OilS_SmallFanTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_BigFanTransfer_01
-	StartGap GapID = JS_BigFanTransfer01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BigFanTransfer01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BigFanTransfer02 Gapscript = JS_OilS_BigFanTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_BigFanTransfer_02
-	StartGap GapID = JS_BigFanTransfer02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BigFanTransfer02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BigFanTransfer01 Gapscript = JS_OilS_BigFanTransfer
 ENDSCRIPT
 
@@ -2318,12 +2208,12 @@ SCRIPT JS_OilS_BigFanTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_TransferBuildingTransfer_01
-	StartGap GapID = JS_TransferBuildingTransfer01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_TransferBuildingTransfer01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_TransferBuildingTransfer02 Gapscript = JS_OilS_TransferBuildingTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_TransferBuildingTransfer_02
-	StartGap GapID = JS_TransferBuildingTransfer02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_TransferBuildingTransfer02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_TransferBuildingTransfer01 Gapscript = JS_OilS_TransferBuildingTransfer
 ENDSCRIPT
 
@@ -2335,22 +2225,22 @@ SCRIPT JS_OilS_TransferBuildingTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_TransferBuildingLevelTransfer_01
-	StartGap GapID = JS_TransferBuildingLevelTransfer01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_TransferBuildingLevelTransfer01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_TransferBuildingLevelTransfer02 Gapscript = JS_OilS_TransferBuildingLevelTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_TransferBuildingLevelTransfer_02
-	StartGap GapID = JS_TransferBuildingLevelTransfer02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_TransferBuildingLevelTransfer02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_TransferBuildingLevelTransfer01 Gapscript = JS_OilS_TransferBuildingLevelTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_TransferBuildingLevelTransfer_03
-	StartGap GapID = JS_TransferBuildingLevelTransfer03 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_TransferBuildingLevelTransfer03 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_TransferBuildingLevelTransfer04 Gapscript = JS_OilS_TransferBuildingLevelTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_TransferBuildingLevelTransfer_04
-	StartGap GapID = JS_TransferBuildingLevelTransfer04 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_TransferBuildingLevelTransfer04 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_TransferBuildingLevelTransfer03 Gapscript = JS_OilS_TransferBuildingLevelTransfer
 ENDSCRIPT
 
@@ -2362,7 +2252,7 @@ SCRIPT JS_OilS_TransferBuildingLevelTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_TransferBuildingDrop_01
-	StartGap GapID = JS_TransferBuildingDrop01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_TransferBuildingDrop01 flags = GapFlags_Cancel_All
 ENDSCRIPT
 
 SCRIPT JS_OilG_TransferBuildingDrop_02
@@ -2377,12 +2267,12 @@ SCRIPT JS_OilS_TransferBuildingDrop
 ENDSCRIPT
 
 SCRIPT JS_OilG_TransferBuildingBargeDrop_01
-	StartGap GapID = JS_TransferBuildingBargeDrop01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_TransferBuildingBargeDrop01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_TransferBuildingBargeDrop02 Gapscript = JS_OilS_TransferBuildingDrop
 ENDSCRIPT
 
 SCRIPT JS_OilG_TransferBuildingBargeDrop_02
-	StartGap GapID = JS_TransferBuildingBargeDrop02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_TransferBuildingBargeDrop02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_TransferBuildingBargeDrop01 Gapscript = JS_OilS_TransferBuildingDrop
 ENDSCRIPT
 
@@ -2394,12 +2284,12 @@ SCRIPT JS_OilS_TransferBuildingBargeDrop
 ENDSCRIPT
 
 SCRIPT JS_OilG_BowlLevelTransfer_01
-	StartGap GapID = JS_BowlLevelTransfer01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BowlLevelTransfer01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BowlLevelTransfer02 Gapscript = JS_OilS_BowlLevelTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_BowlLevelTransfer_02
-	StartGap GapID = JS_BowlLevelTransfer02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BowlLevelTransfer02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BowlLevelTransfer01 Gapscript = JS_OilS_BowlLevelTransfer
 ENDSCRIPT
 
@@ -2411,12 +2301,12 @@ SCRIPT JS_OilS_BowlLevelTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_BargeTransfer_01
-	StartGap GapID = JS_BargeTransfer01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BargeTransfer01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BargeTransfer02 Gapscript = JS_OilS_BargeTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_BargeTransfer_02
-	StartGap GapID = JS_BargeTransfer02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BargeTransfer02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BargeTransfer01 Gapscript = JS_OilS_BargeTransfer
 ENDSCRIPT
 
@@ -2428,12 +2318,12 @@ SCRIPT JS_OilS_BargeTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_BargeRampGap_01
-	StartGap GapID = JS_BargeRampGap01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BargeRampGap01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BargeRampGap02 Gapscript = JS_OilS_BargeRampGap
 ENDSCRIPT
 
 SCRIPT JS_OilG_BargeRampGap_02
-	StartGap GapID = JS_BargeRampGap02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_BargeRampGap02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_BargeRampGap01 Gapscript = JS_OilS_BargeRampGap
 ENDSCRIPT
 
@@ -2445,12 +2335,12 @@ SCRIPT JS_OilS_BargeRampGap
 ENDSCRIPT
 
 SCRIPT JS_OilG_Bumper2BumperTransfer_01
-	StartGap GapID = JS_Bumper2BumperTransfer01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Bumper2BumperTransfer01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_Bumper2BumperTransfer02 Gapscript = JS_OilS_Bumper2BumperTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_Bumper2BumperTransfer_02
-	StartGap GapID = JS_Bumper2BumperTransfer02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_Bumper2BumperTransfer02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_Bumper2BumperTransfer01 Gapscript = JS_OilS_Bumper2BumperTransfer
 ENDSCRIPT
 
@@ -2462,12 +2352,12 @@ SCRIPT JS_OilS_Bumper2BumperTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_HelipadLevelTransfer_01
-	StartGap GapID = JS_HelipadLevelTransfer01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_HelipadLevelTransfer01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_HelipadLevelTransfer02 Gapscript = JS_OilS_HelipadLevelTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_HelipadLevelTransfer_02
-	StartGap GapID = JS_HelipadLevelTransfer02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_HelipadLevelTransfer02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_HelipadLevelTransfer01 Gapscript = JS_OilS_HelipadLevelTransfer
 ENDSCRIPT
 
@@ -2479,12 +2369,12 @@ SCRIPT JS_OilS_HelipadLevelTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_HelipadBaseTransfer_01
-	StartGap GapID = JS_HelipadBaseTransfer01 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_HelipadBaseTransfer01 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_HelipadBaseTransfer02 Gapscript = JS_OilS_HelipadBaseTransfer
 ENDSCRIPT
 
 SCRIPT JS_OilG_HelipadBaseTransfer_02
-	StartGap GapID = JS_HelipadBaseTransfer02 flags = [ CANCEL_GROUND CANCEL_LIP CANCEL_MANUAL CANCEL_RAIL CANCEL_WALL ]
+	StartGap GapID = JS_HelipadBaseTransfer02 flags = GapFlags_Cancel_All
 	EndGap GapID = JS_HelipadBaseTransfer01 Gapscript = JS_OilS_HelipadBaseTransfer
 ENDSCRIPT
 
@@ -2495,15 +2385,17 @@ SCRIPT JS_OilS_HelipadBaseTransfer
 	EndGap GapID = Score_HelipadBaseTransfer text = "HELIPAD BASE TRANSFER" score = 100
 ENDSCRIPT
 
-SCRIPT JS_OilG_Lip_BargeCabin_01
-	StartGap GapID = JS_Lip_BargeCabin flags = [ CANCEL_MANUAL CANCEL_GROUND ]
+SCRIPT JS_OilG_Lip_Up2L1_01
+	StartGap GapID = JS_Lip_Up2L1 flags = [ CANCEL_MANUAL CANCEL_GROUND ]
 ENDSCRIPT
 
-SCRIPT JS_OilG_Lip_BargeCabin_02
+SCRIPT JS_OilG_Lip_Up2L1_02
 	IF Triggertype [ TRIGGER_LIP_ON ]
-		EndGap GapID = JS_Lip_BargeCabin text = "BARGE CABIN LIP" score = 100
+		EndGap GapID = JS_Lip_Up2L1 text = "UP 2 LEVEL 1 LIP" score = 150
 	ENDIF
 ENDSCRIPT
+
+//lip on the windowsil in the building with windows (transfer building) 
 
 SCRIPT JS_OilG_Lip_TransferWindow_01
 	StartGap GapID = JS_Lip_TransferWindow flags = [ CANCEL_MANUAL CANCEL_GROUND ]
@@ -2515,6 +2407,8 @@ SCRIPT JS_OilG_Lip_TransferWindow_02
 	ENDIF
 ENDSCRIPT
 
+//lip on the upper rail in the building with windows (transfer building) 
+
 SCRIPT JS_OilG_Lip_TransferFan_01
 	StartGap GapID = JS_Lip_TransferFan flags = [ CANCEL_MANUAL CANCEL_GROUND ]
 ENDSCRIPT
@@ -2524,6 +2418,20 @@ SCRIPT JS_OilG_Lip_TransferFan_02
 		EndGap GapID = JS_Lip_TransferFan text = "TRANSFER BUILDING FAN LIP" score = 250
 	ENDIF
 ENDSCRIPT
+
+//lip on the barge's cabin on the lowest level
+
+SCRIPT JS_OilG_Lip_BargeCabin_01
+	StartGap GapID = JS_Lip_BargeCabin flags = [ CANCEL_MANUAL CANCEL_GROUND ]
+ENDSCRIPT
+
+SCRIPT JS_OilG_Lip_BargeCabin_02
+	IF Triggertype [ TRIGGER_LIP_ON ]
+		EndGap GapID = JS_Lip_BargeCabin text = "BARGE CABIN LIP" score = 100
+	ENDIF
+ENDSCRIPT
+
+//lip on helipad rail from upper ramp
 
 SCRIPT JS_OilG_Lip_HelipadLo_01
 	StartGap GapID = JS_Lip_HelipadLo flags = [ CANCEL_MANUAL CANCEL_GROUND ]
@@ -2535,6 +2443,8 @@ SCRIPT JS_OilG_Lip_HelipadLo_02
 	ENDIF
 ENDSCRIPT
 
+//lip on helipad rail from lower ramp
+
 SCRIPT JS_OilG_Lip_HelipadHi_01
 	StartGap GapID = JS_Lip_HelipadHi flags = [ CANCEL_MANUAL CANCEL_GROUND ]
 ENDSCRIPT
@@ -2542,15 +2452,5 @@ ENDSCRIPT
 SCRIPT JS_OilG_Lip_HelipadHi_02
 	IF Triggertype [ TRIGGER_LIP_ON ]
 		EndGap GapID = JS_Lip_HelipadHi text = "HELIPAD HIGH LIP" score = 1000
-	ENDIF
-ENDSCRIPT
-
-SCRIPT JS_OilG_Lip_Up2L1_01
-	StartGap GapID = JS_Lip_Up2L1 flags = [ CANCEL_MANUAL CANCEL_GROUND ]
-ENDSCRIPT
-
-SCRIPT JS_OilG_Lip_Up2L1_02
-	IF Triggertype [ TRIGGER_LIP_ON ]
-		EndGap GapID = JS_Lip_Up2L1 text = "UP 2 LEVEL 1 LIP" score = 150
 	ENDIF
 ENDSCRIPT
