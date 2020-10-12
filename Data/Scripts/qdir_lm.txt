@@ -9,7 +9,6 @@ LevelMod\gameflow.qb
 LevelMod\gamemode.qb
 LevelMod\gameoptions.qb
 LevelMod\helper.qb
-LevelMod\js_oil.qb
 LevelMod\mainmenu.qb
 LevelMod\levels.qb
 LevelMod\gspymenu.qb
