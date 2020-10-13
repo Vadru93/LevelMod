@@ -370,10 +370,7 @@ SCRIPT Load_Level_Func
 	LoadNodeArray <lev_qb>
 	
 	LoadTerrain
-	
 	PrepareLevelFog <...>
-	
-	//this should be uncommented when all def structs are fixed
 	LM_MaybeSetTh2Physics <...>
 
 	IF GotParam startup_func
@@ -416,17 +413,9 @@ SCRIPT LM_MaybeSetTh2Physics
 	endif
 ENDSCRIPT
 
-SCRIPT PrepareLevelFog r = 128 b = 128 b = 128 a = 128 cnear = 12 cfar = 10000
-	//IF ClipPlaneEnabled
-	//	SetupForClipPlane
-	//ELSE
-	//	SetBackgroundColor <...>
-	//	SetClippingDistances { near = <cnear> far = <cfar> }
-	//ENDIF
-	
+SCRIPT PrepareLevelFog r = 128 b = 128 b = 128 a = 128 cnear = 12 cfar = 30000
 	SetBackgroundColor <...>
-	
-	//IF ClipPlaneEnabled
+
 	IF IsOptionOn LM_GameOption_bFog
 		EnableFog
 		SetClippingDistances { near = 12 far = 2500 }
@@ -439,12 +428,16 @@ SCRIPT PrepareLevelFog r = 128 b = 128 b = 128 a = 128 cnear = 12 cfar = 10000
 ENDSCRIPT
 
 
-OnlineModes = { 
+online_modes = { 
 	supports_ctf 
 	supports_own 
 	supports_bball 
 }
 
+default_clipping_params = { 
+	cnear = 12
+	cfar = 30000 
+}
 
 //=============================Master Level List==============================
 
@@ -459,7 +452,7 @@ Def_Ware = {
 	levelnum = LevelNum_Warehouse	
 	unlock_flag = LEVEL_UNLOCKED_WAREHOUSE 
 
-	th1_level regular_level NoCareer OnlineModes ignore_th2_physics
+	th1_level regular_level NoCareer online_modes ignore_th2_physics
 
 	lev_bsp = "levels\ware\ware.bsp"
 	lev_qb = "levels\ware\ware.qb"
@@ -486,7 +479,7 @@ Def_Sc1 = {
 	level_id = sc1_id 
 	levelnum = LevelNum_New
 
-	th1_level regular_level NoCareer OnlineModes
+	th1_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_th1\sc1\sc1.bsp" 
 	lev_sky = "levels_th1\sc1\sc1_sky.bsp" 
@@ -512,7 +505,7 @@ Def_Mall = {
 	level_id = mall_id 
 	levelnum = LevelNum_New
 
-	th1_level regular_level NoCareer OnlineModes
+	th1_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_th1\mall\mall.bsp" 
 	lev_sky = "levels_th1\mall\mall_sky.bsp" 
@@ -538,7 +531,7 @@ Def_Vans = {
 	level_id = vans_id 
 	levelnum = LevelNum_New
 
-	th1_level regular_level NoCareer OnlineModes
+	th1_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_th1\vans\vans.bsp" 
 	lev_sky = "levels_th1\vans\vans_sky.bsp" 
@@ -564,7 +557,7 @@ Def_Down = {
 	level_id = down_id 
 	levelnum = LevelNum_New
 
-	th1_level regular_level NoCareer OnlineModes
+	th1_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_th1\down\down.bsp" 
 	lev_sky = "levels_th1\down\down_sky.bsp" 
@@ -591,7 +584,7 @@ Def_Jam = {
 	level_id = jam_id 
 	levelnum = LevelNum_New
 
-	th1_level regular_level NoCareer OnlineModes
+	th1_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_th1\jam\jam.bsp" 
 	lev_sky = "levels_th1\jam\jam_sky.bsp" 
@@ -619,7 +612,7 @@ Def_Burn = {
 	levelnum = LevelNum_Burnside
 	unlock_flag = LEVEL_UNLOCKED_BURNSIDE
 
-	th1_level regular_level NoCareer OnlineModes ignore_th2_physics
+	th1_level regular_level NoCareer online_modes ignore_th2_physics
 
 	lev_bsp = "levels\burn\burn.bsp" 
 	lev_sky = "levels\burn\burn_sky.bsp" 
@@ -647,7 +640,7 @@ Def_SF1 = {
 	level_id = sf1_id 
 	levelnum = LevelNum_New
 
-	th1_level regular_level NoCareer OnlineModes ignore_th2_physics
+	th1_level regular_level NoCareer online_modes ignore_th2_physics
 
 	lev_bsp = "levels_th1\sf1\sf1.bsp" 
 	lev_sky = "levels_th1\sf1\sf1_sky.bsp" 
@@ -674,7 +667,7 @@ Def_Ros = {
 	levelnum = LevelNum_Roswell
 	unlock_flag = LEVEL_UNLOCKED_ROSWELL
 
-	th1_level regular_level NoCareer OnlineModes ignore_th2_physics
+	th1_level regular_level NoCareer online_modes ignore_th2_physics
 
 	lev_bsp = "levels\ros\ros.bsp" 
 	lev_sky = "levels\ros\ros_sky.bsp" 
@@ -702,7 +695,7 @@ Def_Han = {
 	location = "Mullet Falls MT"
 	level_id = han_id 
 	levelnum = LevelNum_New
-	NoCareer th2_level regular_level OnlineModes
+	NoCareer th2_level regular_level online_modes
 	
 	lev_bsp = "levels_th2\Han\han.bsp" 
 	lev_sky = "levels_th2\han\han_sky.bsp" 
@@ -728,7 +721,7 @@ Def_Sc2 = {
 	location = "California"
 	level_id = sc2_id 
 	levelnum = LevelNum_New
-	NoCareer th2_level regular_level OnlineModes
+	NoCareer th2_level regular_level online_modes
 	
 	lev_bsp = "levels_th2\sc2\sc2.bsp"
 	lev_sky = "levels_th2\sc2\sc2_sky.bsp" 
@@ -754,7 +747,7 @@ Def_Mar = {
 	location = "France"
 	level_id = mar_id 
 	levelnum = LevelNum_New
-	NoCareer th2_level regular_level OnlineModes
+	NoCareer th2_level regular_level online_modes
 	
 	lev_bsp = "levels_th2\mar\mar.bsp"
 	lev_sky = "levels_th2\mar\mar_sky.bsp" 
@@ -780,7 +773,7 @@ Def_NY1 = {
 	location = "NY City"
 	level_id = ny1_id 
 	levelnum = LevelNum_New
-	NoCareer th2_level regular_level OnlineModes
+	NoCareer th2_level regular_level online_modes
 	
 	lev_bsp = "levels_th2\ny\ny.bsp" 
 	lev_sky = "levels_th2\ny\ny_Sky.bsp" 
@@ -806,7 +799,7 @@ Def_Ven = {
 	location = "California"
 	level_id = ven_id 
 	levelnum = LevelNum_New
-	NoCareer th2_level regular_level OnlineModes
+	NoCareer th2_level regular_level online_modes
 	
 	lev_bsp = "levels_th2\ven\ven.bsp" 
 	lev_sky = "levels_th2\ven\ven_Sky.bsp" 
@@ -832,7 +825,7 @@ Def_SSV = {
 	location = "Ventura"
 	level_id = ssv_id 
 	levelnum = LevelNum_New
-	NoCareer th2_level regular_level OnlineModes
+	NoCareer th2_level regular_level online_modes
 	
 	lev_bsp = "levels_th2\ssv\ssv.bsp" 
 	lev_sky = "levels_th2\ssv\ssv_Sky.bsp" 
@@ -858,7 +851,7 @@ Def_Ph = {
 	location = "Pennsylvania"
 	level_id = ph_id 
 	levelnum = LevelNum_New
-	NoCareer th2_level regular_level OnlineModes
+	NoCareer th2_level regular_level online_modes
 	
 	lev_bsp = "levels_th2\ph\ph.bsp" 
 	lev_sky = "levels_th2\ph\ph_Sky.bsp" 
@@ -884,7 +877,7 @@ Def_Bul = {
 	location = "New Mexico"
 	level_id = bul_id 
 	levelnum = LevelNum_New
-	NoCareer th2_level regular_level OnlineModes
+	NoCareer th2_level regular_level online_modes
 	
 	lev_bsp = "levels_th2\bul\bul.bsp" 
 	lev_sky = "levels_th2\bul\bul_Sky.bsp" 
@@ -910,7 +903,7 @@ Def_Hvn = {
 	location = "Paradise"
 	level_id = hvn_id 
 	levelnum = LevelNum_New
-	NoCareer th2_level regular_level OnlineModes
+	NoCareer th2_level regular_level online_modes
 	
 	lev_bsp = "levels_th2\hvn\hvn.bsp" 
 	lev_sky = "levels_th2\hvn\hvn_Sky.bsp" 
@@ -936,7 +929,7 @@ Def_Drop = {
 	location = "Hawaii"
 	level_id = drop_id
 	levelnum = LevelNum_New
-	NoCareer th2_level regular_level OnlineModes
+	NoCareer th2_level regular_level online_modes
 	
 	lev_bsp = "levels_th2\Drop\Drop.bsp" 
 	lev_sky = "levels_th2\Drop\Drop_sky.bsp" 
@@ -965,7 +958,7 @@ Def_Cons = {
 	levelnum = LevelNum_New
 	level_name = "Construction Site"
 	
-	NoCareer th2x_level regular_level OnlineModes
+	NoCareer th2x_level regular_level online_modes
 	
 	lev_bsp = "levels_th2\cons\cons.bsp" 
 	lev_sky = "levels_th2\cons\cons_sky.bsp" 
@@ -997,7 +990,7 @@ Def_Club = {
 	lev_amb = "ambience\thps2\club"
 	loadscr = "images\load\th2_club.png"
 	
-	NoCareer th2x_level regular_level OnlineModes
+	NoCareer th2x_level regular_level online_modes
 	
 	r = 0 g = 0 b = 0 a = 0 
 	cnear = 12 cfar = 20000 
@@ -1021,7 +1014,7 @@ Def_Sway = {
 	lev_amb = "ambience\thps2\sway"
 	loadscr = "images\load\th2_sway.png"
 	
-	NoCareer th2x_level regular_level OnlineModes
+	NoCareer th2x_level regular_level online_modes
 	
 	r = 0 g = 0 b = 0 a = 0 
 	cnear = 12 cfar = 20000 
@@ -1046,7 +1039,7 @@ Def_Flor = {
 	lev_amb = "ambience\thps2\flor"
 	loadscr = "images\load\th2_flor.png"
 	
-	NoCareer th2x_level regular_level OnlineModes 
+	NoCareer th2x_level regular_level online_modes 
 	
 	r = 149 g = 192 b = 232 a = 0 
 	cnear = 12 cfar = 20000 
@@ -1069,7 +1062,7 @@ Def_Sky = {
 	lev_amb = "ambience\thps2\sky"
 	loadscr = "images\load\th2_sky.png"
 	
-	NoCareer th2x_level regular_level OnlineModes
+	NoCareer th2x_level regular_level online_modes
 
 	r = 32 g = 36 b = 63 a = 0 
 	cnear = 12 cfar = 20000 
@@ -1092,7 +1085,7 @@ Def_Foun = {
 	
 	lev_lights = SetUpFoundryLights
 	
-	regular_level th3_level OnlineModes
+	regular_level th3_level online_modes
 	
 	once_on_startup = StartRunScript 
 	once_on_exit = EndRunScript 
@@ -1123,7 +1116,7 @@ Def_Can = {
 	location = "Canada"
 	lev_lights = SetUpCanadaLights
 	
-	regular_level th3_level OnlineModes
+	regular_level th3_level online_modes
 	
 	once_on_startup = StartRunScript 
 	once_on_exit = EndRunScript 
@@ -1157,7 +1150,7 @@ Def_Rio = {
 	
 	lev_lights = SetUpRioDeJaneiroLights
 	
-	regular_level th3_level OnlineModes competition
+	regular_level th3_level online_modes competition
 	
 	once_on_startup = StartRunScript 
 	once_on_exit = EndRunScript 
@@ -1192,7 +1185,7 @@ Def_Sub = {
 	
 	lev_lights = SetUpSuburbiaLights
 	
-	regular_level th3_level OnlineModes 
+	regular_level th3_level online_modes 
 	
 	once_on_startup = StartRunScript 
 	once_on_exit = EndRunScript 
@@ -1224,7 +1217,7 @@ Def_Ap = {
 	
 	lev_lights = SetUpAirportLights
 	
-	regular_level th3_level OnlineModes 
+	regular_level th3_level online_modes 
 	
 	once_on_startup = StartRunScript 
 	once_on_exit = EndRunScript 
@@ -1257,7 +1250,7 @@ Def_Trn = {
 	level_id = Trn_id 
 	levelnum = Levelnum_New
 
-	th4_level regular_level NoCareer OnlineModes
+	th4_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_th4\Trn\Trn.bsp" 
 	lev_sky = "levels_th4\Trn\Trn_sky.bsp" 
@@ -1283,7 +1276,7 @@ Def_Sch = {
 	level_id = college_id 
 	levelnum = Levelnum_New
 
-	th4_level regular_level NoCareer OnlineModes
+	th4_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_th4\Sch\Sch.bsp" 
 	lev_sky = "levels_th4\Sch\Sch_sky.bsp" 
@@ -1292,7 +1285,7 @@ Def_Sch = {
 	loadscr = "images\load\th4_col.png"
 
 	r = 140 g = 168 b = 228 a = 0 
-	cnear = 12 cfar = 30000
+	default_clipping_params
 
 	load_script = Load_Sch
 } 
@@ -1309,7 +1302,7 @@ Def_SF2 = {
 	level_id = sanfran2_id
 	levelnum = Levelnum_New
 
-	th4_level regular_level NoCareer OnlineModes
+	th4_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_th4\Sf2\Sf2.bsp"
 	lev_sky = "levels_th4\Sf2\Sf2_sky.bsp"
@@ -1318,7 +1311,7 @@ Def_SF2 = {
 	loadscr = "images\load\th4_sf2.png"
 
 	r = 179 g = 184 b = 192 a = 0 
-	cnear = 12 cfar = 30000
+	default_clipping_params
 
 	load_script = Load_SF2
 }
@@ -1335,7 +1328,7 @@ Def_Alc = {
 	level_id = alcatraz_id
 	levelnum = Levelnum_New
 
-	th4_level regular_level NoCareer OnlineModes
+	th4_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_th4\alc\alc.bsp"
 	lev_sky = "levels_th4\alc\alc_sky.bsp"
@@ -1344,7 +1337,7 @@ Def_Alc = {
 	loadscr = "images\load\th4_alc.png"
 
 	r = 179 g = 184 b = 192 a = 0 
-	cnear = 12 cfar = 30000
+	default_clipping_params
 
 	load_script = Load_Alc
 }
@@ -1361,7 +1354,7 @@ Def_Kon = {
 	level_id = kona_id
 	levelnum = Levelnum_New
 
-	th4_level regular_level NoCareer OnlineModes
+	th4_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_th4\Kon\Kon.bsp"
 	lev_sky = "levels_th4\Kon\Kon_sky.bsp"
@@ -1370,7 +1363,7 @@ Def_Kon = {
 	loadscr = "images\load\th4_Kon.png"
 
 	r = 137 g = 163 b = 186 a = 0 
-	cnear = 12 cfar = 30000
+	default_clipping_params
 
 	load_script = Load_Kon
 }
@@ -1387,7 +1380,7 @@ Def_Jnk = {
 	level_id = shipyard_id
 	levelnum = Levelnum_New
 
-	th4_level regular_level NoCareer OnlineModes
+	th4_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_th4\Jnk\Jnk.bsp"
 	lev_sky = "levels_th4\Jnk\Jnk_sky.bsp"
@@ -1396,7 +1389,7 @@ Def_Jnk = {
 	loadscr = "images\load\th4_Jnk.png"
 
 	r = 112 g = 145 b = 172 a = 0 
-	cnear = 12 cfar = 30000
+	default_clipping_params
 
 	load_script = Load_Jnk
 }
@@ -1413,7 +1406,7 @@ Def_Lon = {
 	level_id = london_id
 	levelnum = Levelnum_New
 
-	th4_level regular_level NoCareer OnlineModes
+	th4_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_th4\Lon\Lon.bsp"
 	lev_sky = "levels_th4\Lon\Lon_sky.bsp"
@@ -1422,7 +1415,7 @@ Def_Lon = {
 	loadscr = "images\load\th4_Lon.png"
 
 	r = 130 g = 154 b = 182 a = 0 
-	cnear = 12 cfar = 30000
+	default_clipping_params
 
 	load_script = Load_Lon
 }
@@ -1439,7 +1432,7 @@ Def_Zoo = {
 	level_id = zoo_id
 	levelnum = Levelnum_New
 
-	th4_level regular_level NoCareer OnlineModes
+	th4_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_th4\Zoo\Zoo.bsp"
 	lev_sky = "levels_th4\Zoo\Zoo_sky.bsp"
@@ -1448,7 +1441,7 @@ Def_Zoo = {
 	loadscr = "images\load\th4_Zoo.png"
 
 	r = 130 g = 154 b = 182 a = 0 
-	cnear = 12 cfar = 30000
+	default_clipping_params
 
 	load_script = Load_Zoo
 }
@@ -1465,7 +1458,7 @@ Def_Cnv = {
 	level_id = carnival_id
 	levelnum = Levelnum_New
 
-	th4_level regular_level NoCareer OnlineModes
+	th4_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_th4\Cnv\Cnv.bsp"
 	lev_sky = "levels_th4\Cnv\Cnv_sky.bsp"
@@ -1474,7 +1467,7 @@ Def_Cnv = {
 	loadscr = "images\load\th4_Cnv.png"
 
 	r = 180 g = 146 b = 119 a = 0 
-	cnear = 12 cfar = 30000
+	default_clipping_params
 
 	load_script = Load_Cnv
 }
@@ -1491,7 +1484,7 @@ Def_Hof = {
 	level_id = hoffman_id
 	levelnum = Levelnum_New
 
-	th4_level regular_level NoCareer OnlineModes
+	th4_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_th4\Hof\Hof.bsp"
 	lev_sky = "levels_th4\Hof\Hof_sky.bsp"
@@ -1500,7 +1493,7 @@ Def_Hof = {
 	loadscr = "images\load\th4_Hof.png"
 
 	r = 165 g = 180 b = 202 a = 0 
-	cnear = 12 cfar = 30000
+	default_clipping_params
 
 	load_script = Load_Hof
 }
@@ -1517,7 +1510,7 @@ Def_Mot = {
 	level_id = motox_id
 	levelnum = Levelnum_New
 
-	th4_level regular_level NoCareer OnlineModes
+	th4_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_th4\Mot\Mot.bsp"
 	lev_sky = "levels_th4\Mot\Mot_sky.bsp"
@@ -1526,7 +1519,7 @@ Def_Mot = {
 	loadscr = "images\load\th4_Mot.png"
 
 	r = 165 g = 180 b = 202 a = 0 
-	cnear = 12 cfar = 30000
+	default_clipping_params
 
 	load_script = Load_Mot
 }
@@ -1534,8 +1527,6 @@ Def_Mot = {
 SCRIPT Load_Mot
 	Load_Level_Func { Def_Mot }
 ENDSCRIPT
-
-
 
 //=========================================THUG1===============================================
 
@@ -1547,7 +1538,7 @@ Def_NJ = {
 	level_id = jersey_id
 	levelnum = Levelnum_New
 
-	ug1_level regular_level NoCareer OnlineModes
+	ug1_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_ug1\nj\nj.bsp" 
 	lev_sky = "levels_ug1\nj\nj_sky.bsp" 
@@ -1556,7 +1547,7 @@ Def_NJ = {
 	loadscr = "images\load\ug1_nj.png"
 
 	r = 165 g = 180 b = 202 a = 0 
-	cnear = 12 cfar = 20000
+	default_clipping_params
 
 	load_script = Load_NJ
 }
@@ -1573,7 +1564,7 @@ Def_NY = {
 	level_id = manhattan_id
 	levelnum = Levelnum_New
 
-	ug1_level regular_level NoCareer OnlineModes
+	ug1_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_ug1\ny\ny.bsp" 
 	lev_sky = "levels_ug1\ny\ny_sky.bsp" 
@@ -1582,7 +1573,7 @@ Def_NY = {
 	loadscr = "images\load\ug1_ny.png"
 
 	r = 165 g = 180 b = 202 a = 0 
-	cnear = 12 cfar = 20000
+	default_clipping_params
 
 	load_script = Load_NY
 }
@@ -1599,7 +1590,7 @@ Def_FL = {
 	level_id = tampa_id
 	levelnum = Levelnum_New
 
-	ug1_level regular_level NoCareer OnlineModes
+	ug1_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_ug1\fl\fl.bsp" 
 	lev_sky = "levels_ug1\fl\fl_sky.bsp" 
@@ -1608,7 +1599,7 @@ Def_FL = {
 	loadscr = "images\load\ug1_fl.png"
 
 	r = 165 g = 180 b = 202 a = 0 
-	cnear = 12 cfar = 20000
+	default_clipping_params
 
 	load_script = Load_FL
 }
@@ -1625,7 +1616,7 @@ Def_SD = {
 	level_id = sandiego_id
 	levelnum = Levelnum_New
 
-	ug1_level regular_level NoCareer OnlineModes
+	ug1_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_ug1\sd\sd.bsp" 
 	lev_sky = "levels_ug1\sd\sd_sky.bsp" 
@@ -1634,7 +1625,7 @@ Def_SD = {
 	loadscr = "images\load\ug1_sd.png"
 
 	r = 165 g = 180 b = 202 a = 0 
-	cnear = 12 cfar = 20000
+	default_clipping_params
 
 	load_script = Load_SD
 }
@@ -1642,42 +1633,134 @@ SCRIPT Load_SD
 	Load_Level_Func { Def_SD }
 ENDSCRIPT
 
+//THUG1 HAWAII
+
+Def_HI = { 
+	level_name = "Hawaii" 
+	location = "USA"
+	level_id = hawaii_id
+	levelnum = Levelnum_New
+
+	ug1_level regular_level NoCareer online_modes
+
+	lev_bsp = "levels_ug1\hi\hi.bsp" 
+	lev_sky = "levels_ug1\hi\hi_sky.bsp" 
+	lev_qb = "levels_ug1\hi\hi.qb" 
+	lev_amb = "ambience\thug1\hi"
+	loadscr = "images\load\ug1_hi.png"
+
+	r = 165 g = 180 b = 202 a = 0 
+	default_clipping_params
+
+	load_script = Load_HI
+}
 SCRIPT Load_HI
-	AddMusicTrack "ambience\thug1\hi"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug1\hi\hi.bsp" lev_sky = "levels_ug1\hi\hi_sky.bsp" lev_qb = "levels_ug1\hi\hi.qb" loadscr = "images\load\ug1_hi.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
+	Load_Level_Func { Def_HI }
 ENDSCRIPT
+
+//THUG1 VANCOUVER
+
+Def_VC = { 
+	level_name = "Vancouver" 
+	location = "Canada"
+	level_id = vancouver_id
+	levelnum = Levelnum_New
+
+	ug1_level regular_level NoCareer online_modes
+
+	lev_bsp = "levels_ug1\vc\vc.bsp" 
+	lev_sky = "levels_ug1\vc\vc_sky.bsp" 
+	lev_qb = "levels_ug1\vc\vc.qb" 
+	lev_amb = "ambience\thug1\vc"
+	loadscr = "images\load\ug1_vc.png"
+
+	r = 165 g = 180 b = 202 a = 0 
+	default_clipping_params
+
+	load_script = Load_VC
+}
 
 SCRIPT Load_VC
-	AddMusicTrack "ambience\thug1\vc"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug1\vc\vc.bsp" lev_sky = "levels_ug1\vc\vc_sky.bsp" lev_qb = "levels_ug1\vc\vc.qb" loadscr = "images\load\ug1_vc.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
+	Load_Level_Func { Def_VC }
 ENDSCRIPT
+
+//THUG1 SLAM CITY JAM
+
+Def_SJ = { 
+	level_name = "Slam City Jam" 
+	location = "Canada"
+	level_id = slam_id
+	levelnum = Levelnum_New
+
+	ug1_level regular_level NoCareer online_modes
+
+	lev_bsp = "levels_ug1\sj\sj.bsp" 
+	lev_sky = "levels_ug1\sj\sj_sky.bsp" 
+	lev_qb = "levels_ug1\sj\sj.qb" 
+	lev_amb = "ambience\thug1\sj"
+	loadscr = "images\load\ug1_sj.png"
+
+	r = 0 g = 0 b = 0 a = 0 
+	default_clipping_params
+
+	load_script = Load_SJ
+}
 
 SCRIPT Load_SJ
-	AddMusicTrack "ambience\thug1\sj"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug1\sj\sj.bsp" lev_sky = "levels_ug1\sj\sj_sky.bsp" lev_qb = "levels_ug1\sj\sj.qb" loadscr = "images\load\ug1_sj.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
+	Load_Level_Func { Def_SJ }
 ENDSCRIPT
+
+//THUG1 MOSCOW
+
+Def_RU = { 
+	level_name = "Moscow" 
+	location = "Russia"
+	level_id = moscow_id
+	levelnum = Levelnum_New
+
+	ug1_level regular_level NoCareer online_modes
+
+	lev_bsp = "levels_ug1\ru\ru.bsp" 
+	lev_sky = "levels_ug1\ru\ru_sky.bsp" 
+	lev_qb = "levels_ug1\ru\ru.qb" 
+	lev_amb = "ambience\thug1\ru"
+	loadscr = "images\load\ug1_ru.png"
+
+	r = 165 g = 180 b = 202 a = 0 
+	default_clipping_params
+
+	load_script = Load_RU
+}
 
 SCRIPT Load_RU
-	AddMusicTrack "ambience\thug1\ru"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug1\ru\ru.bsp" lev_sky = "levels_ug1\ru\ru_sky.bsp" lev_qb = "levels_ug1\ru\ru.qb" loadscr = "images\load\ug1_ru.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
+	Load_Level_Func { Def_RU }
 ENDSCRIPT
+
+//THUG1 HOTTER THAN HELL
+
+Def_SE = { 
+	level_name = "Hotter Than Hell" 
+	location = "???"
+	level_id = hotter_id
+	levelnum = Levelnum_New
+
+	ug1_level regular_level NoCareer online_modes
+
+	lev_bsp = "levels_ug1\se\se.bsp" 
+	lev_sky = "levels_ug1\se\se_sky.bsp" 
+	lev_qb = "levels_ug1\se\se.qb" 
+	lev_amb = "ambience\thug1\se"
+	loadscr = "images\load\ug1_se.png"
+
+	r = 165 g = 180 b = 202 a = 0 
+	default_clipping_params
+
+	load_script = Load_SE
+}
 
 SCRIPT Load_SE
-	AddMusicTrack "ambience\thug1\se"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug1\se\se.bsp" lev_sky = "levels_ug1\se\se_sky.bsp" lev_qb = "levels_ug1\se\se.qb" loadscr = "images\load\ug1_se.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
+	Load_Level_Func { Def_SE }
 ENDSCRIPT
-
-
 
 master_level_list = [
 	//THPS3
@@ -1706,12 +1789,7 @@ master_level_list = [
 	{ Def_Trn } { Def_Sch } { Def_Sf2 } { Def_Alc } { Def_Kon } { Def_Jnk } { Def_Lon } { Def_Zoo } { Def_Cnv } { Def_Hof } { Def_Mot }
 
 	//THUG
-	{ Def_NJ } { Def_NY } { Def_FL } { Def_SD }
-	{ level_name = "Hawaii" load_script = Load_HI level_id = hawaii_id NoCareer regular_level ug1_level supports_ctf supports_own supports_bball }
-	{ level_name = "Vancouver" load_script = Load_VC level_id = vancouver_id NoCareer regular_level ug1_level supports_ctf supports_own supports_bball }
-	{ level_name = "Slam City Jam" load_script = Load_SJ level_id = slam_id NoCareer regular_level ug1_level supports_ctf supports_own supports_bball }
-	{ level_name = "Moscow" load_script = Load_RU level_id = moscow_id NoCareer regular_level ug1_level supports_ctf supports_own supports_bball }
-	{ level_name = "Hotter Than Hell" load_script = Load_SE level_id = hotter_id NoCareer regular_level ug1_level supports_ctf supports_own supports_bball }
+	{ Def_NJ } { Def_NY } { Def_FL } { Def_SD } { Def_HI } { Def_VC } { Def_SJ } { Def_RU } { Def_SE } 
 
 	//THUG2
 	{ level_name = "Boston" load_script = Load_BO_ug2 level_id = BO_id NoCareer regular_level ug2_level supports_ctf supports_own supports_bball }
