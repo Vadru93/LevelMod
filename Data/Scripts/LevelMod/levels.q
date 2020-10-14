@@ -1510,7 +1510,7 @@ Def_Mot = {
 	level_id = motox_id
 	levelnum = Levelnum_New
 
-	th4_level regular_level NoCareer online_modes
+	misc_level regular_level NoCareer online_modes
 
 	lev_bsp = "levels_th4\Mot\Mot.bsp"
 	lev_sky = "levels_th4\Mot\Mot_sky.bsp"
@@ -1770,7 +1770,7 @@ master_level_list = [
 	{ level_name = "Tokyo" load_script = Load_Tok level_id = tokyo_id regular_level th3_level once_on_startup = StartRunScript once_on_exit = EndRunScript unlock_flag = LEVEL_UNLOCKED_TOKYO supports_ctf supports_own supports_bball }
 	{ level_name = "Cruise Ship" load_script = Load_Shp level_id = ship_id regular_level th3_level once_on_startup = StartRunScript once_on_exit = EndRunScript unlock_flag = LEVEL_UNLOCKED_SHIP special_flag = SPECIAL_HAS_SEEN_SHIP supports_ctf supports_own supports_bball }
 	{ level_name = "Oil Rig" load_script = Load_Oil level_id = oil_id NoCareer regular_level th3_level supports_ctf supports_own supports_bball }
-	{ level_name = "Paris" load_script = Load_Roof level_id = rooftops_id NoCareer regular_level th3_level supports_ctf supports_own supports_bball }
+	{ level_name = "Paris" load_script = Load_Roof level_id = rooftops_id NoCareer regular_level misc_level supports_ctf supports_own supports_bball }
 	{ level_name = "Play custom park" load_script = custom_park level_id = custom_park debug_level }
 	{ level_name = "Tutorials" load_script = Load_Tut level_id = tutorials_id NoCareer once_on_startup = CPF_Tut_LoadingScript }
 	{ level_name = "Foo" load_script = Load_Foo level_id = foo_id debug_level }
@@ -1786,7 +1786,7 @@ master_level_list = [
 	{ Def_Club } { Def_Cons } { Def_Flor } { Def_Sway } { Def_Sky }
 
 	//THPS4	
-	{ Def_Trn } { Def_Sch } { Def_Sf2 } { Def_Alc } { Def_Kon } { Def_Jnk } { Def_Lon } { Def_Zoo } { Def_Cnv } { Def_Hof } { Def_Mot }
+	{ Def_Sch } { Def_Sf2 } { Def_Alc } { Def_Kon } { Def_Jnk } { Def_Lon } { Def_Zoo } { Def_Cnv } { Def_Hof } { Def_Mot } { Def_Trn } 
 
 	//THUG
 	{ Def_NJ } { Def_NY } { Def_FL } { Def_SD } { Def_HI } { Def_VC } { Def_SJ } { Def_RU } { Def_SE } 

@@ -634,6 +634,7 @@ SCRIPT CreateNewChangeLevelMenu
 			{ gamelist_shared_options text = "THPS4" params = { mask = th4_level } }
 			{ gamelist_shared_options text = "THUG" params = { mask = ug1_level } }
 			{ gamelist_shared_options text = "THUG2" params = { mask = ug2_level } } 
+			{ gamelist_shared_options text = "MISC" params = { mask = misc_level } } 
 		] 
 	}
 	AttachChild parent = lmc_level_menu_container child = GameList
