@@ -8,6 +8,12 @@
 
 #define p_trigger_node *(DWORD*)0x004003CB
 
+#define p_current_renderstate(x) *(DWORD*)(x * 4 + 0x00971948)
+#define p_target_renderstate(x) *(DWORD*)(x * 4 + 0x00971C18)
+
+#define p_current_texstage(x) *(DWORD*)(x * 4 + 0x00971EE8)
+#define p_target_texstage(x) *(DWORD*)(x * 4 + 0x009712C8)
+
 //--------Spine and Acid--------
 enum TransferType
 {
@@ -52,6 +58,13 @@ namespace Slerp
     extern float speed;
 };
 //--------Spine and Acid--------
+
+namespace Gfx
+{
+    extern __restrict LPDIRECT3DDEVICE9 pDevice;
+    extern float uv_tiling_threshold;
+    extern DWORD frameCounter;
+};
 
 //--------XINPUT--------
 namespace XINPUT
@@ -115,6 +128,8 @@ bool AddOption(CStruct* pStruct, CScript* pScript);
 
 bool OnPostLevelLoad(CStruct* pStruct, CScript* pScript);
 bool ChangeLocalScript(CStruct* pStruct, CScript* pScript);
+
+bool NewShatterScript(CStruct* pStruct, CScript* pScript);
 //--------Functions callable from script--------
 
 //--------Functions NOT callable from script--------
@@ -203,6 +218,8 @@ void Obj_MoveToNode_Naked();
 void Obj_FollowPathLinked_Naked();
 void BouncyObj_Go_Naked();
 void BouncyObj_OnBounce_Naked();
+
+void Render_Naked();
 
 //depricated
 void TestForAcid_naked();

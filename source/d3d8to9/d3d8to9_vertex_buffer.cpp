@@ -99,7 +99,7 @@ D3DRESOURCETYPE STDMETHODCALLTYPE Direct3DVertexBuffer8::GetType()
 
 HRESULT STDMETHODCALLTYPE Direct3DVertexBuffer8::Lock(UINT OffsetToLock, UINT SizeToLock, BYTE** ppbData, DWORD Flags)
 {
-    if ((Flags & D3DLOCK_DISCARD) != 0)
+    /*if ((Flags & D3DLOCK_DISCARD) != 0)
     {
         D3DVERTEXBUFFER_DESC desc;
         ProxyInterface->GetDesc(&desc);
@@ -108,7 +108,7 @@ HRESULT STDMETHODCALLTYPE Direct3DVertexBuffer8::Lock(UINT OffsetToLock, UINT Si
         {
             Flags ^= D3DLOCK_DISCARD;
         }
-    }
+    }*/
 
     return ProxyInterface->Lock(OffsetToLock, SizeToLock, reinterpret_cast<void**>(ppbData), Flags);
 }

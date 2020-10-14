@@ -204,7 +204,7 @@ bool IsOptionOverriden(CStruct* pStruct, CScript* pScript)
                         pParam->Type = QBKeyHeader::QBKeyType::LOCAL;
                         pParam->QBkey = Checksum("option_id");
                         char name[128] = "";
-                        sprintf(name, "%s_id", FindChecksumName(header->Data));
+                        sprintf(name, "%s_id", FindChecksumName(header->Data, false));
                         _printf("Generated: %s\n", name);
                         pParam->Data = Checksum(name);
                         pParam->NextHeader = NULL;
@@ -217,7 +217,7 @@ bool IsOptionOverriden(CStruct* pStruct, CScript* pScript)
             else
             {
                 //Should not happen
-                _printf(__FUNCTION__ " Couldn't find option %s\nRemember to add the option the the list\nCheck settings.q for more info\n", header->Data);
+                _printf(__FUNCTION__ " Couldn't find option %s\nRemember to add the option the the list\nCheck settings.q for more info\n", FindChecksumName(header->Data));
             }
 
         }
@@ -260,7 +260,7 @@ bool IsOptionOn(CStruct* pStruct, CScript* pScript)
             else
             {
                 //Should not happen
-                _printf(__FUNCTION__ " Couldn't find option %s\nRemember to add the option the the list\nCheck settings.q for more info\n", header->Data);
+                _printf(__FUNCTION__ " Couldn't find option %s\nRemember to add the option the the list\nCheck settings.q for more info\n", FindChecksumName(header->Data));
             }
 
         }
@@ -400,8 +400,8 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
             return;
         }
 
-        CreateConsole();
-        _printf("Welcome to DebugMode\n");
+        /*CreateConsole();
+        _printf("Welcome to DebugMode\n");*/
 
         //Check if qbTable exist, if it doesn't exists
         //new Script() will generate qbTable from all .qb files found in qdir
@@ -662,7 +662,7 @@ bool GetParamScript(CStruct* pStruct, CScript* pScript)
     {
         if (header->Type == QBKeyHeader::LOCAL)
         {
-            _printf("Searching for: %s(%X)\n", FindChecksumName(header->Data), header->Data);
+            _printf("Searching for: %s)\n", FindChecksumName(header->Data));
             CStructHeader* param = pScript->GetParam(header->Data);
             if (param)
             {
@@ -746,11 +746,11 @@ bool SetOption(CStruct* pStruct, CScript* pScript)
                 CStructHeader* value = NULL;
                 if (pStruct->GetStruct(Checksum("value"), &value))
                 {
-                    char* ok = FindChecksumName(header->Data);
+                    char* ok = FindChecksumName(header->Data, false);
                     if (!it->second.override || !it->second.Overriden())
                     {
                         it->second.value = value->value.i;
-                        _printf("Setting option %s to %d\n", ok, header->Data, it->second.value);
+                        _printf("Setting option %s to %d\n", ok, it->second.value);
                         AddOption(ok, it->second.value, true);
                     }
                     else
@@ -759,7 +759,7 @@ bool SetOption(CStruct* pStruct, CScript* pScript)
                 }
                 else
                 {
-                    char* ok = FindChecksumName(header->Data);
+                    char* ok = FindChecksumName(header->Data, false);
                     static char tempChar[MAX_PATH + 1] = "";
                     static char id[MAX_PATH + 1] = "";
                     sprintf(id, "%s_id", ok);
@@ -770,7 +770,7 @@ bool SetOption(CStruct* pStruct, CScript* pScript)
                         if (!it->second.override || !it->second.Overriden())
                         {
                             it->second.value = value;//header->NextHeader->value.i;
-                            _printf("Setting option %s to %d\n", ok, header->Data, it->second);
+                            _printf("Setting option %s to %d\n", ok, it->second);
 
                             AddOption(ok, it->second.value, true);
                         }
@@ -811,11 +811,11 @@ bool ToggleHostOption(CStruct* pStruct, CScript* pScript)
                 else
                     _printf("couldn't find option %s\nMake Sure to add the option first\n", FindChecksumName(header->Data));
                 override->second.value = !override->second.value;
-                char* ok = FindChecksumName(header->Data);
+                char* ok = FindChecksumName(header->Data, false);
 
                 static char tempChar[MAX_PATH + 1] = "";
                 memcpy(tempChar, ok, strlen(ok) + 1);
-                _printf("Toggling HostOption %s(%X) %d\n", tempChar, header->Data, override->second.value);
+                _printf("Toggling HostOption %s %d\n", tempChar, override->second.value);
 
                 AddOption(tempChar, override->second.value, true, override->second.option);
 
@@ -843,12 +843,12 @@ bool ToggleOption(CStruct* pStruct, CScript* pScript)
             if (it != options.end())
             {
                 it->second.value = !it->second.value;
-                char* ok = FindChecksumName(header->Data);
+                char* ok = FindChecksumName(header->Data, false);
                 if (!it->second.override || !it->second.Overriden())
                 {
                     static char tempChar[MAX_PATH + 1] = "";
                     memcpy(tempChar, ok, strlen(ok) + 1);
-                    _printf("Toggling option %s(%X)\n", tempChar, header->Data);
+                    _printf("Toggling option %s\n", tempChar);
                     AddOption(ok, it->second.value, true);
                 }
                 else
@@ -916,7 +916,7 @@ bool GetOptionText(CStruct* pStruct, CScript* pScript)
                 }
             }
             else
-                _printf("Couldn't find option %s\nRemember to add the option first, check settings.qb\n");
+                _printf("Couldn't find option %s\nRemember to add the option first, check settings.qb\n", FindChecksumName(option->Data));
         }
         else
             _printf("Need param text in function " __FUNCTION__ "\n");

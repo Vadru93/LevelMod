@@ -287,7 +287,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::Reset(D3DPRESENT_PARAMETERS8* pPresen
             }
         }
 
-        
+
     }
 
     if (DeviceMultiSampleType)
@@ -364,15 +364,15 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateTexture(UINT Width, UINT Height
         else
         {*/
         //ppTexture->
-            Levels = 0;
-            Usage |= D3DUSAGE_AUTOGENMIPMAP;
-            /*DWORD target = min(Width, Height);
+        Levels = 0;
+        Usage |= D3DUSAGE_AUTOGENMIPMAP;
+        /*DWORD target = min(Width, Height);
 
-            while (target > 16)
-            {
-                target /= 2;
-                Levels++;
-            }*/
+        while (target > 16)
+        {
+            target /= 2;
+            Levels++;
+        }*/
         //}
     }
     if (ppTexture == nullptr)
@@ -824,7 +824,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::BeginScene()
         ProxyInterface->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
         ProxyInterface->SetRenderState(D3DRS_ANTIALIASEDLINEENABLE, TRUE);
     }
-    if(Gfx::filtering)
+    if (Gfx::filtering)
     {
         if (MaxAnisotropy)
         {
@@ -843,7 +843,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::BeginScene()
     {
         ProxyInterface->SetRenderState((D3DRENDERSTATETYPE)D3DRS_ADAPTIVETESS_Y, MAKEFOURCC('S', 'S', 'A', 'A'));
     }
-    
+
     /*DrawLines();
     DrawFrame2();*/
     return hres;
@@ -954,8 +954,9 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::SetRenderState(D3DRENDERSTATETYPE Sta
         }
         return hr;
     case D3DRS_ZBIAS:
+        /*MessageBox(0, 0, 0, 0);
         Biased = static_cast<FLOAT>(Value) * -0.000005f;
-        Value = *reinterpret_cast<const DWORD*>(&Biased);
+        Value = *reinterpret_cast<const DWORD*>(&Biased);*/
         State = D3DRS_DEPTHBIAS;
     default:
 
@@ -1159,10 +1160,6 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::GetTextureStageState(DWORD Stage, D3D
 }
 HRESULT STDMETHODCALLTYPE Direct3DDevice8::SetTextureStageState(DWORD Stage, D3DTEXTURESTAGESTATETYPE Type, DWORD Value)
 {
-    if (Type == D3DTSS_TEXCOORDINDEX)
-    {
-        MessageBox(0, "TEXOOOCRDINDX", "", 0);
-    }
     switch (static_cast<DWORD>(Type))
     {
     case D3DTSS_ADDRESSU:
@@ -1261,22 +1258,22 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::GetCurrentTexturePalette(UINT* pPalet
 }
 HRESULT STDMETHODCALLTYPE Direct3DDevice8::DrawPrimitive(D3DPRIMITIVETYPE PrimitiveType, UINT StartVertex, UINT PrimitiveCount)
 {
-    ApplyClipPlanes();
+   //ApplyClipPlanes();
     return ProxyInterface->DrawPrimitive(PrimitiveType, StartVertex, PrimitiveCount);
 }
 HRESULT STDMETHODCALLTYPE Direct3DDevice8::DrawIndexedPrimitive(D3DPRIMITIVETYPE PrimitiveType, UINT MinIndex, UINT NumVertices, UINT StartIndex, UINT PrimitiveCount)
 {
-    ApplyClipPlanes();
+    //ApplyClipPlanes();
     return ProxyInterface->DrawIndexedPrimitive(PrimitiveType, CurrentBaseVertexIndex, MinIndex, NumVertices, StartIndex, PrimitiveCount);
 }
 HRESULT STDMETHODCALLTYPE Direct3DDevice8::DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType, UINT PrimitiveCount, const void* pVertexStreamZeroData, UINT VertexStreamZeroStride)
 {
-    ApplyClipPlanes();
+    //ApplyClipPlanes();
     return ProxyInterface->DrawPrimitiveUP(PrimitiveType, PrimitiveCount, pVertexStreamZeroData, VertexStreamZeroStride);
 }
 HRESULT STDMETHODCALLTYPE Direct3DDevice8::DrawIndexedPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType, UINT MinVertexIndex, UINT NumVertexIndices, UINT PrimitiveCount, const void* pIndexData, D3DFORMAT IndexDataFormat, const void* pVertexStreamZeroData, UINT VertexStreamZeroStride)
 {
-    ApplyClipPlanes();
+    //ApplyClipPlanes();
     return ProxyInterface->DrawIndexedPrimitiveUP(PrimitiveType, MinVertexIndex, NumVertexIndices, PrimitiveCount, pIndexData, IndexDataFormat, pVertexStreamZeroData, VertexStreamZeroStride);
 }
 HRESULT STDMETHODCALLTYPE Direct3DDevice8::ProcessVertices(UINT SrcStartIndex, UINT DestIndex, UINT VertexCount, Direct3DVertexBuffer8* pDestBuffer, DWORD Flags)

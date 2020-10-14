@@ -7,8 +7,10 @@ static char Not_Inited[] = "NOT_INIT";
 static char Unnamed_Param[] = "UnnamedParam";
 char unkString[128] = "";
 
-EXTERN char* FindChecksumName(DWORD checksum)
+EXTERN char* FindChecksumName(DWORD checksum, bool only_debug)
 {
+    if (!debugMode && only_debug)
+        return NULL;
     if (QScript::Scripts)
     {
         if (checksum)

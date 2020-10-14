@@ -242,10 +242,10 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
     VirtualProtect((void*)0x004c050c, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((void*)0x004c067b, sizeof(BYTE), PAGE_EXECUTE_READWRITE, &old);
 
-    VirtualProtect((void*)0x004C067A, sizeof(DWORD)*2, PAGE_EXECUTE_READWRITE, &old);
+    VirtualProtect((void*)0x004C067A, sizeof(DWORD) * 2, PAGE_EXECUTE_READWRITE, &old);
 
 
-    VirtualProtect((void*)0x54EA45 , sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+    VirtualProtect((void*)0x54EA45, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((void*)0x54EA64, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
     *(DWORD*)0x54EA45 = 1; //fulscreen draw mode
     *(DWORD*)0x54EA64 = 1; //windowed draw mode

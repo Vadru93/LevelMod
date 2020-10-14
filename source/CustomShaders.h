@@ -63,7 +63,6 @@ struct ShaderObject2
 };
 #endif
 
-
 //--------Custom Shaders--------
 namespace Gfx
 {
@@ -86,6 +85,7 @@ namespace Gfx
     extern DWORD AntiAliasing;
     extern bool filtering;
     extern bool fps_fix;
+    extern __restrict LPDIRECT3DDEVICE9 pDevice;
 };
 //--------Custom Shaders--------
 

@@ -14,18 +14,18 @@ extern void RemoveMovingObject(SuperSector* sector);
 extern bool updatingObjects;
 //00491820
 //0051E060
-
+#pragma pack(1)
 EXTERN struct SuperSector
 {
     DWORD FFFFFFFF;
-    WORD* indices;
+    WORD* pUnk1;//prbably something about collision?
     D3DXVECTOR3* vertices;
-    DWORD* pUnk1;//always NULL?
-    DWORD* pUnk2;//Looks like axis for CollisionTree?
-    DWORD* pUnk3;//Huge data...
-    DWORD* pUnk4;//Looks like colors?
+    D3DXVECTOR3* normals;
+    float* uv_offset;//Looks like axis for CollisionTree?
+    DWORD* pUnk3;
+    DWORD* color_offset;
     Mesh* mesh;
-    DWORD* pUnk6[6];//Points to itself
+    DWORD* pUnk6[6];//Points to itself, probably child but since the tree is made this way it is like this
     D3DXVECTOR3 bboxMax;
     D3DXVECTOR3 bboxMin;
     DWORD* pUnk7;//Always NULL?
@@ -38,14 +38,15 @@ EXTERN struct SuperSector
     DWORD* pUnk10;//maybe this is the leaf??
     DWORD* pUnk11;//Always NULL?
     DWORD flag;//always 6?
+    BYTE state;//MeshState
     DWORD* pUnk12;//Always NULL?
     WORD* pCollisionFlags;//the flags for skatable, trigger etc
     DWORD* pUnk13;//bunch of 0xFF and random data
     DWORD* pUnk14;//bunch of 00
     BYTE unknown2;//Used when collision checking
-    BYTE padding2[3];
-    DWORD unknownChecksum;// Checksum??
-    DWORD* pUnk16;//bunch of floats, nothing happens when changing them maybe center/position?
+    BYTE padding2[2];
+    DWORD* pUnknown;
+    DWORD* pUnk16;//bunch of floats, maybe something about collision?
     DWORD name;//crc32
     DWORD* pUnk17;//similar to pUnk16
 
@@ -133,6 +134,7 @@ EXTERN struct SuperSector
         pSetMeshState(0x00418DD0)(Node::GetNodeIndex(name), state, &pScript);
     }
 };
+#pragma pop(pack)
 //bool second = true;
 
 struct MovingObject

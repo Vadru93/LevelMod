@@ -60,6 +60,7 @@ bool Gfx::fps_fix = true;
 D3DMATERIAL9* Gfx::oldMaterial = NULL;
 float Gfx::uv_anim_threshold = 0.01f;
 float Gfx::uv_tiling_threshold = 1.0f;
+DWORD Gfx::frameCounter = 0;
 
 EXTERN DWORD _GetCurrentTime()
 {

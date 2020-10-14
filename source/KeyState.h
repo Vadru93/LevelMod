@@ -6,7 +6,7 @@
 //#include "CXBOXController.h"
 struct Skater;
 
-EXTERN char* FindChecksumName(DWORD checksum);
+//EXTERN char* FindChecksumName(DWORD checksum, bool only_debug = true);
 struct KeyState
 {
 private:

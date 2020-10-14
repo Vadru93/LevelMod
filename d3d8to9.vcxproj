@@ -137,6 +137,7 @@
     <ClCompile Include="source\KeyState.cpp" />
     <ClCompile Include="source\math.cpp" />
     <ClCompile Include="source\Memory.cpp" />
+    <ClCompile Include="source\Mesh.cpp" />
     <ClCompile Include="source\Model.cpp" />
     <ClCompile Include="source\Net.cpp" />
     <ClCompile Include="source\Node.cpp" />
@@ -147,6 +148,7 @@
     <ClCompile Include="source\Physics.cpp" />
     <ClCompile Include="source\Script.cpp" />
     <ClCompile Include="source\Settings.cpp" />
+    <ClCompile Include="source\Shatter.cpp" />
     <ClCompile Include="source\Skater.cpp" />
     <ClCompile Include="source\Source.cpp" />
     <ClCompile Include="source\String.cpp" />
@@ -187,6 +189,7 @@
     <ClInclude Include="source\QBKey.h" />
     <ClInclude Include="source\Script.h" />
     <ClInclude Include="source\Settings.h" />
+    <ClInclude Include="source\Shatter.h" />
     <ClInclude Include="source\SkateModule.h" />
     <ClInclude Include="source\Skater.h" />
     <ClInclude Include="source\String.h" />

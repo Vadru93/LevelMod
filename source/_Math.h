@@ -55,6 +55,8 @@ inline	float	Determinant3(float a1, float a2, float a3, float b1, float b2, floa
         c1 * (a2 * b3 - a3 * b2);
 }
 
+struct Matrix;
+
 struct Vector : D3DXVECTOR4
 {
 
@@ -64,6 +66,18 @@ struct Vector : D3DXVECTOR4
         this->y *= scale;
         this->z *= scale;
         this->w *= scale;
+    }
+
+    Vector& Rotate(const Matrix& mat);
+
+    Vector& Set(float cx = 0.0f, float cy = 0.0f, float cz = 0.0f, float cw = 1.0f)
+    {
+        this->x = cx;
+        this->y = cy;
+        this->z = cz;
+        this->w = cw;
+
+        return *this;
     }
 };
 
@@ -231,7 +245,7 @@ struct Vertex : D3DXVECTOR3
         //*this = D3DXVECTOR3(_x, _y, _z);
     }
 
-    EXTERN Vertex& Rotate(const Vertex& axis, const float angle);
+    Vertex& Rotate(const Vertex& axis, const float angle);
 
 
     void Scale(float scale)
@@ -445,6 +459,30 @@ struct Matrix : D3DXMATRIX
 {
 
 
+    inline Matrix& Matrix::Ident(void)
+    {
+        m[X][X] = 1.0f;
+        m[X][Y] = 0.0f;
+        m[X][Z] = 0.0f;
+        m[X][W] = 0.0f;
+
+        m[Y][X] = 0.0f;
+        m[Y][Y] = 1.0f;
+        m[Y][Z] = 0.0f;
+        m[Y][W] = 0.0f;
+
+        m[Z][X] = 0.0f;
+        m[Z][Y] = 0.0f;
+        m[Z][Z] = 1.0f;
+        m[Z][W] = 0.0f;
+
+        m[W][X] = 0.0f;
+        m[W][Y] = 0.0f;
+        m[W][Z] = 0.0f;
+        m[W][W] = 1.0f;
+
+        return *this;
+    }
 
     Matrix& CreateRotateMatrix(Matrix& mat, D3DXVECTOR3& axis, const float angle)
     {
@@ -500,6 +538,18 @@ struct Matrix : D3DXMATRIX
     Matrix(D3DXVECTOR3& axis, const float angle)
     {
         CreateRotateMatrix(*this, axis, angle);
+    }
+
+    inline Vector Rotate(const Vector& src) const
+    {
+        Vector	v;
+
+        v[X] = src[X] * m[RIGHT][X] + src[Y] * m[UP][X] + src[Z] * m[AT][X];
+        v[Y] = src[X] * m[RIGHT][Y] + src[Y] * m[UP][Y] + src[Z] * m[AT][Y];
+        v[Z] = src[X] * m[RIGHT][Z] + src[Y] * m[UP][Z] + src[Z] * m[AT][Z];
+        v[W] = src[W];
+
+        return v;
     }
 
     inline D3DXVECTOR3			Rotate(const D3DXVECTOR3& src) const
@@ -1004,10 +1054,15 @@ struct Matrix : D3DXMATRIX
         return *(Vertex*)&m[index];
     }
 
-    Vertex& operator[](int index)
+    Vector& operator[](int index)
+    {
+        return *(Vector*)&m[index];
+    }
+
+    /*Vertex& operator[](int index)
     {
         return *(Vertex*)&m[index];
-    }
+    }*/
 
 
     inline Matrix& RotateYLocal(const float angle)

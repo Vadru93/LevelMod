@@ -243,7 +243,7 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
 
     // Setup presentation parameters
     D3DPRESENT_PARAMETERS d3dpp;
-    CopyMemory(&d3dpp,&PresentParams, sizeof(D3DPRESENT_PARAMETERS));
+    CopyMemory(&d3dpp, &PresentParams, sizeof(D3DPRESENT_PARAMETERS));
 
     // Check for AntiAliasing
     if (Gfx::AntiAliasing != 0)
@@ -284,7 +284,7 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
 
         if (FAILED(hr))
         {
-            MessageBox(0, " Failed to enable AntiAliasing!", 0,0);
+            MessageBox(0, " Failed to enable AntiAliasing!", 0, 0);
             printf("Failed to enable AntiAliasing");
         }
     }
@@ -298,8 +298,8 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
     }
 
 
-    extern __restrict LPDIRECT3DDEVICE9 pDevice;
-    pDevice = DeviceInterface;
+    //extern __restrict LPDIRECT3DDEVICE9 pDevice;
+    Gfx::pDevice = DeviceInterface;
 
     //const HRESULT hr = ProxyInterface->CreateDevice(Adapter, DeviceType, hFocusWindow, BehaviorFlags, &PresentParams, &DeviceInterface);
 

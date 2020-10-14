@@ -4,7 +4,7 @@
 #include "_math.h"
 
 
-EXTERN Vertex& Vertex::Rotate(const Vertex& axis, const float angle)
+Vertex& Vertex::Rotate(const Vertex& axis, const float angle)
 {
 
 #if 1
@@ -17,6 +17,13 @@ EXTERN Vertex& Vertex::Rotate(const Vertex& axis, const float angle)
 
     return *this;
 }
+
+/*inline Vertex& Vertex::Rotate(const Matrix& mat)
+{
+    *this = *(Vertex*)&mat.Rotate(*(D3DXVECTOR3*)&*this);
+
+    return *this;
+}*/
 
 
 float GetAngleAbout(Vertex& v1, Vertex& v2, Vertex& Axis)
@@ -136,6 +143,16 @@ int Rnd(int n)
     RandB += (RandSeed >> 3) - 0x10101010L;
     return (int)((RandSeed & 0xffff) * n) >> 16;
 }
+
+Vector& Vector::Rotate(const Matrix& mat)
+{
+
+
+    *this = mat.Rotate(*this);
+
+    return *this;
+}
+
 
 Vertex CrossProduct(const Vertex* vec1, Vertex* vec2)
 {

@@ -6,7 +6,7 @@
 #define ReadDWORD() *(DWORD*)pFile; pFile+=4
 #define p_render_shaders *(bool*)0x00040D22
 
-extern __restrict LPDIRECT3DDEVICE9 pDevice;
+//extern __restrict LPDIRECT3DDEVICE9 pDevice;
 
 
 /*ShaderObject* shaders = NULL;
@@ -110,7 +110,7 @@ void Mesh::AddShader(ShaderObject* shader, DWORD matIndex)
     if (shader->env_tiling[0])
     {
         char msg[256] = "";
-        sprintf(msg, "MatSplit %p Tedxture %s\n%s %X\n", this, pTexName, this->sector ? FindChecksumName(this->sector->name) : "No SuperSector", *(DWORD*)pVertexShader);
+        //sprintf(msg, "MatSplit %p Tedxture %s\n%s %X\n", this, pTexName, this->sector ? FindChecksumName(this->sector->name) : "No SuperSector", *(DWORD*)pVertexShader);
         //MessageBox(0, msg, "EnvMap", 0);
         *(DWORD*)pVertexShader = 0x252;
     }
@@ -381,7 +381,10 @@ void __stdcall SetVertexShader_hook()
             if (!restore_matrix)
             {
                 restore_matrix = true;
+
                 pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
+                p_current_texstage(D3DTSS_TEXTURETRANSFORMFLAGS) = D3DTTFF_COUNT2;
+                p_target_texstage(D3DTSS_TEXTURETRANSFORMFLAGS) = D3DTTFF_COUNT2;
             }
 
             env_mat.m[0][0] = pShader->env_tiling[0] * uv_tiling_threshold;
@@ -389,6 +392,8 @@ void __stdcall SetVertexShader_hook()
 
             pDevice->SetTransform(D3DTS_TEXTURE0, &env_mat);
             pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_CAMERASPACEPOSITION);
+            p_current_texstage(D3DTSS_TEXCOORDINDEX) = D3DTSS_TCI_CAMERASPACEPOSITION;
+            p_target_texstage(D3DTSS_TEXCOORDINDEX) = D3DTSS_TCI_CAMERASPACEPOSITION;
         }
         else if (pShader->flags & UV_ANIM)
         {
@@ -396,6 +401,8 @@ void __stdcall SetVertexShader_hook()
             {
                 restore_matrix = true;
                 pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
+                p_current_texstage(D3DTSS_TEXTURETRANSFORMFLAGS) = D3DTTFF_COUNT2;
+                p_target_texstage(D3DTSS_TEXTURETRANSFORMFLAGS) = D3DTTFF_COUNT2;
             }
             else
                 pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
@@ -422,8 +429,12 @@ void __stdcall SetVertexShader_hook()
         else if (restore_matrix)
         {
             restore_matrix = false;
+            p_current_texstage(D3DTSS_TEXTURETRANSFORMFLAGS) = D3DTTFF_DISABLE;
+            p_current_texstage(D3DTSS_TEXCOORDINDEX) = D3DTSS_TCI_PASSTHRU;
+
             pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
             pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
+           
         }
 
         //pDevice->SetMaterial(pShader->material);

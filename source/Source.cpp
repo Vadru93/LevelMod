@@ -19,6 +19,7 @@
 #include "IniWriter.h"
 #include "Bugfixes.h"
 #include "String.h"
+#undef ONLY_SHADER
 #include "CustomShaders.h"
 /*0
 004F9B9E < -non semi
@@ -817,7 +818,7 @@ void CreateSuperSectors()
     _printf("Going to create MovingObjects\n");
     GameState::GotSuperSectors = true;
     *(bool*)0x00040D22 = true;
-    Game::skater = Skater::UpdateSkater();
+    //Game::skater = Skater::UpdateSkater();
 }
 FILE* logFile;
 void __cdecl add_log(const char* string, ...)
@@ -826,54 +827,52 @@ void __cdecl add_log(const char* string, ...)
         DestroySuperSectors();
     else if (string == (const char*)0x005B6104) [[unlikely]]
         CreateSuperSectors();
-
-    if (debugMode) [[unlikely]]
-    {
-        static char buf[256] = "";
-        static CScript* pScript = NULL;
-        _asm mov pScript, esi
-        /*if ((DWORD)string == 0 || (DWORD)string < 0x00420000 || (DWORD)string > 0x02000000)
-          return -1;
-          //MessageBox(0, string, string, 0);
-          va_list args;
-          va_start(args, string);
-          int k = -1;
-
-          if (logFile)
-          {
-          fseek(logFile, 0, SEEK_END);
-          k = vfprintf(logFile, string, args);
-          fputc('\n', logFile);
-          fflush(logFile);
-          }
-          va_end(args);
-          return k;*/
-
-        if ((DWORD)string == 0 || (DWORD)string < 0x00420000 || (DWORD)string > 0x02000000 || (strstr(string, "Tried to"))) [[unlikely]]//string[0] == '\n' && string[1] == 'T' && string[2] == 'r'))
-            return;
-
-        va_list args;
-        va_start(args, string);
-        int k = -1;
-        k = vsprintf(buf, string, args);
-        va_end(args);
-        char* p = buf;
-        if (pScript)
-        {
-            while (*p != 0x0)
-            {
-                if (*p == '?' && *(p + 1) == '?' && *(p + 2) == '?' && *(p + 3) == '?' && *(p + 4) == '?') [[unlikely]]
-                {
-                    sprintf(buf, "%s:%s", buf, lastQB != NULL ? lastQB : FindChecksumName(pScript->scriptChecksum));
-                    break;
-                }
-                p++;
-            }
-        }
-        _printf(buf);
-        _printf("\n");
+    if (!debugMode) [[likely]]
         return;
+
+    static char buf[256] = "";
+    static CScript* pScript = NULL;
+    _asm mov pScript, esi
+    /*if ((DWORD)string == 0 || (DWORD)string < 0x00420000 || (DWORD)string > 0x02000000)
+      return -1;
+      //MessageBox(0, string, string, 0);
+      va_list args;
+      va_start(args, string);
+      int k = -1;
+
+      if (logFile)
+      {
+      fseek(logFile, 0, SEEK_END);
+      k = vfprintf(logFile, string, args);
+      fputc('\n', logFile);
+      fflush(logFile);
+      }
+      va_end(args);
+      return k;*/
+
+    if ((DWORD)string == 0 || (DWORD)string < 0x00420000 || (DWORD)string > 0x02000000 || (strstr(string, "Tried to"))) [[unlikely]]//string[0] == '\n' && string[1] == 'T' && string[2] == 'r'))
+        return;
+
+    va_list args;
+    va_start(args, string);
+    int k = -1;
+    k = vsprintf(buf, string, args);
+    va_end(args);
+    char* p = buf;
+    if (pScript)
+    {
+        while (*p != 0x0)
+        {
+            if (*p == '?' && *(p + 1) == '?' && *(p + 2) == '?' && *(p + 3) == '?' && *(p + 4) == '?') [[unlikely]]
+            {
+                sprintf(buf, "%s:%s", buf, lastQB != NULL ? lastQB : FindChecksumName(pScript->scriptChecksum));
+                break;
+            }
+            p++;
+        }
     }
+    _printf(buf);
+    _printf("\n");
     return;
 }
 
@@ -1539,11 +1538,14 @@ bool ToggleHookDebugMessages(CStruct* pStruct, CScript* pScript)
     return true;
 }
 
+DWORD debug = 0;
+
 void ReadFirstOptions()
 {
     char temp[MAX_PATH] = "";
     GetCurrentDirectory(MAX_PATH, temp);
-    sprintf(IniPath, "%s/LevelMod.ini", temp);
+    sprintf(IniPath, "%s\\LevelMod.ini", temp);
+    //MessageBox(0, IniPath, IniPath, 0);
     OptionWriter = new CIniWriter(IniPath);
     OptionReader = new CIniReader(IniPath);
 
@@ -1563,6 +1565,16 @@ void ReadFirstOptions()
     _printf("Reading from ini file %s, default %d ", "LM_GFX_bFixStutter", Gfx::fps_fix);
     Gfx::fps_fix = OptionReader->ReadInt("Script_Settings", "LM_GFX_bFixStutter", Gfx::fps_fix);
     _printf("value %d\n", Gfx::fps_fix);
+    //CreateConsole();
+
+    _printf("Reading from ini file %s, default %d ", "LM_DebugOption_bDebugMode", debug);
+    debug = OptionReader->ReadInt("Script_Settings", "LM_DebugOption_bDebugMode", debug);
+    _printf("value %d\n", debug);
+    if (debug)
+    {
+        CreateConsole();
+        _printf("Welcome to DebugMode\n");
+    }
 }
 
 void FixTagLimitProtections()
@@ -2498,7 +2510,8 @@ const CompiledScript scripts[] =
     {"LM_PrintInfo", GetInfoScript },
     {"TestReloadQB", TestReloadQB},
     {"OnPostLevelLoad", OnPostLevelLoad},
-    {"Change_Local", ChangeLocalScript}
+    {"Change_Local", ChangeLocalScript},
+{ "NewShatter", NewShatterScript}
     /*{"SetMemoryPoolSize", SetMemoryPoolSize},
     {"GetMemoryPoolSize", GetMemoryPoolSize},
     {"GetMemoryPoolSizeText", GetMemoryPoolSizeText},*/
@@ -3076,7 +3089,7 @@ void FixClampBugs()
 {
     if (shouldfix)
     {
-        MessageBox(0, clamp, "YEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEAH", 0);
+        //MessageBox(0, clamp, "YEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEAH", 0);
         const BYTE vertfix1[116] = {
           0xD9, 0x85, 0x60, 0x87, 0x00, 0x00, 0xD8, 0x5C, 0x24, 0x14, 0xDF, 0xE0, 0x25, 0x00, 0x41, 0x00, 0x00, 0x75, 0x0A, 0x8B, 0x85, 0x60, 0x87, 0x00, 0x00, 0x89, 0x44, 0x24, 0x14, 0x8B, 0x44, 0x24, 0x10, 0x8B, 0x4C, 0x24, 0x14, 0xE9, 0x4F, 0x29, 0x0a, 0x00,
           0x31, 0xFF, 0xD9, 0x85, 0x60, 0x86, 0x00, 0x00, 0xD8, 0x25, 0x38, 0x03, 0x40, 0x00, 0x6A, 0x00, 0x6A, 0x08, 0x6A, 0x00, 0x8B, 0xCD, 0xD9, 0x9D, 0x60, 0x86, 0x00, 0x00, 0xD9, 0x85, 0x70, 0x86, 0x00, 0x00, 0xD8, 0x25, 0x38, 0x03, 0x40, 0x00, 0xD9, 0x9D, 0x70, 0x86, 0x00, 0x00, 0xE8, 0x5B, 0xF9, 0x09, 0x00, 0x84, 0xC0, 0x0F, 0x85, 0xFC, 0x28, 0x0A, 0x00, 0x47, 0x83, 0xFF, 0x0C, 0x7C, 0xC1, 0xE9, 0x5B, 0x2A, 0x0A, 0x00, 0x00, 0x00, 0x40, 0x40
@@ -4456,6 +4469,10 @@ void InitLevelMod()
     memcpy((void*)BouncyObject_Addr, codeCaveBouncyObject, sizeof(codeCaveBouncyObject));
     HookFunction(0x004003BA, BouncyObj_OnBounce_Naked, 0xE9);
 
+    //MessageBox(0, 0, 0, 0);
+    HookFunction(0x004F9C0A, Render_Naked, 0xE9);
+    //MessageBox(0, 0, 0, 0);
+
     VirtualProtect((LPVOID)0x00483D55, 1, PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((LPVOID)0x00483DD0, 1, PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((LPVOID)0x00483DD1, 7, PAGE_EXECUTE_READWRITE, &old);
@@ -4857,6 +4874,31 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
 
         while (!init2)
             Sleep(100);
+        if (!debug)
+        {
+            DWORD old;
+            hooked = true;
+            static BYTE callHooked[] = { 0xE9, 0x00, 0x00, 0x00, 0x00, 0xC3 };
+
+            VirtualProtect((void*)0x00401960, 6, PAGE_EXECUTE_READWRITE, &old);
+            memcpy(oldCustomPrint, (void*)0x00401960, 6);
+
+            *(DWORD*)&callHooked[1] = ((DWORD)add_log - 0x00401960 - 5);
+
+            memcpy((void*)0x00401960, callHooked, 6);
+
+
+            static const DWORD addr = (DWORD)GetProcAddress(GetModuleHandle("msvcrt.dll"), "printf");
+            if (addr)
+            {
+                VirtualProtect((void*)addr, 6, PAGE_EXECUTE_READWRITE, &old);
+                memcpy(oldCustomPrint, (void*)addr, 6);
+                DWORD hookedAddrs = ((DWORD)add_log - addr - 5);
+                *(DWORD*)&callHooked[1] = hookedAddrs;
+                memcpy((void*)addr, callHooked, 6);
+            }
+            //logFile = fopen("loggers.txt", "w+t");*/
+        }
         printf("Init DONE\n");
         return true;
 
@@ -4926,7 +4968,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
                     if (HostOption->GetStruct(Checksums::Name, &Name))
                     {
                         char OptionName[256] = "";
-                        char* pName = FindChecksumName(Name->Data);
+                        char* pName = FindChecksumName(Name->Data, false);
                         memcpy(OptionName, pName, strlen(pName) + 1);
 
                         CStructHeader* Value;
@@ -4987,7 +5029,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
             fclose(f);
             for (auto it = options.begin(); it != options.end(); ++it)
             {
-                char* name = FindChecksumName(it->first);
+                char* name = FindChecksumName(it->first, false);
                 _printf("Adding Option to Ini %s\n", name);
                 OptionWriter->WriteInt("Script_Settings", name, it->second.value);
             }
@@ -5076,13 +5118,13 @@ EXTERN QBKeyHeader* GetQBKeyHeader(unsigned long QBKey)
     return ((GetQBKeyHeaderFunc)(0x00426340))(QBKey);//didn't find header lets let game search through sub qbTables
 }
 
-__restrict LPDIRECT3DDEVICE9 pDevice = NULL;
+__restrict LPDIRECT3DDEVICE9 Gfx::pDevice = NULL;
 
 void DrawLines()
 {
     //pDevice->SetTransfD3DTRANSOFMRorm(0, &lineWorld);
-    pDevice->SetFVF(line_fvf);
-    pDevice->DrawPrimitiveUP(D3DPT_LINELIST,         //PrimitiveType
+    Gfx::pDevice->SetFVF(line_fvf);
+    Gfx::pDevice->DrawPrimitiveUP(D3DPT_LINELIST,         //PrimitiveType
         numLineVertices / 2,              //PrimitiveCount
         lineVertices,            //pVertexStreamZeroData
         sizeof(line_vertex));   //VertexStreamZeroStride
@@ -5138,6 +5180,7 @@ void OnReset()
 
 void DrawFrame()
 {
+    Gfx::frameCounter++;
     //MessageBox(0, 0, 0, 0);
     if (!m_font) [[unlikely]]
     {
@@ -5158,7 +5201,7 @@ void DrawFrame()
         //pDevice->CreateLine
         lineColor = D3DCOLOR_RGBA(255, 255, 255, 255);*/
 
-        D3DXCreateFontA(pDevice, 45, 0, FW_NORMAL, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Arial", &m_font);
+        D3DXCreateFontA(Gfx::pDevice, 45, 0, FW_NORMAL, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Arial", &m_font);
     }
 
         if (GameState::GotSuperSectors) [[likely]]
@@ -5249,29 +5292,29 @@ void DrawFrame()
                     }
                         if (false)
                         {
-                            pDevice->BeginScene();
+                            Gfx::pDevice->BeginScene();
 
                             DWORD  D3DCMP = 0, pShared = 0, vShared = 0, Cull = 0, StencileEnable = 0, Clipping = 0, Clipplane = 0, COLOROP1 = 0, COLORARG1 = 0, COLORARG2 = 0, COLOROP2 = 0;
                             UINT oldStride = 0;
 
                             DWORD oldRenderState;
-                            pDevice->GetRenderState(D3DRS_ZENABLE, &oldRenderState);
-                            pDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
-                            pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_NEVER);
+                            Gfx::pDevice->GetRenderState(D3DRS_ZENABLE, &oldRenderState);
+                            Gfx::pDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+                            Gfx::pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_NEVER);
                             //pDevice->GetPixelShader(&pShared);
-                            pDevice->SetPixelShader(NULL);
-                            pDevice->SetVertexShader(NULL);
-                            pDevice->SetTexture(0, NULL);
-                            pDevice->SetRenderState(D3DRS_ZWRITEENABLE, 0);
+                            Gfx::pDevice->SetPixelShader(NULL);
+                            Gfx::pDevice->SetVertexShader(NULL);
+                            Gfx::pDevice->SetTexture(0, NULL);
+                            Gfx::pDevice->SetRenderState(D3DRS_ZWRITEENABLE, 0);
 
                             /* IDirect3DVertexBuffer8* oldBuffer = NULL;
                              IDirect3DBaseTexture8* oldTexture1, * oldTexture2 = NULL;
                              pDevice->GetStreamSource(0, &oldBuffer, &oldStride);
                              pDevice->GetPixelShader(&pShared);
                              pDevice->GetVertexShader(&vShared);*/
-                            pDevice->GetRenderState(D3DRS_CULLMODE, &Cull);
-                            pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-                            pDevice->SetRenderState(D3DRS_CLIPPING, 0);
+                            Gfx::pDevice->GetRenderState(D3DRS_CULLMODE, &Cull);
+                            Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+                            Gfx::pDevice->SetRenderState(D3DRS_CLIPPING, 0);
                             //pDevice->SetStreamSource(0, 0, 0);
 
                             //m_pIDirect3DDevice8->SetStreamSource(0,0,0);
@@ -5319,9 +5362,9 @@ void DrawFrame()
 
                             //pDevice->DrawPrimitiveUP(D3DPT_LINELIST, lineList.size() / 2, &lineList.front(), sizeof(Line));
                             DrawLines();
-                            pDevice->EndScene();
+                            Gfx::pDevice->EndScene();
 
-                            pDevice->SetRenderState(D3DRS_ZENABLE, oldRenderState);
+                            Gfx::pDevice->SetRenderState(D3DRS_ZENABLE, oldRenderState);
                             //pDevice->SetPixelShader(pShared);
                             /*pDevice->SetTexture(0, oldTexture1);
                             pDevice->SetTexture(1, oldTexture2);
@@ -5332,7 +5375,7 @@ void DrawFrame()
                             pDevice->SetRenderState(D3DRS_CLIPPLANEENABLE, Clipplane);*/
 
 
-                            pDevice->SetRenderState(D3DRS_CULLMODE, Cull);
+                            Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, Cull);
                             /*pDevice->SetPixelShader(pShared);
                             pDevice->SetVertexShader(vShared);
                             pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP);
