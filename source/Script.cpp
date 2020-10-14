@@ -1018,6 +1018,50 @@ void CheckForScriptUpdates()
     }
 }
 
+void UpdateScriptConstants()
+{
+
+    QBKeyHeader* header = GetQBKeyHeader(Checksum("uv_anim_threshold"));
+    if (header)
+    {
+        Gfx::uv_anim_threshold = header->value.f;
+    }
+    else
+        MessageBox(0, "couldn't find uv_anim_threshold", "", 0);
+
+    header = GetQBKeyHeader(Checksum("uv_tiling_threshold"));
+    if (header)
+    {
+        Gfx::uv_tiling_threshold = header->value.f;
+    }
+    else
+        MessageBox(0, "couldn't find uv_tiling_threshold", "", 0);
+
+    header = GetQBKeyHeader(Checksum("shatter_speed"));
+    if (header)
+    {
+        Gfx::shatter_speed = header->value.f;
+    }
+    else
+        MessageBox(0, "couldn't find shatter_speed", "", 0);
+
+    header = GetQBKeyHeader(Checksum("shatter_life_factor"));
+    if (header)
+    {
+        Gfx::shatter_life_factor = header->value.f;
+    }
+    else
+        MessageBox(0, "couldn't find shatter_life_factor", "", 0);
+
+    header = GetQBKeyHeader(Checksum("shatter_gravity"));
+    if (header)
+    {
+        Gfx::shatter_gravity = header->value.f;
+    }
+    else
+        MessageBox(0, "couldn't find shatter_gravity", "", 0);
+}
+
 bool TestReloadQB(CStruct* pStruct, CScript* pScript)
 {
 
@@ -1081,22 +1125,7 @@ bool TestReloadQB(CStruct* pStruct, CScript* pScript)
             pFile++;
     }
     delete[] oldData;
-
-    QBKeyHeader* header = GetQBKeyHeader(Checksum("uv_anim_threshold"));
-    if (header)
-    {
-        Gfx::uv_anim_threshold = header->value.f;
-    }
-    else
-        MessageBox(0, "couldn't find uv_anim_threshold", "", 0);
-
-    header = GetQBKeyHeader(Checksum("uv_tiling_threshold"));
-    if (header)
-    {
-        Gfx::uv_tiling_threshold = header->value.f;
-    }
-    else
-        MessageBox(0, "couldn't find uv_tiling_threshold", "", 0);
+    UpdateScriptConstants();
 
     return true;
 }

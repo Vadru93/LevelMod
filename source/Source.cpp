@@ -806,6 +806,8 @@ void DestroySuperSectors()
     QScript::Scripts->ClearLevelTable();
     _printf("Going to remove MovingObjects\n");
     GameState::GotSuperSectors = false;
+    extern void UnloadShatterObjects();
+    UnloadShatterObjects();
     *(bool*)0x00040D22 = false;
     if (movingObjects.size())
         movingObjects.clear();
@@ -4452,6 +4454,10 @@ void AddFunctions()
         else
             MessageBox(0, "couldn't add script", scripts[i].name, 0);
     }
+
+    header = GetQBKeyHeader(Checksums::Shatter);
+    if(header)
+        header->pFunction = NewShatterScript;
 }
 
 //void HookControls();
@@ -4462,8 +4468,16 @@ void InitLevelMod()
     movableObjects.insert(std::pair<DWORD, DWORD>(Checksum("dt_blimp_GameOb"), Checksum("dt_blimp")));
     //HookControls();
 
-    BYTE codeCaveBouncyObject[] = { 0x84, 0xC0, 0x0F, 0x84, 0xA0, 0x3E, 0x08, 0x00, 0x8A, 0x84, 0x24, 0x00, 0x01, 0x00, 0x00, 0x24, 0x40, 0x74, 0x0D, 0x8B, 0x84, 0x24, 0x14, 0x01, 0x00, 0x00, 0x89, 0x05, 0xCB, 0x03, 0x40, 0x00, 0x8A, 0x84, 0x24, 0x00, 0x01, 0x00, 0x00, 0x90, 0x90, 0x90, 0x90, 0x90, 0x24, 0x10, 0x0F, 0x85, 0x74, 0x3E, 0x08, 0x00, 0xE9, 0x0D, 0x3A, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00 };
     DWORD old;
+    VirtualProtect((LPVOID)0x0042FA0D, 9, PAGE_EXECUTE_READWRITE, &old);
+    VirtualProtect((LPVOID)0x0042FA9D, 19, PAGE_EXECUTE_READWRITE, &old);
+    BYTE codeCaveRenderHook[] = { 0xC6, 0x05, 0x00, 0x90, 0x08, 0x00, 0x01, 0x90, 0x90 };
+    BYTE codeCaveRenderHook2[] = { 0x5E, 0x5D, 0xC6, 0x05, 0x00, 0x90, 0x08, 0x00, 0x00, 0xEB, 0x08, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
+    memcpy((void*)0x0042FA0D, codeCaveRenderHook, sizeof(codeCaveRenderHook));
+    memcpy((void*)0x0042FA9D, codeCaveRenderHook2, sizeof(codeCaveRenderHook2));
+
+
+    BYTE codeCaveBouncyObject[] = { 0x84, 0xC0, 0x0F, 0x84, 0xA0, 0x3E, 0x08, 0x00, 0x8A, 0x84, 0x24, 0x00, 0x01, 0x00, 0x00, 0x24, 0x40, 0x74, 0x0D, 0x8B, 0x84, 0x24, 0x14, 0x01, 0x00, 0x00, 0x89, 0x05, 0xCB, 0x03, 0x40, 0x00, 0x8A, 0x84, 0x24, 0x00, 0x01, 0x00, 0x00, 0x90, 0x90, 0x90, 0x90, 0x90, 0x24, 0x10, 0x0F, 0x85, 0x74, 0x3E, 0x08, 0x00, 0xE9, 0x0D, 0x3A, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00 };
     DWORD BouncyObject_Addr = 0x00400392;
     VirtualProtect((LPVOID)BouncyObject_Addr, sizeof(codeCaveBouncyObject), PAGE_EXECUTE_READWRITE, &old);
     memcpy((void*)BouncyObject_Addr, codeCaveBouncyObject, sizeof(codeCaveBouncyObject));
@@ -4912,25 +4926,12 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
 
         init3 = true;
 
-        QBKeyHeader* header = GetQBKeyHeader(Checksum("uv_anim_threshold"));
-        if (header)
-        {
-            Gfx::uv_anim_threshold = header->value.f;
-        }
-        else
-            MessageBox(0, "couldn't find uv_anim_threshold", "", 0);
-
-        header = GetQBKeyHeader(Checksum("PlaySound"));
+        QBKeyHeader* header = GetQBKeyHeader(Checksum("PlaySound"));
         if (header)
             Game::PlaySound = header->pFunction;
 
-        header = GetQBKeyHeader(Checksum("uv_tiling_threshold"));
-        if (header)
-        {
-            Gfx::uv_tiling_threshold = header->value.f;
-        }
-        else
-            MessageBox(0, "couldn't find uv_tiling_threshold", "", 0);
+        UpdateScriptConstants();
+
 
         header = GetQBKeyHeader(crc32f("LM_HostOptions"));
 

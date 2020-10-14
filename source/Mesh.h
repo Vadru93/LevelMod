@@ -19,39 +19,41 @@ enum MeshState
     update,
 };
 
-    struct Texture
+struct Texture
+{
+    struct Animation
     {
-        struct Animation
-        {
-            float UVel;//0
-            float VVel;//4
-            float UFrequency;//8//  fsin(UFreq*t+UPhase)*UAmp+t*UVel
-            float VFrequency;//12
-            float UAmplitude;//16  fsin(amp*360*Uphase*0.02)*UFreq
-            float VAmplitude;//20
-            float UPhase;//24
-            float VPhase;//28
+        float UVel;//0
+        float VVel;//4
+        float UFrequency;//8//  fsin(UFreq*t+UPhase)*UAmp+t*UVel
+        float VFrequency;//12
+        float UAmplitude;//16  fsin(amp*360*Uphase*0.02)*UFreq
+        float VAmplitude;//20
+        float UPhase;//24
+        float VPhase;//28
 
+    };
+
+    struct ShaderObject2
+    {
+        DWORD flags;
+        DWORD blend_op;
+        DWORD src_blend;
+        DWORD dest_blend;
+        union
+        {
+            Animation* anim;
+            float env_tiling[2];
         };
+        DWORD alphaRef;
+    };
 
-        struct ShaderObject2
+    IDirect3DBaseTexture9* GetBaseTexture()
+    {
+        //_printf("tex %p p_unk %X base %X\n", this, p_unk[0], *(DWORD*)(p_unk[0] + 0x34));
+        Direct3DBaseTexture8* pTexture = *(Direct3DBaseTexture8**)(p_unk[0] + 0x34);
+        if (pTexture)
         {
-            DWORD flags;
-            DWORD blend_op;
-            DWORD src_blend;
-            DWORD dest_blend;
-            union
-            {
-                Animation* anim;
-                float env_tiling[2];
-            };
-            DWORD alphaRef;
-        };
-
-        IDirect3DBaseTexture9* GetBaseTexture()
-        {
-            _printf("tex %p p_unk %X base %X\n", this, p_unk[0], *(DWORD*)(p_unk[0] + 0x34));
-            Direct3DBaseTexture8* pTexture = *(Direct3DBaseTexture8**)(p_unk[0] + 0x34);
             switch (pTexture->GetType())
             {
             case D3DRTYPE_TEXTURE:
@@ -61,16 +63,16 @@ enum MeshState
             case D3DRTYPE_CUBETEXTURE:
                 return static_cast<Direct3DCubeTexture8*>(pTexture)->GetProxyInterface();
             }
-
-            return NULL;
         }
+        return NULL;
+    }
 
 
-        BYTE* p_unk[4];
-        char tex_name[256];
-        DWORD unk[4];
-        ShaderObject2 shader;
-    };
+    BYTE* p_unk[4];
+    char tex_name[256];
+    DWORD unk[4];
+    ShaderObject2 shader;
+};
 
 struct Material
 {
@@ -78,30 +80,34 @@ struct Material
 
     void Submit()
     {
-        _printf("BaseTexture %p material %p\n", texture->GetBaseTexture(), this);
-        Gfx::pDevice->SetTexture(0, texture->GetBaseTexture());
-        
-        if (texture->shader.flags != 0x30303030)
+        if (texture)
         {
-            if (p_current_renderstate(D3DRS_BLENDOP) != texture->shader.blend_op)
-            {
-                //Set old blend_op
-                p_current_renderstate(D3DRS_BLENDOP) = texture->shader.blend_op;
-                Gfx::pDevice->SetRenderState(D3DRS_BLENDOP, texture->shader.blend_op);
-            }
+            //_printf("BaseTexture %p material %p\n", texture->GetBaseTexture(), this);
+            Gfx::pDevice->SetTexture(0, texture->GetBaseTexture());
 
-            if (p_current_renderstate(D3DRS_SRCBLEND) != texture->shader.src_blend)
+            if (texture->shader.flags != 0x30303030)
             {
-                //Set old src_blend
-                p_current_renderstate(D3DRS_SRCBLEND) = texture->shader.src_blend;
-                Gfx::pDevice->SetRenderState(D3DRS_SRCBLEND, texture->shader.src_blend);
-            }
+                //_printf("%X\n", texture->shader.flags);
+                if (p_current_renderstate(D3DRS_BLENDOP) != texture->shader.blend_op)
+                {
+                    //Set old blend_op
+                    p_current_renderstate(D3DRS_BLENDOP) = texture->shader.blend_op;
+                    Gfx::pDevice->SetRenderState(D3DRS_BLENDOP, texture->shader.blend_op);
+                }
 
-            if (p_current_renderstate(D3DRS_DESTBLEND) != texture->shader.dest_blend)
-            {
-                //Set old dest_blend
-                p_current_renderstate(D3DRS_DESTBLEND) = texture->shader.dest_blend;
-                Gfx::pDevice->SetRenderState(D3DRS_DESTBLEND, texture->shader.dest_blend);
+                if (p_current_renderstate(D3DRS_SRCBLEND) != texture->shader.src_blend)
+                {
+                    //Set old src_blend
+                    p_current_renderstate(D3DRS_SRCBLEND) = texture->shader.src_blend;
+                    Gfx::pDevice->SetRenderState(D3DRS_SRCBLEND, texture->shader.src_blend);
+                }
+
+                if (p_current_renderstate(D3DRS_DESTBLEND) != texture->shader.dest_blend)
+                {
+                    //Set old dest_blend
+                    p_current_renderstate(D3DRS_DESTBLEND) = texture->shader.dest_blend;
+                    Gfx::pDevice->SetRenderState(D3DRS_DESTBLEND, texture->shader.dest_blend);
+                }
             }
         }
     }
@@ -144,7 +150,7 @@ struct CSector
         Material* material;
     };
     MaterialSplit splits[];
-    
+
 
 
 
@@ -177,7 +183,7 @@ struct Mesh
         DWORD stride;
         DWORD numIndices;
         DWORD numVertices;
- 
+
         Material* material;
         DWORD vertexShader;
         DWORD flags;

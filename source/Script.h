@@ -25,6 +25,8 @@ bool TestReloadQB(CStruct* pStruct, CScript* pScript);
 
 EXTERN char* FindChecksumName(DWORD checksum, bool only_debug = true);
 
+void UpdateScriptConstants();
+
 
 //inline unsigned long Checksum(const char* string);//THPS3 Function for CRC32
 

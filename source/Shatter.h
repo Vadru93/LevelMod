@@ -52,7 +52,7 @@ struct ShatterData
     D3DXVECTOR3* pos;
     D3DXVECTOR3* vel;
     Matrix* matrices;
-    BYTE* tris;
+    //BYTE* tris;
     int numTris;
 
     float life;
@@ -67,13 +67,18 @@ struct ShatterData
         delete[]pos;
         delete[]vel;
         delete[]matrices;
-        delete[]tris;
+        //delete[]tris;
         ZeroMemory(this, sizeof(ShatterData));
     }
 
     void Render()
     {
-        split->material->Submit();
+        //printf("Split %p Material %X\n", split, split->material);
+        if (split->material)
+        {
+            //_printf("Going to submit material\n");
+            split->material->Submit();
+        }
 
         //_printf("VertexShader %X stride %X\n", split->vertexShader, split->stride);
         Gfx::pDevice->SetFVF(split->vertexShader);
@@ -82,12 +87,15 @@ struct ShatterData
         Gfx::pDevice->SetStreamSource(0, split->vertexBuffer->GetProxyInterface(), 0, split->stride);
         Gfx::pDevice->SetIndices(split->indexBuffer->GetProxyInterface());
         Gfx::pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, split->baseIndex, 0, split->numVertices, 0, split->numIndices);*/
+        //_printf("Going to Draw\n");
         Gfx::pDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, numTris, verts, split->stride);
+        //_printf("Finished rendering, sucessfully :)\n");
 
     }
 
     void Update(float framelength)
     {
+        //_printf("NewShatter: Going to update %s (delta:%f)\n", FindChecksumName(sector->name), framelength);
         BYTE* p_vert_data = verts;
         DWORD stride = split->stride;
 
@@ -158,6 +166,7 @@ struct ShatterData
                 p_v2 = (D3DXVECTOR3*)(((BYTE*)p_v2) + (stride * 3));
             }
         }*/
+        //_printf("Finished updating, now going to render..\n");
     }
 
     ShatterData(SuperSector* _sector, Mesh::MaterialSplit* _split, int numTriangles)
@@ -169,13 +178,17 @@ struct ShatterData
 
         tris = new BYTE[numTriangles * 3];
         */
-        verts = new BYTE[numTriangles * 3 * _split->stride];
+        pos = NULL;
+        vel = NULL;
+        matrices = NULL;
 
+        verts = new BYTE[numTriangles * 3 * _split->stride];
+        numTris = 0;
         sector = _sector;
         split = _split;
 
-        gravity = 128.0f;
-        life = shatterLifetime;
+        gravity = Gfx::shatter_gravity;
+        life = shatterLifetime*Gfx::shatter_life_factor;
         bounce = shatterBounce;
         bounceAmp = shatterBounceAmplitude;
         _printf("Allocated memory\n");
@@ -186,6 +199,11 @@ struct ShatterData
         pos = new D3DXVECTOR3[numTris];
         vel = new D3DXVECTOR3[numTris];
         matrices = new Matrix[numTris];
+
+        if (pos && vel && matrices)
+            _printf("Memory alllocated successfully\n");
+        else
+            _printf("Memory did not allocate...\n");
     }
 
     void ShatterData::UpdateParameters(int index, float timestep)
@@ -241,7 +259,7 @@ bool subdivide_tri_stack(BYTE** p_write, SuperSector* sector, float targetShatte
 {
 
     static float dividers[3] = { 0.5f, 0.75f, 0.33f };
-    float divider = dividers[rand() % 4];
+    float divider = dividers[rand() % 3];
     // Three temporary buffers.
     static BYTE v0[256];
     static BYTE v1[256];

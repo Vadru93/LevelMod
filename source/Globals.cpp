@@ -60,6 +60,9 @@ bool Gfx::fps_fix = true;
 D3DMATERIAL9* Gfx::oldMaterial = NULL;
 float Gfx::uv_anim_threshold = 0.01f;
 float Gfx::uv_tiling_threshold = 1.0f;
+float Gfx::shatter_speed = 0.48f;
+float Gfx::shatter_life_factor = 0.5f;
+float Gfx::shatter_gravity = 128.0f;
 DWORD Gfx::frameCounter = 0;
 
 EXTERN DWORD _GetCurrentTime()

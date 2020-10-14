@@ -78,6 +78,7 @@ namespace Gfx
     extern DWORD numAnimations;
     extern float uv_anim_threshold;
     extern float uv_tiling_threshold;
+    extern float shatter_speed;
     void LoadCustomShaders(char* file);
     void UnloadShaders();
 #endif

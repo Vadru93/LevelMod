@@ -14,6 +14,8 @@
 #define p_current_texstage(x) *(DWORD*)(x * 4 + 0x00971EE8)
 #define p_target_texstage(x) *(DWORD*)(x * 4 + 0x009712C8)
 
+#define p_render_scene *(bool*)0x00089000
+
 //--------Spine and Acid--------
 enum TransferType
 {
@@ -64,6 +66,9 @@ namespace Gfx
     extern __restrict LPDIRECT3DDEVICE9 pDevice;
     extern float uv_tiling_threshold;
     extern DWORD frameCounter;
+    extern float shatter_speed;
+    extern float shatter_life_factor;
+    extern float shatter_gravity;
 };
 
 //--------XINPUT--------
