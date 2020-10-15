@@ -19,6 +19,114 @@ enum MeshState
     update,
 };
 
+struct TextureData
+{
+    BYTE unk[0x34];
+    Direct3DBaseTexture8* base;
+    DWORD unk1;
+    DWORD alpha;
+
+#define p_old_state1 *(DWORD*)0x009714D4
+#define p_old_state2 *(DWORD*)0x009714D0
+#define p_old_state3 *(DWORD*)0x00971540
+#define p_old_state4 *(DWORD*)0x00971C64
+#define p_old_state5 *(DWORD*)0x00972978
+#define p_old_state6(x) *(DWORD*)(0x00971548 + x*4)
+#define p_old_state7 *(DWORD*)0x00971544
+#define p_old_state8 *(DWORD*)0x00971C68
+
+#define p_old_state9(x) *(DWORD*)(0x00971548 + x*4)
+
+#define p_old_state10 *(DWORD*)0x00971C84
+
+#define p_old_state11(x) *(DWORD*)(0x00971548 + x*4)
+
+#define p_some_state1 *(DWORD*)0x005CEF00
+#define p_some_state2 *(DWORD*)0x005CEEFC
+
+#define p_old_state12 *(DWORD*)0x00971C54
+#define p_old_state13(x) *(DWORD*)(0x00971548 + x*4)
+
+#define p_current_texture(pass) *(DWORD*)(0x009714F0+pass*4)
+
+
+
+    void Submit()
+    {
+        if (!alpha)
+        {
+            if (p_old_state1)
+            {
+                p_old_state1 = alpha;
+                if (p_old_state2)
+                {
+                    DWORD old_state5 = p_old_state5;
+
+                    if (p_old_state3 != 0x2)
+                    {
+                        p_old_state4 = p_some_state1;
+                        if (old_state5 < 0x100)
+                        {
+                            p_old_state6(old_state5) = 0x13;
+                            old_state5++;
+                        }
+                        p_old_state3 = 0x2;
+                    }
+
+                    if (p_old_state7 != 0x1)
+                    {
+                        p_old_state8 = p_some_state2;
+                        if (old_state5 < 0x100)
+                        {
+                            p_old_state9(p_old_state5) = 0x14;
+                            old_state5++;
+                        }
+                    }
+                    if (p_old_state10)
+                    {
+                        p_old_state11(old_state5) = 0x1B;
+                        old_state5++;
+                        p_old_state10 = 0;
+                    }
+                    if (p_old_state12)
+                    {
+                        p_old_state12 = 0;
+                        p_old_state13(old_state5) = 0xF;
+                        old_state5++;
+
+                    }
+                    //p_old_state5 = old_state5;
+                }
+            }
+        }
+
+        Direct3DBaseTexture8* pTexture = base;
+
+        if (pTexture)
+        {
+            switch (pTexture->GetType())
+            {
+            case D3DRTYPE_TEXTURE:
+                Gfx::pDevice->SetTexture(0, static_cast<Direct3DTexture8*>(pTexture)->GetProxyInterface());
+                return;
+            case D3DRTYPE_VOLUMETEXTURE:
+                Gfx::pDevice->SetTexture(0, static_cast<Direct3DVolumeTexture8*>(pTexture)->GetProxyInterface());
+                return;
+            case D3DRTYPE_CUBETEXTURE:
+                Gfx::pDevice->SetTexture(0, static_cast<Direct3DCubeTexture8*>(pTexture)->GetProxyInterface());
+                return;
+            default:
+                if(p_current_texture(0) != 0)
+                    Gfx::pDevice->SetTexture(0, NULL);
+                return;
+            }
+        }
+        else if(p_current_texture(0) != 0)
+            Gfx::pDevice->SetTexture(0, NULL);
+    }
+};
+
+
 struct Texture
 {
     struct Animation
@@ -48,29 +156,47 @@ struct Texture
         DWORD alphaRef;
     };
 
+    void Submit()
+    {
+        if (data)
+        {
+            data->Submit();
+        }
+        else if(p_current_texture(0) != 0)
+        {
+            Gfx::pDevice->SetTexture(0, NULL);
+        }
+    }
+
     IDirect3DBaseTexture9* GetBaseTexture()
     {
         //_printf("tex %p p_unk %X base %X\n", this, p_unk[0], *(DWORD*)(p_unk[0] + 0x34));
-        Direct3DBaseTexture8* pTexture = *(Direct3DBaseTexture8**)(p_unk[0] + 0x34);
-        if (pTexture)
+        if (data)
         {
-            switch (pTexture->GetType())
+            Direct3DBaseTexture8* pTexture = data->base;
+            if (pTexture)
             {
-            case D3DRTYPE_TEXTURE:
-                return static_cast<Direct3DTexture8*>(pTexture)->GetProxyInterface();
-            case D3DRTYPE_VOLUMETEXTURE:
-                return static_cast<Direct3DVolumeTexture8*>(pTexture)->GetProxyInterface();
-            case D3DRTYPE_CUBETEXTURE:
-                return static_cast<Direct3DCubeTexture8*>(pTexture)->GetProxyInterface();
+                switch (pTexture->GetType())
+                {
+                case D3DRTYPE_TEXTURE:
+                    return static_cast<Direct3DTexture8*>(pTexture)->GetProxyInterface();
+                case D3DRTYPE_VOLUMETEXTURE:
+                    return static_cast<Direct3DVolumeTexture8*>(pTexture)->GetProxyInterface();
+                case D3DRTYPE_CUBETEXTURE:
+                    return static_cast<Direct3DCubeTexture8*>(pTexture)->GetProxyInterface();
+                }
             }
         }
         return NULL;
     }
 
 
-    BYTE* p_unk[4];
+    TextureData* data;
+    BYTE* p_unk[3];
     char tex_name[256];
-    DWORD unk[4];
+    DWORD unk[2];
+    DWORD uAddress;
+    DWORD vAddress;
     ShaderObject2 shader;
 };
 
@@ -78,36 +204,87 @@ struct Material
 {
     Texture* texture;
 
+    static void Submit_Original(Texture* tex)
+    {
+        typedef void(__cdecl* const pSubmit)(TextureData* data, Texture* tex);
+        pSubmit(0x00554EC0)(tex->data, tex);
+    }
+
     void Submit()
     {
-        if (texture)
+        //_printf("BaseTexture %p material %p\n", texture->GetBaseTexture(), this);
+        //Submit_Original(texture);
+        texture->Submit();
+
+        if (p_current_texstage(D3DTSS_ADDRESSU) != texture->uAddress)
         {
-            //_printf("BaseTexture %p material %p\n", texture->GetBaseTexture(), this);
-            Gfx::pDevice->SetTexture(0, texture->GetBaseTexture());
+            p_current_texstage(D3DTSS_ADDRESSU) = texture->uAddress;
+            p_target_texstage(D3DTSS_ADDRESSU) = texture->uAddress;
+            Gfx::pDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, texture->uAddress);
+        }
 
-            if (texture->shader.flags != 0x30303030)
+        if (p_current_texstage(D3DTSS_ADDRESSV) != texture->vAddress)
+        {
+            p_current_texstage(D3DTSS_ADDRESSV) = texture->vAddress;
+            p_target_texstage(D3DTSS_ADDRESSV) = texture->vAddress;
+            Gfx::pDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, texture->vAddress);
+        }
+
+        if (texture->shader.flags != 0x30303030)
+        {
+            //_printf("%X\n", texture->shader.flags);
+            if (p_current_renderstate(D3DRS_BLENDOP) != texture->shader.blend_op)
             {
-                //_printf("%X\n", texture->shader.flags);
-                if (p_current_renderstate(D3DRS_BLENDOP) != texture->shader.blend_op)
-                {
-                    //Set old blend_op
-                    p_current_renderstate(D3DRS_BLENDOP) = texture->shader.blend_op;
-                    Gfx::pDevice->SetRenderState(D3DRS_BLENDOP, texture->shader.blend_op);
-                }
+                //Set old blend_op
+                p_current_renderstate(D3DRS_BLENDOP) = texture->shader.blend_op;
+                p_target_renderstate(D3DRS_BLENDOP) = texture->shader.blend_op;
+                Gfx::pDevice->SetRenderState(D3DRS_BLENDOP, texture->shader.blend_op);
+            }
 
-                if (p_current_renderstate(D3DRS_SRCBLEND) != texture->shader.src_blend)
-                {
-                    //Set old src_blend
-                    p_current_renderstate(D3DRS_SRCBLEND) = texture->shader.src_blend;
-                    Gfx::pDevice->SetRenderState(D3DRS_SRCBLEND, texture->shader.src_blend);
-                }
+            if (p_current_renderstate(D3DRS_SRCBLEND) != texture->shader.src_blend)
+            {
+                //Set old src_blend
+                p_current_renderstate(D3DRS_SRCBLEND) = texture->shader.src_blend;
+                p_target_renderstate(D3DRS_SRCBLEND) = texture->shader.src_blend;
+                Gfx::pDevice->SetRenderState(D3DRS_SRCBLEND, texture->shader.src_blend);
+            }
 
-                if (p_current_renderstate(D3DRS_DESTBLEND) != texture->shader.dest_blend)
-                {
-                    //Set old dest_blend
-                    p_current_renderstate(D3DRS_DESTBLEND) = texture->shader.dest_blend;
-                    Gfx::pDevice->SetRenderState(D3DRS_DESTBLEND, texture->shader.dest_blend);
-                }
+            if (p_current_renderstate(D3DRS_DESTBLEND) != texture->shader.dest_blend)
+            {
+                //Set old dest_blend
+                p_current_renderstate(D3DRS_DESTBLEND) = texture->shader.dest_blend;
+                p_target_renderstate(D3DRS_DESTBLEND) = texture->shader.dest_blend;
+                Gfx::pDevice->SetRenderState(D3DRS_DESTBLEND, texture->shader.dest_blend);
+            }
+        }
+        else
+        {
+            DWORD target = p_target_renderstate(D3DRS_BLENDOP);
+            if (p_current_renderstate(D3DRS_BLENDOP) != target)
+            {
+                p_current_renderstate(D3DRS_BLENDOP) = target;
+                Gfx::pDevice->SetRenderState(D3DRS_BLENDOP, target);
+            }
+
+            target = p_target_renderstate(D3DRS_SRCBLEND);
+            if (p_current_renderstate(D3DRS_SRCBLEND) != target)
+            {
+                p_current_renderstate(D3DRS_SRCBLEND) = target;
+                Gfx::pDevice->SetRenderState(D3DRS_SRCBLEND, target);
+            }
+
+            target = p_target_renderstate(D3DRS_DESTBLEND);
+            if (p_current_renderstate(D3DRS_DESTBLEND) != target)
+            {
+                p_current_renderstate(D3DRS_DESTBLEND) = target;
+                Gfx::pDevice->SetRenderState(D3DRS_DESTBLEND, target);
+            }
+
+            target = p_target_renderstate(D3DRS_CULLMODE);
+            if (p_current_renderstate(D3DRS_CULLMODE) != target)
+            {
+                p_current_renderstate(D3DRS_CULLMODE) = target;
+                Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, target);
             }
         }
     }

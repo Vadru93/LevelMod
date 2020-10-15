@@ -160,49 +160,54 @@ void BouncyObj_OnBounce(Model* mdl)
 
                     char opcode = *pScript;
 
-                    while (opcode != 0x24)
+                    while (opcode != QScript::ScriptToken::EndScript)
                     {
                         pScript++;
                         switch (opcode)
                         {
-                        case 0x49:
-                        case 0x48:
-                        case 0x47:
+                        case QScript::ScriptToken::If2:
+                        case QScript::ScriptToken::Else2:
+                        case QScript::ScriptToken::EndSwitch2:
                             pScript += 2;
                             break;
 
-                        case 0x1C:
-                        case 0x1B:
+                        case QScript::ScriptToken::String:
+                        case QScript::ScriptToken::LocalString:
                             pScript += *(DWORD*)pScript + 4;
                             break;
 
-                        case 0x17:
-                        case 0x1A:
-                        case 0x2E:
-                        case 2:
+                        case QScript::ScriptToken::Int:
+                        case QScript::ScriptToken::Float:
+                        case QScript::ScriptToken::Jump:
+                        case QScript::ScriptToken::NewLineNumber:
                             pScript += 4;
                             break;
 
-                        case 1:
-                        case 0x3:
-                        case 0x4:
-                        case 5:
-                        case 6:
-                        case 7:
-                        case 9:
-                        case 0x0E:
-                        case 0x0F:
-                        case 0x18:
-                        case 0x23:
-                        case 0x25:
-                        case 0x26:
-                        case 0x28:
-                        case 0x2D:
-                        case 0x30:
-                        case 0x39:
+                            //Known key values
+                        case QScript::ScriptToken::NewLine:
+                        case QScript::ScriptToken::Struct:
+                        case QScript::ScriptToken::EndStruct:
+                        case QScript::ScriptToken::Array:
+                        case QScript::ScriptToken::EndArray:
+                        case QScript::ScriptToken::Equals:
+                        case QScript::ScriptToken::Property:
+                        case QScript::ScriptToken::Comma:
+                        case QScript::ScriptToken::Parenthesis:
+                        case QScript::ScriptToken::EndParenthesis:
+                        case QScript::ScriptToken::Begin:
+                        case QScript::ScriptToken::Repeat:
+                        case QScript::ScriptToken::Break:
+                        case QScript::ScriptToken::Script:
+                        case QScript::ScriptToken::If:
+                        case QScript::ScriptToken::Else:
+                        case QScript::ScriptToken::ElseIf:
+                        case QScript::ScriptToken::EndIf:
+                        case QScript::ScriptToken::Global:
+                        case QScript::ScriptToken::RandomRange:
+                        case QScript::ScriptToken::Not:
                             break;
 
-                        case 0x16:
+                        case QScript::ScriptToken::QBKey:
                             DWORD key;
                             key = *(DWORD*)pScript;
                             if (key == Checksums::Shatter || key == Checksums::ShatterAndDie || key == trigger)
@@ -215,17 +220,17 @@ void BouncyObj_OnBounce(Model* mdl)
                             pScript += 4;
                             break;
 
-                        case 0x1F:
+                        case QScript::ScriptToken::Pair:
                             pScript += 8;
                             break;
 
-                        case 0x1E:
+                        case QScript::ScriptToken::Vector:
                             pScript += 12;
                             break;
 
-                        case 0x40:
-                        case 0x2F:
-                        case 0x37:
+                        case QScript::ScriptToken::Random:
+                        case QScript::ScriptToken::RandomPermute:
+                        case QScript::ScriptToken::RandomNoRepeat:
                             pScript += *(DWORD*)pScript * 4 + 4;
                             break;
 

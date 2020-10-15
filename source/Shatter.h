@@ -74,23 +74,22 @@ struct ShatterData
     void Render()
     {
         //printf("Split %p Material %X\n", split, split->material);
-        if (split->material)
+        if (split->material && split->material->texture)
         {
             //_printf("Going to submit material\n");
             split->material->Submit();
+
+            //_printf("VertexShader %X stride %X\n", split->vertexShader, split->stride);
+            Gfx::pDevice->SetFVF(split->vertexShader);
+
+            /*_printf("VBuffer %p IBuffer %p stride %X primCount %d vertCount %d\n", split->vertexBuffer->GetProxyInterface(), split->indexBuffer->GetProxyInterface(), split->stride, split->numIndices, split->numVertices);
+            Gfx::pDevice->SetStreamSource(0, split->vertexBuffer->GetProxyInterface(), 0, split->stride);
+            Gfx::pDevice->SetIndices(split->indexBuffer->GetProxyInterface());
+            Gfx::pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, split->baseIndex, 0, split->numVertices, 0, split->numIndices);*/
+            //_printf("Going to Draw\n");
+            Gfx::pDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, numTris, verts, split->stride);
+            //_printf("Finished rendering, sucessfully :)\n");
         }
-
-        //_printf("VertexShader %X stride %X\n", split->vertexShader, split->stride);
-        Gfx::pDevice->SetFVF(split->vertexShader);
-
-        /*_printf("VBuffer %p IBuffer %p stride %X primCount %d vertCount %d\n", split->vertexBuffer->GetProxyInterface(), split->indexBuffer->GetProxyInterface(), split->stride, split->numIndices, split->numVertices);
-        Gfx::pDevice->SetStreamSource(0, split->vertexBuffer->GetProxyInterface(), 0, split->stride);
-        Gfx::pDevice->SetIndices(split->indexBuffer->GetProxyInterface());
-        Gfx::pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, split->baseIndex, 0, split->numVertices, 0, split->numIndices);*/
-        //_printf("Going to Draw\n");
-        Gfx::pDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, numTris, verts, split->stride);
-        //_printf("Finished rendering, sucessfully :)\n");
-
     }
 
     void Update(float framelength)
@@ -258,7 +257,7 @@ bool NewShatterScript(CStruct* pStruct, CScript* pScript);
 bool subdivide_tri_stack(BYTE** p_write, SuperSector* sector, float targetShatterArea, int & numTris)
 {
 
-    static float dividers[3] = { 0.5f, 0.75f, 0.33f };
+    static float dividers[4] = { 0.5f, 0.6f, 0.2f, 0.33f };
     float divider = dividers[rand() % 3];
     // Three temporary buffers.
     static BYTE v0[256];

@@ -4460,6 +4460,15 @@ void AddFunctions()
         header->pFunction = NewShatterScript;
 }
 
+float __cdecl proxy_SnapToGroundClamp(float a1)
+{
+    // fixes snap to ground bugs
+    float angle = a1;
+    if (angle > 1.0f) angle = 1.0f;
+    else if (angle < -1.0f) angle = -1.0f;
+    return cos(angle);
+}
+
 //void HookControls();
 void InitLevelMod()
 {
@@ -4505,6 +4514,7 @@ void InitLevelMod()
     *(WORD*)0x00427A9B = 0x840F;//je
     HookFunction(0x00427A9D, NotGood_naked);
     HookFunction(0x004F42AA, SetVertexShader_hook);
+    HookFunction(0x0049F1DD, proxy_SnapToGroundClamp);
     //MessageBox(0, 0, 0, 0);
     *(DWORD*)0x00427AA3 = 0x90909090;//nop
     *(WORD*)(0x00427AA3 + 4) = 0x9090;

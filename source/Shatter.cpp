@@ -130,8 +130,8 @@ void ShatterSuperSector(SuperSector* super_sector)
     float targetShatterArea[5];
     targetShatterArea[0] = shatterAreaTest;
     targetShatterArea[1] = shatterAreaTest;
-    targetShatterArea[2] = shatterAreaTest *= 1.33;
-    targetShatterArea[3] = shatterAreaTest *= 1.25f;
+    targetShatterArea[2] = shatterAreaTest *= 0.9;
+    targetShatterArea[3] = shatterAreaTest *= 1.1f;
     targetShatterArea[4] = shatterAreaTest *= 0.75f;
 
     if (sector->num_total_indices1 >= 3)
@@ -346,14 +346,18 @@ void RenderShatterObjects()
         Gfx::pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
     }
 
-    //Make sure textures are set to zero
-    Gfx::pDevice->SetTexture(1, NULL);
-    Gfx::pDevice->SetTexture(2, NULL);
-    Gfx::pDevice->SetTexture(3, NULL);
 
     //Make sure we update and render once per frame
     if (shatterObjects.size() && lastFrameCount != Gfx::frameCounter)
     {
+
+        //Make sure textures are set to zero
+        Gfx::pDevice->SetTexture(0, NULL);
+        p_current_texture(0) = 0;
+        Gfx::pDevice->SetTexture(1, NULL);
+        Gfx::pDevice->SetTexture(2, NULL);
+        Gfx::pDevice->SetTexture(3, NULL);
+
         lastFrameCount = Gfx::frameCounter;
 
         DWORD old, old_state;
