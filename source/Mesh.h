@@ -358,8 +358,8 @@ struct Mesh
     {
         DWORD unk1;//NULL?
         DWORD stride;
-        DWORD numIndices;
         DWORD numVertices;
+        DWORD numIndices;
 
         Material* material;
         DWORD vertexShader;

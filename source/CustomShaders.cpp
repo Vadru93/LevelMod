@@ -317,6 +317,7 @@ bool reset = false;
 bool restore = false;
 bool restoreMaterial = false;
 bool restore_matrix = false;
+bool restore_filter = false;
 
 void __stdcall SetVertexShader_hook()
 {
@@ -333,12 +334,14 @@ void __stdcall SetVertexShader_hook()
                               0.0f, 0.0f, 0.0f, 0.0f,
                               0.0f, 0.0f, 0.0f, 0.0f };
 
-    static ShaderObject2* pShader = NULL;
+    static ShaderObject2* pShader;
+    static Mesh::MaterialSplit* pMesh;
 
     //p_loaded_shaders is false until shaders are fully loaded.
     if (p_render_shaders)
     {
         //skip 10 bytes to get pointer to our matsplit
+        _asm mov pMesh, esi
         _asm add esi, 0x10
         _asm mov esi, [esi]
 
@@ -440,44 +443,90 @@ void __stdcall SetVertexShader_hook()
         //pDevice->SetMaterial(pShader->material);
 
 
-        //Get old blend_op
-        DWORD old_blend = *(DWORD*)(D3DRS_BLENDOP * 4 + 0x00971948);
-        //Set wanted blend_op
-        *(DWORD*)(D3DRS_BLENDOP * 4 + 0x00971C18) = pShader->blend_op;
-        if (old_blend != pShader->blend_op)
+        p_target_renderstate(D3DRS_BLENDOP) = pShader->blend_op;
+        if (p_current_renderstate(D3DRS_BLENDOP) != pShader->blend_op)
         {
-            //Set old blend_op
-            *(DWORD*)(D3DRS_BLENDOP * 4 + 0x00971948) = pShader->blend_op;
+            p_current_renderstate(D3DRS_BLENDOP) = pShader->blend_op;
             pDevice->SetRenderState(D3DRS_BLENDOP, pShader->blend_op);
         }
 
-        old_blend = *(DWORD*)(D3DRS_SRCBLEND * 4 + 0x00971948);
-        //Set wanted src_blend
-        *(DWORD*)(D3DRS_SRCBLEND * 4 + 0x00971C18) = pShader->src_blend;
-        if (old_blend != pShader->src_blend)
+        p_target_renderstate(D3DRS_SRCBLEND) = pShader->src_blend;
+        if (p_current_renderstate(D3DRS_SRCBLEND) != pShader->src_blend)
         {
-            //Set old src_blend
-            *(DWORD*)(D3DRS_SRCBLEND * 4 + 0x00971948) = pShader->src_blend;
+            p_current_renderstate(D3DRS_SRCBLEND) = pShader->src_blend;
             pDevice->SetRenderState(D3DRS_SRCBLEND, pShader->src_blend);
         }
 
-        old_blend = *(DWORD*)(D3DRS_DESTBLEND * 4 + 0x00971948);
-        //Set wanted dest_blend
-        *(DWORD*)(D3DRS_DESTBLEND * 4 + 0x00971C18) = pShader->dest_blend;
-        if (old_blend != pShader->dest_blend)
+        p_target_renderstate(D3DRS_DESTBLEND) = pShader->dest_blend;
+        if (p_current_renderstate(D3DRS_DESTBLEND) != pShader->dest_blend)
         {
-            //Set old blend_op
-            *(DWORD*)(D3DRS_DESTBLEND * 4 + 0x00971948) = pShader->dest_blend;
+            p_current_renderstate(D3DRS_DESTBLEND) = pShader->dest_blend;
             pDevice->SetRenderState(D3DRS_DESTBLEND, pShader->dest_blend);
         }
 
-         old_blend = *(DWORD*)(D3DRS_ALPHAREF*4 + 0x00971948);
-         *(DWORD*)(D3DRS_ALPHAREF * 4 + 0x00971C18) = pShader->alphaRef;
-         if (old_blend != pShader->alphaRef)
-         {
-             *(DWORD*)(D3DRS_ALPHAREF * 4 + 0x00971948) = pShader->alphaRef;
-             pDevice->SetRenderState(D3DRS_ALPHAREF, pShader->alphaRef);
-         }
+        p_target_renderstate(D3DRS_ALPHAREF) = pShader->alphaRef;
+        if (p_current_renderstate(D3DRS_ALPHAREF) != pShader->alphaRef)
+        {
+            p_current_renderstate(D3DRS_ALPHAREF) = pShader->alphaRef;
+            pDevice->SetRenderState(D3DRS_ALPHAREF, pShader->alphaRef);
+        }
+
+        if (Gfx::filtering)
+        {
+            if (pMesh->material->texture->uAddress != 1 || pMesh->material->texture->vAddress != 1)
+            {
+                restore_filter = true;
+                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MAGFILTER, D3DTEXF_NONE);
+                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MINFILTER, D3DTEXF_NONE);
+                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MIPFILTER, D3DTEXF_NONE);
+            }
+            else if (restore_filter)
+            {
+                restore_filter = false;
+                extern DWORD MaxAnisotropy;
+                DWORD Value = MaxAnisotropy ? D3DTEXF_ANISOTROPIC : D3DTEXF_LINEAR;
+
+                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MAGFILTER, Value);
+                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MINFILTER, Value);
+                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MIPFILTER, Value);
+
+            }
+        }
+        /*if (p_render_scene && !(pShader->flags & 4) && pShader->blend_op == 1 && pShader->src_blend == 5 && pShader->dest_blend == 6)
+        {
+            Texture* texture = pMesh->material->texture;
+
+            if (texture && pMesh->indexBuffer && pMesh->vertexBuffer && pMesh->numIndices && pMesh->numVertices)
+            {
+                texture->data->alpha = 0;
+                /*_printf("Render 2nd pass\n");
+                DWORD target = p_target_texstage(D3DTSS_ADDRESSU);
+                p_current_texstage(D3DTSS_ADDRESSU) = target;
+                pDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, target);
+
+                target = p_target_texstage(D3DTSS_ADDRESSV);
+                p_current_texstage(D3DTSS_ADDRESSV) = target;
+                pDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, target);
+
+                //pDevice->SetFVF(pMesh->vertexShader);
+                /*if (p_current_vertexbuffer != pMesh->vertexBuffer)
+                {
+                    p_current_vertexbuffer = pMesh->vertexBuffer;*/
+                    //pDevice->SetStreamSource(0, pMesh->vertexBuffer->GetProxyInterface(), 0, pMesh->stride);
+  
+                /*}
+                if (p_current_indexbuffer != pMesh->indexBuffer)
+                {
+                    p_current_indexbuffer = pMesh->indexBuffer;*/
+                    //pDevice->SetIndices(pMesh->indexBuffer->GetProxyInterface());
+                /*}
+
+                p_current_baseindex = pMesh->baseIndex;*/
+                //pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, static_cast<INT>(pMesh->baseIndex), 0, pMesh->numVertices, 0, pMesh->numIndices-2);*/
+            /*}
+        }*/
+
+
         _asm pop edi
         _asm pop esi
         _asm mov esp, ebp
@@ -491,7 +540,7 @@ void __stdcall SetVertexShader_hook()
         //Maybe also need to reset blendmodes???
         if (reset)
         {
-
+            reset = false;
             if (restore_matrix)
             {
                 restore_matrix = false;
@@ -499,6 +548,17 @@ void __stdcall SetVertexShader_hook()
                 pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
             }
 
+            if (restore_filter)
+            {
+                restore_filter = false;
+                extern DWORD MaxAnisotropy;
+                DWORD Value = MaxAnisotropy ? D3DTEXF_ANISOTROPIC : D3DTEXF_LINEAR;
+
+                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MAGFILTER, Value);
+                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MINFILTER, Value);
+                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MIPFILTER, Value);
+
+            }
         }
 
     }
@@ -671,16 +731,27 @@ void __stdcall SetVertexShader_hook_old()
 
         //Reset extralayer textures to NULL
         //Maybe also need to reset blendmodes???
-        if (reset)
-        {
 
-            if (restore_matrix)
+        if (restore_matrix)
+        {
+            restore_matrix = false;
+            pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+            pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
+        }
+
+        if (Gfx::filtering)
+        {
+            if (restore_filter)
             {
-                restore_matrix = false;
-                pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
-                pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
+                restore_filter = false;
+                extern DWORD MaxAnisotropy;
+                DWORD Value = MaxAnisotropy ? D3DTEXF_ANISOTROPIC : D3DTEXF_LINEAR;
+
+                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MAGFILTER, Value);
+                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MINFILTER, Value);
+                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MIPFILTER, D3DTEXF_GAUSSIANQUAD);
+
             }
-      
         }
 
     }

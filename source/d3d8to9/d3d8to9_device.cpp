@@ -1178,6 +1178,8 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::SetTextureStageState(DWORD Stage, D3D
             else
                 Value = D3DTEXF_LINEAR;
         }
+        else
+            Value = D3DTEXF_NONE;
         return ProxyInterface->SetSamplerState(Stage, D3DSAMP_MAGFILTER, Value);
     case D3DTSS_MINFILTER:
         if (Gfx::filtering)
@@ -1187,11 +1189,16 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::SetTextureStageState(DWORD Stage, D3D
             else
                 Value = D3DTEXF_LINEAR;
         }
+        else
+            Value = D3DTEXF_NONE;
         return ProxyInterface->SetSamplerState(Stage, D3DSAMP_MINFILTER, Value);
     case D3DTSS_MIPFILTER:
         if (Gfx::filtering)
         {
-            Value = D3DTEXF_LINEAR;
+            if (MaxAnisotropy)
+                Value = D3DTEXF_ANISOTROPIC;
+            else
+                Value = D3DTEXF_LINEAR;
         }
         return ProxyInterface->SetSamplerState(Stage, D3DSAMP_MIPFILTER, Value);
     case D3DTSS_MIPMAPLODBIAS:
@@ -1199,10 +1206,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::SetTextureStageState(DWORD Stage, D3D
     case D3DTSS_MAXMIPLEVEL:
         return ProxyInterface->SetSamplerState(Stage, D3DSAMP_MAXMIPLEVEL, Value);
     case D3DTSS_MAXANISOTROPY:
-        if (Gfx::filtering)
-        {
-            Value = MaxAnisotropy;
-        }
+        Value = MaxAnisotropy;
         return ProxyInterface->SetSamplerState(Stage, D3DSAMP_MAXANISOTROPY, Value);
     default:
         return ProxyInterface->SetTextureStageState(Stage, Type, Value);

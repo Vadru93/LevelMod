@@ -14,6 +14,11 @@
 #define p_current_texstage(x) *(DWORD*)(x * 4 + 0x00971EE8)
 #define p_target_texstage(x) *(DWORD*)(x * 4 + 0x009712C8)
 
+#define p_current_baseindex *(DWORD*)0x005CEDC0
+#define p_current_indexbuffer *(Direct3DIndexBuffer8**)0x005CEDBC
+
+#define p_current_vertexbuffer *(Direct3DVertexBuffer8**)0x00906760
+
 #define p_render_scene *(bool*)0x00089000
 
 //--------Spine and Acid--------

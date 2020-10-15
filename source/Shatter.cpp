@@ -345,6 +345,19 @@ void RenderShatterObjects()
         Gfx::pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
         Gfx::pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
     }
+    extern bool restore_filter;
+
+    if (restore_filter)
+    {
+        restore_filter = false;
+        extern DWORD MaxAnisotropy;
+        DWORD Value = MaxAnisotropy ? D3DTEXF_ANISOTROPIC : D3DTEXF_LINEAR;
+
+        Gfx::pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MAGFILTER, Value);
+        Gfx::pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MINFILTER, Value);
+        Gfx::pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MIPFILTER, Value);
+
+    }
 
 
     //Make sure we update and render once per frame
