@@ -19,7 +19,7 @@
 
 #define p_current_vertexbuffer *(Direct3DVertexBuffer8**)0x00906760
 
-#define p_render_scene *(bool*)0x00089000
+#define p_render_scene *(bool*)0x00400019
 
 //--------Spine and Acid--------
 enum TransferType

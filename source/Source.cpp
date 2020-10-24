@@ -808,7 +808,7 @@ void DestroySuperSectors()
     GameState::GotSuperSectors = false;
     extern void UnloadShatterObjects();
     UnloadShatterObjects();
-    *(bool*)0x00040D22 = false;
+    *(bool*)0x00400020 = false;
     if (movingObjects.size())
         movingObjects.clear();
 
@@ -819,7 +819,7 @@ void CreateSuperSectors()
 {
     _printf("Going to create MovingObjects\n");
     GameState::GotSuperSectors = true;
-    *(bool*)0x00040D22 = true;
+    *(bool*)0x00400020 = true;
     //Game::skater = Skater::UpdateSkater();
 }
 FILE* logFile;
@@ -1552,26 +1552,26 @@ void ReadFirstOptions()
     OptionReader = new CIniReader(IniPath);
 
 
-    _printf("Reading from ini file %s, default %d ", "LM_GFX_eBuffering", Gfx::numBackBuffers);
+    //_printf("Reading from ini file %s, default %d ", "LM_GFX_eBuffering", Gfx::numBackBuffers);
     Gfx::numBackBuffers = OptionReader->ReadInt("Script_Settings", "LM_GFX_eBuffering", Gfx::numBackBuffers);
-    _printf("value %d\n", Gfx::numBackBuffers);
+    //_printf("value %d\n", Gfx::numBackBuffers);
 
-    _printf("Reading from ini file %s, default %d ", "LM_GFX_eAntiAlias", Gfx::AntiAliasing);
+    //_printf("Reading from ini file %s, default %d ", "LM_GFX_eAntiAlias", Gfx::AntiAliasing);
     Gfx::AntiAliasing = OptionReader->ReadInt("Script_Settings", "LM_GFX_eAntiAlias", Gfx::AntiAliasing);
-    _printf("value %d\n", Gfx::AntiAliasing);
+    //_printf("value %d\n", Gfx::AntiAliasing);
 
-    _printf("Reading from ini file %s, default %d ", "LM_GFX_bFiltering", Gfx::filtering);
+    //_printf("Reading from ini file %s, default %d ", "LM_GFX_bFiltering", Gfx::filtering);
     Gfx::filtering = OptionReader->ReadInt("Script_Settings", "LM_GFX_bFiltering", Gfx::filtering);
-    _printf("value %d\n", Gfx::filtering);
+    //_printf("value %d\n", Gfx::filtering);
 
-    _printf("Reading from ini file %s, default %d ", "LM_GFX_bFixStutter", Gfx::fps_fix);
+    //_printf("Reading from ini file %s, default %d ", "LM_GFX_bFixStutter", Gfx::fps_fix);
     Gfx::fps_fix = OptionReader->ReadInt("Script_Settings", "LM_GFX_bFixStutter", Gfx::fps_fix);
-    _printf("value %d\n", Gfx::fps_fix);
+    //_printf("value %d\n", Gfx::fps_fix);
     //CreateConsole();
 
-    _printf("Reading from ini file %s, default %d ", "LM_DebugOption_bDebugMode", debug);
+    //_printf("Reading from ini file %s, default %d ", "LM_DebugOption_bDebugMode", debug);
     debug = OptionReader->ReadInt("Script_Settings", "LM_DebugOption_bDebugMode", debug);
-    _printf("value %d\n", debug);
+    //_printf("value %d\n", debug);
     if (debug)
     {
         CreateConsole();
@@ -4472,16 +4472,14 @@ float __cdecl proxy_SnapToGroundClamp(float a1)
 //void HookControls();
 void InitLevelMod()
 {
-
-    extern std::map<DWORD, DWORD> movableObjects;
-    movableObjects.insert(std::pair<DWORD, DWORD>(Checksum("dt_blimp_GameOb"), Checksum("dt_blimp")));
     //HookControls();
 
     DWORD old;
+    VirtualProtect((LPVOID)0x00400019, 6, PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((LPVOID)0x0042FA0D, 9, PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((LPVOID)0x0042FA9D, 19, PAGE_EXECUTE_READWRITE, &old);
-    BYTE codeCaveRenderHook[] = { 0xC6, 0x05, 0x00, 0x90, 0x08, 0x00, 0x01, 0x90, 0x90 };
-    BYTE codeCaveRenderHook2[] = { 0x5E, 0x5D, 0xC6, 0x05, 0x00, 0x90, 0x08, 0x00, 0x00, 0xEB, 0x08, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
+    BYTE codeCaveRenderHook[] = { 0xC6, 0x05, 0x19, 0x00, 0x40, 0x00, 0x01, 0x90, 0x90 };
+    BYTE codeCaveRenderHook2[] = { 0x5E, 0x5D, 0xC6, 0x05, 0x19, 0x00, 0x40, 0x00, 0x00, 0xEB, 0x08, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
     memcpy((void*)0x0042FA0D, codeCaveRenderHook, sizeof(codeCaveRenderHook));
     memcpy((void*)0x0042FA9D, codeCaveRenderHook2, sizeof(codeCaveRenderHook2));
 
@@ -5153,25 +5151,28 @@ void DrawFrame2()
 
 void OnRelease()
 {
-    _printf("OnRelease\n");
-    if (m_font)
+    if (!init)
     {
-        m_font->Release();
-        m_font = NULL;
+        _printf("OnRelease\n");
+        if (m_font)
+        {
+            m_font->Release();
+            m_font = NULL;
+        }
+        if (QScript::Scripts)
+            delete QScript::Scripts;
+        QScript::Scripts = NULL;
+        movingObjects.clear();
+        if (observe)
+            delete observe;
+        observe = NULL;
+        if (OptionWriter)
+            delete OptionWriter;
+        OptionWriter = NULL;
+        if (OptionReader)
+            delete OptionReader;
+        OptionReader = NULL;
     }
-    if (QScript::Scripts)
-        delete QScript::Scripts;
-    QScript::Scripts = NULL;
-    movingObjects.clear();
-    if (observe)
-        delete observe;
-    observe = NULL;
-    if (OptionWriter)
-        delete OptionWriter;
-    OptionWriter = NULL;
-    if (OptionReader)
-        delete OptionReader;
-    OptionReader = NULL;
 }
 
 void OnLost()

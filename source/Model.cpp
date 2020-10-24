@@ -288,9 +288,6 @@ void BouncyObj_Go(Model* mdl)
 }
 
 
-
-std::map<DWORD, DWORD> movableObjects;
-
 void Obj_MoveToNode(Model* mdl, CStruct* pStruct)
 {
     CStructHeader* node = Node::GetNodeStructByIndex(mdl->GetNodeIndex());

@@ -213,6 +213,7 @@ void UpdatePresentParameterForMultisample(D3DPRESENT_PARAMETERS* pPresentationPa
 }
 HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE DeviceType, HWND hFocusWindow, DWORD BehaviorFlags, D3DPRESENT_PARAMETERS8* pPresentationParameters, Direct3DDevice8** ppReturnedDeviceInterface)
 {
+   // MessageBox(0, 0, 0, 0);
 #ifndef D3D8TO9NOLOG
     LOG << "Redirecting '" << "IDirect3D8::CreateDevice" << "(" << this << ", " << Adapter << ", " << DeviceType << ", " << hFocusWindow << ", " << BehaviorFlags << ", " << pPresentationParameters << ", " << ppReturnedDeviceInterface << ")' ..." << std::endl;
 #endif
@@ -251,7 +252,7 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
         DWORD QualityLevels = 0;
 
         // Check AntiAliasing quality
-        for (int x = min(16, Gfx::AntiAliasing); x > 0; x--)
+        for (int x = Gfx::AntiAliasing == 1 ? 16 : min(16, Gfx::AntiAliasing); x > 0; x--)
         {
             if (SUCCEEDED(ProxyInterface->CheckDeviceMultiSampleType(Adapter,
                 DeviceType, (d3dpp.BackBufferFormat) ? d3dpp.BackBufferFormat : D3DFMT_A8R8G8B8, d3dpp.Windowed,
@@ -313,10 +314,13 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
     ProxyInterface->GetDeviceCaps(Adapter, DeviceType, &caps);
     MaxAnisotropy = caps.MaxAnisotropy;
 
+    //MessageBox(0, 0, 0, 0);
+
     *ppReturnedDeviceInterface = new Direct3DDevice8(this, DeviceInterface, (PresentParams.Flags & D3DPRESENTFLAG_DISCARD_DEPTHSTENCIL) != 0);
 
     // Set default vertex declaration
     DeviceInterface->SetFVF(D3DFVF_XYZ);
+    //MessageBox(0, "I need this to test", "", 0);
 
     return D3D_OK;
 }

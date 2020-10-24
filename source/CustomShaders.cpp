@@ -4,7 +4,7 @@
 #include "d3d9.h"
 
 #define ReadDWORD() *(DWORD*)pFile; pFile+=4
-#define p_render_shaders *(bool*)0x00040D22
+#define p_render_shaders *(bool*)0x00400020
 
 //extern __restrict LPDIRECT3DDEVICE9 pDevice;
 

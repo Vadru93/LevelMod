@@ -12,7 +12,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7EE21ADA-3B02-4CD6-A891-C2257A54B061}</ProjectGuid>
-    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -36,7 +36,7 @@
     <TargetName>d3d8</TargetName>
     <OutDir>bin\$(Configuration)\</OutDir>
     <IntDir>intermediate\$(Configuration)\</IntDir>
-    <IncludePath>C:\Users\Vadru\Documents\Visual Studio 2019\LevelMod\d3d8to9-master\source;C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\xinput.h;$(WindowsSdkDir)include;C:\Users\Vadru\Documents\Chilkat\include;$(IncludePath);$(DXSDK_DIR)\Include</IncludePath>
+    <IncludePath>C:\Users\Vadru\Documents\Visual Studio 2019\LevelMod\d3d8to9-master\source;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.18362.0\um\xinput.h;$(WindowsSdkDir)include;C:\Users\Vadru\Documents\Chilkat\include;$(IncludePath);$(DXSDK_DIR)\Include</IncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.18362.0\um\x86\xinput.lib;C:\Users\Vadru\Documents\Chilkat\libs;$(DXSDK_DIR)\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -48,6 +48,7 @@
       <SmallerTypeCheck>true</SmallerTypeCheck>
       <ControlFlowGuard>false</ControlFlowGuard>
       <FloatingPointExceptions>true</FloatingPointExceptions>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
