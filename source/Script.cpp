@@ -528,7 +528,7 @@ void QBScript::CreateQBTable(BYTE* table, bool level)
                 }
             }
         }
-        /*else if (_stricmp(it->second, name))
+        /*else if (__stricmp(it->second, name))
         {
             FILE* debugFile = fopen("debug.txt", "r+t");
             fseek(debugFile, 0, SEEK_END);
@@ -758,7 +758,7 @@ void QBScript::OpenScript(char* path, bool level)
         bool found = false;
         for (DWORD i = 0; i < qbFiles.size(); i++)
         {
-            if (stricmp(qbFiles[i].fileName, qbFile.fileName))
+            if (_stricmp(qbFiles[i].fileName, qbFile.fileName))
             {
                 qbFiles[i].checksum = checksum;
                 qbFiles[i].size = size;
@@ -880,7 +880,7 @@ bool QScript::FileExists(char* file)
 {
     for (DWORD i = 0; i < qbFiles.size(); i++)
     {
-        if (!stricmp(qbFiles[i].fileName, file))
+        if (!_stricmp(qbFiles[i].fileName, file))
             return true;
     }
     _printf("New File %s\n", file);

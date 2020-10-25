@@ -221,7 +221,7 @@ namespace String
             }
             if (crc32f(strings[i].pStr) == checksum_non_case)
             {
-                if (stricmp(strings[i].pStr, str))
+                if (_stricmp(strings[i].pStr, str))
                     _printf("String missmatch? %s %s\n", strings[i].pStr, str);
                 return strings[i].pStr;
             }
@@ -232,7 +232,7 @@ namespace String
         {
             if (permanentStrings[i].checksum == checksum)
             {
-                if (stricmp(strings[i].pStr, str))
+                if (_stricmp(strings[i].pStr, str))
                     MessageBox(0, strings[i].pStr, str, 0);
                 _printf("Returning optimized string %s\n", strings[i].pStr);
                 return strings[i].pStr;
@@ -253,7 +253,7 @@ namespace String
         {
             if (levelStrings[i].checksum == checksum)
             {
-                if (stricmp(levelStrings[i].pStr, str))
+                if (_stricmp(levelStrings[i].pStr, str))
                     MessageBox(0, levelStrings[i].pStr, str, 0);
                 _printf("Returning optimized level string %s\n", levelStrings[i].pStr);
                 return levelStrings[i].pStr;
@@ -312,7 +312,7 @@ namespace String
             }
             else if (crc32f(strings[i].pStr) == checksum_non_case)
             {
-                if (stricmp(strings[i].pStr, str))
+                if (_stricmp(strings[i].pStr, str))
                     _printf("String missmatch? %s %s\n", strings[i].pStr, str);
                 return strings[i].pStr;
             }
@@ -325,7 +325,7 @@ namespace String
         {
             if (permanentStrings[i].checksum == checksum)
             {
-                if (stricmp(permanentStrings[i].pStr, str))
+                if (_stricmp(permanentStrings[i].pStr, str))
                     MessageBox(0, permanentStrings[i].pStr, str, 0);
                 _printf("Returning optimized string %s\n", permanentStrings[i].pStr);
                 return strings[i].pStr;

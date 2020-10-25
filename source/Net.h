@@ -427,9 +427,8 @@ namespace Network
         }
 
 
-
-        static void __stdcall AddClientMessages(unsigned char msg_id, void* pCallback, int flags, NetHandler* net_handler, int prio);
-        static void __stdcall AddServerMessages(unsigned char msg_id, void* pCallback, int flags, NetHandler* net_handler, int prio);
+        void AddClientMessages(unsigned char msg_id, void* pCallback, int flags, NetHandler* net_handler, int prio);
+        void AddServerMessages(unsigned char msg_id, void* pCallback, int flags, NetHandler* net_handler, int prio);
     };
 };
 

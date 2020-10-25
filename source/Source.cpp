@@ -136,6 +136,19 @@ typedef HRESULT(__stdcall* Present_t)(LPDIRECT3DDEVICE8 pDevice, CONST RECT* pSo
 Present_t pPresent;*/
 
 
+__inline void HookFunction(DWORD addr, void (Network::MessageHandler::* function)(unsigned char msg_id, void* pCallback, int flags, Network::NetHandler* net_handler, int prio), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+
 __inline void HookFunction(DWORD addr, void* function, BYTE byteCode = 0, DWORD nopCount = 0)
 {
     DWORD old;
@@ -157,7 +170,6 @@ struct Hook
     Hook()
     {
         func = NULL;
-        auto backup = { 0 };
     }
 
 
@@ -3423,7 +3435,7 @@ void AddChecksum(int key, char* name, void* retAddr)
             QScript::Scripts->qbTable.insert(std::pair<DWORD, char*>(key, String::AddString(name)));
             QScript::qbKeys.push_back(key);
         }
-        /*else if (_stricmp(it->second, name))
+        /*else if (__stricmp(it->second, name))
         {
             FILE* debugFile = fopen("debug.txt", "r+t");
             fseek(debugFile, 0, SEEK_END);
@@ -4535,8 +4547,9 @@ void InitLevelMod()
     /*DWORD old;
     VirtualProtect((LPVOID)0x004C02C5, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
     *(DWORD*)0x004C02C5 += 12 * NUM_EXTRA_IDS;*/
-    HookFunction(0x00474D08, Network::MessageHandler::AddClientMessages);
-    HookFunction(0x004751EA, Network::MessageHandler::AddServerMessages);
+    
+    HookFunction(0x00474D08, &Network::MessageHandler::AddClientMessages);
+    HookFunction(0x004751EA, &Network::MessageHandler::AddServerMessages);
 
     //HookFunction(0x0058D0B1, Fopen_naked, 0xE9);
     /*if(!QScript::Scripts)

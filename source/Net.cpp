@@ -56,15 +56,12 @@ namespace Network
         return HANDLER_CONTINUE;
     }
 
-
     //Messages sent by host
     void MessageHandler::AddServerMessages(unsigned char msg_id, void* pCallback, int flags, NetHandler* net_handler, int prio)
     {
-        MessageHandler* handler;
-        _asm mov handler, ecx;
         //Add the original message that we have replaced with our hook
-        handler->AddMessage(msg_id, pCallback, flags, net_handler, prio);
-        
+        this->AddMessage(msg_id, pCallback, flags, net_handler, prio);
+
         //New Messages sent by host to client
         Manager* net_man = Manager::Instance();
 
@@ -73,20 +70,19 @@ namespace Network
         //It's possible to override only true, only false, or both
         //To add a new HostOption, add them to the struct in settings.q
         net_man->SetMessageName(MSG_ID_LM_HOSTOPTION_CHANGED, "LM - HostOption Update");
-        handler->AddMessage(MSG_ID_LM_HOSTOPTION_CHANGED, Handle_HostOption_Changed, HANDLER_LATE, net_handler);
+        this->AddMessage(MSG_ID_LM_HOSTOPTION_CHANGED, Handle_HostOption_Changed, HANDLER_LATE, net_handler);
 
         //This is a test message
         net_man->SetMessageName(MSG_ID_LM_TEST, "LM - Test Message");
-        handler->AddMessage(MSG_ID_LM_TEST, Handle_Test, HANDLER_LATE, net_handler);
+        this->AddMessage(MSG_ID_LM_TEST, Handle_Test, HANDLER_LATE, net_handler);
     }
 
     //Messages sent by clients
     void MessageHandler::AddClientMessages(unsigned char msg_id, void* pCallback, int flags, NetHandler* net_handler, int prio)
     {
-        MessageHandler* handler;
-        _asm mov handler, ecx;
+        //_asm mov handler, ecx;
         //Add the original message that we have replaced with our hook
-        handler->AddMessage(msg_id, pCallback, flags, net_handler, prio);
+        this->AddMessage(msg_id, pCallback, flags, net_handler, prio);
 
         //TODO add new client messages here
     }
