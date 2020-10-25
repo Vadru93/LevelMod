@@ -450,9 +450,9 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
     //if change the 0xFF here need to also change it in LevelMod, else it can't find the SuperSectors
     *(DWORD*)0x41211F = 0xC0000;
     *(DWORD*)0x412134 = 0x10000;
-    //*(BYTE*)0x41217F = 0xFF;
+    *(BYTE*)0x41217F = 0xFF;
     *(DWORD*)0x4121D1 = 0x10000;
-   // *(BYTE*)0x412245 = 0xFF;
+    *(BYTE*)0x412245 = 0xFF;
 
     *(BYTE*)0x42B93F = 0xFF;
     *(BYTE*)0x42b98A = 0xFF;

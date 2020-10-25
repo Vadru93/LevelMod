@@ -56,6 +56,14 @@ EXTERN struct SuperSector
     }
 
     //004fea30 00412230
+    static DWORD GetSuperSectorName(DWORD checksum)
+    {
+        SuperSector* sector = GetSuperSector(checksum);
+        if (sector)
+            return checksum;
+        return 0;
+    }
+
     EXTERN static SuperSector* GetSuperSector(DWORD checksum)
     {
         //code to get index from checksum
@@ -68,25 +76,35 @@ EXTERN struct SuperSector
         _asm ret;
     con:
         _asm mov edx, checksum;
-        _asm and edx, 0x0000FFF;//Added 1 byte more to reduce collision in list
+        _asm and edx, 0x000FFFF;//Added 1 byte more to reduce collision in list
         _asm lea edx, [edx + edx * 2];
         _asm lea ecx, [eax + edx * 4];
         _asm mov pSectors, ecx;
 
+        //Added for early exit, this optimization will make 2 less comparision per SuperSector, per frame
+        if (*pSectors == checksum)//Checksum match
+        {
+            pSectors++;//skip 4 bytes to get the pointer
+            return (SuperSector*)*pSectors;//return the pointer
+        }
+
+        pSectors += 2;
+        pSectors = *(DWORD**)pSectors;
 
         //the SuperSectors are stored in a list 
-        //each item is 8 bytes, the first 4 bytes is checksum and last 4 bytes is pointer to the SuperSector
+        //each item is 12 bytes, the first 4 bytes is checksum, following 4 bytes is pointer to the SuperSector and last 4 bytes is link to next item(if it have collision)
         //since 2 or more checksums can have the same index we need to loop until we get a checksum match
         //if we find an uninitialized item before we get a checksum match it means the checksum is not in the list
-        while (*pSectors != 0)//Continue until found an uninitialized item
+        while (pSectors != 0)//Continue until found an uninitialized item
         {
-
             if (*pSectors == checksum)//Checksum match
             {
                 pSectors++;//skip 4 bytes to get the pointer
                 return (SuperSector*)*pSectors;//return the pointer
             }
-            pSectors += 2;//skip 8 bytes to get next item in the list
+
+            pSectors += 2;
+            pSectors = *(DWORD**)pSectors;
         }
         //MessageBox(0, "return NULL", "", 0);//Checksum is not in the list
         return NULL;

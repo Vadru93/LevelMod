@@ -4469,6 +4469,7 @@ float __cdecl proxy_SnapToGroundClamp(float a1)
     return cos(angle);
 }
 
+
 //void HookControls();
 void InitLevelMod()
 {
@@ -4511,8 +4512,18 @@ void InitLevelMod()
 
     *(WORD*)0x00427A9B = 0x840F;//je
     HookFunction(0x00427A9D, NotGood_naked);
+
     HookFunction(0x004F42AA, SetVertexShader_hook);
+
     HookFunction(0x0049F1DD, proxy_SnapToGroundClamp);
+
+    HookFunction(0x00412160, SuperSector::GetSuperSector);
+    HookFunction(0x00412278, SuperSector::GetSuperSector);
+    HookFunction(0x004122C7, SuperSector::GetSuperSector);
+    HookFunction(0x00412307, SuperSector::GetSuperSector);
+    HookFunction(0x0041236B, SuperSector::GetSuperSector);
+    HookFunction(0x0041246B, SuperSector::GetSuperSector);
+
     //MessageBox(0, 0, 0, 0);
     *(DWORD*)0x00427AA3 = 0x90909090;//nop
     *(WORD*)(0x00427AA3 + 4) = 0x9090;

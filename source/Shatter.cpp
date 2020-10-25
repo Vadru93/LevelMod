@@ -106,6 +106,7 @@ bool NewShatterScript(CStruct* pStruct, CScript* pScript)
         SuperSector* sector = SuperSector::GetSuperSector(name);
         if (sector)
         {
+            area = max(1000.0f, area);
             ShatterSetParams(velocity, area, variance, spread, life, bounce, bounce_amp);
             ShatterSuperSector(sector);
         }
@@ -134,7 +135,7 @@ void ShatterSuperSector(SuperSector* super_sector)
     targetShatterArea[3] = shatterAreaTest *= 1.1f;
     targetShatterArea[4] = shatterAreaTest *= 0.75f;
 
-    if (sector->num_total_indices1 >= 3)
+    if (super_sector->mesh)
     {
         DWORD stride = super_sector->mesh->splits[0].stride;
         //_printf("SuperSector %p normals %p color_offset %p uv_offset %p numVErts %d\n", super_sector, super_sector->normals, super_sector->color_offset, super_sector->uv_offset, super_sector->numVertices);
