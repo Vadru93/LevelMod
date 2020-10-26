@@ -644,6 +644,16 @@ int AddOption(char* name, int value, bool update, DWORD HostOption, BYTE type)
             {
                 override = &overrideOptions.find(checksum)->second;
             }*/
+            if (!it->second.override)
+            {
+                auto Override = overrideOptions.find(checksum);
+                if (Override != overrideOptions.end())
+                {
+                    it->second.override = &Override->second;
+                }
+                else
+                    MessageBox(0, "This is not good", "", 0);
+            }
             if (it->second.Overriden())
             {
                 _printf("Now we updating..\n");
