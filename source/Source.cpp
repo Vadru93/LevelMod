@@ -4536,6 +4536,8 @@ void InitLevelMod()
     HookFunction(0x0041236B, SuperSector::GetSuperSector);
     HookFunction(0x0041246B, SuperSector::GetSuperSector);
 
+    HookFunction(0x00526D4B, Obj_SetShader_hook);
+
     //MessageBox(0, 0, 0, 0);
     *(DWORD*)0x00427AA3 = 0x90909090;//nop
     *(WORD*)(0x00427AA3 + 4) = 0x9090;
@@ -5245,7 +5247,7 @@ void DrawFrame()
             Skater * skater = Skater::Instance();
             if (skater) [[likely]]
             {
-                if (XINPUT::Player1->IsConnected())
+                if (LevelModSettings::HookedControls && XINPUT::Player1->IsConnected())
                 {
                     if (XINPUT::vibrationFrames)
                     {

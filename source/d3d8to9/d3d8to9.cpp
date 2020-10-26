@@ -20,8 +20,23 @@ BYTE hashTable[HASH_SIZE + 0x14] = { 0 };//the node hash names, each item is 12 
 static DWORD pOld = 0x008A8B48;
 static DWORD pNew = (DWORD)&hashTable;
 
-//faces??
-static BYTE pFaces[0x60804];
+
+struct SPrefixLookup
+{
+    // Checksum of the prefix string
+    DWORD mChecksum;
+
+    // Pointer to the list of node indices of the nodes that have this prefix.
+    WORD* mpNodes;
+};
+// in thug1src 13000
+#define MAX_PREFIX_LOOKUPS 21000
+// in thug1src 121000, this needs to be so much bigger because of extralayer sharing same prefix
+#define NODE_LIST_BUFFER_SIZE 0x65804
+static SPrefixLookup sp_prefix_lookups[MAX_PREFIX_LOOKUPS];
+
+//Node Index Lookup(For prefix)
+static BYTE pIndexLookup[NODE_LIST_BUFFER_SIZE];
 
 
 //#pragma pack(1)
@@ -42,6 +57,7 @@ QBKeyHeader triggers2[MAX_TRIGGERS2]{ 0 };
 static DWORD pOld2 = 0x0087D8F8;
 static DWORD pNew2 = (DWORD)&triggers;
 QBKeyHeader* oldTriggers = (QBKeyHeader*)pOld2;
+
 
 //CreateThread(0, 0, (LPTHREAD_START_ROUTINE)FixMessage, 0, 0, 0);
 extern void InitSkater();
@@ -289,21 +305,21 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
     VirtualProtect((void*)0x004FEEC6, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((void*)0x004FF050, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);*/
 
-    * (DWORD*)0x0042B0EF = 0x04A1F60F;
-    *(DWORD*)0x0042B137 = 0x04A1F60F;
-    *(DWORD*)0x0042B153 = 0x04A1F60F;
-    *(DWORD*)0x0042BC7B = 0x04A1F60F;
-    *(DWORD*)0x0042BCAF = 0x04A1F60F;
-    *(DWORD*)0x0042BCE7 = 0x04A1F60F;
-    *(DWORD*)0x0042BC5E = 0x04A1F60F;
+    *(DWORD**)0x0042B0EF = &sp_prefix_lookups[0].mChecksum;
+    *(DWORD**)0x0042B137 = &sp_prefix_lookups[0].mChecksum;
+    *(DWORD**)0x0042B153 = &sp_prefix_lookups[0].mChecksum;
+    *(DWORD**)0x0042BC7B = &sp_prefix_lookups[0].mChecksum;
+    *(DWORD**)0x0042BCAF = &sp_prefix_lookups[0].mChecksum;
+    *(DWORD**)0x0042BCE7 = &sp_prefix_lookups[0].mChecksum;
+    *(DWORD**)0x0042BC5E = &sp_prefix_lookups[0].mChecksum;
 
-    *(DWORD*)0x0042B0FE = 0x04A1F613;
-    *(DWORD*)0x0042BBDE = 0x04A1F613;
-    *(DWORD*)0x0042BBF5 = 0x04A1F613;
-    *(DWORD*)0x0042BC50 = 0x04A1F613;
-    *(DWORD*)0x0042BC92 = 0x04A1F613;
-    *(DWORD*)0x0042BC99 = 0x04A1F613;
-    *(DWORD*)0x0042BCDB = 0x04A1F613;
+    *(WORD***)0x0042B0FE = &sp_prefix_lookups[0].mpNodes;
+    *(WORD***)0x0042BBDE = &sp_prefix_lookups[0].mpNodes;
+    *(WORD***)0x0042BBF5 = &sp_prefix_lookups[0].mpNodes;
+    *(WORD***)0x0042BC50 = &sp_prefix_lookups[0].mpNodes;
+    *(WORD***)0x0042BC92 = &sp_prefix_lookups[0].mpNodes;
+    *(WORD***)0x0042BC99 = &sp_prefix_lookups[0].mpNodes;
+    *(WORD***)0x0042BCDB = &sp_prefix_lookups[0].mpNodes;
 
     *(DWORD*)0x0042BFE2 = 0x008935CC;
 
@@ -354,7 +370,7 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
     *(DWORD*)0x0042C0C4 = *(DWORD*)0x0042C09D - 8;
     *(DWORD*)0x0042C0CC = *(DWORD*)0x0042C09D - 4;
 
-    *(DWORD*)0x0042BBCD = (DWORD)&pFaces;
+    *(DWORD*)0x0042BBCD = (DWORD)&pIndexLookup;
 
     //*(BYTE*)0x008E1DF8 = 1;
 
@@ -391,8 +407,8 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
     *(DWORD*)0x0042B171 = (DWORD)&hashTable + 4;
     *(DWORD*)0x0042B183 = (DWORD)&hashTable + HASH_SIZE + 4;
     //Dunno why it crashes when changing these, maybe should try 0xFF?
-    //*(BYTE*)0x0042B2B8 = 0x3F;
-    //*(BYTE*)0x0042B23E = 0x3F;
+    //*(BYTE*)0x0042B2B8 = 0xFF;
+    //*(BYTE*)0x0042B23E = 0xFF;
 
     //fix crash when calling function that don't exists
     *(DWORD*)0x00427A99 = 0xFF85;
@@ -437,9 +453,9 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 
 
 
-    *(DWORD*)0x0042B9C8 = 0xC0000;
-    *(DWORD*)0x0042B9E9 = 0x10000;
-    *(DWORD*)0x0042BB31 = 0x10000;
+    *(DWORD*)0x0042B9C8 = 0xC4B0;
+    *(DWORD*)0x0042B9E9 = 0x1064;
+    *(DWORD*)0x0042BB31 = 0x1064;
 
 
 
@@ -448,20 +464,20 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 
     //this is the SuperSectors list size
     //if change the 0xFF here need to also change it in LevelMod, else it can't find the SuperSectors
-    *(DWORD*)0x41211F = 0xC0000;
-    *(DWORD*)0x412134 = 0x10000;
+    *(DWORD*)0x41211F = 0xC4B00;
+    *(DWORD*)0x412134 = 0x10064;
     *(BYTE*)0x41217F = 0xFF;
-    *(DWORD*)0x4121D1 = 0x10000;
+    *(DWORD*)0x4121D1 = 0x10064;
     *(BYTE*)0x412245 = 0xFF;
 
     *(BYTE*)0x42B93F = 0xFF;
     *(BYTE*)0x42b98A = 0xFF;
 
-    *(WORD*)0x42B9C9 = 0x3000;
-    *(BYTE*)0x42B9EA = 0x40;
-    //*(BYTE*)0x42BA1E = 0x3F;
-    //*(BYTE*)0x42BAC2 = 0x3F;
-    *(BYTE*)0x42BB32 = 0x40;
+    //*(WORD*)0x42B9C9 = 0x3000;
+    //*(BYTE*)0x42B9EA = 0x40;
+    //*(BYTE*)0x42BA1E = 0xFF;
+    //*(BYTE*)0x42BAC2 = 0xFF;
+    //*(BYTE*)0x42BB32 = 0x40;
 
     *(BYTE*)0x42BB73 = 0x10;
     *(BYTE*)0x42BB98 = 0x10;

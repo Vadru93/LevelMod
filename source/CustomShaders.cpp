@@ -319,11 +319,10 @@ bool restoreMaterial = false;
 bool restore_matrix = false;
 bool restore_filter = false;
 
-void __stdcall SetVertexShader_hook()
+void SubmitShader(ShaderObject2* pShader, Texture* texture)
 {
     static float t;
     static DWORD oldShader = 0x005CEDB4;
-    static DWORD pReturn = 0x00550DC0;
     static DWORD ShaderTextureSkip = (sizeof(ShaderTexture) - 4);
     static D3DMATRIX env_mat = { 0.5f,  0.0f, 0.0f, 0.0f,
                                  0.0f, -0.5f, 0.0f, 0.0f,
@@ -334,6 +333,219 @@ void __stdcall SetVertexShader_hook()
                               0.0f, 0.0f, 0.0f, 0.0f,
                               0.0f, 0.0f, 0.0f, 0.0f };
 
+
+    //Tell the engine we wanna reset textures next call
+    reset = true;
+
+    if (pShader->flags & ENV_MAP)
+    {
+        if (!restore_matrix)
+        {
+            restore_matrix = true;
+
+            pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
+            p_current_texstage(D3DTSS_TEXTURETRANSFORMFLAGS) = D3DTTFF_COUNT2;
+            p_target_texstage(D3DTSS_TEXTURETRANSFORMFLAGS) = D3DTTFF_COUNT2;
+        }
+
+        env_mat.m[0][0] = pShader->env_tiling[0] * uv_tiling_threshold;
+        env_mat.m[1][1] = pShader->env_tiling[1] * uv_tiling_threshold;
+
+        pDevice->SetTransform(D3DTS_TEXTURE0, &env_mat);
+        pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_CAMERASPACEPOSITION);
+        p_current_texstage(D3DTSS_TEXCOORDINDEX) = D3DTSS_TCI_CAMERASPACEPOSITION;
+        p_target_texstage(D3DTSS_TEXCOORDINDEX) = D3DTSS_TCI_CAMERASPACEPOSITION;
+    }
+    else if (pShader->flags & UV_ANIM && pShader->anim)
+    {
+        if (!restore_matrix)
+        {
+            restore_matrix = true;
+            pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
+            p_current_texstage(D3DTSS_TEXTURETRANSFORMFLAGS) = D3DTTFF_COUNT2;
+            p_target_texstage(D3DTSS_TEXTURETRANSFORMFLAGS) = D3DTTFF_COUNT2;
+        }
+        else
+            pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
+
+        t += Game::skater->GetFrameLength() * uv_anim_threshold;
+        float uoff = (t * pShader->anim->UVel) + (pShader->anim->UAmplitude * sinf(pShader->anim->UFrequency * t + pShader->anim->UPhase));
+        float voff = (t * pShader->anim->VVel) + (pShader->anim->VAmplitude * sinf(pShader->anim->VFrequency * t + pShader->anim->VPhase));
+
+        // Reduce offset mod 16 and put it in the range -8 to +8.
+        /*uoff	+= 8.0f;
+        uoff	-= (float)(( (int)uoff >> 4 ) << 4 );
+        voff	+= 8.0f;
+        voff	-= (float)(( (int)voff >> 4 ) << 4 );*/
+        uoff -= (float)(int)uoff;
+        voff -= (float)(int)voff;
+
+
+        uv_mat._31 = uoff;//( uoff < 0.0f ) ? ( uoff + 8.0f ) : ( uoff - 8.0f );
+        uv_mat._32 = voff;//( voff < 0.0f ) ? ( voff + 8.0f ) : ( voff - 8.0f );
+
+        pDevice->SetTransform(D3DTS_TEXTURE0, &uv_mat);
+
+    }
+    else if (restore_matrix)
+    {
+        restore_matrix = false;
+        p_current_texstage(D3DTSS_TEXTURETRANSFORMFLAGS) = D3DTTFF_DISABLE;
+        p_current_texstage(D3DTSS_TEXCOORDINDEX) = D3DTSS_TCI_PASSTHRU;
+
+        pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+        pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
+
+    }
+
+    //pDevice->SetMaterial(pShader->material);
+
+
+    p_target_renderstate(D3DRS_BLENDOP) = pShader->blend_op;
+    if (p_current_renderstate(D3DRS_BLENDOP) != pShader->blend_op)
+    {
+        p_current_renderstate(D3DRS_BLENDOP) = pShader->blend_op;
+        pDevice->SetRenderState(D3DRS_BLENDOP, pShader->blend_op);
+    }
+
+    p_target_renderstate(D3DRS_SRCBLEND) = pShader->src_blend;
+    if (p_current_renderstate(D3DRS_SRCBLEND) != pShader->src_blend)
+    {
+        p_current_renderstate(D3DRS_SRCBLEND) = pShader->src_blend;
+        pDevice->SetRenderState(D3DRS_SRCBLEND, pShader->src_blend);
+    }
+
+    p_target_renderstate(D3DRS_DESTBLEND) = pShader->dest_blend;
+    if (p_current_renderstate(D3DRS_DESTBLEND) != pShader->dest_blend)
+    {
+        p_current_renderstate(D3DRS_DESTBLEND) = pShader->dest_blend;
+        pDevice->SetRenderState(D3DRS_DESTBLEND, pShader->dest_blend);
+    }
+
+    p_target_renderstate(D3DRS_ALPHAREF) = pShader->alphaRef;
+    if (p_current_renderstate(D3DRS_ALPHAREF) != pShader->alphaRef)
+    {
+        p_current_renderstate(D3DRS_ALPHAREF) = pShader->alphaRef;
+        pDevice->SetRenderState(D3DRS_ALPHAREF, pShader->alphaRef);
+    }
+
+    if (Gfx::filtering)
+    {
+        if (texture->uAddress != 1 || texture->vAddress != 1)
+        {
+            restore_filter = true;
+            pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MAGFILTER, D3DTEXF_NONE);
+            pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MINFILTER, D3DTEXF_NONE);
+            pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MIPFILTER, D3DTEXF_NONE);
+        }
+        else if (restore_filter)
+        {
+            restore_filter = false;
+            extern DWORD MaxAnisotropy;
+            DWORD Value = MaxAnisotropy ? D3DTEXF_ANISOTROPIC : D3DTEXF_LINEAR;
+
+            pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MAGFILTER, Value);
+            pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MINFILTER, Value);
+            pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MIPFILTER, Value);
+
+        }
+    }
+    /*if (p_render_scene && !(pShader->flags & 4) && pShader->blend_op == 1 && pShader->src_blend == 5 && pShader->dest_blend == 6)
+    {
+        Texture* texture = pMesh->material->texture;
+
+        if (texture && pMesh->indexBuffer && pMesh->vertexBuffer && pMesh->numIndices && pMesh->numVertices)
+        {
+            texture->data->alpha = 0;
+            /*_printf("Render 2nd pass\n");
+            DWORD target = p_target_texstage(D3DTSS_ADDRESSU);
+            p_current_texstage(D3DTSS_ADDRESSU) = target;
+            pDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, target);
+
+            target = p_target_texstage(D3DTSS_ADDRESSV);
+            p_current_texstage(D3DTSS_ADDRESSV) = target;
+            pDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, target);
+
+            //pDevice->SetFVF(pMesh->vertexShader);
+            /*if (p_current_vertexbuffer != pMesh->vertexBuffer)
+            {
+                p_current_vertexbuffer = pMesh->vertexBuffer;*/
+                //pDevice->SetStreamSource(0, pMesh->vertexBuffer->GetProxyInterface(), 0, pMesh->stride);
+
+            /*}
+            if (p_current_indexbuffer != pMesh->indexBuffer)
+            {
+                p_current_indexbuffer = pMesh->indexBuffer;*/
+                //pDevice->SetIndices(pMesh->indexBuffer->GetProxyInterface());
+            /*}
+
+            p_current_baseindex = pMesh->baseIndex;*/
+            //pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, static_cast<INT>(pMesh->baseIndex), 0, pMesh->numVertices, 0, pMesh->numIndices-2);*/
+        /*}
+    }*/
+}
+
+void RestoreShader()
+{
+    //Reset extralayer textures to NULL
+    //Maybe also need to reset blendmodes???
+    if (reset)
+    {
+        reset = false;
+        if (restore_matrix)
+        {
+            restore_matrix = false;
+            pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
+            pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
+        }
+
+        if (restore_filter)
+        {
+            restore_filter = false;
+            extern DWORD MaxAnisotropy;
+            DWORD Value = MaxAnisotropy ? D3DTEXF_ANISOTROPIC : D3DTEXF_LINEAR;
+
+            pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MAGFILTER, Value);
+            pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MINFILTER, Value);
+            pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MIPFILTER, Value);
+
+        }
+    }
+}
+
+void __stdcall Obj_SetShader_hook()
+{
+    static DWORD pReturn = 0x00555400;
+    static Texture* pTexture;
+    static ShaderObject2* pShader;
+
+    if (p_render_shaders)
+    {
+        _asm mov eax, [esp+8];
+        _asm mov pTexture, eax
+        if (!pTexture)
+            goto SKIP;
+        pShader = (ShaderObject2*)&pTexture->shader;
+        if (pShader->flags == 0x30303030)
+            goto SKIP;
+        SubmitShader(pShader, pTexture);
+
+        _asm pop ebp
+        _asm jmp[pReturn];
+    SKIP:
+
+
+        RestoreShader();
+
+    }
+    _asm pop ebp
+    _asm jmp[pReturn];
+}
+
+void __stdcall SetVertexShader_hook()
+{
+
+    static DWORD pReturn = 0x00550DC0;
     static ShaderObject2* pShader;
     static Mesh::MaterialSplit* pMesh;
 
@@ -372,161 +584,11 @@ void __stdcall SetVertexShader_hook()
         DWORD oldPixelShader = *(DWORD*)0x005CEDB4;
 
         _asm mov pShader, esi;
-
         if (pShader->flags == 0x30303030)
             goto SKIP;
 
-        //Tell the engine we wanna reset textures next call
-        reset = true;
-
-        if (pShader->flags & ENV_MAP)
-        {
-            if (!restore_matrix)
-            {
-                restore_matrix = true;
-
-                pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
-                p_current_texstage(D3DTSS_TEXTURETRANSFORMFLAGS) = D3DTTFF_COUNT2;
-                p_target_texstage(D3DTSS_TEXTURETRANSFORMFLAGS) = D3DTTFF_COUNT2;
-            }
-
-            env_mat.m[0][0] = pShader->env_tiling[0] * uv_tiling_threshold;
-            env_mat.m[1][1] = pShader->env_tiling[1] * uv_tiling_threshold;
-
-            pDevice->SetTransform(D3DTS_TEXTURE0, &env_mat);
-            pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_CAMERASPACEPOSITION);
-            p_current_texstage(D3DTSS_TEXCOORDINDEX) = D3DTSS_TCI_CAMERASPACEPOSITION;
-            p_target_texstage(D3DTSS_TEXCOORDINDEX) = D3DTSS_TCI_CAMERASPACEPOSITION;
-        }
-        else if (pShader->flags & UV_ANIM)
-        {
-            if (!restore_matrix)
-            {
-                restore_matrix = true;
-                pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2);
-                p_current_texstage(D3DTSS_TEXTURETRANSFORMFLAGS) = D3DTTFF_COUNT2;
-                p_target_texstage(D3DTSS_TEXTURETRANSFORMFLAGS) = D3DTTFF_COUNT2;
-            }
-            else
-                pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
-
-            t += Game::skater->GetFrameLength() * uv_anim_threshold;
-            float uoff = (t * pShader->anim->UVel) + (pShader->anim->UAmplitude * sinf(pShader->anim->UFrequency * t + pShader->anim->UPhase));
-            float voff = (t * pShader->anim->VVel) + (pShader->anim->VAmplitude * sinf(pShader->anim->VFrequency * t + pShader->anim->VPhase));
-
-            // Reduce offset mod 16 and put it in the range -8 to +8.
-            /*uoff	+= 8.0f;
-            uoff	-= (float)(( (int)uoff >> 4 ) << 4 );
-            voff	+= 8.0f;
-            voff	-= (float)(( (int)voff >> 4 ) << 4 );*/
-            uoff -= (float)(int)uoff;
-            voff -= (float)(int)voff;
-
-
-            uv_mat._31 = uoff;//( uoff < 0.0f ) ? ( uoff + 8.0f ) : ( uoff - 8.0f );
-            uv_mat._32 = voff;//( voff < 0.0f ) ? ( voff + 8.0f ) : ( voff - 8.0f );
-
-            pDevice->SetTransform(D3DTS_TEXTURE0, &uv_mat);
-
-        }
-        else if (restore_matrix)
-        {
-            restore_matrix = false;
-            p_current_texstage(D3DTSS_TEXTURETRANSFORMFLAGS) = D3DTTFF_DISABLE;
-            p_current_texstage(D3DTSS_TEXCOORDINDEX) = D3DTSS_TCI_PASSTHRU;
-
-            pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
-            pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
-           
-        }
-
-        //pDevice->SetMaterial(pShader->material);
-
-
-        p_target_renderstate(D3DRS_BLENDOP) = pShader->blend_op;
-        if (p_current_renderstate(D3DRS_BLENDOP) != pShader->blend_op)
-        {
-            p_current_renderstate(D3DRS_BLENDOP) = pShader->blend_op;
-            pDevice->SetRenderState(D3DRS_BLENDOP, pShader->blend_op);
-        }
-
-        p_target_renderstate(D3DRS_SRCBLEND) = pShader->src_blend;
-        if (p_current_renderstate(D3DRS_SRCBLEND) != pShader->src_blend)
-        {
-            p_current_renderstate(D3DRS_SRCBLEND) = pShader->src_blend;
-            pDevice->SetRenderState(D3DRS_SRCBLEND, pShader->src_blend);
-        }
-
-        p_target_renderstate(D3DRS_DESTBLEND) = pShader->dest_blend;
-        if (p_current_renderstate(D3DRS_DESTBLEND) != pShader->dest_blend)
-        {
-            p_current_renderstate(D3DRS_DESTBLEND) = pShader->dest_blend;
-            pDevice->SetRenderState(D3DRS_DESTBLEND, pShader->dest_blend);
-        }
-
-        p_target_renderstate(D3DRS_ALPHAREF) = pShader->alphaRef;
-        if (p_current_renderstate(D3DRS_ALPHAREF) != pShader->alphaRef)
-        {
-            p_current_renderstate(D3DRS_ALPHAREF) = pShader->alphaRef;
-            pDevice->SetRenderState(D3DRS_ALPHAREF, pShader->alphaRef);
-        }
-
-        if (Gfx::filtering)
-        {
-            if (pMesh->material->texture->uAddress != 1 || pMesh->material->texture->vAddress != 1)
-            {
-                restore_filter = true;
-                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MAGFILTER, D3DTEXF_NONE);
-                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MINFILTER, D3DTEXF_NONE);
-                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MIPFILTER, D3DTEXF_NONE);
-            }
-            else if (restore_filter)
-            {
-                restore_filter = false;
-                extern DWORD MaxAnisotropy;
-                DWORD Value = MaxAnisotropy ? D3DTEXF_ANISOTROPIC : D3DTEXF_LINEAR;
-
-                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MAGFILTER, Value);
-                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MINFILTER, Value);
-                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MIPFILTER, Value);
-
-            }
-        }
-        /*if (p_render_scene && !(pShader->flags & 4) && pShader->blend_op == 1 && pShader->src_blend == 5 && pShader->dest_blend == 6)
-        {
-            Texture* texture = pMesh->material->texture;
-
-            if (texture && pMesh->indexBuffer && pMesh->vertexBuffer && pMesh->numIndices && pMesh->numVertices)
-            {
-                texture->data->alpha = 0;
-                /*_printf("Render 2nd pass\n");
-                DWORD target = p_target_texstage(D3DTSS_ADDRESSU);
-                p_current_texstage(D3DTSS_ADDRESSU) = target;
-                pDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, target);
-
-                target = p_target_texstage(D3DTSS_ADDRESSV);
-                p_current_texstage(D3DTSS_ADDRESSV) = target;
-                pDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, target);
-
-                //pDevice->SetFVF(pMesh->vertexShader);
-                /*if (p_current_vertexbuffer != pMesh->vertexBuffer)
-                {
-                    p_current_vertexbuffer = pMesh->vertexBuffer;*/
-                    //pDevice->SetStreamSource(0, pMesh->vertexBuffer->GetProxyInterface(), 0, pMesh->stride);
-  
-                /*}
-                if (p_current_indexbuffer != pMesh->indexBuffer)
-                {
-                    p_current_indexbuffer = pMesh->indexBuffer;*/
-                    //pDevice->SetIndices(pMesh->indexBuffer->GetProxyInterface());
-                /*}
-
-                p_current_baseindex = pMesh->baseIndex;*/
-                //pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, static_cast<INT>(pMesh->baseIndex), 0, pMesh->numVertices, 0, pMesh->numIndices-2);*/
-            /*}
-        }*/
-
-
+        SubmitShader(pShader, pMesh->material->texture);
+ 
         _asm pop edi
         _asm pop esi
         _asm mov esp, ebp
@@ -536,30 +598,7 @@ void __stdcall SetVertexShader_hook()
     SKIP:
 
 
-        //Reset extralayer textures to NULL
-        //Maybe also need to reset blendmodes???
-        if (reset)
-        {
-            reset = false;
-            if (restore_matrix)
-            {
-                restore_matrix = false;
-                pDevice->SetTextureStageState(0, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_DISABLE);
-                pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
-            }
-
-            if (restore_filter)
-            {
-                restore_filter = false;
-                extern DWORD MaxAnisotropy;
-                DWORD Value = MaxAnisotropy ? D3DTEXF_ANISOTROPIC : D3DTEXF_LINEAR;
-
-                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MAGFILTER, Value);
-                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MINFILTER, Value);
-                pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MIPFILTER, Value);
-
-            }
-        }
+        RestoreShader();
 
     }
     _asm pop edi

@@ -223,6 +223,7 @@ void __cdecl HookVibrate_naked();
 //This is used to add custom VertexShaders
 void SetVertexShader_naked();
 void __stdcall SetVertexShader_hook();
+void __stdcall Obj_SetShader_hook();
 
 void Obj_MoveToNode_Naked();
 void Obj_FollowPathLinked_Naked();

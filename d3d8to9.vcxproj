@@ -20,6 +20,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -36,7 +37,7 @@
     <TargetName>d3d8</TargetName>
     <OutDir>bin\$(Configuration)\</OutDir>
     <IntDir>intermediate\$(Configuration)\</IntDir>
-    <IncludePath>C:\Users\Vadru\Documents\Visual Studio 2019\LevelMod\d3d8to9-master\source;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.18362.0\um\xinput.h;$(WindowsSdkDir)include;C:\Users\Vadru\Documents\Chilkat\include;$(IncludePath);$(DXSDK_DIR)\Include</IncludePath>
+    <IncludePath>$(IncludePath);$(DXSDK_DIR)\Include;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.18362.0\um\xinput.h;$(WindowsSdkDir)include;C:\Users\Vadru\Documents\Chilkat\include;C:\Users\Vidar\Documents\GitHub\LevelMod\source</IncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.18362.0\um\x86\xinput.lib;C:\Users\Vadru\Documents\Chilkat\libs;$(DXSDK_DIR)\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
