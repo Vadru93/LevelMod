@@ -1,9 +1,9 @@
 //All new LevelMod Scripts
 //Created: 2020-08-29
 Script KillSafely
-    IF IsAlive name = <name>
-        Kill name = <name>
-    ENDIF
+  IF IsAlive name = <name>
+    Kill name = <name>
+  ENDIF
 EndScript
 
 Script UnPauseSkaters_Script
@@ -12,12 +12,12 @@ printf "Finished reloading NodeArray"
 EndScript
 
 Script ReloadNodeArray_Script
-  PauseSkaters
-  ReloadNodeArray
+ PauseSkaters
+ ReloadNodeArray
 EndScript
 
 //Render customization values
-uv_anim_threshold = 0.02
+uv_anim_threshold = 0.05
 uv_tiling_threshold = 1.0
 
 SCRIPT Float_Generic01 TurnDist = 40
@@ -139,7 +139,7 @@ SCRIPT CPF_ChaseCarCheckDistance
 ENDSCRIPT
 
 SCRIPT CPF_Chase180Left
-	Obj_PlaySound random( @CarBrakeSqueal @LA_skid_11  ) random( @pitch = 50 @pitch = 80 @pitch = 100 @pitch = 130  ) Vol = 50
+	Obj_PlaySound random( @CarBrakeSqueal @LA_skid_11 ) pitch = random( @50 @80 @100 @130 ) Vol = 50
 	Obj_PathHeading off
 	Obj_Rotate relative = (0, 0, 90) time = 0.3 FLAG_MAX_COORDS
 	Obj_WaitRotate
@@ -147,7 +147,7 @@ SCRIPT CPF_Chase180Left
 	Obj_WaitRotate
 	Obj_Rotate relative = (0, 0, -40) time = 0.2 FLAG_MAX_COORDS
 	Obj_WaitRotate
-	Obj_PlaySound random( @CarBrakeSqueal @LA_skid_11  ) random( @pitch = 150 @pitch = 80 @pitch = 100 @pitch = 130  ) Vol = 30
+	Obj_PlaySound random( @CarBrakeSqueal @LA_skid_11 ) pitch = random( @150 @80 @100 @130 ) Vol = 30
 	Obj_Rotate relative = (0, 0, 15) time = 0.1 FLAG_MAX_COORDS
 	Obj_WaitRotate
 	Obj_Rotate relative = (0, 0, -5) time = 0.1 FLAG_MAX_COORDS
@@ -318,5 +318,5 @@ SCRIPT Ped_AI_Skater Path = TRG_Ped_AI_SkaterNav01
 ENDSCRIPT
 
 SCRIPT Ped_InitAI
-    CPF_PedGeneric <...>
+  CPF_PedGeneric <...>
 ENDSCRIPT
