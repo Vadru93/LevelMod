@@ -19,6 +19,9 @@ EndScript
 //Render customization values
 uv_anim_threshold = 0.05
 uv_tiling_threshold = 1.0
+shatter_speed = 0.48
+shatter_life_factor = 0.5
+shatter_gravity = 1000.0
 
 SCRIPT Float_Generic01 TurnDist = 40
 	Obj_StickToGround off distAbove = 1 distBelow = 1
