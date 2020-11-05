@@ -74,6 +74,8 @@ namespace Gfx
     extern float shatter_speed;
     extern float shatter_life_factor;
     extern float shatter_gravity;
+    extern LPDIRECT3DSURFACE9 world_rendertarget;
+    extern D3DVIEWPORT9 world_viewport;
 };
 
 //--------XINPUT--------

@@ -21,6 +21,12 @@
 #include "String.h"
 #undef ONLY_SHADER
 #include "CustomShaders.h"
+#include "ObjParser.h"
+#include <string.h>
+#include <memory.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 /*0
 004F9B9E < -non semi
     8
@@ -36,24 +42,28 @@
     4 = particles ?
     call 004F9C80*/
 
-/*//Game states
-extern bool GotSuperSectors;
+    /*//Game states
+    extern bool GotSuperSectors;
 
-//XINPUT
-extern bool vibrating;
-extern XINPUT_VIBRATION vibration;
-extern DWORD vibrationFrames;
-extern CXBOXController* Player1;
+    //XINPUT
+    extern bool vibrating;
+    extern XINPUT_VIBRATION vibration;
+    extern DWORD vibrationFrames;
+    extern CXBOXController* Player1;
 
-//Script stuff
-extern const char* QBTypes[];*/
+    //Script stuff
+    extern const char* QBTypes[];*/
 
-//Not curently used?
+    //Not curently used?
 ID3DXLine* line = NULL;
 
 DWORD numLineVertices = 0;
 D3DCOLOR lineColor = 0;
 D3DXMATRIX lineWorld;
+
+LPD3DXSPRITE eye_sprite;
+DWORD wheel_timer = 0;
+LPDIRECT3DTEXTURE9 wheel_texture[12];
 
 void SetTagLimit(DWORD limit);
 
@@ -2526,10 +2536,10 @@ const CompiledScript scripts[] =
     {"OnPostLevelLoad", OnPostLevelLoad},
     {"Change_Local", ChangeLocalScript},
 { "NewShatter", NewShatterScript}
-    /*{"SetMemoryPoolSize", SetMemoryPoolSize},
-    {"GetMemoryPoolSize", GetMemoryPoolSize},
-    {"GetMemoryPoolSizeText", GetMemoryPoolSizeText},*/
-    //{"GetMotd", GetMotd},
+/*{"SetMemoryPoolSize", SetMemoryPoolSize},
+{"GetMemoryPoolSize", GetMemoryPoolSize},
+{"GetMemoryPoolSizeText", GetMemoryPoolSizeText},*/
+//{"GetMotd", GetMotd},
 };
 
 
@@ -4447,6 +4457,42 @@ bool DumpScripts(CStruct* params, CScript* pScript)
     return true;
 }
 
+bool (*pDisplayLoadingScreen)(CStruct*, CScript*);
+bool (*pHideLoadingScreen)(CStruct*, CScript*);
+bool show_loading_screen = false;
+bool rendering_loading_screen = false;
+
+void DrawEye();
+
+void RenderLoadingScreen()
+{
+    while (show_loading_screen)
+    {
+        DrawEye();
+        Gfx::pDevice->Present(0, 0, 0, 0);
+        Sleep(10);
+    }
+
+
+    rendering_loading_screen = false;
+}
+
+
+bool HideLoadingScreen(CStruct* pStruct, CScript* pScript)
+{
+    show_loading_screen = false;
+    //while (rendering_loading_screen) Sleep(10);
+    return pHideLoadingScreen(pStruct, pScript);
+}
+
+bool DisplayLoadingScreen(CStruct* pStruct, CScript* pScript)
+{
+    show_loading_screen = true;
+    rendering_loading_screen = true;
+    //CreateThread(0, 0, (LPTHREAD_START_ROUTINE)RenderLoadingScreen, 0, 0, 0);
+    return pDisplayLoadingScreen(pStruct, pScript);
+}
+
 
 
 const DWORD numFunctions = sizeof(scripts) / sizeof(CompiledScript);
@@ -4468,7 +4514,7 @@ void AddFunctions()
     }
 
     header = GetQBKeyHeader(Checksums::Shatter);
-    if(header)
+    if (header)
         header->pFunction = NewShatterScript;
 }
 
@@ -4519,7 +4565,7 @@ void InitLevelMod()
     *(BYTE*)0x00483DD5 = 0x90;
     *(BYTE*)0x00483DD6 = 0x90;
     *(BYTE*)0x00483DD7 = 0x90;
-   
+
 
 
     *(WORD*)0x00427A9B = 0x840F;//je
@@ -4549,7 +4595,7 @@ void InitLevelMod()
     /*DWORD old;
     VirtualProtect((LPVOID)0x004C02C5, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
     *(DWORD*)0x004C02C5 += 12 * NUM_EXTRA_IDS;*/
-    
+
     HookFunction(0x00474D08, &Network::MessageHandler::AddClientMessages);
     HookFunction(0x004751EA, &Network::MessageHandler::AddServerMessages);
 
@@ -4570,6 +4616,18 @@ void InitLevelMod()
     if (header)
     {
         header->pFunction = DumpScripts;
+    }
+
+    header = GetQBKeyHeader(Checksum("DisplayLoadingScreen"));
+    {
+        pDisplayLoadingScreen = header->pFunction;
+        header->pFunction = DisplayLoadingScreen;
+    }
+
+    header = GetQBKeyHeader(Checksum("HideLoadingScreen"));
+    {
+        pHideLoadingScreen = header->pFunction;
+        header->pFunction = HideLoadingScreen;
     }
 
     //MessageBox(0, "going to fix msg", "going to fix msg", MB_OK);
@@ -4953,8 +5011,8 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
     }
     else if (!init3)
     {
-    //MessageBox(0, "GOING TO ADD HOSTOPTIONS", "", 0);
-    CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CheckForScriptUpdates, NULL, 0/*CREATE_SUSPENDED*/, NULL);
+        //MessageBox(0, "GOING TO ADD HOSTOPTIONS", "", 0);
+        CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CheckForScriptUpdates, NULL, 0/*CREATE_SUSPENDED*/, NULL);
         using namespace LevelModSettings;
         _printf("Already inited\n");
 
@@ -5198,6 +5256,12 @@ void OnRelease()
         if (OptionReader)
             delete OptionReader;
         OptionReader = NULL;
+
+        for (DWORD i = 0; i < 6; i++)
+        {
+            wheel_texture[i]->Release();
+        }
+        eye_sprite->Release();
     }
 }
 
@@ -5205,16 +5269,576 @@ void OnLost()
 {
     _printf("OnLost\n");
     if (m_font)
+    {
         m_font->OnLostDevice();
+        eye_sprite->OnLostDevice();
+    }
 }
 
 void OnReset()
 {
     _printf("OnReset\n");
     if (m_font)
+    {
         m_font->OnResetDevice();
+        eye_sprite->OnResetDevice();
+    }
 }
 
+static char* mmap_file(size_t* len, const char* filename) {
+#ifdef _WIN32
+    HANDLE file =
+        CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, NULL);
+
+    if (file == INVALID_HANDLE_VALUE) { /* E.g. Model may not have materials. */
+        return NULL;
+    }
+
+    HANDLE fileMapping = CreateFileMapping(file, NULL, PAGE_READONLY, 0, 0, NULL);
+
+    LPVOID fileMapView = MapViewOfFile(fileMapping, FILE_MAP_READ, 0, 0, 0);
+    char* fileMapViewChar = (char*)fileMapView;
+
+    DWORD file_size = GetFileSize(file, NULL);
+    (*len) = (size_t)file_size;
+
+    return fileMapViewChar;
+#else
+
+    FILE* f;
+    long file_size;
+    struct stat sb;
+    char* p;
+    int fd;
+
+    (*len) = 0;
+
+    f = fopen(filename, "r");
+    if (!f)
+    {
+        perror("open");
+        return NULL;
+    }
+    fseek(f, 0, SEEK_END);
+    file_size = ftell(f);
+    fclose(f);
+
+    fd = open(filename, O_RDONLY);
+    if (fd == -1) {
+        perror("open");
+        return NULL;
+    }
+
+    if (fstat(fd, &sb) == -1) {
+        perror("fstat");
+        return NULL;
+    }
+
+    if (!S_ISREG(sb.st_mode)) {
+        fprintf(stderr, "%s is not a file\n", "lineitem.tbl");
+        return NULL;
+    }
+
+    p = (char*)mmap(0, (size_t)file_size, PROT_READ, MAP_SHARED, fd, 0);
+
+    if (p == MAP_FAILED) {
+        perror("mmap");
+        return NULL;
+    }
+
+    if (close(fd) == -1) {
+        perror("close");
+        return NULL;
+    }
+
+    (*len) = (size_t)file_size;
+
+    return p;
+
+#endif
+}
+
+/* path will be modified */
+static char* get_dirname(char* path)
+{
+    char* last_delim = NULL;
+
+    if (path == NULL) {
+        return path;
+    }
+
+#if defined(_WIN32)
+    /* TODO: Unix style path */
+    last_delim = strrchr(path, '\\');
+#else
+    last_delim = strrchr(path, '/');
+#endif
+
+    if (last_delim == NULL) {
+        /* no delimiter in the string. */
+        return path;
+    }
+
+    /* remove '/' */
+    last_delim[0] = '\0';
+
+    return path;
+}
+
+static void get_file_data(const char* filename, const int is_mtl, const char* obj_filename, char** data, size_t* len) {
+    if (!filename) {
+        fprintf(stderr, "null filename\n");
+        (*data) = NULL;
+        (*len) = NULL;
+    }
+
+    const char* ext = strrchr(filename, '.');
+
+    size_t data_len = 0;
+
+    if (strcmp(ext, ".gz") == 0) {
+        MessageBox(0, 0, 0, 0);
+
+    }
+    else {
+
+        char* basedirname = NULL;
+
+        char tmp[MAX_PATH] = "";
+        DWORD len = strlen(filename);
+        strncpy(tmp, filename, len);
+
+        /* For .mtl, extract base directory path from .obj filename and append .mtl filename */
+        if (is_mtl && obj_filename) {
+            tmp[len - 3] = 'm';
+            tmp[len - 2] = 't';
+            tmp[len - 1] = 'l';
+        }
+
+        *data = mmap_file(&data_len, tmp);
+    }
+
+    (*len) = data_len;
+}
+
+static void CalcNormal(float N[3], float v0[3], float v1[3], float v2[3]) {
+    float v10[3];
+    float v20[3];
+    float len2;
+
+    v10[0] = v1[0] - v0[0];
+    v10[1] = v1[1] - v0[1];
+    v10[2] = v1[2] - v0[2];
+
+    v20[0] = v2[0] - v0[0];
+    v20[1] = v2[1] - v0[1];
+    v20[2] = v2[2] - v0[2];
+
+    N[0] = v20[1] * v10[2] - v20[2] * v10[1];
+    N[1] = v20[2] * v10[0] - v20[0] * v10[2];
+    N[2] = v20[0] * v10[1] - v20[1] * v10[0];
+
+    len2 = N[0] * N[0] + N[1] * N[1] + N[2] * N[2];
+    if (len2 > 0.0f) {
+        float len = (float)sqrt((double)len2);
+
+        N[0] /= len;
+        N[1] /= len;
+    }
+}
+
+struct TexCoord
+{
+    float u, v;
+
+    TexCoord(float u, float v)
+    {
+        this->u = u;
+        this->v = v;
+    }
+};
+
+struct Direct3DVertex
+{
+    float x, y, z;
+    //DWORD color;
+    float u, v;
+
+    Direct3DVertex(D3DXVECTOR3& vec, TexCoord& uv)
+    {
+        x = vec.x;
+        y = vec.y;
+        z = vec.z;
+        //color = 0xFFFFFFFF;
+        u = uv.u;
+        v = uv.v;
+    }
+};
+
+bool ReadLine(BYTE* pFile, BYTE* eof, char** line)
+{
+    if (pFile >= eof)
+        return false;
+    while (*pFile == '\n' || *pFile == '\r')
+        pFile++;
+
+    if (pFile >= eof)
+        return false;
+    *line = (char*)pFile;
+    return true;
+}
+
+struct SimpleMesh
+{
+    DWORD numVertices;
+    DWORD numTriangles;
+    std::vector<Direct3DVertex> vertices;
+    size_t face_offset = 0;
+
+    SimpleMesh(char* filename)
+    {
+        tinyobj_attrib_t attrib;
+        tinyobj_shape_t* shapes = NULL;
+        size_t num_shapes;
+        tinyobj_material_t* materials = NULL;
+        size_t num_materials;
+
+        FILE* f = fopen(filename, "rb+");
+        fseek(f, 0, SEEK_END);
+        DWORD size = ftell(f);
+
+        BYTE* pFile = new BYTE[size];
+        BYTE* eof = pFile + size;
+        fseek(f, 0, SEEK_SET);
+        fread(pFile, size, 1, f);
+        fclose(f);
+        BYTE* pBuffer = pFile;
+
+        std::vector<D3DXVECTOR3> positions;
+        std::vector<TexCoord> texcoords;
+
+        char* line;
+        int success = 0;
+
+        while (ReadLine(pFile, eof, &line))
+        {
+            switch (*line)
+            {
+            case 'f':
+                line += 2;
+                int vert_idx[3];
+                int tex_idx[3];
+                int normal_idx[3];
+
+                success = sscanf(line, "%d/%d/%d %d/%d/%d %d/%d/%d", &vert_idx[0], &tex_idx[0], &normal_idx[0], &vert_idx[1], &tex_idx[1], &normal_idx[1], &vert_idx[2], &tex_idx[2], &normal_idx[2]);
+                if (success != 9)
+                    MessageBox(0, "Not Good", 0, 0);
+                vertices.push_back(Direct3DVertex(positions[vert_idx[0] - 1], texcoords[tex_idx[0] - 1]));
+                vertices.push_back(Direct3DVertex(positions[vert_idx[1] - 1], texcoords[tex_idx[1] - 1]));
+                vertices.push_back(Direct3DVertex(positions[vert_idx[2] - 1], texcoords[tex_idx[2] - 1]));
+                while (*line != '\n' && *line != '\r')
+                    line++;
+                pFile = (BYTE*)line;
+                break;
+            case 'v':
+                line++;
+                if (*line == 't')
+                {
+                    line += 2;
+                    float u, v;
+                    success = sscanf(line, "%f %f", &u, &v);
+                    if (success != 2)
+                        MessageBox(0, "Not Good", 0, 0);
+                    texcoords.push_back(TexCoord(u, v));
+
+                }
+                else if (*line == ' ')
+                {
+                    line++;
+                    float x, y, z;
+                    success = sscanf(line, "%f %f %f", &x, &y, &z);
+                    if (success != 3)
+                        MessageBox(0, "Not Good", 0, 0);
+                    positions.push_back(D3DXVECTOR3(x, y, z));
+                }
+                while (*line != '\n' && *line != '\r')
+                    line++;
+                pFile = (BYTE*)line;
+                break;
+            default:
+                while (*line != '\n' && *line != '\r')
+                    line++;
+                pFile = (BYTE*)line;
+                break;
+
+            }
+        }
+
+        numVertices = vertices.size();
+        numTriangles = numVertices / 3;
+
+        char temp[256] = "";
+
+        f = fopen("Temp.txt", "w+b");
+        for (DWORD i = 0; i < vertices.size(); i++)
+        {
+            fprintf(f, "%f %f %f\n", vertices[i].x, vertices[i].y, vertices[i].z);
+        }
+        fclose(f);
+        texcoords.clear();
+        positions.clear();
+        sprintf(temp, "numVerts %d numTri %d\n", numVertices, numTriangles);
+        MessageBox(0, temp, temp, 0);
+
+        /*float* vb;
+        size_t face_offset = 0;
+        size_t i;
+
+        size_t num_triangles = attrib.num_face_num_verts;
+        size_t stride = 9;
+
+        vb = (float*)vertices;
+
+        for (i = 0; i < attrib.num_face_num_verts; i++) {
+            size_t f;
+            assert(attrib.face_num_verts[i] % 3 ==
+                0);
+            for (f = 0; f < (size_t)attrib.face_num_verts[i] / 3; f++) {
+                size_t k;
+                float v[3][3];
+                float n[3][3];
+                float t[3][2];
+                float c[3];
+                float len2;
+
+                tinyobj_vertex_index_t idx0 = attrib.faces[face_offset + 3 * f + 0];
+                tinyobj_vertex_index_t idx1 = attrib.faces[face_offset + 3 * f + 1];
+                tinyobj_vertex_index_t idx2 = attrib.faces[face_offset + 3 * f + 2];
+
+                for (k = 0; k < 3; k++) {
+                    int f0 = idx0.v_idx;
+                    int f1 = idx1.v_idx;
+                    int f2 = idx2.v_idx;
+                    assert(f0 >= 0);
+                    assert(f1 >= 0);
+                    assert(f2 >= 0);
+
+                    v[0][k] = attrib.vertices[3 * (size_t)f0 + k];
+                    v[1][k] = attrib.vertices[3 * (size_t)f1 + k];
+                    v[2][k] = attrib.vertices[3 * (size_t)f2 + k];
+                }
+
+                if (attrib.num_texcoords > 0) {
+                    int f0 = idx0.vt_idx;
+                    int f1 = idx1.vt_idx;
+                    int f2 = idx2.vt_idx;
+                    if (f0 >= 0 && f1 >= 0 && f2 >= 0) {
+                        assert(f0 < (int)attrib.num_texcoords);
+                        assert(f1 < (int)attrib.num_texcoords);
+                        assert(f2 < (int)attrib.num_texcoords);
+                        for (k = 0; k < 2; k++) {
+                            t[0][k] = attrib.texcoords[2 * (size_t)f0 + k];
+                            t[1][k] = attrib.texcoords[2 * (size_t)f1 + k];
+                            t[2][k] = attrib.texcoords[2 * (size_t)f2 + k];
+                        }
+                    }
+                }
+
+                if (attrib.num_normals > 0) {
+                    int f0 = idx0.vn_idx;
+                    int f1 = idx1.vn_idx;
+                    int f2 = idx2.vn_idx;
+                    if (f0 >= 0 && f1 >= 0 && f2 >= 0) {
+                        assert(f0 < (int)attrib.num_normals);
+                        assert(f1 < (int)attrib.num_normals);
+                        assert(f2 < (int)attrib.num_normals);
+                        for (k = 0; k < 3; k++) {
+                            n[0][k] = attrib.normals[3 * (size_t)f0 + k];
+                            n[1][k] = attrib.normals[3 * (size_t)f1 + k];
+                            n[2][k] = attrib.normals[3 * (size_t)f2 + k];
+                        }
+                    }
+                    else {
+                        CalcNormal(n[0], v[0], v[1], v[2]);
+                        n[1][0] = n[0][0];
+                        n[1][1] = n[0][1];
+                        n[1][2] = n[0][2];
+                        n[2][0] = n[0][0];
+                        n[2][1] = n[0][1];
+                        n[2][2] = n[0][2];
+                    }
+                }
+                else {
+
+                    CalcNormal(n[0], v[0], v[1], v[2]);
+                    n[1][0] = n[0][0];
+                    n[1][1] = n[0][1];
+                    n[1][2] = n[0][2];
+                    n[2][0] = n[0][0];
+                    n[2][1] = n[0][1];
+                    n[2][2] = n[0][2];
+                }
+
+                for (k = 0; k < 3; k++) {
+                    vb[(3 * i + k) * stride + 0] = v[k][0];
+                    vb[(3 * i + k) * stride + 1] = v[k][1];
+                    vb[(3 * i + k) * stride + 2] = v[k][2];
+                    vb[(3 * i + k) * stride + 6] = n[k][0];
+                    vb[(3 * i + k) * stride + 7] = n[k][1];
+                    vb[(3 * i + k) * stride + 8] = n[k][2];
+
+                    vb[(3 * i + k) * stride + 4] = t[k][0];
+                    vb[(3 * i + k) * stride + 5] = t[k][1];
+
+                    c[0] = n[k][0];
+                    c[1] = n[k][1];
+                    c[2] = n[k][2];
+                    len2 = c[0] * c[0] + c[1] * c[1] + c[2] * c[2];
+                    if (len2 > 0.0f) {
+                        float len = (float)sqrt((double)len2);
+
+                        c[0] /= len;
+                        c[1] /= len;
+                        c[2] /= len;
+                    }
+
+                    BYTE rgb[4];
+                    rgb[0] = 0;// (c[0] * 255.0f);
+                    rgb[1] = 0;// (c[1] * 255.0f);
+                    rgb[2] = 0;// (c[2] * 255.0f);
+                    rgb[3] = 255;
+
+                    *(DWORD*)&vb[(3 * i + k) * stride + 3] = *(DWORD*)rgb;
+
+                }
+            }
+
+            face_offset += (size_t)attrib.face_num_verts[i];
+        }
+        numTriangles = numVertices / 3;*/
+        delete[] pBuffer;
+    }
+
+};
+
+SimpleMesh* Eye = NULL;
+
+
+LPDIRECT3DTEXTURE9 target_texture, eye_texture;
+LPDIRECT3DSURFACE9 eye_target;
+
+BYTE eye_state = 0;
+DWORD actual_timer = 0;
+DWORD last_state;
+bool rotating = false;
+
+
+void DrawEye()
+{
+    LPDIRECT3DSURFACE9 old_target;
+    D3DXMATRIX old_view, old_world;
+
+    Gfx::pDevice->GetRenderTarget(0, &old_target);
+
+    LPDIRECT3DSURFACE9 old_surface;
+    D3DVIEWPORT9 old_viewport;
+    Gfx::pDevice->GetDepthStencilSurface(&old_surface);
+    Gfx::pDevice->GetViewport(&old_viewport);
+    Gfx::pDevice->SetDepthStencilSurface(nullptr);
+
+    Gfx::pDevice->BeginScene();
+
+    Gfx::pDevice->SetViewport(&Gfx::world_viewport);
+
+    Gfx::pDevice->SetRenderTarget(0, Gfx::world_rendertarget);
+
+    eye_sprite->Begin(D3DXSPRITE_ALPHABLEND);
+
+    D3DXMATRIX M;
+    D3DXMatrixTranslation(&M, 10.0f, 500.0f, 0.0f);
+    eye_sprite->SetTransform(&M);
+
+    if (eye_state < 6)
+    {
+        last_state = eye_state;
+        eye_sprite->Draw(wheel_texture[eye_state], NULL, NULL, &D3DXVECTOR3(0.0, 0.0, 0.0), 0xFFFFFFFF);
+    }
+
+    switch (eye_state)
+    {
+    case 0:
+        wheel_timer++;
+        if (wheel_timer > 45)
+        {
+            wheel_timer = 0;
+            eye_state = (std::rand() % 5) + 1;
+            if (eye_state > 6)
+                eye_state = 0;
+        }
+        break;
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    //case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+        wheel_timer++;
+        actual_timer++;
+        if (actual_timer > 90)
+        {
+            wheel_timer = 0;
+            actual_timer = 0;
+            eye_state = 6;
+        }
+        if (wheel_timer > 30)
+        {
+            wheel_timer = 0;
+            eye_state = 0;
+        }
+        break;
+
+
+    case 6:
+        actual_timer++;
+        wheel_timer++;
+        if (!rotating)
+        {
+            actual_timer = 0;
+            rotating = true;
+            last_state++;
+        }
+        else if(wheel_timer > 7)
+        {
+            wheel_timer = 0;
+            last_state++;
+        }
+        if (last_state > 5)
+            last_state = 0;
+        eye_sprite->Draw(wheel_texture[last_state], NULL, NULL, &D3DXVECTOR3(0.0, 0.0, 0.0), 0xFFFFFFFF);
+        if (actual_timer > 700)
+        {
+            eye_state = 0;
+            wheel_timer = 0;
+            actual_timer = 0;
+            rotating = false;
+        }
+        break;
+
+    }
+    eye_sprite->End();
+
+    Gfx::pDevice->EndScene();
+
+    Gfx::pDevice->SetDepthStencilSurface(old_surface);
+    Gfx::pDevice->SetViewport(&old_viewport);
+    Gfx::pDevice->SetRenderTarget(0, old_target);
+}
 
 void DrawFrame()
 {
@@ -5240,6 +5864,29 @@ void DrawFrame()
         lineColor = D3DCOLOR_RGBA(255, 255, 255, 255);*/
 
         D3DXCreateFontA(Gfx::pDevice, 45, 0, FW_NORMAL, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Arial", &m_font);
+
+
+        //Eye = new SimpleMesh("C:\\Program Files (x86)\\Activision\\Thps3\\Data\\LevelMod\\Neversoft\\eyes3.obj\0");
+
+        //D3DXCreateTextureFromFile(Gfx::pDevice, "blank_texture.png", &blank_texture);
+        //Gfx::pDevice->CreateTexture(120, 120, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &target_texture, nullptr);
+        /*HRESULT hres = D3DXCreateTextureFromFileExA(Gfx::pDevice, "C:\\Program Files (x86)\\Activision\\Thps3\\Data\\LevelMod\\Neversoft\\eyes2.png", D3DX_DEFAULT, D3DX_DEFAULT, D3DX_FROM_FILE, 0, D3DFMT_FROM_FILE, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 0, NULL, NULL, &eye_texture);
+        if (FAILED(hres))
+            MessageBox(0, 0, "FAILED", 0);*/
+        D3DXCreateSprite(Gfx::pDevice, &eye_sprite);
+        char temp[MAX_PATH] = "";
+        GetCurrentDirectory(MAX_PATH, temp);
+        char imageName[MAX_PATH] = "";
+        for (DWORD i = 0; i < 6; i++)
+        {
+            sprintf(imageName, "%s\\Data\\Images\\wheel_%02d.png", temp, i+1);
+            HRESULT hres = D3DXCreateTextureFromFileExA(Gfx::pDevice, imageName, D3DX_DEFAULT, D3DX_DEFAULT, D3DX_FROM_FILE, 0, D3DFMT_FROM_FILE, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 0, NULL, NULL, &wheel_texture[i]);
+            if (FAILED(hres))
+            {
+                MessageBox(0, "Failed to load texture", imageName, 0);
+            }
+        }
+
     }
 
         if (GameState::GotSuperSectors) [[likely]]
@@ -5282,245 +5929,251 @@ void DrawFrame()
             updatingObjects = false;
         }
         }
-            if (observe && observe->observing) [[unlikely]]
+            /*else
+            {*/
+            if(show_loading_screen)
+               DrawEye();
+
+    //}
+    if (observe && observe->observing) [[unlikely]]
+    {
+        Skater * skater = Skater::Instance();
+        if (skater)
+        {
+            KeyState* ollie = skater->GetKeyState(KeyState::OLLIE);
+            if (ollie->IsPressed() && ollie->GetPressedTime() != observe->timeNext)
+                observe->Next(ollie->GetPressedTime());
+            observe->Update();
+        }
+        else
+        {
+            observe->Leave();
+            delete observe;
+            observe = NULL;
+        }
+    }
+        if (LevelModSettings::grafCounter && Modulating()) [[unlikely]]
+        {
+            //TestForAcid();
+            DWORD tagCount = GetTagCount();
+            if (tagCount != oldTagCount)
             {
-                Skater * skater = Skater::Instance();
-                if (skater)
+                if (tagCount && tagCount < 1000)
                 {
-                    KeyState* ollie = skater->GetKeyState(KeyState::OLLIE);
-                    if (ollie->IsPressed() && ollie->GetPressedTime() != observe->timeNext)
-                        observe->Next(ollie->GetPressedTime());
-                    observe->Update();
+                    oldTagCount = tagCount;
+                    sprintf(&tags[6], "%u %X", tagCount, *(DWORD*)(0x0040033C + ((tagCount - 1) * 4)));
+                    CStruct params;
+                    CStructHeader param(QBKeyHeader::STRING, Checksums::text, tags);
+                    params.AddParam(&param);
+                    ExecuteQBScript("LaunchGrafCounter", &params);
                 }
                 else
                 {
-                    observe->Leave();
-                    delete observe;
-                    observe = NULL;
-                }
-            }
-                if (LevelModSettings::grafCounter && Modulating()) [[unlikely]]
-                {
-                    //TestForAcid();
-                    DWORD tagCount = GetTagCount();
-                    if (tagCount != oldTagCount)
-                    {
-                        if (tagCount && tagCount < 1000)
-                        {
-                            oldTagCount = tagCount;
-                            sprintf(&tags[6], "%u %X", tagCount, *(DWORD*)(0x0040033C + ((tagCount - 1) * 4)));
-                            CStruct params;
-                            CStructHeader param(QBKeyHeader::STRING, Checksums::text, tags);
-                            params.AddParam(&param);
-                            ExecuteQBScript("LaunchGrafCounter", &params);
-                        }
-                        else
-                        {
-                            oldTagCount = 0;
-                            CStruct params;
-                            ExecuteQBScript("LaunchGrafCounter", &params);
-                        }
-                    }
-                }
-                    if (downloading || showmessage) [[unlikely]]
-                    {
-                        if (showmessage)
-                          showmessage--;
-                        m_font->DrawText(NULL, download_message, -1, &rct, DT_LEFT | DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 255));
-                    }
-                        if (false)
-                        {
-                            Gfx::pDevice->BeginScene();
-
-                            DWORD  D3DCMP = 0, pShared = 0, vShared = 0, Cull = 0, StencileEnable = 0, Clipping = 0, Clipplane = 0, COLOROP1 = 0, COLORARG1 = 0, COLORARG2 = 0, COLOROP2 = 0;
-                            UINT oldStride = 0;
-
-                            DWORD oldRenderState;
-                            Gfx::pDevice->GetRenderState(D3DRS_ZENABLE, &oldRenderState);
-                            Gfx::pDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
-                            Gfx::pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_NEVER);
-                            //pDevice->GetPixelShader(&pShared);
-                            Gfx::pDevice->SetPixelShader(NULL);
-                            Gfx::pDevice->SetVertexShader(NULL);
-                            Gfx::pDevice->SetTexture(0, NULL);
-                            Gfx::pDevice->SetRenderState(D3DRS_ZWRITEENABLE, 0);
-
-                            /* IDirect3DVertexBuffer8* oldBuffer = NULL;
-                             IDirect3DBaseTexture8* oldTexture1, * oldTexture2 = NULL;
-                             pDevice->GetStreamSource(0, &oldBuffer, &oldStride);
-                             pDevice->GetPixelShader(&pShared);
-                             pDevice->GetVertexShader(&vShared);*/
-                            Gfx::pDevice->GetRenderState(D3DRS_CULLMODE, &Cull);
-                            Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-                            Gfx::pDevice->SetRenderState(D3DRS_CLIPPING, 0);
-                            //pDevice->SetStreamSource(0, 0, 0);
-
-                            //m_pIDirect3DDevice8->SetStreamSource(0,0,0);
-
-                            //m_pIDirect3DDevice8->SetViewport(&pViewport);
-                            //m_pIDirect3DDevice8->SetTexture(0,NULL);
-                            /*pDevice->SetPixelShader(NULL);
-
-
-                            pDevice->SetRenderState(D3DRS_ZENABLE, TRUE);
-                            //m_pIDirect3DDevice8->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-                            pDevice->GetRenderState(D3DRS_ZFUNC, &D3DCMP);
-                            pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
-                            //m_pIDirect3DDevice8->SetRenderState( D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL );
-                            //m_pIDirect3DDevice8->SetRenderState( D3DRS_FILLMODE, D3DFILL_SOLID );
-                            pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-                            pDevice->GetRenderState(D3DRS_STENCILENABLE, &StencileEnable);
-                            pDevice->SetRenderState(D3DRS_STENCILENABLE, FALSE);
-                            pDevice->GetRenderState(D3DRS_CLIPPING, &Clipping);
-                            pDevice->SetRenderState(D3DRS_CLIPPING, FALSE);
-                            pDevice->GetRenderState(D3DRS_CLIPPLANEENABLE, &Clipplane);
-                            pDevice->SetRenderState(D3DRS_CLIPPLANEENABLE, FALSE);
-
-                            pDevice->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
-                            pDevice->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN |
-                                D3DCOLORWRITEENABLE_BLUE | D3DCOLORWRITEENABLE_ALPHA);
-
-                            pDevice->GetTextureStageState(0, D3DTSS_COLOROP, &COLOROP1);
-                            pDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTSS_COLOROP);
-                            pDevice->GetTextureStageState(0, D3DTSS_COLORARG1, &COLORARG1);
-                            pDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-                            pDevice->GetTextureStageState(0, D3DTSS_COLORARG2, &COLORARG2);
-                            pDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-
-                            pDevice->GetTextureStageState(1, D3DTSS_COLOROP, &COLOROP2);
-                            pDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-                            pDevice->GetTexture(0, &oldTexture1);
-                            pDevice->GetTexture(1, &oldTexture2);
-                            pDevice->SetTexture(0, NULL);
-                            pDevice->SetTexture(1, NULL);*/
-
-
-                            //pDevice->SetVertexShader(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-
-
-                            //pDevice->DrawPrimitiveUP(D3DPT_LINELIST, lineList.size() / 2, &lineList.front(), sizeof(Line));
-                            DrawLines();
-                            Gfx::pDevice->EndScene();
-
-                            Gfx::pDevice->SetRenderState(D3DRS_ZENABLE, oldRenderState);
-                            //pDevice->SetPixelShader(pShared);
-                            /*pDevice->SetTexture(0, oldTexture1);
-                            pDevice->SetTexture(1, oldTexture2);
-                            pDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
-                            //m_pIDirect3DDevice8->SetRenderState( D3DRS_ZENABLE, TRUE);
-                            pDevice->SetRenderState(D3DRS_STENCILENABLE, StencileEnable);
-                            pDevice->SetRenderState(D3DRS_CLIPPING, Clipping);
-                            pDevice->SetRenderState(D3DRS_CLIPPLANEENABLE, Clipplane);*/
-
-
-                            Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, Cull);
-                            /*pDevice->SetPixelShader(pShared);
-                            pDevice->SetVertexShader(vShared);
-                            pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP);
-                            pDevice->SetStreamSource(0, oldBuffer, oldStride);*/
-
-
-
-                        }
-                    /*else if (downloading)
-                    {
-                    m_font->DrawText(msg, -1, &rct, 0, D3DCOLOR_ARGB(255, 0, 0, 255));
-                    }*/
-                    /*else
-                    {
-                    DWORD tagCount = GetTagCount();
-                    if (tagCount && tagCount < 1000)
-                    {
-                    oldTagCount = tagCount;
-                    DWORD crc = *(DWORD*)(0x0040033C + (tagCount * 4));
-                    if (crc)
-                    {
-                    sprintf(&tags[6], "%X", crc);
-                    CStruct params;
-                    CStructHeader* param = params.AddParam("text", QBKeyHeader::STRING);
-                    param->pStr = tags;
-                    ExecuteQBScript("LaunchGrafCounter", &params);
-                    params.DellocateCStruct();
-                    }
-                    }
-                    else if(oldTagCount != 0)
-                    {
                     oldTagCount = 0;
                     CStruct params;
                     ExecuteQBScript("LaunchGrafCounter", &params);
-                    }
-                    }*/
+                }
+            }
+        }
+            if (downloading || showmessage) [[unlikely]]
+            {
+                if (showmessage)
+                  showmessage--;
+                m_font->DrawTextA(NULL, download_message, -1, &rct, DT_LEFT | DT_NOCLIP, D3DCOLOR_ARGB(255, 0, 0, 255));
+            }
+                if (false)
+                {
+                    Gfx::pDevice->BeginScene();
 
+                    DWORD  D3DCMP = 0, pShared = 0, vShared = 0, Cull = 0, StencileEnable = 0, Clipping = 0, Clipplane = 0, COLOROP1 = 0, COLORARG1 = 0, COLORARG2 = 0, COLOROP2 = 0;
+                    UINT oldStride = 0;
 
-                    /*DWORD  D3DCMP, pShared, vShared, Cull, StencileEnable, Clipping, Clipplane, COLOROP1, COLORARG1, COLORARG2, COLOROP2;
-                    UINT oldStride;
-                    IDirect3DVertexBuffer8* oldBuffer;
-                    IDirect3DBaseTexture8* oldTexture1, *oldTexture2;
-                    m_pIDirect3DDevice8->GetStreamSource(0, &oldBuffer, &oldStride);
-                    m_pIDirect3DDevice8->GetPixelShader(&pShared);
-                    m_pIDirect3DDevice8->GetVertexShader(&vShared);
-                    m_pIDirect3DDevice8->GetRenderState(D3DRS_CULLMODE, &Cull);
+                    DWORD oldRenderState;
+                    Gfx::pDevice->GetRenderState(D3DRS_ZENABLE, &oldRenderState);
+                    Gfx::pDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+                    Gfx::pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_NEVER);
+                    //pDevice->GetPixelShader(&pShared);
+                    Gfx::pDevice->SetPixelShader(NULL);
+                    Gfx::pDevice->SetVertexShader(NULL);
+                    Gfx::pDevice->SetTexture(0, NULL);
+                    Gfx::pDevice->SetRenderState(D3DRS_ZWRITEENABLE, 0);
+
+                    /* IDirect3DVertexBuffer8* oldBuffer = NULL;
+                     IDirect3DBaseTexture8* oldTexture1, * oldTexture2 = NULL;
+                     pDevice->GetStreamSource(0, &oldBuffer, &oldStride);
+                     pDevice->GetPixelShader(&pShared);
+                     pDevice->GetVertexShader(&vShared);*/
+                    Gfx::pDevice->GetRenderState(D3DRS_CULLMODE, &Cull);
+                    Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+                    Gfx::pDevice->SetRenderState(D3DRS_CLIPPING, 0);
+                    //pDevice->SetStreamSource(0, 0, 0);
 
                     //m_pIDirect3DDevice8->SetStreamSource(0,0,0);
 
                     //m_pIDirect3DDevice8->SetViewport(&pViewport);
                     //m_pIDirect3DDevice8->SetTexture(0,NULL);
-                    m_pIDirect3DDevice8->SetPixelShader(NULL);
+                    /*pDevice->SetPixelShader(NULL);
 
 
-                    m_pIDirect3DDevice8->SetRenderState(D3DRS_ZENABLE, TRUE);
+                    pDevice->SetRenderState(D3DRS_ZENABLE, TRUE);
                     //m_pIDirect3DDevice8->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
-                    m_pIDirect3DDevice8->GetRenderState(D3DRS_ZFUNC, &D3DCMP);
-                    m_pIDirect3DDevice8->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+                    pDevice->GetRenderState(D3DRS_ZFUNC, &D3DCMP);
+                    pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
                     //m_pIDirect3DDevice8->SetRenderState( D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL );
                     //m_pIDirect3DDevice8->SetRenderState( D3DRS_FILLMODE, D3DFILL_SOLID );
-                    m_pIDirect3DDevice8->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-                    m_pIDirect3DDevice8->GetRenderState(D3DRS_STENCILENABLE, &StencileEnable);
-                    m_pIDirect3DDevice8->SetRenderState(D3DRS_STENCILENABLE, FALSE);
-                    m_pIDirect3DDevice8->GetRenderState(D3DRS_CLIPPING, &Clipping);
-                    m_pIDirect3DDevice8->SetRenderState(D3DRS_CLIPPING, FALSE);
-                    m_pIDirect3DDevice8->GetRenderState(D3DRS_CLIPPLANEENABLE, &Clipplane);
-                    m_pIDirect3DDevice8->SetRenderState(D3DRS_CLIPPLANEENABLE, FALSE);
+                    pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+                    pDevice->GetRenderState(D3DRS_STENCILENABLE, &StencileEnable);
+                    pDevice->SetRenderState(D3DRS_STENCILENABLE, FALSE);
+                    pDevice->GetRenderState(D3DRS_CLIPPING, &Clipping);
+                    pDevice->SetRenderState(D3DRS_CLIPPING, FALSE);
+                    pDevice->GetRenderState(D3DRS_CLIPPLANEENABLE, &Clipplane);
+                    pDevice->SetRenderState(D3DRS_CLIPPLANEENABLE, FALSE);
 
-                    m_pIDirect3DDevice8->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
-                    m_pIDirect3DDevice8->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN |
-                    D3DCOLORWRITEENABLE_BLUE | D3DCOLORWRITEENABLE_ALPHA);
+                    pDevice->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
+                    pDevice->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN |
+                        D3DCOLORWRITEENABLE_BLUE | D3DCOLORWRITEENABLE_ALPHA);
 
-                    m_pIDirect3DDevice8->GetTextureStageState(0, D3DTSS_COLOROP, &COLOROP1);
-                    m_pIDirect3DDevice8->SetTextureStageState(0, D3DTSS_COLOROP, D3DTSS_COLOROP);
-                    m_pIDirect3DDevice8->GetTextureStageState(0, D3DTSS_COLORARG1, &COLORARG1);
-                    m_pIDirect3DDevice8->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-                    m_pIDirect3DDevice8->GetTextureStageState(0, D3DTSS_COLORARG2, &COLORARG2);
-                    m_pIDirect3DDevice8->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+                    pDevice->GetTextureStageState(0, D3DTSS_COLOROP, &COLOROP1);
+                    pDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTSS_COLOROP);
+                    pDevice->GetTextureStageState(0, D3DTSS_COLORARG1, &COLORARG1);
+                    pDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+                    pDevice->GetTextureStageState(0, D3DTSS_COLORARG2, &COLORARG2);
+                    pDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 
-                    m_pIDirect3DDevice8->GetTextureStageState(1, D3DTSS_COLOROP, &COLOROP2);
-                    m_pIDirect3DDevice8->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
-                    m_pIDirect3DDevice8->GetTexture(0, &oldTexture1);
-                    m_pIDirect3DDevice8->GetTexture(1, &oldTexture2);
-                    m_pIDirect3DDevice8->SetTexture(0, NULL);
-                    m_pIDirect3DDevice8->SetTexture(1, NULL);
-
-
-                    m_pIDirect3DDevice8->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
-                    for (DWORD i = 0; i < pointList.size(); i++)
-                    m_pIDirect3DDevice8->DrawPrimitiveUP(D3DPT_LINELIST, (pointList[i].numNodes - 1) / 2, &pointList[i].v[0], sizeof(pointList[i].v[0]));*/
+                    pDevice->GetTextureStageState(1, D3DTSS_COLOROP, &COLOROP2);
+                    pDevice->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+                    pDevice->GetTexture(0, &oldTexture1);
+                    pDevice->GetTexture(1, &oldTexture2);
+                    pDevice->SetTexture(0, NULL);
+                    pDevice->SetTexture(1, NULL);*/
 
 
-                    //}
-                    /*m_pIDirect3DDevice8->SetTexture(0, oldTexture1);
-                    m_pIDirect3DDevice8->SetTexture(1, oldTexture2);
-                    m_pIDirect3DDevice8->SetRenderState(D3DRS_ZENABLE, FALSE);
+                    //pDevice->SetVertexShader(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+
+
+                    //pDevice->DrawPrimitiveUP(D3DPT_LINELIST, lineList.size() / 2, &lineList.front(), sizeof(Line));
+                    DrawLines();
+                    Gfx::pDevice->EndScene();
+
+                    Gfx::pDevice->SetRenderState(D3DRS_ZENABLE, oldRenderState);
+                    //pDevice->SetPixelShader(pShared);
+                    /*pDevice->SetTexture(0, oldTexture1);
+                    pDevice->SetTexture(1, oldTexture2);
+                    pDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
                     //m_pIDirect3DDevice8->SetRenderState( D3DRS_ZENABLE, TRUE);
-                    m_pIDirect3DDevice8->SetRenderState(D3DRS_STENCILENABLE, StencileEnable);
-                    m_pIDirect3DDevice8->SetRenderState(D3DRS_CLIPPING, Clipping);
-                    m_pIDirect3DDevice8->SetRenderState(D3DRS_CLIPPLANEENABLE, Clipplane);
+                    pDevice->SetRenderState(D3DRS_STENCILENABLE, StencileEnable);
+                    pDevice->SetRenderState(D3DRS_CLIPPING, Clipping);
+                    pDevice->SetRenderState(D3DRS_CLIPPLANEENABLE, Clipplane);*/
 
 
-                    m_pIDirect3DDevice8->SetRenderState(D3DRS_CULLMODE, Cull);
-                    m_pIDirect3DDevice8->SetPixelShader(pShared);
-                    m_pIDirect3DDevice8->SetVertexShader(vShared);
-                    m_pIDirect3DDevice8->SetRenderState(D3DRS_ZFUNC, D3DCMP);
-                    m_pIDirect3DDevice8->SetStreamSource(0, oldBuffer, oldStride);*/
-                    return;
+                    Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, Cull);
+                    /*pDevice->SetPixelShader(pShared);
+                    pDevice->SetVertexShader(vShared);
+                    pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP);
+                    pDevice->SetStreamSource(0, oldBuffer, oldStride);*/
+
+
+
+                }
+            /*else if (downloading)
+            {
+            m_font->DrawText(msg, -1, &rct, 0, D3DCOLOR_ARGB(255, 0, 0, 255));
+            }*/
+            /*else
+            {
+            DWORD tagCount = GetTagCount();
+            if (tagCount && tagCount < 1000)
+            {
+            oldTagCount = tagCount;
+            DWORD crc = *(DWORD*)(0x0040033C + (tagCount * 4));
+            if (crc)
+            {
+            sprintf(&tags[6], "%X", crc);
+            CStruct params;
+            CStructHeader* param = params.AddParam("text", QBKeyHeader::STRING);
+            param->pStr = tags;
+            ExecuteQBScript("LaunchGrafCounter", &params);
+            params.DellocateCStruct();
+            }
+            }
+            else if(oldTagCount != 0)
+            {
+            oldTagCount = 0;
+            CStruct params;
+            ExecuteQBScript("LaunchGrafCounter", &params);
+            }
+            }*/
+
+
+            /*DWORD  D3DCMP, pShared, vShared, Cull, StencileEnable, Clipping, Clipplane, COLOROP1, COLORARG1, COLORARG2, COLOROP2;
+            UINT oldStride;
+            IDirect3DVertexBuffer8* oldBuffer;
+            IDirect3DBaseTexture8* oldTexture1, *oldTexture2;
+            m_pIDirect3DDevice8->GetStreamSource(0, &oldBuffer, &oldStride);
+            m_pIDirect3DDevice8->GetPixelShader(&pShared);
+            m_pIDirect3DDevice8->GetVertexShader(&vShared);
+            m_pIDirect3DDevice8->GetRenderState(D3DRS_CULLMODE, &Cull);
+
+            //m_pIDirect3DDevice8->SetStreamSource(0,0,0);
+
+            //m_pIDirect3DDevice8->SetViewport(&pViewport);
+            //m_pIDirect3DDevice8->SetTexture(0,NULL);
+            m_pIDirect3DDevice8->SetPixelShader(NULL);
+
+
+            m_pIDirect3DDevice8->SetRenderState(D3DRS_ZENABLE, TRUE);
+            //m_pIDirect3DDevice8->SetRenderState(D3DRS_ZWRITEENABLE,TRUE);
+            m_pIDirect3DDevice8->GetRenderState(D3DRS_ZFUNC, &D3DCMP);
+            m_pIDirect3DDevice8->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+            //m_pIDirect3DDevice8->SetRenderState( D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL );
+            //m_pIDirect3DDevice8->SetRenderState( D3DRS_FILLMODE, D3DFILL_SOLID );
+            m_pIDirect3DDevice8->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+            m_pIDirect3DDevice8->GetRenderState(D3DRS_STENCILENABLE, &StencileEnable);
+            m_pIDirect3DDevice8->SetRenderState(D3DRS_STENCILENABLE, FALSE);
+            m_pIDirect3DDevice8->GetRenderState(D3DRS_CLIPPING, &Clipping);
+            m_pIDirect3DDevice8->SetRenderState(D3DRS_CLIPPING, FALSE);
+            m_pIDirect3DDevice8->GetRenderState(D3DRS_CLIPPLANEENABLE, &Clipplane);
+            m_pIDirect3DDevice8->SetRenderState(D3DRS_CLIPPLANEENABLE, FALSE);
+
+            m_pIDirect3DDevice8->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE);
+            m_pIDirect3DDevice8->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN |
+            D3DCOLORWRITEENABLE_BLUE | D3DCOLORWRITEENABLE_ALPHA);
+
+            m_pIDirect3DDevice8->GetTextureStageState(0, D3DTSS_COLOROP, &COLOROP1);
+            m_pIDirect3DDevice8->SetTextureStageState(0, D3DTSS_COLOROP, D3DTSS_COLOROP);
+            m_pIDirect3DDevice8->GetTextureStageState(0, D3DTSS_COLORARG1, &COLORARG1);
+            m_pIDirect3DDevice8->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+            m_pIDirect3DDevice8->GetTextureStageState(0, D3DTSS_COLORARG2, &COLORARG2);
+            m_pIDirect3DDevice8->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+
+            m_pIDirect3DDevice8->GetTextureStageState(1, D3DTSS_COLOROP, &COLOROP2);
+            m_pIDirect3DDevice8->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
+            m_pIDirect3DDevice8->GetTexture(0, &oldTexture1);
+            m_pIDirect3DDevice8->GetTexture(1, &oldTexture2);
+            m_pIDirect3DDevice8->SetTexture(0, NULL);
+            m_pIDirect3DDevice8->SetTexture(1, NULL);
+
+
+            m_pIDirect3DDevice8->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
+            for (DWORD i = 0; i < pointList.size(); i++)
+            m_pIDirect3DDevice8->DrawPrimitiveUP(D3DPT_LINELIST, (pointList[i].numNodes - 1) / 2, &pointList[i].v[0], sizeof(pointList[i].v[0]));*/
+
+
+            //}
+            /*m_pIDirect3DDevice8->SetTexture(0, oldTexture1);
+            m_pIDirect3DDevice8->SetTexture(1, oldTexture2);
+            m_pIDirect3DDevice8->SetRenderState(D3DRS_ZENABLE, FALSE);
+            //m_pIDirect3DDevice8->SetRenderState( D3DRS_ZENABLE, TRUE);
+            m_pIDirect3DDevice8->SetRenderState(D3DRS_STENCILENABLE, StencileEnable);
+            m_pIDirect3DDevice8->SetRenderState(D3DRS_CLIPPING, Clipping);
+            m_pIDirect3DDevice8->SetRenderState(D3DRS_CLIPPLANEENABLE, Clipplane);
+
+
+            m_pIDirect3DDevice8->SetRenderState(D3DRS_CULLMODE, Cull);
+            m_pIDirect3DDevice8->SetPixelShader(pShared);
+            m_pIDirect3DDevice8->SetVertexShader(vShared);
+            m_pIDirect3DDevice8->SetRenderState(D3DRS_ZFUNC, D3DCMP);
+            m_pIDirect3DDevice8->SetStreamSource(0, oldBuffer, oldStride);*/
+            return;
 }
 

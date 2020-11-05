@@ -654,16 +654,19 @@ SCRIPT LM_ToggleHostOption
 				printf "without menu id!"
 			ENDIF
 		ENDIF
-		IF GotParam LinkedTo
-		    IF #"Not" IsOptionOn <LinkedTo>
-		        DestroyElement id = <id>
+		IF GotParam 
+		    IF IsOptionOn <LinkedTo>
+		        MakeTextMenuElementStatic <id> nonstatic = 1
+			ELSE
+			    MakeTextMenuElementStatic <id>
 			ENDIF
 		ELSE
 		    IF LM_GotParam LinkedTo_id
-		        GetParam LinkedTo
 				IF GotParam Name
-		            IF #"Not" IsOptionOn <name>
-			            DestroyElement id = <LinkedTo_id>
+		            IF IsOptionOn <name>
+			            MakeTextMenuElementStatic <LinkedTo_id> nonstatic = 1
+					ELSE
+					    MakeTextMenuElementStatic <LinkedTo_id> 
 			        ENDIF
 				ENDIF
 		    ENDIF
@@ -754,15 +757,18 @@ SCRIPT LM_ToggleOption
 			ENDIF
 		ENDIF
 		IF GotParam LinkedTo
-		    IF #"Not" IsOptionOn <LinkedTo>
-		        DestroyElement id = <id>
+		    IF IsOptionOn <LinkedTo>
+		        MakeTextMenuElementStatic <id> nonstatic = 1
+			ELSE
+			    MakeTextMenuElementStatic <id>
 			ENDIF
 		ELSE
 		    IF LM_GotParam LinkedTo_id
-		        GetParam LinkedTo
 				IF GotParam Name
-		            IF #"Not" IsOptionOn <name>
-			            DestroyElement id = <LinkedTo_id>
+		            IF IsOptionOn <name>
+			            MakeTextMenuElementStatic <LinkedTo_id> nonstatic = 1
+					ELSE
+					    MakeTextMenuElementStatic <LinkedTo_id> 
 			        ENDIF
 				ENDIF
 		    ENDIF
@@ -884,6 +890,7 @@ script Settings_AddLine
 				text = <text>
 				target = <target>
 				params = <params>
+				link = <link>
 				w = 300.0
 			}
 		else

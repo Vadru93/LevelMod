@@ -185,6 +185,7 @@
     <ClInclude Include="source\Model.h" />
     <ClInclude Include="source\Net.h" />
     <ClInclude Include="source\Node.h" />
+    <ClInclude Include="source\ObjParser.h" />
     <ClInclude Include="source\Observe.h" />
     <ClInclude Include="source\pch.h" />
     <ClInclude Include="source\Physics.h" />

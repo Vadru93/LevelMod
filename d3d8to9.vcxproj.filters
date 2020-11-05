@@ -269,6 +269,9 @@
     <ClInclude Include="source\Shatter.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
+    <ClInclude Include="source\ObjParser.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\d3d8.def">

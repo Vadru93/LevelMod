@@ -165,13 +165,13 @@ void CommandTell(const char* message);
 void CommandDebug(const char* message);
 void CommandAdd(const char* message);
 
-struct Command
+struct Commands
 {
     DWORD checksum;
     void(*function)(const char* message);
     char name[12];
 };
-Command commands[] = {
+Commands commands[] = {
     { crc32f("commands"), &CommandShowCommands, "commands" },
     { crc32f("tell"), &CommandTell, "tell" },
     { crc32f("kick"), &CommandKick, "kick" },
@@ -219,7 +219,7 @@ inline void ReadChat()
             command[j] = 0x00;
 
             DWORD cmd = crc32f(command);
-            for (DWORD i = 0; i < sizeof(commands) / sizeof(Command); i++)
+            for (DWORD i = 0; i < sizeof(commands) / sizeof(Commands); i++)
             {
                 if (cmd == commands[i].checksum)
                 {
@@ -594,7 +594,7 @@ void CommandAdd(const char* message)
 void CommandShowCommands(const char* message)
 {
     DWORD k = 0;
-    for (DWORD i = 1; i < sizeof(commands) / sizeof(Command); i++)
+    for (DWORD i = 1; i < sizeof(commands) / sizeof(Commands); i++)
     {
         DWORD j = 0;
         while (commands[i].name[j] != 0)

@@ -362,9 +362,11 @@ void RenderShatterObjects()
 
 
     //Make sure we update and render once per frame
-    if (shatterObjects.size() && lastFrameCount != Gfx::frameCounter)
+    if (lastFrameCount != Gfx::frameCounter)
     {
 
+        Gfx::pDevice->GetRenderTarget(0, &Gfx::world_rendertarget);
+        Gfx::pDevice->GetViewport(&Gfx::world_viewport);
         //Make sure textures are set to zero
         Gfx::pDevice->SetTexture(0, NULL);
         p_current_texture(0) = 0;
@@ -386,25 +388,27 @@ void RenderShatterObjects()
         Gfx::pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
 
 
-        float framelength = Game::skater->GetFrameLength() * Gfx::shatter_speed;
-
-        for (DWORD i = 0; i < shatterObjects.size(); i++)
+        if (shatterObjects.size())
         {
-            shatterObjects[i]->life -= framelength;
+            float framelength = Game::skater->GetFrameLength() * Gfx::shatter_speed;
 
-            if (shatterObjects[i]->life <= 0)
+            for (DWORD i = 0; i < shatterObjects.size(); i++)
             {
-                delete shatterObjects[i];
-                shatterObjects[i] = NULL;
-                shatterObjects.erase(shatterObjects.begin() + i);
-                i--;
-                continue;
+                shatterObjects[i]->life -= framelength;
+
+                if (shatterObjects[i]->life <= 0)
+                {
+                    delete shatterObjects[i];
+                    shatterObjects[i] = NULL;
+                    shatterObjects.erase(shatterObjects.begin() + i);
+                    i--;
+                    continue;
+                }
+
+                shatterObjects[i]->Update(framelength);
+                shatterObjects[i]->Render();
             }
-
-            shatterObjects[i]->Update(framelength);
-            shatterObjects[i]->Render();
         }
-
 
         Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, old_state);
         Gfx::pDevice->SetFVF(old);

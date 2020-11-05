@@ -10,6 +10,8 @@
 #include "d3d8to9.hpp"
 #include "..\CustomShaders.h"
 
+D3DPRESENT_PARAMETERS current_params;
+
 D3DMULTISAMPLE_TYPE DeviceMultiSampleType = D3DMULTISAMPLE_NONE;
 bool CopyRenderTarget = false;
 bool SetSSAA = false;
@@ -245,11 +247,13 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
     // Setup presentation parameters
     D3DPRESENT_PARAMETERS d3dpp;
     CopyMemory(&d3dpp, &PresentParams, sizeof(D3DPRESENT_PARAMETERS));
+    CopyMemory(&current_params, &d3dpp, sizeof(D3DPRESENT_PARAMETERS));
 
     // Check for AntiAliasing
     if (Gfx::AntiAliasing != 0)
     {
-        DWORD QualityLevels = 0;
+        extern DWORD QualityLevels;
+        QualityLevels = 0;
 
         // Check AntiAliasing quality
         for (int x = Gfx::AntiAliasing == 1 ? 16 : min(16, Gfx::AntiAliasing); x > 0; x--)
@@ -270,6 +274,7 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
                 // Check if device was created successfully
                 if (SUCCEEDED(hr))
                 {
+                    CopyMemory(&current_params, &d3dpp, sizeof(D3DPRESENT_PARAMETERS));
                     DeviceMultiSampleType = (D3DMULTISAMPLE_TYPE)x;
                     DeviceInterface->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
                     //LOG_LIMIT(3, "Setting MultiSample " << d3dpp.MultiSampleType << " Quality " << d3dpp.MultiSampleQuality);

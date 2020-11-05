@@ -18,6 +18,8 @@ extern bool CopyRenderTarget;
 extern bool SetSSAA;
 extern DWORD MaxAnisotropy;
 
+DWORD QualityLevels = 0;
+
 extern void UpdatePresentParameterForMultisample(D3DPRESENT_PARAMETERS* pPresentationParameters, D3DMULTISAMPLE_TYPE MultiSampleType);
 
 struct VertexShaderInfo
@@ -192,7 +194,6 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateAdditionalSwapChain(D3DPRESENT_
     if (DeviceMultiSampleType)
     {
         DeviceMultiSampleType = D3DMULTISAMPLE_NONE;
-        DWORD QualityLevels = 0;
         D3DDEVICE_CREATION_PARAMETERS CreationParams;
         ProxyInterface->GetCreationParameters(&CreationParams);
 
@@ -246,67 +247,46 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::Reset(D3DPRESENT_PARAMETERS8* pPresen
     D3DPRESENT_PARAMETERS PresentParams;
     ConvertPresentParameters(*pPresentationParameters, PresentParams);
 
-    D3DPRESENT_PARAMETERS d3dpp;
-    CopyMemory(&d3dpp, &PresentParams, sizeof(D3DPRESENT_PARAMETERS));
-    // Update Present Parameter for Multisample
-    UpdatePresentParameterForMultisample(&d3dpp, DeviceMultiSampleType);
-
-    d3dpp.BackBufferCount = Gfx::numBackBuffers; //(d3dpp.BackBufferCount) ? d3dpp.BackBufferCount : 1;
     if (Gfx::fps_fix)
     {
-        d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-        d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
         PresentParams.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
         PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
     }
     PresentParams.BackBufferCount = Gfx::numBackBuffers;// d3dpp.BackBufferCount;
     PresentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
 
-    // Get multisample quality level
-    if (Gfx::AntiAliasing)
-    {
-        DeviceMultiSampleType = (D3DMULTISAMPLE_TYPE)0;
-        DWORD QualityLevels = 0;
-        D3DDEVICE_CREATION_PARAMETERS CreationParams;
-        ProxyInterface->GetCreationParameters(&CreationParams);
 
-        for (int x = min((Gfx::AntiAliasing == 1 ? 16 : Gfx::AntiAliasing), 16); x > 0; x--)
-        {
-            d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)x;
-            DWORD QualityLevels = 0;
-            if (D3D->GetProxyInterface()->CheckDeviceMultiSampleType(CreationParams.AdapterOrdinal,
-                CreationParams.DeviceType, PresentParams.BackBufferFormat, PresentParams.Windowed,
-                PresentParams.MultiSampleType, &QualityLevels) == S_OK &&
-                D3D->GetProxyInterface()->CheckDeviceMultiSampleType(CreationParams.AdapterOrdinal,
-                    CreationParams.DeviceType, PresentParams.AutoDepthStencilFormat, PresentParams.Windowed,
-                    PresentParams.MultiSampleType, &QualityLevels) == S_OK)
-            {
+    // Create new d3d9 device
+    HRESULT hr = D3DERR_INVALIDCALL;
 
-                DeviceMultiSampleType = d3dpp.MultiSampleType;
-                d3dpp.MultiSampleQuality = (QualityLevels != 0) ? QualityLevels - 1 : 0;
-            }
-        }
+    // Setup presentation parameters
+    D3DPRESENT_PARAMETERS d3dpp;
+    CopyMemory(&d3dpp, &PresentParams, sizeof(D3DPRESENT_PARAMETERS));
 
-
-    }
+    OnLost();
 
     if (DeviceMultiSampleType)
     {
-
+        UpdatePresentParameterForMultisample(&d3dpp, DeviceMultiSampleType, (QualityLevels > 0) ? QualityLevels - 1 : 0);
 
         // Reset device
         if (SUCCEEDED(ProxyInterface->Reset(&d3dpp)))
         {
+            OnReset();
             return D3D_OK;
         }
-        MessageBox(0, "Failed to enable AA", "", 0);
+        extern D3DPRESENT_PARAMETERS current_params;
+        if (SUCCEEDED(ProxyInterface->Reset(&current_params)))
+        {
+            OnReset();
+            return D3D_OK;
+        }
         // If failed
         DeviceMultiSampleType = D3DMULTISAMPLE_NONE;
     }
 
 
 
-    OnLost();
     HRESULT hres = ProxyInterface->Reset(&PresentParams);
     OnReset();
     return hres;
@@ -510,7 +490,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateRenderTarget(UINT Width, UINT H
 
     *ppSurface = nullptr;
 
-    DWORD QualityLevels = 0;
+    DWORD _QualityLevels = 0;
 
     // Get multisample quality level
     if (MultiSample != D3DMULTISAMPLE_NONE)
@@ -518,13 +498,13 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateRenderTarget(UINT Width, UINT H
         D3DDEVICE_CREATION_PARAMETERS CreationParams;
         ProxyInterface->GetCreationParameters(&CreationParams);
 
-        D3D->GetProxyInterface()->CheckDeviceMultiSampleType(CreationParams.AdapterOrdinal, CreationParams.DeviceType, Format, FALSE, MultiSample, &QualityLevels);
-        QualityLevels = (QualityLevels != 0) ? QualityLevels - 1 : 0;
+        D3D->GetProxyInterface()->CheckDeviceMultiSampleType(CreationParams.AdapterOrdinal, CreationParams.DeviceType, Format, FALSE, MultiSample, &_QualityLevels);
+        _QualityLevels = (_QualityLevels != 0) ? _QualityLevels - 1 : 0;
     }
 
     IDirect3DSurface9* SurfaceInterface = nullptr;
 
-    HRESULT hr = ProxyInterface->CreateRenderTarget(Width, Height, Format, MultiSample, QualityLevels, Lockable, &SurfaceInterface, nullptr);
+    HRESULT hr = ProxyInterface->CreateRenderTarget(Width, Height, Format, MultiSample, _QualityLevels, Lockable, &SurfaceInterface, nullptr);
 
     if (FAILED(hr))
     {
