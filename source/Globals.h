@@ -76,6 +76,7 @@ namespace Gfx
     extern float shatter_gravity;
     extern LPDIRECT3DSURFACE9 world_rendertarget;
     extern D3DVIEWPORT9 world_viewport;
+    extern D3DXVECTOR3 sun_position;
 };
 
 //--------XINPUT--------
@@ -142,6 +143,9 @@ bool OnPostLevelLoad(CStruct* pStruct, CScript* pScript);
 bool ChangeLocalScript(CStruct* pStruct, CScript* pScript);
 
 bool NewShatterScript(CStruct* pStruct, CScript* pScript);
+
+bool AddLights(CStruct* pStruct, CScript* pScript);
+bool RemoveLights(CStruct* pStruct, CScript* pScript);
 //--------Functions callable from script--------
 
 //--------Functions NOT callable from script--------

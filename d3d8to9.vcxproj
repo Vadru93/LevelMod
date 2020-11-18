@@ -192,6 +192,7 @@
     <ClInclude Include="source\QBKey.h" />
     <ClInclude Include="source\Script.h" />
     <ClInclude Include="source\Settings.h" />
+    <ClInclude Include="source\shadow.h" />
     <ClInclude Include="source\Shatter.h" />
     <ClInclude Include="source\SkateModule.h" />
     <ClInclude Include="source\Skater.h" />

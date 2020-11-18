@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include "shadow.h"
 /*0
 004F9B9E < -non semi
     8
@@ -64,6 +65,11 @@ D3DXMATRIX lineWorld;
 LPD3DXSPRITE eye_sprite;
 DWORD wheel_timer = 0;
 LPDIRECT3DTEXTURE9 wheel_texture[12];
+
+BYTE eye_state = 0;
+DWORD actual_timer = 0;
+DWORD last_state;
+bool rotating = false;
 
 void SetTagLimit(DWORD limit);
 
@@ -2535,7 +2541,9 @@ const CompiledScript scripts[] =
     {"TestReloadQB", TestReloadQB},
     {"OnPostLevelLoad", OnPostLevelLoad},
     {"Change_Local", ChangeLocalScript},
-{ "NewShatter", NewShatterScript}
+{ "NewShatter", NewShatterScript},
+    {"AddLights", AddLights},
+    {"RemoveLights", RemoveLights},
 /*{"SetMemoryPoolSize", SetMemoryPoolSize},
 {"GetMemoryPoolSize", GetMemoryPoolSize},
 {"GetMemoryPoolSizeText", GetMemoryPoolSizeText},*/
@@ -3411,6 +3419,66 @@ bool ChangeLocalScript(CStruct* pStruct, CScript* pScript)
 
     _printf("No param passed to Local_Param? in script %s\n", FindChecksumName(pScript->scriptChecksum));
     return false;
+}
+
+
+struct Light
+{
+    D3DXVECTOR3 position;
+    float clipping;
+
+    Light(D3DXVECTOR3& pos, float& clipping_distance)
+    {
+        position = pos;
+        clipping = clipping_distance;
+    }
+};
+std::vector<Light> lights;
+
+bool RemoveLights(CStruct* pStruct, CScript* pScript)
+{
+    lights.clear();
+    return true;
+}
+
+bool AddLights(CStruct* pStruct, CScript* pScript)
+{
+    CStructHeader* header = pStruct->head;
+
+    while (header)
+    {
+        if (header->Type = QBKeyHeader::QBKeyType::ARRAY)
+        {
+            for (DWORD i = 0; i < header->pArray->GetNumItems(); i++)
+            {
+                D3DXVECTOR3 position = D3DXVECTOR3(1000.0f, 8000.0f, 1000.0f);
+                float clipping = 0;
+
+                CStruct *pItem = header->pArray->GetStructure(i);
+
+                CStructHeader* data;
+                if (pItem->GetStruct(Checksums::Pos, &data))
+                {
+                    position = *data->pVec;
+                }
+
+                if (pItem->GetStruct(Checksum("Clipping"), &data))
+                {
+                    clipping = data->value.f;
+                }
+                
+                lights.push_back(Light(position, clipping));
+            }
+            return true;
+        }
+        header = header->NextHeader;
+    }
+    return false;
+}
+
+bool RemoveLightsScript(CStruct* pStruct, CScript* pScript)
+{
+    lights.clear();
 }
 
 /*__declspec(naked) void Fopen_naked()
@@ -4487,6 +4555,12 @@ bool HideLoadingScreen(CStruct* pStruct, CScript* pScript)
 
 bool DisplayLoadingScreen(CStruct* pStruct, CScript* pScript)
 {
+    eye_state = 6;
+    last_state = 0;
+    wheel_timer = 0;
+    actual_timer = 0;
+    rotating = false;
+
     show_loading_screen = true;
     rendering_loading_screen = true;
     //CreateThread(0, 0, (LPTHREAD_START_ROUTINE)RenderLoadingScreen, 0, 0, 0);
@@ -4528,6 +4602,146 @@ float __cdecl proxy_SnapToGroundClamp(float a1)
 }
 
 
+struct OptimizedCRC
+{
+    DWORD string;
+    DWORD eax;
+    DWORD esp;
+
+    void Optimize()
+    {
+        DWORD old;
+        VirtualProtect((LPVOID)string, 5 + 5 + 3 + eax + esp, PAGE_EXECUTE_READWRITE, &old);
+
+        DWORD ptr = string;
+        char error[256];
+        sprintf(error, "%X %d", string, esp);
+        ptr++;
+        char* c = *(char**)ptr;
+        //MessageBox(0, c, c, 0);
+        *(BYTE*)string = 0x90;
+        string++;
+        ptr += 4;
+        if (*(BYTE*)ptr == 0xC7 || *(BYTE*)ptr == 0xC6)
+            *(BYTE*)(ptr + 3) -= 4;
+        else if (*(BYTE*)ptr == 0x88 || *(BYTE*)ptr == 0x89)
+            *(BYTE*)(ptr + 3) -= 4;
+        ptr += eax;
+        if (*(BYTE*)ptr != 0xE8)
+            MessageBox(0, "Wrong eax", "", 0);
+        *(BYTE*)ptr = 0xB8;
+        ptr++;
+        _printf("Optimizing checksum access: %s\n", c);
+        *(DWORD*)ptr = crc32f(c);
+        *(DWORD*)string = 0x90909090;
+        ptr += 4;
+        if (*(BYTE*)ptr == 0x8B && (*(BYTE*)(ptr+1) != 0x8F && *(BYTE*)(ptr+1) != 0x8E && *(BYTE*)(ptr+1) != 0x0E && *(BYTE*)(ptr+1) != 0x4E))
+        {
+            *(BYTE*)(ptr + 3) -= 4;
+            if (*(BYTE*)(ptr + 3) == 0)
+                *(BYTE*)(ptr + 3) = 0x90;
+        }
+        ptr += esp;
+        if (*(BYTE*)ptr != 0x83)
+        {
+            MessageBox(0, "Wrong esp", error, 0);
+        }
+        if (*(BYTE*)(ptr + 2) == 4)
+        {
+            *(BYTE*)ptr = 0x90;
+            ptr++;
+            *(BYTE*)ptr = 0x90;
+            ptr++;
+            *(BYTE*)ptr = 0x90;
+        }
+        else
+        {
+            *(BYTE*)(ptr + 2) -= 4;
+        }
+    }
+};
+
+OptimizedCRC optimized[] = { {0x00401B3F, 5, 9},  {0x00401E0C, 4, 9}, {0x004021DA, 4, 9}, {0x00404C50, 8, 0}, {0x00404C71, 0, 0},  
+    {0x00404C89, 0, 0},  {0x00404CA1, 0, 0}, {0x00405240, 16, 0}, {0x00405640, 8, 0}, {0x0041525F, 0, 0}, {0x0041527A, 0, 0},
+    {0x00405660, 0, 0}, {0x00405678, 0, 0},  {0x0040BBA7, 0, 4},  {0x0040BBBD, 0, 4},  {0x0040BBD3, 0, 4},  {0x0040BBE9,0, 4},
+ {0x0040BBFF, 0, 4},  {0x00413C97, 0, 0},  {0x00413FB4, 0, 0},  {0x00413FD6, 0, 0},  {0x0041417E, 0, 0},   {0x0041419D, 0, 0},
+ {0x004141E7, 0, 0},  {0x00414206, 0, 0},  {0x004143BD, 0, 0},  {0x004146A4,8, 0 },  {0x004151A8, 0, 0},   {0x00415295, 0, 0},
+ {0x004152B2, 0, 0},  {0x004152D0, 0, 0},  {0x004152EC, 0, 0},  {0x00415374, 0, 0},  {0x00415397, 0, 0},   {0x004153BA, 0, 0}, 
+{0x004153E0, 0, 0}, {0x0041545B, 0, 0}, {0x00415476, 0, 0}, {0x00415491, 0, 0}, {0x004154A9, 0, 4}, {0x00416291, 8, 0},
+{0x004162DA, 0, 0}, {0x0041631B, 0, 0}, {0x004163A4, 0, 0}, {0x00416823, 8, 0}, {0x00416A52, 0, 9}, {0x00416A89, 0, 9},
+{0x00416AC0, 0, 9}, {0x00416AF3, 0, 9}, {0x00416B45, 0, 9}, {0x00416B75, 0, 9}, {0x00416BA5, 0, 9}, {0x00416C11, 0, 9},
+{0x00416C58, 0, 9}, {0x00416C7D, 0, 9}, {0x00416CA9, 0, 0}, {0x0041AA22, 0, 0}, {0x0041AC0C, 0, 0}, {0x0041AC3F, 0, 0},
+{0x0041B04A, 0, 0}, {0x0041D258, 0, 22}, {0x0041D268, 0, 6}, {0x0041F7B3, 8, 0}, {0x0041FF8C, 0, 0}, {0x00420051, 0, 0},
+{0x00421C41, 0, 0}, {0x00421C5D, 0, 0}, {0x0042216F, 8, 0}, {0x00422D31, 2, 0}, {0x00422D70, 0, 0}, {0x00422D7E, 0, 0},
+    {0x00422DB2, 0, 0}, {0x00422DC0, 0, 0}, {0x00422DD5, 2, 0}, {0x00422DE5, 0, 0}, {0x00422EF4, 0, 0}, {0x00422F0D, 0, 0},
+    {0x00422F23, 0, 0}, {0x00422FD9, 4, 0}, {0x004242CE, 8, 0}, {0x00424A05, 5, 9}, {0x00424BD8, 2, 0}, {0x00424BF9, 2, 0},
+    {0x00424EA5, 0, 0}, {0x0042556C, 0, 4}, {0x0042560F, 2, 0}, {0x00425639, 0, 4}, {0x004256BF, 2, 0}, {0x004256E9, 0, 4},
+    {0x0042576F, 2, 0}, {0x00425799, 0, 4}, {0x0042590F, 2, 0}, {0x00425939, 0, 4}, {0x00425A6F, 0, 21}, {0x00425A79, 4, 7},
+    {0x004265AB, 0, 0}, {0x0042C8B5, 0, 6}, {0x0042D59E, 11, 0}, {0x00431ED1, 11, 0}, {0x00433FF5, 0, 13}, {0x004341E8, 2, 0},
+    {0x00434212, 0, 4}, {0x00434236, 0, 4}, {0x00434508, 0, 0}, {0x00434531, 0, 0}, {0x0043484D, 0, 0}, {0x00434FCA, 0, 0},
+{0x004375B3, 0, 0}, {0x0043766C, 0, 0}, {0x004378E5, 2, 0}, {0x004380A5, 30, 0}, {0x004380ED, 6, 0}, {0x0043883C, 0, 0},
+    {0x00438BBA, 2, 4}, {0x00438E2D, 4, 4}, {0x00438E82, 0, 0}, {0x00438E9A, 0, 0}, {0x00438F9C, 0, 0}, {0x00438FC2, 0, 0}, 
+    {0x00438FDF, 0, 0}, {0x00438FFD, 0, 0}, {0x0043901B, 0, 0}, {0x00439528, 0, 0}, {0x00439585, 0, 0}, {0x004395F3, 0, 0}, 
+    {0x0043969B, 0, 0}, {0x0043972A, 0, 6}, {0x004399A9, 0, 0}, {0x004399BE, 0, 6}, {0x00439AE7, 0, 6}, {0x00439B6B, 2, 0},
+    {0x00439B8D, 0, 6}, {0x0043A342, 0, 4}, {0x0043A596, 0, 4}, {0x0043B229, 0, 4}, {0x0043B28C, 0, 0}, {0x0043CFF0, 5, 0},
+    {0x0043D00A, 0, 0}, {0x0043D01A, 0, 0}, {0x0043D039, 0, 0}, {0x0043D25C, 0, 0}, {0x0043D271, 0, 0}, {0x0043D281, 0, 0},
+    {0x0043D2C3, 4, 0}, {0x0043DA4A, 0, 0}, {0x0043DD79, 0, 3}, {0x0043DE11, 0, 0}, {0x0043DEF4, 5, 0}, {0x0043DF0E, 0, 0},
+    {0x0043769F, 0, 0}, {0x0043DF1E, 0, 0}, {0x0043DF3A, 0, 0}, {0x0043DFDA, 0, 0}, {0x0043E0E2, 0, 0}, {0x0043E0FB, 0, 0},
+    {0x0043E111, 0, 0}, {0x0043E144, 0, 2}, {0x0043E15D, 0, 0}, {0x0043FDAE, 0, 0}, {0x0043FF67, 0, 0}, {0x0043FFB9, 0, 0},
+    {0x004404EA, 5, 0}, {0x004409C0, 0, 9}, {0x00440A34, 0, 9}, {0x00440AB9, 4, 9}, {0x00440B1F, 8, 0}, {0x00440B4D, 0, 9},
+{0x00440BC0, 0, 9}, {0x00440CF4, 0, 0}, {0x00440E25, 8, 9}, {0x0044114D, 3, 0}, {0x0044125E, 3, 0}, {0x00441412, 3, 0},
+    {0x00441570, 2, 0}, {0x00441592, 0, 0}, {0x004415B2, 0, 0}, {0x004415D2, 0, 0}, {0x004415F2, 0, 0}, {0x00441612, 0, 0},
+  };
+DWORD optimized2[] = { 0x0040100F, 0x00401D40, 0x00402478, 0x0041117C, 0x00411589, 0x00413A31, 0x00413A3D, 0x00413AEF,
+0x00413AFB, 0x004155B2, 0x004194EC, 0x0041963B, 0x0041A6CA, 0x0041AC5A, 0x004201CD, 0x004251F9, 0x00425250, 0x0042527D,
+0x0042528B, 0x004263CA, 0x0042641A, 0x0042646A, 0x004264BA, 0x0042651F, 0x0042657A, 0x004265DA, 0x004273F2, 0x00428254,
+0x004286D8, 0x00429776, 0x00429856, 0x00429936, 0x00429A26, 0x00429B16, 0x00429C26, 0x00429CF6, 0x00429DD6, 0x00429E52,
+0x00429F16, 0x00429FCA, 0x0042B0DF, 0x0042B2E5, 0x0042BF87, 0x0042BFBF, 0x0042C6A6, 0x0042C6B2, 0x0043299E, 0x004329B1,
+0x00433BF7, 0x004355F4, 0x0043763D, 0x00438F6C, 0x0043D6D3, 0x0042A05A, 0x004508ED, 0x004508F9, 0x00504F7F, 0x004BA6F2};
+
+struct OptimizedArrayCRC
+{
+    DWORD string;
+
+    void Optimize()
+    {
+        DWORD old;
+        DWORD ptr = string;
+        ptr++;
+        VirtualProtect((LPVOID)ptr, 4, PAGE_EXECUTE_READWRITE, &old);
+        char* c = *(char**)ptr;
+        _printf("Optimizing array access: %s\n", c);
+        *(DWORD*)ptr = crc32f(c);
+        if (string == 0x004B8306 || string == 0x004B830D)
+            return;
+        ptr += 4;
+        retry:
+        while (*(BYTE*)ptr != 0xE8) ptr++;
+        ptr++;
+        if ((*(DWORD*)ptr + ptr + 4) != 0x004265D0)
+            goto retry;
+        VirtualProtect((LPVOID)ptr, 4, PAGE_EXECUTE_READWRITE, &old);
+        *(DWORD*)ptr = 0x00426590 - ptr - 4;
+    }
+};
+
+//00454D6C this one needs fix
+//0048FB7C this one needs fix
+//004E7B91
+//0050360F
+
+OptimizedArrayCRC optimized3[] = { 0x00412035, 0x004142C2, 0x00418869, 0x00418BAC, 0x004198C5, 0x00419CF7,  0x00419D5E,
+0x0041B2F1, 0x0041D8BB, 0x0041DAFD, 0x0041DD52, 0x0041E059, 0x0041FE95, 0x00420EBF, 0x00422670, 0x00422EC0, 0x004252A8, 
+0x0042C724, 0x00432786, 0x0043E0AB, 0x0043F946, 0x00442CCA, 0x00444951, 0x004457B8, 0x004460C6, 0x004469E5, 0x00446AF6,
+0x00446C46, 0x00446D06, 0x00446F44, 0x00446FF2, 0x004471FF, 0x004475DE, 0x0044770E, 0x004477FA, 0x0044782C, 0x00447F0F,
+0x0044871F, 0x00448AAC, 0x00448B36, 0x00448E16, 0x0044F3EA, 0x00451207, 0x00454F0A, 0x0045515E, 0x0045556E, 0x00457E3B,
+0x0045872E, 0x0045932E, 0x0045A025, 0x0045C340, 0x0045C74D, 0x0045C925, 0x0045D359, 0x0045D55B, 0x0045FAD5, 0x00464786,
+0x00464B4B, 0x004677D9, 0x00467E99, 0x00469448, 0x0046A680, 0x0046AF8B, 0x004714BD, 0x00474B6E, 0x00477310, 0x0047A392,
+0x0047A65F, 0x0047C265, 0x00488085, 0x00498402, 0x00498437, 0x0049B903, 0x0049BD13, 0x0049C032, 0x004A5AF5, 0x004A5BE1,
+0x004A6011, 0x004B50E9, 0x004B54C3, 0x004B5502, 0x004B5AC7, 0x004B6A37, 0x004B73C3, 0x004B8316, 0x004B8306, 0x004B830D, 
+0x004BB741, 0x004BC052,
+0x004BD32C, 0x004BDB05, 0x004BDE7A, 0x004BEA69, 0x004E3145, 0x004E31B2, 0x004E4E55, 0x004F07C5, };
+
 //void HookControls();
 void InitLevelMod()
 {
@@ -4541,6 +4755,11 @@ void InitLevelMod()
     BYTE codeCaveRenderHook2[] = { 0x5E, 0x5D, 0xC6, 0x05, 0x19, 0x00, 0x40, 0x00, 0x00, 0xEB, 0x08, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
     memcpy((void*)0x0042FA0D, codeCaveRenderHook, sizeof(codeCaveRenderHook));
     memcpy((void*)0x0042FA9D, codeCaveRenderHook2, sizeof(codeCaveRenderHook2));
+
+    for (DWORD i = 0; i < sizeof(optimized) / sizeof(OptimizedCRC); i++)
+    {
+        optimized[i].Optimize();
+    }
 
 
     BYTE codeCaveBouncyObject[] = { 0x84, 0xC0, 0x0F, 0x84, 0xA0, 0x3E, 0x08, 0x00, 0x8A, 0x84, 0x24, 0x00, 0x01, 0x00, 0x00, 0x24, 0x40, 0x74, 0x0D, 0x8B, 0x84, 0x24, 0x14, 0x01, 0x00, 0x00, 0x89, 0x05, 0xCB, 0x03, 0x40, 0x00, 0x8A, 0x84, 0x24, 0x00, 0x01, 0x00, 0x00, 0x90, 0x90, 0x90, 0x90, 0x90, 0x24, 0x10, 0x0F, 0x85, 0x74, 0x3E, 0x08, 0x00, 0xE9, 0x0D, 0x3A, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -4604,6 +4823,30 @@ void InitLevelMod()
         QScript::Scripts = new QScript::QBScript();*/
     if (debugMode)
         HookFunction(0x004265F1, Checksum_naked, 0xE9);
+    else
+    {
+        DWORD old;
+        for (DWORD i = 0; i < sizeof(optimized2) / 4; i++)
+        {
+            DWORD addr = optimized2[i] + 1;
+            VirtualProtect((LPVOID)addr, 4, PAGE_EXECUTE_READWRITE, &old);
+            *(DWORD*)addr = 0x004110E0 - addr - 4;
+        }
+    }
+
+    /*VirtualProtect((LPVOID)0x004265D9, 3 + 4 * 4, PAGE_EXECUTE_READWRITE, &old);
+
+    *(WORD*)0x004265D9 = 0x31FF;
+    *(BYTE*)0x004265DB = 0xE8;
+    *(DWORD*)0x004265DC = 0xFFFFFFB1;
+    *(DWORD*)0x004265E0 = 0xC308C483;
+    *(DWORD*)0x004265E4 = 0x90909090;
+    *(DWORD*)0x004265E8 = 0x90909090;*/
+
+    for (DWORD i = 0; i < sizeof(optimized3) / sizeof(OptimizedArrayCRC); i++)
+    {
+        optimized3[i].Optimize();
+    }
     char msg[128] = "";
     /*sprintf(msg, "OFFSET %X", offset);
     MessageBox(0, msg, msg, 0);*/
@@ -5728,11 +5971,7 @@ SimpleMesh* Eye = NULL;
 LPDIRECT3DTEXTURE9 target_texture, eye_texture;
 LPDIRECT3DSURFACE9 eye_target;
 
-BYTE eye_state = 0;
-DWORD actual_timer = 0;
-DWORD last_state;
-bool rotating = false;
-
+std::vector<ShadowMap> shadows;
 
 void DrawEye()
 {
@@ -5891,15 +6130,15 @@ void DrawFrame()
 
         if (GameState::GotSuperSectors) [[likely]]
         {
-            Skater * skater = Skater::Instance();
-            if (skater) [[likely]]
+            //Skater * skater = Skater::Instance();
+            if (Game::skater) [[likely]]
             {
                 if (LevelModSettings::HookedControls && XINPUT::Player1->IsConnected())
                 {
                     if (XINPUT::vibrationFrames)
                     {
                         XINPUT::Player1->Vibrate(XINPUT::vibration.wLeftMotorSpeed, XINPUT::vibration.wRightMotorSpeed);
-                        XINPUT::vibrationFrames -= skater->GetFrameLength();
+                        XINPUT::vibrationFrames -= Game::skater->GetFrameLength();
                     }
                     else
                     {
@@ -5907,6 +6146,8 @@ void DrawFrame()
                     }
 
                 }
+
+            //RenderShadows();
             //ProxyPad(skater);
 
             updatingObjects = true;
@@ -5916,7 +6157,7 @@ void DrawFrame()
                 if (!(movingObjects[i].state & MeshState::kill)) [[likely]]
                 {
                     //_printf("FALSE\n");
-                    if (movingObjects[i].Update(skater->GetFrameLength()))
+                    if (movingObjects[i].Update(Game::skater->GetFrameLength()))
                         movingObjects[i].sector->Update();//Send state to update vertexbuffer
                 }
                 else

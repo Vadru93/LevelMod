@@ -272,6 +272,9 @@
     <ClInclude Include="source\ObjParser.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
+    <ClInclude Include="source\shadow.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\d3d8.def">

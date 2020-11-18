@@ -66,6 +66,7 @@ float Gfx::shatter_gravity = 128.0f;
 DWORD Gfx::frameCounter = 0;
 D3DVIEWPORT9 Gfx::world_viewport;
 LPDIRECT3DSURFACE9 Gfx::world_rendertarget;
+D3DXVECTOR3 Gfx::sun_position;
 
 EXTERN DWORD _GetCurrentTime()
 {
