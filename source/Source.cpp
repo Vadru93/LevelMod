@@ -4741,13 +4741,70 @@ OptimizedArrayCRC optimized3[] = { 0x00412035, 0x004142C2, 0x00418869, 0x00418BA
 0x004A6011, 0x004B50E9, 0x004B54C3, 0x004B5502, 0x004B5AC7, 0x004B6A37, 0x004B73C3, 0x004B8316, 0x004B8306, 0x004B830D, 
 0x004BB741, 0x004BC052,
 0x004BD32C, 0x004BDB05, 0x004BDE7A, 0x004BEA69, 0x004E3145, 0x004E31B2, 0x004E4E55, 0x004F07C5, };
-
+LARGE_INTEGER freq;
+double fFreq;
+LARGE_INTEGER endTime;
+#define startTime (*(LARGE_INTEGER*)0x008E8E18)
+LARGE_INTEGER elapsedTime;
 //void HookControls();
+
+DWORD TimerElapsed()
+{
+    QueryPerformanceCounter(&endTime);
+    if (endTime.HighPart == startTime.HighPart)
+    {
+        elapsedTime.LowPart = (endTime.LowPart - startTime.LowPart);
+        _asm xor edx, edx
+        return (elapsedTime.LowPart * 1000) / freq.QuadPart;
+    }
+    else
+    {
+        elapsedTime.LowPart = 0xFFFFFFFF - startTime.LowPart + endTime.LowPart;
+        _asm xor edx, edx
+        return (elapsedTime.LowPart * 1000) / freq.QuadPart;
+    }
+}
+
+/*DWORD TimerElapsed()
+{
+    QueryPerformanceCounter(&endTime);
+
+    if (endTime.HighPart == startTime.HighPart)
+    {
+        elapsedTime.LowPart = (endTime.LowPart - startTime.LowPart);
+        _asm xor edx, edx;
+        return (DWORD)((float)elapsedTime.LowPart * fFreq);
+    }
+    else
+    {
+        elapsedTime.LowPart = 0xFFFFFFFF - startTime.LowPart + endTime.LowPart;
+        _asm xor edx, edx
+        return (DWORD)((float)elapsedTime.LowPart * fFreq);
+    }
+}*/
+
+
+LARGE_INTEGER TimerStart()
+{
+    QueryPerformanceCounter(&startTime);
+    return startTime;
+}
+
 void InitLevelMod()
 {
     //HookControls();
 
+    QueryPerformanceFrequency(&freq);
+
+    //HookFunction(0x004C04F0, TimerElapsed);
+    BYTE timer[] = { 0xE8, 0x98, 0xF4, 0xF7, 0x79, 0xB9, 0x0F, 0x00, 0x00, 0x00, 0x39, 0xC8, 0x73, 0x27, 0x29, 0xC1, 0x51, 0xE8, 0xD7, 0x29, 0x8C, 0x75, 0xEB, 0x1D };
+
+    *(DWORD*)&timer[1] = (PtrToUlong(TimerElapsed) - 0x004C04E4) - 4;
+    HookFunction(0x004C0519, TimerStart);
+
     DWORD old;
+    VirtualProtect((LPVOID)0x004C04E3, sizeof(timer), PAGE_EXECUTE_READWRITE, &old);
+    memcpy((void*)0x004C04E3, timer, sizeof(timer));
     VirtualProtect((LPVOID)0x00400019, 6, PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((LPVOID)0x0042FA0D, 9, PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((LPVOID)0x0042FA9D, 19, PAGE_EXECUTE_READWRITE, &old);
