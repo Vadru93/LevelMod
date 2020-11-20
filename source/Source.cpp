@@ -4755,13 +4755,13 @@ DWORD TimerElapsed()
     {
         elapsedTime.LowPart = (endTime.LowPart - startTime.LowPart);
         _asm xor edx, edx
-        return (elapsedTime.LowPart * 1000) / freq.QuadPart;
+        return (elapsedTime.LowPart * 1000) / freq.LowPart;
     }
     else
     {
         elapsedTime.LowPart = 0xFFFFFFFF - startTime.LowPart + endTime.LowPart;
         _asm xor edx, edx
-        return (elapsedTime.LowPart * 1000) / freq.QuadPart;
+        return (elapsedTime.LowPart * 1000) / freq.LowPart;
     }
 }
 
