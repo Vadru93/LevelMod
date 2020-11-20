@@ -6,7 +6,8 @@ The new iteration of the mod is a hobby project for die hard fans of THPS3. It a
 
 LevelMod features:
 - playable levels from various Tony Hawk's games
-- multiple crash fixes
+- multiple crash & bug fixes
+- some optimizations to game engine
 - mod settings menu with multiple features to toggle
 - trick system overhaul to add features from later games (extra tricks, wallplant/wallieplant, etc).
 - intergrated patches like 251x or 32 tag counter limit.
