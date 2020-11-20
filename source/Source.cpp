@@ -4802,9 +4802,15 @@ void InitLevelMod()
     *(DWORD*)&timer[1] = (PtrToUlong(TimerElapsed) - 0x004C04E4) - 4;
     HookFunction(0x004C0519, TimerStart);
 
+
     DWORD old;
     VirtualProtect((LPVOID)0x004C04E3, sizeof(timer), PAGE_EXECUTE_READWRITE, &old);
     memcpy((void*)0x004C04E3, timer, sizeof(timer));
+
+
+    static const DWORD addr = (DWORD)GetProcAddress(GetModuleHandle("KERNELBASE.dll"), "Sleep");
+    HookFunction(0x004C04F5, (void*)addr);
+
     VirtualProtect((LPVOID)0x00400019, 6, PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((LPVOID)0x0042FA0D, 9, PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((LPVOID)0x0042FA9D, 19, PAGE_EXECUTE_READWRITE, &old);
