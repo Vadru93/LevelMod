@@ -11,6 +11,7 @@ LevelMod features:
 - mod settings menu with multiple features to toggle
 - trick system overhaul to add features from later games (extra tricks, wallplant/wallieplant, etc).
 - intergrated patches like 251x or 32 tag counter limit.
+- graphics enhancement(extra blendmodes, shaders, mipmaps, AA, etc)
 
 ### How to install
 **Important!** *The mod requires original game to be installed on your computer. You cannot play the mod without original files. You also need the [1.01 patch](#links)*
