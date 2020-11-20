@@ -881,6 +881,7 @@ struct EXTERN CStruct
         return rett;
     }
 
+
     inline bool GetScript(const char** dest)
     {
         bool rett;

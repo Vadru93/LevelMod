@@ -4747,6 +4747,37 @@ LARGE_INTEGER endTime;
 #define startTime (*(LARGE_INTEGER*)0x008E8E18)
 LARGE_INTEGER elapsedTime;
 //void HookControls();
+DWORD old_trigger;
+DWORD old_trigger_frame;
+
+__declspec(naked) void TriggerScript()
+{
+    static DWORD pTrigger;
+    static DWORD pCall = 0x0049D070;
+    static DWORD oldECX;
+    _asm mov oldECX, ecx;
+    _asm lea eax, [ecx + 0x0000867C];
+    _asm push eax;
+    _asm mov pTrigger, eax;
+    pTrigger += 0x48;
+    if (*(bool*)pTrigger)
+    {
+        pTrigger += 4;
+        if (*(DWORD*)pTrigger != old_trigger || (Gfx::frameCounter-old_trigger_frame)>30)
+        {
+            old_trigger_frame = Gfx::frameCounter;
+            old_trigger = *(DWORD*)pTrigger;
+
+            _asm push 0;
+            _asm mov ecx, oldECX;
+            _asm call[pCall];
+            _asm ret;
+        }
+    }
+    _asm pop eax;
+    _asm mov ecx, oldECX;
+    _asm ret;
+}
 
 DWORD TimerElapsed()
 {
@@ -4818,6 +4849,8 @@ void InitLevelMod()
     BYTE codeCaveRenderHook2[] = { 0x5E, 0x5D, 0xC6, 0x05, 0x19, 0x00, 0x40, 0x00, 0x00, 0xEB, 0x08, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
     memcpy((void*)0x0042FA0D, codeCaveRenderHook, sizeof(codeCaveRenderHook));
     memcpy((void*)0x0042FA9D, codeCaveRenderHook2, sizeof(codeCaveRenderHook2));
+
+    HookFunction(0x00499B48, TriggerScript, 0xE9);
 
     for (DWORD i = 0; i < sizeof(optimized) / sizeof(OptimizedCRC); i++)
     {
