@@ -5,12 +5,12 @@ class CIniWriter
 {
 public:
     CIniWriter(char* szFileName);
-    void WriteInt(char* szSection, char* szKey, int iValue);
-    void WriteFloat(char* szSection, char* szKey, float fltValue);
-    void WriteBool(char* szSection, char* szKey, bool bolValue);
-    void WriteString(char* szSection, char* szKey, char* szValue);
+    void WriteInt(const char* szSection, const char* szKey, int iValue);
+    void WriteFloat(const char* szSection, const char* szKey, float fltValue);
+    void WriteBool(const char* szSection, const char* szKey, bool bolValue);
+    void WriteString(const char* szSection, const char* szKey, char* szValue);
 
-    bool find(char* szSection, char* szKey);
+    bool find(const char* szSection, char* szKey);
 private:
     char m_szFileName[255];
 };

@@ -22,13 +22,14 @@ struct ShadowMap
 
     void Update(float distance)
     {
+        static const D3DXVECTOR3 UP(0, 0, 1);
         D3DXMATRIX inverse;
         D3DXMatrixInverse(&inverse, NULL, Game::skater->GetMatrix());
 
         D3DXVECTOR3 camPos = *(D3DXVECTOR3*)&inverse._41;
 
         Vertex position = model->pos;
-        Vertex lightDir = *(Vertex*)&(position - Gfx::sun_position);
+        Vertex lightDir = Vertex(position - Gfx::sun_position);
         lightDir.Normalize();
 
         bool cast_shadow = false;
@@ -43,7 +44,7 @@ struct ShadowMap
         Game::skater->Restore();
         if (cast_shadow)
         {
-            D3DXMatrixLookAtLH(&lightView, &Gfx::sun_position, &shadow_pos, &D3DXVECTOR3(0, 0, 1));
+            D3DXMatrixLookAtLH(&lightView, &Gfx::sun_position, &shadow_pos, &UP);
             D3DXMatrixOrthoLH(&lightProj, 96.0f, 96.0f, 1.0f, 128.0f);
 
             //Set the view and projection matrices to match the lights "view"

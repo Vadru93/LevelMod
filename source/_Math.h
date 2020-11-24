@@ -183,6 +183,11 @@ struct Vertex : D3DXVECTOR3
         z = 0.0f;
     }
 
+    Vertex(const D3DXVECTOR3& v)
+    {
+        *this = *(Vertex*)&v;
+    }
+
     /*Vertex& operator=	(const D3DXVECTOR3& v)
     {
         x = v.x;
@@ -298,8 +303,7 @@ struct Vertex : D3DXVECTOR3
 
     Vertex& RotateToNormal(const Vertex& normal)
     {
-
-        *this = *(Vertex*)&(normal * Length());
+        *this = Vertex((normal * Length()));
 
         return *this;
     }
@@ -308,7 +312,7 @@ struct Vertex : D3DXVECTOR3
     {
 
         float dot = D3DXVec3Dot(this, &normal);
-        *this = *(Vertex*)&(normal * dot);
+        *this = Vertex(normal * dot);
 
         return *this;
     }
@@ -458,8 +462,12 @@ Vertex CrossProduct(const Vertex* vec1, Vertex* vec2);
 struct Matrix : D3DXMATRIX
 {
 
+    Matrix(const D3DXMATRIX& _m)
+    {
+        *this = *(Matrix*)&_m;
+    }
 
-    inline Matrix& Matrix::Ident(void)
+    inline Matrix& Ident(void)
     {
         m[X][X] = 1.0f;
         m[X][Y] = 0.0f;
@@ -907,7 +915,8 @@ struct Matrix : D3DXMATRIX
         }
         if (reverse)
         {
-            *pAxis = *(Vertex*)&(-*pAxis);
+            const D3DXVECTOR3& v = -*pAxis;
+            *pAxis = *(Vertex*)&v;
             (*pRadians) = (2.0f * D3DX_PI) - (*pRadians);
         }
     }

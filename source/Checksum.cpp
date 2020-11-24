@@ -9,7 +9,7 @@ char unkString[128] = "";
 
 EXTERN char* FindChecksumName(DWORD checksum, bool only_debug)
 {
-    if (!debugMode && only_debug)
+    if (!bDebugMode && only_debug)
         return NULL;
     if (QScript::Scripts)
     {
@@ -70,3 +70,5 @@ unsigned long Checksum(const char* string)//THPS3 Function for CRC32
 
     return checksum;
 }
+
+//004C85D0

@@ -9,7 +9,7 @@ Vertex& Vertex::Rotate(const Vertex& axis, const float angle)
 
 #if 1
     Matrix	mat(*(D3DXVECTOR3*)&axis, angle);
-    *this = *(Vertex*)&mat.Rotate(*(D3DXVECTOR3*)&*this);
+    *this = Vertex(mat.Rotate(*(D3DXVECTOR3*)&*this));
 #else
     Quat	quat(*(D3DXVECTOR3*)&axis, angle);
     *this = *(Vertex*)&quat.Rotate(*(D3DXVECTOR3*)&*this);
@@ -171,7 +171,7 @@ float AngleY(D3DXMATRIX& orient, D3DXVECTOR3& from, D3DXVECTOR3& to)
     D3DXVec3Normalize(&toNormalized, &to);*/
 
 
-    Vertex tempHeading = *(Vertex*)&(to - from);
+    Vertex tempHeading = Vertex(to - from);
     tempHeading.ProjectToPlane(*(Vertex*)&orient.m[Y]);
     if (!tempHeading.Length())
     {

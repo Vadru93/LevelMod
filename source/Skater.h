@@ -190,8 +190,8 @@ public:
         Special = 0x20
     };
 
-    typedef void(__thiscall* const pAddTrick)(void* pThis, char* trickName, DWORD trickScore, TrickType type);
-    void AddTrick(char* trickName, DWORD trickScore, TrickType type)
+    typedef void(__thiscall* const pAddTrick)(void* pThis, const char* trickName, DWORD trickScore, TrickType type);
+    void AddTrick(const char* trickName, DWORD trickScore, TrickType type)
     {
         pAddTrick(0x00435550)(this->trickFont, trickName, trickScore, type);
     }
@@ -279,8 +279,8 @@ public:
     }
 
 
-    typedef float(__thiscall* const pGetScriptedStat)(Skater* pThis, char* name);
-    float GetScriptedStat(char* name)
+    typedef float(__thiscall* const pGetScriptedStat)(Skater* pThis, const char* name);
+    float GetScriptedStat(const char* name)
     {
         return pGetScriptedStat(0x0049F670)(this, name);
     }
@@ -397,7 +397,7 @@ public:
     //Tell Physcs we are inside vert air
     EXTERN void SetVertAir(bool value);
 
-    EXTERN void Skater::SetTracking(bool value);
+    EXTERN void SetTracking(bool value);
 
     EXTERN void SetCanBreakVert(bool value);
 

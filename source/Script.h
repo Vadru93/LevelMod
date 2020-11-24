@@ -177,7 +177,7 @@ namespace QScript
 
 
     extern QBScript* Scripts;
-    extern char* QBTypes[19];
+    extern const char* QBTypes[19];
 };
 //--------Script Stuff--------
 

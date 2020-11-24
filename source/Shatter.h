@@ -205,7 +205,7 @@ struct ShatterData
             _printf("Memory did not allocate...\n");
     }
 
-    void ShatterData::UpdateParameters(int index, float timestep)
+    void UpdateParameters(int index, float timestep)
     {
         pos[index] += vel[index] * timestep;
 

@@ -12,6 +12,9 @@ namespace Network
     {
         int option;
         int value;
+
+        HostOptionMsg(int _option, int _value) : option(_option), value(_value)
+        {}
     };
 
     struct TestMsg
@@ -297,7 +300,7 @@ namespace Network
             return &msg_names[32 * msg_id];
         }
 
-        void SetMessageName(BYTE msg_id, char* name)
+        void SetMessageName(BYTE msg_id, const char* name)
         {
             if (strlen(name) > 31)
             {

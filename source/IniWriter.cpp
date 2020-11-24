@@ -11,30 +11,30 @@ CIniWriter::CIniWriter(char* szFileName)
     memcpy(m_szFileName, szFileName, strlen(szFileName));
 }
 
-bool CIniWriter::find(char* szSection, char* szKey)
+bool CIniWriter::find(const char* szSection, char* szKey)
 {
     return GetPrivateProfileInt(szSection, szKey, 0xFF, m_szFileName) != 0xFF;
 }
 
-void CIniWriter::WriteInt(char* szSection, char* szKey, int iValue)
+void CIniWriter::WriteInt(const char* szSection, const char* szKey, int iValue)
 {
     char szValue[255];
     sprintf(szValue, "%d", iValue);
     WritePrivateProfileString(szSection, szKey, szValue, m_szFileName);
 }
-void CIniWriter::WriteFloat(char* szSection, char* szKey, float fltValue)
+void CIniWriter::WriteFloat(const char* szSection, const char* szKey, float fltValue)
 {
     char szValue[255];
     sprintf(szValue, "%f", fltValue);
     WritePrivateProfileString(szSection, szKey, szValue, m_szFileName);
 }
-void CIniWriter::WriteBool(char* szSection, char* szKey, bool bolValue)
+void CIniWriter::WriteBool(const char* szSection, const char* szKey, bool bolValue)
 {
     char szValue[255];
     sprintf(szValue, "%s", bolValue ? "True" : "False");
     WritePrivateProfileString(szSection, szKey, szValue, m_szFileName);
 }
-void CIniWriter::WriteString(char* szSection, char* szKey, char* szValue)
+void CIniWriter::WriteString(const char* szSection, const char* szKey, char* szValue)
 {
     WritePrivateProfileString(szSection, szKey, szValue, m_szFileName);
 }

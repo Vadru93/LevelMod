@@ -269,7 +269,7 @@ void ShatterSuperSector(SuperSector* super_sector)
                 BYTE* p_write_vertex = p_shatter->verts;
                 DWORD details_index = 0;
 
-                Vertex spread_center = *(Vertex*)&(shatterVelocity * -shatterSpreadFactor);
+                Vertex spread_center = Vertex(shatterVelocity * -shatterSpreadFactor);
                 float base_speed = shatterVelocity.Length();
 
                 spread_center += *Game::skater->GetHitPoint();//(bboxMax + bboxMin) * 0.5f;//
@@ -305,7 +305,7 @@ void ShatterSuperSector(SuperSector* super_sector)
                     // Calculate the vector <velocity> back from the bounding box of the object. Then use this to figure the 'spread' of the
                     // shards by calculating the vector from this position to the center of each shard.
                     float speed = base_speed + (base_speed * ((shatterVelocityVariance * rand()) / RAND_MAX));
-                    p_shatter->vel[details_index] = (*(Vertex*)&(p_shatter->pos[details_index] - spread_center)).Normalize(speed);
+                    p_shatter->vel[details_index] = (Vertex(p_shatter->pos[details_index] - spread_center)).Normalize(speed);
 
                     Vertex axis(-1.0f + (2.0f * (float)rand() / RAND_MAX), -1.0f + (2.0f * (float)rand() / RAND_MAX), -1.0f + (2.0f * (float)rand() / RAND_MAX));
                     axis.Normalize();

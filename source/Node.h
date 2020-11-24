@@ -143,7 +143,7 @@ struct EXTERN CArray
         return structures[index];
     }
 
-    CStructHeader* GetCStruct(DWORD index, char* functionName = NULL)
+    CStructHeader* GetCStruct(DWORD index, const char* functionName = NULL)
     {
         if (Type != 0xA && Type != 0xB)
         {

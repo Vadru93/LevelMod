@@ -12,12 +12,12 @@ CIniReader::CIniReader(char* szFileName)
     memset(m_szFileName, 0x00, 255);
     memcpy(m_szFileName, szFileName, strlen(szFileName));
 }
-int CIniReader::ReadInt(char* szSection, char* szKey, int iDefaultValue)
+int CIniReader::ReadInt(const char* szSection, const char* szKey, int iDefaultValue)
 {
     int iResult = GetPrivateProfileInt(szSection, szKey, iDefaultValue, m_szFileName);
     return iResult;
 }
-float CIniReader::ReadFloat(char* szSection, char* szKey, float fltDefaultValue)
+float CIniReader::ReadFloat(const char* szSection, const char* szKey, float fltDefaultValue)
 {
     char szResult[255];
     char szDefault[255];
@@ -27,7 +27,7 @@ float CIniReader::ReadFloat(char* szSection, char* szKey, float fltDefaultValue)
     fltResult = atof(szResult);
     return fltResult;
 }
-bool CIniReader::ReadBool(char* szSection, char* szKey, bool bolDefaultValue)
+bool CIniReader::ReadBool(const char* szSection, const char* szKey, bool bolDefaultValue)
 {
     char szResult[255];
     char szDefault[255];
@@ -38,7 +38,7 @@ bool CIniReader::ReadBool(char* szSection, char* szKey, bool bolDefaultValue)
     return bolResult;
 }
 
-char* CIniReader::ReadString(char* szSection, char* szKey, const char* szDefaultValue)
+char* CIniReader::ReadString(const char* szSection, const char* szKey, const char* szDefaultValue)
 {
     char* szResult = new char[255];
     memset(szResult, 0x00, 255);

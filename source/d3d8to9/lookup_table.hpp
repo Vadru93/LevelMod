@@ -73,7 +73,7 @@ public:
             return static_cast<T*>(it->second);
         }
 
-        return new T(Device, static_cast<AddressCacheIndex<T>::Type9*>(pAddress9));
+        return new T(Device, static_cast<typename AddressCacheIndex<T>::Type9*>(pAddress9));
     }
 
     template <typename T>

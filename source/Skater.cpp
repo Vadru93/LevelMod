@@ -380,7 +380,7 @@ void Skater::Slerping()
             Interporlate(&slerp, SmoothStep(ClampMax(Slerp::timer / Slerp::duration, 1.0f)));
             Matrix inv = Slerp::old;
             inv.InvertUniform();
-            Matrix delta = *(Matrix*)&(*(D3DXMATRIX*)&inv * *(D3DXMATRIX*)&slerp);
+            Matrix delta = Matrix(*(D3DXMATRIX*)&inv * *(D3DXMATRIX*)&slerp);
             this->MultiplyMatrix(delta);
             Slerp::old = slerp;
         }

@@ -110,7 +110,7 @@ EXTERN struct SuperSector
         return NULL;
     }
 
-    void SetPosition(D3DXVECTOR3& position)
+    void SetPosition(const D3DXVECTOR3& position)
     {
         D3DXVECTOR3 pos = (bboxMax + bboxMin) / 2.0f;
 
@@ -137,7 +137,7 @@ EXTERN struct SuperSector
             if (pos)
                 SetPosition(*pos);
             else
-                SetPosition(Vertex(0, 0, 0));
+                SetPosition(D3DXVECTOR3(0, 0, 0));
         }
         else
             _printf("Couldn't find Node %s in " __FUNCTION__ "\n");
@@ -231,7 +231,8 @@ struct MovingObject
         angle = Vertex(0.0f, 0.0f, 0.0f);
         goal = _goal;
         timer = 0.0f;
-        float distance = D3DXVec3Length(&(pos - goal));
+        const D3DXVECTOR3& v = (pos - goal);
+        float distance = D3DXVec3Length(&v);
         speed = 100.0f;
         end = distance / speed;
 
@@ -326,7 +327,8 @@ struct MovingObject
         goal = _goal;
         pos = _pos;
         timer = 0.0f;
-        float distance = D3DXVec3Length(&(pos - goal));
+        const D3DXVECTOR3& v = (pos - goal);
+        float distance = D3DXVec3Length(&v);
         speed = 1000.0f;
         end = distance / speed;
         this->link = _node;

@@ -3,7 +3,7 @@
 #include "pch.h"
 #include "Observe.h"
 
-EXTERN ObserveMode* observe = NULL;
+EXTERN ObserveMode* pObserve = NULL;
 
 void ObserveMode::Enter()
 {
@@ -751,23 +751,23 @@ void ObserveMode::InterpolateCamera()
 
 bool EnterObserveMode(CStruct* pParams, CScript* pScript)
 {
-    if (observe)
+    if (pObserve)
     {
-        delete observe;
-        observe = NULL;
+        delete pObserve;
+        pObserve = NULL;
     }
-    observe = new ObserveMode;
-    observe->Enter();
-    _printf("Entered ObserveMode, Observing player: %s\n", observe->name);
-    return observe->current != NULL;
+    pObserve = new ObserveMode;
+    pObserve->Enter();
+    _printf("Entered ObserveMode, Observing player: %s\n", pObserve->name);
+    return pObserve->current != NULL;
     return true;
 }
 
 bool ObserveNext(CStruct* pParams, CScript* pScript)
 {
-    if (observe)
+    if (pObserve)
     {
-        observe->Next();
+        pObserve->Next();
         return true;
     }
     return true;
@@ -775,13 +775,13 @@ bool ObserveNext(CStruct* pParams, CScript* pScript)
 
 bool LeaveObserveMode(CStruct* pParams, CScript* pScript)
 {
-    if (observe)
+    if (pObserve)
     {
-        DWORD camMode = observe->GetCamModeAddress();// Skater::GetCamModeAddress();
+        DWORD camMode = pObserve->GetCamModeAddress();// Skater::GetCamModeAddress();
         *(DWORD*)camMode = 0;
-        observe->Leave();
-        delete observe;
-        observe = NULL;
+        pObserve->Leave();
+        delete pObserve;
+        pObserve = NULL;
     }
     return true;
 }

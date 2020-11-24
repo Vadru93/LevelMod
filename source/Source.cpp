@@ -76,7 +76,7 @@ void SetTagLimit(DWORD limit);
 
 bool init = true;
 bool init2 = false;
-bool init3 = false;
+bool bAddedOptions = false;
 
 CIniWriter* OptionWriter = NULL;// ini("LevelMod.ini");
 CIniReader* OptionReader = NULL;
@@ -103,8 +103,8 @@ line_vertex lineVertices[2];
 using namespace std;
 char qbPath[256] = "";
 char Level[256] = "";
-bool downloading = false;
-bool debugMode = false;
+bool bDownloading = false;
+bool bDebugMode = false;
 //int pSpeed;
 static const char* clamp = "Clamp";
 BYTE clampfunc[] = { 0x2E, 0x3E, 0x2B, 0xFF, 0xFE, 0xCE, 0xAE, 0xBE, 0x90, 0x90, 0x23 };
@@ -135,7 +135,7 @@ FILE* debugFile = NULL;
 
 Vertex vertex;
 
-extern ObserveMode* observe;
+extern ObserveMode* pObserve;
 
 
 
@@ -514,54 +514,7 @@ bool WallplantScript(CStruct* pParams, CScript* pScript)
         return true;
 }
 
-bool UsingNewMenu(CStruct* pStruct, CScript* pScript)
-{
-    return LevelModSettings::UseNewMenu;
-}
-bool UsingSoundFix(CStruct* pStruct, CScript* pScript)
-{
-    return LevelModSettings::FixSound;
-}
-bool UsingTeleFix(CStruct* pStruct, CScript* pScript)
-{
-    return LevelModSettings::TeleFix;
-}
-
 BYTE oldLimit = 32;
-
-bool ToggleNewMenu(CStruct* pStruct, CScript* pScript)
-{
-    DWORD old;
-    if (VirtualProtect((LPVOID)0x004404CE, sizeof(LevelModSettings::NewMenu), PAGE_EXECUTE_READWRITE, &old))
-    {
-        LevelModSettings::UseNewMenu = !LevelModSettings::UseNewMenu;
-        if (LevelModSettings::UseNewMenu)
-            memcpy((void*)0x004404CE, &LevelModSettings::NewMenu, sizeof(LevelModSettings::NewMenu));
-        else
-            memcpy((void*)0x004404CE, &LevelModSettings::OldMenu, sizeof(LevelModSettings::OldMenu));
-        VirtualProtect((LPVOID)0x004404CE, sizeof(LevelModSettings::NewMenu), old, &old);
-        /*FILE*f = fopen("settings","w+b");
-        if(f)
-        {
-        fwrite(&LevelModSettings::UseNewMenu, 1, 1, f);
-        fwrite(&LevelModSettings::FixSound, 1, 1, f);
-        fwrite(&LevelModSettings::TeleFix, 1, 1, f);
-        fwrite(&oldLimit, 1, 1, f);
-        bool disableGrass = false;
-        QBKeyHeader* header = GetQBKeyHeader(crc32f((unsigned char*)"GrassLayersDisabled"));
-        if(header)
-        disableGrass = header->value.i;
-        fwrite(&disableGrass,1,1,f);
-        fclose(f);
-        }*/
-        return true;
-    }
-    else
-    {
-        MessageBox(0, "couldn't fix protection for", "NewMenu", 0);
-        return false;
-    }
-}
 
 bool CreatePair(CStruct* pStruct, CScript* pScript)
 {
@@ -586,131 +539,6 @@ bool CreatePair(CStruct* pStruct, CScript* pScript)
     param->pVec->x = x;
     param->pVec->y = y;
     return true;
-}
-
-bool CounterIsOn(CStruct* pStruct, CScript* pScript)
-{
-    return LevelModSettings::grafCounter;
-}
-
-
-bool ToggleGrafCounter(CStruct* pStruct, CScript* pScript)
-{
-    /*DWORD addr = NULL;
-    do {
-        addr = (DWORD)GetModuleHandle("d3d8.dll");
-        Sleep(20);
-    } while (!addr);
-
-    DWORD_PTR* vTable = Hook::GetD3D8VTable(addr, 0x0001A4F4);//0x128000);
-    if (!vTable || !vTable[15])
-        return false;
-
-    addr = (DWORD)vTable[15];
-
-    LevelModSettings::grafCounter = !LevelModSettings::grafCounter;
-    if (LevelModSettings::grafCounter)
-    {
-        BYTE backup[5];
-        memcpy(backup, (void*)addr, 5);
-        memcpy((void*)addr, PresentHook.backup, 5);
-        memcpy(PresentHook.backup, backup, 5);
-    }
-    else
-    {
-        BYTE backup[5];
-        memcpy(backup, (void*)addr, 5);
-        memcpy((void*)addr, PresentHook.backup, 5);
-        memcpy(PresentHook.backup, backup, 5);
-    }*/
-    LevelModSettings::grafCounter = !LevelModSettings::grafCounter;
-    return true;
-}
-
-bool ToggleTeleFix(CStruct* pStruct, CScript* pScript)
-{
-    const static DWORD Addr = 0x004AE562;
-    const static DWORD Addr2 = 0x004AE581;
-
-    DWORD old;
-    if (VirtualProtect((LPVOID)Addr, 4, PAGE_EXECUTE_READWRITE, &old))
-    {
-        if (VirtualProtect((LPVOID)Addr2, 1, PAGE_EXECUTE_READWRITE, &old))
-        {
-            LevelModSettings::TeleFix = !LevelModSettings::TeleFix;
-            if (LevelModSettings::TeleFix)
-            {
-                *(DWORD*)Addr = 0x90909090;//84 c0 75 26
-                *(BYTE*)Addr2 = 0x75;//74
-            }
-            else
-            {
-                *(DWORD*)Addr = 0x2675C084;
-                *(BYTE*)Addr2 = 0x74;
-            }
-            /*FILE*f = fopen("settings","w+b");
-            if(f)
-            {
-            fwrite(&LevelModSettings::UseNewMenu, 1, 1, f);
-            fwrite(&LevelModSettings::FixSound, 1, 1, f);
-            fwrite(&LevelModSettings::TeleFix, 1, 1, f);
-            fwrite(&oldLimit, 1, 1, f);
-            bool disableGrass = false;
-            QBKeyHeader* header = GetQBKeyHeader(crc32f((unsigned char*)"GrassLayersDisabled"));
-            if(header)
-            disableGrass = header->value.i;
-            fwrite(&disableGrass,1,1,f);
-            fclose(f);
-            }*/
-            return true;
-        }
-        else
-        {
-            MessageBox(0, "couldn't fix protection for", "TeleFix", 0);
-            return false;
-        }
-    }
-    else
-    {
-        MessageBox(0, "couldn't fix protection for", "TeleFix", 0);
-        return false;
-    }
-}
-
-bool ToggleSoundFix(CStruct* pStruct, CScript* pScript)
-{
-    const static DWORD Addr = 0x004C665D;
-    DWORD old;
-    if (VirtualProtect((void*)Addr, 1, PAGE_EXECUTE_READWRITE, &old))
-    {
-        LevelModSettings::FixSound = !LevelModSettings::FixSound;
-
-        if (LevelModSettings::FixSound)
-            *(BYTE*)Addr = 0xEB;
-        else
-            *(BYTE*)Addr = 0x75;
-        //VirtualProtect((void*)Addr, 1, old, &old);
-        /*FILE*f = fopen("settings","w+b");
-        if(f)
-        {
-        fwrite(&LevelModSettings::UseNewMenu, 1, 1, f);
-        fwrite(&LevelModSettings::FixSound, 1, 1, f);
-        fwrite(&LevelModSettings::TeleFix, 1, 1, f);
-        fwrite(&oldLimit, 1, 1, f);
-        bool disableGrass = false;
-        QBKeyHeader* header = GetQBKeyHeader(crc32f((unsigned char*)"GrassLayersDisabled"));
-        if(header)
-        disableGrass = header->value.i;
-        fwrite(&disableGrass,1,1,f);
-        fclose(f);
-        }*/
-        return true;
-    }
-    else
-    {
-        MessageBox(0, "couldn't fix protection for", "SoundFix", 0);
-        return false;
-    }
 }
 
 bool GetMotd(CStruct* pStruct, CScript* pScript)
@@ -857,7 +685,7 @@ void __cdecl add_log(const char* string, ...)
         DestroySuperSectors();
     else if (string == (const char*)0x005B6104) [[unlikely]]
         CreateSuperSectors();
-    if (!debugMode) [[likely]]
+    if (!bDebugMode) [[likely]]
         return;
 
     static char buf[256] = "";
@@ -961,7 +789,7 @@ void NormalMemoryMode()
 }
 
 
-bool hooked = false;
+bool bHooked = false;
 BYTE oldCustomPrint[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 BYTE oldPrint[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
@@ -1004,7 +832,7 @@ BOOL CreateConsole()
 
 bool UnhookDebugMessages(CStruct* pStruct, CScript* pScript)
 {
-    debugMode = false;
+    bDebugMode = false;
     /*if (hooked)
     {
         hooked = false;
@@ -1032,10 +860,10 @@ bool HideConsole(CStruct* pStruct, CScript* pScript)
 bool HookDebugMessages(CStruct* pStruct, CScript* pScript)
 {
     if (pStruct && pScript)
-        debugMode = true;
-    if (!hooked)
+        bDebugMode = true;
+    if (!bHooked)
     {
-        hooked = true;
+        bHooked = true;
         DWORD old;
         static BYTE callHooked[] = { 0xE9, 0x00, 0x00, 0x00, 0x00, 0xC3 };
 
@@ -1312,7 +1140,7 @@ void StartedGraf(StructScript* pStructScript)
                     if (connectionSocket != INVALID_SOCKET)
                     {
                         _printf("connected to client: %d.%d.%d.%d!!\n", ((BYTE*)&clientInfo.sin_addr)[0], ((BYTE*)&clientInfo.sin_addr)[1], ((BYTE*)&clientInfo.sin_addr)[2], ((BYTE*)&clientInfo.sin_addr)[3]);
-                        Message msg(connectionSocket, (const char*)&LevelModSettings::UnlimitedGraf, 1, clientInfo.sin_addr);
+                        Message msg(connectionSocket, (const char*)&LevelModSettings::bUnlimitedGraf, 1, clientInfo.sin_addr);
                         HANDLE hRequestThread = ::CreateThread(NULL, 4, (LPTHREAD_START_ROUTINE)SendMessage, (LPVOID)&msg, 0/*CREATE_SUSPENDED*/, NULL);
                     }
                     else
@@ -1441,7 +1269,7 @@ bool GrafStarted(CStruct* pStruct, CScript* pScript)
     StructScript structScript;
     structScript.pStruct = pStruct;
     structScript.pScript = pScript;
-    if (LevelModSettings::UnlimitedGraf)
+    if (LevelModSettings::bUnlimitedGraf)
         CreateThread(0, 0, (LPTHREAD_START_ROUTINE)StartedGraf, &structScript, 0, 0);
     //MessageBox(0,"done","done",0);
     return true;
@@ -1469,9 +1297,9 @@ bool UpdateLevelModSettings(CStruct* params, CScript* pScript)
     if (f)
     {
         _printf("going to save settings\n");
-        fwrite(&LevelModSettings::UseNewMenu, 1, 1, f);
-        fwrite(&LevelModSettings::FixSound, 1, 1, f);
-        fwrite(&LevelModSettings::TeleFix, 1, 1, f);
+        fwrite(&LevelModSettings::bUseNewMenu, 1, 1, f);
+        fwrite(&LevelModSettings::bFixSound, 1, 1, f);
+        fwrite(&LevelModSettings::bTeleFix, 1, 1, f);
         fwrite(&oldLimit, 1, 1, f);
         bool disableGrass = false;
         QBKeyHeader* header = GetQBKeyHeader(Checksum("GrassLayersDisabled"));
@@ -1499,7 +1327,7 @@ bool UpdateLevelModSettings(CStruct* params, CScript* pScript)
         if (header)
             b = header->value.i != 0;
         fwrite(&b, 1, 1, f);*/
-        fwrite(&debugMode, 1, 1, f);
+        fwrite(&bDebugMode, 1, 1, f);
         header = GetQBKeyHeader(Checksum("spine_button_text"));
         if (header)
         {
@@ -1530,8 +1358,8 @@ bool UpdateLevelModSettings(CStruct* params, CScript* pScript)
 bool ToggleHookDebugMessages(CStruct* pStruct, CScript* pScript)
 {
     static const DWORD addr = (DWORD)GetProcAddress(GetModuleHandle("msvcrt.dll"), "printf");
-    hooked = !hooked;
-    if (hooked)
+    bHooked = !bHooked;
+    if (bHooked)
     {
         logFile = fopen("loggers.txt", "w+t");
         DWORD old;
@@ -1790,7 +1618,7 @@ bool SetTagLimit(CStruct* pStruct, CScript* pScript)
         *(BYTE*)0x004BFD6A = limit;
         /**(BYTE*)0x004BFC85 = limit;
         *(BYTE*)0x004BFC89 = limit;*/
-        LevelModSettings::UnlimitedGraf = (limit != 32);//Set the new settings
+        LevelModSettings::bUnlimitedGraf = (limit != 32);//Set the new settings
 
 
 
@@ -2902,7 +2730,7 @@ void DownloadAndInstall(char* address, char* filename)
 
 void GetLevelModVersion()
 {
-    downloading = true;
+    bDownloading = true;
     CStruct params;
     ExecuteQBScript("ShowDownloadInfo", &params);
     ExecuteQBScript("SetHelperPos", &params);
@@ -3112,7 +2940,7 @@ void GetLevelModVersion()
     //closesocket(fd);
     WSACleanup();
     Sleep(10000);
-    downloading = false;
+    bDownloading = false;
 }
 
 bool shouldfix = false;
@@ -3324,7 +3152,7 @@ void AddCompressedNodes()
 
     }
 }
-bool hookDone = false;
+bool bHookDone = false;
 
 void AddFunctions();
 
@@ -3336,12 +3164,12 @@ void HookedFopen(char* p)
     {
         if (p[strlen(p) - 1] == 'b' && p[strlen(p) - 2] == 'q' && p[strlen(p) - 3] == '.' && game)
         {
-            if (!hookDone)
+            if (!bHookDone)
             {
                 AddFunctions();
-                hookDone = true;
+                bHookDone = true;
             }
-            if (debugMode)
+            if (bDebugMode)
             {
                 _printf("Fopen: %s\n", p);
                 memcpy(qbPath, p, strlen(p) + 1);
@@ -3349,7 +3177,7 @@ void HookedFopen(char* p)
 
                 /*MessageBox(0, p, qbPath, 0);
                 AddCompressedNodes();*/
-                if (debugMode)
+                if (bDebugMode)
                     QScript::Scripts->OpenScript(p, true);
             }
 
@@ -4155,9 +3983,9 @@ bool DefaultMemoryMode()
             FILE* f = fopen("settings", "w+b");
             if (f)
             {
-                fwrite(&LevelModSettings::UseNewMenu, 1, 1, f);
-                fwrite(&LevelModSettings::FixSound, 1, 1, f);
-                fwrite(&LevelModSettings::TeleFix, 1, 1, f);
+                fwrite(&LevelModSettings::bUseNewMenu, 1, 1, f);
+                fwrite(&LevelModSettings::bFixSound, 1, 1, f);
+                fwrite(&LevelModSettings::bTeleFix, 1, 1, f);
                 fwrite(&oldLimit, 1, 1, f);
                 bool disableGrass = false;
                 QBKeyHeader* header = GetQBKeyHeader(Checksum("GrassLayersDisabled"));
@@ -4538,9 +4366,11 @@ void RenderLoadingScreen()
     {
         DrawEye();
         Gfx::pDevice->Present(0, 0, 0, 0);
-        Sleep(10);
+        Sleep(16);
     }
-
+    DrawEye();
+    Gfx::pDevice->Present(0, 0, 0, 0);
+    Sleep(16);
 
     rendering_loading_screen = false;
 }
@@ -4563,7 +4393,7 @@ bool DisplayLoadingScreen(CStruct* pStruct, CScript* pScript)
 
     show_loading_screen = true;
     rendering_loading_screen = true;
-    //CreateThread(0, 0, (LPTHREAD_START_ROUTINE)RenderLoadingScreen, 0, 0, 0);
+    CreateThread(0, 0, (LPTHREAD_START_ROUTINE)RenderLoadingScreen, 0, 0, 0);
     return pDisplayLoadingScreen(pStruct, pScript);
 }
 
@@ -4835,11 +4665,12 @@ void InitLevelMod()
     QueryPerformanceFrequency(&freq);
 
     //HookFunction(0x004C04F0, TimerElapsed);
-    BYTE timer[] = { 0xE8, 0x98, 0xF4, 0xF7, 0x79, 0xB9, 0x0F, 0x00, 0x00, 0x00, 0x39, 0xC8, 0x73, 0x27, 0x29, 0xC1, 0x51, 0xE8, 0xD7, 0x29, 0x8C, 0x75, 0xEB, 0x1D };
+    BYTE timer[] = { 0xE8, 0x98, 0xF4, 0xF7, 0x79, 0xB9, 0x0F, 0x00, 0x00, 0x00, 0x39, 0xC8, 0x73, 0x27, 0x29, 0xC1, 0x51, 0xE8, 0xD7, 0x29, 0x8C, 0x75, 0xA1, 0x00, 0x00, 0x00, 0x00, 0x85, 0xC0, 0x75, 0x16, 0xE8, 0x00, 0x00, 0x00, 0x00, 0xEB, 0x0F };
 
     *(DWORD*)&timer[1] = (PtrToUlong(TimerElapsed) - 0x004C04E4) - 4;
     HookFunction(0x004C0519, TimerStart);
-
+    *(bool**)&timer[23] = &show_loading_screen;
+    *(DWORD*)&timer[32] = (PtrToUlong(DrawEye) - (0x004C04E4+31)) - 4;
 
     DWORD old;
     VirtualProtect((LPVOID)0x004C04E3, sizeof(timer), PAGE_EXECUTE_READWRITE, &old);
@@ -4926,7 +4757,7 @@ void InitLevelMod()
     //HookFunction(0x0058D0B1, Fopen_naked, 0xE9);
     /*if(!QScript::Scripts)
         QScript::Scripts = new QScript::QBScript();*/
-    if (debugMode)
+    if (bDebugMode)
         HookFunction(0x004265F1, Checksum_naked, 0xE9);
     else
     {
@@ -5239,6 +5070,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
 {
     if (init)//00425e10
     {
+
         XINPUT::vibrating = false;
         XINPUT::vibrationFrames;
 
@@ -5277,15 +5109,15 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
 
         Slerp::speed = 0.0f;
 
-        LevelModSettings::UseNewMenu = true;
-        LevelModSettings::AA = false;
+        LevelModSettings::bUseNewMenu = true;
+        LevelModSettings::bAA = false;
         LevelModSettings::AllowNewTricks = LevelModSettings::ALLOW_NONE;
-        LevelModSettings::UnlimitedGraf = false;
-        LevelModSettings::FixSound = true;
-        LevelModSettings::TeleFix = true;
-        LevelModSettings::grafCounter = true;
+        LevelModSettings::bUnlimitedGraf = false;
+        LevelModSettings::bFixSound = true;
+        LevelModSettings::bTeleFix = true;
+        LevelModSettings::bGrafCounter = true;
         LevelModSettings::MemorySize = 0xFA000;
-        LevelModSettings::HookedControls = false;
+        LevelModSettings::bHookedControls = false;
 
 
         LevelModSettings::SpineButton = 7;
@@ -5316,6 +5148,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
         *(BYTE*)0x00425E3C = 0x90;
         *(BYTE*)0x00425E3D = 0x90;
         *(BYTE*)0x00425E3E = 0x90;
+
         //MessageBox(0, "INIT", "", 0);
         init = false;
         _printf("Going to init\n");
@@ -5331,7 +5164,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
         if (!debug)
         {
             DWORD old;
-            hooked = true;
+            bHooked = true;
             static BYTE callHooked[] = { 0xE9, 0x00, 0x00, 0x00, 0x00, 0xC3 };
 
             VirtualProtect((void*)0x00401960, 6, PAGE_EXECUTE_READWRITE, &old);
@@ -5353,18 +5186,19 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
             }
             //logFile = fopen("loggers.txt", "w+t");*/
         }
+
         printf("Init DONE\n");
         return true;
 
     }
-    else if (!init3)
+    else if (!bAddedOptions)
     {
         //MessageBox(0, "GOING TO ADD HOSTOPTIONS", "", 0);
         CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CheckForScriptUpdates, NULL, 0/*CREATE_SUSPENDED*/, NULL);
         using namespace LevelModSettings;
         _printf("Already inited\n");
 
-        init3 = true;
+        bAddedOptions = true;
 
         QBKeyHeader* header = GetQBKeyHeader(Checksum("PlaySound"));
         if (header)
@@ -5375,14 +5209,12 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
 
         header = GetQBKeyHeader(crc32f("LM_HostOptions"));
 
-        /*if (!debugMode)
+        /*if (!bDebugMode)
         {
-            char currDirr[MAX_PATH];
-            GetCurrentDirectory(MAX_PATH, currDirr);
-            MessageBox(0, "GOing to open settings.qb", currDirr, 0);
+            
             char* dir = QScript::GetScriptDir();
             unsigned int i = 13;
-            char* settings = "Settings.qb";
+            const char* settings = "LevelMod\\Settings.qb";
             while (*settings != 0x00)
             {
                 dir[i] = *settings;
@@ -5392,9 +5224,9 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
             }
 
             dir[i] = 0;
-            strcat(currDirr, dir);
-            MessageBox(0, currDirr, dir, 0);
-            QScript::Scripts->OpenScript(currDirr);
+            if (!QScript::Scripts)
+                QScript::Scripts = new QScript::QBScript(false);
+            QScript::Scripts->OpenScript(dir);
         }*/
 
         if (header)
@@ -5458,7 +5290,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
                 if (it != options.end())
                 {
                     _printf("OK2\n");
-                    it->second.override = &override->second;
+                    it->second.pOverride = &override->second;
                 }
                 else
                     _printf("Option %s not found in HostOption %s\n", FindChecksumName(override->second.option), FindChecksumName(override->first));
@@ -5478,6 +5310,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
         else
             _printf("Couldn't find HostOptions\n");
     }
+
     /*int id = -255;
     pStruct->GetScript("id", &id);
     printf("ID %d", id);
@@ -5595,9 +5428,9 @@ void OnRelease()
             delete QScript::Scripts;
         QScript::Scripts = NULL;
         movingObjects.clear();
-        if (observe)
-            delete observe;
-        observe = NULL;
+        if (pObserve)
+            delete pObserve;
+        pObserve = NULL;
         if (OptionWriter)
             delete OptionWriter;
         OptionWriter = NULL;
@@ -6080,6 +5913,7 @@ std::vector<ShadowMap> shadows;
 
 void DrawEye()
 {
+    static const D3DXVECTOR3 origin(0, 0, 0);
     LPDIRECT3DSURFACE9 old_target;
     D3DXMATRIX old_view, old_world;
 
@@ -6106,7 +5940,7 @@ void DrawEye()
     if (eye_state < 6)
     {
         last_state = eye_state;
-        eye_sprite->Draw(wheel_texture[eye_state], NULL, NULL, &D3DXVECTOR3(0.0, 0.0, 0.0), 0xFFFFFFFF);
+        eye_sprite->Draw(wheel_texture[eye_state], NULL, NULL, &origin, 0xFFFFFFFF);
     }
 
     switch (eye_state)
@@ -6164,7 +5998,7 @@ void DrawEye()
         }
         if (last_state > 5)
             last_state = 0;
-        eye_sprite->Draw(wheel_texture[last_state], NULL, NULL, &D3DXVECTOR3(0.0, 0.0, 0.0), 0xFFFFFFFF);
+        eye_sprite->Draw(wheel_texture[last_state], NULL, NULL, &origin, 0xFFFFFFFF);
         if (actual_timer > 700)
         {
             eye_state = 0;
@@ -6238,7 +6072,7 @@ void DrawFrame()
             //Skater * skater = Skater::Instance();
             if (Game::skater) [[likely]]
             {
-                if (LevelModSettings::HookedControls && XINPUT::Player1->IsConnected())
+                if (LevelModSettings::bHookedControls && XINPUT::Player1->IsConnected())
                 {
                     if (XINPUT::vibrationFrames)
                     {
@@ -6281,24 +6115,24 @@ void DrawFrame()
                DrawEye();
 
     //}
-    if (observe && observe->observing) [[unlikely]]
+    if (pObserve && pObserve->observing) [[unlikely]]
     {
         Skater * skater = Skater::Instance();
         if (skater)
         {
             KeyState* ollie = skater->GetKeyState(KeyState::OLLIE);
-            if (ollie->IsPressed() && ollie->GetPressedTime() != observe->timeNext)
-                observe->Next(ollie->GetPressedTime());
-            observe->Update();
+            if (ollie->IsPressed() && ollie->GetPressedTime() != pObserve->timeNext)
+                pObserve->Next(ollie->GetPressedTime());
+            pObserve->Update();
         }
         else
         {
-            observe->Leave();
-            delete observe;
-            observe = NULL;
+            pObserve->Leave();
+            delete pObserve;
+            pObserve = NULL;
         }
     }
-        if (LevelModSettings::grafCounter && Modulating()) [[unlikely]]
+        if (LevelModSettings::bGrafCounter && Modulating()) [[unlikely]]
         {
             //TestForAcid();
             DWORD tagCount = GetTagCount();
@@ -6321,7 +6155,7 @@ void DrawFrame()
                 }
             }
         }
-            if (downloading || showmessage) [[unlikely]]
+            if (bDownloading || showmessage) [[unlikely]]
             {
                 if (showmessage)
                   showmessage--;

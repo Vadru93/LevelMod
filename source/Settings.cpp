@@ -15,7 +15,7 @@
 using namespace LevelModSettings;
 
 
-extern bool init3, debugMode, hooked;
+extern bool bAddedOptions, bDebugMode, bHooked;
 
 extern CIniWriter* OptionWriter;
 extern CIniReader* OptionReader;
@@ -30,15 +30,15 @@ extern void __cdecl add_log(const char* string, ...);
 #undef CreateConsole
 extern BOOL CreateConsole();
 
-bool LevelModSettings::UseNewMenu = true;
-bool LevelModSettings::AA = false;
+bool LevelModSettings::bUseNewMenu = true;
+bool LevelModSettings::bAA = false;
 WORD LevelModSettings::AllowNewTricks = LevelModSettings::ALLOW_NONE;
-bool LevelModSettings::UnlimitedGraf = false;
-bool LevelModSettings::FixSound = true;
-bool LevelModSettings::TeleFix = true;
-bool LevelModSettings::grafCounter = true;
+bool LevelModSettings::bUnlimitedGraf = false;
+bool LevelModSettings::bFixSound = true;
+bool LevelModSettings::bTeleFix = true;
+bool LevelModSettings::bGrafCounter = true;
 DWORD LevelModSettings::MemorySize = 0xFA000;
-bool LevelModSettings::HookedControls = false;
+bool LevelModSettings::bHookedControls = false;
 std::map<DWORD, Option> LevelModSettings::options;
 std::map<DWORD, OverrideOption> LevelModSettings::overrideOptions;
 
@@ -46,68 +46,25 @@ std::map<DWORD, OverrideOption> LevelModSettings::overrideOptions;
 int LevelModSettings::SpineButton = 7;
 int LevelModSettings::SpineButton2 = -1;
 
-void LevelModSettings::ToggleNewMenu()
-{
-    const static DWORD Addr = 0x004404CE;
-    UseNewMenu = !UseNewMenu;
 
-    if (UseNewMenu)
-        memcpy((void*)Addr, &NewMenu, sizeof(NewMenu));
-    else
-        memcpy((void*)Addr, &OldMenu, sizeof(OldMenu));
-}
-
-void LevelModSettings::ToggleSoundFix()
-{
-    const static DWORD Addr = 0x004C665D;
-    FixSound = !FixSound;
-
-    if (FixSound)
-        *(BYTE*)Addr = 0xEB;
-    else
-        *(BYTE*)Addr = 0x75;
-}
-
-void LevelModSettings::FixTele()
-{
-    const static DWORD Addr = 0x004AE562;
-    const static DWORD Addr2 = 0x004AE581;
-    DWORD old;
-    if (VirtualProtect((LPVOID)Addr, 4, PAGE_EXECUTE_READWRITE, &old))
-    {
-        *(DWORD*)Addr = 0x90909090;//84 c0 75 26
-        if (VirtualProtect((LPVOID)Addr2, 1, PAGE_EXECUTE_READWRITE, &old))
-            *(BYTE*)Addr2 = 0x75;//74
-        else
-            MessageBox(0, "couldn't fix protection for", "TeleFix", 0);
-    }
-    else
-        MessageBox(0, "couldn't fix protection for", "TeleFix", 0);
-}
 
 struct TrickSpeed
 {
-    DWORD trickName;
-    float originalSpeed;
-    float th4Speed;
-    float fastAir;
+    DWORD TrickName;
+    float fOriginalSpeed;
+    float fTh4Speed;
+    float fFastAir;
 
-    TrickSpeed(DWORD name, float speed, float speed2, float speed3)
-    {
-        trickName = name;
-        originalSpeed = speed;
-        th4Speed = speed2;
-        fastAir = speed3;
-    }
+    TrickSpeed(DWORD name, float speed, float speed2, float speed3) :
+        TrickName(name), fOriginalSpeed(speed), fTh4Speed(speed2), fFastAir(speed3)
+    {}
 };
 
 
 void __stdcall SendHostOptionChanged(int option, int value)
 {
     using namespace Network;
-    HostOptionMsg msg;
-    msg.option = option;
-    msg.value = value;
+    HostOptionMsg msg(option, value);
     SendMessageToClients(MSG_ID_LM_HOSTOPTION_CHANGED, 8, &msg);
 }
 
@@ -172,15 +129,15 @@ bool IsOptionOverriden(CStruct* pStruct, CScript* pScript)
             auto it = options.find(header->Data);
             if (it != options.end())
             {
-                if (it->second.override == 0)
+                if (it->second.pOverride == NULL)
                 {
                     //Option is not linked to a HostOption, so return original value   
                     return false;
                 }
                 else
                 {
-                    CStructHeader* pHeader;
-                    if (!pScript->params->GetStruct(Checksum("option_id"), &pHeader))
+                    CStructHeader* pOption;
+                    if (!pScript->params->GetStruct(Checksum("option_id"), &pOption))
                     {
                         _printf("couldn't find option_id, going to auto-generate it...\n");
                         //Add the option_id
@@ -238,7 +195,7 @@ bool IsOptionOn(CStruct* pStruct, CScript* pScript)
             auto it = options.find(header->Data);
             if (it != options.end())
             {
-                if (it->second.override == 0)
+                if (it->second.pOverride == NULL)
                 {
                     //Option is not linked to a HostOption, so return original value   
                     return it->second.value;
@@ -252,7 +209,7 @@ bool IsOptionOn(CStruct* pStruct, CScript* pScript)
                     }
                     else
                     {
-                        return it->second.override->value;
+                        return it->second.pOverride->value;
                     }
 
                 }
@@ -280,27 +237,27 @@ void SetAirTrickSpeed(DWORD speed)
     _printf("Setting AirTrickSpeed to %d\n", speed);
     for (int i = 0; i < sizeof(trickSpeed) / sizeof(TrickSpeed); i++)
     {
-        QBKeyHeader* header = GetQBKeyHeader(trickSpeed[i].trickName);
+        QBKeyHeader* header = GetQBKeyHeader(trickSpeed[i].TrickName);
         if (header)
         {
             switch (speed)
             {
             case 0:
-                if (!header->SetFloat(Checksums::Speed, trickSpeed[i].originalSpeed))
-                    _printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].trickName));
+                if (!header->SetFloat(Checksums::Speed, trickSpeed[i].fOriginalSpeed))
+                    _printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].TrickName));
                 break;
             case 1:
-                if (!header->SetFloat(Checksums::Speed, trickSpeed[i].th4Speed))
-                    _printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].trickName));
+                if (!header->SetFloat(Checksums::Speed, trickSpeed[i].fTh4Speed))
+                    _printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].TrickName));
                 break;
             case 2:
-                if (!header->SetFloat(Checksums::Speed, trickSpeed[i].fastAir))
-                    _printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].trickName));
+                if (!header->SetFloat(Checksums::Speed, trickSpeed[i].fFastAir))
+                    _printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].TrickName));
                 break;
             case 3:
             case 4:
-                if (!header->SetFloat(Checksums::Speed, trickSpeed[i].originalSpeed * ((speed - 2) * 0.1f + 1.0f)))
-                    _printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].trickName));
+                if (!header->SetFloat(Checksums::Speed, trickSpeed[i].fOriginalSpeed * ((speed - 2) * 0.1f + 1.0f)))
+                    _printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].TrickName));
                 break;
 
             default:
@@ -309,7 +266,7 @@ void SetAirTrickSpeed(DWORD speed)
             }
         }
         else
-            _printf("Couldn't find trick %s[%d]\n", FindChecksumName(trickSpeed[i].trickName), i);
+            _printf("Couldn't find trick %s[%d]\n", FindChecksumName(trickSpeed[i].TrickName), i);
     }
 }
 
@@ -371,8 +328,8 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
     case Checksums::LM_Control_AirTrickSpeed:
         SetAirTrickSpeed(value);
         break;
-    case Checksums::LM_DebugOption_bDebugMode:
-        if (init3)//this means we have already added all options, so we have to alert about restart
+    case (DWORD)Checksums::LM_DebugOption_bDebugMode:
+        if (bAddedOptions)//this means we have already added all options, so we have to alert about restart
         {
             int result = MessageBox(0, "Do you want to exit now?", "This option requires restart", MB_YESNO);
             if (result == IDYES)
@@ -380,11 +337,12 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
             else
                 return;
         }
-        if (debugMode || !value)//If we are already debugMode or value is false just return
+
+        if (bDebugMode || !value)//If we are already debugMode or value is false just return
         {
             char* dir = QScript::GetScriptDir();
             unsigned int i = 13;
-            char* settings = "LevelMod\\Settings.qb";
+            const char* settings = "LevelMod\\Settings.qb";
             while (*settings != 0x00)
             {
                 dir[i] = *settings;
@@ -415,9 +373,9 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
         //We don't want to hook this twice...
         //Probably don't need to check since we should not be here twice
         //But added just in case
-        if (!hooked)
+        if (!bHooked)
         {
-            hooked = true;
+            bHooked = true;
             static BYTE callHooked[] = { 0xE9, 0x00, 0x00, 0x00, 0x00, 0xC3 };
 
             VirtualProtect((void*)0x00401960, 6, PAGE_EXECUTE_READWRITE, &old);
@@ -441,20 +399,20 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
         }
 
         //Finally tell whole engine we are in debugMode
-        debugMode = true;
+        bDebugMode = true;
         break;
 
-    case Checksums::LM_GameOption_bLimitTags:
+    case (DWORD)Checksums::LM_GameOption_bLimitTags:
         if (value)
             SetTagLimit(200);
         else
             SetTagLimit(32);
-        LevelModSettings::UnlimitedGraf = !value;
+        LevelModSettings::bUnlimitedGraf = !value;
         break;
 
 
     case Checksums::LM_GUI_bShowGrafCounter:
-        LevelModSettings::grafCounter = value;
+        LevelModSettings::bGrafCounter = value;
         break;
 
     case Checksums::LM_GUI_bNewMenu:
@@ -466,10 +424,10 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
         break;
 
     case Checksums::LM_BugFix_bSoundFix:
-        LevelModSettings::FixSound = value;
+        LevelModSettings::bFixSound = value;
 
         VirtualProtect((LPVOID)0x004C665D, 1, PAGE_EXECUTE_READWRITE, &old);
-        if (LevelModSettings::FixSound)
+        if (LevelModSettings::bFixSound)
             *(BYTE*)0x004C665D = 0xEB;
         else
             *(BYTE*)0x004C665D = 0x75;
@@ -477,12 +435,12 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
 
     case Checksums::LM_BugFix_bTeleFix:
 
-        LevelModSettings::TeleFix = value;
+        LevelModSettings::bTeleFix = value;
 
         VirtualProtect((LPVOID)0x004AE562, 4, PAGE_EXECUTE_READWRITE, &old);
         VirtualProtect((LPVOID)0x004AE581, 1, PAGE_EXECUTE_READWRITE, &old);
 
-        if (LevelModSettings::TeleFix)
+        if (LevelModSettings::bTeleFix)
         {
             *(DWORD*)0x004AE562 = 0x90909090;//84 c0 75 26
             *(BYTE*)0x004AE581 = 0x75;//74
@@ -493,7 +451,7 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
             *(BYTE*)0x004AE581 = 0x74;
         }
         break;
-    case Checksums::LM_Control_bWallplant:
+    case (DWORD)Checksums::LM_Control_bWallplant:
         if (value)
             LevelModSettings::AllowNewTricks |= LevelModSettings::ALLOW_WALLPLANT;
         else
@@ -505,7 +463,7 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
         else
             LevelModSettings::AllowNewTricks &= ~LevelModSettings::ALLOW_SPINE;
         break;
-    case Checksums::LM_Control_bAcid:
+    case (DWORD)Checksums::LM_Control_bAcid:
         if (value)
             LevelModSettings::AllowNewTricks |= LevelModSettings::ALLOW_ACID;
         else
@@ -522,7 +480,7 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
             break;*/
 
     case Checksums::LM_Control_bXinput:
-        if (init3)//this means we have already added all options, so we have to alert about restart
+        if (bAddedOptions)//this means we have already added all options, so we have to alert about restart
         {
             int result = MessageBox(0, "Do you want to exit now?", "This option requires restart", MB_YESNO);
             if (result == IDYES)
@@ -530,10 +488,10 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
             else
                 return;
         }
-        if (LevelModSettings::HookedControls || !value)
+        if (LevelModSettings::bHookedControls || !value)
             return;
         HookControls();
-        LevelModSettings::HookedControls = true;
+        LevelModSettings::bHookedControls = true;
         break;
 
 
@@ -644,12 +602,12 @@ int AddOption(char* name, int value, bool update, DWORD HostOption, BYTE type)
             {
                 override = &overrideOptions.find(checksum)->second;
             }*/
-            if (!it->second.override)
+            if (!it->second.pOverride)
             {
                 auto Override = overrideOptions.find(checksum);
                 if (Override != overrideOptions.end())
                 {
-                    it->second.override = &Override->second;
+                    it->second.pOverride = &Override->second;
                 }
                 else
                     MessageBox(0, "This is not good", "", 0);
@@ -757,7 +715,7 @@ bool SetOption(CStruct* pStruct, CScript* pScript)
                 if (pStruct->GetStruct(Checksum("value"), &value))
                 {
                     char* ok = FindChecksumName(header->Data, false);
-                    if (!it->second.override || !it->second.Overriden())
+                    if (!it->second.pOverride || !it->second.Overriden())
                     {
                         it->second.value = value->value.i;
                         _printf("Setting option %s to %d\n", ok, it->second.value);
@@ -777,7 +735,7 @@ bool SetOption(CStruct* pStruct, CScript* pScript)
                     DWORD value = GetElementSliderValue(crc32f(id));
                     if (value != 0xFFFFFFFF)
                     {
-                        if (!it->second.override || !it->second.Overriden())
+                        if (!it->second.pOverride || !it->second.Overriden())
                         {
                             it->second.value = value;//header->NextHeader->value.i;
                             _printf("Setting option %s to %d\n", ok, it->second);
@@ -854,7 +812,7 @@ bool ToggleOption(CStruct* pStruct, CScript* pScript)
             {
                 it->second.value = !it->second.value;
                 char* ok = FindChecksumName(header->Data, false);
-                if (!it->second.override || !it->second.Overriden())
+                if (!it->second.pOverride || !it->second.Overriden())
                 {
                     static char tempChar[MAX_PATH + 1] = "";
                     memcpy(tempChar, ok, strlen(ok) + 1);
@@ -938,7 +896,7 @@ bool GetOptionText(CStruct* pStruct, CScript* pScript)
 
 bool AddOption(CStruct* pStruct, CScript* pScript)
 {
-    if (init3)
+    if (bAddedOptions)
         return false;
 
     CStructHeader* name = NULL;

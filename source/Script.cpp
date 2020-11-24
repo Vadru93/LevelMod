@@ -20,7 +20,7 @@ namespace FileHandler
     BYTE* pFile = NULL;
     const BYTE* oldFile = NULL;
     DWORD size = 0;
-    bool OpenFile(char* path, char* mode)
+    bool OpenFile(const char* path, const char* mode)
     {
         pFile = NULL;
         FILE* f = fopen(path, mode);
@@ -46,7 +46,7 @@ namespace FileHandler
         size = 0;
     }
 
-    bool CalculateCRC(DWORD& checksum, char* path)
+    bool CalculateCRC(DWORD& checksum, const char* path)
     {
         if (OpenFile(path, "rb"))
         {
@@ -59,7 +59,7 @@ namespace FileHandler
 
 }
 
-char* QScript::QBTypes[] = {
+const char* QScript::QBTypes[] = {
      "None",//End of array / struct and used when parsing / calling scripts
      "Int",
      "Float",

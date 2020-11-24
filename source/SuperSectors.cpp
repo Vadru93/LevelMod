@@ -128,7 +128,8 @@ bool MovingObject::Update(float delta)
                 //reset timer to zero
                 timer = 0;
                 //calculate distance between current position and target position
-                float distance = D3DXVec3Length(&(pos - goal));
+                const D3DXVECTOR3& v = (pos - goal);
+                float distance = D3DXVec3Length(&v);
                 //calculate end time
                 end = distance / speed;
                 //Calculate the angle needed to look at a position, taken from thug1src but for some reason not working?

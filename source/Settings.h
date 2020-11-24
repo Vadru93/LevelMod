@@ -13,26 +13,20 @@ namespace LevelModSettings
     static BYTE NewMenu[9] = { 0x90, 0x90, 0x90, 0x90, 0x74, 0x70, 0xEB, 0x7B, 0x90 };//000404ce
     static BYTE OldMenu[9] = { 0xC6, 0x46, 0x04, 0x01, 0x74, 0x70, 0x57, 0x6A, 0x00 };
 
-    extern bool UseNewMenu;// = true;
-    extern bool AA;// = false;
+    extern bool bUseNewMenu;// = true;
+    extern bool bAA;// = false;
     extern WORD AllowNewTricks;// = ALLOW_NONE;
-    extern bool UnlimitedGraf;// = false;
-    extern bool FixSound;// = true;
-    extern bool TeleFix;// = true;
-    extern bool grafCounter;// = true;
+    extern bool bUnlimitedGraf;// = false;
+    extern bool bFixSound;// = true;
+    extern bool bTeleFix;// = true;
+    extern bool bGrafCounter;// = true;
     extern DWORD MemorySize;// = 0xFA000;
-    extern bool HookedControls;// = false;
+    extern bool bHookedControls;// = false;
 
 
     extern int SpineButton;// = 7;
     extern int SpineButton2;// = -1;
 
-    void ToggleNewMenu();
-
-
-    void ToggleSoundFix();
-
-    void FixTele();
 
     struct OverrideOption
     {
@@ -46,30 +40,28 @@ namespace LevelModSettings
         int value;
         DWORD option;
 
-        OverrideOption(Type t, int v, DWORD o)
-        {
-            type = t;
-            value = v;
-            option = o;
-        }
+        OverrideOption(Type _type, int _value, DWORD _option) : 
+            type(_type), value(_value), option(_option)
+        {}
 
     };
 
     struct Option
     {   
-        OverrideOption* override;
+        OverrideOption* pOverride;
         int value;
 
-        Option(int Value)
+    public:
+        Option(int _value)
         {
-            override = NULL;
-            value = Value;
+            pOverride = NULL;
+            value = _value;
         }
 
         bool Overriden()
         {
-            if ((override->type == OverrideOption::Type::OVERRIDE_TRUE && override->value != 0) //Only true is overriden
-                || (override->type == OverrideOption::Type::OVERRIDE_FALSE && override->value == 0)) //Only false is overriden
+            if ((pOverride && pOverride->type == OverrideOption::Type::OVERRIDE_TRUE && pOverride->value != 0) //Only true is overriden
+                || (pOverride->type == OverrideOption::Type::OVERRIDE_FALSE && pOverride->value == 0)) //Only false is overriden
                 return false;
             else
                 return true;

@@ -166,7 +166,7 @@ bool look_for_transfer_target(const D3DXVECTOR3& search_dir, const Vertex& start
         // (and low to high, proving you can jump up from the low point to the high point first)
         /*Vertex vel = *GetVelocity();
         Vertex vel_normal = ::GetNormal(&vel);*/
-        Vertex start = *(Vertex*)&(*(Vertex*)skater->GetPosition() + search_dir * step);		// start at current height
+        Vertex start = Vertex(*(Vertex*)skater->GetPosition() + search_dir * step);		// start at current height
         //printf("Start %f %f, pos %f %f\n", start.x, start.z, skater->GetPosition()->x, skater->GetPosition()->z);
         //start.y += 100.0f;m
         Vertex end = start;
@@ -328,14 +328,14 @@ bool Skater::CheckForSpine()
 #endif
 
     // assuming we have not slowed down much, then our velocity should roughly be in the direction we took off from 
-    Vertex forward = *(Vertex*)&(-*GetVelocity());
+    Vertex forward = Vertex(-*GetVelocity());
     if (-forward.y < 1.0f)
         return false;
     forward.Normalize();
 
     Vertex wall_out = forward; 							// forward facing vector
     wall_out.Rotate(side, D3DX_PI / 2.0f);					// rotate fowrad 90 degrees
-    wall_out = *(Vertex*)&(-wall_out);
+    wall_out = Vertex(-wall_out);
 
     float speed;
     float dist = 12.0f;
@@ -380,13 +380,13 @@ bool Skater::CheckForSpine()
             // halfway between the previous search direction and the plane of the vert
             if (!GetKeyState(KeyState::LEFT)->IsPressed() && GetKeyState(KeyState::RIGHT)->IsPressed())
             {
-                Vertex search_dir = *(Vertex*)&(-left_along_vert + wall_out);
+                Vertex search_dir = Vertex(-left_along_vert + wall_out);
                 search_dir.Normalize();
                 target_found = look_for_transfer_target(search_dir, start_normal, hip_transfer, target, target_normal);
             }
             else if (!GetKeyState(KeyState::RIGHT)->IsPressed() && GetKeyState(KeyState::LEFT)->IsPressed())
             {
-                Vertex search_dir = *(Vertex*)&(left_along_vert + wall_out);
+                Vertex search_dir = Vertex(left_along_vert + wall_out);
                 search_dir.Normalize();
                 target_found = look_for_transfer_target(search_dir, start_normal, hip_transfer, target, target_normal);
             }
@@ -421,13 +421,13 @@ bool Skater::CheckForSpine()
                 // halfway between the previous search direction and the plane of the vert
                 if (!GetKeyState(KeyState::LEFT)->IsPressed() && GetKeyState(KeyState::RIGHT)->IsPressed())
                 {
-                    Vertex search_dir = *(Vertex*)&(-left_along_vert + wall_out);
+                    Vertex search_dir = Vertex(-left_along_vert + wall_out);
                     search_dir.Normalize();
                     target_found = look_for_transfer_target(search_dir, start_normal, hip_transfer, target, target_normal);
                 }
                 else if (!GetKeyState(KeyState::RIGHT)->IsPressed() && GetKeyState(KeyState::LEFT)->IsPressed())
                 {
-                    Vertex search_dir = *(Vertex*)&(left_along_vert + wall_out);
+                    Vertex search_dir = Vertex(left_along_vert + wall_out);
                     search_dir.Normalize();
                     target_found = look_for_transfer_target(search_dir, start_normal, hip_transfer, target, target_normal);
                 }
@@ -462,13 +462,13 @@ bool Skater::CheckForSpine()
                     // halfway between the previous search direction and the plane of the vert
                     if (!GetKeyState(KeyState::LEFT)->IsPressed() && GetKeyState(KeyState::RIGHT)->IsPressed())
                     {
-                        Vertex search_dir = *(Vertex*)&(-left_along_vert + wall_out);
+                        Vertex search_dir = Vertex(-left_along_vert + wall_out);
                         search_dir.Normalize();
                         target_found = look_for_transfer_target(search_dir, start_normal, hip_transfer, target, target_normal);
                     }
                     else if (!GetKeyState(KeyState::RIGHT)->IsPressed() && GetKeyState(KeyState::LEFT)->IsPressed())
                     {
-                        Vertex search_dir = *(Vertex*)&(left_along_vert + wall_out);
+                        Vertex search_dir = Vertex(left_along_vert + wall_out);
                         search_dir.Normalize();
                         target_found = look_for_transfer_target(search_dir, start_normal, hip_transfer, target, target_normal);
                     }
@@ -481,7 +481,7 @@ bool Skater::CheckForSpine()
 
     if (!target_found) return false;
 
-    Vertex XZ_to_target = *(Vertex*)&(target - wall_pos);
+    Vertex XZ_to_target = Vertex(target - wall_pos);
     XZ_to_target.y = 0.0f;
     dist = XZ_to_target.Length();
 
@@ -582,7 +582,7 @@ bool Skater::CheckForSpine()
     if (!hip_transfer)
     {
         //target_normal = *(Vertex*)&(-target_normal);
-        Slerp::facing = *(Vertex*)&(target - *(Vertex*)GetPosition());
+        Slerp::facing = Vertex(target - *(Vertex*)GetPosition());
         Slerp::facing.y = -(Slerp::facing.x * target_normal.x + Slerp::facing.z * target_normal.z) / target_normal.y;
         Slerp::facing.Normalize();
         /*land_facing = *(Vertex*)&(target - *(Vertex*)GetPosition());
@@ -593,7 +593,7 @@ bool Skater::CheckForSpine()
     else
     {
         _printf("\nHIP TRANSFER\n");
-        Vertex offset = *(Vertex*)&(target - *(Vertex*)GetPosition());
+        Vertex offset = Vertex(target - *(Vertex*)GetPosition());
         offset.y = 0.0f;
         offset.Normalize();
         float dot = D3DXVec3Dot(&offset, &horizontal_target_normal);
@@ -652,7 +652,7 @@ bool Skater::CheckForSpine()
     /*target_normal = *(Vertex*)&(-target_normal);
     skater_up = *(Vertex*)&(-skater_up);*/
     //skater_up = *(Vertex*)&(-skater_up);
-    Vertex normal_diff = *(Vertex*)&(target_normal - skater_up);
+    Vertex normal_diff = Vertex(target_normal - skater_up);
     //normal_diff[Y] = 0.0f;
 
 
@@ -950,7 +950,7 @@ bool Skater::CheckForSpine()
     Slerp::height = target.y;
 
     // set velocity over the wall fast enough to land on the target point																	 
-    Slerp::vel = *(Vertex*)&((target - *(Vertex*)GetPosition()) / time);		// velocity from start to target
+    Slerp::vel = Vertex((target - *(Vertex*)GetPosition()) / time);		// velocity from start to target
     Slerp::vel.y = 0.0f;															// but ignore Y, as gravity handles that...
 
     // tell the code we are doing spine physics, so we lean quicker 
@@ -1014,7 +1014,7 @@ bool TestForClearPath(Vertex& target, Vertex& vel, Vertex& pos, Skater* skater)
     float length = drop_direction.Length();
     if (length < 0.01f) return false;
     drop_direction *= 1.0f / length;
-    Vertex horizontal_offset = *(Vertex*)&(target - pos);
+    Vertex horizontal_offset = Vertex(target - pos);
     horizontal_offset.y = 0.0f;
     float distance = horizontal_offset.Length();
     float original_target_height = target.y;
@@ -1022,7 +1022,7 @@ bool TestForClearPath(Vertex& target, Vertex& vel, Vertex& pos, Skater* skater)
     {
         distance = -distance;
     }
-    drop_direction = *(Vertex*)&(horizontal_offset / distance);
+    drop_direction = Vertex(horizontal_offset / distance);
 
     Vertex hold_vel = vel;
     vel[Y] = fminf(vel[Y], 2.0f * 200.0f);
@@ -1204,14 +1204,14 @@ bool maybe_acid(bool skated_off_edge, const Vertex& pos, const Vertex& old_pos, 
     float original_target_height = target.y;
 
     // because our search began behind us, the horizontal offset to the target may not be forward
-    Vertex horizontal_offset = *(Vertex*)&(target - pos);
+    Vertex horizontal_offset = Vertex(target - pos);
     horizontal_offset.y = 0.0f;
     distance = horizontal_offset.Length();
     if (D3DXVec3Dot((D3DXVECTOR3*)&horizontal_offset, (D3DXVECTOR3*)&drop_direction) < 0.0f)
     {
         distance = -distance;
     }
-    drop_direction = *(Vertex*)&(horizontal_offset / distance);
+    drop_direction = Vertex(horizontal_offset / distance);
 
     // stash a copy of velocity so we can pretend it has an adjusted value
     Vertex hold_vel = vel;
@@ -1343,7 +1343,7 @@ void EnterAcid(const SAcidDropData& data)
         const Vertex& target_normal = data.target_normal;
         const float& true_target_height = data.true_target_height;
 
-        Vertex horizoffset = *(Vertex*)&(target_pos - *(Vertex*)skater->GetPosition());
+        Vertex horizoffset = Vertex(target_pos - *(Vertex*)skater->GetPosition());
         horizoffset.y = 0.0f;
         float distance = horizoffset.Length();
 
@@ -1389,7 +1389,7 @@ void EnterAcid(const SAcidDropData& data)
         /*Slerp::facing = dropdirr;
         Slerp::facing.y = -(Slerp::facing.x * Slerp::facing.x + Slerp::facing.z * Slerp::facing.z) / target_normal.y;
         Slerp::facing.Normalize();*/
-        Slerp::facing = *(Vertex*)&(target_pos - *(Vertex*)skater->GetPosition());
+        Slerp::facing = Vertex(target_pos - *(Vertex*)skater->GetPosition());
         Slerp::facing.y = -(Slerp::facing.x * target_normal.x + Slerp::facing.z * target_normal.z) / target_normal.y;
         Slerp::facing.Normalize();
         //Slerp::facing = -Slerp::facing;
@@ -2062,7 +2062,7 @@ bool Skater::CheckForWallpant()
     _printf("Speed %f\n", speed);
     if (speed < 0.01f) return false;
 
-    Vertex forward = *(Vertex*)&(*velocity / speed);
+    Vertex forward = Vertex(*velocity / speed);
 
     Vertex horiz_forward = forward;
     horiz_forward.y = 0.0f;
@@ -2127,7 +2127,7 @@ bool Skater::CheckForWallpant()
     }
     else
     {
-        *velocity = *(Vertex*)&(Physics_Wallplant_Min_Exit_Speed * horiz_normal);
+        *velocity = Vertex(Physics_Wallplant_Min_Exit_Speed * horiz_normal);
     }
 
     velocity->y = Physics_Wallplant_Vertical_Exit_Speed;
@@ -2505,8 +2505,8 @@ void FixSpineFlag()
      = (DWORD)_fopen;*/
 
 
-    extern bool debugMode;
-    if (debugMode)
+    extern bool bDebugMode;
+    if (bDebugMode)
     {
         VirtualProtect((void*)0x004265F0, 5, PAGE_EXECUTE_READWRITE, &old);
         *(BYTE*)0x004265F0 = 0xE9;
@@ -2560,7 +2560,7 @@ void Interporlate(Matrix* result, float delta)
         *(D3DXVECTOR4*)&lerp[RIGHT] = *(D3DXVECTOR4*)&Slerp::end[RIGHT] - *(D3DXVECTOR4*)&Slerp::start[RIGHT];
         *(D3DXVECTOR4*)&lerp[UP] = *(D3DXVECTOR4*)&Slerp::end[UP] - *(D3DXVECTOR4*)&Slerp::start[UP];
         *(D3DXVECTOR4*)&lerp[AT] = *(D3DXVECTOR4*)&Slerp::end[AT] - *(D3DXVECTOR4*)&Slerp::start[AT];
-        lpos = *(Vertex*)&(epos - spos);
+        lpos = Vertex(epos - spos);
 
         /* Do lerp */
         (*(Vector*)&(lerp[RIGHT])).Scale(delta);
@@ -2571,7 +2571,7 @@ void Interporlate(Matrix* result, float delta)
         *(D3DXVECTOR4*)&(*result)[RIGHT] = *(D3DXVECTOR4*)&Slerp::start[RIGHT] + *(D3DXVECTOR4*)&lerp[RIGHT];
         *(D3DXVECTOR4*)&(*result)[UP] = *(D3DXVECTOR4*)&Slerp::start[UP] + *(D3DXVECTOR4*)&lerp[UP];
         *(D3DXVECTOR4*)&(*result)[AT] = *(D3DXVECTOR4*)&Slerp::start[AT] + *(D3DXVECTOR4*)&lerp[AT];
-        rpos = *(Vertex*)&(spos + lpos);
+        rpos = Vertex(spos + lpos);
 
         (*(Vertex*)&((*result)[RIGHT])).Normalize();
         (*(Vertex*)&((*result)[UP])).Normalize();
