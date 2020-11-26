@@ -3890,7 +3890,7 @@ void InitLevelMod()
     HookFunction(0x004003BA, BouncyObj_OnBounce_Naked, 0xE9);
 
     //MessageBox(0, 0, 0, 0);
-    //HookFunction(0x004F9C0A, Render_Naked, 0xE9);
+    HookFunction(0x004F9C0A, Render_Naked, 0xE9);
     //MessageBox(0, 0, 0, 0);
 
     VirtualProtect((LPVOID)0x00483D55, 1, PAGE_EXECUTE_READWRITE, &old);
@@ -3911,9 +3911,9 @@ void InitLevelMod()
     *(WORD*)0x00427A9B = 0x840F;//je
     HookFunction(0x00427A9D, NotGood_naked);
 
-    //HookFunction(0x004F42AA, SetVertexShader_hook);
+    HookFunction(0x004F42AA, SetVertexShader_hook);
 
-    //HookFunction(0x0049F1DD, proxy_SnapToGroundClamp);
+    HookFunction(0x0049F1DD, proxy_SnapToGroundClamp);
 
     HookFunction(0x00412160, SuperSector::GetSuperSector);
     HookFunction(0x00412278, SuperSector::GetSuperSector);
@@ -3922,7 +3922,7 @@ void InitLevelMod()
     HookFunction(0x0041236B, SuperSector::GetSuperSector);
     HookFunction(0x0041246B, SuperSector::GetSuperSector);
 
-    //HookFunction(0x00526D4B, Obj_SetShader_hook);
+    HookFunction(0x00526D4B, Obj_SetShader_hook);
 
     //MessageBox(0, 0, 0, 0);
     *(DWORD*)0x00427AA3 = 0x90909090;//nop
@@ -3930,7 +3930,7 @@ void InitLevelMod()
 
     //HookFunction(0x0048E036, Obj_MoveToNode_Naked, 0xE9);
     //HookFunction(0x0048DA53, Obj_FollowPathLinked_Naked, 0xE9);
-    //HookFunction(0x004846E6, BouncyObj_Go_Naked, 0xE8);
+    HookFunction(0x004846E6, BouncyObj_Go_Naked, 0xE8);
     //Network::MessageHandler handler;
     /*DWORD old;
     VirtualProtect((LPVOID)0x004C02C5, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
