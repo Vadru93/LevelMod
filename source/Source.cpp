@@ -4623,11 +4623,11 @@ void OnRelease()
             delete OptionReader;
         OptionReader = NULL;
 
-        for (DWORD i = 0; i < 6; i++)
+        /*for (DWORD i = 0; i < 6; i++)
         {
             wheel_texture[i]->Release();
         }
-        eye_sprite->Release();
+        eye_sprite->Release();*/
     }
 }
 
@@ -4637,7 +4637,7 @@ void OnLost()
     if (m_font)
     {
         m_font->OnLostDevice();
-        eye_sprite->OnLostDevice();
+        //eye_sprite->OnLostDevice();
     }
 }
 
@@ -4647,7 +4647,7 @@ void OnReset()
     if (m_font)
     {
         m_font->OnResetDevice();
-        eye_sprite->OnResetDevice();
+        //eye_sprite->OnResetDevice();
     }
 }
 
@@ -5236,7 +5236,9 @@ void DrawFrame()
         /*HRESULT hres = D3DXCreateTextureFromFileExA(Gfx::pDevice, "C:\\Program Files (x86)\\Activision\\Thps3\\Data\\LevelMod\\Neversoft\\eyes2.png", D3DX_DEFAULT, D3DX_DEFAULT, D3DX_FROM_FILE, 0, D3DFMT_FROM_FILE, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 0, NULL, NULL, &eye_texture);
         if (FAILED(hres))
             MessageBox(0, 0, "FAILED", 0);*/
-        D3DXCreateSprite(Gfx::pDevice, &eye_sprite);
+
+
+        /*D3DXCreateSprite(Gfx::pDevice, &eye_sprite);
         char temp[MAX_PATH] = "";
         GetCurrentDirectory(MAX_PATH, temp);
         char imageName[MAX_PATH] = "";
@@ -5248,7 +5250,7 @@ void DrawFrame()
             {
                 MessageBox(0, "Failed to load texture", imageName, 0);
             }
-        }
+        }*/
 
     }
 
