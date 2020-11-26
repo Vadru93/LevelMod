@@ -156,7 +156,7 @@ bool TestForAcid(CStruct* pParams, CScript* pScript);
 //--------Functions NOT callable from script--------
 
 //--------depricated--------
-bool Kill3DGrass(CStruct* params, CScript* pScript);
+/*bool Kill3DGrass(CStruct* params, CScript* pScript);
 bool UpdateLevelModSettings(CStruct* params, CScript* pScript);
 bool ToggleHookDebugMessages(CStruct* pStruct, CScript* pScript);
 bool UnhookDebugMessages(CStruct* pStruct, CScript* pScript);
@@ -178,7 +178,7 @@ bool ToggleGrafCounter(CStruct* pStruct, CScript* pScript);
 bool ToggleTeleFix(CStruct* pStruct, CScript* pScript);
 bool ToggleSoundFix(CStruct* pStruct, CScript* pScript);
 bool GetMotd(CStruct* pStruct, CScript* pScript);
-bool CallWithNoNameScript(CStruct* pStruct, CScript* pScript);
+bool CallWithNoNameScript(CStruct* pStruct, CScript* pScript);*/
 //--------depricated--------
 
 

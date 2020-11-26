@@ -162,7 +162,6 @@ bool GetInfoScript(CStruct* pStruct, CScript* pScript)
 
 void CommandConsole(const char* message);
 void CommandTell(const char* message);
-void CommandDebug(const char* message);
 void CommandAdd(const char* message);
 
 struct Commands
@@ -178,7 +177,6 @@ Commands commands[] = {
     { crc32f("ban"), &CommandBan, "ban" },
     { crc32f("getinfo"), &CommandGetInfo, "getinfo" },
     { crc32f("console"), &CommandConsole, "console" },
-    { crc32f("debug"), &CommandDebug, "debug" },
     { crc32f("add"), &CommandAdd, "add"} };
 
 
@@ -470,11 +468,7 @@ void CommandConsole(const char* message)
     _printf("Welcome to Console!!!!\n\n");
     *(BYTE*)0x00478983 = 0x75;
 }
-void CommandDebug(const char* message)
-{
-    HookDebugMessages(NULL, NULL);
-    *(BYTE*)0x00478983 = 0x75;
-}
+
 void CommandTell(const char* message)
 {
     message += 5;

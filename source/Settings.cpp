@@ -329,6 +329,10 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
         SetAirTrickSpeed(value);
         break;
     case (DWORD)Checksums::LM_DebugOption_bDebugMode:
+        //casting to DWORD to prevent compiler warning, code actually works without this cast
+        //This could be prevented all together if use DWORD constexpr instead of enum for the compile-time checksums
+        //However I think enum is still better since a compiler error will come if have unwanted collision in the list
+
         if (bAddedOptions)//this means we have already added all options, so we have to alert about restart
         {
             int result = MessageBox(0, "Do you want to exit now?", "This option requires restart", MB_YESNO);
@@ -340,6 +344,7 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
 
         if (bDebugMode || !value)//If we are already debugMode or value is false just return
         {
+            //If we are not in debugmode we need to add the checksums from settings.qb to be able to toggle options correctly
             char* dir = QScript::GetScriptDir();
             unsigned int i = 13;
             const char* settings = "LevelMod\\Settings.qb";
@@ -402,7 +407,7 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
         bDebugMode = true;
         break;
 
-    case (DWORD)Checksums::LM_GameOption_bLimitTags:
+    case (DWORD)Checksums::LM_GameOption_bLimitTags://casting to DWORD to prevent compiler warning, code actually works without this cast
         if (value)
             SetTagLimit(200);
         else

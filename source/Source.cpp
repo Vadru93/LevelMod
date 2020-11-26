@@ -101,55 +101,53 @@ line_vertex lineVertices[2];
 
 
 using namespace std;
+//Used for qb loading
 char qbPath[256] = "";
+//Used to store LevelName
 char Level[256] = "";
+//True when downloading new update
 bool bDownloading = false;
+//True when DebugMode is enabled
 bool bDebugMode = false;
-//int pSpeed;
+//Old bugfix
 static const char* clamp = "Clamp";
 BYTE clampfunc[] = { 0x2E, 0x3E, 0x2B, 0xFF, 0xFE, 0xCE, 0xAE, 0xBE, 0x90, 0x90, 0x23 };
-bool FirstTime = true;
+//Game function
 void* __restrict mallocx(const DWORD buflen);
+//Last loading qb script
 static const char* lastQB = NULL;
+//Reverse endian
 #define REV_END(x)  ((x << 24) | ((x << 8) & 0xFF0000) | (x >> 24) | ((x >> 8) & 0xFF00))
-//#define CScript void
+//Maximum recv length
 #define MAXRECV 20576
 #undef SendMessage
+
+//Not sure if these declarations are needed anymore?
 struct CStruct;
 struct CStructHeader;
 struct CArray;
 struct KeyState;
+struct Matrix;
 void SetStructValues(CStructHeader* pStruct, CStructHeader* values);
 void SetArrayValues(CArray* pArray, CStructHeader* values);
+bool InvalidReadPtr(const void* const __restrict ptr, const DWORD size);
+bool InvalidReadPtr(const void* const __restrict ptr);
+
+//Current version
 #define VERSION 4.8f
 static float version = VERSION;
 
-bool InvalidReadPtr(const void* const __restrict ptr, const DWORD size);
-bool InvalidReadPtr(const void* const __restrict ptr);
-//FILE* _cdecl _fopen(const char* p, const char* b);
-//void Ncomp_naked();
-struct Matrix;
-
+//Used for logging
 FILE* debugFile = NULL;
 
-
-Vertex vertex;
-
+//Used for custom ObserveMode
 extern ObserveMode* pObserve;
 
+//Used for graf tag counter
+char tags[256] = "Tags: 0";
+LPD3DXFONT m_font = NULL;
+RECT rct;
 
-
-
-struct D3D_PARAMS
-{
-};
-
-//HRESULT (*CreateDevice)(UINT Adapter,DWORD DeviceType,HWND hFocusWindow,DWORD BehaviorFlags,D3D_PARAMS* pPresentationParameters,void** ppReturnedDeviceInterface);
-//HRESULT (*Present)(LPDIRECT3DDEVICE8 pDevice, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion)=NULL;
-
-/*HRESULT __stdcall Present(LPDIRECT3DDEVICE8 pDevice, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion);
-typedef HRESULT(__stdcall* Present_t)(LPDIRECT3DDEVICE8 pDevice, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion);
-Present_t pPresent;*/
 
 
 __inline void HookFunction(DWORD addr, void (Network::MessageHandler::* function)(unsigned char msg_id, void* pCallback, int flags, Network::NetHandler* net_handler, int prio), BYTE byteCode = 0, DWORD nopCount = 0)
@@ -309,21 +307,18 @@ struct Hook
     }
 };
 
+//Used for custom mod to be able to add render callback
 Hook CreateDeviceHook;
-
-
 Hook PresentHook;
+//HRESULT (*CreateDevice)(UINT Adapter,DWORD DeviceType,HWND hFocusWindow,DWORD BehaviorFlags,D3D_PARAMS* pPresentationParameters,void** ppReturnedDeviceInterface);
+//HRESULT (*Present)(LPDIRECT3DDEVICE8 pDevice, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion)=NULL;
 
-char tags[256] = "Tags: 0";
-LPD3DXFONT m_font = NULL;
-RECT rct;
-
-
-
-
-static BYTE test = 0;
-
-
+/*HRESULT __stdcall Present(LPDIRECT3DDEVICE8 pDevice, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion);
+typedef HRESULT(__stdcall* Present_t)(LPDIRECT3DDEVICE8 pDevice, CONST RECT* pSourceRect, CONST RECT* pDestRect, HWND hDestWindowOverride, CONST RGNDATA* pDirtyRegion);
+Present_t pPresent;*/
+struct D3D_PARAMS
+{
+};
 
 void NotGood(DWORD checksum, CScript* pScript)
 {
@@ -541,121 +536,6 @@ bool CreatePair(CStruct* pStruct, CScript* pScript)
     return true;
 }
 
-bool GetMotd(CStruct* pStruct, CScript* pScript)
-{
-    /*WSADATA wsa;
-    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
-    return false;
-    SOCKET fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (fd < 0)
-    {
-    WSACleanup();
-    return false;
-    }
-    SOCKADDR_IN service;
-    service.sin_family = AF_INET;
-    service.sin_port = htons(80);
-    LPHOSTENT host = gethostbyname("vadru.chapter-3.net");
-    if (!host)
-    {
-    closesocket(fd);
-    WSACleanup();
-    return false;
-    }
-    service.sin_addr = *((LPIN_ADDR)*host->h_addr_list);
-    if (connect(fd, (SOCKADDR *)&service, sizeof(service)) < 0)
-    {
-    closesocket(fd);
-    WSACleanup();
-    return false;
-    }
-    static const char* GetStr = "GET /LevelModMotd HTTP/1.1\r\n"
-    "Host: vadru.chapter-3.net\r\n"
-    "User-Agent: Mozilla FireFox/4.0\r\n"
-    "User-Agent: Mozilla Firefox/4.0\r\n"
-    "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*//*;q=0.8\r\n"
-    "Accept-Language: en-gb,en;q=0.5\r\n"
-    "Accept-Encoding: gzip,deflate\r\n"
-    "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n\r\n";
-
-    send(fd, GetStr, strlen(GetStr)+1, 0);
-    std::string response = "";
-    int resp_leng= 1024;
-    char buffer[1024];
-    while (resp_leng > 0)
-    {
-    resp_leng= recv(fd, (char*)&buffer, 1024, 0);
-    if (resp_leng>0)
-    response += std::string(buffer).substr(0,resp_leng);
-    }
-    if(strstr(response.c_str(),"404 Not Found"))
-    {
-    closesocket(fd);
-    WSACleanup();
-    return false;
-    }
-    else
-    {
-    int pos = response.find("\r\n\r\n");
-    pos += 4;
-    char motd[1024] = "";
-    if(sscanf(&response.c_str()[pos], "%s", motd))
-    {
-    int id = 0;
-    pStruct->GetScript("id", &id);
-    //SetElementText(18, "hey");
-    /*QBKeyHeader* header = GetQBKeyHeader(crc32f((unsigned char*)"motd"));
-    if(header)
-    {
-    if(header->str)
-    {
-    if(strlen(motd)>strlen(header->str))
-    {
-    free(header->str);
-    header->str = (char*)malloc(strlen(motd)+1);
-    strcpy(header->str, motd);
-    }
-    else
-    {
-    char* p = motd;
-    char* d = header->str;
-    while(*p != '\0')
-    {
-    *d = *p;
-    d++;
-    p++;
-    }
-    *d = '\0';
-    }
-    }
-    else
-    {
-    header->str = (char*)malloc(strlen(motd)+1);
-    strcpy(header->str, motd);
-    }
-    return true;
-    }
-    else
-    {
-    header = AddQBKeyHeader(crc32f((unsigned char*)"motd"), 2);
-    if(header)
-    {
-    header->type = QBKeyHeader::STRING;
-    header->str = (char*)malloc(strlen(motd)+1);
-    strcpy(header->str, motd);
-    return true;
-    }
-
-    }*/
-    /*}
-    }*/
-
-    /* response.clear();
-    closesocket(fd);
-    WSACleanup();*/
-    return true;
-}
-
 void DestroySuperSectors()
 {
     String::RemoveLevelStrings();
@@ -756,38 +636,6 @@ void FixMemoryProtection()
     VirtualProtect((VOID*)0x004288F7, 1, PAGE_EXECUTE_READWRITE, &old);
 }
 
-/*void LowMemoryMode()
-{
-*(DWORD*)0x0042C18D = 0x000FA000;
-*(DWORD*)0x0042C1C7 = 0x000F9FF0;
-*(DWORD*)0x0042C1D5 = 0x000F9FF0;
-*(DWORD*)0x0042C1E1 = 0x000F9FF8;
-*(DWORD*)0x0042C1EC = 0x000F9FFC;
-*(BYTE*)0x00426088 = 0x75;
-*(BYTE*)0x004260E7 = 0x75;
-*(BYTE*)0x004288F7 = 0x75;
-*(BYTE*)0x00428B97 = 0x75;
-*(BYTE*)0x004288F7 = 0x75;
-}*/
-
-void NormalMemoryMode()
-{
-    /**(DWORD*)0x0042C18D = 0x000FA000;
-    *(DWORD*)0x0042C1C7 = 0x000F9FF0;
-    *(DWORD*)0x0042C1D5 = 0x000F9FF0;
-    *(DWORD*)0x0042C1E1 = 0x000F9FF8;
-    *(DWORD*)0x0042C1EC = 0x000F9FFC;
-    *(BYTE*)0x00426088 = 0x74;
-    *(BYTE*)0x004260E7 = 0x74;
-    *(BYTE*)0x004288F7 = 0x74;
-    *(BYTE*)0x00428B97 = 0x74;
-    *(BYTE*)0x004288F7 = 0x74;*/
-
-    /*00428B97
-
-      0042C280*/
-}
-
 
 bool bHooked = false;
 BYTE oldCustomPrint[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -830,66 +678,6 @@ BOOL CreateConsole()
 
 }
 
-bool UnhookDebugMessages(CStruct* pStruct, CScript* pScript)
-{
-    bDebugMode = false;
-    /*if (hooked)
-    {
-        hooked = false;
-        memcpy((void*)0x00401960, oldCustomPrint, 6);
-
-        static const DWORD addr = (DWORD)GetProcAddress(GetModuleHandle("msvcrt.dll"), "printf");
-        if (addr)
-        {
-            memcpy((void*)addr, oldCustomPrint, 6);
-        }
-        fclose(logFile);
-    }*/
-    return true;
-}
-
-bool CreateConsole(CStruct* pStruct, CScript* pScript)
-{
-    return CreateConsole() == TRUE;
-}
-bool HideConsole(CStruct* pStruct, CScript* pScript)
-{
-    return FreeConsole() == TRUE;
-}
-
-bool HookDebugMessages(CStruct* pStruct, CScript* pScript)
-{
-    if (pStruct && pScript)
-        bDebugMode = true;
-    if (!bHooked)
-    {
-        bHooked = true;
-        DWORD old;
-        static BYTE callHooked[] = { 0xE9, 0x00, 0x00, 0x00, 0x00, 0xC3 };
-
-        VirtualProtect((void*)0x00401960, 6, PAGE_EXECUTE_READWRITE, &old);
-        memcpy(oldCustomPrint, (void*)0x00401960, 6);
-
-        *(DWORD*)&callHooked[1] = ((DWORD)add_log - 0x00401960 - 5);
-
-        memcpy((void*)0x00401960, callHooked, 6);
-        //VirtualProtect((void*)0x00401960, 6, old, &old);
-
-
-        static const DWORD addr = (DWORD)GetProcAddress(GetModuleHandle("msvcrt.dll"), "printf");
-        if (addr)
-        {
-            VirtualProtect((void*)addr, 6, PAGE_EXECUTE_READWRITE, &old);
-            memcpy(oldCustomPrint, (void*)addr, 6);
-            DWORD hookedAddrs = ((DWORD)add_log - addr - 5);
-            *(DWORD*)&callHooked[1] = hookedAddrs;
-            memcpy((void*)addr, callHooked, 6);
-            //VirtualProtect((void*)addr, 6, old, &old);
-        }
-        //logFile = fopen("loggers.txt", "w+t");
-    }
-    return true;
-}
 bool hookedFopen = false;
 
 DWORD HookGeneralFunction(const char* Dll, const char* FuncName, void* Function, unsigned char* backup, int pa)
@@ -1272,127 +1060,6 @@ bool GrafStarted(CStruct* pStruct, CScript* pScript)
     if (LevelModSettings::bUnlimitedGraf)
         CreateThread(0, 0, (LPTHREAD_START_ROUTINE)StartedGraf, &structScript, 0, 0);
     //MessageBox(0,"done","done",0);
-    return true;
-}
-
-bool Kill3DGrass(CStruct* params, CScript* pScript)
-{
-    CStructHeader* param = params->AddParam("Name", QBKeyHeader::LOCAL);
-
-    char name[256] = "";
-
-    for (DWORD i = 0; i < 1000; i++)
-    {
-        sprintf(name, "3DGrassMesh%u", i);
-        param->SetChecksum(name);
-        ExecuteQBScript("KillIfAlive", params);
-    }
-    params->DellocateCStruct();
-    return true;
-}
-
-bool UpdateLevelModSettings(CStruct* params, CScript* pScript)
-{
-    FILE* f = fopen("settings", "w+b");
-    if (f)
-    {
-        _printf("going to save settings\n");
-        fwrite(&LevelModSettings::bUseNewMenu, 1, 1, f);
-        fwrite(&LevelModSettings::bFixSound, 1, 1, f);
-        fwrite(&LevelModSettings::bTeleFix, 1, 1, f);
-        fwrite(&oldLimit, 1, 1, f);
-        bool disableGrass = false;
-        QBKeyHeader* header = GetQBKeyHeader(Checksum("GrassLayersDisabled"));
-        if (header)
-            disableGrass = header->value.i != 0;
-        fwrite(&disableGrass, 1, 1, f);
-        bool slapOn = true;
-        header = GetQBKeyHeader(Checksum("SlapIsOn"));
-        if (header)
-            slapOn = header->value.i != 0;
-        fwrite(&slapOn, 1, 1, f);
-        bool hudOn = true;
-        header = GetQBKeyHeader(Checksum("HudIsOn"));
-        if (header)
-            hudOn = header->value.i != 0;
-        fwrite(&hudOn, 1, 1, f);
-        fwrite(&version, 4, 1, f);
-
-        /*bool b = false;
-        header = GetQBKeyHeader(Checksum("bShowConsole"));
-        if (header)
-            b = header->value.i != 0;
-        fwrite(&b, 1, 1, f);
-        header = GetQBKeyHeader(Checksum("bPrintDebug"));
-        if (header)
-            b = header->value.i != 0;
-        fwrite(&b, 1, 1, f);*/
-        fwrite(&bDebugMode, 1, 1, f);
-        header = GetQBKeyHeader(Checksum("spine_button_text"));
-        if (header)
-        {
-            if (strstr(header->pStr, "Revert"))
-            {
-                LevelModSettings::SpineButton = KeyState::REVERT;
-            }
-            else if (strstr(header->pStr, "Nollie"))
-            {
-                LevelModSettings::SpineButton = KeyState::NOLLIE;
-            }
-            else if (strstr(header->pStr, "Left"))
-            {
-                LevelModSettings::SpineButton = KeyState::SPINLEFT;
-            }
-            else if (strstr(header->pStr, "Right"))
-            {
-                LevelModSettings::SpineButton = KeyState::SPINRIGHT;
-            }
-            fwrite(&LevelModSettings::SpineButton, 1, 1, f);
-        }
-        fclose(f);
-    }
-    ExecuteQBScript("LoadLevelModSettings", params);
-    return true;
-}
-
-bool ToggleHookDebugMessages(CStruct* pStruct, CScript* pScript)
-{
-    static const DWORD addr = (DWORD)GetProcAddress(GetModuleHandle("msvcrt.dll"), "printf");
-    bHooked = !bHooked;
-    if (bHooked)
-    {
-        logFile = fopen("loggers.txt", "w+t");
-        DWORD old;
-        static BYTE callHooked[] = { 0xE9, 0x00, 0x00, 0x00, 0x00, 0xC3 };
-
-        VirtualProtect((void*)0x00401960, 6, PAGE_EXECUTE_READWRITE, &old);
-        memcpy(oldCustomPrint, (void*)0x00401960, 6);
-
-        *(DWORD*)&callHooked[1] = ((DWORD)add_log - 0x00401960 - 5);
-
-        memcpy((void*)0x00401960, callHooked, 6);
-        //VirtualProtect((void*)0x00401960, 6, old, &old);
-
-        if (addr)
-        {
-            VirtualProtect((void*)addr, 6, PAGE_EXECUTE_READWRITE, &old);
-            memcpy(oldCustomPrint, (void*)addr, 6);
-            DWORD hookedAddrs = ((DWORD)add_log - addr - 5);
-            *(DWORD*)&callHooked[1] = hookedAddrs;
-            memcpy((void*)addr, callHooked, 6);
-            //VirtualProtect((void*)addr, 6, old, &old);
-        }
-    }
-    else
-    {
-        fclose(logFile);
-        memcpy((void*)0x00401960, oldCustomPrint, 6);
-
-        if (addr)
-        {
-            memcpy((void*)addr, oldCustomPrint, 6);
-        }
-    }
     return true;
 }
 
@@ -1843,61 +1510,6 @@ bool NotScript(CStruct* pStruct, CScript* pScript)
         }
         header = header->NextHeader;
     }
-    return true;
-}
-
-char PoolSize[128] = "";
-char PoolSizeText[128] = "";
-
-bool GetMemoryPoolSize(CStruct* pStruct, CScript* pScript)
-{
-    sprintf(PoolSize, "%u", LevelModSettings::MemorySize / 0x10);
-    CStructHeader* header = pScript->params->head;
-    while (header)
-    {
-        if (header->QBkey == 0x083FDB95)
-        {
-            header->pStr = PoolSize;
-            return true;
-        }
-        header = header->NextHeader;
-    }
-    CStruct* const __restrict params = pScript->params;
-    CStructHeader* const __restrict pHeader = params->AllocateCStruct();
-    if (!pHeader)
-        return false;
-    params->tail->NextHeader = pHeader;
-    params->tail = pHeader;
-    pHeader->Type = QBKeyHeader::STRING;
-    pHeader->QBkey = 0x083FDB95;
-    pHeader->pStr = PoolSize;
-    pHeader->NextHeader = NULL;
-    return true;
-}
-
-bool GetMemoryPoolSizeText(CStruct* pStruct, CScript* pScript)
-{
-    sprintf(PoolSizeText, "MemoryPoolSize: %u", LevelModSettings::MemorySize / 0x10);
-    CStructHeader* header = pScript->params->head;
-    while (header)
-    {
-        if (header->QBkey == 0x083FDB95)
-        {
-            header->pStr = PoolSizeText;
-            return true;
-        }
-        header = header->NextHeader;
-    }
-    CStruct* const __restrict params = pScript->params;
-    CStructHeader* const __restrict pHeader = params->AllocateCStruct();
-    if (!pHeader)
-        return false;
-    params->tail->NextHeader = pHeader;
-    params->tail = pHeader;
-    pHeader->Type = QBKeyHeader::STRING;
-    pHeader->QBkey = 0x083FDB95;
-    pHeader->pStr = PoolSizeText;
-    pHeader->NextHeader = NULL;
     return true;
 }
 
@@ -3309,21 +2921,6 @@ bool RemoveLightsScript(CStruct* pStruct, CScript* pScript)
     lights.clear();
 }
 
-/*__declspec(naked) void Fopen_naked()
-{
-    static const DWORD jmpBack = 0x0040314A + 4;
-    _asm pushad;
-    _asm pushfd;
-    _asm mov path, ecx
-    HookedFopen(path);
-    _asm popfd;
-    _asm popad;
-    _asm add esp, 0x0C;
-    _asm mov al, [ecx];
-    _asm jmp[jmpBack];
-}*/
-
-
 void AddChecksum(int key, char* name, void* retAddr)
 {
     lastQB = name;
@@ -3392,66 +2989,6 @@ __declspec(naked) void Checksum_naked()
     _asm ret;
 }
 
-/*CStructHeader* HookAddCStruct(int ParamName, int Data, int qbType)
-{
-    if (ParamName == 0xD)
-    {
-
-    }
-}*/
-
-/*struct Node
-{
-    CStructHeader* first;
-    CStructHeader* last;
-};
-*/
-
-
-
-
-
-/*__declspec(naked) void Ncomp_naked()
-{
-    static CStruct* node = NULL;
-    static DWORD checksum = 0;
-    static const DWORD jmpBack = 0x004294C3;
-    static const DWORD jmpBack2 = 0x0042945F;
-    static const DWORD oldESP = 0;
-    static BYTE* pFile = NULL;
-    _asm push esp
-    _asm pushad;
-    _asm pushfd;
-    _asm cmp ebx, 0x68A9B4E1;
-    _asm je hi;
-    _asm popfd;
-    _asm popad;
-    _asm pop esp;
-    _asm add esp, 8;
-    _asm mov ecx, ebp;
-    _asm jmp[jmpBack];
-hi:
-
-    _asm mov node, ebp;
-    _asm mov pFile, eax;
-    game = false;
-    pFile++;
-    checksum = *(DWORD*)pFile;
-    pFile += 4;
-
-    AddCompressedNode(checksum, node);
-
-    game = true;
-    _asm popfd;
-    _asm popad;
-    _asm pop esp
-    _asm add esp, 8
-    //_asm mov byte ptr[esp - 0x15], 00;
-    _asm mov eax, pFile;
-    _asm jmp[jmpBack2];
-}*/
-//char* fopen_path = NULL;
-
 __declspec(naked) void Fopen_naked()
 {
     static DWORD fopen = *(DWORD*)0x0058D0B0;
@@ -3487,19 +3024,6 @@ FILE* __cdecl _fopen(const char* p, const char* b)
     return fopen(p, b);
 }
 
-__declspec(naked) void TestForAcid_naked()
-{
-    static DWORD retaddr = 0;
-    _asm pop retaddr;
-    _asm pushad;
-    _asm pushfd;
-    TestForAcid();
-    _asm popfd;
-    _asm popad;
-    _asm sub esp, 0x000000B4
-    _asm push retaddr;
-    _asm ret
-}
 
 struct BBox
 {
@@ -3920,364 +3444,10 @@ void FixMessage()
 *(BYTE*)0x00428B97 = 0x74;
 *(BYTE*)0x004288F7 = 0x74;*;*/
 
-bool DefaultMemoryMode()
-{
-    FILE* temp = fopen("temp", "w+b");
-    if (temp)
-    {
-        LevelModSettings::MemorySize = 0xFA000;
-
-        CStructHeader* backup = *(CStructHeader**)0x008E1E00;
-        for (DWORD i = 0; i < 0xFA00; i++)
-        {
-            fwrite(backup, sizeof(CStructHeader), 1, temp);
-            backup++;
-        }
-        freex((void*)*(CStructHeader**)0x008E1E00);
-        CStructHeader* head = (CStructHeader*)mallocx(0xFA000);
-        CStructHeader** ptr = *(CStructHeader***)0x008E1E2C + 64000;
-        CStructHeader** end = *(CStructHeader***)0x008E1E30;
-
-        CStructHeader* old = *(CStructHeader**)0x008E1E00;
-        CStructHeader* oldEnd = old + 0xFA00;
-
-        while (ptr < end)
-        {
-            if (*ptr > old && *ptr < oldEnd)
-            {
-                CStructHeader* parser = *ptr;
-                DWORD index = ((DWORD)parser - (DWORD)old) / 0x10;
-                parser = head + index;
-                if (parser > head && parser < (head + 0xFA00))
-                    *ptr = parser;
-            }
-            ptr++;//;= (CStructHeader**)((DWORD)ptr+1);
-        }
-        //CStructHeader* old = *(CStructHeader**)0x008E1E00;
-        *(CStructHeader**)0x008E1E00 = head;
-        CStructHeader* parser = *(CStructHeader**)0x008E1E04;
-        DWORD index = ((DWORD)parser - (DWORD)old) / 0x10;
-        *(CStructHeader**)0x008E1E04 = head + index;//*(CStructHeader**)0x008E1E04+(head-old);
-        if (fflush(temp) == 0)
-        {
-            fseek(temp, 0, SEEK_SET);
-            backup = head;
-            for (DWORD i = 0; i < 0xFA00; i++)
-            {
-                fread(backup, sizeof(CStructHeader), 1, temp);
-                backup++;
-            }
-            fclose(temp);
-            CStructHeader* header = head;
-            DWORD last = (DWORD)head + 0xFA000;
-            while ((DWORD)header < last)
-            {
-                header->NextHeader = header + 1;
-                header++;
-            }
-
-            header = head + 0xF9FF;
-            header->Type = QBKeyHeader::QBKeyType::UNDEFINED;
-            header->value.i = 0;
-            header->NextHeader = 0;
-            FILE* f = fopen("settings", "w+b");
-            if (f)
-            {
-                fwrite(&LevelModSettings::bUseNewMenu, 1, 1, f);
-                fwrite(&LevelModSettings::bFixSound, 1, 1, f);
-                fwrite(&LevelModSettings::bTeleFix, 1, 1, f);
-                fwrite(&oldLimit, 1, 1, f);
-                bool disableGrass = false;
-                QBKeyHeader* header = GetQBKeyHeader(Checksum("GrassLayersDisabled"));
-                if (header)
-                    disableGrass = header->value.i != 0;
-                fwrite(&disableGrass, 1, 1, f);
-                fclose(f);
-                _fcloseall();
-            }
-        }
-        else
-            fclose(temp);
-        DeleteFile("temp");
-        return true;
-    }
-    return false;
-}
-
 /*VirtualProtect((void*)0x004260E7, 7, PAGE_EXECUTE_READWRITE, &old);
 *(DWORD*)0x004260E7 = 0x9090F775;
 *(WORD*)0x004260EB = 0x9090;
 *(BYTE*)0x004260ED = 0x90;*/
-
-void AddLock()
-{
-    DWORD old;
-
-    VirtualProtect((void*)0x004288F1, 1, PAGE_EXECUTE_READWRITE, &old);
-    VirtualProtect((void*)0x00428B91, 1, PAGE_EXECUTE_READWRITE, &old);
-    VirtualProtect((void*)0x004260E1, 1, PAGE_EXECUTE_READWRITE, &old);
-    VirtualProtect((void*)0x00426081, 1, PAGE_EXECUTE_READWRITE, &old);
-    *(BYTE*)0x004288F1 = 0xF9;
-    *(BYTE*)0x00428B91 = 0xF9;
-    *(BYTE*)0x004260E1 = 0xF9;
-    *(BYTE*)0x00426081 = 0xF9;
-
-    VirtualProtect((void*)0x004260E7, 7, PAGE_EXECUTE_READWRITE, &old);
-    *(DWORD*)0x004260E7 = 0x9090F775;
-    *(WORD*)0x004260EB = 0x9090;
-    *(BYTE*)0x004260ED = 0x90;
-
-    VirtualProtect((void*)0x004288F7, 7, PAGE_EXECUTE_READWRITE, &old);
-    *(DWORD*)0x004288F7 = 0x9090F775;
-    *(WORD*)0x004288FB = 0x9090;
-    *(BYTE*)0x004288FD = 0x90;
-
-    VirtualProtect((void*)0x00428B97, 4, PAGE_EXECUTE_READWRITE, &old);
-    *(DWORD*)0x00428B97 = 0x3DEBF775;
-
-    VirtualProtect((void*)0x00426088, 4, PAGE_EXECUTE_READWRITE, &old);
-    *(DWORD*)0x00426088 = 0x2DEBF675;
-
-    /*VirtualProtect((void*)0x004260E7, 4, PAGE_EXECUTE_READWRITE, &old);
-    *(DWORD*)0x004260E7 = 0x3DEBF775;*/
-}
-
-bool HighMemoryMode(DWORD newSize)
-{
-    if (newSize == LevelModSettings::MemorySize)
-        return true;
-    if (newSize <= 0xFA000)
-    {
-        if (LevelModSettings::MemorySize != 0xFA000)
-            return DefaultMemoryMode();
-        return false;
-    }
-    DWORD newCount = newSize / 0x10;
-    DWORD oldSize = LevelModSettings::MemorySize;
-    if (newSize < oldSize)
-    {
-        //MessageBox(0, "new size needs to be bigger than old", "...", 0);
-        //return false;
-        oldSize = newSize;
-    }
-    FILE* temp = fopen("temp", "w+b");
-    if (temp)
-    {
-        LevelModSettings::MemorySize = newSize;
-        DWORD oldCount = oldSize / 0x10;
-
-        CStructHeader* backup = *(CStructHeader**)0x008E1E00;
-        for (DWORD i = 0; i < oldCount; i++)
-        {
-            fwrite(backup, sizeof(CStructHeader), 1, temp);
-            backup++;
-        }
-        ZeroMemory((void*)*(CStructHeader**)0x008E1E00, oldSize);
-        freex((void*)*(CStructHeader**)0x008E1E00);
-        CStructHeader* head = (CStructHeader*)mallocx(newSize);
-        CStructHeader** ptr = *(CStructHeader***)0x008E1E2C + 30000 - 3804;
-        //*(ptr-5)=head+newCount;
-        CStructHeader** end = *(CStructHeader***)0x008E1E30 + ((DWORD) * (CStructHeader***)0x008E1E34);//120000
-
-        CStructHeader* old = *(CStructHeader**)0x008E1E00;
-        CStructHeader* oldEnd = old + oldCount;
-
-        while (ptr < end)
-        {
-            if (*ptr >= old && *ptr < oldEnd)
-            {
-                CStructHeader* parser = *ptr;
-                DWORD index = ((DWORD)parser - (DWORD)old) / 0x10;
-                parser = head + index;
-                if (parser >= head && parser < (head + newCount))
-                    *ptr = parser;
-            }
-            ptr++;//;= (CStructHeader**)((DWORD)ptr+1);
-        }
-
-        if (head == NULL)
-        {
-            newSize = oldSize;
-            newCount = oldCount;
-            head = (CStructHeader*)mallocx(oldSize);
-            if (head == NULL)
-            {
-                newSize = 0xFA000;
-                newCount = 0xFA00;
-                head = (CStructHeader*)mallocx(0xFA000);
-                if (head == NULL)
-                    return false;
-            }
-        }
-        //CStructHeader* old = *(CStructHeader**)0x008E1E00;
-        *(CStructHeader**)0x008E1E00 = head;
-        CStructHeader* parser = *(CStructHeader**)0x008E1E04;
-        if (parser >= old && parser < oldEnd)
-        {
-            DWORD index = ((DWORD)parser - (DWORD)old) / 0x10;
-            *(CStructHeader**)0x008E1E04 = head + index;//*(CStructHeader**)0x008E1E04+(head-old);
-        }
-        if (fflush(temp) == 0)
-        {
-            fseek(temp, 0, SEEK_SET);
-            backup = head;
-            for (DWORD i = 0; i < oldCount; i++)
-            {
-                fread(backup, sizeof(CStructHeader), 1, temp);
-                CStructHeader* parser = (CStructHeader*)backup->pData;
-                if (parser >= old && parser < oldEnd)
-                {
-                    DWORD index = ((DWORD)parser - (DWORD)old) / 0x10;
-                    parser = head + index;
-                    if (parser >= head && parser < (head + newCount))
-                        backup->pData = (void*)parser;
-                }
-                if (backup->NextHeader == NULL || (backup->NextHeader >= old && backup->NextHeader < oldEnd))
-                    backup->NextHeader = backup + 1;
-                backup++;
-            }
-            fclose(temp);
-
-
-            CStructHeader* header = head + (oldCount - 1);//-1
-            DWORD last = (DWORD)head + newSize;
-            while ((DWORD)header < last)
-            {
-                header->Type = QBKeyHeader::QBKeyType::UNDEFINED;
-                header->QBkey = 0;
-                header->Data = 0;
-                header->NextHeader = header + 1;
-                header++;
-            }
-            header = head + (newCount - 1);
-            header->Type = QBKeyHeader::QBKeyType::UNDEFINED;
-            header->QBkey = 0;
-            header->Data = 0;
-            header->NextHeader = NULL;
-        }
-        else
-            fclose(temp);
-        DeleteFile("temp");
-        return true;
-    }
-    return false;
-}
-
-bool SetMemoryPoolSize(CStruct* pStruct, CScript* pScript)
-{
-    void** puEBP = NULL;
-    __asm { mov puEBP, ebp };
-    char ok[25];
-    sprintf(ok, "%p %p", pStruct, pScript->params);
-    MessageBox(0, ok, ok, 0);
-    /*void * pvReturn = puEBP[2];
-    char ok[25];
-    sprintf(ok, "%X %p", pvReturn, pvReturn);
-    MessageBox(0,ok,"",0);
-    puEBP = (void**)puEBP[0];
-    sprintf(ok, "%X %p", puEBP, puEBP);
-    MessageBox(0,ok,"",0);*/
-    Sleep(1000);
-    const char* string;
-    if (pStruct->GetString("string", &string))
-    {
-        const  BYTE* it = (const BYTE*)string;
-        DWORD size = 0;
-        while (*it >= '0' && *it <= '9')
-        {
-            size = size * 10 + *it - '0';
-            it++;
-        }
-        if (size)
-        {
-            ExecuteQBScript("StopScripts", NULL);
-            *(bool*)0x008E1DF9 = true;
-            CStructHeader* old = *(CStructHeader**)0x008E1E00;
-
-            DWORD oldSize = LevelModSettings::MemorySize;
-            DWORD oldCount = oldSize / 0x10;
-
-            bool ret = HighMemoryMode(size * 0x10);
-
-
-
-            CStructHeader* head = *(CStructHeader**)0x008E1E00;
-            CStructHeader* oldEnd = old + oldCount;
-
-            CStructHeader* header = pStruct->head;
-            if (header)
-            {
-                if (header >= old && header <= oldEnd)
-                {
-                    DWORD index = ((DWORD)pStruct->head - (DWORD)old) / 0x10;
-                    pStruct->head = head + index;
-                }
-                if (pStruct->tail >= old && pStruct->tail <= oldEnd)
-                {
-                    DWORD index = ((DWORD)pStruct->tail - (DWORD)old) / 0x10;
-                    pStruct->tail = head + index;
-                }
-                while (header && header->NextHeader)
-                {
-                    if (header->NextHeader >= old && header->NextHeader <= oldEnd)
-                    {
-                        DWORD index = ((DWORD)header->NextHeader - (DWORD)old) / 0x10;
-                        header->NextHeader = head + index;
-                    }
-                    header = header->NextHeader;
-                }
-            }
-            if (pScript->params)
-            {
-                header = pScript->params->head;
-                if (header)
-                {
-                    if (header >= old && header <= oldEnd)
-                    {
-                        DWORD index = ((DWORD)pScript->params->head - (DWORD)old) / 0x10;
-                        pScript->params->head = head + index;
-                    }
-                    if (pScript->params->tail >= old && pScript->params->tail <= oldEnd)
-                    {
-                        DWORD index = ((DWORD)pScript->params->tail - (DWORD)old) / 0x10;
-                        pScript->params->tail = head + index;
-                    }
-                    while (header && header->NextHeader)
-                    {
-                        if (header->NextHeader >= old && header->NextHeader <= oldEnd)
-                        {
-                            DWORD index = ((DWORD)header->NextHeader - (DWORD)old) / 0x10;
-                            header->NextHeader = head + index;
-                        }
-                        header = header->NextHeader;
-                    }
-                }
-            }
-
-            *(bool*)0x008E1DF9 = false;
-            //MessageBox(0,"done",0,0);
-            return ret;
-        }
-
-        return false;
-    }
-
-    if (LevelModSettings::MemorySize != 0xFA000)
-    {
-        *(bool*)0x008E1DF9 = true;
-        bool ret = DefaultMemoryMode();
-        *(bool*)0x008E1DF9 = false;
-        return ret;
-    }
-    return false;
-}
-
-DWORD newSize;
-
-void HighMemMode()
-{
-
-}
 
 void InitSkater()
 {
@@ -4432,6 +3602,10 @@ float __cdecl proxy_SnapToGroundClamp(float a1)
 }
 
 
+//To optimize CRC we put the checksum in eax instead of calling Checksum("string")
+//string here means pointer in memory where string is pushed to stack
+//eax means pointer to where function is called and should be replaced with eax
+//esp means where stack is changed, since we remove the push string we need to decrease add esp with 4
 struct OptimizedCRC
 {
     DWORD string;
@@ -4448,10 +3622,12 @@ struct OptimizedCRC
         sprintf(error, "%X %d", string, esp);
         ptr++;
         char* c = *(char**)ptr;
-        //MessageBox(0, c, c, 0);
+
         *(BYTE*)string = 0x90;
         string++;
         ptr += 4;
+
+        //If trying to access esp we need to decrease by 4
         if (*(BYTE*)ptr == 0xC7 || *(BYTE*)ptr == 0xC6)
             *(BYTE*)(ptr + 3) -= 4;
         else if (*(BYTE*)ptr == 0x88 || *(BYTE*)ptr == 0x89)
@@ -4463,8 +3639,12 @@ struct OptimizedCRC
         ptr++;
         _printf("Optimizing checksum access: %s\n", c);
         *(DWORD*)ptr = crc32f(c);
+
+        //Replace push string with nop
         *(DWORD*)string = 0x90909090;
         ptr += 4;
+
+        //If trying to access esp we need to decrease by 4
         if (*(BYTE*)ptr == 0x8B && (*(BYTE*)(ptr+1) != 0x8F && *(BYTE*)(ptr+1) != 0x8E && *(BYTE*)(ptr+1) != 0x0E && *(BYTE*)(ptr+1) != 0x4E))
         {
             *(BYTE*)(ptr + 3) -= 4;
@@ -4476,6 +3656,8 @@ struct OptimizedCRC
         {
             MessageBox(0, "Wrong esp", error, 0);
         }
+
+        //If add esp, 4 replace it with nop
         if (*(BYTE*)(ptr + 2) == 4)
         {
             *(BYTE*)ptr = 0x90;
@@ -4484,6 +3666,7 @@ struct OptimizedCRC
             ptr++;
             *(BYTE*)ptr = 0x90;
         }
+        //Else reduce by 4
         else
         {
             *(BYTE*)(ptr + 2) -= 4;

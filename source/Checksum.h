@@ -1,5 +1,4 @@
 #pragma once
-//#ifndef NO_DEFINES
 #ifndef CHECKSUM_H
 #define CHECKSUM_H
 #include "Defines.h"
@@ -81,22 +80,16 @@ constexpr DWORD checksumTable[256] =
 unsigned long crc32f(const char* buf);
 unsigned long crc32f_file(const BYTE* buf, DWORD len);
 
-/*template<size_t idx>
+template<size_t idx>
 constexpr uint32_t crc32(const char* str)
 {
     //Commented out the part to change to lowercase to make it compile faster
     //Just need to remember to only use lowercase strings now while generating checksums @ compiletime
     //Else they will not match
-    char c = str[idx];
+    /*char c = str[idx];
     if (c >= 'A' && c <= 'Z') c += 32;
-    //if (c == '/') c = '\\';
-    return (crc32<idx - 1>(str) >> 8) ^ checksumTable[(unsigned char)(crc32<idx - 1>(str) ^ str[idx]) & 0x000000FF];
-}*/
+    if (c == '/') c = '\\';*/
 
-
-template<size_t idx>
-constexpr uint32_t crc32(const char* str)
-{
     uint32_t previous = crc32<idx - 1>(str); // Computing the previous value only once
     return (previous >> 8) ^ checksumTable[(previous ^ str[idx]) & 0x000000FF];
 }
