@@ -3982,7 +3982,7 @@ void InitLevelMod()
         header->pFunction = DumpScripts;
     }
 
-    header = GetQBKeyHeader(Checksum("DisplayLoadingScreen"));
+    /*header = GetQBKeyHeader(Checksum("DisplayLoadingScreen"));
     {
         pDisplayLoadingScreen = header->pFunction;
         header->pFunction = DisplayLoadingScreen;
@@ -3992,7 +3992,7 @@ void InitLevelMod()
     {
         pHideLoadingScreen = header->pFunction;
         header->pFunction = HideLoadingScreen;
-    }
+    }*/
 
     //MessageBox(0, "going to fix msg", "going to fix msg", MB_OK);
 
