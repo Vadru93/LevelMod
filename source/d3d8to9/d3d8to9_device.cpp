@@ -289,6 +289,8 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::Reset(D3DPRESENT_PARAMETERS8* pPresen
 
     HRESULT hres = ProxyInterface->Reset(&PresentParams);
     OnReset();
+    if (FAILED(hres))
+        MessageBox(0, "Failed to reset....", "", 0);
     return hres;
 }
 extern void DrawFrame();

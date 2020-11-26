@@ -513,7 +513,7 @@ void RestoreShader()
     }
 }
 
-void __stdcall Obj_SetShader_hook()
+__declspec(naked) void __cdecl Obj_SetShader_hook()
 {
     static DWORD pReturn = 0x00555400;
     static Texture* pTexture;
@@ -522,6 +522,8 @@ void __stdcall Obj_SetShader_hook()
     if (p_render_shaders)
     {
         _asm mov eax, [esp+8];
+        _asm pushad;
+        _asm pushfd;
         _asm mov pTexture, eax
         if (!pTexture)
             goto SKIP;
@@ -530,15 +532,18 @@ void __stdcall Obj_SetShader_hook()
             goto SKIP;
         SubmitShader(pShader, pTexture);
 
-        _asm pop ebp
+        _asm popfd;
+        _asm popad;
+        //_asm pop ebp
         _asm jmp[pReturn];
     SKIP:
 
-
+        _asm popfd;
+        _asm popad;
         RestoreShader();
 
     }
-    _asm pop ebp
+    //_asm pop ebp
     _asm jmp[pReturn];
 }
 
