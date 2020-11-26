@@ -3846,6 +3846,8 @@ void InitLevelMod()
 {
     //HookControls();
 
+
+    //Initializing the new timer
     QueryPerformanceFrequency(&freq);
 
     //HookFunction(0x004C04F0, TimerElapsed);
@@ -3873,8 +3875,10 @@ void InitLevelMod()
     memcpy((void*)0x0042FA0D, codeCaveRenderHook, sizeof(codeCaveRenderHook));
     memcpy((void*)0x0042FA9D, codeCaveRenderHook2, sizeof(codeCaveRenderHook2));
 
+    //Fixing bug that produces duplicate TriggerScripts
     HookFunction(0x00499B48, TriggerScript, 0xE9);
 
+    //Optimize static checksum access
     for (DWORD i = 0; i < sizeof(optimized) / sizeof(OptimizedCRC); i++)
     {
         optimized[i].Optimize();
@@ -3883,15 +3887,15 @@ void InitLevelMod()
     *(DWORD*)0x0044410E -= 4;
 
 
+    //BouncyObject fixes
     BYTE codeCaveBouncyObject[] = { 0x84, 0xC0, 0x0F, 0x84, 0xA0, 0x3E, 0x08, 0x00, 0x8A, 0x84, 0x24, 0x00, 0x01, 0x00, 0x00, 0x24, 0x40, 0x74, 0x0D, 0x8B, 0x84, 0x24, 0x14, 0x01, 0x00, 0x00, 0x89, 0x05, 0xCB, 0x03, 0x40, 0x00, 0x8A, 0x84, 0x24, 0x00, 0x01, 0x00, 0x00, 0x90, 0x90, 0x90, 0x90, 0x90, 0x24, 0x10, 0x0F, 0x85, 0x74, 0x3E, 0x08, 0x00, 0xE9, 0x0D, 0x3A, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00 };
     DWORD BouncyObject_Addr = 0x00400392;
     VirtualProtect((LPVOID)BouncyObject_Addr, sizeof(codeCaveBouncyObject), PAGE_EXECUTE_READWRITE, &old);
     memcpy((void*)BouncyObject_Addr, codeCaveBouncyObject, sizeof(codeCaveBouncyObject));
     HookFunction(0x004003BA, BouncyObj_OnBounce_Naked, 0xE9);
 
-    //MessageBox(0, 0, 0, 0);
+    //Rendering of models hook, currently used to render custom shattered meshes
     HookFunction(0x004F9C0A, Render_Naked, 0xE9);
-    //MessageBox(0, 0, 0, 0);
 
     VirtualProtect((LPVOID)0x00483D55, 1, PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((LPVOID)0x00483DD0, 1, PAGE_EXECUTE_READWRITE, &old);
@@ -3907,14 +3911,17 @@ void InitLevelMod()
     *(BYTE*)0x00483DD7 = 0x90;
 
 
-
+    //Fix to add a MessageBox when call a script that's not found instead of crashing game
     *(WORD*)0x00427A9B = 0x840F;//je
     HookFunction(0x00427A9D, NotGood_naked);
 
+    //Hook to add new effects, blendmodes, anims to static scene meshes
     HookFunction(0x004F42AA, SetVertexShader_hook);
 
+    //Fix the snap to ground issue
     HookFunction(0x0049F1DD, proxy_SnapToGroundClamp);
 
+    //Fix SuperSector size limitations and crashing issues + improve performance of GetSuperSector function
     HookFunction(0x00412160, SuperSector::GetSuperSector);
     HookFunction(0x00412278, SuperSector::GetSuperSector);
     HookFunction(0x004122C7, SuperSector::GetSuperSector);
@@ -3922,30 +3929,32 @@ void InitLevelMod()
     HookFunction(0x0041236B, SuperSector::GetSuperSector);
     HookFunction(0x0041246B, SuperSector::GetSuperSector);
 
+    //Hook to add new effects, blendmodes, anims to non static scene meshes
     HookFunction(0x00526D4B, Obj_SetShader_hook);
 
-    //MessageBox(0, 0, 0, 0);
     *(DWORD*)0x00427AA3 = 0x90909090;//nop
     *(WORD*)(0x00427AA3 + 4) = 0x9090;
 
+    //Temporarly commented out Obj_ functions until figure out why it causes issues
     //HookFunction(0x0048E036, Obj_MoveToNode_Naked, 0xE9);
     //HookFunction(0x0048DA53, Obj_FollowPathLinked_Naked, 0xE9);
     HookFunction(0x004846E6, BouncyObj_Go_Naked, 0xE8);
-    //Network::MessageHandler handler;
-    /*DWORD old;
-    VirtualProtect((LPVOID)0x004C02C5, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
-    *(DWORD*)0x004C02C5 += 12 * NUM_EXTRA_IDS;*/
 
+    //Hooks to add custom net messages
     HookFunction(0x00474D08, &Network::MessageHandler::AddClientMessages);
     HookFunction(0x004751EA, &Network::MessageHandler::AddServerMessages);
 
+    //Old code
     //HookFunction(0x0058D0B1, Fopen_naked, 0xE9);
     /*if(!QScript::Scripts)
         QScript::Scripts = new QScript::QBScript();*/
+
+    //If debugmode is enabled we want to hook checksum generating function
     if (bDebugMode)
         HookFunction(0x004265F1, Checksum_naked, 0xE9);
     else
     {
+        //Else we want to optimize the checksum
         DWORD old;
         for (DWORD i = 0; i < sizeof(optimized2) / 4; i++)
         {
@@ -3964,18 +3973,23 @@ void InitLevelMod()
     *(DWORD*)0x004265E4 = 0x90909090;
     *(DWORD*)0x004265E8 = 0x90909090;*/
 
+    //Optimize the static array checksum access
     for (DWORD i = 0; i < sizeof(optimized3) / sizeof(OptimizedArrayCRC); i++)
     {
         optimized3[i].Optimize();
     }
-    char msg[128] = "";
-    /*sprintf(msg, "OFFSET %X", offset);
-    MessageBox(0, msg, msg, 0);*/
 
+    //This uses original code that was made for thps2 and used even in thug2
+    //It's very predictable and will yield almost same result everytime you relaunch game
+    //With this random init atleast it will yield same result every 49 days
+    //Maybe should implement more "true" randomness?
     InitialRand(GetTickCount());
     QBKeyHeader* header = NULL;
 
 
+    //Hook DumpScripts ScriptFunction, this function is empty in thps3 PC
+    //However it's there in XBOX version of thps3
+    //This is a reproduced version to view similar info
     header = GetQBKeyHeader(Checksum("DumpScripts"));
     if (header)
     {
@@ -3994,237 +4008,6 @@ void InitLevelMod()
         header->pFunction = HideLoadingScreen;
     }*/
 
-    //MessageBox(0, "going to fix msg", "going to fix msg", MB_OK);
-
-
-    /*FILE* f;
-    f = fopen("settings", "r+b");
-    BYTE tagLimit;
-    tagLimit = 32;
-    if (movingObjects.size())
-        movingObjects.clear();
-
-    HookDebugMessages(NULL, NULL);
-
-    if (f)
-    {
-        _printf("Loading settings...\n");
-        fread(&LevelModSettings::UseNewMenu, 1, 1, f);
-        fread(&LevelModSettings::FixSound, 1, 1, f);
-        fread(&LevelModSettings::TeleFix, 1, 1, f);
-        if (fread(&tagLimit, 1, 1, f) != 1)
-            fwrite(&tagLimit, 1, 1, f);
-        bool disableGrass = false;
-        if (fread(&disableGrass, 1, 1, f) != 1)
-            fwrite(&disableGrass, 1, 1, f);
-        else
-        {
-            QBKeyHeader* header = GetQBKeyHeader(Checksum("GrassLayersDisabled"));
-            if (header)
-                header->value.i = disableGrass;
-        }
-        bool slapOn = true;
-        if (fread(&slapOn, 1, 1, f) != 1)
-            fwrite(&slapOn, 1, 1, f);
-        else if (!slapOn)
-        {
-            QBKeyHeader* header = GetQBKeyHeader(Checksum("InternetClientCollRadius"));
-            if (header)
-                header->value.i = 0;
-            header = GetQBKeyHeader(Checksum("InternetServerCollRadius"));
-            if (header)
-                header->value.i = 0;
-            header = GetQBKeyHeader(Checksum("SlapIsOn"));
-            if (header)
-                header->value.i = 0;
-        }
-        bool hudOn = true;
-        if (fread(&hudOn, 1, 1, f) != 1)
-            fwrite(&hudOn, 1, 1, f);
-        else if (!hudOn)
-        {
-            QBKeyHeader* header = GetQBKeyHeader(Checksum("HudIsOn"));
-            if (header)
-                header->value.i = 0;
-        }
-        if (fread(&version, 4, 1, f) != 1)
-        {
-            _printf("version not found\n");
-            version = VERSION;
-            fwrite(&version, 4, 1, f);
-        }
-        _printf("Setting Version %.2f\nLevelMod Version %.2f", version, VERSION);
-        //
-        if (version != VERSION)
-        {
-            _printf("version not same\n");
-            fseek(f, -4, SEEK_CUR);
-            version = VERSION;
-            fwrite(&version, 4, 1, f);
-            debugMode = false;
-            fwrite(&debugMode, 1, 1, f);
-            SpineButton = 7;
-            fwrite(&SpineButton, 1, 1, f);
-
-            header = GetQBKeyHeader(Checksum("spine_button_text"));
-            if (header)
-                memcpy(header->pStr, "Revert", 7);
-        }
-        else
-        {
-            if (fread(&debugMode, 1, 1, f) != 1)
-                fwrite(&debugMode, 1, 1, f);
-            else if (debugMode)
-            {
-
-                CreateConsole();
-                qbTable = new Script();
-
-                //debugFile = fopen("debug.txt", "r+t");
-                //fseek(debugFile, 0, SEEK_END);
-
-                CompiledScript* pScript = (CompiledScript*)0x005B83D8;
-                for (DWORD i = 0; i < 292; i++)
-                {
-                    if (pScript->name && (DWORD)pScript->name != 0xFFFFFFFF && !InvalidReadPtr(pScript->name) && strlen(pScript->name) > 1 && strlen(pScript->name) < 50)
-                    {
-                        printf("Adding ScriptedCFunction %s %X %p\n", pScript->name, crc32f((unsigned char*)pScript->name), pScript->pFunction);
-                        //fprintf(debugFile, "Adding ScriptedCFunction %s %X %p\n", pScript->name, crc32f((unsigned char*)pScript->name), pScript->pFunction);
-                    }
-                    pScript++;
-                }
-
-                pScript = (CompiledScript*)0x005B7510;
-                for (DWORD i = 0; i < 473; i++)
-                {
-                    if (pScript->name && (DWORD)pScript->name != 0xFFFFFFFF && !InvalidReadPtr(pScript->name) && strlen(pScript->name) > 1 && strlen(pScript->name) < 50)
-                    {
-                        printf("Adding ScriptedCFunction %s %X %p\n", pScript->name, crc32f((unsigned char*)pScript->name), pScript->pFunction);
-                        //fprintf(debugFile, "Adding ScriptedCFunction %s %X %p\n", pScript->name, crc32f((unsigned char*)pScript->name), pScript->pFunction);
-                    }
-                    pScript++;
-
-                }
-                //fclose(debugFile);
-
-
-
-
-
-            }
-            if (fread(&SpineButton, 1, 1, f) != 1)
-            {
-                SpineButton = 7;
-                fwrite(&SpineButton, 1, 1, f);
-            }
-
-            header = GetQBKeyHeader(Checksum("spine_button_text"));
-            if (header)
-            {
-                switch (SpineButton)
-                {
-                case KeyState::REVERT:
-                    memcpy(header->pStr, "Revert", 7);
-                    break;
-                case KeyState::NOLLIE:
-                    SpineButton = KeyState::NOLLIE;
-                    memcpy(header->pStr, "Nollie", 7);
-                    break;
-                case KeyState::SPINLEFT:
-                    SpineButton = KeyState::SPINLEFT;
-                    memcpy(header->pStr, "Left Spin Button", 17);
-                    break;
-                case KeyState::SPINRIGHT:
-                    SpineButton = KeyState::SPINRIGHT;
-                    memcpy(header->pStr, "Right Spin Button", 18);
-                    break;
-                default:
-                    SpineButton = KeyState::REVERT;
-                    _printf("Trashed LevelMod Settings file...\n");
-                    memcpy(header->pStr, "Revert", 7);
-                    break;
-                }
-            }
-        }
-        version = VERSION;
-    }
-    else
-    {
-        _printf("Writing settings...\n");
-        f = fopen("settings", "w+b");
-        if (f)
-        {
-            fwrite(&LevelModSettings::UseNewMenu, 1, 1, f);
-            fwrite(&LevelModSettings::FixSound, 1, 1, f);
-            fwrite(&LevelModSettings::TeleFix, 1, 1, f);
-            fwrite(&tagLimit, 1, 1, f);
-            bool disableGrass = false;
-            fwrite(&disableGrass, 1, 1, f);
-            bool slapOn = true;
-            fwrite(&slapOn, 1, 1, f);
-            bool hudOn = true;
-            fwrite(&hudOn, 1, 1, f);
-            version = VERSION;
-            fwrite(&version, 4, 1, f);
-            debugMode = false;
-            fwrite(&debugMode, 1, 1, f);
-            SpineButton = 7;
-            fwrite(&SpineButton, 1, 1, f);
-            header = GetQBKeyHeader(Checksum("spine_button_text"));
-            if (header)
-                memcpy(header->pStr, "Revert", 7);
-            //fwrite(&newSize, 4, 1, f);
-            fclose(f);
-        }
-    }
-    _fcloseall();
-
-
-
-    if (LevelModSettings::UseNewMenu)
-    {
-        if (VirtualProtect((LPVOID)0x004404CE, sizeof(LevelModSettings::NewMenu), PAGE_EXECUTE_READWRITE, &old))
-            memcpy((void*)0x004404CE, &LevelModSettings::NewMenu, sizeof(LevelModSettings::NewMenu));
-        else
-            MessageBox(0, "couldn't fix protection for", "NewMenu", 0);
-    }
-    if (LevelModSettings::TeleFix)
-        LevelModSettings::FixTele();
-    if (LevelModSettings::FixSound)
-    {
-        if (VirtualProtect((LPVOID)0x004C665D, 1, PAGE_EXECUTE_READWRITE, &old))
-            *(BYTE*)0x004C665D = 0xEB;
-        else
-            MessageBox(0, "couldn't fix protection for", "SFXFix", 0);
-    }
-    if (tagLimit != 32)
-    {
-        CStruct pStruct;//= new CStruct;
-        CStructHeader head;
-        pStruct.head = &head;//new CStructHeader;
-        pStruct.tail = pStruct.head;
-        //oldLimit = tagLimit;
-        pStruct.head->Data = tagLimit;
-        pStruct.head->Type = QBKeyHeader::QBKeyType::INT;
-        pStruct.head->QBkey = 0;
-        SetTagLimit(&pStruct, NULL);
-        //delete pStruct.head;
-        LevelModSettings::UnlimitedGraf = true;
-    }
-    */
-
-
-    /*//MessageBox(0, "going to hook", "going to hook", MB_OK);
-    PresentHook = Hook(15, HookedPresent, 1);//CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)D3D8BASE, NULL, NULL, NULL);
-    pPresent = (Present_t)PresentHook.func;*/
-
-    //HookFopen();
-    /*if (HookFopen())
-        MessageBox(0, "sucess", "", MB_OK);
-    else
-        MessageBox(0, "fail", "", MB_OK);*/
-        //CreateThread(0, 0, (LPTHREAD_START_ROUTINE)Test, 0, 0, 0);
-        //MessageBox(0, "DOne", "", MB_OK);
 }
 
 
