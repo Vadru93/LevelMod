@@ -87,6 +87,7 @@ namespace Gfx
     extern bool filtering;
     extern bool fps_fix;
     extern __restrict LPDIRECT3DDEVICE9 pDevice;
+    extern bool bOnReset;
 };
 //--------Custom Shaders--------
 

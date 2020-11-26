@@ -5541,6 +5541,11 @@ void DrawFrame()
             m_pIDirect3DDevice8->SetVertexShader(vShared);
             m_pIDirect3DDevice8->SetRenderState(D3DRS_ZFUNC, D3DCMP);
             m_pIDirect3DDevice8->SetStreamSource(0, oldBuffer, oldStride);*/
+
+            if (Gfx::world_rendertarget)
+            {
+                Gfx::world_rendertarget->Release();
+            }
             return;
 }
 

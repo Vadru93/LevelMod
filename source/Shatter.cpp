@@ -30,7 +30,7 @@ void sTriSubdivideStack::Clear(void)
 /******************************************************************/
 void sTriSubdivideStack::Push(void* p_data)
 {
-    if(m_offset + m_block_size >= TRI_SUBDIVIDE_STACK_SIZE)
+    if (m_offset + m_block_size >= TRI_SUBDIVIDE_STACK_SIZE)
         MessageBox(0, "Increase stack size...", "", 0);
 
     memcpy(m_data + m_offset, p_data, m_block_size);
@@ -45,7 +45,7 @@ void sTriSubdivideStack::Push(void* p_data)
 /******************************************************************/
 void sTriSubdivideStack::Pop(void* p_data)
 {
-    if(m_offset < m_block_size)
+    if (m_offset < m_block_size)
         MessageBox(0, "Something is wrong", "", 0);
 
     m_offset -= m_block_size;
@@ -59,7 +59,7 @@ void sTriSubdivideStack::Pop(void* p_data)
 const void* sTriSubdivideStack::Peek(DWORD index)
 {
     int offset = index * m_block_size;
-    if(offset >= m_offset) _printf("Index %d is beyond end offset %d", index, m_offset);
+    if (offset >= m_offset) _printf("Index %d is beyond end offset %d", index, m_offset);
 
     return m_data + offset;
 }
@@ -174,7 +174,7 @@ void ShatterSuperSector(SuperSector* super_sector)
             {
 
                 _printf("Mesh %s Split %d/%d\n", FindChecksumName(super_sector->name), m + 1, sector->numSplits);
-                split->vertexBuffer->GetProxyInterface()->Lock(split->baseIndex*stride/*0*/, 0, (void**)&p_vert_data, D3DLOCK_READONLY);
+                split->vertexBuffer->GetProxyInterface()->Lock(split->baseIndex * stride/*0*/, 0, (void**)&p_vert_data, D3DLOCK_READONLY);
                 D3DXVECTOR3 bboxMax = D3DXVECTOR3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
                 D3DXVECTOR3 bboxMin = D3DXVECTOR3(FLT_MAX, FLT_MAX, FLT_MAX);
 
@@ -196,7 +196,7 @@ void ShatterSuperSector(SuperSector* super_sector)
                     if (bboxMin.z > v.z)
                         bboxMin.z = v.z;
                 }
- 
+
                 //_printf("TargetShatterArea %f numSplits %d numIndices %d stide %X\n", shatterAreas[m], sector->numSplits, mesh->numIndices, stride);
                 //MessageBox(0, 0, 0, 0);
 
@@ -264,7 +264,7 @@ void ShatterSuperSector(SuperSector* super_sector)
                 _printf("Worst case scenario %d tris\n", valid_tris);
 
                 // Create a tracking structure for this mesh.
-                ShatterData* p_shatter = new ShatterData(super_sector, &super_sector->mesh->splits[m], valid_tris*4);
+                ShatterData* p_shatter = new ShatterData(super_sector, &super_sector->mesh->splits[m], valid_tris * 4);
                 //p_shatter->numTris = valid_tris;
                 BYTE* p_write_vertex = p_shatter->verts;
                 DWORD details_index = 0;
@@ -282,7 +282,7 @@ void ShatterSuperSector(SuperSector* super_sector)
                 {
                     numTris = subdivide_tri_stack(&p_write_vertex, super_sector, targetShatterArea[0]);//  targetShatterArea[rand() % 5]);
                 }*/
-                while(subdivide_tri_stack(&p_write_vertex, super_sector, targetShatterArea[rand() % 5], p_shatter->numTris));//  );
+                while (subdivide_tri_stack(&p_write_vertex, super_sector, targetShatterArea[rand() % 5], p_shatter->numTris));//  );
 
                 _printf("Going to allocate %d tris\n", p_shatter->numTris);
                 p_shatter->Allocate();
@@ -332,7 +332,7 @@ void ShatterSuperSector(SuperSector* super_sector)
 
 bool rendering = false;
 
-void RenderShatterObjects()
+void __stdcall RenderShatterObjects()
 {
     rendering = true;
     static DWORD lastFrameCount;
@@ -367,29 +367,31 @@ void RenderShatterObjects()
 
         Gfx::pDevice->GetRenderTarget(0, &Gfx::world_rendertarget);
         Gfx::pDevice->GetViewport(&Gfx::world_viewport);
-        //Make sure textures are set to zero
-        Gfx::pDevice->SetTexture(0, NULL);
-        p_current_texture(0) = 0;
-        Gfx::pDevice->SetTexture(1, NULL);
-        Gfx::pDevice->SetTexture(2, NULL);
-        Gfx::pDevice->SetTexture(3, NULL);
-
-        lastFrameCount = Gfx::frameCounter;
-
-        DWORD old, old_state;
-        Gfx::pDevice->GetFVF(&old);
-
-        old_state = p_current_renderstate(D3DRS_CULLMODE);
-        DWORD old_alpha = p_current_renderstate(D3DRS_ALPHABLENDENABLE);
-        DWORD old_alpha2 = p_current_renderstate(D3DRS_ALPHATESTENABLE);
-
-        Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-        Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-        Gfx::pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
 
 
         if (shatterObjects.size())
         {
+            //Make sure textures are set to zero
+            Gfx::pDevice->SetTexture(0, NULL);
+            p_current_texture(0) = 0;
+            Gfx::pDevice->SetTexture(1, NULL);
+            Gfx::pDevice->SetTexture(2, NULL);
+            Gfx::pDevice->SetTexture(3, NULL);
+
+            lastFrameCount = Gfx::frameCounter;
+
+            DWORD old, old_state;
+            Gfx::pDevice->GetFVF(&old);
+
+            old_state = p_current_renderstate(D3DRS_CULLMODE);
+            DWORD old_alpha = p_current_renderstate(D3DRS_ALPHABLENDENABLE);
+            DWORD old_alpha2 = p_current_renderstate(D3DRS_ALPHATESTENABLE);
+
+            Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+            Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+            Gfx::pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
+
+
             float framelength = Game::skater->GetFrameLength() * Gfx::shatter_speed;
 
             for (DWORD i = 0; i < shatterObjects.size(); i++)
@@ -408,12 +410,12 @@ void RenderShatterObjects()
                 shatterObjects[i]->Update(framelength);
                 shatterObjects[i]->Render();
             }
-        }
 
-        Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, old_state);
-        Gfx::pDevice->SetFVF(old);
-        Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, old_alpha);
-        Gfx::pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, old_alpha2);
+            Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, old_state);
+            Gfx::pDevice->SetFVF(old);
+            Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, old_alpha);
+            Gfx::pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, old_alpha2);
+        }
     }
     rendering = false;
 }
@@ -430,8 +432,10 @@ __declspec(naked) void Render_Naked()
     static DWORD pCall = 0x004F9C80;
     static DWORD pJmp = 0x004F9C0E;
     _asm pushad;
-    if(p_render_scene)
+    _asm pushfd;
+    if (p_render_scene)
         RenderShatterObjects();
+    _asm popfd;
     _asm popad;
     _asm call[pCall];
     _asm jmp[pJmp];

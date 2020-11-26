@@ -233,6 +233,7 @@ extern void OnReset();
 extern void OnLost();
 HRESULT STDMETHODCALLTYPE Direct3DDevice8::Reset(D3DPRESENT_PARAMETERS8* pPresentationParameters)
 {
+    Gfx::bOnReset = true;
 #ifndef D3D8TO9NOLOG
     LOG << "Redirecting '" << "IDirect3DDevice8::Reset" << "(" << this << ", " << pPresentationParameters << ")' ..." << std::endl;
 #endif
@@ -291,6 +292,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::Reset(D3DPRESENT_PARAMETERS8* pPresen
     OnReset();
     if (FAILED(hres))
         MessageBox(0, "Failed to reset....", "", 0);
+    Gfx::bOnReset = false;
     return hres;
 }
 extern void DrawFrame();
