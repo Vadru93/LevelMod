@@ -149,7 +149,7 @@ void CommandGetInfo(const char* message)
 
     using namespace Network;
     char test[128] = "Test Msg";
-    SendMessageToClients(MSG_ID_LM_TEST, strlen(test)+1, &test);
+    SendMessageToClients(MSG_ID_LM_TEST, strlen(test) + 1, &test);
 
 
 }

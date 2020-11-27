@@ -654,7 +654,7 @@ SCRIPT LM_ToggleHostOption
 				printf "without menu id!"
 			ENDIF
 		ENDIF
-		IF GotParam 
+		IF GotParam LinkedTo
 		    IF IsOptionOn <LinkedTo>
 		        MakeTextMenuElementStatic <id> nonstatic = 1
 			ELSE

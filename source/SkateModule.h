@@ -13,12 +13,12 @@ struct SkateMod
 
     GameMode* GetGameMode()
     {
-        typedef GameMode*(__thiscall* const pGetGameMode)(SkateMod* pThis);
+        typedef GameMode* (__thiscall* const pGetGameMode)(SkateMod* pThis);
         return pGetGameMode(0x0046FF6)(this);
     }
 
-  
 
-//
-//00438B60 GetProfile
+
+    //
+    //00438B60 GetProfile
 };

@@ -213,7 +213,7 @@ namespace Network
         void* GetHandler()
         {
             _printf("Connection %p %p\n", this, (void*)(*(DWORD*)this + 0x3C));
-             return (void*)(*(DWORD*)this + 0x3C);
+            return (void*)(*(DWORD*)this + 0x3C);
         }
 
         void Invalidate()
@@ -406,7 +406,7 @@ namespace Network
                 return conn;//optimization instead of NULL
         }
 
-        
+
     };
 
     /*struct MsgHandlerContext

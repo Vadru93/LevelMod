@@ -116,12 +116,12 @@ struct TextureData
                 Gfx::pDevice->SetTexture(0, static_cast<Direct3DCubeTexture8*>(pTexture)->GetProxyInterface());
                 return;
             default:
-                if(p_current_texture(0) != 0)
+                if (p_current_texture(0) != 0)
                     Gfx::pDevice->SetTexture(0, NULL);
                 return;
             }
         }
-        else if(p_current_texture(0) != 0)
+        else if (p_current_texture(0) != 0)
             Gfx::pDevice->SetTexture(0, NULL);
     }
 };
@@ -162,7 +162,7 @@ struct Texture
         {
             data->Submit();
         }
-        else if(p_current_texture(0) != 0)
+        else if (p_current_texture(0) != 0)
         {
             Gfx::pDevice->SetTexture(0, NULL);
         }

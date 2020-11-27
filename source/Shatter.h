@@ -17,7 +17,7 @@ static const float	DEFAULT_BOUNCE_AMPLITUDE = 0.8f;
 
 struct sTriSubdivideStack
 {
-    static const int	TRI_SUBDIVIDE_STACK_SIZE = 16 * 1024*4;
+    static const int	TRI_SUBDIVIDE_STACK_SIZE = 16 * 1024 * 4;
 
     void				Reset(void);
     void				Clear(void);
@@ -187,7 +187,7 @@ struct ShatterData
         split = _split;
 
         gravity = Gfx::shatter_gravity;
-        life = shatterLifetime*Gfx::shatter_life_factor;
+        life = shatterLifetime * Gfx::shatter_life_factor;
         bounce = shatterBounce;
         bounceAmp = shatterBounceAmplitude;
         _printf("Allocated memory\n");
@@ -254,7 +254,7 @@ bool NewShatterScript(CStruct* pStruct, CScript* pScript);
 /*                                                                */
 /*                                                                */
 /******************************************************************/
-bool subdivide_tri_stack(BYTE** p_write, SuperSector* sector, float targetShatterArea, int & numTris)
+bool subdivide_tri_stack(BYTE** p_write, SuperSector* sector, float targetShatterArea, int& numTris)
 {
 
     static float dividers[4] = { 0.5f, 0.6f, 0.2f, 0.33f };

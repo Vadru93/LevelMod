@@ -735,60 +735,60 @@ struct Matrix : D3DXMATRIX
             if (hip_transfer) [[unlikely]]//hip_transfer, keeep both rotations
             {
                 _printf("An unlikely event..\n");
-        /*vTwoSinThetaAxis.x = m[UP][Z] - m[AT][Y];
-        vTwoSinThetaAxis.z = m[UP][X] - m[RIGHT][Y];*/
-    }
-    else//need to check if we just drifted or if this is a non vertical ramp
-    {
-        _printf("drifted?");
-        if (xDiff > zDiff)
-        {
-            if ((xDiff - zDiff) > 80.0f)//we just drifted, so rotate ONLY on the longest distance
-            {
-                vTwoSinThetaAxis.x = 0.0f;
-                _printf(" YES\n");
+                /*vTwoSinThetaAxis.x = m[UP][Z] - m[AT][Y];
+                 vTwoSinThetaAxis.z = m[UP][X] - m[RIGHT][Y];*/
             }
-            else
+            else//need to check if we just drifted or if this is a non vertical ramp
             {
-                _printf(" NO 1\n");
-                //vTwoSinThetaAxis.x = m[UP][Z] - m[AT][Y];
-                //vTwoSinThetaAxis.y = m[AT][X] - m[RIGHT][Z];
-                ///vTwoSinThetaAxis.z = 0;// m[UP][X] - m[RIGHT][Y];
-                //reverse = true;
-                vTwoSinThetaAxis.x = m[UP][Z] - m[AT][Y];
-                vTwoSinThetaAxis.y = m[AT][X] - m[RIGHT][Z];
-                vTwoSinThetaAxis.z = m[RIGHT][Y] - m[UP][X];
+                _printf("drifted?");
+                if (xDiff > zDiff)
+                {
+                    if ((xDiff - zDiff) > 80.0f)//we just drifted, so rotate ONLY on the longest distance
+                    {
+                        vTwoSinThetaAxis.x = 0.0f;
+                        _printf(" YES\n");
+                    }
+                    else
+                    {
+                        _printf(" NO 1\n");
+                        //vTwoSinThetaAxis.x = m[UP][Z] - m[AT][Y];
+                        //vTwoSinThetaAxis.y = m[AT][X] - m[RIGHT][Z];
+                        ///vTwoSinThetaAxis.z = 0;// m[UP][X] - m[RIGHT][Y];
+                        //reverse = true;
+                        vTwoSinThetaAxis.x = m[UP][Z] - m[AT][Y];
+                        vTwoSinThetaAxis.y = m[AT][X] - m[RIGHT][Z];
+                        vTwoSinThetaAxis.z = m[RIGHT][Y] - m[UP][X];
+                    }
+                }
+                else
+                {
+                    if ((zDiff - xDiff) > 80.0f)//we just drifted, so rotate ONLY on the longest distance
+                    {
+                        vTwoSinThetaAxis.z = 0.0f;
+                        _printf(" YES\n");
+                    }
+                    else
+                    {
+                        //reverse = true;
+                        _printf(" NO 2\n");
+                        vTwoSinThetaAxis.x = m[UP][Z] - m[AT][Y];
+                        vTwoSinThetaAxis.y = m[AT][X] - m[RIGHT][Z];
+                        vTwoSinThetaAxis.z = m[RIGHT][Y] - m[UP][X];
+                        //vTwoSinThetaAxis.z = 0.5f;
+                        //vTwoSinThetaAxis.z = 0.5f;
+                        //vTwoSinThetaAxis.z = -m[RIGHT][Y] - m[UP][X];// *= -1.0f;// m[UP][X] - m[RIGHT][Y];
+                        /*vTwoSinThetaAxis.x = 0;// m[UP][Z] - m[AT][Y];
+                        //vTwoSinThetaAxis.y =  m[AT][X] - m[RIGHT][Z];
+                        vTwoSinThetaAxis.z = 0;// m[UP][X] - m[RIGHT][Y];*/
+                    }
+                }
             }
-        }
-        else
-        {
-            if ((zDiff - xDiff) > 80.0f)//we just drifted, so rotate ONLY on the longest distance
-            {
-                vTwoSinThetaAxis.z = 0.0f;
-                _printf(" YES\n");
-            }
-            else
-            {
-                //reverse = true;
-                _printf(" NO 2\n");
-                vTwoSinThetaAxis.x = m[UP][Z] - m[AT][Y];
-                vTwoSinThetaAxis.y = m[AT][X] - m[RIGHT][Z];
-                vTwoSinThetaAxis.z = m[RIGHT][Y] - m[UP][X];
-                //vTwoSinThetaAxis.z = 0.5f;
-                //vTwoSinThetaAxis.z = 0.5f;
-                //vTwoSinThetaAxis.z = -m[RIGHT][Y] - m[UP][X];// *= -1.0f;// m[UP][X] - m[RIGHT][Y];
-                /*vTwoSinThetaAxis.x = 0;// m[UP][Z] - m[AT][Y];
-                //vTwoSinThetaAxis.y =  m[AT][X] - m[RIGHT][Z];
-                vTwoSinThetaAxis.z = 0;// m[UP][X] - m[RIGHT][Y];*/
-            }
-        }
-    }
 
         }
-            /*vTwoSinThetaAxis.x = -m[UP][Z] - m[AT][Y];
-            vTwoSinThetaAxis.y = 0;// -m[UP][Z] - m[AT][Y];
-            vTwoSinThetaAxis.z = 0;// -m[UP][Z] - m[AT][Y];*/
-            // 0.0f;// m[RIGHT][Y] - m[UP][X];
+        /*vTwoSinThetaAxis.x = -m[UP][Z] - m[AT][Y];
+        vTwoSinThetaAxis.y = 0;// -m[UP][Z] - m[AT][Y];
+        vTwoSinThetaAxis.z = 0;// -m[UP][Z] - m[AT][Y];*/
+        // 0.0f;// m[RIGHT][Y] - m[UP][X];
         _printf("theta %f %f %f\nstart %f %f\nend %f %f\n", vTwoSinThetaAxis.x, vTwoSinThetaAxis.y, vTwoSinThetaAxis.z, start.x, start.z, end.x, end.z);
 
         /*

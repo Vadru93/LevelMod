@@ -116,7 +116,7 @@ namespace QScript
             size = fileSize;
             if (!level)
             {
-                if(*file == '.')
+                if (*file == '.')
                     strcpy(fileName, &file[7]);
                 else
                     strcpy(fileName, &file[5]);

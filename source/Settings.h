@@ -40,14 +40,14 @@ namespace LevelModSettings
         int value;
         DWORD option;
 
-        OverrideOption(Type _type, int _value, DWORD _option) : 
+        OverrideOption(Type _type, int _value, DWORD _option) :
             type(_type), value(_value), option(_option)
         {}
 
     };
 
     struct Option
-    {   
+    {
         OverrideOption* pOverride;
         int value;
 
@@ -76,7 +76,7 @@ void SetAirTrickSpeed(DWORD speed);
 
 void UpdateOption(DWORD checksum, int value);//, bool HostOption = false);
 
-int AddOption(char* name, int value, bool update = false, DWORD HostOption = 0,  BYTE type = 0);
+int AddOption(char* name, int value, bool update = false, DWORD HostOption = 0, BYTE type = 0);
 
 void __stdcall SendHostOptionChanged(int option, int value);
 #endif
