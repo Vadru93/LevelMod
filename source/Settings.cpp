@@ -599,7 +599,7 @@ int AddOption(char* name, int value, bool update, DWORD HostOption, BYTE type)
             auto it = options.find(HostOption);
             if (it == options.end())
             {
-                MessageBox(0, "This is not good", "", 0);
+                MessageBox(0, "This is not good", "HostOption badly linked...", 0);
             }
 
             /*auto override = it->second.override;
@@ -615,13 +615,11 @@ int AddOption(char* name, int value, bool update, DWORD HostOption, BYTE type)
                     it->second.pOverride = &Override->second;
                 }
                 else
-                    MessageBox(0, "This is not good", "", 0);
+                    MessageBox(0, "This is not good aswell", "HostOption badly linked...", 0);
             }
-            if (it->second.Overriden())
-            {
-                _printf("Now we updating..\n");
-                UpdateOption(HostOption, value);
-            }
+
+            _printf("Now we updating..\n");
+            UpdateOption(HostOption, value);
         }
     }
     return value;
