@@ -21,6 +21,8 @@
 
 #define p_render_scene *(bool*)0x00400019
 
+#define p_target_ms (*(BYTE*)0x004C04E9)
+
 //--------Spine and Acid--------
 enum TransferType
 {

@@ -225,6 +225,8 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
         return D3DERR_INVALIDCALL;
     }
 
+    Gfx::hFocusWindow = hFocusWindow;
+
     *ppReturnedDeviceInterface = nullptr;
 
     D3DPRESENT_PARAMETERS PresentParams;

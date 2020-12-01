@@ -256,7 +256,7 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
     VirtualProtect((void*)0x00438031, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
 
     VirtualProtect((void*)0x004c050c, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
-    VirtualProtect((void*)0x004c067b, sizeof(BYTE), PAGE_EXECUTE_READWRITE, &old);
+    //VirtualProtect((void*)0x004c067b, sizeof(BYTE), PAGE_EXECUTE_READWRITE, &old);
 
     VirtualProtect((void*)0x004C067A, sizeof(DWORD) * 2, PAGE_EXECUTE_READWRITE, &old);
 
@@ -271,7 +271,8 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
         /**(DWORD*)0x004C067A = 0x90909090;
         *(DWORD*)(0x004C067A + 4) = 0x90909090;*/
         *(DWORD*)0x004c050c = 0x3E80;// 16000;
-        *(BYTE*)0x004c067b = 0x10;
+        *(DWORD*)0x004c067a = 0x90909090;
+        *(DWORD*)0x004c067e = 0x90909090;
     }
 
     static BYTE CodeCave_AddAnimation[] = { 0x8D, 0x54, 0x29, 0x30, 0x8B, 0x03, 0x52, 0x85, 0xC0, 0x0F, 0x84, 0xD8, 0x49, 0x0F, 0x00, 0x05,

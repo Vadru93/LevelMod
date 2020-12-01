@@ -3805,9 +3805,14 @@ DWORD TimerElapsed()
     QueryPerformanceCounter(&endTime);
     if (endTime.HighPart == startTime.HighPart)
     {
-        elapsedTime.LowPart = (endTime.LowPart - startTime.LowPart);
+        //elapsedTime.LowPart = (endTime.LowPart - startTime.LowPart);
         _asm xor edx, edx
-        return (elapsedTime.LowPart * 1000) / freq.LowPart;
+        double ms = (double((endTime.LowPart - startTime.LowPart)) * fFreq);
+        DWORD truncated = ms;
+        double test = ms - (double)truncated;
+        if (ms - test >= 0.66)
+            truncated++;
+        return truncated;// (elapsedTime.LowPart * 1000) / freq.LowPart;
     }
     else
     {
@@ -3835,10 +3840,34 @@ DWORD TimerElapsed()
     }
 }*/
 
+DWORD old_start;
 
 LARGE_INTEGER TimerStart()
 {
+    old_start = startTime.LowPart;
+
+
     QueryPerformanceCounter(&startTime);
+    double ms = (double((startTime.LowPart - old_start)) * fFreq);
+    if (ms >= 16.667)
+    {
+        BYTE target_ms = p_target_ms;
+        if (target_ms > 1)
+        {
+            target_ms--;
+            p_target_ms = target_ms;
+        }
+    }
+    else if (ms < 15.4)
+    {
+        BYTE target_ms = p_target_ms;
+        if (target_ms < 0x0F)
+        {
+            target_ms++;
+            p_target_ms = target_ms;
+        }
+    }
+    
     return startTime;
 }
 
@@ -3849,9 +3878,13 @@ void InitLevelMod()
 
     //Initializing the new timer
     QueryPerformanceFrequency(&freq);
+    fFreq = 1000.0 / (double)freq.QuadPart;
+
+    /*_printf("%d %f", freq.LowPart, fFreq);
+    MessageBox(0, 0, 0, 0);*/
 
     //HookFunction(0x004C04F0, TimerElapsed);
-    BYTE timer[] = { 0xE8, 0x98, 0xF4, 0xF7, 0x79, 0xB9, 0x0F, 0x00, 0x00, 0x00, 0x39, 0xC8, 0x73, 0x27, 0x29, 0xC1, 0x51, 0xE8, 0xD7, 0x29, 0x8C, 0x75, 0xA1, 0x00, 0x00, 0x00, 0x00, 0x85, 0xC0, 0x75, 0x16, 0xE8, 0x00, 0x00, 0x00, 0x00, 0xEB, 0x0F };
+    BYTE timer[] = { 0xE8, 0x98, 0xF4, 0xF7, 0x79, 0xB9, 0x0E, 0x00, 0x00, 0x00, 0x39, 0xC8, 0x73, 0x27, 0x29, 0xC1, 0x51, 0xE8, 0xD7, 0x29, 0x8C, 0x75, 0xA1, 0x00, 0x00, 0x00, 0x00, 0x85, 0xC0, 0x75, 0x16, 0xE8, 0x00, 0x00, 0x00, 0x00, 0xEB, 0x0F };
 
     *(DWORD*)&timer[1] = (PtrToUlong(TimerElapsed) - 0x004C04E4) - 4;
     HookFunction(0x004C0519, TimerStart);

@@ -88,6 +88,7 @@ namespace Gfx
     extern bool fps_fix;
     extern __restrict LPDIRECT3DDEVICE9 pDevice;
     extern bool bOnReset;
+    extern HWND hFocusWindow;
 };
 //--------Custom Shaders--------
 

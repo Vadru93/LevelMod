@@ -68,6 +68,7 @@ D3DVIEWPORT9 Gfx::world_viewport;
 LPDIRECT3DSURFACE9 Gfx::world_rendertarget = NULL;
 D3DXVECTOR3 Gfx::sun_position;
 bool Gfx::bOnReset = false;
+HWND Gfx::hFocusWindow = 0;
 
 EXTERN DWORD _GetCurrentTime()
 {
