@@ -23,6 +23,8 @@
 
 #define p_target_ms (*(BYTE*)0x004C04E9)
 
+#define p_bWindowed *(bool*)0x008510a9
+
 //--------Spine and Acid--------
 enum TransferType
 {

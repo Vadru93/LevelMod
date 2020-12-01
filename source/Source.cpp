@@ -3840,7 +3840,8 @@ DWORD TimerElapsed()
     }
 }*/
 
-DWORD old_start;
+DWORD old_start = 0;
+DWORD timer_lock = 0x10;
 
 LARGE_INTEGER TimerStart()
 {
@@ -3861,7 +3862,7 @@ LARGE_INTEGER TimerStart()
     else if (ms < 15.4)
     {
         BYTE target_ms = p_target_ms;
-        if (target_ms < 0x0F)
+        if (target_ms < timer_lock)
         {
             target_ms++;
             p_target_ms = target_ms;
@@ -3879,6 +3880,9 @@ void InitLevelMod()
     //Initializing the new timer
     QueryPerformanceFrequency(&freq);
     fFreq = 1000.0 / (double)freq.QuadPart;
+
+    if (!p_bWindowed)
+        timer_lock = 0x0F;
 
     /*_printf("%d %f", freq.LowPart, fFreq);
     MessageBox(0, 0, 0, 0);*/
