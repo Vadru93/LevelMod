@@ -3887,22 +3887,26 @@ void InitLevelMod()
     /*_printf("%d %f", freq.LowPart, fFreq);
     MessageBox(0, 0, 0, 0);*/
 
-    //HookFunction(0x004C04F0, TimerElapsed);
-    BYTE timer[] = { 0xE8, 0x98, 0xF4, 0xF7, 0x79, 0xB9, 0x0E, 0x00, 0x00, 0x00, 0x39, 0xC8, 0x73, 0x27, 0x29, 0xC1, 0x51, 0xE8, 0xD7, 0x29, 0x8C, 0x75, 0xA1, 0x00, 0x00, 0x00, 0x00, 0x85, 0xC0, 0x75, 0x16, 0xE8, 0x00, 0x00, 0x00, 0x00, 0xEB, 0x0F };
-
-    *(DWORD*)&timer[1] = (PtrToUlong(TimerElapsed) - 0x004C04E4) - 4;
-    HookFunction(0x004C0519, TimerStart);
-    *(bool**)&timer[23] = &show_loading_screen;
-    *(BYTE*)&timer[31] = 0x90;
-    *(DWORD*)&timer[32] = 0x90909090;// (PtrToUlong(DrawEye) - (0x004C04E4 + 31)) - 4;
 
     DWORD old;
-    VirtualProtect((LPVOID)0x004C04E3, sizeof(timer), PAGE_EXECUTE_READWRITE, &old);
-    memcpy((void*)0x004C04E3, timer, sizeof(timer));
+    //HookFunction(0x004C04F0, TimerElapsed);
+    if (Gfx::fps_fix)
+    {
+        BYTE timer[] = { 0xE8, 0x98, 0xF4, 0xF7, 0x79, 0xB9, 0x0E, 0x00, 0x00, 0x00, 0x39, 0xC8, 0x73, 0x27, 0x29, 0xC1, 0x51, 0xE8, 0xD7, 0x29, 0x8C, 0x75, 0xA1, 0x00, 0x00, 0x00, 0x00, 0x85, 0xC0, 0x75, 0x16, 0xE8, 0x00, 0x00, 0x00, 0x00, 0xEB, 0x0F };
+
+        *(DWORD*)&timer[1] = (PtrToUlong(TimerElapsed) - 0x004C04E4) - 4;
+        HookFunction(0x004C0519, TimerStart);
+        *(bool**)&timer[23] = &show_loading_screen;
+        *(BYTE*)&timer[31] = 0x90;
+        *(DWORD*)&timer[32] = 0x90909090;// (PtrToUlong(DrawEye) - (0x004C04E4 + 31)) - 4;
+
+        VirtualProtect((LPVOID)0x004C04E3, sizeof(timer), PAGE_EXECUTE_READWRITE, &old);
+        memcpy((void*)0x004C04E3, timer, sizeof(timer));
 
 
-    static const DWORD addr = (DWORD)GetProcAddress(GetModuleHandle("KERNELBASE.dll"), "Sleep");
-    HookFunction(0x004C04F5, (void*)addr);
+        static const DWORD addr = (DWORD)GetProcAddress(GetModuleHandle("KERNELBASE.dll"), "Sleep");
+        HookFunction(0x004C04F5, (void*)addr);
+    }
 
     VirtualProtect((LPVOID)0x00400019, 6, PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((LPVOID)0x0042FA0D, 9, PAGE_EXECUTE_READWRITE, &old);

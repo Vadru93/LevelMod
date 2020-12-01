@@ -263,8 +263,8 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 
     VirtualProtect((void*)0x54EA45, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((void*)0x54EA64, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
-    *(DWORD*)0x54EA45 = 1; //fulscreen draw mode
-    *(DWORD*)0x54EA64 = 1; //windowed draw mode
+    //*(DWORD*)0x54EA45 = 1; //fulscreen draw mode
+    //*(DWORD*)0x54EA64 = 1; //windowed draw mode
 
     if (Gfx::fps_fix)
     {
@@ -596,13 +596,13 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
     // Load D3DX
     if (!D3DXAssembleShader || !D3DXDisassembleShader || !D3DXLoadSurfaceFromSurface)
     {
-        const HMODULE module = LoadLibrary(TEXT("d3dx9_43.dll"));
+        const HMODULE mod = LoadLibrary(TEXT("d3dx9_43.dll"));
 
-        if (module != nullptr)
+        if (mod != nullptr)
         {
-            D3DXAssembleShader = reinterpret_cast<PFN_D3DXAssembleShader>(GetProcAddress(module, "D3DXAssembleShader"));
-            D3DXDisassembleShader = reinterpret_cast<PFN_D3DXDisassembleShader>(GetProcAddress(module, "D3DXDisassembleShader"));
-            D3DXLoadSurfaceFromSurface = reinterpret_cast<PFN_D3DXLoadSurfaceFromSurface>(GetProcAddress(module, "D3DXLoadSurfaceFromSurface"));
+            D3DXAssembleShader = reinterpret_cast<PFN_D3DXAssembleShader>(GetProcAddress(mod, "D3DXAssembleShader"));
+            D3DXDisassembleShader = reinterpret_cast<PFN_D3DXDisassembleShader>(GetProcAddress(mod, "D3DXDisassembleShader"));
+            D3DXLoadSurfaceFromSurface = reinterpret_cast<PFN_D3DXLoadSurfaceFromSurface>(GetProcAddress(mod, "D3DXLoadSurfaceFromSurface"));
         }
         else
         {
