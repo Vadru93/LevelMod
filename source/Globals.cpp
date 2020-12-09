@@ -70,6 +70,11 @@ D3DXVECTOR3 Gfx::sun_position;
 bool Gfx::bOnReset = false;
 HWND Gfx::hFocusWindow = 0;
 
+bool GameState::IsActive()
+{
+    return *(bool*)0x00850F74;
+}
+
 EXTERN DWORD _GetCurrentTime()
 {
     static const DWORD timer = 0x00409AE0;

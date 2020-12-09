@@ -98,6 +98,8 @@ namespace XINPUT
 namespace GameState
 {
     EXTERN extern bool GotSuperSectors;
+
+    bool IsActive();
 };
 //--------Game States--------
 

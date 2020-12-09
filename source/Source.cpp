@@ -3808,10 +3808,12 @@ DWORD TimerElapsed()
         //elapsedTime.LowPart = (endTime.LowPart - startTime.LowPart);
         _asm xor edx, edx
         double ms = (double((endTime.LowPart - startTime.LowPart)) * fFreq);
+
         DWORD truncated = ms;
         double test = ms - (double)truncated;
-        if (ms - test >= 0.66)
+        if (ms - test >= 0.45)
             truncated++;
+
         return truncated;// (elapsedTime.LowPart * 1000) / freq.LowPart;
     }
     else
@@ -3850,7 +3852,17 @@ LARGE_INTEGER TimerStart()
 
     QueryPerformanceCounter(&startTime);
     double ms = (double((startTime.LowPart - old_start)) * fFreq);
-    if (ms >= 16.667)
+    _printf("2nd %f ", ms);
+
+    //We need to cap FPS around 60 because else some physics and scripts will not work correctly
+    //Also this is the most fair in a game heavily dependant on speed etc
+    //Maybe in the future can change this so can have more FPS
+    //Vsync is always on when we are using the new timer
+    //So on a screen with 60hz this will not matter too much because we will get perfect 60 FPS
+    //However on my screen with 144hz it's pretty hard to get consistent 60 FPS
+    //Currently worst case scenario is 59.9-65 and it's usually around 63-64
+    //For some reason it's more consistent in window mode than in fullscreen mode
+    if (ms >= 16.4) // ~60.98 FPS
     {
         BYTE target_ms = p_target_ms;
         if (target_ms > 1)
@@ -3859,7 +3871,7 @@ LARGE_INTEGER TimerStart()
             p_target_ms = target_ms;
         }
     }
-    else if (ms < 15.4)
+    else if (ms < 15.4) // ~64.9 FPS
     {
         BYTE target_ms = p_target_ms;
         if (target_ms < timer_lock)
@@ -5027,6 +5039,72 @@ void DrawEye()
     Gfx::pDevice->SetRenderTarget(0, old_target);
 }
 
+bool PostRender()
+{
+    static DWORD lastTime = 0;
+    if (GameState::IsActive())
+    {
+        if (KeyState::IsPressed(KeyCode::ENTER))
+        {
+            //Toggle windowed mode
+            if (GetAsyncKeyState(VK_MENU) < 0)//alt
+            {
+                DWORD time = GetCurrentTime();
+                if (time < lastTime + 10000)
+                    return false;
+                lastTime = time;
+                //Set focus to desktop
+                SetFocus(HWND_DESKTOP);
+                //minimize the window
+                ShowWindow(Gfx::hFocusWindow, SW_MINIMIZE);
+
+                D3DPRESENT_PARAMETERS8* d3dpp = (D3DPRESENT_PARAMETERS8*)0x00973be0;
+                //Inverse windowed param to DirectX
+                d3dpp->Windowed = !d3dpp->Windowed;
+
+                RECT rect;
+                rect.left = 0;
+                rect.top = 0;
+                rect.right = d3dpp->BackBufferWidth;
+                rect.bottom = d3dpp->BackBufferHeight;
+
+                if (d3dpp->Windowed)
+                {
+
+                    ShowWindow(Gfx::hFocusWindow, SW_NORMAL);
+                    SetFocus(Gfx::hFocusWindow);
+
+                    SetWindowLongPtr(Gfx::hFocusWindow, GWL_STYLE, WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE);
+                    AdjustWindowRect(&rect, WS_CAPTION | WS_POPUPWINDOW, FALSE);
+                    MoveWindow(Gfx::hFocusWindow, 0, 0, rect.right - rect.left, rect.bottom - rect.top, TRUE);
+
+                }
+                else
+                {
+                    POINT Point = { 0 };
+                    HMONITOR Monitor = MonitorFromPoint(Point, MONITOR_DEFAULTTONEAREST);
+                    MONITORINFO MonitorInfo = { sizeof(MonitorInfo) };
+                    if (GetMonitorInfo(Monitor, &MonitorInfo)) {
+
+                        ShowWindow(Gfx::hFocusWindow, SW_NORMAL);
+                        SetFocus(Gfx::hFocusWindow);
+
+                        DWORD Style = WS_POPUP | WS_VISIBLE;
+                        SetWindowLongPtr(Gfx::hFocusWindow, GWL_STYLE, Style);
+                        SetWindowPos(Gfx::hFocusWindow, 0, MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.top,
+                            MonitorInfo.rcMonitor.right - MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.bottom - MonitorInfo.rcMonitor.top,
+                            SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+                    }
+                }
+                return true;
+            }
+
+        }
+
+    }
+    return false;
+}
+
 void DrawFrame()
 {
     Gfx::frameCounter++;
@@ -5083,6 +5161,7 @@ void DrawFrame()
             //Skater * skater = Skater::Instance();
             if (Game::skater) [[likely]]
             {
+
                 if (LevelModSettings::bHookedControls && XINPUT::Player1->IsConnected())
                 {
                     if (XINPUT::vibrationFrames)

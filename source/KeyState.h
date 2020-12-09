@@ -4,6 +4,17 @@
 #undef NO_DEFINES
 #include "Defines.h"
 //#include "CXBOXController.h"
+
+//0x005D0300 How many keys were pressed`?
+//0x005d030c keys[256]
+
+enum class KeyCode : BYTE
+{
+    ENTER = 0x19,
+};
+
+#define p_num_keys *(DWORD*)0x005D0300
+#define p_key_state(idx) *(KeyCode*)(0x005d030c+idx)
 struct Skater;
 
 //EXTERN char* FindChecksumName(DWORD checksum, bool only_debug = true);
@@ -22,6 +33,28 @@ public:
     {
         NONE = -1, UP = 0, DOWN = 1, LEFT = 2, RIGHT = 3, SPINLEFT = 4, NOLLIE = 5, SPINRIGHT = 6, REVERT = 7, GRAB = 8, FLIP = 9, GRIND = 10, OLLIE = 11
     };
+
+    static DWORD GetNumKeyPress()
+    {
+        return p_num_keys;
+    }
+
+    static KeyCode GetKeyPress(DWORD idx)
+    {
+        return p_key_state(idx);
+    }
+
+    static bool IsPressed(KeyCode key)
+    {
+        DWORD numKeys = GetNumKeyPress();
+
+        for (auto press = 0; press < numKeys; press++)
+        {
+            if (GetKeyPress(press) == key)
+                return true;
+        }
+        return false;
+    }
 
     DWORD GetChecksum()
     {
