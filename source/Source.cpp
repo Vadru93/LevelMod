@@ -5039,10 +5039,10 @@ void DrawEye()
     Gfx::pDevice->SetRenderTarget(0, old_target);
 }
 
-bool PostRender()
+HRESULT PostRender(HRESULT hres)
 {
     static DWORD lastTime = 0;
-    if (GameState::IsActive())
+    if (hres == D3D_OK && GameState::IsActive())
     {
         if (KeyState::IsPressed(KeyCode::ENTER))
         {
@@ -5050,7 +5050,7 @@ bool PostRender()
             if (GetAsyncKeyState(VK_MENU) < 0)//alt
             {
                 DWORD time = GetCurrentTime();
-                if (time < lastTime + 10000)
+                if (time < lastTime + 2000)
                     return false;
                 lastTime = time;
                 //Set focus to desktop
@@ -5096,13 +5096,13 @@ bool PostRender()
                             SWP_FRAMECHANGED | SWP_SHOWWINDOW);
                     }
                 }
-                return true;
+                return D3DERR_DEVICELOST;
             }
 
         }
 
     }
-    return false;
+    return hres;
 }
 
 void DrawFrame()

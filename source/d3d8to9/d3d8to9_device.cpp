@@ -296,16 +296,14 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::Reset(D3DPRESENT_PARAMETERS8* pPresen
     return hres;
 }
 extern void DrawFrame();
-extern bool PostRender();
+extern HRESULT PostRender(HRESULT hres);
 
 HRESULT STDMETHODCALLTYPE Direct3DDevice8::Present(const RECT* pSourceRect, const RECT* pDestRect, HWND hDestWindowOverride, const RGNDATA* pDirtyRegion)
 {
     UNREFERENCED_PARAMETER(pDirtyRegion);
     DrawFrame();
     HRESULT hres = ProxyInterface->Present(pSourceRect, pDestRect, hDestWindowOverride, nullptr);
-    if (PostRender())
-        return D3DERR_DEVICELOST;
-    return hres;
+    return PostRender(hres);
 }
 HRESULT STDMETHODCALLTYPE Direct3DDevice8::GetBackBuffer(UINT iBackBuffer, D3DBACKBUFFER_TYPE Type, Direct3DSurface8** ppBackBuffer)
 {
