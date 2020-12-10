@@ -170,6 +170,7 @@ __inline void HookFunction(DWORD addr, void* function, BYTE byteCode = 0, DWORD 
     if (byteCode)
         *(DWORD*)(addr - 1) = byteCode;
     *(DWORD*)addr = (PtrToUlong(function) - addr) - 4;
+    addr += 4;
     for (DWORD i = 0; i < nopCount; i++)
         *(BYTE*)addr++ = 0x90;
     //
@@ -3974,6 +3975,9 @@ void InitLevelMod()
     //Fix the snap to ground issue
     HookFunction(0x0049F1DD, proxy_SnapToGroundClamp);
 
+    //Currently used for alt+enter toggle windowed mode
+    HookFunction(0x00403C75, proxy_GetAsyncKeyState, 0xE8, 1);
+
     //Fix SuperSector size limitations and crashing issues + improve performance of GetSuperSector function
     HookFunction(0x00412160, SuperSector::GetSuperSector);
     HookFunction(0x00412278, SuperSector::GetSuperSector);
@@ -5039,65 +5043,85 @@ void DrawEye()
     Gfx::pDevice->SetRenderTarget(0, old_target);
 }
 
+bool bToggleWindowed = false;
+
+SHORT __stdcall proxy_GetAsyncKeyState(int key)
+{
+    if (KeyState::GetKeyboardState(VirtualKeyCode::ENTER) && GetAsyncKeyState(VK_MENU) < 0)//alt + enter
+    {
+        //Unpress the enter KeyboardState
+        KeyState::Unpress(VirtualKeyCode::ENTER);
+        bToggleWindowed = true;
+    }
+    else
+        bToggleWindowed = false;
+
+    return GetAsyncKeyState(key);
+}
+
+static DWORD lastTime = 0;
+
 HRESULT PostRender(HRESULT hres)
 {
-    static DWORD lastTime = 0;
+
     if (hres == D3D_OK && GameState::IsActive())
     {
-        if (KeyState::IsPressed(KeyCode::ENTER))
+        if (bToggleWindowed)
         {
-            //Toggle windowed mode
-            if (GetAsyncKeyState(VK_MENU) < 0)//alt
+
+            //Make sure we toggle only 1 per 2 sec
+            DWORD time = GetCurrentTime();
+            if (time < lastTime + 2000)
+                return false;
+            lastTime = time;
+
+            //Unpress enter key, should already be unpressed but better safe than sorry...
+            KeyState::Unpress(KeyCode::ENTER);
+
+            //Set focus to desktop
+            SetFocus(HWND_DESKTOP);
+            //minimize the window
+            ShowWindow(Gfx::hFocusWindow, SW_MINIMIZE);
+
+            D3DPRESENT_PARAMETERS8* d3dpp = (D3DPRESENT_PARAMETERS8*)0x00973be0;
+            //Inverse windowed param to DirectX
+            d3dpp->Windowed = !d3dpp->Windowed;
+
+            RECT rect;
+            rect.left = 0;
+            rect.top = 0;
+            rect.right = d3dpp->BackBufferWidth;
+            rect.bottom = d3dpp->BackBufferHeight;
+
+            if (d3dpp->Windowed)
             {
-                DWORD time = GetCurrentTime();
-                if (time < lastTime + 2000)
-                    return false;
-                lastTime = time;
-                //Set focus to desktop
-                SetFocus(HWND_DESKTOP);
-                //minimize the window
-                ShowWindow(Gfx::hFocusWindow, SW_MINIMIZE);
 
-                D3DPRESENT_PARAMETERS8* d3dpp = (D3DPRESENT_PARAMETERS8*)0x00973be0;
-                //Inverse windowed param to DirectX
-                d3dpp->Windowed = !d3dpp->Windowed;
+                ShowWindow(Gfx::hFocusWindow, SW_NORMAL);
+                SetFocus(Gfx::hFocusWindow);
 
-                RECT rect;
-                rect.left = 0;
-                rect.top = 0;
-                rect.right = d3dpp->BackBufferWidth;
-                rect.bottom = d3dpp->BackBufferHeight;
+                SetWindowLongPtr(Gfx::hFocusWindow, GWL_STYLE, WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE);
+                AdjustWindowRect(&rect, WS_CAPTION | WS_POPUPWINDOW, FALSE);
+                MoveWindow(Gfx::hFocusWindow, 0, 0, rect.right - rect.left, rect.bottom - rect.top, TRUE);
 
-                if (d3dpp->Windowed)
-                {
+            }
+            else
+            {
+                POINT Point = { 0 };
+                HMONITOR Monitor = MonitorFromPoint(Point, MONITOR_DEFAULTTONEAREST);
+                MONITORINFO MonitorInfo = { sizeof(MonitorInfo) };
+                if (GetMonitorInfo(Monitor, &MonitorInfo)) {
 
                     ShowWindow(Gfx::hFocusWindow, SW_NORMAL);
                     SetFocus(Gfx::hFocusWindow);
 
-                    SetWindowLongPtr(Gfx::hFocusWindow, GWL_STYLE, WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE);
-                    AdjustWindowRect(&rect, WS_CAPTION | WS_POPUPWINDOW, FALSE);
-                    MoveWindow(Gfx::hFocusWindow, 0, 0, rect.right - rect.left, rect.bottom - rect.top, TRUE);
-
+                    DWORD Style = WS_POPUP | WS_VISIBLE;
+                    SetWindowLongPtr(Gfx::hFocusWindow, GWL_STYLE, Style);
+                    SetWindowPos(Gfx::hFocusWindow, 0, MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.top,
+                        MonitorInfo.rcMonitor.right - MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.bottom - MonitorInfo.rcMonitor.top,
+                        SWP_FRAMECHANGED | SWP_SHOWWINDOW);
                 }
-                else
-                {
-                    POINT Point = { 0 };
-                    HMONITOR Monitor = MonitorFromPoint(Point, MONITOR_DEFAULTTONEAREST);
-                    MONITORINFO MonitorInfo = { sizeof(MonitorInfo) };
-                    if (GetMonitorInfo(Monitor, &MonitorInfo)) {
-
-                        ShowWindow(Gfx::hFocusWindow, SW_NORMAL);
-                        SetFocus(Gfx::hFocusWindow);
-
-                        DWORD Style = WS_POPUP | WS_VISIBLE;
-                        SetWindowLongPtr(Gfx::hFocusWindow, GWL_STYLE, Style);
-                        SetWindowPos(Gfx::hFocusWindow, 0, MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.top,
-                            MonitorInfo.rcMonitor.right - MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.bottom - MonitorInfo.rcMonitor.top,
-                            SWP_FRAMECHANGED | SWP_SHOWWINDOW);
-                    }
-                }
-                return D3DERR_DEVICELOST;
             }
+            return D3DERR_DEVICELOST;
 
         }
 

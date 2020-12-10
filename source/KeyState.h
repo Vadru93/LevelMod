@@ -10,7 +10,62 @@
 
 enum class KeyCode : BYTE
 {
+    UNDEFINED = 0x0,
     ENTER = 0x19,
+};
+
+enum class VirtualKeyCode : BYTE
+{
+    L_MOUSE = 0x1,
+    R_MOUSE,
+    CANCEL,
+    M_MOUSE,
+    U_MOUSE,
+    D_MOUSE,
+    UNDEFINED,
+    BACK,
+    TAB,
+    RESERVED,
+    RESERVED2,
+    CLEAR,
+    ENTER,
+    UNDEFINED2,
+    UNDEFINED3,
+    SHIFT,
+    CNTRL,
+    ALT,
+    PAUSE,
+    CAPS,
+    KANA,
+    HANGUEL,
+    HANGAL,
+    IME_ON,
+    KUNJA,
+    FINAL,
+    HANJA,
+    KANJI,
+    IME_OFF,
+    ESC,
+    CONVERT,
+    NONCONVERT,
+    ACCEPT,
+    MODECHANGE,
+    SPACE,
+    PAGE_UP,
+    PAGE_DOWN,
+    END,
+    HOME,
+    LEFT,
+    UP,
+    RIGHT,
+    DOWN,
+    SELECT,
+    PRINT,
+    EXECUTE,
+    PRNTSCRN,
+    INSERT,
+    DEL,
+    HELP,
 };
 
 #define p_num_keys *(DWORD*)0x005D0300
@@ -28,6 +83,18 @@ private:
     DWORD unk1[2];//1
     DWORD checksum;
 
+
+    static KeyCode GetKeyPress(DWORD idx)
+    {
+        return p_key_state(idx);
+    }
+
+    static void Unpress(DWORD idx)
+    {
+        p_key_state(idx) = KeyCode::UNDEFINED;
+    }
+
+
 public:
     enum
     {
@@ -37,11 +104,6 @@ public:
     static DWORD GetNumKeyPress()
     {
         return p_num_keys;
-    }
-
-    static KeyCode GetKeyPress(DWORD idx)
-    {
-        return p_key_state(idx);
     }
 
     static bool IsPressed(KeyCode key)
@@ -54,6 +116,27 @@ public:
                 return true;
         }
         return false;
+    }
+
+    static bool GetKeyboardState(VirtualKeyCode code)
+    {
+        return (*(BYTE**)(0x005D0308))[(BYTE)code] & 1;
+    }
+
+    static void Unpress(VirtualKeyCode code)
+    {
+        (*(BYTE**)(0x005D0308))[(BYTE)code] = 0;
+    }
+
+    static void Unpress(KeyCode key)
+    {
+        DWORD numKeys = GetNumKeyPress();
+
+        for (auto press = 0; press < numKeys; press++)
+        {
+            if (GetKeyPress(press) == key)
+                Unpress(press);
+        }
     }
 
     DWORD GetChecksum()

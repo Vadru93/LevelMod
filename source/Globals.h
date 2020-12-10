@@ -238,6 +238,8 @@ void SetVertexShader_naked();
 void __stdcall SetVertexShader_hook();
 void __cdecl Obj_SetShader_hook();
 
+SHORT __stdcall proxy_GetAsyncKeyState(int key);
+
 void Obj_MoveToNode_Naked();
 void Obj_FollowPathLinked_Naked();
 void BouncyObj_Go_Naked();
