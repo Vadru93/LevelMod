@@ -5047,7 +5047,7 @@ bool bToggleWindowed = false;
 
 SHORT __stdcall proxy_GetAsyncKeyState(int key)
 {
-    if (KeyState::GetKeyboardState(VirtualKeyCode::ENTER) && KeyState::GetKeyboardState(VirtualKeyCode::ALT))//alt + enter
+    if (KeyState::GetKeyboardState(VirtualKeyCode::ALT) && KeyState::GetKeyboardState(VirtualKeyCode::ENTER) && !KeyState::GetOldKeyboardState(VirtualKeyCode::ENTER))//alt + enter
     {
         //Unpress the enter KeyboardState
         KeyState::Unpress(VirtualKeyCode::ENTER);

@@ -70,6 +70,9 @@ enum class VirtualKeyCode : BYTE
 
 #define p_num_keys *(DWORD*)0x005D0300
 #define p_key_state(idx) *(KeyCode*)(0x005d030c+idx)
+#define p_OldKeyboardState(code) (*(BYTE**)(0x005D0304))[(BYTE)code]
+#define p_KeyboardState(code) (*(BYTE**)(0x005D0308))[(BYTE)code]
+
 struct Skater;
 
 //EXTERN char* FindChecksumName(DWORD checksum, bool only_debug = true);
@@ -120,12 +123,17 @@ public:
 
     static bool GetKeyboardState(VirtualKeyCode code)
     {
-        return (*(BYTE**)(0x005D0308))[(BYTE)code] & 1;
+        return p_KeyboardState(code) & 0x80;
+    }
+
+    static bool GetOldKeyboardState(VirtualKeyCode code)
+    {
+        return p_OldKeyboardState(code) & 0x80;
     }
 
     static void Unpress(VirtualKeyCode code)
     {
-        (*(BYTE**)(0x005D0308))[(BYTE)code] = 0;
+        p_KeyboardState(code) = 0;
     }
 
     static void Unpress(KeyCode key)
