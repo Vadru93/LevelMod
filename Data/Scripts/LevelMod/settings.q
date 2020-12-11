@@ -101,7 +101,7 @@ LevelModOptions = [
 	 //3 = SpinRight
 	 //4 = Revert+Nollie
 	 //5 = SpinLeft+SpinRight
-	{ name = "LM_Control_SpineButton" Value = 0 }
+	{ name = "LM_Control_SpineButton" Value = 0 max = 6 }
 	{ name = "LM_Control_bSpine" Value = 1 }
 	{ name = "LM_Control_bAcid" Value = 1 }
 	{ name = "LM_Control_bBank" Value = 1 }
@@ -111,7 +111,7 @@ LevelModOptions = [
 	//2 = Fast Air Speed
 	//3 = 10% faster
 	//4 = 20% faster
-	{ name = "LM_Control_AirTrickSpeed" Value = 0 }
+	{ name = "LM_Control_AirTrickSpeed" Value = 0 max = 5}
 	{ name = "LM_Control_bXinput" value = 0 }
 	{ name = "LM_Control_bWalliePlant" Value = 1 }
 	{ name = "LM_Control_bButtSlap" value = 1 }
@@ -140,8 +140,8 @@ LevelModOptions = [
 	{ name = "LM_LevelOption_TH4ProObjects" value = 0 StartGame Do = UpdateTH4ProObjects }
 	{ name = "LM_LevelOption_TH4CompObjects" value = 0 StartGame Do = UpdateTH4CompObjects }
 
-	{ name = "LM_GFX_eBuffering" value = 2 } //"Off" "Double" "Triple"
-	{ name = "LM_GFX_eAntiAlias" value = 4 } //"Off" "auto" "2x" "4x" "8x"
+	{ name = "LM_GFX_eBuffering" value = 2 max = 3 } //"Off" "Double" "Triple"
+	{ name = "LM_GFX_eAntiAlias" value = 4 max = 5 } //"Off" "auto" "2x" "4x" "8x"
 	{ name = "LM_GFX_bFiltering" value = 1 }
 	{ name = "LM_GFX_bFixStutter" value = 1 }
 ]
@@ -523,8 +523,8 @@ ENDSCRIPT
 
 
 
-SCRIPT sAddOption
-    AddOption Name = <Name> Value = <Value>
+SCRIPT sAddOption max = 2
+    AddOption Name = <Name> Value = <Value> max = <max>
 ENDSCRIPT
 
 SCRIPT AddOptions

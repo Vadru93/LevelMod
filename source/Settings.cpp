@@ -30,6 +30,7 @@ extern void __cdecl add_log(const char* string, ...);
 #undef CreateConsole
 extern BOOL CreateConsole();
 
+CStructHeader* LevelModSettings::pMax = NULL;
 bool LevelModSettings::bUseNewMenu = true;
 bool LevelModSettings::bAA = false;
 WORD LevelModSettings::AllowNewTricks = LevelModSettings::ALLOW_NONE;
@@ -548,12 +549,22 @@ int AddOption(char* name, int value, bool update, DWORD HostOption, BYTE type)
     }
     else
     {
+        int maximum = pMax ? pMax->value.i : 2;
+
         if (!OptionWriter->find("Script_Settings", name))
             OptionWriter->WriteInt("Script_Settings", name, value);
         else
         {
+
             _printf("Reading from ini file %s, default %d ", name, value);
-            value = OptionReader->ReadInt("Script_Settings", name, value);
+            int new_value = OptionReader->ReadInt("Script_Settings", name, value);
+
+            if (new_value < maximum)
+                value = new_value;
+                
+            else
+                _printf("Too high value in ini file option %s\n Setting to default %d\n", name, value);
+
             _printf("value %d\n", value);
         }
         if (options.find(checksum) == options.end())
@@ -914,6 +925,7 @@ bool AddOption(CStruct* pStruct, CScript* pScript)
                 if (pStruct->GetStruct(Checksums::Value, &DEFAULT))
                 {
                     _printf("Adding option %s default %d\n", name->pStr, DEFAULT->value.i);
+                    pStruct->GetStruct(crc32f("max"), &pMax);
                     AddOption(name->pStr, DEFAULT->value.i);
                 }
                 else

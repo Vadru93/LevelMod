@@ -1077,24 +1077,34 @@ void ReadFirstOptions()
 
 
     //_printf("Reading from ini file %s, default %d ", "LM_GFX_eBuffering", Gfx::numBackBuffers);
-    Gfx::numBackBuffers = OptionReader->ReadInt("Script_Settings", "LM_GFX_eBuffering", Gfx::numBackBuffers);
+    DWORD new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_eBuffering", Gfx::numBackBuffers);
+    if (new_value < 3)
+        Gfx::numBackBuffers = new_value;
     //_printf("value %d\n", Gfx::numBackBuffers);
 
     //_printf("Reading from ini file %s, default %d ", "LM_GFX_eAntiAlias", Gfx::AntiAliasing);
-    Gfx::AntiAliasing = OptionReader->ReadInt("Script_Settings", "LM_GFX_eAntiAlias", Gfx::AntiAliasing);
+    new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_eAntiAlias", Gfx::AntiAliasing);
+    if (new_value < 5)
+        Gfx::AntiAliasing = new_value;
     //_printf("value %d\n", Gfx::AntiAliasing);
 
     //_printf("Reading from ini file %s, default %d ", "LM_GFX_bFiltering", Gfx::filtering);
-    Gfx::filtering = OptionReader->ReadInt("Script_Settings", "LM_GFX_bFiltering", Gfx::filtering);
+    new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_bFiltering", Gfx::filtering);
+    if (new_value < 2)
+        Gfx::filtering= new_value;
     //_printf("value %d\n", Gfx::filtering);
 
     //_printf("Reading from ini file %s, default %d ", "LM_GFX_bFixStutter", Gfx::fps_fix);
-    Gfx::fps_fix = OptionReader->ReadInt("Script_Settings", "LM_GFX_bFixStutter", Gfx::fps_fix);
+    new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_bFixStutter", Gfx::fps_fix);
+    if (new_value < 2)
+        Gfx::fps_fix = new_value;
     //_printf("value %d\n", Gfx::fps_fix);
     //CreateConsole();
 
     //_printf("Reading from ini file %s, default %d ", "LM_DebugOption_bDebugMode", debug);
-    debug = OptionReader->ReadInt("Script_Settings", "LM_DebugOption_bDebugMode", debug);
+    new_value = OptionReader->ReadInt("Script_Settings", "LM_DebugOption_bDebugMode", debug);
+    if (new_value < 2)
+       debug = new_value;
     //_printf("value %d\n", debug);
     if (debug)
     {
@@ -4262,6 +4272,9 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
 
                 if (HostOption)
                 {
+                    //Set option max to 1(bool)
+                    LevelModSettings::pMax = NULL;
+
                     CStructHeader* Name;
                     if (HostOption->GetStruct(Checksums::Name, &Name))
                     {
