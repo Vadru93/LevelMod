@@ -239,6 +239,10 @@ void __stdcall SetVertexShader_hook();
 void __cdecl Obj_SetShader_hook();
 
 SHORT __stdcall proxy_GetAsyncKeyState(int key);
+BOOL __stdcall proxy_GetMessage(LPMSG lpMsg,
+    HWND  hWnd,
+    UINT  wMsgFilterMin,
+    UINT  wMsgFilterMax);
 
 void Obj_MoveToNode_Naked();
 void Obj_FollowPathLinked_Naked();

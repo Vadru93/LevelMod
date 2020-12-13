@@ -3965,6 +3965,8 @@ void InitLevelMod()
     VirtualProtect((LPVOID)0x00483DD0, 1, PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((LPVOID)0x00483DD1, 7, PAGE_EXECUTE_READWRITE, &old);
 
+    VirtualProtect((LPVOID)0x004092AB, 6, PAGE_EXECUTE_READWRITE, &old);
+
     *(DWORD*)0x005CEC78 *= 4;
 
     *(BYTE*)0x00483D55 = 0x0;
@@ -3987,6 +3989,11 @@ void InitLevelMod()
 
     //Currently used for alt+enter toggle windowed mode
     HookFunction(0x00403C75, proxy_GetAsyncKeyState, 0xE8, 1);
+
+    //Used for stored windowed position
+    *(BYTE*)0x004092AB = 0xBD;
+    *(DWORD*)0x004092AC = PtrToUlong(proxy_GetMessage);
+    *(BYTE*)0x004092B0 = 0x90;
 
     //Fix SuperSector size limitations and crashing issues + improve performance of GetSuperSector function
     HookFunction(0x00412160, SuperSector::GetSuperSector);
@@ -5072,6 +5079,33 @@ SHORT __stdcall proxy_GetAsyncKeyState(int key)
     return GetAsyncKeyState(key);
 }
 
+typedef BOOL(__stdcall* const pGetMessage)(LPMSG lpMsg,
+    HWND  hWnd,
+    UINT  wMsgFilterMin,
+    UINT  wMsgFilterMax);
+BOOL __stdcall proxy_GetMessage(LPMSG lpMsg,
+    HWND  hWnd,
+    UINT  wMsgFilterMin,
+    UINT  wMsgFilterMax)
+{
+    BOOL result = pGetMessage(*(DWORD*)0x0058D228)(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax);
+    if (result)
+    {
+        switch (lpMsg->message)
+        {
+        case WM_WINDOWPOSCHANGING:
+        case WM_WINDOWPOSCHANGED:
+        case WM_MOVING:
+        case WM_MOVE:
+                MessageBox(0, 0, 0, 0);
+                OptionWriter->WriteInt("Other_Settings", "LM_WindowedX", lpMsg->lParam);
+                OptionWriter->WriteInt("Other_Settings", "LM_WindowedY", lpMsg->wParam);
+                break;
+        }
+    }
+    return result;
+}
+
 static DWORD lastTime = 0;
 
 HRESULT PostRender(HRESULT hres)
@@ -5093,12 +5127,14 @@ HRESULT PostRender(HRESULT hres)
 
             //Set focus to desktop
             SetFocus(HWND_DESKTOP);
-            //minimize the window
+            //minimize the window to reset engine
             ShowWindow(Gfx::hFocusWindow, SW_MINIMIZE);
 
             D3DPRESENT_PARAMETERS8* d3dpp = (D3DPRESENT_PARAMETERS8*)0x00973be0;
             //Inverse windowed param to DirectX
             d3dpp->Windowed = !d3dpp->Windowed;
+            //Toggle windowed mode flag
+            d3dpp->Windowed ? *(BYTE*)0x00851094  &= ~1 : *(BYTE*)0x00851094  |= 1;
 
             RECT rect;
             rect.left = 0;
@@ -5114,7 +5150,8 @@ HRESULT PostRender(HRESULT hres)
 
                 SetWindowLongPtr(Gfx::hFocusWindow, GWL_STYLE, WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE);
                 AdjustWindowRect(&rect, WS_CAPTION | WS_POPUPWINDOW, FALSE);
-                MoveWindow(Gfx::hFocusWindow, 0, 0, rect.right - rect.left, rect.bottom - rect.top, TRUE);
+                SetWindowPos(Gfx::hFocusWindow, HWND_NOTOPMOST, 0, 0, d3dpp->BackBufferWidth, d3dpp->BackBufferHeight, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+                //MoveWindow(Gfx::hFocusWindow, 0, 0, rect.right - rect.left, rect.bottom - rect.top, TRUE);
 
             }
             else
@@ -5124,14 +5161,14 @@ HRESULT PostRender(HRESULT hres)
                 MONITORINFO MonitorInfo = { sizeof(MonitorInfo) };
                 if (GetMonitorInfo(Monitor, &MonitorInfo)) {
 
-                    ShowWindow(Gfx::hFocusWindow, SW_NORMAL);
-                    SetFocus(Gfx::hFocusWindow);
-
                     DWORD Style = WS_POPUP | WS_VISIBLE;
                     SetWindowLongPtr(Gfx::hFocusWindow, GWL_STYLE, Style);
-                    SetWindowPos(Gfx::hFocusWindow, 0, MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.top,
+                    SetWindowPos(Gfx::hFocusWindow, HWND_TOPMOST, MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.top,
                         MonitorInfo.rcMonitor.right - MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.bottom - MonitorInfo.rcMonitor.top,
-                        SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+                        SWP_FRAMECHANGED | SWP_SHOWWINDOW | SWP_NOMOVE);
+
+                    ShowWindow(Gfx::hFocusWindow, SW_NORMAL);
+                    SetFocus(Gfx::hFocusWindow);
                 }
             }
             return D3DERR_DEVICELOST;
