@@ -69,6 +69,9 @@ LPDIRECT3DSURFACE9 Gfx::world_rendertarget = NULL;
 D3DXVECTOR3 Gfx::sun_position;
 bool Gfx::bOnReset = false;
 HWND Gfx::hFocusWindow = 0;
+DWORD Gfx::width = 0;
+DWORD Gfx::height = 0;
+Gfx::Command Gfx::command = Gfx::Command::None;
 
 bool GameState::IsActive()
 {

@@ -269,9 +269,6 @@
     <ClInclude Include="source\Shatter.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
-    <ClInclude Include="source\ObjParser.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
     <ClInclude Include="source\shadow.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>

@@ -153,6 +153,8 @@ bool NewShatterScript(CStruct* pStruct, CScript* pScript);
 
 bool AddLights(CStruct* pStruct, CScript* pScript);
 bool RemoveLights(CStruct* pStruct, CScript* pScript);
+
+bool ToggleWindowedScript(CStruct* pStruct, CScript* pScript);
 //--------Functions callable from script--------
 
 //--------Functions NOT callable from script--------

@@ -82,6 +82,13 @@ namespace Gfx
     void LoadCustomShaders(char* file);
     void UnloadShaders();
 #endif
+    enum class Command : BYTE
+    {
+        None = 0,
+        ToggleWindowed = 1,
+        ChangeResolution = 2,
+        ToggleFiltering = 3,
+    };
     extern DWORD numBackBuffers;
     extern DWORD AntiAliasing;
     extern bool filtering;
@@ -89,6 +96,9 @@ namespace Gfx
     extern __restrict LPDIRECT3DDEVICE9 pDevice;
     extern bool bOnReset;
     extern HWND hFocusWindow;
+    extern DWORD width;
+    extern DWORD height;
+    extern Command command;
 };
 //--------Custom Shaders--------
 

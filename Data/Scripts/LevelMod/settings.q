@@ -144,6 +144,7 @@ LevelModOptions = [
 	{ name = "LM_GFX_eAntiAlias" value = 4 max = 5 } //"Off" "auto" "2x" "4x" "8x"
 	{ name = "LM_GFX_bFiltering" value = 1 }
 	{ name = "LM_GFX_bFixStutter" value = 1 }
+	{ name = "LM_GFX_bWindowed" value = 0 }
 ]
 
 
@@ -521,7 +522,9 @@ SCRIPT OptionsOnStartGame
    ENDIF
 ENDSCRIPT
 
-
+SCRIPT sToggleWindowed
+    ToggleWindowed
+ENDSCRIPT
 
 SCRIPT sAddOption max = 2
     AddOption Name = <Name> Value = <Value> max = <max>
@@ -827,9 +830,10 @@ game_menu_items = [
 	{ IsBool text = "GrafCounter" 		option_id = item25 option = LM_GUI_bShowGrafCounter 	toggle_id = item5_toggle cat_gui } 
 	
 	{ IsEnum text = "Buffering" 		option_id = item211 option = LM_GFX_eBuffering 	toggle_id = item1_toggle cat_gfx TextValues = [ "Off" "Double" "Triple" ] max = 2 } 
-	{ IsEnum text = "MSAA Level" 		option_id = item214 option = LM_GFX_eAntiAlias 	toggle_id = item4_toggle cat_gfx TextValues = [ "Off" "auto" "2x" "4x" "8x" ] max = 4 } 
-	{ IsBool text = "Texture Filtering" option_id = item215 option = LM_GFX_bFiltering 			toggle_id = item5_toggle cat_gfx } 
-	{ IsBool text = "Fix Stuttering" 	option_id = item216 option = LM_GFX_bFixStutter 			toggle_id = item6_toggle cat_gfx } 
+	{ IsEnum text = "MSAA Level" 		option_id = item212 option = LM_GFX_eAntiAlias 	toggle_id = item2_toggle cat_gfx TextValues = [ "Off" "auto" "2x" "4x" "8x" ] max = 4 } 
+	{ IsBool text = "Windowed"          option_id = item213 option = LM_GFX_bWindowed   toggle_id = item3_toggle cat_gfx Do = sToggleWindowed }
+	{ IsBool text = "Texture Filtering" option_id = item215 option = LM_GFX_bFiltering 	toggle_id = item5_toggle cat_gfx } 
+	{ IsBool text = "Fix Stuttering" 	option_id = item216 option = LM_GFX_bFixStutter toggle_id = item6_toggle cat_gfx } 
 ]
 
 

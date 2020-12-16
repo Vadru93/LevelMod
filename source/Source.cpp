@@ -1974,6 +1974,7 @@ const CompiledScript scripts[] =
     { "ChangeValues", ChangeValues },
     { "CreatePair", CreatePair },
     { "GetSliderValue", GetSliderValue },
+    { "ToggleWindowed", ToggleWindowedScript },
     { "SetSliderText", SetSliderArrayText},
     { "InitLevelMod", Initialize },
     { "MoveObject", MoveObjectScript   },
@@ -4253,6 +4254,8 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
     }
     else if (!bAddedOptions)
     {
+
+    //Gfx::command = Gfx::Command::ToggleWindowed;
         //MessageBox(0, "GOING TO ADD HOSTOPTIONS", "", 0);
         CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CheckForScriptUpdates, NULL, 0/*CREATE_SUSPENDED*/, NULL);
         using namespace LevelModSettings;
@@ -5126,6 +5129,66 @@ BOOL __stdcall proxy_GetMessage(LPMSG lpMsg,
 
 static DWORD lastTime = 0;
 
+bool IsOptionOn(const char* option)
+{
+    DWORD value = 0;
+    DWORD new_value = OptionReader->ReadInt("Script_Settings", option, value);
+    if (new_value < 2)
+        value = new_value;
+    return value != 0;
+}
+
+void ToggleWindowed()
+{
+    D3DPRESENT_PARAMETERS8* d3dpp = (D3DPRESENT_PARAMETERS8*)0x00973be0;
+    //Inverse windowed param to DirectX
+    d3dpp->Windowed = !d3dpp->Windowed;
+    //Toggle windowed mode flag
+    d3dpp->Windowed ? *(BYTE*)0x00851094 &= ~1 : *(BYTE*)0x00851094 |= 1;
+
+    RECT rect;
+    rect.left = 0;
+    rect.top = 0;
+    rect.right = d3dpp->BackBufferWidth;
+    rect.bottom = d3dpp->BackBufferHeight;
+
+    if (d3dpp->Windowed)
+    {
+
+        ShowWindow(Gfx::hFocusWindow, SW_NORMAL);
+        SetFocus(Gfx::hFocusWindow);
+
+        SetWindowLongPtr(Gfx::hFocusWindow, GWL_STYLE, WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE);
+        AdjustWindowRect(&rect, WS_CAPTION | WS_POPUPWINDOW, FALSE);
+        SetWindowPos(Gfx::hFocusWindow, HWND_NOTOPMOST, 0, 0, d3dpp->BackBufferWidth, d3dpp->BackBufferHeight, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+        //MoveWindow(Gfx::hFocusWindow, 0, 0, rect.right - rect.left, rect.bottom - rect.top, TRUE);
+
+    }
+    else
+    {
+        POINT Point = { 0 };
+        HMONITOR Monitor = MonitorFromPoint(Point, MONITOR_DEFAULTTONEAREST);
+        MONITORINFO MonitorInfo = { sizeof(MonitorInfo) };
+        if (GetMonitorInfo(Monitor, &MonitorInfo)) {
+
+            DWORD Style = WS_POPUP | WS_VISIBLE;
+            SetWindowLongPtr(Gfx::hFocusWindow, GWL_STYLE, Style);
+            SetWindowPos(Gfx::hFocusWindow, HWND_TOPMOST, MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.top,
+                MonitorInfo.rcMonitor.right - MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.bottom - MonitorInfo.rcMonitor.top,
+                SWP_FRAMECHANGED | SWP_SHOWWINDOW | SWP_NOMOVE);
+
+            ShowWindow(Gfx::hFocusWindow, SW_NORMAL);
+            SetFocus(Gfx::hFocusWindow);
+        }
+    }
+}
+
+bool ToggleWindowedScript(CStruct* pStruct, CScript* pScript)
+{
+    Gfx::command = Gfx::Command::ToggleWindowed;
+    return true;
+}
+
 HRESULT PostRender(HRESULT hres)
 {
 
@@ -5148,49 +5211,44 @@ HRESULT PostRender(HRESULT hres)
             //minimize the window to reset engine
             ShowWindow(Gfx::hFocusWindow, SW_MINIMIZE);
 
-            D3DPRESENT_PARAMETERS8* d3dpp = (D3DPRESENT_PARAMETERS8*)0x00973be0;
-            //Inverse windowed param to DirectX
-            d3dpp->Windowed = !d3dpp->Windowed;
-            //Toggle windowed mode flag
-            d3dpp->Windowed ? *(BYTE*)0x00851094  &= ~1 : *(BYTE*)0x00851094  |= 1;
-
-            RECT rect;
-            rect.left = 0;
-            rect.top = 0;
-            rect.right = d3dpp->BackBufferWidth;
-            rect.bottom = d3dpp->BackBufferHeight;
-
-            if (d3dpp->Windowed)
-            {
-
-                ShowWindow(Gfx::hFocusWindow, SW_NORMAL);
-                SetFocus(Gfx::hFocusWindow);
-
-                SetWindowLongPtr(Gfx::hFocusWindow, GWL_STYLE, WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE);
-                AdjustWindowRect(&rect, WS_CAPTION | WS_POPUPWINDOW, FALSE);
-                SetWindowPos(Gfx::hFocusWindow, HWND_NOTOPMOST, 0, 0, d3dpp->BackBufferWidth, d3dpp->BackBufferHeight, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
-                //MoveWindow(Gfx::hFocusWindow, 0, 0, rect.right - rect.left, rect.bottom - rect.top, TRUE);
-
-            }
-            else
-            {
-                POINT Point = { 0 };
-                HMONITOR Monitor = MonitorFromPoint(Point, MONITOR_DEFAULTTONEAREST);
-                MONITORINFO MonitorInfo = { sizeof(MonitorInfo) };
-                if (GetMonitorInfo(Monitor, &MonitorInfo)) {
-
-                    DWORD Style = WS_POPUP | WS_VISIBLE;
-                    SetWindowLongPtr(Gfx::hFocusWindow, GWL_STYLE, Style);
-                    SetWindowPos(Gfx::hFocusWindow, HWND_TOPMOST, MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.top,
-                        MonitorInfo.rcMonitor.right - MonitorInfo.rcMonitor.left, MonitorInfo.rcMonitor.bottom - MonitorInfo.rcMonitor.top,
-                        SWP_FRAMECHANGED | SWP_SHOWWINDOW | SWP_NOMOVE);
-
-                    ShowWindow(Gfx::hFocusWindow, SW_NORMAL);
-                    SetFocus(Gfx::hFocusWindow);
-                }
-            }
+            ToggleWindowed();
             return D3DERR_DEVICELOST;
 
+        }
+        else if (Gfx::command != Gfx::Command::None)
+        {
+            //Make sure command is only executed once
+            Gfx::Command command = Gfx::command;
+            Gfx::command = Gfx::Command::None;
+
+            D3DPRESENT_PARAMETERS8* d3dpp = (D3DPRESENT_PARAMETERS8*)0x00973be0;
+
+            //Set focus to desktop
+            SetFocus(HWND_DESKTOP);
+            //minimize the window to reset engine
+            ShowWindow(Gfx::hFocusWindow, SW_MINIMIZE);
+
+            switch (command)
+            {
+            case Gfx::Command::ToggleFiltering:
+                Gfx::filtering = !Gfx::filtering;
+                //Maybe need to reset some flags?
+                break;
+
+            case Gfx::Command::ChangeResolution:
+                d3dpp->BackBufferWidth = Gfx::width;
+                d3dpp->BackBufferHeight = Gfx::height;
+                break;
+
+            case Gfx::Command::ToggleWindowed:
+                ToggleWindowed();
+                return D3DERR_DEVICELOST;
+            }
+
+
+            ShowWindow(Gfx::hFocusWindow, SW_NORMAL);
+            SetFocus(Gfx::hFocusWindow);
+            return D3DERR_DEVICELOST;
         }
 
     }
