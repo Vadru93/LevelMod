@@ -11,6 +11,7 @@ struct EXTERN CArray
         CStructHeader** Items;
         CStruct** structures;
         int* indices;
+        char** texts;
     };
     WORD Type;
     WORD NumItems;
@@ -35,7 +36,7 @@ struct EXTERN CArray
         return  *(indices + x);
     }
 
-    DWORD GetNumItems(bool trueCount = true);
+    DWORD GetNumItems(bool trueCount = true) const;
     void SetValues(CStructHeader* values);
     inline float GetFloat(int Item)
     {

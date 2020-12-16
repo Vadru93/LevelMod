@@ -23,17 +23,36 @@ EXTERN Hooked_Present pHookedPresent;*/
 
 
 
-
-
-
 //Set Element Text
 inline void SetElementText(int id, char* text);
 
+struct PairedText
+{
+    char* text;
+    DWORD value;
+};
 
 //Menu Element
 struct Element
 {
-    BYTE unk[256];//not yet disambled
+
+    BYTE unk[0x1CC];
+    BYTE* pUnk;//This seems to be unused
+    float xy[2];
+    BOOL unk2;
+    PairedText* pair;//This is actually supported array of char, but dunno how to use, probably there is a bool that should be used when create sliderelement
+    DWORD value;
+
+
+    PairedText* AllocatePairedText(DWORD num)
+    {
+        /*typedef PairedText* (__thiscall* const pAllocatePairedText)(void* pMemRegion, DWORD size);
+        return pAllocatePairedText(0x00411310)((void*)0x00859364, num * sizeof(PairedText));*/
+        return (PairedText*)mallocx(num * sizeof(PairedText));
+    }
+
+    void SetSliderArrayText(const CArray* pArray);
+
     typedef Element* (__thiscall* const pGetElement)(Element* pThis, DWORD name, DWORD id);
 
     Element* GetElement(DWORD name, DWORD id = 1)
@@ -51,8 +70,11 @@ DWORD GetElementSliderValue(DWORD name);
 
 
 //LevelMod Example Script
-//Get's the slider value of a menu element, check optionsmenu.qb
+//Gets the slider value of a menu element, check optionsmenu.qb
 bool GetSliderValue(CStruct* pStruct, CScript* pScript);
+
+//Sets the sider array text
+bool SetSliderArrayText(CStruct* pStruct, CScript* pScript);
 
 //LevelMod Example Script
 //Change the values of a struct, check optionsmenu.qb

@@ -19,7 +19,7 @@ LM_HostOptions = [
 	
 ]
 
-
+ 
 //maybe move to shader.q, when enough code for shaders??
 
 BlendModes = [
@@ -530,6 +530,11 @@ ENDSCRIPT
 SCRIPT AddOptions
 	ForEachIn LevelModOptions do = sAddOption params =  <...>
 ENDSCRIPT
+
+SCRIPT LM_SetOption_Slider
+SetSliderText id = <id> enum = <TextFromValue>
+LM_SetOption <...>
+ENDSCRIPT
  
 SCRIPT LM_SetOption
 	printf "Setting option"
@@ -821,8 +826,8 @@ game_menu_items = [
 	{ IsBool text = "New Net Menu" 		option_id = item24 option = LM_GUI_bNewMenu 			toggle_id = item4_toggle cat_gui } 
 	{ IsBool text = "GrafCounter" 		option_id = item25 option = LM_GUI_bShowGrafCounter 	toggle_id = item5_toggle cat_gui } 
 	
-	{ IsEnum text = "Buffering" 		option_id = item211 option = LM_GFX_eBuffering 	toggle_id = item1_toggle cat_gfx TextValues = [ "Off" "Double" "Triple" ] } 
-	{ IsEnum text = "MSAA Level" 		option_id = item214 option = LM_GFX_eAntiAlias 	toggle_id = item4_toggle cat_gfx TextValues = [ "Off" "auto" "2x" "4x" "8x" ] } 
+	{ IsEnum text = "Buffering" 		option_id = item211 option = LM_GFX_eBuffering 	toggle_id = item1_toggle cat_gfx TextValues = [ "Off" "Double" "Triple" ] max = 2 } 
+	{ IsEnum text = "MSAA Level" 		option_id = item214 option = LM_GFX_eAntiAlias 	toggle_id = item4_toggle cat_gfx TextValues = [ "Off" "auto" "2x" "4x" "8x" ] max = 4 } 
 	{ IsBool text = "Texture Filtering" option_id = item215 option = LM_GFX_bFiltering 			toggle_id = item5_toggle cat_gfx } 
 	{ IsBool text = "Fix Stuttering" 	option_id = item216 option = LM_GFX_bFixStutter 			toggle_id = item6_toggle cat_gfx } 
 ]
@@ -894,12 +899,24 @@ script Settings_AddLine
 				w = 300.0
 			}
 		else
-			AddLine { 
+		    if GotParam IsEnum
+			    AddLine { 
 				parent = game_options_names_menu 
-				Type = textmenuelement 
-				id = <option_id>
-				text = <text>
-			}
+				Type = slidermenuelement 
+				id = <option_id> 
+				text = <text> 
+				lower = 0 upper = <max> delta = 1 start = 0 wrap = 1 right_side_w = 100
+				eventhandlers = [ {Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextFromValue = <TextValues> TextOnly } }{ Type = ContentsChangedEventHandler target = "LM_SetOption" params = { name = <option> id = <option_id> TextFromValue = <TextValues> } } ]
+				
+				}
+			else
+			    AddLine { 
+				    parent = game_options_names_menu 
+				    Type = textmenuelement 
+				    id = <option_id>
+				    text = <text>
+			    }
+			endif
 		endif
 		
 		if GotParam toggle_id
@@ -908,9 +925,10 @@ script Settings_AddLine
 					parent = game_options_on_off_menu 
 					Type = textmenuelement 
 					id = <toggle_id>
+					text = " "
 				}
-				GetOptionText option = <option> text = <TextValues>
-				SetMenuElementText id = <toggle_id> <text>
+				//GetOptionText option = <option> text = <TextValues>
+				//SetMenuElementText id = <toggle_id> <text>
 			else
 				AddLine {
 					parent = game_options_on_off_menu 

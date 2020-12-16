@@ -210,7 +210,7 @@ EXTERN CStructHeader* CArray::GetCStruct(int Name, int Item, int Struct)
     else return 0;
 }
 
-EXTERN DWORD CArray::GetNumItems(bool trueCount)
+EXTERN DWORD CArray::GetNumItems(bool trueCount) const
 {
     if (!trueCount)
     {

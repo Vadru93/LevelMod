@@ -156,7 +156,7 @@ void RenderShadows()
 
         //set_blend_mode(vBLEND_MODE_MODULATE_COLOR);
 
-        //model->Render();
+        //model->Ren- ();
     }
 
     Gfx::pDevice->SetVertexShader(NULL);

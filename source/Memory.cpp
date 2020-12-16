@@ -24,7 +24,6 @@ void* __restrict mallocx(const DWORD buflen)
     _asm push 0
     _asm push 1
     _asm push buflen
-    _asm mov esi, 0;
     _asm call mx
     /*_asm pop esi
     _asm mov esp, ebp

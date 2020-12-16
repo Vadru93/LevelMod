@@ -2,6 +2,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "pch.h"
 #include "Extension.h"
+#include "String.h"
 
 //Set Element Text
 inline void SetElementText(int id, char* text)
@@ -24,6 +25,20 @@ void SendPm(char* who, const char* message)
     pSendPm(0x004E0F20)(*(void**)0x008F14F4, who, message, 0);
 }
 
+void Element::SetSliderArrayText(const CArray* pArray)
+{
+    if (!pair)
+    {
+        pair = AllocatePairedText(pArray->GetNumItems());
+
+        for (DWORD i = 0; i < pArray->GetNumItems(); i++)
+        {
+            pair[i].text = String::AddString(pArray->texts[i]);
+            pair[i].value = i;
+        }
+    }
+}
+
 
 
 typedef Element* (__cdecl* const pAllocateElement)(DWORD unk);
@@ -33,6 +48,29 @@ static const pFreeElement FreeElement = (pFreeElement)(0x004D12F0);
 typedef void* (__cdecl* const pCastPointer)(void* pointer, LONG VfDelta, DWORD SrcType, DWORD TargetType, BOOL isReference);
 static const pCastPointer CastPointer = (pCastPointer)(0x00577E58);
 
+
+bool SetElementSliderText(DWORD id, const CArray* pArray)
+{
+    _asm pushad;
+    _asm pushfd;
+    Element* container = AllocateElement(0);
+    Element* element = container->GetElement(id);
+    if (element)
+    {
+        element = (Element*)CastPointer((void*)element, 0, 0x005B6344, 0x005B6638, FALSE);
+        element->SetSliderArrayText(pArray);
+        FreeElement();
+
+        _asm popfd;
+        _asm popad;
+        return true;
+    }
+    FreeElement();
+
+    _asm popfd;
+    _asm popad;
+    return false;
+}
 
 DWORD GetElementSliderValue(DWORD name)
 {
@@ -59,7 +97,7 @@ DWORD GetElementSliderValue(DWORD name)
 
 
 //LevelMod Example Script
-//Get's the slider value of a menu element, check optionsmenu.qb
+//Gets the slider value of a menu element, check optionsmenu.qb
 bool GetSliderValue(CStruct* pStruct, CScript* pScript)
 {
     int name = 0;
@@ -83,6 +121,17 @@ bool GetSliderValue(CStruct* pStruct, CScript* pScript)
         param->value.f = (float)GetElementSliderValue(name);
     }
     return true;
+}
+
+bool SetSliderArrayText(CStruct* pStruct, CScript* pScript)
+{
+    int id = 0;
+    pStruct->GetScript("id", &id);
+    const CArray* pText = NULL;
+
+    pStruct->GetArray("enum", &pText);
+
+    return SetElementSliderText(id, pText);
 }
 
 //LevelMod Example Script

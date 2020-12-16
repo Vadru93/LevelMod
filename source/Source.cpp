@@ -1974,6 +1974,7 @@ const CompiledScript scripts[] =
     { "ChangeValues", ChangeValues },
     { "CreatePair", CreatePair },
     { "GetSliderValue", GetSliderValue },
+    { "SetSliderText", SetSliderArrayText},
     { "InitLevelMod", Initialize },
     { "MoveObject", MoveObjectScript   },
 { "KillMovingObject", KillMovingObjectScript},
@@ -3613,6 +3614,21 @@ float __cdecl proxy_SnapToGroundClamp(float a1)
     return cos(angle);
 }
 
+int proxy_sprintf(char* result, char* format, DWORD value)
+{
+    static Element* pElement;
+    _asm mov pElement, ebx;
+
+    if (pElement && pElement->pair)
+    {
+        format = (char*)0x005B4428;
+        value = (DWORD)pElement->pair[value].text;
+    }
+    return sprintf(result, format, value);
+}
+
+//004D5759
+
 
 //To optimize CRC we put the checksum in eax instead of calling Checksum("string")
 //string here means pointer in memory where string is pushed to stack
@@ -3994,6 +4010,8 @@ void InitLevelMod()
     *(BYTE*)0x004092AB = 0xBD;
     *(DWORD*)0x004092AC = PtrToUlong(proxy_GetMessage);
     *(BYTE*)0x004092B0 = 0x90;
+
+    //HookFunction(0x004D575A, proxy_sprintf, 0xE8, 1);
 
     //Fix SuperSector size limitations and crashing issues + improve performance of GetSuperSector function
     HookFunction(0x00412160, SuperSector::GetSuperSector);
