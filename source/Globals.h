@@ -155,6 +155,12 @@ bool AddLights(CStruct* pStruct, CScript* pScript);
 bool RemoveLights(CStruct* pStruct, CScript* pScript);
 
 bool ToggleWindowedScript(CStruct* pStruct, CScript* pScript);
+
+bool GetMaximumIndexScript(CStruct* pStruct, CScript* pScript);
+
+bool GetOptionValue(CStruct* pStruct, CScript* pScript);
+
+bool LaunchGFXCommand(CStruct* pStruct, CScript* pScript);
 //--------Functions callable from script--------
 
 //--------Functions NOT callable from script--------

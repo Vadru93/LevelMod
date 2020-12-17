@@ -715,6 +715,32 @@ bool LM_GotParamScript(CStruct* pStruct, CScript* pScript)
     return false;
 }
 
+LevelModSettings::Option* GetOption(DWORD option)
+{
+    auto it = LevelModSettings::options.find(option);
+    if (it != LevelModSettings::options.end())
+        return &it->second;
+    return NULL;
+}
+
+bool GetOptionValue(CStruct* pStruct, CScript* pScript)
+{
+    for(auto header = pStruct->head; header != NULL; header = header->NextHeader)
+    {
+        if (header->Type == QBKeyHeader::LOCAL)
+        {
+            auto it = options.find(header->Data);
+            if (it != options.end())
+            {
+                auto param = pScript->params->AddParam("OptionValue", QBKeyHeader::QBKeyType::INT);
+                param->Data = it->second.value;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 bool SetOption(CStruct* pStruct, CScript* pScript)
 {
     CStructHeader* header = pStruct->head;

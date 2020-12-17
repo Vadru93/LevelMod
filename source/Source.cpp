@@ -1533,7 +1533,7 @@ bool UpdateSpineText(CStruct* pStruct, CScript* pScript)
     typedef void(__cdecl* const pFreeElement)();
     static const pFreeElement FreeElement = (pFreeElement)(0x004D12F0);
     typedef void* (__cdecl* const pCastPointer)(void* pointer, LONG VfDelta, DWORD SrcType, DWORD TargetType, BOOL isReference);
-    static const pCastPointer CastPointer = (pCastPointer)(0x00577E58);
+    static const pCastPointer CastPointer = (pCastPointer)(*(DWORD*)0x0058D150);// 0x00577E58);
 
     if (pStruct->GetScript("menu_id", &id))
     {
@@ -1975,6 +1975,9 @@ const CompiledScript scripts[] =
     { "CreatePair", CreatePair },
     { "GetSliderValue", GetSliderValue },
     { "ToggleWindowed", ToggleWindowedScript },
+    { "GetMaximumIndex", GetMaximumIndexScript },
+    { "GetOptionValue", GetOptionValue},
+    { "LaunchGFXCommand", LaunchGFXCommand },
     { "SetSliderText", SetSliderArrayText},
     { "InitLevelMod", Initialize },
     { "MoveObject", MoveObjectScript   },
@@ -5189,6 +5192,38 @@ bool ToggleWindowedScript(CStruct* pStruct, CScript* pScript)
     return true;
 }
 
+bool LaunchGFXCommand(CStruct* pStruct, CScript* pScript)
+{
+    for (auto header = pStruct->head; header != NULL; header = header->NextHeader)
+    {
+        if (header->Type == QBKeyHeader::LOCAL)
+        {
+            switch (header->Data)
+            {
+            case Checksums::Reset:
+                Gfx::command = Gfx::Command::Reset;
+                    break;
+            case Checksums::ToggleWindowed:
+                Gfx::command = Gfx::Command::ToggleWindowed;
+                break;
+            }
+
+            return true;
+        }
+    }
+    return false;
+}
+
+bool GetMaximumIndexScript(CStruct* pStruct, CScript* pScript)
+{
+    const CArray* pArray;
+    pStruct->GetArray("array", &pArray);
+
+    CStructHeader* param = pScript->params->AddParam("Max", QBKeyHeader::QBKeyType::INT);
+    param->Data = (pArray->GetNumItems() - 1);
+    return true;
+}
+
 HRESULT PostRender(HRESULT hres)
 {
 
@@ -5227,6 +5262,7 @@ HRESULT PostRender(HRESULT hres)
             SetFocus(HWND_DESKTOP);
             //minimize the window to reset engine
             ShowWindow(Gfx::hFocusWindow, SW_MINIMIZE);
+            LevelModSettings::Option* option = NULL;
 
             switch (command)
             {
@@ -5243,6 +5279,15 @@ HRESULT PostRender(HRESULT hres)
             case Gfx::Command::ToggleWindowed:
                 ToggleWindowed();
                 return D3DERR_DEVICELOST;
+
+            case Gfx::Command::Reset:
+                option = GetOption(crc32f("LM_GFX_eBuffering"));
+                if(option)
+                    Gfx::numBackBuffers = option->value;
+
+                option = GetOption(crc32f("LM_GFX_eAntiAlias"));
+                    Gfx::AntiAliasing = option->value;
+                break;
             }
 
 

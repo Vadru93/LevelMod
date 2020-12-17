@@ -55,7 +55,7 @@ struct Element
 
     typedef Element* (__thiscall* const pGetElement)(Element* pThis, DWORD name, DWORD id);
 
-    Element* GetElement(DWORD name, DWORD id = 1)
+    Element* GetElement(DWORD name, DWORD id = 0)
     {
         return pGetElement(0x004D23B0)(this, name, id);
     }

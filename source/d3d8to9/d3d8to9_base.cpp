@@ -229,7 +229,7 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
     }
 
     Gfx::hFocusWindow = hFocusWindow;
-    if(IsOptionOn("LM_GFX_bWindowed"))
+    if(!pPresentationParameters->Windowed && IsOptionOn("LM_GFX_bWindowed"))
         Gfx::command = Gfx::Command::ToggleWindowed;
 
     *ppReturnedDeviceInterface = nullptr;

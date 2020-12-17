@@ -88,6 +88,7 @@ namespace Gfx
         ToggleWindowed = 1,
         ChangeResolution = 2,
         ToggleFiltering = 3,
+        Reset = 4,
     };
     extern DWORD numBackBuffers;
     extern DWORD AntiAliasing;

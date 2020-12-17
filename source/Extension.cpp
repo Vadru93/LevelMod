@@ -46,13 +46,11 @@ static const pAllocateElement AllocateElement = (pAllocateElement)(0x004D12A0);
 typedef void(__cdecl* const pFreeElement)();
 static const pFreeElement FreeElement = (pFreeElement)(0x004D12F0);
 typedef void* (__cdecl* const pCastPointer)(void* pointer, LONG VfDelta, DWORD SrcType, DWORD TargetType, BOOL isReference);
-static const pCastPointer CastPointer = (pCastPointer)(0x00577E58);
+static const pCastPointer CastPointer = (pCastPointer)(*(DWORD*)0x0058D150);// 0x00577E58);
 
 
 bool SetElementSliderText(DWORD id, const CArray* pArray)
 {
-    _asm pushad;
-    _asm pushfd;
     Element* container = AllocateElement(0);
     Element* element = container->GetElement(id);
     if (element)
@@ -61,21 +59,44 @@ bool SetElementSliderText(DWORD id, const CArray* pArray)
         element->SetSliderArrayText(pArray);
         FreeElement();
 
-        _asm popfd;
-        _asm popad;
         return true;
     }
     FreeElement();
 
-    _asm popfd;
-    _asm popad;
+    return false;
+}
+
+bool SetSliderValueScript(CStruct* pStruct, CScript* pScript)
+{
+    CStructHeader* option = NULL;
+    if (pStruct->GetStruct(Checksums::option, &option))
+    {
+        Element* container = AllocateElement(0);
+        char* ok = FindChecksumName(option->Data, false);
+        static char tempChar[MAX_PATH + 1] = "";
+        static char id[MAX_PATH + 1] = "";
+        sprintf(id, "%s_id", ok);
+        memcpy(tempChar, ok, strlen(ok) + 1);
+        Element* element = container->GetElement(crc32f(id));
+        if (element)
+        {
+            element = (Element*)CastPointer((void*)element, 0, 0x005B6344, 0x005B6638, FALSE);
+            auto it = LevelModSettings::options.find(option->Data);
+            if (it != LevelModSettings::options.end())
+                element->value = it->second.value;
+            FreeElement();
+
+            return true;
+        }
+        FreeElement();
+
+        return false;
+    }
     return false;
 }
 
 DWORD GetElementSliderValue(DWORD name)
 {
-    _asm pushad;
-    _asm pushfd;
     Element* container = AllocateElement(0);
     Element* element = container->GetElement(name);
     if (element)
@@ -84,14 +105,10 @@ DWORD GetElementSliderValue(DWORD name)
         DWORD value = element->GetValue();
         FreeElement();
 
-        _asm popfd;
-        _asm popad;
         return value;
     }
     FreeElement();
 
-    _asm popfd;
-    _asm popad;
     return 0xFFFFFFFF;
 }
 

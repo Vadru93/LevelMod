@@ -277,7 +277,7 @@ levelmod_menu_air_items = [
 	//4 = Revert+Nollie
 	//5 = SpinLeft+SpinRight
 	{ Type = textmenuelement id = LM_Control_SpineButton_id text = "Spine Button" link = spine_button_menu params = { name = LM_Control_SpineButton id = LM_Control_SpineButton_id } }	
-	{ Type = textmenuelement id = SpineButtonText_id text = "Foo" static dont_gray drawer = keyboard_property params = { id = SpineButtonText_id TextFromValue = LM_Control_SpineButton_Text name = LM_Control_SpineButton } }
+	{ Type = textmenuelement id = SpineButtonText_id text = "Foo" static dont_gray drawer = keyboard_property params = { id = SpineButtonText_id TextFromValue = LM_Control_SpineButton_Text name = LM_Control_SpineButton UpdateText } }
 	{ LM_Menu_Shared_Bool id = LM_Control_bSpine_id params = { name = LM_Control_bSpine id = LM_Control_bSpine_id on = "Spine Transfer: on" off = "Spine Transfer: off" } }
 	{ LM_Menu_Shared_Bool id = LM_Control_bAcid_id params = { name = LM_Control_bAcid id = LM_Control_bAcid_id on = "Acid Drop: on" off = "Acid Drop: off" } }
 	{ LM_Menu_Shared_Bool id = LM_Control_bBank_id params = { name = LM_Control_bBank id = LM_Control_bBank_id on = "Bank Drop: on" off = "Bank Drop: off" } }
@@ -286,7 +286,7 @@ levelmod_menu_air_items = [
 	//0 = normal
 	//1 = THPS4
 	//2 = Fast 1
-	{ Type = slidermenuelement id = LM_Control_AirTrickSpeed_id text = "Foo" lower = 0 upper = 4 delta = 1 start = 0 wrap = 0 right_side_w = 80 eventhandlers = [ {Type = showeventhandler target = "LM_SetOption" params = { id = LM_Control_AirTrickSpeed_id TextFromValue = LM_Control_AirTrickSpeed_Text TextOnly } }{ Type = ContentsChangedEventHandler target = "LM_SetOption" params = { name = LM_Control_AirTrickSpeed id = LM_Control_AirTrickSpeed_id TextFromValue = LM_Control_AirTrickSpeed_Text} } ] }
+	{ Type = slidermenuelement id = LM_Control_AirTrickSpeed_id text = "Foo" lower = 0 upper = 4 delta = 1 start = 0 wrap = 0 right_side_w = 80 eventhandlers = [ {Type = showeventhandler target = "LM_SetOption" params = { id = LM_Control_AirTrickSpeed_id TextFromValue = LM_Control_AirTrickSpeed_Text TextOnly UpdateText } }{ Type = ContentsChangedEventHandler target = "LM_SetOption" params = { name = LM_Control_AirTrickSpeed id = LM_Control_AirTrickSpeed_id TextFromValue = LM_Control_AirTrickSpeed_Text UpdateText } } ] }
 	
 	//goes back to previous menu
 	{ LM_Menu_Shared_Back Params = { id = LevelMod_menu_air } } 
@@ -522,8 +522,8 @@ SCRIPT OptionsOnStartGame
    ENDIF
 ENDSCRIPT
 
-SCRIPT sToggleWindowed
-    ToggleWindowed
+SCRIPT sLaunchGFXCommand command = Reset
+    LaunchGFXCommand <command> params = <params>
 ENDSCRIPT
 
 SCRIPT sAddOption max = 2
@@ -546,29 +546,35 @@ SCRIPT LM_SetOption
 		GetParam id
 		printf "Going to set option"
 		IF LM_GotParam TextOnly
-			GetParam TextFromValue
-			GetOptionText option = <name> text = <TextFromValue>
-			printf "setting menu element text"
-			SetMenuElementText id = <id> <text>
-			
+		    SetSliderValue option = <name>
+			IF LM_GotParam UpdateText
+			    GetParam TextFromValue
+			    GetOptionText option = <name> text = <TextFromValue>
+			    printf "setting menu element text"
+			    SetMenuElementText id = <id> <text>
+			ENDIF
 			LM_MaybeMakeStatic option = <name>
 		ELSE
 		    IF LM_GotParam Value
 			    GetParam Value
 				//Sets option from value
 				IF SetOption <name> value = <Value>
-				     GetParam TextFromValue
-					 GetOptionText option = <name> text = <TextFromValue>
-					 SetMenuElementText id = <id> <text>
+				    IF LM_GotParam UpdateText
+				        GetParam TextFromValue
+					    GetOptionText option = <name> text = <TextFromValue>
+					    SetMenuElementText id = <id> <text>
+					ENDIF
 				ENDIF
 			ELSE
 			    //Sets option from slider
 				IF SetOption <name>
-					printf "Getting option text"
-					GetParam TextFromValue
-					GetOptionText option = <name> text = <TextFromValue>
-					printf "setting menu element text"
-					SetMenuElementText id = <id> <text>
+				    IF LM_GotParam UpdateText
+					    printf "Getting option text"
+					    GetParam TextFromValue
+					    GetOptionText option = <name> text = <TextFromValue>
+					    printf "setting menu element text"
+					    SetMenuElementText id = <id> <text>
+			        ENDIF
 				ENDIF
 			ENDIF
 		ENDIF
@@ -829,9 +835,9 @@ game_menu_items = [
 	{ IsBool text = "New Net Menu" 		option_id = item24 option = LM_GUI_bNewMenu 			toggle_id = item4_toggle cat_gui } 
 	{ IsBool text = "GrafCounter" 		option_id = item25 option = LM_GUI_bShowGrafCounter 	toggle_id = item5_toggle cat_gui } 
 	
-	{ IsEnum text = "Buffering" 		option_id = item211 option = LM_GFX_eBuffering 	toggle_id = item1_toggle cat_gfx TextValues = [ "Off" "Double" "Triple" ] max = 2 } 
-	{ IsEnum text = "MSAA Level" 		option_id = item212 option = LM_GFX_eAntiAlias 	toggle_id = item2_toggle cat_gfx TextValues = [ "Off" "auto" "2x" "4x" "8x" ] max = 4 } 
-	{ IsBool text = "Windowed"          option_id = item213 option = LM_GFX_bWindowed   toggle_id = item3_toggle cat_gfx Do = sToggleWindowed }
+	{ IsEnum text = "Buffering" 		option_id = LM_GFX_eBuffering_id option = LM_GFX_eBuffering 	toggle_id = item1_toggle cat_gfx TextValues = [ "Off" "Double" "Triple" ] Do = sLaunchGFXCommand } 
+	{ IsEnum text = "MSAA Level" 		option_id = LM_GFX_eAntiAlias_id option = LM_GFX_eAntiAlias 	toggle_id = item2_toggle cat_gfx TextValues = [ "Off" "auto" "2x" "4x" "8x" ] Do = sLaunchGFXCommand } 
+	{ IsBool text = "Windowed"          option_id = item213 option = LM_GFX_bWindowed   toggle_id = item3_toggle cat_gfx Do = sLaunchGFXCommand params = { command = ToggleWindowed } }
 	{ IsBool text = "Texture Filtering" option_id = item215 option = LM_GFX_bFiltering 	toggle_id = item5_toggle cat_gfx } 
 	{ IsBool text = "Fix Stuttering" 	option_id = item216 option = LM_GFX_bFixStutter toggle_id = item6_toggle cat_gfx } 
 ]
@@ -904,12 +910,14 @@ script Settings_AddLine
 			}
 		else
 		    if GotParam IsEnum
+			    GetMaximumIndex array = <TextValues>
+				GetOptionValue <option>
 			    AddLine { 
 				parent = game_options_names_menu 
 				Type = slidermenuelement 
 				id = <option_id> 
 				text = <text> 
-				lower = 0 upper = <max> delta = 1 start = 0 wrap = 1 right_side_w = 100
+				lower = 0 upper = <max> delta = 1 start = <OptionValue> wrap = 1 right_side_w = 100
 				eventhandlers = [ {Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextFromValue = <TextValues> TextOnly } }{ Type = ContentsChangedEventHandler target = "LM_SetOption" params = { name = <option> id = <option_id> TextFromValue = <TextValues> } } ]
 				
 				}
@@ -961,11 +969,11 @@ script Settings_AddLine
 	endif
 endscript
 
-script Settings_ToggleOption
+script Settings_ToggleOption params = { }
 	ToggleOption <option>
 	Settings_UpdateBoolText <...>
 	if GotParam do
-		GoTo <do>
+		GoTo <do> params = <params>
 	endif
 endscript
 

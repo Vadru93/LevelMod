@@ -241,6 +241,9 @@ namespace Checksums
         Shadow = COMPILE_CRC32("shadow"),
         BounceSound = COMPILE_CRC32("bouncesound"),
 
+        Reset = COMPILE_CRC32("reset"),
+        ToggleWindowed = COMPILE_CRC32("togglewindowed"),
+
         //Trick_KFBackflip = 0xF7B4E0CB
 
 
