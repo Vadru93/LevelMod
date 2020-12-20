@@ -4,6 +4,7 @@
 #include "Script.h"
 #include "_Math.h"
 #include "Skater.h"
+#include "Checksum.h"
 
 bool XINPUT::vibrating = false;
 XINPUT_VIBRATION XINPUT::vibration;
@@ -126,47 +127,38 @@ DWORD UpdateKeyState(KeyState* state, DWORD press)
     //DWORD time = _GetCurrentTime();
     switch (state->GetChecksum())
     {
-    case 0x7323E97C:
-        //_printf("Updating X? ");
+    case Checksums::X:
         press = (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A) * 0xFF;
         break;
-    case 0x2B489A86:
-        //_printf("Updating CIRCLE? ");
+    case Checksums::Circle:
         press = (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B) * 0xFF;
         break;
-    case 0x321C9756:
-        //_printf("Updating SQUARE? ");
+    case Checksums::Square:
         press = (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_X) * 0xFF;
         break;
-    case 0x20689278:
-        //_printf("Updating TRIANGLE? ");
+    case Checksums::Triangle:
         press = (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y) * 0xFF;
         break;
-    case 0xF2F1F64E://LEFTSPIN
-        //_printf("Updating SPINRIGHT? ");
+    case (DWORD)Checksums::R1://LEFTSPIN
         press = (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) * 0xFF;
         break;
-    case 0x26B0C991://RIGHTSPIN
-        //_printf("Updating SPINLEFT? ");
+    case Checksums::L1://RIGHTSPIN
         press = (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) * 0xFF;
         break;
-    case 0xBFB9982B://NOLLIE
-        //_printf("Updating NOLLIE? ");
+    case (DWORD)Checksums::L2://NOLLIE
         if ((XINPUT::Player1->GetState().Gamepad.bLeftTrigger) > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
             press = 0xFF;
         else
             press = 0;
         break;
-    case 0x6BF8A7F4://REVERT
-        //_printf("Updating REVERT? ");
+    case Checksums::R2://REVERT
         if ((XINPUT::Player1->GetState().Gamepad.bRightTrigger) > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
             press = 0xFF;
         else
             press = 0;
         break;
 
-    case 0x4B358AEB://RIGHT
-        //_printf("Updating RIGHT? ");
+    case Checksums::Right:
         //state->Update(time, press);
         if (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT)
             press = 0xFF;
@@ -180,8 +172,7 @@ DWORD UpdateKeyState(KeyState* state, DWORD press)
                 press = 0;
         }
         break;
-    case 0x85981897://LEFT
-        //_printf("Updating LEFT? ");
+    case (DWORD)Checksums::Left:
         if (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT)
             press = 0xFF;
         else
@@ -195,8 +186,7 @@ DWORD UpdateKeyState(KeyState* state, DWORD press)
         }
         break;
 
-    case 0xBC6B118F://UP
-        //_printf("Updating UP? ");
+    case (DWORD)Checksums::Up:
         if (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP)
             press = 0xFF;
         else
@@ -209,8 +199,7 @@ DWORD UpdateKeyState(KeyState* state, DWORD press)
                 press = 0;
         }
         break;
-    case 0xE3006FC4://DOWN
-        //_printf("Updating DOWN? ");
+    case (DWORD)Checksums::Down:
         if (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN)
             press = 0xFF;
         else

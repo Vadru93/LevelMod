@@ -244,6 +244,20 @@ namespace Checksums
         Reset = COMPILE_CRC32("reset"),
         ToggleWindowed = COMPILE_CRC32("togglewindowed"),
 
+        Down = COMPILE_CRC32("down"),
+        Left = COMPILE_CRC32("left"),
+        Right = COMPILE_CRC32("right"),
+        Up = COMPILE_CRC32("up"),
+        R2 = COMPILE_CRC32("r2"),
+        R1 = COMPILE_CRC32("r1"),
+        L2 = COMPILE_CRC32("l2"),
+        L1 = COMPILE_CRC32("l1"),
+        Triangle = COMPILE_CRC32("triangle"),
+        Square = COMPILE_CRC32("square"),
+        X = COMPILE_CRC32("x"),
+        Circle = COMPILE_CRC32("circle"),
+
+
         //Trick_KFBackflip = 0xF7B4E0CB
 
 
