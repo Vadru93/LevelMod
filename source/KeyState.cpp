@@ -139,10 +139,10 @@ DWORD UpdateKeyState(KeyState* state, DWORD press)
     case Checksums::Triangle:
         press = (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y) * 0xFF;
         break;
-    case (DWORD)Checksums::R1://LEFTSPIN
+    case Checksums::L1://LEFTSPIN
         press = (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) * 0xFF;
         break;
-    case Checksums::L1://RIGHTSPIN
+    case (DWORD)Checksums::R1://RIGHTSPIN
         press = (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) * 0xFF;
         break;
     case (DWORD)Checksums::L2://NOLLIE
