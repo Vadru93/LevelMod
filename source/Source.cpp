@@ -1539,7 +1539,7 @@ bool UpdateSpineText(CStruct* pStruct, CScript* pScript)
     {
         Element* container = AllocateElement(0);
         Element* element = container->GetElement(id);
-        element = (Element*)CastPointer((void*)element, 0, 0x005B6344, 0x005B666C, FALSE);
+        //element = (Element*)CastPointer((void*)element, 0, 0x005B6344, 0x005B666C, FALSE);
 
         FreeElement();
     }

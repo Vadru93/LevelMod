@@ -53,9 +53,10 @@ bool SetElementSliderText(DWORD id, const CArray* pArray)
 {
     Element* container = AllocateElement(0);
     Element* element = container->GetElement(id);
+    MessageBox(0, "ELEMENTE", "", 0);
     if (element)
     {
-        element = (Element*)CastPointer((void*)element, 0, 0x005B6344, 0x005B6638, FALSE);
+        //element = (Element*)CastPointer((void*)element, 0, 0x005B6344, 0x005B6638, FALSE);
         element->SetSliderArrayText(pArray);
         FreeElement();
 
@@ -80,7 +81,7 @@ bool SetSliderValueScript(CStruct* pStruct, CScript* pScript)
         Element* element = container->GetElement(crc32f(id));
         if (element)
         {
-            element = (Element*)CastPointer((void*)element, 0, 0x005B6344, 0x005B6638, FALSE);
+            //element = (Element*)CastPointer((void*)element, 0, 0x005B6344, 0x005B6638, FALSE);
             auto it = LevelModSettings::options.find(option->Data);
             if (it != LevelModSettings::options.end())
                 element->value = it->second.value;
@@ -101,7 +102,7 @@ DWORD GetElementSliderValue(DWORD name)
     Element* element = container->GetElement(name);
     if (element)
     {
-        element = (Element*)CastPointer((void*)element, 0, 0x005B6344, 0x005B6638, FALSE);
+        //element = (Element*)CastPointer((void*)element, 0, 0x005B6344, 0x005B6638, FALSE);
         DWORD value = element->GetValue();
         FreeElement();
 
