@@ -53,7 +53,6 @@ bool SetElementSliderText(DWORD id, const CArray* pArray)
 {
     Element* container = AllocateElement(0);
     Element* element = container->GetElement(id);
-    MessageBox(0, "ELEMENTE", "", 0);
     if (element)
     {
         //element = (Element*)CastPointer((void*)element, 0, 0x005B6344, 0x005B6638, FALSE);
