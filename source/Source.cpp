@@ -3893,7 +3893,7 @@ LARGE_INTEGER TimerStart()
     //However on my screen with 144hz it's pretty hard to get consistent 60 FPS
     //Currently worst case scenario is 59.9-65 and it's usually around 63-64
     //For some reason it's more consistent in window mode than in fullscreen mode
-    if (ms >= 16.4) // ~60.98 FPS
+    if (ms >= 16.39) // ~61.01 FPS
     {
         BYTE target_ms = p_target_ms;
         if (target_ms > 1)
@@ -3902,7 +3902,7 @@ LARGE_INTEGER TimerStart()
             p_target_ms = target_ms;
         }
     }
-    else if (ms < 15.4) // ~64.9 FPS
+    else if (ms < 15.38) // ~65.02 FPS
     {
         BYTE target_ms = p_target_ms;
         if (target_ms < timer_lock)
@@ -3925,7 +3925,7 @@ void InitLevelMod()
     fFreq = 1000.0 / (double)freq.QuadPart;
 
     if (!p_bWindowed)
-        timer_lock = 0x0F;
+        timer_lock = 0x0D;
 
     /*_printf("%d %f", freq.LowPart, fFreq);
     MessageBox(0, 0, 0, 0);*/
@@ -3933,6 +3933,14 @@ void InitLevelMod()
 
     DWORD old;
     //HookFunction(0x004C04F0, TimerElapsed);
+
+    //Fix menu crashing
+    VirtualProtect((LPVOID)0x004CEDE8, 8, PAGE_EXECUTE_READWRITE, &old);
+    *(BYTE*)0x004CEDE8 = 0xE9;
+    *(DWORD*)0x004CEDE9 = 0x0000008E;
+    *(BYTE*)0x004CEDED = 0x90;
+    *(WORD*)0x004CEDEE = 0x9090;
+
     if (Gfx::fps_fix)
     {
         BYTE timer[] = { 0xE8, 0x98, 0xF4, 0xF7, 0x79, 0xB9, 0x0E, 0x00, 0x00, 0x00, 0x39, 0xC8, 0x73, 0x27, 0x29, 0xC1, 0x51, 0xE8, 0xD7, 0x29, 0x8C, 0x75, 0xA1, 0x00, 0x00, 0x00, 0x00, 0x85, 0xC0, 0x75, 0x16, 0xE8, 0x00, 0x00, 0x00, 0x00, 0xEB, 0x0F };
@@ -5201,10 +5209,12 @@ bool LaunchGFXCommand(CStruct* pStruct, CScript* pScript)
             switch (header->Data)
             {
             case Checksums::Reset:
+                MessageBox(0, 0, 0, 0);
                 Gfx::command = Gfx::Command::Reset;
                     break;
             case Checksums::ToggleWindowed:
-                Gfx::command = Gfx::Command::ToggleWindowed;
+                if(IsOptionOn("LM_GFX_bWindowed") == (*(BYTE*)0x00851094 & 1))
+                    Gfx::command = Gfx::Command::ToggleWindowed;
                 break;
             }
 
