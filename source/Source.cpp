@@ -3661,7 +3661,7 @@ float __cdecl proxy_SnapToGroundClamp(float a1)
     float angle = a1;
     if (angle > 1.0f) angle = 1.0f;
     else if (angle < -1.0f) angle = -1.0f;
-    return asinf(angle);//pClacos(0x776B31E0)(angle);
+    return sinf(angle);//pClacos(0x776B31E0)(angle);
 }
 
 int proxy_sprintf(char* result, char* format, DWORD value)
