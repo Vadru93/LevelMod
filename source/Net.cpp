@@ -38,10 +38,14 @@ namespace Network
                 if (it->second.value != msg->value)
                 {
                     it->second.value = msg->value;
-                    if (it->second.type == OverrideOption::Type::OVERRIDE ||
-                        (it->second.type == OverrideOption::Type::OVERRIDE_TRUE && !it->second.value) ||
-                        (it->second.type == OverrideOption::Type::OVERRIDE_FALSE && it->second.value))
-                        UpdateOption(it->second.option, it->second.value);
+                    auto option = GetOption(it->second.option);
+                    if (option)
+                    {
+                        if (it->second.value == option->value || option->Overriden())
+                            UpdateOption(it->second.option, it->second.value);
+                    }
+                    else
+                        _printf("Couldn't find option %s[HostOption:%s]\n", FindChecksumName(it->second.option), FindChecksumName(msg->option));
                 }
             }
             else

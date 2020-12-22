@@ -607,30 +607,27 @@ int AddOption(char* name, int value, bool update, DWORD HostOption, BYTE type)
             SendHostOptionChanged(checksum, value);
             _printf("Sent message\n");
 
-            auto it = options.find(HostOption);
-            if (it == options.end())
+            auto option = GetOption(HostOption);
+            if (option)
             {
-                MessageBox(0, "This is not good", "HostOption badly linked...", 0);
-            }
-
-            /*auto override = it->second.override;
-            if (!override)
-            {
-                override = &overrideOptions.find(checksum)->second;
-            }*/
-            if (!it->second.pOverride)
-            {
-                auto Override = overrideOptions.find(checksum);
-                if (Override != overrideOptions.end())
+                if (!option->pOverride)
                 {
-                    it->second.pOverride = &Override->second;
+                    auto Override = overrideOptions.find(checksum);
+                    if (Override != overrideOptions.end())
+                    {
+                        option->pOverride = &Override->second;
+                    }
+                    else
+                        MessageBox(0, "This is not good aswell", "HostOption badly linked...", 0);
                 }
-                else
-                    MessageBox(0, "This is not good aswell", "HostOption badly linked...", 0);
-            }
 
-            _printf("Now we updating..\n");
-            UpdateOption(HostOption, value);
+                _printf("Now we updating..\n");
+                if (value == option->value || option->Overriden())
+                    UpdateOption(HostOption, value);
+            }
+            else
+                MessageBox(0, "This is not good", "HostOption badly linked...", 0);
+
         }
     }
     return value;
@@ -813,9 +810,9 @@ bool ToggleHostOption(CStruct* pStruct, CScript* pScript)
             auto override = overrideOptions.find(header->Data);
             if (override != overrideOptions.end())
             {
-                auto it = options.find(header->Data);
-                if (it != options.end())
-                    it->second.value = !it->second.value;
+                Option* option = GetOption(header->Data);
+                if(option)
+                    option->value = !option->value;
                 else
                     _printf("couldn't find option %s\nMake Sure to add the option first\n", FindChecksumName(header->Data));
                 override->second.value = !override->second.value;
