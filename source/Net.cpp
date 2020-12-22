@@ -31,16 +31,23 @@ namespace Network
         NetHandler* net_handler = NetHandler::Instance();
         if (!net_handler->OnServer())
         {
+            //Get the current override option
             auto it = LevelModSettings::overrideOptions.find(msg->option);
             if (it != LevelModSettings::overrideOptions.end())
             {
                 _printf("Host sent HostOption %s %d\n", FindChecksumName(msg->option), msg->value);
+
+                //If the current override value equals the recieved override value we don't need to do anything
                 if (it->second.value != msg->value)
                 {
+                    //Set the current override value to the recieved override value
                     it->second.value = msg->value;
+
+                    //Get the actual option
                     auto option = GetOption(it->second.option);
                     if (option)
                     {
+                        //If the override value equals the actual option value, or option is overriden we need to update the option(aka apply the option)
                         if (it->second.value == option->value || option->Overriden())
                             UpdateOption(it->second.option, it->second.value);
                     }

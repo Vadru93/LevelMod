@@ -610,6 +610,7 @@ int AddOption(char* name, int value, bool update, DWORD HostOption, BYTE type)
             auto option = GetOption(HostOption);
             if (option)
             {
+                //If the link between option and override option is not found we can now link it instead of crash app...
                 if (!option->pOverride)
                 {
                     auto Override = overrideOptions.find(checksum);
@@ -622,6 +623,8 @@ int AddOption(char* name, int value, bool update, DWORD HostOption, BYTE type)
                 }
 
                 _printf("Now we updating..\n");
+
+                //If the override value equals the actual option value, or option is overriden we need to update the option(aka apply the option)
                 if (value == option->value || option->Overriden())
                     UpdateOption(HostOption, value);
             }
