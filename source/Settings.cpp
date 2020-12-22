@@ -538,8 +538,35 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
     }
 }
 
+void MaybeUpdateOption(DWORD overriden_option, DWORD HostOption, DWORD value)
+{
+    auto option = GetOption(overriden_option);
+    if (option)
+    {
+        //If the link between option and override option is not found we can now link it instead of crash app...
+        if (!option->pOverride)
+        {
+            auto Override = overrideOptions.find(HostOption);
+            if (Override != overrideOptions.end())
+            {
+                option->pOverride = &Override->second;
+            }
+            else
+                MessageBox(0, "This is not good aswell", "HostOption badly linked...", 0);
+        }
 
-int AddOption(char* name, int value, bool update, DWORD HostOption, BYTE type)
+        _printf("Now we updating..\n");
+
+        //If the override value equals the actual option value, or option is overriden we need to update the option(aka apply the option)
+        if (value == option->value || option->Overriden())
+            UpdateOption(overriden_option, value);
+    }
+    else
+        MessageBox(0, "This is not good", "HostOption badly linked...", 0);
+}
+
+
+int AddOption(char* name, int value, bool update, DWORD overriden_option, BYTE type)
 {
     DWORD checksum = crc32f(name);
     if (update)
@@ -571,10 +598,10 @@ int AddOption(char* name, int value, bool update, DWORD HostOption, BYTE type)
             options.insert(std::pair<DWORD, Option>(checksum, Option(value)));
         else
             MessageBox(0, "Added an option that already exists...", "Check settings.qb you dummy!!", 0);
-        if (HostOption)
+        if (overriden_option)
         {
             if(overrideOptions.find(checksum) == overrideOptions.end())
-                overrideOptions.insert(std::pair<DWORD, OverrideOption>(checksum, OverrideOption((OverrideOption::Type)type, value, HostOption)));
+                overrideOptions.insert(std::pair<DWORD, OverrideOption>(checksum, OverrideOption((OverrideOption::Type)type, value, overriden_option)));
             else
                 MessageBox(0, "Added an HostOption that already exists...", "Check settings.qb you dummy!!", 0);
         }
@@ -595,7 +622,7 @@ int AddOption(char* name, int value, bool update, DWORD HostOption, BYTE type)
         //MessageBox(0, FindChecksumName(checksum), "", 0);
 
     }
-    if (HostOption == 0)
+    if (overriden_option == 0)
     {
         UpdateOption(checksum, value);
     }
@@ -607,30 +634,7 @@ int AddOption(char* name, int value, bool update, DWORD HostOption, BYTE type)
             SendHostOptionChanged(checksum, value);
             _printf("Sent message\n");
 
-            auto option = GetOption(HostOption);
-            if (option)
-            {
-                //If the link between option and override option is not found we can now link it instead of crash app...
-                if (!option->pOverride)
-                {
-                    auto Override = overrideOptions.find(checksum);
-                    if (Override != overrideOptions.end())
-                    {
-                        option->pOverride = &Override->second;
-                    }
-                    else
-                        MessageBox(0, "This is not good aswell", "HostOption badly linked...", 0);
-                }
-
-                _printf("Now we updating..\n");
-
-                //If the override value equals the actual option value, or option is overriden we need to update the option(aka apply the option)
-                if (value == option->value || option->Overriden())
-                    UpdateOption(HostOption, value);
-            }
-            else
-                MessageBox(0, "This is not good", "HostOption badly linked...", 0);
-
+            MaybeUpdateOption(overriden_option, checksum, value);
         }
     }
     return value;

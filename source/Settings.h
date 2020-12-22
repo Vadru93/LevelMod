@@ -83,5 +83,7 @@ int AddOption(char* name, int value, bool update = false, DWORD HostOption = 0, 
 
 void __stdcall SendHostOptionChanged(int option, int value);
 
+void MaybeUpdateOption(DWORD overriden_option, DWORD HostOption, DWORD value);
+
 LevelModSettings::Option* GetOption(DWORD option);
 #endif

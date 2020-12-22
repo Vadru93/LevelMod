@@ -43,16 +43,7 @@ namespace Network
                     //Set the current override value to the recieved override value
                     it->second.value = msg->value;
 
-                    //Get the actual option
-                    auto option = GetOption(it->second.option);
-                    if (option)
-                    {
-                        //If the override value equals the actual option value, or option is overriden we need to update the option(aka apply the option)
-                        if (it->second.value == option->value || option->Overriden())
-                            UpdateOption(it->second.option, it->second.value);
-                    }
-                    else
-                        _printf("Couldn't find option %s[HostOption:%s]\n", FindChecksumName(it->second.option), FindChecksumName(msg->option));
+                    MaybeUpdateOption(it->second.option, msg->option, msg->value);
                 }
             }
             else
