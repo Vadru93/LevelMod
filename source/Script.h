@@ -274,6 +274,8 @@ struct EXTERN CScript
         _printf("\n");
     }
 
+    bool AddCStruct(CStructHeader* pStruct, bool allocate = true);
+
     DWORD GetNodeName();
 
 };

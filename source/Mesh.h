@@ -326,7 +326,7 @@ struct CSector
         DWORD numIndices;
         Material* material;
     };
-    MaterialSplit splits[];
+    MaterialSplit splits[64];
 
 
 
@@ -371,7 +371,7 @@ struct Mesh
         DWORD* punk4;//NULL?
 
     };
-    MaterialSplit splits[];
+    MaterialSplit splits[64];
 
     void AddShader(ShaderObject* shader, DWORD matIndex);
 };

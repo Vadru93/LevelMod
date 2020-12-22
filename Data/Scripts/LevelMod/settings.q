@@ -177,6 +177,7 @@ LM_Menu_Shared_Back = {
 //=======================levelmod settings menus============================
 
 SCRIPT MaybeAddHostOption
+    RestoreGoBack
     IF OnServer
 	    AddLine parent = Levelmod_menu_root Type = textmenuelement id = lm_hostoption_id text = "Host Options" link = levelmod_HostOptions_root
 	ENDIF
@@ -192,6 +193,10 @@ Levelmod_menu_root = {
 	eventhandler = { type = showeventhandler target = "MaybeAddHostOption" }
 }
 
+SCRIPT sFixGoBack
+    FixGoBack
+ENDSCRIPT
+
 levelmod_menu_root_children = [
 	//title
 	{ Type = textmenuelement auto_id text = "LevelMod settings" static dont_gray drawer = title }
@@ -206,7 +211,7 @@ levelmod_menu_root_children = [
 	
 	//hardware graphics options (AA, filtering, 
 	{ Type = textmenuelement auto_id text = "Graphics Options" link = newSettingsMenu  
-	target = "populate_game_options" params = { mask = cat_gfx items = game_menu_items title = "Graphics Options" } }
+	target = "populate_game_options" params = { mask = cat_gfx items = game_menu_items title = "Graphics Options" OnShow = sFixGoBack  } }
 	
 	
 	//Options that affect certain parts of th level
@@ -532,6 +537,11 @@ ENDSCRIPT
 
 SCRIPT AddOptions
 	ForEachIn LevelModOptions do = sAddOption params =  <...>
+ENDSCRIPT
+
+SCRIPT LM_SetOption_Do
+GoTo <Do> params = <params>
+LM_SetOption <...>
 ENDSCRIPT
 
 SCRIPT LM_SetOption_Slider
@@ -889,13 +899,16 @@ script populate_game_options
 	
 	ForeachIn <items> do = Settings_AddLine params = { <...> }
 	Settings_AddLine back_menu_item target = "go_back" Params = { id = game_options_names_menu } 
+	IF GotParam OnShow
+	    Goto <OnShow>
+	ENDIF
 endscript
 
 
 //to avoid multiple nested IFs
 //should rewrite this func in switch-case-ish logic
 //like if isEnum call enum func, if IsBool call bool func etc.
-script Settings_AddLine
+script Settings_AddLine params = {}
 	if GotParam <mask>
 		if GotParam link
 			AddLine { 
@@ -918,7 +931,7 @@ script Settings_AddLine
 				id = <option_id> 
 				text = <text> 
 				lower = 0 upper = <max> delta = 1 start = <OptionValue> wrap = 1 right_side_w = 100
-				eventhandlers = [ {Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextFromValue = <TextValues> TextOnly } }{ Type = ContentsChangedEventHandler target = "LM_SetOption" params = { name = <option> id = <option_id> TextFromValue = <TextValues> } } ]
+				eventhandlers = [ {Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextFromValue = <TextValues> TextOnly } }{ Type = ContentsChangedEventHandler target = "LM_SetOption_Do" params = { Do = <Do> params = <params> name = <option> id = <option_id> TextFromValue = <TextValues> } } ]
 				
 				}
 			else

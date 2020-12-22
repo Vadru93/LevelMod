@@ -339,8 +339,57 @@ EXTERN DWORD CStructHeader::GetSize()
     return size;
 }
 
+bool CScript::AddCStruct(CStructHeader* pStruct, bool allocate)
+{
+    if (!pStruct)
+        return false;
 
+    for (auto param = params->head; param != NULL; param = param->NextHeader)
+    {
+        if (param->Data == pStruct->Data)
+            return false;
+    }
 
+    auto param = allocate ? params->AllocateCStruct() : pStruct;
+    param->Type = pStruct->Type;
+    param->QBkey = pStruct->QBkey;
+    param->Data = pStruct->Data;
+
+    auto head = params->head;
+    auto tail = params->tail;
+
+    if (head)
+    {
+        if (tail)
+        {
+            tail->NextHeader = param;
+            tail = param;
+            tail->NextHeader = NULL;
+        }
+        else
+        {
+            auto currparam = head->NextHeader;
+            CStructHeader* prevparam = NULL;
+            while (currparam)
+            {
+                prevparam = currparam;
+                currparam = param->NextHeader;
+            }
+            prevparam->NextHeader = param;
+            param = prevparam->NextHeader;
+            tail->NextHeader = param;
+            tail = param;
+            tail->NextHeader = NULL;
+        }
+    }
+    else
+    {
+        head = param;
+        tail = head;
+        tail->NextHeader = NULL;
+    }
+    return true;
+}
 
 CStructHeader* CScript::GetParam(DWORD name)
 {

@@ -10,6 +10,32 @@ bool XINPUT::vibrating = false;
 XINPUT_VIBRATION XINPUT::vibration;
 DWORD XINPUT::vibrationFrames = 0;
 CXBOXController* XINPUT::Player1 = NULL;
+KeyMap* keyMap = NULL;
+BYTE* keyState = NULL;
+
+
+void  KeyMap::UpdateKeyMap()
+{
+    DWORD pKeyboardControl = *(DWORD*)0x008510B8;
+    DWORD pKeyMap = *(DWORD*)(pKeyboardControl + 0x10);
+    pKeyMap = *(DWORD*)(pKeyMap + 4);
+    keyState = (BYTE*)(pKeyMap + 0x24);
+    pKeyMap = *(DWORD*)(pKeyMap + 0xE8);
+
+    keyMap = (KeyMap*)(pKeyMap + 0x80);
+}
+
+bool KeyMap::IsPressed(Button button)
+{
+    return keyState[(BYTE)button] > 0x40;
+}
+
+VirtualKeyCode KeyMap::GetVKeyCode(MappedKey key)
+{
+    return keyMap[(BYTE)key].vkCode;
+}
+
+
 
 
 

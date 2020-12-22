@@ -9,7 +9,7 @@ namespace LevelModSettings
     //Used to set option max value
     extern CStructHeader* pMax;
 
-    static enum NewTrickOptions
+    enum NewTrickOptions
     {
         ALLOW_NONE = 0, ALLOW_SPINE = 1, ALLOW_BANK = 2, ALLOW_ACID = 4, ALLOW_WALLPLANT = 8, ALL_SPINE = (ALLOW_SPINE | ALLOW_BANK | ALLOW_ACID)
     };

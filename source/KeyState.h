@@ -37,12 +37,9 @@ enum class VirtualKeyCode : BYTE
     PAUSE,
     CAPS,
     KANA,
-    HANGUEL,
-    HANGAL,
     IME_ON,
-    KUNJA,
+    JUNJA,
     FINAL,
-    HANJA,
     KANJI,
     IME_OFF,
     ESC,
@@ -67,6 +64,62 @@ enum class VirtualKeyCode : BYTE
     DEL,
     HELP,
 };
+
+struct KeyMap
+{
+    bool mapped;
+    BYTE padding;
+    VirtualKeyCode vkCode;
+    BYTE padding2;
+
+    enum class Button : BYTE
+    {
+        Right,
+        Left,
+        Up,
+        Down,
+        Triangle,
+        Circle,
+        X,
+        Square,
+    };
+
+    /*enum class KeyState : BYTE
+    {
+       Released = 0,
+       Pressed = 0xFF
+    };*/
+
+    static bool IsPressed(Button button);
+
+    enum class MappedKey : BYTE
+    {
+        Pause,
+        CameraToggle,
+        Unknown,
+        CameraLock,
+        Grind,
+        Grab,
+        Ollie,
+        Flip,
+        SpinLeft,
+        SpinRight,
+        Nollie,
+        Revert,
+        Right,
+        Left,
+        Up,
+        Down
+    };  
+
+    static VirtualKeyCode GetVKeyCode(MappedKey key);
+
+    static void  UpdateKeyMap();
+
+
+};
+
+
 
 #define p_num_keys *(DWORD*)0x005D0300
 #define p_key_state(idx) *(KeyCode*)(0x005d030c+idx)

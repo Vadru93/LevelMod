@@ -14,7 +14,7 @@ extern void RemoveMovingObject(SuperSector* sector);
 extern bool updatingObjects;
 //00491820
 //0051E060
-#pragma pack(1)
+//#pragma pack(1)
 EXTERN struct SuperSector
 {
     DWORD FFFFFFFF;
@@ -39,12 +39,13 @@ EXTERN struct SuperSector
     DWORD* pUnk11;//Always NULL?
     DWORD flag;//always 6?
     BYTE state;//MeshState
-    DWORD* pUnk12;//Always NULL?
+    BYTE padding2[19];
+    /*DWORD* pUnk12;//Always NULL?
     WORD* pCollisionFlags;//the flags for skatable, trigger etc
     DWORD* pUnk13;//bunch of 0xFF and random data
     DWORD* pUnk14;//bunch of 00
     BYTE unknown2;//Used when collision checking
-    BYTE padding2[2];
+    BYTE padding2[2];*/
     DWORD* pUnknown;
     DWORD* pUnk16;//bunch of floats, maybe something about collision?
     DWORD name;//crc32
@@ -152,7 +153,7 @@ EXTERN struct SuperSector
         pSetMeshState(0x00418DD0)(Node::GetNodeIndex(name), state, &pScript);
     }
 };
-#pragma pop(pack)
+//#pragma pop(pack)
 //bool second = true;
 
 struct MovingObject

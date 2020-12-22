@@ -10,6 +10,7 @@ LevelMod\gamemode.qb
 LevelMod\gameoptions.qb
 LevelMod\helper.qb
 LevelMod\mainmenu.qb
+LevelMod\levelmenu.qb
 LevelMod\levels.qb
 LevelMod\gspymenu.qb
 LevelMod\groundtricks.qb
@@ -28,12 +29,14 @@ ajc_scripts.qb
 alf_scripts.qb
 alltricks.qb
 anim.qb
+bdj_goalscripts.qb
 bdj_pedscripts.qb
 bdj_scripts.qb
 bird_a.qb
 bird_a_resting.qb
 bird_b.qb
 bird_b_resting.qb
+blue_flg.qb
 boardselect.qb
 camera.qb
 cas.qb
@@ -81,7 +84,6 @@ jku_scripts.qb
 js_scripts.qb
 judges.qb
 keyboard.qb
-levelmenu.qb
 lights.qb
 liptricks.qb
 memcard.qb
@@ -193,6 +195,7 @@ physics.qb
 promenu.qb
 protricks.qb
 records.qb
+red_flg.qb
 replay.qb
 reverb.qb
 scaling.qb

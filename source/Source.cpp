@@ -556,6 +556,7 @@ void CreateSuperSectors()
 {
     _printf("Going to create MovingObjects\n");
     GameState::GotSuperSectors = true;
+    KeyMap::UpdateKeyMap();
     *(bool*)0x00400020 = true;
     //Game::skater = Skater::UpdateSkater();
 }
@@ -1497,6 +1498,32 @@ bool UnfreezeCamera(CStruct* pStruct, CScript* pScript)
     return true;
 }
 
+bool FileExistsScript(CStruct* pStruct, CScript* pScript)
+{
+    CStructHeader* header = pStruct->head;
+
+    if (header)
+    {
+        static char dir[256] = "data\\";
+        DWORD len = strlen(header->pStr) + 1;
+        memcpy(&dir[5], header->pStr, len);
+
+        FILE* f = fopen(dir, "rb");
+        if (f)
+        {
+            fclose(f);
+            return true;
+        }
+        return false;
+    }
+    return true;
+}
+
+bool AddParamScript(CStruct* pStruct, CScript* pScript)
+{
+    return pScript->AddCStruct(pStruct->head);
+}
+
 bool NotScript(CStruct* pStruct, CScript* pScript)
 {
     CStructHeader* header = pStruct->head;
@@ -1966,6 +1993,8 @@ const CompiledScript scripts[] =
     { "Not", NotScript },
     { "IsNot", NotScript },
     { "NotTrue", NotScript},
+    { "FileExists", FileExistsScript },
+    { "AddParam", AddParamScript },
     { "SubToGlobal", SubToGlobal },
     { "AddToGlobal", AddToGlobal },
     { "FreezeCamera", FreezeCamera },
@@ -1975,6 +2004,8 @@ const CompiledScript scripts[] =
     { "CreatePair", CreatePair },
     { "GetSliderValue", GetSliderValue },
     { "ToggleWindowed", ToggleWindowedScript },
+    { "RestoreGoBack", RestoreGoBackScript },
+    { "FixGoback", FixGoBackScript },
     { "GetMaximumIndex", GetMaximumIndexScript },
     { "GetOptionValue", GetOptionValue},
     { "LaunchGFXCommand", LaunchGFXCommand },
@@ -3609,6 +3640,20 @@ void AddFunctions()
         header->pFunction = NewShatterScript;
 }
 
+bool __stdcall proxy_FixGoBack(BYTE unk1, BYTE unk2, BYTE unk3, BYTE unk4)
+{
+    static void* oldECX;
+    _asm mov oldECX, ecx;
+    //VirtualKeyCode vk_triangle = KeyMap::GetVKeyCode(KeyMap::MappedKey::Grind);
+    if (KeyState::GetKeyboardState(VirtualKeyCode::ESC) || KeyState::GetOldKeyboardState(VirtualKeyCode::ESC) || KeyMap::IsPressed(KeyMap::Button::Triangle))
+    {
+        typedef bool(__thiscall* pMaybeGoBack)(void* pThis, BYTE unk1, BYTE unk2, BYTE unk3, BYTE unk4);
+        return pMaybeGoBack(0x004CF380)(oldECX, unk1, unk2, unk3, unk4);
+    }
+    _asm mov ecx, oldECX;
+    return true;
+}
+
 float __cdecl proxy_SnapToGroundClamp(float a1)
 {
     typedef float(__cdecl* pClacos)(float angle);
@@ -3916,6 +3961,8 @@ LARGE_INTEGER TimerStart()
     return startTime;
 }
 
+
+
 void InitLevelMod()
 {
     //HookControls();
@@ -3936,11 +3983,11 @@ void InitLevelMod()
     //HookFunction(0x004C04F0, TimerElapsed);
 
     //Fix menu crashing
-    VirtualProtect((LPVOID)0x004CEDE8, 8, PAGE_EXECUTE_READWRITE, &old);
-    *(BYTE*)0x004CEDE8 = 0xE9;
+    VirtualProtect((LPVOID)0x004CEDE4, 8, PAGE_EXECUTE_READWRITE, &old);
+    /**(BYTE*)0x004CEDE8 = 0xE9;
     *(DWORD*)0x004CEDE9 = 0x0000008E;
     *(BYTE*)0x004CEDED = 0x90;
-    *(WORD*)0x004CEDEE = 0x9090;
+    *(WORD*)0x004CEDEE = 0x9090;*/
 
     if (Gfx::fps_fix)
     {
@@ -4089,6 +4136,7 @@ void InitLevelMod()
     //With this random init atleast it will yield same result every 49 days
     //Maybe should implement more "true" randomness?
     InitialRand(GetTickCount());
+    KeyMap::UpdateKeyMap();
     QBKeyHeader* header = NULL;
 
 
@@ -5198,6 +5246,24 @@ void ToggleWindowed()
 bool ToggleWindowedScript(CStruct* pStruct, CScript* pScript)
 {
     Gfx::command = Gfx::Command::ToggleWindowed;
+    return true;
+}
+
+bool FixGoBackScript(CStruct* pStruct, CScript* pScript)
+{
+    /**(BYTE*)0x004CEDE8 = 0xE9;
+    *(DWORD*)0x004CEDE9 = 0x0000008E;
+    *(BYTE*)0x004CEDED = 0x90;
+    *(WORD*)0x004CEDEE = 0x9090;*/
+    HookFunction(0x004CEDE4, proxy_FixGoBack);
+    return true;
+}
+
+bool RestoreGoBackScript(CStruct* pStruct, CScript* pScript)
+{
+    /*BYTE restored[] = { 0x84, 0xC0, 0x0F, 0x85, 0x8B, 0x00, 0x00, 0x00 };
+    memcpy((LPVOID)0x004CEDE8, restored, sizeof(restored));*/
+    *(DWORD*)0x004CEDE4 = 0x00000598;
     return true;
 }
 
