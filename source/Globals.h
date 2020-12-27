@@ -250,6 +250,8 @@ void SetVertexShader_naked();
 void __stdcall SetVertexShader_hook();
 void __cdecl Obj_SetShader_hook();
 
+HRESULT __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYTE data);
+
 SHORT __stdcall proxy_GetAsyncKeyState(int key);
 BOOL __stdcall proxy_GetMessage(LPMSG lpMsg,
     HWND  hWnd,

@@ -51,6 +51,20 @@ EXTERN struct SuperSector
     DWORD name;//crc32
     DWORD* pUnk17;//similar to pUnk16
 
+
+    struct Color
+    {
+        BYTE r;
+        BYTE g;
+        BYTE b;
+        BYTE a;
+    };
+
+    Color* GetColors()
+    {
+        return (Color*)color_offset;
+    }
+
     void Update()
     {
         sector->Update();
@@ -63,6 +77,11 @@ EXTERN struct SuperSector
         if (sector)
             return checksum;
         return 0;
+    }
+
+    DWORD GetNumSplits()
+    {
+        return sector ? sector->numSplits : 0;
     }
 
     EXTERN static SuperSector* GetSuperSector(DWORD checksum)

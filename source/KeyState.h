@@ -69,8 +69,8 @@ struct KeyMap
 {
     bool mapped;
     BYTE padding;
-    VirtualKeyCode vkCode;
-    BYTE padding2;
+    //dinput
+    WORD DIK_KeyCode;
 
     enum class Button : BYTE
     {

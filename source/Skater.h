@@ -190,6 +190,11 @@ public:
         Special = 0x20
     };
 
+    DWORD GetCollisionName()
+    {
+        return checksumName;
+    }
+
     typedef void(__thiscall* const pAddTrick)(void* pThis, const char* trickName, DWORD trickScore, TrickType type);
     void AddTrick(const char* trickName, DWORD trickScore, TrickType type)
     {

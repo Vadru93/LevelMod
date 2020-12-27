@@ -241,6 +241,7 @@ void ShatterSetParams(Vertex& velocity, float area_test, float velocity_variance
 
 
 std::vector<ShatterData*> shatterObjects;
+std::vector<SuperSector*> PointyObjects;
 
 
 void ShatterSuperSector(SuperSector* super_sector);

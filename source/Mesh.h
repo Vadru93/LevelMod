@@ -210,6 +210,28 @@ struct Material
         pSubmit(0x00554EC0)(tex->data, tex);
     }
 
+    void SubmitTextureOnly()
+    {
+        //_printf("BaseTexture %p material %p\n", texture->GetBaseTexture(), this);
+        //Submit_Original(texture);
+        texture->Submit();
+
+
+        if (p_current_texstage(D3DTSS_ADDRESSU) != texture->uAddress)
+        {
+            p_current_texstage(D3DTSS_ADDRESSU) = texture->uAddress;
+            p_target_texstage(D3DTSS_ADDRESSU) = texture->uAddress;
+            Gfx::pDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, texture->uAddress);
+        }
+
+        if (p_current_texstage(D3DTSS_ADDRESSV) != texture->vAddress)
+        {
+            p_current_texstage(D3DTSS_ADDRESSV) = texture->vAddress;
+            p_target_texstage(D3DTSS_ADDRESSV) = texture->vAddress;
+            Gfx::pDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, texture->vAddress);
+        }
+    }
+
     void Submit()
     {
         //_printf("BaseTexture %p material %p\n", texture->GetBaseTexture(), this);

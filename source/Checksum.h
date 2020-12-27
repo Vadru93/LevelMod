@@ -110,6 +110,7 @@ namespace Checksums
     enum CompileTimeChecksums//Generated at compile-time for improved performance and code readability
     {
         Class = COMPILE_CRC32("class"),
+        EnvironmentObject = COMPILE_CRC32("environmentobject"),
         Name = COMPILE_CRC32("name"),
         Position = COMPILE_CRC32("position"),
         Pos = COMPILE_CRC32("pos"),

@@ -368,6 +368,67 @@ void __stdcall RenderShatterObjects()
         Gfx::pDevice->GetRenderTarget(0, &Gfx::world_rendertarget);
         Gfx::pDevice->GetViewport(&Gfx::world_viewport);
 
+        if (GameState::GotSuperSectors && PointyObjects.size())
+        {
+            DWORD old_factor;
+            DWORD old_ref;
+            DWORD old_blend;
+            DWORD old_z;
+            DWORD old_bias;
+            DWORD old_slope;
+
+            Gfx::pDevice->GetRenderState(D3DRS_BLENDFACTOR, &old_factor);
+            Gfx::pDevice->GetRenderState(D3DRS_ALPHAREF, &old_ref);
+            Gfx::pDevice->GetRenderState(D3DRS_ALPHABLENDENABLE, &old_blend);
+            Gfx::pDevice->GetRenderState(D3DRS_ZFUNC, &old_z);
+            Gfx::pDevice->GetRenderState(D3DRS_DEPTHBIAS, &old_bias);
+            Gfx::pDevice->GetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, &old_slope);
+
+            /*Gfx::pDevice->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, static_cast<DWORD>(-1.0f));
+            Gfx::pDevice->SetRenderState(D3DRS_DEPTHBIAS, 4294967295);*/
+            //Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+            Gfx::pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+            Gfx::pDevice->SetRenderState(D3DRS_BLENDFACTOR, D3DXCOLOR(255, 0, 0, 255));
+            //Gfx::pDevice->SetRenderState(D3DRS_ALPHAREF, 8);
+            Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+            Gfx::pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
+            Gfx::pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+            Gfx::pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+            Gfx::pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+
+            for (auto object = PointyObjects.begin(); object != PointyObjects.end(); object++)
+            {
+                SuperSector* sector = *object;
+
+                if (sector->flag & 6 && sector->state && sector->mesh)
+                {
+                    DWORD numSplits = sector->GetNumSplits();
+
+                    for (auto i = 0; i < numSplits; i++)
+                    {
+                        Mesh::MaterialSplit* split = &sector->mesh->splits[i];
+                        if (split->numVertices && split->numIndices && split->material && split->material->texture)
+                        {
+                            split->material->SubmitTextureOnly();
+
+                            //_printf("VertexShader %X stride %X\n", split->vertexShader, split->stride);
+                            Gfx::pDevice->SetFVF(split->vertexShader);
+
+                            Gfx::pDevice->SetStreamSource(0, split->vertexBuffer->GetProxyInterface(), 0, split->stride);
+                            Gfx::pDevice->SetIndices(split->indexBuffer->GetProxyInterface());
+                            Gfx::pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, split->baseIndex, 0, split->numVertices, 0, split->numIndices-2);
+                        }
+                    }
+                }
+            }
+
+            Gfx::pDevice->SetRenderState(D3DRS_BLENDFACTOR, old_factor);
+            Gfx::pDevice->SetRenderState(D3DRS_ALPHAREF, old_ref);
+            Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, old_blend);
+            Gfx::pDevice->SetRenderState(D3DRS_ZFUNC, old_z);
+            Gfx::pDevice->SetRenderState(D3DRS_DEPTHBIAS, old_bias);
+            Gfx::pDevice->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, old_slope);
+        }
 
         if (shatterObjects.size())
         {

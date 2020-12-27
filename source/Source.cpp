@@ -28,6 +28,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include "shadow.h"
+#include "dinput.h"
 /*0
 004F9B9E < -non semi
     8
@@ -61,6 +62,9 @@ ID3DXLine* line = NULL;
 DWORD numLineVertices = 0;
 D3DCOLOR lineColor = 0;
 D3DXMATRIX lineWorld;
+
+vector<SuperSector*> EnvironmentObjects;
+extern vector<SuperSector*> PointyObjects;
 
 LPD3DXSPRITE eye_sprite;
 DWORD wheel_timer = 0;
@@ -539,6 +543,8 @@ bool CreatePair(CStruct* pStruct, CScript* pScript)
 
 void DestroySuperSectors()
 {
+    EnvironmentObjects.clear();
+    PointyObjects.clear();
     String::RemoveLevelStrings();
     QScript::Scripts->ClearLevelTable();
     _printf("Going to remove MovingObjects\n");
@@ -2863,7 +2869,115 @@ void LoadCustomShaderThread()
 
     //First update skater pointer
     Game::skater = Skater::UpdateSkater();
+    while(!Game::skater) Skater::UpdateSkater();
 
+    /*Game::skater->Store();
+
+    //Try to find narrow objects for nata spin
+    for (auto object = EnvironmentObjects.begin(); object != EnvironmentObjects.end(); object++)
+    {
+        SuperSector* sector = *object;
+
+        //Get the width and height
+        float x_width = sector->bboxMax.x - sector->bboxMin.x;
+        float height = sector->bboxMax.y - sector->bboxMin.y;
+        float z_width = sector->bboxMax.z - sector->bboxMin.z;
+
+        //Super math... probably is a better way to do this
+        if (x_width < 35.0f && x_width > 3.0f && z_width < 35.0f && z_width > 3.0f && height > 15.0f)
+        {
+
+            //Now we found a narrow object, but we still need to check if there is another object ontop of it that will make the object unaccessable
+            //So we will make raytracing from object top position to slightly above and vice versa to combat CCW
+
+            //Get the middle topmomst point of the object, not 100% true but seems to be true enough
+            D3DXVECTOR3 top;
+            top.x = (sector->bboxMax.x + sector->bboxMin.x) / 2.0f;
+            top.y = sector->bboxMax.y;
+            top.z = (sector->bboxMax.z + sector->bboxMin.z) / 2.0f;
+
+            D3DXVECTOR3 end = top;
+            //Set end point sligthly above
+            end.y += 50.0f;
+            Game::skater->SetRay(top, end);
+            //Ignore hollow collision
+            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0))
+                continue;
+
+            //We did not collide, but there still may be an object ontop of this object that has the same exact position as the topmost point
+            //So we need to check slightly below the topmost point
+            if (height > 20.0f)
+                top.y -= 20.0f;
+            else
+                top.y -= 8.0f;
+            Game::skater->SetRay(top, end);
+            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name && Game::skater->GetHitPoint()->y >= top.y)
+                continue;
+
+            //Now we need to check again in reverse order to take care of CCW
+            Game::skater->SetRay(end, top);
+            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name && Game::skater->GetHitPoint()->y >= top.y)
+                continue;
+
+            //Now let's check in circle around, should use boundingsphere collision checking instead of raytracing here
+            top.y = sector->bboxMax.y+1.0f;
+            end.y = top.y;
+            end.x += 50.0f;
+            Game::skater->SetRay(top, end);
+            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
+                continue;
+
+            end.z += 50.0f;
+            Game::skater->SetRay(top, end);
+            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
+                continue;
+
+            end.x -= 50.0f;
+            Game::skater->SetRay(top, end);
+            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
+                continue;
+
+            end.x -= 50.0f;
+            Game::skater->SetRay(top, end);
+            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
+                continue;
+
+            end.z -= 50.0f;
+            Game::skater->SetRay(top, end);
+            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
+                continue;
+
+            end.z -= 50.0f;
+            Game::skater->SetRay(top, end);
+            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
+                continue;
+
+            end.x += 50.0f;
+            Game::skater->SetRay(top, end);
+            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
+                continue;
+
+            end.x += 50.0f;
+            Game::skater->SetRay(top, end);
+            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
+                continue;
+
+            //We have a narrow object that seems to be accessible
+            for (auto i = 0; i < sector->numVertices; i++)
+            {
+                //Decrease b and g value, keep r value = make object more red
+                SuperSector::Color* colors = sector->GetColors();
+                colors[i].g *= 0.2f;
+                colors[i].b *= 0.2f;
+            }
+            
+            //Tell engine to update the VertexBuffer to vram
+            sector->Update();
+            //PointyObjects.push_back(sector);
+        }
+    }
+    Game::skater->Restore();
+    */
     //Then check if we are host and if we are, send the HostOptions to clients
     Network::NetHandler* net_handler = Network::NetHandler::Instance();
 
@@ -2883,6 +2997,31 @@ bool OnPostLevelLoad(CStruct* pStruct, CScript* pScript)
 {
     _printf("OnPostLevelLoad...\n");
     oldSkater = Game::skater;
+
+    CArray* NodeArray = Node::GetNodeArray();
+    for (auto i = 0; i < NodeArray->GetNumItems(); i++)
+    {
+        CStruct* pStruct = NodeArray->GetStructure(i);
+
+        CStructHeader* Class = NULL;
+        if (pStruct->GetStruct(Checksums::Class, &Class))
+        {
+            if (Class->Data == Checksums::EnvironmentObject)
+            {
+                CStructHeader* Name = NULL;
+                if (pStruct->GetStruct(Checksums::Name, &Name))
+                {
+                    SuperSector* sector = SuperSector::GetSuperSector(Name->Data);
+                    if (sector)
+                    {
+                        EnvironmentObjects.push_back(sector);
+                    }
+                }
+            }
+        }
+    }
+
+
     CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)LoadCustomShaderThread, NULL, NULL, NULL);
     return true;
 }
@@ -3644,11 +3783,12 @@ bool __stdcall proxy_FixGoBack(BYTE unk1, BYTE unk2, BYTE unk3, BYTE unk4)
 {
     static void* oldECX;
     _asm mov oldECX, ecx;
-    //VirtualKeyCode vk_triangle = KeyMap::GetVKeyCode(KeyMap::MappedKey::Grind);
+
+    //If escape or triangle is pressed we need to handle it
     if (KeyState::GetKeyboardState(VirtualKeyCode::ESC) || KeyState::GetOldKeyboardState(VirtualKeyCode::ESC) || KeyMap::IsPressed(KeyMap::Button::Triangle))
     {
-        typedef bool(__thiscall* pMaybeGoBack)(void* pThis, BYTE unk1, BYTE unk2, BYTE unk3, BYTE unk4);
-        return pMaybeGoBack(0x004CF380)(oldECX, unk1, unk2, unk3, unk4);
+        typedef bool(__thiscall* pHandleBackKey)(void* pThis, BYTE unk1, BYTE unk2, BYTE unk3, BYTE unk4);
+        return pHandleBackKey(0x004CF380)(oldECX, unk1, unk2, unk3, unk4);
     }
     _asm mov ecx, oldECX;
     return true;
@@ -3961,7 +4101,14 @@ LARGE_INTEGER TimerStart()
     return startTime;
 }
 
-
+void OilRigGrindPatch()
+{
+    Vertex* __restrict pVel;
+   _asm  mov pVel, edi;
+   //If we have speed greater than 100, rotate the velocity so we don't grind backwards on steep rails
+   if(((pVel->x * pVel->x) + (pVel->z * pVel->z)) > 100.0f)
+       pVel->RotateToPlane(Vertex(0, 1.0f, 0));
+}
 
 void InitLevelMod()
 {
@@ -3988,6 +4135,12 @@ void InitLevelMod()
     *(DWORD*)0x004CEDE9 = 0x0000008E;
     *(BYTE*)0x004CEDED = 0x90;
     *(WORD*)0x004CEDEE = 0x9090;*/
+
+    BYTE oil_grind_fix[] = { 0x8D, 0xBE, 0x34, 0x03, 0x00, 0x00, 0xD9, 0x07, 0xD8, 0x15, 0x5C, 0xD8, 0x58, 0x00, 0xDF, 0xE0, 0xF6, 0xC4, 0x44, 0x7A, 0x1B, 0xD9, 0x47, 0x08, 0xD8, 0x15, 0x5C, 0xD8, 0x58, 0x00, 0xDF, 0xE0, 0xF6, 0xC4, 0x44, 0x7A, 0x0B, 0x8B, 0x47, 0x0, 0x8B, 0x4F, 0x48, 0x89, 0x07, 0x89, 0x4F, 0x08, 0xE8, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
+
+    VirtualProtect((LPVOID)0x004A66D0, sizeof(oil_grind_fix), PAGE_EXECUTE_READWRITE, &old);
+    memcpy((void*)0x4a66d0, oil_grind_fix, sizeof(oil_grind_fix));
+    HookFunction(0x004A6701, OilRigGrindPatch);
 
     if (Gfx::fps_fix)
     {
@@ -4065,6 +4218,9 @@ void InitLevelMod()
 
     //Currently used for alt+enter toggle windowed mode
     HookFunction(0x00403C75, proxy_GetAsyncKeyState, 0xE8, 1);
+
+    //Hook dinput
+    HookFunction(0x0040CA2B, proxy_Dinput_GetDeviceState);
 
     //Used for stored windowed position
     *(BYTE*)0x004092AB = 0xBD;
