@@ -54,6 +54,7 @@ struct SkaterProfileContainer
         ReleaseSkaterProfile(0x00436830)();//decrease vp count
     }
 };
+struct RailNode;
 static D3DXVECTOR3 oldCollNormal;
 static D3DXVECTOR3 oldHitPoint;
 static DWORD oldCollFlag;
@@ -96,8 +97,14 @@ private://0575a190
     //3D4
     bool truelandedfromvert;
     //3D5
-    BYTE unknown0[0x27B];
+    BYTE unknown1[0x1A0];
+    //575
+    bool bRail_Backwards;
+    //576
+    BYTE unknown0[0xDA];
+    //650
     bool blockspin;
+    //651
     BYTE unknown4[0x7CCF];
     //8320
     bool inVert;
@@ -115,11 +122,11 @@ private://0575a190
     bool autoturn;
     //8381
     BYTE unknown[0x57];//1 more
-    //83D8
-    D3DXMATRIX  old;
-    //8418
+    //83F8
     D3DXMATRIX  lerp;//1 more
-    //8458
+    //8438
+    D3DXMATRIX  old;
+    //8478
     BYTE unknown2[0x58];
     //84D0
     KeyState keystates[12];
@@ -149,12 +156,16 @@ private://0575a190
     DWORD collFlags;
     //86B8
     BYTE unk5[0x10];
+    //bool trigger;//Maybe?
     //86C8
+public:
     DWORD checksumName;
+private:
     //86CC
     DWORD nodeIndex;
     //86D0
-    BYTE unk6[0x100];
+    DWORD triggerScript;
+    BYTE unk6[0x100-4];
     //87D0
     float height;//relative to ground
     //87D4
@@ -173,9 +184,31 @@ private://0575a190
     float un2;
     //8814
     float normallerp;
-    BYTE un[0xA50];
+    //8818
+    BYTE u[0x18];
+    //8830
+        public:
+    DWORD m_rail_time;
+    //8834
+    DWORD m_rail_time2;
+    //8838
+    RailNode* mp_rail_node;
+    private:
+    //883c
+    BYTE un[0xA2c];
+    //9268
     void* trickFont;//not sure?
+    //926c
+    BYTE un3[0x8C];
+    public:
+    //92F8
+    DWORD m_last_rail_node_name;
 
+
+    void SetTrigger()
+    {
+        //unk5[0x0F] = true;
+    }
 //#pragma pop(pack)
 public:
 
@@ -190,10 +223,28 @@ public:
         Special = 0x20
     };
 
+    enum EStateType
+    {
+        GROUND,
+        AIR,
+        WALL,
+        LIP,
+        RAIL,
+        WALLPLANT
+    };
+
+    void SetState(EStateType state)
+    {
+        typedef void(__thiscall* const pSetState)(void* pThis, EStateType state);
+        pSetState(0x0049F6D0)(this, state);
+    }
+
     DWORD GetCollisionName()
     {
         return checksumName;
     }
+
+    void maybe_trip_rail_trigger(DWORD type);
 
     typedef void(__thiscall* const pAddTrick)(void* pThis, const char* trickName, DWORD trickScore, TrickType type);
     void AddTrick(const char* trickName, DWORD trickScore, TrickType type)
@@ -220,7 +271,7 @@ public:
     {
         static const DWORD timer = 0x00409AE0;
         _asm call timer
-        static DWORD temp = 0;
+        static DWORD temp = 0;  
         _asm mov temp, eax
         return temp;
     }
@@ -263,24 +314,24 @@ public:
     void SetNormal(D3DXVECTOR4& normal)
     {
 
-        D3DXMATRIX* pMatrix = GetMatrix();
+        D3DXMATRIX* pMatrix = &GetMatrix();
         displaynormal = *(D3DXVECTOR4*)pMatrix->m[Y];
         currentnormal = normal;
         lastdisplaynormal = displaynormal;
         normallerp = 0.1f;
         *(D3DXVECTOR4*)pMatrix->m[Y] = normal;
-        OrthoNormalizeAbout(GetMatrix(), Y);
+        OrthoNormalizeAbout(&GetMatrix(), Y);
     }
     void SetNormalFast(D3DXVECTOR4& normal)
     {
 
-        D3DXMATRIX* pMatrix = GetMatrix();
+        D3DXMATRIX* pMatrix = &GetMatrix();
         displaynormal = *(D3DXVECTOR4*)pMatrix->m[Y];
         currentnormal = normal;
         lastdisplaynormal = displaynormal;
         normallerp = 1.0f;
         *(D3DXVECTOR4*)pMatrix->m[Y] = normal;
-        OrthoNormalizeAbout(GetMatrix(), Y);
+        OrthoNormalizeAbout(&GetMatrix(), Y);
     }
 
 
@@ -318,7 +369,7 @@ public:
     }
 
 
-    KeyState* GetKeyState(BYTE idx)
+    KeyState* const __restrict GetKeyState(BYTE idx)
     {
         if (idx > 11)
             idx = 11;
@@ -330,7 +381,7 @@ public:
         return framelength;
     }
 
-    static Skater* Instance()
+    static Skater* const __restrict Instance()
     {
         /*static const DWORD ptr = 0x005D06C0;
         //VALIDATE_PTR((void*)ptr);
@@ -349,7 +400,7 @@ public:
         return Game::skater;
     }
 
-    static Skater* UpdateSkater()
+    static Skater* const __restrict UpdateSkater()
     {
         static const DWORD ptr = 0x005D06C0;
         VALIDATE_PTR((void*)ptr);
@@ -365,11 +416,15 @@ public:
         return (Skater*)pSkater;
     }
 
-    D3DXMATRIX* GetMatrix()
+    Matrix& __restrict const GetLerpMatrix()
     {
-        return &matrix;
+        return *(Matrix*)&lerp;
     }
 
+    D3DXMATRIX & const __restrict GetMatrix()
+    {
+        return matrix;
+    }
 
     //used for spine transfer, don't call this
     EXTERN void Store();
@@ -406,15 +461,28 @@ public:
 
     EXTERN void SetCanBreakVert(bool value);
 
+    void set_terrain(DWORD terrain)
+    {
+        typedef void(__thiscall* const p_set_terrain)(Skater* pThis, DWORD terrain);
+        p_set_terrain(0x0049BA80)(this, terrain);
+    }
+
     typedef void(__thiscall* const pTriggerScript)(Skater* pThis, DWORD triggerType, void*);
     void TriggerScript(DWORD triggerType)
     {
+        //unk5[0xF] = true;
         pTriggerScript(0x0049D070)(this, triggerType, scripts);
     }
 
 
     //call this before CheckCollision to set the ray for raytracing.
-    EXTERN void SetRay(D3DXVECTOR3 start, D3DXVECTOR3 end);
+    EXTERN void SetRay(const D3DXVECTOR3 & start, const D3DXVECTOR3 & end);
+    void FlipDirection()
+    {
+        D3DXVECTOR3 temp = this->startcol;
+        this->startcol = this->endcol;
+        this->endcol = temp;
+    }
 
     void SetNormals()
     {
@@ -422,11 +490,26 @@ public:
         currentnormal.w = 1.0f;
     }
 
+    __inline void SkateOffRail();
+    __inline void MaybeSkateOffRail(bool last_segment, Vertex & extra_dist, RailNode* pFrom, RailNode* pOnto);
+
+    static void skate_off_rail()
+    {
+        Game::skater->SkateOffRail();
+        _asm mov ecx, Game::skater;
+    }
+  
     //clear 
     typedef void(__thiscall* const pFlagException)(Skater* pThis, const char* name, DWORD unk2);
     void FlagException(const char* name, DWORD unk2 = 0)
     {
         pFlagException(0x0048F990)(this, name, unk2);
+    }
+
+    //Default is to ignore hollow collision flag
+    __inline bool CollisionCheck()
+    {
+        return CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0);
     }
 
     EXTERN bool CollisionCheck(Collision::Flags flag, bool ignore = false);
@@ -448,7 +531,7 @@ public:
         return &oldpos;
     }
 
-    D3DXVECTOR3* GetPosition()
+    D3DXVECTOR3* const __restrict GetPosition()
     {
         return &position;
     }
@@ -462,7 +545,7 @@ public:
     }
 
 
-    D3DXVECTOR3* GetVelocity()
+    D3DXVECTOR3* const __restrict GetVelocity()
     {
         /*DWORD pSpeed = (DWORD)this + 0x334;
         VALIDATE_DATA((D3DXVECTOR3*)pSpeed, sizeof(D3DXVECTOR3));

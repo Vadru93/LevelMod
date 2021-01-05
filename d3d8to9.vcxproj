@@ -90,7 +90,7 @@
       <IgnoreAllDefaultLibraries>
       </IgnoreAllDefaultLibraries>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-	  <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -196,6 +196,7 @@
     <ClInclude Include="source\pch.h" />
     <ClInclude Include="source\Physics.h" />
     <ClInclude Include="source\QBKey.h" />
+    <ClInclude Include="source\Rail.h" />
     <ClInclude Include="source\Script.h" />
     <ClInclude Include="source\Settings.h" />
     <ClInclude Include="source\shadow.h" />

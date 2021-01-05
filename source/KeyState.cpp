@@ -5,13 +5,14 @@
 #include "_Math.h"
 #include "Skater.h"
 #include "Checksum.h"
+#include "dinput.h"
 
 bool XINPUT::vibrating = false;
 XINPUT_VIBRATION XINPUT::vibration;
 DWORD XINPUT::vibrationFrames = 0;
-CXBOXController* XINPUT::Player1 = NULL;
-KeyMap* keyMap = NULL;
-BYTE* keyState = NULL;
+CXBOXController* __restrict XINPUT::Player1 = NULL;
+KeyMap* __restrict keyMap = NULL;
+BYTE* __restrict keyState = NULL;
 
 
 void  KeyMap::UpdateKeyMap()
@@ -36,111 +37,145 @@ VirtualKeyCode KeyMap::GetVKeyCode(MappedKey key)
 }
 
 
-HRESULT __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYTE data)
+__declspec(noalias) bool __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYTE data)
 {
-    typedef HRESULT(__stdcall* pDinput_GetDeviceState)(DWORD size, LPBYTE data);
-    auto hres = pDinput_GetDeviceState(0x0040C770)(size, data);
+    typedef bool(__stdcall* pDinput_GetDeviceState)(DWORD size, LPBYTE data);
+    bool suceeded = pDinput_GetDeviceState(0x0040C770)(size, data);
 
     //MessageBox(0, 0, 0, 0);
 
     BYTE* buffer = data;
 
+    //KeyMap key = keyMap[(BYTE)KeyMap::MappedKey::Grind];
+    //buffer[key.DIK_KeyCode] = buffer[DIK_Y];
+
     if (XINPUT::Player1 && XINPUT::Player1->IsConnected())
     {
+        //Move the global pointer to stack to make sure compiler optimize well
+        KeyMap* __restrict const map = keyMap;
+        //Move the controller1 state to stack for cache optimization
         XINPUT_STATE state = XINPUT::Player1->GetState();
 
-
-        KeyMap key = keyMap[(BYTE)KeyMap::MappedKey::Pause];
-        buffer[key.DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_START) * 0x80;
+        //This happens for every mapped key
+        //First get the appropiet KeyMap into stack variable "key"
+        //Then check if the the key is already pressed on keyboard
+        //If it's not pressed check if it's pressed on controller
+        KeyMap key = map[(BYTE)KeyMap::MappedKey::Pause];
+        if(!buffer[key.DIK_KeyCode])
+            buffer[key.DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_START) * 0x80;
+        //Set stack boolean to know if Pause key is pressed
         bool pause = (buffer[key.DIK_KeyCode] == 0x80);
 
-        key = keyMap[(BYTE)KeyMap::MappedKey::CameraToggle];
-        buffer[key.DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) * 0x80;
+        key = map[(BYTE)KeyMap::MappedKey::CameraToggle];
+        if (!buffer[key.DIK_KeyCode])
+            buffer[key.DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) * 0x80;
+        //Set stack boolean to know if CameraToggle key is pressed
         bool start = (buffer[key.DIK_KeyCode] == 0x80);
 
-        key = keyMap[(BYTE)KeyMap::MappedKey::CameraLock];
-        buffer[key.DIK_KeyCode] = (pause && start);
+        key = map[(BYTE)KeyMap::MappedKey::CameraLock];
+        if (!buffer[key.DIK_KeyCode])
+            buffer[key.DIK_KeyCode] = (pause && start);
 
-        key = keyMap[(BYTE)KeyMap::MappedKey::Grind];
-        buffer[key.DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_Y) * 0x80;
+        key = map[(BYTE)KeyMap::MappedKey::Grind];
+        if (!buffer[key.DIK_KeyCode])
+            buffer[key.DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_Y) * 0x80;
 
-        key = keyMap[(BYTE)KeyMap::MappedKey::Grab];
-        buffer[key.DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_B) * 0x80;
+        key = map[(BYTE)KeyMap::MappedKey::Grab];
+        if (!buffer[key.DIK_KeyCode])
+            buffer[key.DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_B) * 0x80;
 
-        key = keyMap[(BYTE)KeyMap::MappedKey::Ollie];
-        buffer[key.DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_A) * 0x80;
+        key = map[(BYTE)KeyMap::MappedKey::Ollie];
+        if (!buffer[key.DIK_KeyCode])
+            buffer[key.DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_A) * 0x80;
 
-        key = keyMap[(BYTE)KeyMap::MappedKey::Flip];
-        buffer[key.DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_X) * 0x80;
+        key = map[(BYTE)KeyMap::MappedKey::Flip];
+        if (!buffer[key.DIK_KeyCode])
+            buffer[key.DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_X) * 0x80;
 
-        key = keyMap[(BYTE)KeyMap::MappedKey::SpinLeft];
-        buffer[key.DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) * 0x80;
+        key = map[(BYTE)KeyMap::MappedKey::SpinLeft];
+        if (!buffer[key.DIK_KeyCode])
+            buffer[key.DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) * 0x80;
 
-        key = keyMap[(BYTE)KeyMap::MappedKey::SpinRight];
-        buffer[key.DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) * 0x80;
+        key = map[(BYTE)KeyMap::MappedKey::SpinRight];
+        if (!buffer[key.DIK_KeyCode])
+            buffer[key.DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) * 0x80;
 
-        key = keyMap[(BYTE)KeyMap::MappedKey::Nollie];
-        buffer[key.DIK_KeyCode] = ((state.Gamepad.bLeftTrigger) > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) ? 0x80 : 0;
+        key = map[(BYTE)KeyMap::MappedKey::Nollie];
+        if (!buffer[key.DIK_KeyCode])
+            buffer[key.DIK_KeyCode] = ((state.Gamepad.bLeftTrigger) > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) ? 0x80 : 0;
 
-        key = keyMap[(BYTE)KeyMap::MappedKey::Revert];
-        buffer[key.DIK_KeyCode] = ((state.Gamepad.bRightTrigger) > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) ? 0x80 : 0;
+        key = map[(BYTE)KeyMap::MappedKey::Revert];
+        if (!buffer[key.DIK_KeyCode])
+            buffer[key.DIK_KeyCode] = ((state.Gamepad.bRightTrigger) > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) ? 0x80 : 0;
 
-        key = keyMap[(BYTE)KeyMap::MappedKey::Right];
-        if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT)
-            buffer[key.DIK_KeyCode] = 0x80;
-        else
+        key = map[(BYTE)KeyMap::MappedKey::Right];
+        if (!buffer[key.DIK_KeyCode])
         {
-            if (state.Gamepad.sThumbLX >= XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
-            {
-                buffer[key.DIK_KeyCode] = ClampValue(state.Gamepad.sThumbLX, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF);
-            }
+            if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT)
+                buffer[key.DIK_KeyCode] = 0x80;
             else
-                buffer[key.DIK_KeyCode] = 0;
+            {
+                if (state.Gamepad.sThumbLX >= XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+                {
+                    buffer[key.DIK_KeyCode] = 0x80;// ClampValue(state.Gamepad.sThumbLX, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF);
+                }
+                else
+                    buffer[key.DIK_KeyCode] = 0;
 
+            }
         }
 
-        key = keyMap[(BYTE)KeyMap::MappedKey::Left];
-        if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT)
-            buffer[key.DIK_KeyCode] = 0x80;
-        else
+        key = map[(BYTE)KeyMap::MappedKey::Left];
+        if (!buffer[key.DIK_KeyCode])
         {
-            if (state.Gamepad.sThumbLX <= -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
-            {
-                buffer[key.DIK_KeyCode] = ClampValue(state.Gamepad.sThumbLX, -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, -32767, 0x40, 0xFF);
-            }
+            if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT)
+                buffer[key.DIK_KeyCode] = 0x80;
             else
-                buffer[key.DIK_KeyCode] = 0;
+            {
+                if (state.Gamepad.sThumbLX <= -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+                {
+                    buffer[key.DIK_KeyCode] = 0x80;// ClampValue(state.Gamepad.sThumbLX, -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, -32767, 0x40, 0xFF);
+                }
+                else
+                    buffer[key.DIK_KeyCode] = 0;
+            }
         }
 
-        key = keyMap[(BYTE)KeyMap::MappedKey::Up];
-        if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP)
-            buffer[key.DIK_KeyCode] = 0x80;
-        else
+        key = map[(BYTE)KeyMap::MappedKey::Up];
+        if (!buffer[key.DIK_KeyCode])
         {
-            if (state.Gamepad.sThumbLY >= XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
-            {
-                buffer[key.DIK_KeyCode] = ClampValue(state.Gamepad.sThumbLY, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF);
-            }
+            if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP)
+                buffer[key.DIK_KeyCode] = 0x80;
             else
-                buffer[key.DIK_KeyCode] = 0;
+            {
+                if (state.Gamepad.sThumbLY >= XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+                {
+                    buffer[key.DIK_KeyCode] = 0x80;// ClampValue(state.Gamepad.sThumbLY, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF);
+                }
+                else
+                    buffer[key.DIK_KeyCode] = 0;
+            }
         }
 
-        key = keyMap[(BYTE)KeyMap::MappedKey::Down];
-        if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN)
-            buffer[key.DIK_KeyCode] = 0x80;
-        else
+        key = map[(BYTE)KeyMap::MappedKey::Down];
+        if (!buffer[key.DIK_KeyCode])
         {
-            if (state.Gamepad.sThumbLY <= -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
-            {
-                buffer[key.DIK_KeyCode] = ClampValue(state.Gamepad.sThumbLY, -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF);
-            }
+            if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN)
+                buffer[key.DIK_KeyCode] = 0x80;
             else
-                buffer[key.DIK_KeyCode] = 0;
+            {
+                if (state.Gamepad.sThumbLY <= -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+                {
+                    buffer[key.DIK_KeyCode] = 0x80;// ClampValue(state.Gamepad.sThumbLY, -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF);
+                }
+                else
+                    buffer[key.DIK_KeyCode] = 0;
+            }
         }
 
     }
 
-    return hres;
+    return suceeded;
 }
 
 
@@ -444,36 +479,18 @@ BYTE UpdateKeyState2(DWORD button, BYTE pressed)
     return pressed;
 }
 
-__declspec(naked) void __cdecl UpdateKeyState_naked()
+void __cdecl UpdateKeyState_naked(DWORD press, void* pUnk)
 {
     static bool bUpdate;
-    static DWORD pSkater;
-    static DWORD press;
+    KeyState* pState;
     static DWORD pCall = 0x0049BAA0;
-    static DWORD pOldESP;
-    static DWORD pOldEBP;
-    _asm mov pOldESP, esp;
-    _asm mov pOldEBP, ebp;
-    _asm mov pSkater, ecx;
-    _asm mov eax, [esp + 4];
-    _asm mov press, eax;
-    press = UpdateKeyState((KeyState*)pSkater, press);
-    _asm mov eax, press;
-
-    /*if (bUpdate)
-    {*/
-    _asm mov ecx, pSkater;
-    _asm mov esp, pOldESP;
-    _asm mov ebp, pOldEBP;
-    _asm mov[esp + 4], eax;
-    _asm jmp[pCall];
-    _asm ret;
-
-    /*}
-    _asm mov ecx, pSkater
-    _asm mov esp, pOldESP;
-    _asm mov ebp, pOldEBP;
-    _asm ret 8;*/
+    _asm mov pState, ecx;
+    press = UpdateKeyState(pState, press);
+    typedef void(__thiscall* const pUpdateKeyState)(KeyState* state, DWORD press, void* pUnk);
+    pUpdateKeyState(0x0049BAA0)(pState, press, pUnk);
+    _asm mov esp, ebp
+    _asm pop ebp;
+    _asm ret 8;
 }
 typedef void(__thiscall* const pUpdateKeyBuffer)(void* pThis, DWORD key, DWORD value);
 
@@ -509,10 +526,27 @@ __declspec(naked) void __cdecl UpdateKeyState2_naked()
     _asm ret 8;*/
 }
 
+__inline void HookFunction(DWORD addr, void* function, BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong(function) - addr) - 4;
+    addr += 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
 
 void HookControls()
 {
     HookVibrate();
+    //Hook dinput
+    HookFunction(0x0040CA2B, proxy_Dinput_GetDeviceState);
+
+    return;
     DWORD old;
     VirtualProtect((LPVOID)0x00498D5D, 4, PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((LPVOID)0x00498D6B, 4, PAGE_EXECUTE_READWRITE, &old);
@@ -557,7 +591,7 @@ void HookControls()
 
 
 
-    *(DWORD*)0x00499167 = (PtrToUlong(UpdateKeyState2_naked) - 0x00499167) - 4;
+    /**(DWORD*)0x00499167 = (PtrToUlong(UpdateKeyState2_naked) - 0x00499167) - 4;
     *(DWORD*)0x00499177 = (PtrToUlong(UpdateKeyState2_naked) - 0x00499177) - 4;
     *(DWORD*)0x00499187 = (PtrToUlong(UpdateKeyState2_naked) - 0x00499187) - 4;
     *(DWORD*)0x00499197 = (PtrToUlong(UpdateKeyState2_naked) - 0x00499197) - 4;
@@ -579,7 +613,7 @@ void HookControls()
 
     *(DWORD*)0x00499239 = (PtrToUlong(UpdateKeyState2_naked) - 0x00499239) - 4;
 
-    *(DWORD*)0x00499247 = (PtrToUlong(UpdateKeyState2_naked) - 0x00499247) - 4;
+    *(DWORD*)0x00499247 = (PtrToUlong(UpdateKeyState2_naked) - 0x00499247) - 4;*/
 
     /**(BYTE*)0x00499176 = 0x90;
     *(DWORD*)0x00499177 = 0x90909090;

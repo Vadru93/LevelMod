@@ -3,7 +3,7 @@
 #include "Model.h"
 
 
-extern Skater* Game::skater;
+extern Skater* __restrict Game::skater;
 
 
 struct ShadowMap
@@ -24,7 +24,7 @@ struct ShadowMap
     {
         static const D3DXVECTOR3 UP(0, 0, 1);
         D3DXMATRIX inverse;
-        D3DXMatrixInverse(&inverse, NULL, Game::skater->GetMatrix());
+        D3DXMatrixInverse(&inverse, NULL, &Game::skater->GetMatrix());
 
         D3DXVECTOR3 camPos = *(D3DXVECTOR3*)&inverse._41;
 

@@ -1067,48 +1067,30 @@ void CheckForScriptUpdates()
     }
 }
 
+void UpdateScriptFloat(float& value, const char* name)
+{
+    QBKeyHeader* header = GetQBKeyHeader(Checksum(name));
+    if (header)
+    {
+        if (header->type == QBKeyHeader::FLOAT)
+            value = header->GetFloat();
+        else if (header->type == QBKeyHeader::INT)
+            value = header->GetInt();
+    }
+    else
+        MessageBox(0, name, "Couldn't find", 0);
+}
+
 void UpdateScriptConstants()
 {
 
-    QBKeyHeader* header = GetQBKeyHeader(Checksum("uv_anim_threshold"));
-    if (header)
-    {
-        Gfx::uv_anim_threshold = header->value.f;
-    }
-    else
-        MessageBox(0, "couldn't find uv_anim_threshold", "", 0);
-
-    header = GetQBKeyHeader(Checksum("uv_tiling_threshold"));
-    if (header)
-    {
-        Gfx::uv_tiling_threshold = header->value.f;
-    }
-    else
-        MessageBox(0, "couldn't find uv_tiling_threshold", "", 0);
-
-    header = GetQBKeyHeader(Checksum("shatter_speed"));
-    if (header)
-    {
-        Gfx::shatter_speed = header->value.f;
-    }
-    else
-        MessageBox(0, "couldn't find shatter_speed", "", 0);
-
-    header = GetQBKeyHeader(Checksum("shatter_life_factor"));
-    if (header)
-    {
-        Gfx::shatter_life_factor = header->value.f;
-    }
-    else
-        MessageBox(0, "couldn't find shatter_life_factor", "", 0);
-
-    header = GetQBKeyHeader(Checksum("shatter_gravity"));
-    if (header)
-    {
-        Gfx::shatter_gravity = header->value.f;
-    }
-    else
-        MessageBox(0, "couldn't find shatter_gravity", "", 0);
+    UpdateScriptFloat(Gfx::uv_anim_threshold, "uv_anim_threshold");
+    UpdateScriptFloat(Gfx::uv_tiling_threshold, "uv_tiling_threshold");
+    UpdateScriptFloat(Gfx::shatter_speed, "shatter_speed");
+    UpdateScriptFloat(Gfx::shatter_life_factor, "shatter_life_factor");
+    UpdateScriptFloat(Gfx::shatter_gravity, "shatter_gravity");
+    UpdateScriptFloat(Physics::Rail_Max_Snap, "Rail_Max_Snap");
+    UpdateScriptFloat(Physics::Rail_Corner_Leave_Angle, "Rail_Corner_Leave_Angle");
 }
 
 bool TestReloadQB(CStruct* pStruct, CScript* pScript)

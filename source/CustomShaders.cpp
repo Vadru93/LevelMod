@@ -319,11 +319,11 @@ bool restoreMaterial = false;
 bool restore_matrix = false;
 bool restore_filter = false;
 
-void SubmitShader(ShaderObject2* pShader, Texture* texture)
+__declspec(noalias) void SubmitShader(ShaderObject2* __restrict pShader, Texture* __restrict texture)
 {
-    static float t;
-    static DWORD oldShader = 0x005CEDB4;
-    static DWORD ShaderTextureSkip = (sizeof(ShaderTexture) - 4);
+    float t;
+    constexpr DWORD oldShader = 0x005CEDB4;
+    constexpr DWORD ShaderTextureSkip = (sizeof(ShaderTexture) - 4);
     static D3DMATRIX env_mat = { 0.5f,  0.0f, 0.0f, 0.0f,
                                  0.0f, -0.5f, 0.0f, 0.0f,
                                  0.0f,  0.0f, 0.0f,	0.0f,
@@ -516,8 +516,8 @@ void RestoreShader()
 __declspec(naked) void __cdecl Obj_SetShader_hook()
 {
     static DWORD pReturn = 0x00555400;
-    static Texture* pTexture;
-    static ShaderObject2* pShader;
+    static Texture* __restrict pTexture;
+    static ShaderObject2* __restrict pShader;
 
     if (p_render_shaders)
     {
@@ -551,8 +551,8 @@ void __stdcall SetVertexShader_hook()
 {
 
     static DWORD pReturn = 0x00550DC0;
-    static ShaderObject2* pShader;
-    static Mesh::MaterialSplit* pMesh;
+    ShaderObject2* __restrict pShader;
+    Mesh::MaterialSplit* __restrict pMesh;
 
     //p_loaded_shaders is false until shaders are fully loaded.
     if (p_render_shaders)

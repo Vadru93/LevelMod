@@ -179,6 +179,11 @@ public:
         return p_KeyboardState(code) & 0x80;
     }
 
+    static void SetKeyboardState(VirtualKeyCode code, DWORD value)
+    {
+        p_KeyboardState(code) = value;
+    }
+
     static bool GetOldKeyboardState(VirtualKeyCode code)
     {
         return p_OldKeyboardState(code) & 0x80;

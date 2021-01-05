@@ -258,6 +258,8 @@ namespace Checksums
         X = COMPILE_CRC32("x"),
         Circle = COMPILE_CRC32("circle"),
 
+        Oil = COMPILE_CRC32("oil"),
+
 
         //Trick_KFBackflip = 0xF7B4E0CB
 

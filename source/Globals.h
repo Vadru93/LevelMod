@@ -84,13 +84,19 @@ namespace Gfx
     extern bool bOnReset;
 };
 
+namespace Physics
+{
+    extern float Rail_Max_Snap;
+    extern float Rail_Corner_Leave_Angle;
+};
+
 //--------XINPUT--------
 namespace XINPUT
 {
     extern bool vibrating;
     extern XINPUT_VIBRATION vibration;
     extern DWORD vibrationFrames;
-    extern CXBOXController* Player1;
+    extern CXBOXController* __restrict Player1;
 };
 //--------XINPUT--------
 
@@ -107,8 +113,9 @@ struct Skater;
 //--------Game--------
 namespace Game
 {
-    extern Skater* skater;
+    extern Skater* __restrict skater;
     extern bool(*PlaySound)(CStruct*, CScript*);// = NULL; 00417bd0
+    extern DWORD level_checksum;
 };
 //--------Game--------
 
@@ -250,7 +257,7 @@ void SetVertexShader_naked();
 void __stdcall SetVertexShader_hook();
 void __cdecl Obj_SetShader_hook();
 
-HRESULT __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYTE data);
+bool __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYTE data);
 
 SHORT __stdcall proxy_GetAsyncKeyState(int key);
 BOOL __stdcall proxy_GetMessage(LPMSG lpMsg,

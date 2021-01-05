@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include "shadow.h"
 #include "dinput.h"
+#include "rail.h"
 /*0
 004F9B9E < -non semi
     8
@@ -152,6 +153,57 @@ char tags[256] = "Tags: 0";
 LPD3DXFONT m_font = NULL;
 RECT rct;
 
+__inline void HookFunction(DWORD addr, bool (RailNode::* function )(int SearchNode), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+
+__inline void HookFunction(DWORD addr, void (Skater::* function)(DWORD type), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+
+__inline void HookFunction(DWORD addr, void (Skater::* function)(D3DXVECTOR3 *off_point), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+
+__inline void HookFunction(DWORD addr, void (RailManager::* function)(DWORD index, CStruct* pNodeStruct), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
 
 
 __inline void HookFunction(DWORD addr, void (Network::MessageHandler::* function)(unsigned char msg_id, void* pCallback, int flags, Network::NetHandler* net_handler, int prio), BYTE byteCode = 0, DWORD nopCount = 0)
@@ -2834,29 +2886,40 @@ void HookedFopen(char* p)
                 AddFunctions();
                 bHookDone = true;
             }
-            if (bDebugMode)
+            else if (strstr(p, "Levels\\") || strstr(p, "levels\\"))
             {
-                _printf("Fopen: %s\n", p);
-                memcpy(qbPath, p, strlen(p) + 1);
-                qbPath[strlen(qbPath) - 1] = 0x0;
+                DWORD pos = std::string(p).find_last_of("\\");
 
-                /*MessageBox(0, p, qbPath, 0);
-                AddCompressedNodes();*/
+                char temp_level[50];
+                memcpy(temp_level, &p[pos + 1], strlen(p) - 3 - (pos + 1));
+                temp_level[strlen(p) - 3 - (pos + 1)] = 0x00;
+                Game::level_checksum = Checksum(temp_level);
+                //MessageBox(0, temp_level, Level, 0);
+
+
                 if (bDebugMode)
-                    QScript::Scripts->OpenScript(p, true);
+                {
+                    _printf("Fopen: %s\n", p);
+                    memcpy(qbPath, p, strlen(p) + 1);
+                    qbPath[strlen(qbPath) - 1] = 0x0;
+
+                    /*MessageBox(0, p, qbPath, 0);
+                    AddCompressedNodes();*/
+                    if (bDebugMode)
+                        QScript::Scripts->OpenScript(p, true);
+                }
+
+
+                strcpy(ShaderFile, p);
+
+                ShaderFile[strlen(p) - 2] = 's';
+                ShaderFile[strlen(p) - 1] = 'h';
+                /*ShaderFile[strlen(p)] = 'h';
+                ShaderFile[strlen(p)+1] = 0x0;*/
+
+                //LoadCustomShaders(ShaderFile);
+
             }
-
-
-            strcpy(ShaderFile, p);
-
-            ShaderFile[strlen(p) - 2] = 's';
-            ShaderFile[strlen(p) - 1] = 'h';
-            /*ShaderFile[strlen(p)] = 'h';
-            ShaderFile[strlen(p)+1] = 0x0;*/
-
-            //LoadCustomShaders(ShaderFile);
-
-
         }
     }
 }
@@ -2871,7 +2934,7 @@ void LoadCustomShaderThread()
     Game::skater = Skater::UpdateSkater();
     while(!Game::skater) Skater::UpdateSkater();
 
-    /*Game::skater->Store();
+    Game::skater->Store();
 
     //Try to find narrow objects for nata spin
     for (auto object = EnvironmentObjects.begin(); object != EnvironmentObjects.end(); object++)
@@ -2901,7 +2964,7 @@ void LoadCustomShaderThread()
             end.y += 50.0f;
             Game::skater->SetRay(top, end);
             //Ignore hollow collision
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0))
+            if (Game::skater->CollisionCheck())
                 continue;
 
             //We did not collide, but there still may be an object ontop of this object that has the same exact position as the topmost point
@@ -2911,12 +2974,12 @@ void LoadCustomShaderThread()
             else
                 top.y -= 8.0f;
             Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name && Game::skater->GetHitPoint()->y >= top.y)
+            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name && Game::skater->GetHitPoint()->y >= top.y)
                 continue;
 
             //Now we need to check again in reverse order to take care of CCW
             Game::skater->SetRay(end, top);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name && Game::skater->GetHitPoint()->y >= top.y)
+            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name && Game::skater->GetHitPoint()->y >= top.y)
                 continue;
 
             //Now let's check in circle around, should use boundingsphere collision checking instead of raytracing here
@@ -2924,42 +2987,42 @@ void LoadCustomShaderThread()
             end.y = top.y;
             end.x += 50.0f;
             Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
+            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
                 continue;
 
             end.z += 50.0f;
             Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
+            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
                 continue;
 
             end.x -= 50.0f;
             Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
+            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
                 continue;
 
             end.x -= 50.0f;
             Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
+            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
                 continue;
 
             end.z -= 50.0f;
             Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
+            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
                 continue;
 
             end.z -= 50.0f;
             Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
+            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
                 continue;
 
             end.x += 50.0f;
             Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
+            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
                 continue;
 
             end.x += 50.0f;
             Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
+            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
                 continue;
 
             //We have a narrow object that seems to be accessible
@@ -2977,7 +3040,7 @@ void LoadCustomShaderThread()
         }
     }
     Game::skater->Restore();
-    */
+    
     //Then check if we are host and if we are, send the HostOptions to clients
     Network::NetHandler* net_handler = Network::NetHandler::Instance();
 
@@ -4105,9 +4168,55 @@ void OilRigGrindPatch()
 {
     Vertex* __restrict pVel;
    _asm  mov pVel, edi;
+   if (Game::level_checksum != Checksums::Oil)
+       return;
    //If we have speed greater than 100, rotate the velocity so we don't grind backwards on steep rails
    if(((pVel->x * pVel->x) + (pVel->z * pVel->z)) > 100.0f)
        pVel->RotateToPlane(Vertex(0, 1.0f, 0));
+}
+
+__declspec (naked) void HookEmptyRailNodeData()
+{
+    static RailNode** first;
+    _asm push ecx;
+    _asm add ecx, 0x48;
+    _asm mov ecx, [ecx];
+    _asm mov first, ecx
+    RailManager::AllocateTempRailData(first);
+    _asm pop ecx;
+    _asm lea eax, [ecx + 0x00000118];
+    _asm ret;
+}
+
+void HookOverlappingRailRemoval()
+{
+    RailManager::FixRailLinks();
+    RailManager::RemoveOverlapping();
+    /*typedef void(__cdecl* const pOverlappingRailRemoval)(); 
+    pOverlappingRailRemoval(0x00496090)();*/
+}
+
+__declspec(naked) void FixMemOpt1()
+{
+    static DWORD skip = 0x00496D20;
+    static DWORD jmpBack = 0x004967CD;
+    _asm je skip_label;
+    _asm mov edi, EndOfRail
+    _asm jmp [jmpBack];
+skip_label:
+    _asm jmp[skip];
+}
+
+__declspec(naked) void FixMemOpt2()
+{
+    static DWORD skip = 0x00496172;
+    static DWORD jmpBack = 0x00496163;
+    _asm je skip_label;
+    _asm mov edi, EndOfRail
+    _asm mov ecx, [esp + 18];
+    _asm jmp[jmpBack];
+skip_label:
+    _asm jmp[skip];
 }
 
 void InitLevelMod()
@@ -4135,6 +4244,53 @@ void InitLevelMod()
     *(DWORD*)0x004CEDE9 = 0x0000008E;
     *(BYTE*)0x004CEDED = 0x90;
     *(WORD*)0x004CEDEE = 0x9090;*/
+
+    BYTE AddRailFix[] = { 0x50, 0x51, 0x52, 0x56, 0x57, 0xE8, 0x00, 0x00, 0x00, 0x00, 0x5A, 0x59, 0x58, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90};
+
+    VirtualProtect((LPVOID)0x00419AB5, sizeof(AddRailFix), PAGE_EXECUTE_READWRITE, &old);
+    memcpy((void*)0x00419AB5, AddRailFix, sizeof(AddRailFix));
+    HookFunction(0x00419ABB, &RailManager::AddRailNode);
+    HookFunction(0x004198B8, HookEmptyRailNodeData);
+    HookFunction(0x00419BCF, HookOverlappingRailRemoval);
+
+    BYTE MemOptFix1_array[] = { 0x83, 0xC6, 0x44, 0x39, 0xFE };
+    BYTE MemOptFix2_array[] = { 0x83, 0xC0, 0x44, 0x39, 0xF8 };
+    VirtualProtect((LPVOID)0x0049616B, sizeof(MemOptFix1_array), PAGE_EXECUTE_READWRITE, &old);
+    memcpy((void*)0x0049616B, MemOptFix2_array, sizeof(MemOptFix1_array));
+    VirtualProtect((LPVOID)0x00496CD8, sizeof(MemOptFix1_array), PAGE_EXECUTE_READWRITE, &old);
+    memcpy((void*)0x00496CD8, MemOptFix1_array, sizeof(MemOptFix1_array));
+    VirtualProtect((LPVOID)0x00496BAB, 1, PAGE_EXECUTE_READWRITE, &old);
+    *(BYTE*)0x00496BAB = 0x94;
+    VirtualProtect((LPVOID)0x00496BBC, 1, PAGE_EXECUTE_READWRITE, &old);
+    *(BYTE*)0x00496BBC = 0xD2;
+    HookFunction(0x004967C8, FixMemOpt1, 0xE9, 1);
+    HookFunction(0x0049615E, FixMemOpt2, 0xE9, 1);  
+
+    HookFunction(0x004A480C, RailManager::StickToRail);
+    HookFunction(0x004A6246, RailManager::StickToRail);
+
+    HookFunction(0x004189CD, RailManager::SetActive);
+    HookFunction(0x00418C5F, RailManager::SetActive);
+
+    HookFunction(0x004A540C, Skater::skate_off_rail);
+    HookFunction(0x004A5424, maybe_skate_off_rail, 0xE9);
+
+    HookFunction(0x004A4A00, &Skater::maybe_trip_rail_trigger);
+    HookFunction(0x004A4C14, &Skater::maybe_trip_rail_trigger);
+    HookFunction(0x004A5403, &Skater::maybe_trip_rail_trigger);
+    HookFunction(0x004A5A70, &Skater::maybe_trip_rail_trigger);
+    HookFunction(0x004A5BD1, &Skater::maybe_trip_rail_trigger);
+    HookFunction(0x004A6816, &Skater::maybe_trip_rail_trigger);
+    HookFunction(0x004A70BB, &Skater::maybe_trip_rail_trigger);
+    HookFunction(0x004B088C, &Skater::maybe_trip_rail_trigger);
+
+    HookFunction(0x00489C7F, &RailNode::ProbablyOnSameRailAs);
+
+
+    *(BYTE*)0x004960E7 = 0xEB;
+    VirtualProtect((LPVOID)0x00495750, 2, PAGE_EXECUTE_READWRITE, &old);
+    *(WORD*)0x00495750 = 0x90C3;
+    RailManager::Initialize();
 
     BYTE oil_grind_fix[] = { 0x8D, 0xBE, 0x34, 0x03, 0x00, 0x00, 0xD9, 0x07, 0xD8, 0x1D, 0x5C, 0xD8, 0x58, 0x00, 0xDF, 0xE0, 0xF6, 0xC4, 0x44, 0x7A, 0x1B, 0xD9, 0x47, 0x08, 0xD8, 0x1D, 0x5C, 0xD8, 0x58, 0x00, 0xDF, 0xE0, 0xF6, 0xC4, 0x44, 0x7A, 0x0B, 0x8B, 0x47, 0x0, 0x8B, 0x4F, 0x48, 0x89, 0x07, 0x89, 0x4F, 0x08, 0xE8, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
 
@@ -4219,8 +4375,8 @@ void InitLevelMod()
     //Currently used for alt+enter toggle windowed mode
     HookFunction(0x00403C75, proxy_GetAsyncKeyState, 0xE8, 1);
 
-    //Hook dinput
-    HookFunction(0x0040CA2B, proxy_Dinput_GetDeviceState);
+    /*//Hook dinput
+    HookFunction(0x0040CA2B, proxy_Dinput_GetDeviceState);*/
 
     //Used for stored windowed position
     *(BYTE*)0x004092AB = 0xBD;
@@ -4675,6 +4831,8 @@ EXTERN QBKeyHeader* GetQBKeyHeader(unsigned long QBKey)
 }
 
 __restrict LPDIRECT3DDEVICE9 Gfx::pDevice = NULL;
+float Physics::Rail_Max_Snap = 40.0f;
+float Physics::Rail_Corner_Leave_Angle = 50.0f;
 
 void DrawLines()
 {
@@ -5457,7 +5615,7 @@ bool GetMaximumIndexScript(CStruct* pStruct, CScript* pScript)
     return true;
 }
 
-HRESULT PostRender(HRESULT hres)
+__declspec(noalias) HRESULT PostRender(HRESULT hres)
 {
 
     if (hres == D3D_OK && GameState::IsActive())
@@ -5533,7 +5691,7 @@ HRESULT PostRender(HRESULT hres)
     return hres;
 }
 
-void DrawFrame()
+__declspec(noalias) void DrawFrame()
 {
     Gfx::frameCounter++;
     //MessageBox(0, 0, 0, 0);

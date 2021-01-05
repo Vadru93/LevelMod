@@ -280,7 +280,7 @@ bool GetSpeedScript(CStruct* pParams, CScript* pScript)
 }
 
 
-EXTERN void Skater::SetRay(D3DXVECTOR3 start, D3DXVECTOR3 end)
+EXTERN void Skater::SetRay(const D3DXVECTOR3 & start, const D3DXVECTOR3 & end)
 {
     this->startcol = start;
     this->endcol = end;
