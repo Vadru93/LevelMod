@@ -59,10 +59,32 @@ static D3DXVECTOR3 oldCollNormal;
 static D3DXVECTOR3 oldHitPoint;
 static DWORD oldCollFlag;
 static float oldHeight;
+static DWORD previus_state;
 //#pragma pack(1)
 //Skater: contains information about camera, position, collision etc
+struct Timer
+{
+    __inline static DWORD Begin()
+    {
+        return GetTickCount();
+    }
+};
+
 EXTERN struct Skater//GetSkaterInfo 004769D0
 {
+
+
+    enum EStateType : DWORD
+    {
+        GROUND,
+        AIR,
+        WALL,
+        LIP,
+        RAIL,
+        WALLPLANT
+    };
+
+
 private://0575a190
     //0
     DWORD** memberFunctions;
@@ -97,11 +119,23 @@ private://0575a190
     //3D4
     bool truelandedfromvert;
     //3D5
-    BYTE unknown1[0x1A0];
+    BYTE unk53[0x37];
+    //40C
+    float mTallyAngles;
+    //410
+    BYTE unknown1[0x165];
     //575
     bool bRail_Backwards;
     //576
-    BYTE unknown0[0xDA];
+    BYTE unknown9[0x0A];
+    //580
+    DWORD m_went_airborne_time;
+    DWORD m_went_airborne_time2;
+    //588
+    DWORD m_land_time;
+    DWORD m_land_time2;
+    //590
+    BYTE unknown0[0xC0];
     //650
     bool blockspin;
     //651
@@ -117,17 +151,35 @@ private://0575a190
     //8350
     bool canbreakvert;
     //8351
-    BYTE unknown8[0x4F];//1 more
+    BYTE unknown8[0x2F];//1 more
     //8380
+    bool bRailSliding;
+    BYTE padding;
+    BYTE padding1;
+    BYTE pdading2;
+    DWORD padding3;
+    //8388
+    DWORD m_stop_sliding_time;
+    DWORD m_stop_sliding_time2;
+    BYTE unknown10[0x10];
+    //83A0
     bool autoturn;
-    //8381
+    //83A1
     BYTE unknown[0x57];//1 more
     //83F8
     D3DXMATRIX  lerp;//1 more
     //8438
     D3DXMATRIX  old;
     //8478
-    BYTE unknown2[0x58];
+    BYTE unkn[0x20];
+    //8498
+    EStateType m_state;
+    //849C
+    DWORD unp;
+    //84A0
+    DWORD m_state_change_timestamp;
+    DWORD m_state_change_timestamp2;
+    BYTE unknown2[0x28];
     //84D0
     KeyState keystates[12];
     //8620
@@ -165,7 +217,12 @@ private:
     DWORD nodeIndex;
     //86D0
     DWORD triggerScript;
-    BYTE unk6[0x100-4];
+    //86D4
+    BYTE unk7[0x78];
+    //874C
+    Vertex m_pre_lip_pos;
+    //8758
+    BYTE unk6[0x78];
     //87D0
     float height;//relative to ground
     //87D4
@@ -183,13 +240,14 @@ private:
     //8810
     float un2;
     //8814
-    float normallerp;
+    public:
+    float normallerp;//m_tap_turns
+    private:
     //8818
     BYTE u[0x18];
     //8830
         public:
     DWORD m_rail_time;
-    //8834
     DWORD m_rail_time2;
     //8838
     RailNode* mp_rail_node;
@@ -207,8 +265,16 @@ private:
 
     void SetTrigger()
     {
-        //unk5[0x0F] = true;
+        unk5[0x0F] = true;
     }
+
+
+    __inline void SetGraffitiTrickStarted(bool bStart)
+    {
+        typedef void(__thiscall* const pSetGraffitiTrickStarted)(Skater* pThis, bool bStart);
+        pSetGraffitiTrickStarted(0x004b5220)(this, bStart);
+    }
+
 //#pragma pop(pack)
 public:
 
@@ -223,18 +289,87 @@ public:
         Special = 0x20
     };
 
-    enum EStateType
+    /*void SetState(EStateType state)
+        
     {
-        GROUND,
-        AIR,
-        WALL,
-        LIP,
-        RAIL,
-        WALLPLANT
-    };
+        DWORD time;
+        if (state != m_state)
+        {
+            time = Timer::Begin();
+            m_state_change_timestamp = time;
+            previus_state = (DWORD)m_state;
+        }
+
+        if (state != LIP)
+        {
+            m_pre_lip_pos = Vertex(0, 0, 0);
+            if (m_state == LIP
+                && (m_pre_lip_pos[X] != 0.0f || m_pre_lip_pos[Y] != 0.0f || m_pre_lip_pos[Z] != 0.0f))
+            {
+                position = m_pre_lip_pos;
+                oldpos = position;
+            }
+        }
+
+        if (state != GROUND) {
+            SetGraffitiTrickStarted(true);
+        }
+        if (m_state == RAIL && state != RAIL && bRailSliding) {
+            bRailSliding = false;
+            m_stop_sliding_time = time;
+        }
+        if (m_state == AIR) {
+            if (state != AIR) {
+                m_land_time = time;
+            }
+        }
+        else if (state == AIR) {
+                if (m_state != WALL) {
+                    m_went_airborne_time = time;
+                }
+                mTallyAngles = 0.0f;
+                GetKeyState(KeyState::SPINLEFT)->Unpress();
+                GetKeyState(KeyState::SPINRIGHT)->Unpress();
+                //m_tap_turns = 0.0f;
+                normallerp = 0.0f;
+        }
+    }*/
+
+    static DWORD GetMaxArenaSize()
+    {
+        typedef DWORD(__cdecl* pGetMaxArenaSize)();
+        return pGetMaxArenaSize(0x005586B0)();
+    }
+
+    static DWORD GetArenaSize()
+    {
+        typedef DWORD(__cdecl* pGetArenaSize)();
+        return pGetArenaSize(0x005586C0)();
+    }
 
     void SetState(EStateType state)
     {
+        /*DWORD start_time_game = GetTime();
+        for (DWORD i = 0; i < 100000; i++)
+        {
+            GetCurrentTime();
+            GetCurrentTime();
+            GetCurrentTime();
+            GetCurrentTime();
+        }
+        DWORD stop_time_game = GetTime();
+
+        DWORD start_time = GetCurrentTime();
+        for (DWORD i = 0; i < 100000; i++)
+        {
+            GetTime();
+            GetTime();
+            GetTime();
+            GetTime();
+        }
+        DWORD stop_time = GetCurrentTime();
+        sprintf(testing, "%d %d", stop_time_game-start_time_game, stop_time-start_time);
+        MessageBox(0, testing, testing, 0);*/
         typedef void(__thiscall* const pSetState)(void* pThis, EStateType state);
         pSetState(0x0049F6D0)(this, state);
     }
@@ -470,7 +605,7 @@ public:
     typedef void(__thiscall* const pTriggerScript)(Skater* pThis, DWORD triggerType, void*);
     void TriggerScript(DWORD triggerType)
     {
-        //unk5[0xF] = true;
+        unk5[0xF] = true;
         pTriggerScript(0x0049D070)(this, triggerType, scripts);
     }
 

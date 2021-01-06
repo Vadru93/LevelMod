@@ -25,6 +25,8 @@
 
 #define p_bWindowed *(bool*)0x008510a9
 
+extern DWORD GetTime();
+
 //--------Spine and Acid--------
 enum TransferType
 {
@@ -33,6 +35,7 @@ enum TransferType
 namespace Slerp
 {
     extern bool transfer;
+    extern bool bDisallowTransfer;
     extern bool landing;
     extern bool m_began_frame_in_transfer;
     extern bool slerping;

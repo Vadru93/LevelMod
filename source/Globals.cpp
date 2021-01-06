@@ -6,6 +6,7 @@
 
 
 bool Slerp::transfer = false;
+bool Slerp::bDisallowTransfer = false;
 bool Slerp::landing = false;
 bool Slerp::m_began_frame_in_transfer = false;
 bool Slerp::slerping = false;

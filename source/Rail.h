@@ -1313,14 +1313,17 @@ __declspec(naked) void maybe_skate_off_rail()
     _asm mov pOnto, eax;
     _asm mov al, [esp + 0x13];
     _asm mov last_segment, al;
-    _asm mov eax, [esp + 0x2C];
-    _asm mov extra_dist, eax;
+    _asm mov extra_dist, esp
+    extra_dist += 0x2C;
     Game::skater->MaybeSkateOffRail(last_segment, *(Vertex*)&extra_dist, pFrom, pOnto);
     _asm jmp[jmpBack];
 }
 
+bool skated_off_rail = false;
+
 __inline void Skater::MaybeSkateOffRail(bool last_segment, Vertex& extra_dist, RailNode* pFrom, RailNode* pOnto)
 {
+    //_printf("MaybeSkateOffRail last_segment %X extra_dist%X\n", &last_segment, &extra_dist);
     // recalculate start, end, dir, as we might be on a new segment
     const RailNode* pStart = mp_rail_node;
     const RailNode* pEnd = pStart->GetNextLink();
@@ -1334,9 +1337,6 @@ __inline void Skater::MaybeSkateOffRail(bool last_segment, Vertex& extra_dist, R
     float sign = Sgn(D3DXVec3Dot(&dir, GetVelocity()));
 
     m_rail_time = GetCurrentTime();
-    DWORD temp2;
-    _asm mov temp2, edx;
-    m_rail_time2 = temp2;
 
     ((Vertex*)GetVelocity())->RotateToNormal(dir);
     random = 0;
@@ -1486,8 +1486,9 @@ __inline void Skater::MaybeSkateOffRail(bool last_segment, Vertex& extra_dist, R
         if (CollisionCheck())
         {
             // if in the park editor, then ignore collision with invisible surfaces 
-            if (!ParkEditor::Instance()->UsingCustomPark() || !(fabsf(normal.y) > 0.1f))
+            if (!ParkEditor::Instance()->UsingCustomPark() || normal.y < 0.5f)// || (!ParkEditor::Instance()->UsingCustomPark() && fabsf(D3DXVec3Length(&extra_dist)<0.5f)))
             {
+                //_printf("OffRail.... %f normal.y %f off %d\n", fabsf(D3DXVec3Length(&extra_dist)), normal.y, skated_off_rail);
                 maybe_trip_rail_trigger(Node::TRIGGER_SKATE_OFF);
                 // don't let him make this movement!!
                 *GetPosition() = *GetOldPosition();
@@ -1501,10 +1502,12 @@ __inline void Skater::MaybeSkateOffRail(bool last_segment, Vertex& extra_dist, R
             }
         }
     }
+    skated_off_rail = false;
 }
 
 void Skater::SkateOffRail()
 {
+    skated_off_rail = true;
     // we have skated off a rail; either it was the end of a rail or we hit a sharp corner
     // we need to see if there is another rail in front of us that we can continue skating on
 

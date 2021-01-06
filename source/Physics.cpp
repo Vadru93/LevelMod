@@ -1469,7 +1469,11 @@ __declspec(noalias) bool TestForAcid(CStruct* pParams, CScript* pScript)
         }
         else
         {
+            //skater->normallerp = 0;
             Slerp::landing = true;
+            Slerp::duration = 0;
+            Slerp::slerping = false;
+            Slerp::transfer = false;
             skater->Restore();
             Vertex forward = *(Vertex*)&(*skater->GetVelocity());
             if (forward.y < 0.0f)
@@ -1477,7 +1481,10 @@ __declspec(noalias) bool TestForAcid(CStruct* pParams, CScript* pScript)
                 return false;
             }
 
-            skater->ResetLerpingMatrix();
+            //skater->ResetLerpingMatrix();
+
+            Slerp::start = *(Matrix*)&skater->GetMatrix();
+            Slerp::end = Slerp::start;
 
             if (skater->IsTracking())
             {
@@ -1492,6 +1499,7 @@ __declspec(noalias) bool TestForAcid(CStruct* pParams, CScript* pScript)
             skater->SetLanded(false);
             Slerp::vert = false;
             Slerp::done = true;
+
 
 
             /*D3DXVECTOR3 start = *skater->GetPosition();
@@ -1531,9 +1539,8 @@ __declspec(noalias) bool TestForAcid(CStruct* pParams, CScript* pScript)
             CStruct pStruct;
             CScript pScript;
 
-
+            skater->SetState(Skater::GROUND);
             skater->SetState(Skater::AIR);
-
 
             CStructHeader param(QBKeyHeader::INT, 500);
             pStruct.AddParam(&param);
@@ -1542,6 +1549,19 @@ __declspec(noalias) bool TestForAcid(CStruct* pParams, CScript* pScript)
             pStruct.tail = NULL;
             skater->CallMemberFunction(Checksums::OrientToNormal, &pStruct, &pScript);
 
+            skater->SetState(Skater::GROUND);
+            skater->SetState(Skater::AIR);
+            Slerp::bDisallowTransfer = true;
+
+
+            /**skater->GetVelocity()[X] += -*skater->GetCurrentNormal()[X] * 24.0f;
+            *skater->GetVelocity()[Z] += -*skater->GetCurrentNormal()[Z] * 24.0f;
+
+            (*(Matrix*)&skater->GetMatrix()).RotateXLocal(DegToRad(40.0f));
+
+
+            (*(Vertex*)&skater->GetMatrix().m[Z]).Normalize();
+            (*(Matrix*)&skater->GetMatrix()).OrthoNormalizeAbout(Z);*/
             /*
 
             Slerp::transfer = true;
@@ -2245,6 +2265,7 @@ __declspec(noalias) void OnGround()
     Slerp::OnGrind = false;
     Slerp::landing = false;
     Slerp::slerping = false;
+    Slerp::bDisallowTransfer = false;
     Slerp::wallplant = false;
 
     if (Slerp::transfer) [[unlikely]]
@@ -2324,7 +2345,7 @@ __declspec(noalias) DWORD GrindParamHook(char* str, int unk)
     //_printf("OnGrind?\n");
     Slerp::OnGrind = true;
     Slerp::wallplant = false;
-    if ((Slerp::transfer || Slerp::landing)) [[unlikely]]
+    if ((Slerp::transfer)) [[unlikely]]
     {
         Slerp::OnGround = false;
         Skater* __restrict const skater = Skater::Instance();
@@ -2342,6 +2363,7 @@ __declspec(noalias) DWORD GrindParamHook(char* str, int unk)
             Slerp::transfer = false;
             Slerp::landing = false;
             Slerp::slerping = false;
+            Slerp::bDisallowTransfer = true;
             skater->ResetLerpingMatrix();
             Slerp::landed = true;
 

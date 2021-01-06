@@ -4080,6 +4080,24 @@ __declspec(naked) void TriggerScript()
     _asm ret;
 }
 
+LARGE_INTEGER timer_time;
+DWORD timer_old_start;
+
+DWORD GetTime()
+{
+    timer_old_start = timer_time.LowPart;
+
+
+    QueryPerformanceCounter(&timer_time);
+    double ms = double(timer_time.LowPart)* fFreq;
+    DWORD truncated = ms;
+    double test = ms - (double)truncated;
+    if (ms - test >= 0.45)
+        truncated++;
+    _asm xor edx, edx;
+    return truncated;
+}
+
 DWORD TimerElapsed()
 {
     QueryPerformanceCounter(&endTime);
@@ -4132,7 +4150,7 @@ LARGE_INTEGER TimerStart()
 
     QueryPerformanceCounter(&startTime);
     double ms = (double((startTime.LowPart - old_start)) * fFreq);
-    _printf("2nd %f ", ms);
+    //_printf("2nd %f ", ms);
 
     //We need to cap FPS around 60 because else some physics and scripts will not work correctly
     //Also this is the most fair in a game heavily dependant on speed etc
@@ -4286,6 +4304,77 @@ void InitLevelMod()
 
     HookFunction(0x00489C7F, &RailNode::ProbablyOnSameRailAs);
 
+    /*HookFunction(0x00403C13, GetTime);
+    HookFunction(0x00403D61, GetTime);
+    HookFunction(0x00403F29, GetTime);
+    HookFunction(0x00404086, GetTime);
+    HookFunction(0x0040409A, GetTime);
+    HookFunction(0x00405824, GetTime);
+    HookFunction(0x004058C1, GetTime);
+    HookFunction(0x0040864A, GetTime);
+    HookFunction(0x0040A1E7, GetTime);
+    HookFunction(0x0040A209, GetTime);
+    HookFunction(0x00417131, GetTime);
+    HookFunction(0x004171CA, GetTime);
+    HookFunction(0x00419764, GetTime);
+    HookFunction(0x004279BE, GetTime);
+    HookFunction(0x00428022, GetTime);
+    HookFunction(0x0042F0C4, GetTime);
+    HookFunction(0x0043A3DF, GetTime);
+    HookFunction(0x00441004, GetTime);
+    HookFunction(0x004615AF, GetTime);
+    HookFunction(0x0046E635, GetTime);
+    HookFunction(0x0046E788, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);
+    HookFunction(0x, GetTime);*/
 
     *(BYTE*)0x004960E7 = 0xEB;
     VirtualProtect((LPVOID)0x00495750, 2, PAGE_EXECUTE_READWRITE, &old);

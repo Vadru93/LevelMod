@@ -194,6 +194,11 @@ public:
         p_KeyboardState(code) = 0;
     }
 
+    void Unpress()
+    {
+        pressed = 0;
+    }
+
     static void Unpress(KeyCode key)
     {
         DWORD numKeys = GetNumKeyPress();
