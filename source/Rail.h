@@ -296,6 +296,7 @@ public:
 
     static void AllocateTempRailData(RailNode** first)
     {
+        Node::UpdateNodeArray();
         current_node = 0;
         numRailNodes = 0;
         numNodes = 0;
@@ -1176,10 +1177,9 @@ public:
             pRailNode->pNextLink = NULL;
             pRailNode->pPrevLink = NULL;
 
-            int terrain = 0;
-            if (!pNodeStruct->GetInt(Checksums::TerrainType, &terrain, false))
+            pRailNode->terrain = 0;
+            if (!pNodeStruct->GetEnum(Checksums::TerrainType, &pRailNode->terrain, false))
                 MessageBox(0, "Terrain not found", "", 0);
-            pRailNode->terrain = terrain;
 
             for (int i = 0; i < MAX_RAIL_LINKS; i++)
             {
@@ -1212,8 +1212,8 @@ public:
             }
 
 
-            CArray* links;
-            if (pNodeStruct->GetArray("links", (const CArray**)&links))
+            const CArray* links;
+            if (pNodeStruct->GetArray("links", &links))
             {
                 int numLinks = links->GetNumItems();
                 if (numLinks > MAX_RAIL_LINKS)

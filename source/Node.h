@@ -16,7 +16,7 @@ struct EXTERN CArray
     WORD Type;
     WORD NumItems;
 
-    int& operator[] (int x) {
+    const int& operator[] (int x) const {
         if (Type != 1)
         {
             _printf("Unsupported ArrayType\n");
@@ -214,11 +214,18 @@ struct Node
     }
 
     //Gets pointer to the NodeArray, type is CArray(See Above)
-    static CArray* GetNodeArray()
+    static CArray* const __restrict GetNodeArray()
     {
+        extern CArray* __restrict NodeArray;
+        return NodeArray;
+    }
+
+    static void UpdateNodeArray()
+    {
+        extern CArray* __restrict NodeArray;
         typedef CArray* (__cdecl* const pGetNodeArray)(DWORD checksum, DWORD param);
         //_printf("NodeArray %p\n", pGetNodeArray(0x00426590)(0xC472ECC5, 1));
-        return pGetNodeArray(0x00426590)(0xC472ECC5, 1);
+        NodeArray = pGetNodeArray(0x00426590)(0xC472ECC5, 1);
     }
 
     //Gets CStructHeader of this node

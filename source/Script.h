@@ -794,15 +794,15 @@ struct EXTERN CStruct
         return pint;
     }
 
-    typedef bool(__thiscall* getInt)(CStruct* pThis, DWORD unk1, int* dest, bool assert);
-    inline bool GetInt(DWORD checksum, int* out_int, bool assert = false)
+    typedef bool(__thiscall* getInt)(CStruct* pThis, DWORD unk1, BYTE* dest, bool assert);
+    inline bool GetEnum(DWORD checksum, BYTE* out_num, bool assert = false)
     {
-        return getInt(0x00429890)(this,checksum, out_int, assert);
+        return getInt(0x00429890)(this,checksum, out_num, assert);
     }
 
     inline bool GetInt(int* dest)
     {
-        return getInt(0x00429890)(this, 0, dest, 0);
+        return getInt(0x00429890)(this, 0, (BYTE*)dest, 0);
     }
 
     inline bool GetInt(const char* Param, int* dest)
@@ -954,17 +954,10 @@ struct EXTERN CStruct
         return rett;
     }
 
-    inline bool GetArray(const char* Param, const CArray** dest)
+    inline bool GetArray(const char* name, const CArray** dest, bool assert = false)
     {
-        bool rett;
-        static const DWORD pGetArray = 0x00429F00;
-        _asm push 0;
-        _asm push dest;
-        _asm push Param;
-        _asm mov ecx, this;
-        _asm call pGetArray;
-        _asm mov rett, al;
-        return rett;
+        typedef bool(__thiscall* pGetArray)(CStruct* pThis, const char* name, const CArray** dest, bool assert);
+        return pGetArray(0x00429F00)(this, name, dest, assert);
     }
 
 
