@@ -22,7 +22,7 @@ protected:
     Vector vBBMin;;
     Vector vBBMax;
     Vector vPos;
-    RailNode* pNext;
+    //RailNode* pNext;
     RailNode* pNextLink;
     RailNode* pPrevLink;
     WORD node;
@@ -256,7 +256,8 @@ struct Line2d
 };
 
 static DWORD current_node;
-static RailNode* temp_nodes;
+static RailNode* temp_nodes = NULL;
+static RailNode* mp_nodes = NULL;
 static RailLinks* temp_links;
 static DWORD numRailNodes;
 static DWORD numNodes;
@@ -314,6 +315,8 @@ public:
                 numRailNodes++;
             }
         }
+        if (mp_nodes)
+            freex(mp_nodes);
         if (temp_nodes)
             freex(temp_nodes);
 
@@ -333,14 +336,14 @@ public:
             /*if (*first)
                 freex(*first);*/
             *first = temp_nodes;
-            temp_nodes[0].pNext = NULL;
+            //temp_nodes[0].pNext = NULL;
             temp_nodes[0].pNextLink = NULL;
             temp_nodes[0].pPrevLink = NULL;
         }
         else if (*first)
         {
             RailNode* node = *first;
-            node->pNext = NULL;
+            //node->pNext = NULL;
             node->pNextLink = NULL;
             node->pPrevLink = NULL;
         }
@@ -433,7 +436,7 @@ public:
         //	while (pRailNode)
         for (int check_node = 0; check_node < current_node; check_node++)
         {
-            RailNode* const __restrict pRailNode = &temp_nodes[check_node];
+            RailNode* const __restrict pRailNode = &mp_nodes[check_node];
             if (!pRailNode->GetFlag(RailNode::Flags::ONLY_CLIMBING) && pRailNode != p_ignore_node && pRailNode->IsActive())
             {
                 if (pRailNode->pNextLink)
@@ -575,12 +578,15 @@ public:
         {
             // note, the line from pos1 to closest_point will not reflect the line segment found above
             // as the line segment will actually start somewhere between pos1 and pos2, and not always on pos1
-    //		if ( closest_dist > Script::GetFloat("Rail_Max_Snap"))
-    //		{
-    //			found = false;
-    //		}
-    //		else
+    		if ( closest_dist > 40.0f)
+    		{
+    			found = false;
+    		}
+    		else
             {
+                char tmp[20];
+                _printf("%X\n", &Game::skater->mp_rail_node);
+                //MessageBox(0, tmp, tmp, 0);
                 *p_point = closest_point;
                 *pp_rail_node = p_closest_rail;
             }
@@ -603,15 +609,19 @@ public:
             RailNode* p_node;// = *first_node;
             int last = current_node - 1;
             *first_node = &temp_nodes[0];
+            /*char test_msg[50];
+            sprintf(test_msg, "%X\n", &Game::skater->mp_rail_node);
+            MessageBox(0,test_msg,test_msg,0);
+            MessageBox(0, 0, 0, 0);*/
             EndOfRail = (DWORD)&temp_nodes[current_node];
 
             for (int node = 0; node < current_node; node++)
             {
                 p_node = &temp_nodes[node];
-                if (node != last)
+                /*if (node != last)
                     p_node->pNext = p_node + 1;
                 else
-                    p_node->pNext = NULL;
+                    p_node->pNext = NULL;*/
                 pp_railnodes[p_node->node] = p_node;
                 //p_node = p_node->pNext;
             }
@@ -643,6 +653,95 @@ public:
 
             freex(pp_railnodes);
             freex(temp_links);
+
+            mp_nodes = (RailNode*)mallocx(current_node * sizeof(RailNode));
+            DWORD temp_counter = 0;
+
+            vector<RailNode*> alreadyAdded;
+
+            for (DWORD i = 0; i < current_node; i++)
+            {
+                bool found = false;
+                for (DWORD j = 0; j < alreadyAdded.size(); j++)
+                {
+                    if (alreadyAdded[j] == &temp_nodes[i])
+                        found = true;
+                }
+                if (found)
+                    continue;
+
+                RailNode* pRail = &temp_nodes[i];
+                mp_nodes[temp_counter] = *pRail;
+                temp_counter++;
+                alreadyAdded.push_back(pRail);
+
+                if (pRail->pPrevLink)
+                {
+                    found = false;
+                    for (DWORD j = 0; j < alreadyAdded.size(); j++)
+                    {
+                        if (alreadyAdded[j] == pRail->pPrevLink)
+                            found = true;
+                    }
+                    if (!found)
+                    {
+                        RailNode* pNext = &mp_nodes[temp_counter];
+                        mp_nodes[temp_counter] = *pRail->pPrevLink;
+                        temp_counter++;
+                        alreadyAdded.push_back(pRail->pPrevLink);
+                    }
+                }
+                if (pRail->pNextLink)
+                {
+                    found = false;
+                    for (DWORD j = 0; j < alreadyAdded.size(); j++)
+                    {
+                        if (alreadyAdded[j] == pRail->pNextLink)
+                            found = true;
+                    }
+                    if (!found)
+                    {
+                        mp_nodes[temp_counter] = *pRail->pNextLink;
+                        temp_counter++;
+                        alreadyAdded.push_back(pRail->pNextLink);
+                    }
+                }
+                
+            }
+            if (temp_counter != current_node)
+                MessageBox(0, "NOT GOOD", "", 0);
+
+            for (DWORD i = 0; i < temp_counter; i++)
+            {
+                RailNode* pNext = mp_nodes[i].pNextLink;
+                if (pNext)
+                {
+                    DWORD node = pNext->node;
+                    for (DWORD j = 0; j < temp_counter; j++)
+                    {
+                        if (mp_nodes[j].node == node)
+                        {
+                            mp_nodes[i].pNextLink = &mp_nodes[j];
+                            break;
+                        }
+                    }
+                }
+                RailNode* pPrev = mp_nodes[i].pPrevLink;
+                if (pPrev)
+                {
+                    DWORD node = pPrev->node;
+                    for (DWORD j = 0; j < temp_counter; j++)
+                    {
+                        if (mp_nodes[j].node == node)
+                        {
+                            mp_nodes[i].pPrevLink = &mp_nodes[j];
+                            break;
+                        }
+                    }
+                }
+            }
+            freex(temp_nodes);
+            temp_nodes = NULL;
         }
     }
 
@@ -712,7 +811,7 @@ public:
         //	while (pRailNode)
         for (int check_node = 0; check_node < current_node; check_node++)
         {
-            RailNode* __restrict pRailNode = &temp_nodes[check_node];
+            RailNode* __restrict pRailNode = temp_nodes ? &temp_nodes[check_node] : &mp_nodes[check_node];
 
             if (pRailNode->node == node)
             {
@@ -774,7 +873,7 @@ public:
         //	{
         for (int node = 0; node < current_node; node++)
         {
-            RailNode* pRailNode = &temp_nodes[node];
+            RailNode* pRailNode = &mp_nodes[node];
             if (pRailNode->pNextLink)	   	// it's a segment
             {
 
@@ -799,7 +898,7 @@ public:
                 //			CRailNode *pCheckNode = pRailNode->m_pNext;
                 while (check_node < current_node && pRailNode->IsActive())
                 {
-                    RailNode* pCheckNode = &temp_nodes[check_node];
+                    RailNode* pCheckNode = &mp_nodes[check_node];
                     if (pCheckNode->pNextLink)	   	// it's a segment
                     {
                         // first check to see if bounding boxes overlap
@@ -900,7 +999,7 @@ public:
 
         for (int node = 0; node < current_node; node++)
         {
-            RailNode* pRailNode = &temp_nodes[node];
+            RailNode* pRailNode = &mp_nodes[node];
 
             if (pRailNode->IsActive())
             {
@@ -1160,8 +1259,8 @@ public:
         if (!SkateMod::ShouldBeAbsentNode(pNodeStruct))
         {
             RailNode* pRailNode = &temp_nodes[current_node];
-            pRailNode->pNext = *first_node;
-            *first_node = pRailNode;
+            /*pRailNode->pNext = *first_node;
+            *first_node = pRailNode;*/
             RailLinks* pLinkNode = &temp_links[current_node++];
             if (current_node > numRailNodes)
                 MessageBox(0, "Too many rails?", "", 0);
@@ -1173,7 +1272,7 @@ public:
             DWORD type_checksum = 0;
             pNodeStruct->GetChecksum(Checksums::Type, &type_checksum);
 
-            pRailNode->pNext = NULL;
+            //pRailNode->pNext = NULL;
             pRailNode->pNextLink = NULL;
             pRailNode->pPrevLink = NULL;
 
