@@ -548,9 +548,9 @@ public:
         pSkater = *(DWORD*)pSkater + 0x48;
         pSkater = *(DWORD*)pSkater;
         VALIDATE_DATA((Skater*)pSkater, sizeof(Skater));
-        char test_msg[59];
+        /*char test_msg[59];
         sprintf(test_msg, "%X\n", &((Skater*)pSkater)->mp_rail_node);
-        MessageBox(0, test_msg, test_msg, 0);
+        MessageBox(0, test_msg, test_msg, 0);*/
         return (Skater*)pSkater;
     }
 

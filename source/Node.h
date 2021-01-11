@@ -236,6 +236,7 @@ struct Node
 
     static void PrintNodeArrayInfo()
     {
+        Node::UpdateNodeArray();
         CArray* NodeArray = GetNodeArray();
 
 

@@ -297,7 +297,7 @@ public:
 
     static void AllocateTempRailData(RailNode** first)
     {
-        Node::UpdateNodeArray();
+        Node::UpdateNodeArray();//00419BC9
         current_node = 0;
         numRailNodes = 0;
         numNodes = 0;
@@ -523,7 +523,7 @@ public:
                                                             if (old_dist > snap_dist)
                                                             {
                                                                 // there is a good rail, but too far away
-                                                                // so kill any rail we've found so far
+                                                                // so kill any rail we've found so far00
                                                                 // and make this the new target
                                                                 closest_dist = dist;
                                                                 found = false;
@@ -584,9 +584,7 @@ public:
     		}
     		else
             {
-                char tmp[20];
                 _printf("%X\n", &Game::skater->mp_rail_node);
-                //MessageBox(0, tmp, tmp, 0);
                 *p_point = closest_point;
                 *pp_rail_node = p_closest_rail;
             }
@@ -674,37 +672,48 @@ public:
                 mp_nodes[temp_counter] = *pRail;
                 temp_counter++;
                 alreadyAdded.push_back(pRail);
-
-                if (pRail->pPrevLink)
+                RailNode* pPrev = pRail->pPrevLink;
+                RailNode* p_loop = pRail;
+                bool loop_advance = false;
+                while (pPrev && pPrev != pRail && pPrev != p_loop)
                 {
                     found = false;
                     for (DWORD j = 0; j < alreadyAdded.size(); j++)
                     {
-                        if (alreadyAdded[j] == pRail->pPrevLink)
+                        if (alreadyAdded[j] == pPrev)
                             found = true;
                     }
                     if (!found)
                     {
-                        RailNode* pNext = &mp_nodes[temp_counter];
-                        mp_nodes[temp_counter] = *pRail->pPrevLink;
-                        temp_counter++;
-                        alreadyAdded.push_back(pRail->pPrevLink);
+                        mp_nodes[temp_counter++] = *pPrev;
+                        alreadyAdded.push_back(pPrev);
                     }
+                    pPrev = pPrev->pPrevLink;
+                    if (!loop_advance)
+                        p_loop = p_loop->pPrevLink;
+                    loop_advance = !loop_advance;
                 }
-                if (pRail->pNextLink)
+
+                RailNode* pNext = pRail->pNextLink;
+                p_loop = pRail;
+                loop_advance = false;
+                while (pNext && pNext != pRail && pNext != p_loop)
                 {
                     found = false;
                     for (DWORD j = 0; j < alreadyAdded.size(); j++)
                     {
-                        if (alreadyAdded[j] == pRail->pNextLink)
+                        if (alreadyAdded[j] == pNext)
                             found = true;
                     }
                     if (!found)
                     {
-                        mp_nodes[temp_counter] = *pRail->pNextLink;
-                        temp_counter++;
-                        alreadyAdded.push_back(pRail->pNextLink);
+                        mp_nodes[temp_counter++] = *pNext;
+                        alreadyAdded.push_back(pNext);
                     }
+                    pNext = pNext->pNextLink;
+                    if (!loop_advance)
+                        p_loop = p_loop->pNextLink;
+                    loop_advance = !loop_advance;
                 }
                 
             }
@@ -1365,12 +1374,9 @@ void Skater::maybe_trip_rail_trigger(DWORD type)
         // did not get it, so scoot backwards until we detect a loop or we find one
         const RailNode* p_loop_detect = pRail;	 	// start loop detect at the start
         pRail = pRail->GetPrevLink(); 				// and the first node we check is the next one
-        int loop_advance = 0;
+        bool loop_advance = false;
         while (pRail && pRail != pStartOfRail && pRail != p_loop_detect)
         {
-            if (num_loops > 1000)
-                break;
-            num_loops++;
             pNode = pNodeArray->GetStructure(pRail->GetNode());
             if (pNode->GetChecksum(Checksums::TriggerScript, &value)) break;
 
@@ -1381,7 +1387,7 @@ void Skater::maybe_trip_rail_trigger(DWORD type)
             {
                 p_loop_detect = p_loop_detect->GetPrevLink();
             }
-            loop_advance ^= 1;
+            loop_advance = !loop_advance;
         }
     }
 
