@@ -1574,6 +1574,7 @@ __inline void Skater::MaybeSkateOffRail(bool last_segment, Vertex& extra_dist, R
 
         if (deltaZ >= 0.01f && deltaX >= 0.01f)
         {
+            _printf("This is not normal\n");
             last_segment = false;
         }
     }
@@ -1593,6 +1594,7 @@ __inline void Skater::MaybeSkateOffRail(bool last_segment, Vertex& extra_dist, R
             // if in the park editor, then ignore collision with invisible surfaces 
             if (!ParkEditor::Instance()->UsingCustomPark() || normal.y < 0.5f)// || (!ParkEditor::Instance()->UsingCustomPark() && fabsf(D3DXVec3Length(&extra_dist)<0.5f)))
             {
+                _printf("COllided offrail\n");
                 //_printf("OffRail.... %f normal.y %f off %d\n", fabsf(D3DXVec3Length(&extra_dist)), normal.y, skated_off_rail);
                 maybe_trip_rail_trigger(Node::TRIGGER_SKATE_OFF);
                 // don't let him make this movement!!

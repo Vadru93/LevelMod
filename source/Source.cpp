@@ -3995,7 +3995,10 @@ struct OptimizedCRC
 };
 
 OptimizedGrind optimized_grind[] = { {0x00489CCB, 3}, {0x004A507C, 2}, {0x004A5316, 2}, {0x004A5384, 2}, {0x004A5395, 2},
-    {0x004A53F5, 2}, {0x004A538E, 2}, {0x004A537B, 2}, {0x004A5071, 2}, {0x004A4EC1, 2}, {0x004A4ECC, 2 }, {0x004A530B, 2}, {0x004A50D3, 2},  {0x004A5059, 2}, {0x004A4F23, 2}, {0x004A4CA1, 2},  {0x004A5AFF, 3}, {0x004A6566,2}, {0x004A633E, 2}, {0x004A6341, 2}, {0x004A6306, 2}, {0x004A62CE, 2}, {0x004A6278, 2}, {0x004A626F, 2}, {0x004A6735, 2},  {0x004A657E, 2} };
+    {0x004A53F5, 2}, {0x004A538E, 2}, {0x004A537B, 2}, {0x004A5071, 2}, {0x004A4EC1, 2}, {0x004A4ECC, 2 }, {0x004A530B, 2}, 
+    {0x004A50D3, 2},  {0x004A5059, 2}, {0x004A4F23, 2}, {0x004A4CA1, 2},  {0x004A5AFF, 3}, {0x004A6566,2}, {0x004A633E, 2}, 
+    {0x004A6341, 2}, {0x004A6306, 2}, {0x004A62CE, 2}, {0x004A6278, 2}, {0x004A626F, 2}, {0x004A6735, 2},  {0x004A657E, 2},
+    {0x004A5985, 2},  {0x004A596D, 2}, {0x004A542C, 2},  };
 
 OptimizedCRC optimized[] = { {0x00401B3F, 5, 9},  {0x00401E0C, 4, 9}, {0x004021DA, 4, 9}, {0x00404C50, 8, 0}, {0x00404C71, 0, 0},  
     {0x00404C89, 0, 0},  {0x00404CA1, 0, 0}, {0x00405240, 16, 0}, {0x00405640, 8, 0}, {0x0041525F, 0, 0}, {0x0041527A, 0, 0},
@@ -4376,13 +4379,13 @@ void InitLevelMod()
     HookFunction(0x00418C5F, RailManager::SetActive);
 
     HookFunction(0x004A540C, Skater::skate_off_rail);
-    HookFunction(0x004A5424, maybe_skate_off_rail, 0xE9);
+    //HookFunction(0x004A5424, maybe_skate_off_rail, 0xE9);
 
     //This is needed to fix crash issue when multiple links to same RailNode
     HookFunction(0x004A4A00, &Skater::maybe_trip_rail_trigger);
     HookFunction(0x004A4C14, &Skater::maybe_trip_rail_trigger);
     HookFunction(0x004A5403, &Skater::maybe_trip_rail_trigger);
-    HookFunction(0x004A5A70, &Skater::maybe_trip_rail_trigger);
+    HookFunction(0x004A5A6A, &Skater::maybe_trip_rail_trigger);
     HookFunction(0x004A5BD1, &Skater::maybe_trip_rail_trigger);
     HookFunction(0x004A6816, &Skater::maybe_trip_rail_trigger);
     HookFunction(0x004A70BB, &Skater::maybe_trip_rail_trigger);
