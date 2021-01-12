@@ -4389,7 +4389,7 @@ void InitLevelMod()
     HookFunction(0x004A4A00, &Skater::maybe_trip_rail_trigger);
     HookFunction(0x004A4C14, &Skater::maybe_trip_rail_trigger);
     HookFunction(0x004A5403, &Skater::maybe_trip_rail_trigger);
-    //HookFunction(0x004A5A6A, &Skater::maybe_trip_rail_trigger);
+    HookFunction(0x004A5A6A, &Skater::maybe_trip_rail_trigger);
     HookFunction(0x004A5BD1, &Skater::maybe_trip_rail_trigger);
     HookFunction(0x004A6816, &Skater::maybe_trip_rail_trigger);
     HookFunction(0x004A70BB, &Skater::maybe_trip_rail_trigger);
