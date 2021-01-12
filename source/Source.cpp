@@ -4128,18 +4128,26 @@ __declspec(naked) void TriggerScript()
 LARGE_INTEGER timer_time;
 DWORD timer_old_start;
 
-DWORD GetTime()
+DWORD __cdecl GetTime()
 {
-    timer_old_start = timer_time.LowPart;
+    //timer_old_start = timer_time.LowPart;
 
 
     QueryPerformanceCounter(&timer_time);
     double ms = double(timer_time.LowPart)* fFreq;
+    ms += 0.5f;
     DWORD truncated = ms;
-    double test = ms - (double)truncated;
-    if (ms - test >= 0.45)
-        truncated++;
-    _asm xor edx, edx;
+
+    if (timer_time.HighPart)
+    {
+        ms = double(timer_time.HighPart) * fFreq;
+        ms += 0.5f;
+        DWORD truncated2 = ms;
+        _asm mov edx, truncated2;
+    }
+    else
+        _asm xor edx, edx
+
     return truncated;
 }
 
@@ -4151,11 +4159,12 @@ DWORD TimerElapsed()
         //elapsedTime.LowPart = (endTime.LowPart - startTime.LowPart);
         _asm xor edx, edx
         double ms = (double((endTime.LowPart - startTime.LowPart)) * fFreq);
+        ms += 0.55f;
 
         DWORD truncated = ms;
-        double test = ms - (double)truncated;
+        /*double test = ms - (double)truncated;
         if (ms - test >= 0.45)
-            truncated++;
+            truncated++;*/
 
         return truncated;// (elapsedTime.LowPart * 1000) / freq.LowPart;
     }
@@ -4163,7 +4172,12 @@ DWORD TimerElapsed()
     {
         elapsedTime.LowPart = 0xFFFFFFFF - startTime.LowPart + endTime.LowPart;
         _asm xor edx, edx
-        return (elapsedTime.LowPart * 1000) / freq.LowPart;
+        //return (elapsedTime.LowPart * 1000) / freq.LowPart;
+        double ms = (double(elapsedTime.LowPart) * fFreq);
+        ms += 0.55f;
+
+        DWORD truncated = ms;
+        return truncated;
     }
 }
 
@@ -4396,7 +4410,7 @@ void InitLevelMod()
     HookFunction(0x004B088C, &Skater::maybe_trip_rail_trigger);
     HookFunction(0x00489C7F, &RailNode::ProbablyOnSameRailAs);
 
-    /*HookFunction(0x00403C13, GetTime);
+    HookFunction(0x00403C13, GetTime);
     HookFunction(0x00403D61, GetTime);
     HookFunction(0x00403F29, GetTime);
     HookFunction(0x00404086, GetTime);
@@ -4417,56 +4431,172 @@ void InitLevelMod()
     HookFunction(0x004615AF, GetTime);
     HookFunction(0x0046E635, GetTime);
     HookFunction(0x0046E788, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);
-    HookFunction(0x, GetTime);*/
+    HookFunction(0x0046E7E7, GetTime);
+    HookFunction(0x0046E933, GetTime);
+    HookFunction(0x0046E9D1, GetTime);
+    HookFunction(0x0046F4B9, GetTime);
+    HookFunction(0x004712F2, GetTime);
+    HookFunction(0x00471901, GetTime);
+    HookFunction(0x00473124, GetTime);
+    HookFunction(0x00473989, GetTime);
+    HookFunction(0x004740C6, GetTime);
+    HookFunction(0x0047418E, GetTime);
+    HookFunction(0x00474493, GetTime);
+    HookFunction(0x004745DD, GetTime);
+    HookFunction(0x00474649, GetTime);
+    HookFunction(0x004750B6, GetTime);
+    HookFunction(0x004751B9, GetTime);
+    HookFunction(0x004754F9, GetTime);
+    HookFunction(0x00475744, GetTime);
+    HookFunction(0x0047699C, GetTime);
+    HookFunction(0x00479098, GetTime);
+    HookFunction(0x0047BCF5, GetTime);
+    HookFunction(0x0047D172, GetTime);
+    HookFunction(0x0047D1A1, GetTime);
+    HookFunction(0x0047DEBF, GetTime);
+    HookFunction(0x0047E6B4, GetTime);
+    HookFunction(0x0047E72E, GetTime);
+    HookFunction(0x0047E757, GetTime);
+    HookFunction(0x0047EB75, GetTime);
+    HookFunction(0x0047F427, GetTime);
+    HookFunction(0x0047F449, GetTime);
+    HookFunction(0x0047FE62, GetTime);
+    HookFunction(0x0048154F, GetTime);
+    HookFunction(0x00481624, GetTime);
+    HookFunction(0x00487978, GetTime);
+    HookFunction(0x00487A4B, GetTime);
+    HookFunction(0x00487A63, GetTime);
+    HookFunction(0x00487C36, GetTime);
+    HookFunction(0x0048858E, GetTime);
+    HookFunction(0x00489E48, GetTime);
+    HookFunction(0x0048A026, GetTime);
+    HookFunction(0x0048E4F0, GetTime);
+    HookFunction(0x00498993, GetTime);
+    HookFunction(0x004989EB, GetTime);
+    HookFunction(0x00499AD9, GetTime);
+    HookFunction(0x00499ECA, GetTime);
+    HookFunction(0x00499EE9, GetTime);
+    HookFunction(0x0049AEE6, GetTime);
+    HookFunction(0x0049AFCF, GetTime);
+    HookFunction(0x0049B183, GetTime);
+    HookFunction(0x0049B282, GetTime);
+    HookFunction(0x0049B793, GetTime);
+    HookFunction(0x0049B85F, GetTime);
+    HookFunction(0x0049BA16, GetTime);
+    HookFunction(0x0049BAB6, GetTime);
+    HookFunction(0x0049BACD, GetTime);
+    HookFunction(0x0049BFB4, GetTime);
+    HookFunction(0x0049C222, GetTime);
+    HookFunction(0x0049C613, GetTime);
+    HookFunction(0x0049C63B, GetTime);
+    HookFunction(0x0049C686, GetTime);
+    HookFunction(0x0049C6B8, GetTime);
+    HookFunction(0x0049C6F6, GetTime);
+    HookFunction(0x0049C734, GetTime);
+    HookFunction(0x0049C767, GetTime);
+    HookFunction(0x0049C7A5, GetTime);
+    HookFunction(0x0049C910, GetTime);
+    HookFunction(0x0049CBB4, GetTime);
+    HookFunction(0x0049CBE1, GetTime);
+    HookFunction(0x0049D367, GetTime);
+    HookFunction(0x0049D386, GetTime);
+    HookFunction(0x0049D3A5, GetTime);
+    HookFunction(0x0049D3D5, GetTime);
+    HookFunction(0x0049D421, GetTime);
+    HookFunction(0x0049D666, GetTime);
+    HookFunction(0x0049D688, GetTime);
+    HookFunction(0x0049D6AA, GetTime);
+    HookFunction(0x0049D6E9, GetTime);
+    HookFunction(0x0049E3FA, GetTime);
+    HookFunction(0x0049EFC8, GetTime);
+    HookFunction(0x0049EFF7, GetTime);
+    HookFunction(0x0049F019, GetTime);
+    HookFunction(0x0049F035, GetTime);
+    HookFunction(0x0049F243, GetTime);
+    HookFunction(0x0049F35C, GetTime);
+    HookFunction(0x0049F37B, GetTime);
+    HookFunction(0x0049F6D6, GetTime);
+    HookFunction(0x0049F7C0, GetTime);
+    HookFunction(0x0049F912, GetTime);
+    HookFunction(0x0049F9BA, GetTime);
+    HookFunction(0x0049FB3B, GetTime);
+    HookFunction(0x004A11B1, GetTime);
+    HookFunction(0x004A11DA, GetTime);
+    HookFunction(0x004A19DB, GetTime);
+    HookFunction(0x004A2148, GetTime);
+    HookFunction(0x004A216A, GetTime);
+    HookFunction(0x004A218C, GetTime);
+    HookFunction(0x004A258E, GetTime);
+    HookFunction(0x004A2971, GetTime);
+    HookFunction(0x004A2999, GetTime);
+    HookFunction(0x004A29D8, GetTime);
+    HookFunction(0x004A3328, GetTime);
+    HookFunction(0x004A3653, GetTime);
+    HookFunction(0x004A38CA, GetTime);
+    HookFunction(0x004A54D5, GetTime);
+    HookFunction(0x004A61DB, GetTime);
+    HookFunction(0x004A6407, GetTime);
+    HookFunction(0x004A7C27, GetTime);
+    HookFunction(0x004A7C67, GetTime);
+    HookFunction(0x004A8B5A, GetTime);
+    HookFunction(0x004A90CD, GetTime);
+    HookFunction(0x004AA670, GetTime);
+    HookFunction(0x004AC942, GetTime);
+    HookFunction(0x004AC955, GetTime);
+    HookFunction(0x004ACA65, GetTime);
+    HookFunction(0x004ACAC7, GetTime);
+    HookFunction(0x004AD218, GetTime);
+    HookFunction(0x004ADD41, GetTime);
+    HookFunction(0x004AE5B1, GetTime);
+    HookFunction(0x004AE84B, GetTime);
+    HookFunction(0x004AF97C, GetTime);
+    HookFunction(0x004AF9A2, GetTime);
+    HookFunction(0x004AFBA2, GetTime);
+    HookFunction(0x004AFFB8, GetTime);
+    HookFunction(0x004B0797, GetTime);
+    HookFunction(0x004B0E52, GetTime);
+    HookFunction(0x004B1975, GetTime);
+    HookFunction(0x004B2FBD, GetTime);
+    HookFunction(0x004B3138, GetTime);
+    HookFunction(0x004B321B, GetTime);
+    HookFunction(0x004B3363, GetTime);
+    HookFunction(0x004B359F, GetTime);
+    HookFunction(0x004B389C, GetTime);
+    HookFunction(0x004B3B16, GetTime);
+    HookFunction(0x004B3C91, GetTime);
+    HookFunction(0x004B3DD2, GetTime);
+    HookFunction(0x004B3F5B, GetTime);
+    HookFunction(0x004B4147, GetTime);
+    HookFunction(0x004B43C1, GetTime);
+    HookFunction(0x004B45BD, GetTime);
+    HookFunction(0x004B486C, GetTime);
+    HookFunction(0x004B499E, GetTime);
+    HookFunction(0x004B49F4, GetTime);
+    HookFunction(0x004B4FCF, GetTime);
+    HookFunction(0x004C04AC, GetTime);
+    HookFunction(0x004D88E4, GetTime);
+    HookFunction(0x004D8ED3, GetTime);
+    HookFunction(0x004DA359, GetTime);
+    HookFunction(0x004DAAAA, GetTime);
+    HookFunction(0x004DD99D, GetTime);
+    HookFunction(0x004DD9B4, GetTime);
+    HookFunction(0x004DD9C4, GetTime);
+    HookFunction(0x004DFF25, GetTime);
+    HookFunction(0x004E062F, GetTime);
+    HookFunction(0x004E06DB, GetTime);
+    HookFunction(0x004E07D0, GetTime);
+    HookFunction(0x004EA1ED, GetTime);
+    HookFunction(0x004EA2C0, GetTime);
+    HookFunction(0x004EE836, GetTime);
+    HookFunction(0x004EF333, GetTime);
+    HookFunction(0x004F24BA, GetTime);
+    HookFunction(0x004F36F5, GetTime);
+    HookFunction(0x004F3BA1, GetTime);
+    HookFunction(0x004F3D07, GetTime);
+    HookFunction(0x004F40AB, GetTime);
+    HookFunction(0x004FA86D, GetTime);
+    HookFunction(0x00502BA0, GetTime);
+    HookFunction(0x00502BE2, GetTime);
 
     //Not really used?
     *(BYTE*)0x004960E7 = 0xEB;
@@ -4726,7 +4856,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
         Slerp::trying = false;
         Slerp::value = 0.0f;
         Slerp::wallplant = false;
-        Slerp::m_last_wallplant_time_stamp = 0;
+        Slerp::m_last_wallplant_time_stamp.QuadPart = 0;
         Slerp::realVelocity = Vertex(0.0f, 0.0f, 0.0f);
         Slerp::targetNormal = Vertex(0.0f, 0.0f, 0.0f);
         Slerp::target_normal = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f);

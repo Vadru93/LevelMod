@@ -63,7 +63,7 @@ namespace Slerp
     extern bool trying;
     extern float value;
     extern bool wallplant;
-    extern DWORD m_last_wallplant_time_stamp;
+    extern LARGE_INTEGER m_last_wallplant_time_stamp;
     extern Vertex realVelocity;
     extern TransferType type;
     extern Vertex targetNormal;

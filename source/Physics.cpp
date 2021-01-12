@@ -8,13 +8,23 @@
 #include "Script.h"
 #include "Settings.h"
 
+DWORD GetElapsedTime(DWORD currentTime, LARGE_INTEGER last_time)
+{
+    DWORD currentTime2;
+    _asm mov currentTime2, edx;
+    if (currentTime2 == last_time.HighPart)
+    {
+        return currentTime - last_time.LowPart;
+    }
+    return (0xFFFFFFFF - last_time.LowPart + currentTime);
+}
+
+
 bool WallplantTimeGreaterThan(CStruct* pParams, CScript* pScript)
 {
     int time = pParams->GetInt();
-    DWORD currentTime = _GetCurrentTime();
-
-    _printf("targetTime %d timeLapsed %d currentTime %d\n", time, currentTime - Slerp::m_last_wallplant_time_stamp, currentTime);
-    return (currentTime - Slerp::m_last_wallplant_time_stamp) > time;
+    //_printf("targetTime %d timeLapsed %d currentTime %d\n", time, diff, currentTime);
+    return GetElapsedTime(GetTime(), Slerp::m_last_wallplant_time_stamp) > time;
 }
 
 //Spine and acid stuff, this is based off thug1src
@@ -1922,13 +1932,12 @@ __declspec(noalias) bool TestForAcid(CStruct* pParams, CScript* pScript)
     return false;
 }
 
-
 __declspec(noalias) void MaybeAcid()
 {
     if (Slerp::wallplant)
     {
         Skater* __restrict const skater = Skater::Instance();
-        if ((_GetCurrentTime() - Slerp::m_last_wallplant_time_stamp) > Physics_Wallplant_Duration)
+        if ((GetElapsedTime(GetTime(), Slerp::m_last_wallplant_time_stamp)) > Physics_Wallplant_Duration)
         {
             skater->SetState(Skater::AIR);
             _printf("Wallplant wait time done - Applying velocity\n");
@@ -2003,10 +2012,13 @@ bool Skater::CheckForWallpant()
     _printf("%f\n", GetMatrix().m[Y][Y]);
     //if(GetMatrix()[Y][Y] < -0.90f) return false;
 
-    DWORD currentTime = _GetCurrentTime();
-    if ((currentTime - Slerp::m_last_wallplant_time_stamp) < Physics_Disallow_Rewallplant_Duration) return false;
+    DWORD currentTime = GetTime();
+    DWORD currentTime2;
+    _asm mov currentTime2, edx;
+    if (GetElapsedTime(currentTime, Slerp::m_last_wallplant_time_stamp) < Physics_Disallow_Rewallplant_Duration) return false;
 
-    Slerp::m_last_wallplant_time_stamp = currentTime;
+    Slerp::m_last_wallplant_time_stamp.LowPart = currentTime;
+    Slerp::m_last_wallplant_time_stamp.HighPart = currentTime2;
     _printf("Timer passed, height %f!\n", height);
 
     if (height < Physics_Min_Wallplant_Height) return false;

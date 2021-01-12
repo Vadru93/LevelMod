@@ -287,6 +287,7 @@ public:
 
     static void Initialize()
     {
+        Slerp::m_last_wallplant_time_stamp.QuadPart = 0;
         temp_nodes = NULL;
         temp_links = NULL;
         current_node = 0;

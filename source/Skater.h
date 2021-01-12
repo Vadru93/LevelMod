@@ -429,20 +429,20 @@ public:
     {
         return *(bool*)((DWORD)this + 0x84CC);
     }
-    DWORD GetCurrentTime()
+    /*DWORD GetCurrentTime()
     {
         static const DWORD timer = 0x00409AE0;
         _asm call timer
         static DWORD temp = 0;  
         _asm mov temp, eax
         return temp;
-    }
+    }*/
 
     //the press is between 0x0-0xFF, press below or equal to 0x40 is deadzone
     void UpdateKeyState(BYTE key, DWORD press)
     {
 
-        GetKeyState(key)->Update(this->GetCurrentTime(), press);
+        GetKeyState(key)->Update(GetTime()/*this->GetCurrentTime()*/, press);
 
 
         //_printf("Updating press %d\nKeyState %p chc %X\n", press, this, this->checksum);
