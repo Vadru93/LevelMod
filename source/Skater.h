@@ -263,9 +263,12 @@ private:
     DWORD m_last_rail_node_name;
 
 
-    void SetTrigger()
+    __inline void SetTrigger(DWORD node_name, DWORD trigger_script)
     {
-        unk5[0x0F] = true;
+        unk5[0x0C] = true;
+        checksumName = node_name;
+        triggerScript = trigger_script;
+        //m_last_rail_node_name = node_name;
     }
 
 
@@ -605,11 +608,10 @@ public:
         p_set_terrain(0x0049BA80)(this, terrain);
     }
 
-    typedef void(__thiscall* const pTriggerScript)(Skater* pThis, DWORD triggerType, void*);
+    typedef void(__thiscall* const pTriggerScript)(Skater* pThis, DWORD triggerType, void**);
     void TriggerScript(DWORD triggerType)
     {
-        unk5[0xF] = true;
-        pTriggerScript(0x0049D070)(this, triggerType, scripts);
+        pTriggerScript(0x0049D070)(this, triggerType, &scripts);
     }
 
 

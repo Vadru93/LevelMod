@@ -33,6 +33,7 @@ void UpdateScriptConstants();
 //--------Script Stuff--------
 namespace QScript
 {
+    auto constexpr ASSERT = 1;
     enum ScriptToken
     {
         EndOfFile = 0x00,
@@ -605,6 +606,13 @@ struct EXTERN CStruct
         header = CStructHeader(type, value);
         head = &header;
         tail = head;
+    }
+
+    DWORD GetName()
+    {
+        DWORD name = 0;
+        GetChecksum(Checksums::Name, &name);
+        return name;
     }
 
     void RemoveParam(DWORD name);

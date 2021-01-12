@@ -1363,8 +1363,8 @@ void Skater::maybe_trip_rail_trigger(DWORD type)
     CStruct* pNode = pNodeArray->GetStructure(mp_rail_node->GetNode());
 
     // find a rail node that has a "TriggerScript" in it
-    DWORD value = 0;
-    if (pNode->GetChecksum(Checksums::TriggerScript, &value))
+    DWORD trigger = 0;
+    if (pNode->GetChecksum(Checksums::TriggerScript, &trigger))
     {
         // we got it 
     }
@@ -1378,7 +1378,7 @@ void Skater::maybe_trip_rail_trigger(DWORD type)
         while (pRail && pRail != pStartOfRail && pRail != p_loop_detect)
         {
             pNode = pNodeArray->GetStructure(pRail->GetNode());
-            if (pNode->GetChecksum(Checksums::TriggerScript, &value)) break;
+            if (pNode->GetChecksum(Checksums::TriggerScript, &trigger)) break;
 
             pRail = pRail->GetPrevLink();
             // The p_loop_detect pointer goes backwards at half speed, so if there is a loop
@@ -1391,19 +1391,26 @@ void Skater::maybe_trip_rail_trigger(DWORD type)
         }
     }
 
-    if (value)
+    if (trigger)
     {
+        char tmp[256] = "";
+        sprintf(tmp, "%s -> %s\n", FindChecksumName(pNode->GetName(), false), FindChecksumName(trigger,false));
+        _printf(tmp);
         // If this is different to last time, then set flag accordingly
         DWORD new_last_rail_node_name;
-        pNode->GetChecksum(Checksums::Name, &new_last_rail_node_name, 1);
+        pNode->GetChecksum(Checksums::Name, &new_last_rail_node_name, QScript::ASSERT);
 
-        checksumName = new_last_rail_node_name;
-        m_last_rail_node_name = new_last_rail_node_name;
+        SetTrigger(new_last_rail_node_name, trigger);
+
 
         TriggerScript(
             type
         );
     }
+    /*else
+    {
+        pNode->GetChecksum(Checksums::Name, &m_last_rail_node_name, QScript::ASSERT);
+    }*/
 }
 __declspec(naked) void maybe_skate_off_rail()
 {
