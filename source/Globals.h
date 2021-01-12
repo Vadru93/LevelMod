@@ -85,6 +85,7 @@ namespace Gfx
     extern D3DVIEWPORT9 world_viewport;
     extern D3DXVECTOR3 sun_position;
     extern bool bOnReset;
+    extern float uv_anim_timer;
 };
 
 namespace Physics

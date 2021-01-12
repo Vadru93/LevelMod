@@ -321,7 +321,7 @@ bool restore_filter = false;
 
 __declspec(noalias) void SubmitShader(ShaderObject2* __restrict pShader, Texture* __restrict texture)
 {
-    float t;
+    //static float t;
     constexpr DWORD oldShader = 0x005CEDB4;
     constexpr DWORD ShaderTextureSkip = (sizeof(ShaderTexture) - 4);
     static D3DMATRIX env_mat = { 0.5f,  0.0f, 0.0f, 0.0f,
@@ -368,7 +368,7 @@ __declspec(noalias) void SubmitShader(ShaderObject2* __restrict pShader, Texture
         else
             pDevice->SetTextureStageState(0, D3DTSS_TEXCOORDINDEX, D3DTSS_TCI_PASSTHRU);
 
-        t += Game::skater->GetFrameLength() * uv_anim_threshold;
+        const float t = Gfx::uv_anim_timer;//t += Game::skater->GetFrameLength() * uv_anim_threshold;
         float uoff = (t * pShader->anim->UVel) + (pShader->anim->UAmplitude * sinf(pShader->anim->UFrequency * t + pShader->anim->UPhase));
         float voff = (t * pShader->anim->VVel) + (pShader->anim->VAmplitude * sinf(pShader->anim->VFrequency * t + pShader->anim->VPhase));
 

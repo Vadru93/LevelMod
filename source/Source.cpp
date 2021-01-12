@@ -5884,7 +5884,6 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
 
 __declspec(noalias) void DrawFrame()
 {
-    Gfx::frameCounter++;
     //MessageBox(0, 0, 0, 0);
     if (!m_font) [[unlikely]]
     {
@@ -5938,7 +5937,8 @@ __declspec(noalias) void DrawFrame()
             //Skater * skater = Skater::Instance();
             if (Game::skater) [[likely]]
             {
-
+                Gfx::frameCounter++;
+                Gfx::uv_anim_timer += Game::skater->GetFrameLength();
                 if (LevelModSettings::bHookedControls && XINPUT::Player1->IsConnected())
                 {
                     if (XINPUT::vibrationFrames)
