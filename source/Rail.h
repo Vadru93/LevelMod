@@ -1370,7 +1370,6 @@ void Skater::maybe_trip_rail_trigger(DWORD type)
     }
     else
     {
-        DWORD num_loops = 0;
         // did not get it, so scoot backwards until we detect a loop or we find one
         const RailNode* p_loop_detect = pRail;	 	// start loop detect at the start
         pRail = pRail->GetPrevLink(); 				// and the first node we check is the next one
@@ -1393,19 +1392,16 @@ void Skater::maybe_trip_rail_trigger(DWORD type)
 
     if (trigger)
     {
-        char tmp[256] = "";
-        sprintf(tmp, "%s -> %s\n", FindChecksumName(pNode->GetName(), false), FindChecksumName(trigger,false));
-        _printf(tmp);
-        // If this is different to last time, then set flag accordingly
-        DWORD new_last_rail_node_name;
-        pNode->GetChecksum(Checksums::Name, &new_last_rail_node_name, QScript::ASSERT);
+        _printf("%s -> %s\n", FindChecksumName(pNode->GetName()), FindChecksumName(trigger));
 
-        SetTrigger(new_last_rail_node_name, trigger);
+        DWORD node_name;
+        pNode->GetChecksum(Checksums::Name, &node_name, QScript::ASSERT);
 
+        //Think this is needed for graf?
+        SetName(node_name);
 
-        TriggerScript(
-            type
-        );
+        //Actually spawn the TriggerScript
+        TripTrigger(type, trigger, pRail->GetNode(), pNode);
     }
     /*else
     {

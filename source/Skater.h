@@ -178,8 +178,14 @@ private://0575a190
     DWORD unp;
     //84A0
     DWORD m_state_change_timestamp;
+    //84A4
     DWORD m_state_change_timestamp2;
-    BYTE unknown2[0x28];
+    //84A8
+    BYTE unknown2[0x18];
+    //84C0
+    DWORD current_trigger_type;
+    //84C4
+    BYTE unknown34[0x0C];
     //84D0
     KeyState keystates[12];
     //8620
@@ -268,7 +274,25 @@ private:
         unk5[0x0C] = true;
         checksumName = node_name;
         triggerScript = trigger_script;
-        //m_last_rail_node_name = node_name;
+        m_last_rail_node_name = node_name;
+    }
+
+    __inline void SetName(DWORD name)
+    {
+        checksumName = name;
+    }
+
+    void SpawnAndRunScript(DWORD trigger_script, DWORD node_index, bool net_enabled = false, bool permanent = false)
+    {
+
+        typedef void(__thiscall* const pSpawnAndRunScript)(Skater* pThis, DWORD trigger_name, DWORD node_index, bool net_enabled, bool permanent);
+        pSpawnAndRunScript(0x004AC670)(this, trigger_script, node_index, net_enabled, permanent);
+    }
+
+    void TripTrigger(DWORD type, DWORD trigger_script, DWORD node_index, CStruct* pNode)
+    {
+        current_trigger_type = type;
+        SpawnAndRunScript(trigger_script, node_index, pNode->ContainsFlag(Checksums::NetEnabled), pNode->ContainsFlag(Checksums::Permanent));
     }
 
 
