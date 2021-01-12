@@ -185,7 +185,8 @@ private://0575a190
     //84C0
     DWORD current_trigger_type;
     //84C4
-    BYTE unknown34[0x0C];
+    bool m_restarted_this_frame;
+    BYTE unknown34[0x0B];
     //84D0
     KeyState keystates[12];
     //8620
@@ -268,6 +269,11 @@ private:
     //92F8
     DWORD m_last_rail_node_name;
 
+    void SetFlag(void* flag, bool value)
+    {
+        typedef void(__thiscall* const pSetFlag)(void* flag, bool value);
+        pSetFlag(0x004A2580)(flag, value);
+    }
 
     __inline void SetTrigger(DWORD node_name, DWORD trigger_script)
     {
@@ -280,6 +286,16 @@ private:
     __inline void SetName(DWORD name)
     {
         checksumName = name;
+    }
+
+
+    void got_rail_hook();
+    bool will_take_rail();
+    //void CheckForPointRail_Hook(DWORD terrain);
+
+    bool HaveBeenReset()
+    {
+        return m_restarted_this_frame;
     }
 
     void SpawnAndRunScript(DWORD trigger_script, DWORD node_index, bool net_enabled = false, bool permanent = false)
@@ -616,6 +632,8 @@ public:
     {
         return &normal;
     }
+
+    void PointRail(const Vertex & rail_pos);
 
 
 

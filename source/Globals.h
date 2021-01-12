@@ -92,6 +92,8 @@ namespace Physics
 {
     extern float Rail_Max_Snap;
     extern float Rail_Corner_Leave_Angle;
+    extern float Physics_Point_Rail_Kick_Upward_Angle;
+    extern float Point_Rail_Speed_Boost;
 };
 
 //--------XINPUT--------

@@ -1958,7 +1958,10 @@ __declspec(noalias) void MaybeAcid()
     if (skater == NULL) [[unlikely]]
         return;
     skater->Store();
-    if (!Slerp::OnGround && skater->GetKeyState(LevelModSettings::SpineButton)->IsPressed() && (LevelModSettings::SpineButton2 == KeyState::NONE || skater->GetKeyState(LevelModSettings::SpineButton2)->IsPressed()))
+    if (!Slerp::OnGround && ( KeyState::GetKeyboardState(LevelModSettings::SpineButton3) ||
+        ( skater->GetKeyState(LevelModSettings::SpineButton)->IsPressed() && 
+            (LevelModSettings::SpineButton2 == KeyState::NONE || skater->GetKeyState(LevelModSettings::SpineButton2)->IsPressed()) ) 
+        ))
     {
         _printf("trying acid\n");
 

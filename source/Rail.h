@@ -414,6 +414,7 @@ public:
         // Go through all the rail segments, and find the shortest distance to line
         // and there is your rail
 
+
         Line2d movement;
 
         *(Vertex*)&movement.start = pos1;
@@ -579,11 +580,11 @@ public:
         {
             // note, the line from pos1 to closest_point will not reflect the line segment found above
             // as the line segment will actually start somewhere between pos1 and pos2, and not always on pos1
-    		if ( closest_dist > 40.0f)
+    		/*if ( closest_dist > 40.0f)
     		{
     			found = false;
     		}
-    		else
+    		else*/
             {
                 _printf("%X\n", &Game::skater->mp_rail_node);
                 *p_point = closest_point;
@@ -1110,6 +1111,7 @@ public:
             printf("r-l above collision, invalid\n");
             feeler.DebugLine(255, 0, 0);
 #endif
+            Game::skater->Restore();
             return false;
         }
         else

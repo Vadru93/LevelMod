@@ -16,6 +16,7 @@ enum class KeyCode : BYTE
 
 enum class VirtualKeyCode : BYTE
 {
+    Undefined = 0,
     L_MOUSE = 0x1,
     R_MOUSE,
     CANCEL,
@@ -96,7 +97,7 @@ struct KeyMap
     {
         Pause,
         CameraToggle,
-        Unknown,
+        Unused,//probably used while developing the game, like maybe move camera or spawn something
         CameraLock,
         Grind,
         Grab,

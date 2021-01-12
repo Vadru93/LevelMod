@@ -10,7 +10,7 @@
 #include <d3dx8core.h>*/
 
 //same accuracy as th3
-#define DegToRad(degree) ((degree) * (3.14f / 180.0f))//* 0.01f))
+#define DegToRad(degree) ((degree) * (3.14f * 0.01f))
 
 
 int ClampValue(int value, int min, int max, int outMin, int outMax);

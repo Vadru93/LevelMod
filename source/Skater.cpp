@@ -473,6 +473,8 @@ void Skater::Slerping()
         *v += Slerp::vel;
     Slerp::last = *v;
 }
+BYTE old_feeler[0x60*2];
+//BYTE old_feeler2[0x60];
 
 
 void Skater::Store()
@@ -480,12 +482,14 @@ void Skater::Store()
     /*skpos = position;
     skopos = oldpos;
     skvel = velocity;*/
-    oldCollNormal = normal;
+    memcpy(old_feeler, &scripts, 0x60*2);
+    //memcpy(old_feeler2, &scripts+0x60, 0x60);
+    /*oldCollNormal = normal;
     oldHitPoint = hitpoint;
     oldCollFlag = collFlags;
     oldHeight = height;
     scol = *(Vertex*)&startcol;
-    ecol = *(Vertex*)&endcol;
+    ecol = *(Vertex*)&endcol;*/
 }
 
 void Skater::Restore()
@@ -493,12 +497,14 @@ void Skater::Restore()
     /*position = skpos;
     oldpos = skopos;
     skvel = velocity;^*/
-    normal = oldCollNormal;
+    memcpy(&scripts, old_feeler, 0x60*2);
+    //memcpy(&scripts + 0x60, old_feeler2, 0x60);
+    /*normal = oldCollNormal;
     hitpoint = oldHitPoint;
     collFlags = oldCollFlag;
     height = oldHeight;
     scol = *(Vertex*)&startcol;
-    ecol = *(Vertex*)&endcol;
+    ecol = *(Vertex*)&endcol;*/
 }
 
 void Skater::ResetLerpingMatrix()
