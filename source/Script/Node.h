@@ -200,7 +200,7 @@ struct Node
         if (pStruct->GetStruct(Checksums::Position, &header))
         {
             out_pos->x = header->pVec->x;
-            out_pos->y = header->pVec->y;
+            out_pos->y = header->pVec->y + 0.2f;
             out_pos->z = header->pVec->z * -1.0f;
         }
         else
