@@ -6,6 +6,7 @@
 
 
 bool Slerp::transfer = false;
+bool Slerp::bDisallowTransfer = false;
 bool Slerp::landing = false;
 bool Slerp::m_began_frame_in_transfer = false;
 bool Slerp::slerping = false;
@@ -33,7 +34,7 @@ bool Slerp::done = false;
 bool Slerp::trying = false;
 float Slerp::value = 0.0f;
 bool Slerp::wallplant = false;
-DWORD Slerp::m_last_wallplant_time_stamp = 0;
+LARGE_INTEGER Slerp::m_last_wallplant_time_stamp;
 Vertex Slerp::realVelocity = Vertex(0, 0, 0);
 TransferType Slerp::type = ACID;
 Vertex Slerp::targetNormal = Vertex(0, 0, 0);
@@ -42,8 +43,9 @@ D3DXVECTOR4 Slerp::target_normal = D3DXVECTOR4(0, 0, 0, 0);
 float Slerp::speed = 0.0f;
 
 EXTERN bool GameState::GotSuperSectors = false;
-Skater* Game::skater = NULL;
+Skater* __restrict Game::skater = NULL;
 bool(*Game::PlaySound)(CStruct*, CScript*) = NULL;
+DWORD Game::level_checksum = 0;
 
 ShaderObject* Gfx::shaders = NULL;
 DWORD Gfx::numMaterials = 0;
@@ -68,6 +70,7 @@ D3DVIEWPORT9 Gfx::world_viewport;
 LPDIRECT3DSURFACE9 Gfx::world_rendertarget = NULL;
 D3DXVECTOR3 Gfx::sun_position;
 bool Gfx::bOnReset = false;
+float Gfx::uv_anim_timer = 0;
 HWND Gfx::hFocusWindow = 0;
 DWORD Gfx::width = 0;
 DWORD Gfx::height = 0;

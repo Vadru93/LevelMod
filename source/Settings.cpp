@@ -46,6 +46,7 @@ std::map<DWORD, OverrideOption> LevelModSettings::overrideOptions;
 
 int LevelModSettings::SpineButton = 7;
 int LevelModSettings::SpineButton2 = -1;
+VirtualKeyCode LevelModSettings::SpineButton3 = VirtualKeyCode::Undefined;
 
 
 

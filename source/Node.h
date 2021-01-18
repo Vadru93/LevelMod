@@ -16,7 +16,7 @@ struct EXTERN CArray
     WORD Type;
     WORD NumItems;
 
-    int& operator[] (int x) {
+    const int& operator[] (int x) const {
         if (Type != 1)
         {
             _printf("Unsupported ArrayType\n");
@@ -181,13 +181,51 @@ struct Node
     BYTE unknown2[52];
     DWORD name;//checksum
 
+    enum TriggerType
+    {
+        TRIGGER_SKATE_OFF_EDGE = 1,
+        TRIGGER_JUMP_OFF,
+        TRIGGER_LAND_ON,
+        TRIGGER_SKATE_OFF,
+        TRIGGER_SKATE_ONTO,
+        TRIGGER_BONK,
+        TRIGGER_LIP_ON,
+        TRIGGER_LIP_OFF,
+        TRIGGER_LIP_JUMP,
+    };
+
+    static void GetPosition(CStruct* pStruct, Vector* const __restrict out_pos)
+    {
+        CStructHeader* __restrict header;
+        if (pStruct->GetStruct(Checksums::Position, &header))
+        {
+            out_pos->x = header->pVec->x;
+            out_pos->y = header->pVec->y;
+            out_pos->z = header->pVec->z * -1.0f;
+        }
+        else
+        {
+            out_pos->x = 0.0f;
+            out_pos->y = 0.0f;
+            out_pos->z = 0.0f;
+        }
+        /*typedef void (__cdecl* const pGetPosition)(CStruct* pStruct, Vector* out_pos);
+        pGetPosition(0x0042C3C0)(pStruct, out_pos);*/
+    }
 
     //Gets pointer to the NodeArray, type is CArray(See Above)
-    static CArray* GetNodeArray()
+    static CArray* const __restrict GetNodeArray()
     {
+        extern CArray* __restrict NodeArray;
+        return NodeArray;
+    }
+
+    static void UpdateNodeArray()
+    {
+        extern CArray* __restrict NodeArray;
         typedef CArray* (__cdecl* const pGetNodeArray)(DWORD checksum, DWORD param);
         //_printf("NodeArray %p\n", pGetNodeArray(0x00426590)(0xC472ECC5, 1));
-        return pGetNodeArray(0x00426590)(0xC472ECC5, 1);
+        NodeArray = pGetNodeArray(0x00426590)(0xC472ECC5, 1);
     }
 
     //Gets CStructHeader of this node
@@ -198,6 +236,7 @@ struct Node
 
     static void PrintNodeArrayInfo()
     {
+        Node::UpdateNodeArray();
         CArray* NodeArray = GetNodeArray();
 
 

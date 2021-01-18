@@ -25,6 +25,8 @@
 
 #define p_bWindowed *(bool*)0x008510a9
 
+extern DWORD GetTime();
+
 //--------Spine and Acid--------
 enum TransferType
 {
@@ -33,6 +35,7 @@ enum TransferType
 namespace Slerp
 {
     extern bool transfer;
+    extern bool bDisallowTransfer;
     extern bool landing;
     extern bool m_began_frame_in_transfer;
     extern bool slerping;
@@ -60,7 +63,7 @@ namespace Slerp
     extern bool trying;
     extern float value;
     extern bool wallplant;
-    extern DWORD m_last_wallplant_time_stamp;
+    extern LARGE_INTEGER m_last_wallplant_time_stamp;
     extern Vertex realVelocity;
     extern TransferType type;
     extern Vertex targetNormal;
@@ -82,6 +85,15 @@ namespace Gfx
     extern D3DVIEWPORT9 world_viewport;
     extern D3DXVECTOR3 sun_position;
     extern bool bOnReset;
+    extern float uv_anim_timer;
+};
+
+namespace Physics
+{
+    extern float Rail_Max_Snap;
+    extern float Rail_Corner_Leave_Angle;
+    extern float Physics_Point_Rail_Kick_Upward_Angle;
+    extern float Point_Rail_Speed_Boost;
 };
 
 //--------XINPUT--------
@@ -90,7 +102,7 @@ namespace XINPUT
     extern bool vibrating;
     extern XINPUT_VIBRATION vibration;
     extern DWORD vibrationFrames;
-    extern CXBOXController* Player1;
+    extern CXBOXController* __restrict Player1;
 };
 //--------XINPUT--------
 
@@ -107,8 +119,9 @@ struct Skater;
 //--------Game--------
 namespace Game
 {
-    extern Skater* skater;
+    extern Skater* __restrict skater;
     extern bool(*PlaySound)(CStruct*, CScript*);// = NULL; 00417bd0
+    extern DWORD level_checksum;
 };
 //--------Game--------
 
@@ -250,7 +263,7 @@ void SetVertexShader_naked();
 void __stdcall SetVertexShader_hook();
 void __cdecl Obj_SetShader_hook();
 
-HRESULT __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYTE data);
+bool __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYTE data);
 
 SHORT __stdcall proxy_GetAsyncKeyState(int key);
 BOOL __stdcall proxy_GetMessage(LPMSG lpMsg,

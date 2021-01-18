@@ -18,6 +18,14 @@ struct SkateMod
     }
 
 
+    static bool ShouldBeAbsentNode(CStruct* pNode)
+    {
+        Network::NetHandler* net = Network::NetHandler::Instance();
+
+        return (net->InNetGame() && pNode->ContainsFlag(Checksum("AbsentInNetGames")));
+    }
+
+
 
     //
     //00438B60 GetProfile

@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include "shadow.h"
 #include "dinput.h"
+#include "rail.h"
 /*0
 004F9B9E < -non semi
     8
@@ -65,6 +66,7 @@ D3DXMATRIX lineWorld;
 
 vector<SuperSector*> EnvironmentObjects;
 extern vector<SuperSector*> PointyObjects;
+extern vector<ColouredVertex> bbox_rails;
 
 LPD3DXSPRITE eye_sprite;
 DWORD wheel_timer = 0;
@@ -149,9 +151,107 @@ extern ObserveMode* pObserve;
 
 //Used for graf tag counter
 char tags[256] = "Tags: 0";
+char stat_cheat_message[] = "Stat cheat detected...";
 LPD3DXFONT m_font = NULL;
 RECT rct;
 
+void InjectHook(DWORD addr, BYTE* hook, DWORD size)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, size, PAGE_EXECUTE_READWRITE, &old);
+    memcpy((void*)addr, hook, size);
+}
+
+__inline void HookFunction(DWORD addr, void(SfxManager::* function)(float* lvol, float* rvol, Vector* soundSource, float dropoffDist), BYTE byteCode = 0, DWORD nopCount=0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+
+__inline void HookFunction(DWORD addr, bool (RailNode::* function )(int SearchNode), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+
+__inline void HookFunction(DWORD addr, void (Skater::* function)(), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+
+__inline void HookFunction(DWORD addr, void (Skater::* function)(DWORD type), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+
+__inline void HookFunction(DWORD addr, void (Skater::* function)(D3DXVECTOR3 *off_point), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+
+__inline void HookFunction(DWORD addr, void (Skater::* function)(Skater::EStateType state, DWORD terrain), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+
+__inline void HookFunction(DWORD addr, void (RailManager::* function)(DWORD index, CStruct* pNodeStruct), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
 
 
 __inline void HookFunction(DWORD addr, void (Network::MessageHandler::* function)(unsigned char msg_id, void* pCallback, int flags, Network::NetHandler* net_handler, int prio), BYTE byteCode = 0, DWORD nopCount = 0)
@@ -161,6 +261,20 @@ __inline void HookFunction(DWORD addr, void (Network::MessageHandler::* function
     if (byteCode)
         *(DWORD*)(addr - 1) = byteCode;
     *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+
+__inline void HookFunction(DWORD addr, DWORD function, BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = ((function) - addr) - 4;
+    addr += 4;
     for (DWORD i = 0; i < nopCount; i++)
         *(BYTE*)addr++ = 0x90;
     //
@@ -605,7 +719,7 @@ void __cdecl add_log(const char* string, ...)
     k = vsprintf(buf, string, args);
     va_end(args);
     char* p = buf;
-    if (pScript)
+    if (pScript && (DWORD)pScript > 0x00400000 && (DWORD)pScript < 0x10000000)
     {
         while (*p != 0x0)
         {
@@ -2834,29 +2948,40 @@ void HookedFopen(char* p)
                 AddFunctions();
                 bHookDone = true;
             }
-            if (bDebugMode)
+            else if (strstr(p, "Levels\\") || strstr(p, "levels\\"))
             {
-                _printf("Fopen: %s\n", p);
-                memcpy(qbPath, p, strlen(p) + 1);
-                qbPath[strlen(qbPath) - 1] = 0x0;
+                DWORD pos = std::string(p).find_last_of("\\");
 
-                /*MessageBox(0, p, qbPath, 0);
-                AddCompressedNodes();*/
+                char temp_level[50];
+                memcpy(temp_level, &p[pos + 1], strlen(p) - 3 - (pos + 1));
+                temp_level[strlen(p) - 3 - (pos + 1)] = 0x00;
+                Game::level_checksum = Checksum(temp_level);
+                //MessageBox(0, temp_level, Level, 0);
+
+
                 if (bDebugMode)
-                    QScript::Scripts->OpenScript(p, true);
+                {
+                    _printf("Fopen: %s\n", p);
+                    memcpy(qbPath, p, strlen(p) + 1);
+                    qbPath[strlen(qbPath) - 1] = 0x0;
+
+                    /*MessageBox(0, p, qbPath, 0);
+                    AddCompressedNodes();*/
+                    if (bDebugMode)
+                        QScript::Scripts->OpenScript(p, true);
+                }
+
+
+                strcpy(ShaderFile, p);
+
+                ShaderFile[strlen(p) - 2] = 's';
+                ShaderFile[strlen(p) - 1] = 'h';
+                /*ShaderFile[strlen(p)] = 'h';
+                ShaderFile[strlen(p)+1] = 0x0;*/
+
+                //LoadCustomShaders(ShaderFile);
+
             }
-
-
-            strcpy(ShaderFile, p);
-
-            ShaderFile[strlen(p) - 2] = 's';
-            ShaderFile[strlen(p) - 1] = 'h';
-            /*ShaderFile[strlen(p)] = 'h';
-            ShaderFile[strlen(p)+1] = 0x0;*/
-
-            //LoadCustomShaders(ShaderFile);
-
-
         }
     }
 }
@@ -2871,113 +2996,6 @@ void LoadCustomShaderThread()
     Game::skater = Skater::UpdateSkater();
     while(!Game::skater) Skater::UpdateSkater();
 
-    /*Game::skater->Store();
-
-    //Try to find narrow objects for nata spin
-    for (auto object = EnvironmentObjects.begin(); object != EnvironmentObjects.end(); object++)
-    {
-        SuperSector* sector = *object;
-
-        //Get the width and height
-        float x_width = sector->bboxMax.x - sector->bboxMin.x;
-        float height = sector->bboxMax.y - sector->bboxMin.y;
-        float z_width = sector->bboxMax.z - sector->bboxMin.z;
-
-        //Super math... probably is a better way to do this
-        if (x_width < 35.0f && x_width > 3.0f && z_width < 35.0f && z_width > 3.0f && height > 15.0f)
-        {
-
-            //Now we found a narrow object, but we still need to check if there is another object ontop of it that will make the object unaccessable
-            //So we will make raytracing from object top position to slightly above and vice versa to combat CCW
-
-            //Get the middle topmomst point of the object, not 100% true but seems to be true enough
-            D3DXVECTOR3 top;
-            top.x = (sector->bboxMax.x + sector->bboxMin.x) / 2.0f;
-            top.y = sector->bboxMax.y;
-            top.z = (sector->bboxMax.z + sector->bboxMin.z) / 2.0f;
-
-            D3DXVECTOR3 end = top;
-            //Set end point sligthly above
-            end.y += 50.0f;
-            Game::skater->SetRay(top, end);
-            //Ignore hollow collision
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0))
-                continue;
-
-            //We did not collide, but there still may be an object ontop of this object that has the same exact position as the topmost point
-            //So we need to check slightly below the topmost point
-            if (height > 20.0f)
-                top.y -= 20.0f;
-            else
-                top.y -= 8.0f;
-            Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name && Game::skater->GetHitPoint()->y >= top.y)
-                continue;
-
-            //Now we need to check again in reverse order to take care of CCW
-            Game::skater->SetRay(end, top);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name && Game::skater->GetHitPoint()->y >= top.y)
-                continue;
-
-            //Now let's check in circle around, should use boundingsphere collision checking instead of raytracing here
-            top.y = sector->bboxMax.y+1.0f;
-            end.y = top.y;
-            end.x += 50.0f;
-            Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
-                continue;
-
-            end.z += 50.0f;
-            Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
-                continue;
-
-            end.x -= 50.0f;
-            Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
-                continue;
-
-            end.x -= 50.0f;
-            Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
-                continue;
-
-            end.z -= 50.0f;
-            Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
-                continue;
-
-            end.z -= 50.0f;
-            Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
-                continue;
-
-            end.x += 50.0f;
-            Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
-                continue;
-
-            end.x += 50.0f;
-            Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck(Collision::Flags::Hollow, Collision::IGNORE0) && Game::skater->GetCollisionName() != sector->name)
-                continue;
-
-            //We have a narrow object that seems to be accessible
-            for (auto i = 0; i < sector->numVertices; i++)
-            {
-                //Decrease b and g value, keep r value = make object more red
-                SuperSector::Color* colors = sector->GetColors();
-                colors[i].g *= 0.2f;
-                colors[i].b *= 0.2f;
-            }
-            
-            //Tell engine to update the VertexBuffer to vram
-            sector->Update();
-            //PointyObjects.push_back(sector);
-        }
-    }
-    Game::skater->Restore();
-    */
     //Then check if we are host and if we are, send the HostOptions to clients
     Network::NetHandler* net_handler = Network::NetHandler::Instance();
 
@@ -2997,30 +3015,6 @@ bool OnPostLevelLoad(CStruct* pStruct, CScript* pScript)
 {
     _printf("OnPostLevelLoad...\n");
     oldSkater = Game::skater;
-
-    CArray* NodeArray = Node::GetNodeArray();
-    for (auto i = 0; i < NodeArray->GetNumItems(); i++)
-    {
-        CStruct* pStruct = NodeArray->GetStructure(i);
-
-        CStructHeader* Class = NULL;
-        if (pStruct->GetStruct(Checksums::Class, &Class))
-        {
-            if (Class->Data == Checksums::EnvironmentObject)
-            {
-                CStructHeader* Name = NULL;
-                if (pStruct->GetStruct(Checksums::Name, &Name))
-                {
-                    SuperSector* sector = SuperSector::GetSuperSector(Name->Data);
-                    if (sector)
-                    {
-                        EnvironmentObjects.push_back(sector);
-                    }
-                }
-            }
-        }
-    }
-
 
     CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)LoadCustomShaderThread, NULL, NULL, NULL);
     return true;
@@ -3819,6 +3813,23 @@ int proxy_sprintf(char* result, char* format, DWORD value)
 
 //004D5759
 
+auto constexpr size_reduction = 0x44 - sizeof(RailNode);
+
+struct OptimizedGrind
+{
+    DWORD addr;
+    DWORD offset;
+
+    void Optimize()
+    {
+        DWORD old;
+        VirtualProtect((LPVOID)addr, offset, PAGE_EXECUTE_READWRITE, &old);
+        addr += offset;
+        old = *(BYTE*)addr;
+        *(BYTE*)addr -= size_reduction;
+    }
+};
+
 
 //To optimize CRC we put the checksum in eax instead of calling Checksum("string")
 //string here means pointer in memory where string is pushed to stack
@@ -3891,6 +3902,12 @@ struct OptimizedCRC
         }
     }
 };
+
+OptimizedGrind optimized_grind[] = { {0x00489CCB, 3}, {0x004A507C, 2}, {0x004A5316, 2}, {0x004A5384, 2}, {0x004A5395, 2},
+    {0x004A53F5, 2}, {0x004A538E, 2}, {0x004A537B, 2}, {0x004A5071, 2}, {0x004A4EC1, 2}, {0x004A4ECC, 2 }, {0x004A530B, 2}, 
+    {0x004A50D3, 2},  {0x004A5059, 2}, {0x004A4F23, 2}, {0x004A4CA1, 2},  {0x004A5AFF, 3}, {0x004A6566,2}, {0x004A633E, 2}, 
+    {0x004A6341, 2}, {0x004A6306, 2}, {0x004A62CE, 2}, {0x004A6278, 2}, {0x004A626F, 2}, {0x004A6735, 2},  {0x004A657E, 2},
+    {0x004A5985, 2},  {0x004A596D, 2}, {0x004A542C, 2},  };
 
 OptimizedCRC optimized[] = { {0x00401B3F, 5, 9},  {0x00401E0C, 4, 9}, {0x004021DA, 4, 9}, {0x00404C50, 8, 0}, {0x00404C71, 0, 0},  
     {0x00404C89, 0, 0},  {0x00404CA1, 0, 0}, {0x00405240, 16, 0}, {0x00405640, 8, 0}, {0x0041525F, 0, 0}, {0x0041527A, 0, 0},
@@ -4017,6 +4034,32 @@ __declspec(naked) void TriggerScript()
     _asm ret;
 }
 
+LARGE_INTEGER timer_time;
+DWORD timer_old_start;
+
+DWORD __cdecl GetTime()
+{
+    //timer_old_start = timer_time.LowPart;
+
+
+    QueryPerformanceCounter(&timer_time);
+    double ms = double(timer_time.LowPart)* fFreq;
+    ms += 0.5f;
+    DWORD truncated = ms;
+
+    if (timer_time.HighPart)
+    {
+        ms = double(timer_time.HighPart) * fFreq;
+        ms += 0.5f;
+        DWORD truncated2 = ms;
+        _asm mov edx, truncated2;
+    }
+    else
+        _asm xor edx, edx
+
+    return truncated;
+}
+
 DWORD TimerElapsed()
 {
     QueryPerformanceCounter(&endTime);
@@ -4025,11 +4068,12 @@ DWORD TimerElapsed()
         //elapsedTime.LowPart = (endTime.LowPart - startTime.LowPart);
         _asm xor edx, edx
         double ms = (double((endTime.LowPart - startTime.LowPart)) * fFreq);
+        ms += 0.55f;
 
         DWORD truncated = ms;
-        double test = ms - (double)truncated;
+        /*double test = ms - (double)truncated;
         if (ms - test >= 0.45)
-            truncated++;
+            truncated++;*/
 
         return truncated;// (elapsedTime.LowPart * 1000) / freq.LowPart;
     }
@@ -4037,7 +4081,12 @@ DWORD TimerElapsed()
     {
         elapsedTime.LowPart = 0xFFFFFFFF - startTime.LowPart + endTime.LowPart;
         _asm xor edx, edx
-        return (elapsedTime.LowPart * 1000) / freq.LowPart;
+        //return (elapsedTime.LowPart * 1000) / freq.LowPart;
+        double ms = (double(elapsedTime.LowPart) * fFreq);
+        ms += 0.55f;
+
+        DWORD truncated = ms;
+        return truncated;
     }
 }
 
@@ -4069,7 +4118,7 @@ LARGE_INTEGER TimerStart()
 
     QueryPerformanceCounter(&startTime);
     double ms = (double((startTime.LowPart - old_start)) * fFreq);
-    _printf("2nd %f ", ms);
+    //_printf("2nd %f ", ms);
 
     //We need to cap FPS around 60 because else some physics and scripts will not work correctly
     //Also this is the most fair in a game heavily dependant on speed etc
@@ -4105,9 +4154,262 @@ void OilRigGrindPatch()
 {
     Vertex* __restrict pVel;
    _asm  mov pVel, edi;
+   if (Game::level_checksum != Checksums::Oil)
+       return;
    //If we have speed greater than 100, rotate the velocity so we don't grind backwards on steep rails
    if(((pVel->x * pVel->x) + (pVel->z * pVel->z)) > 100.0f)
        pVel->RotateToPlane(Vertex(0, 1.0f, 0));
+}
+
+__declspec (naked) void HookEmptyRailNodeData()
+{
+    static RailNode** first;
+    _asm push ecx;
+    _asm add ecx, 0x48;
+    _asm mov ecx, [ecx];
+    _asm mov first, ecx
+    RailManager::AllocateTempRailData(first);
+    _asm pop ecx;
+    _asm lea eax, [ecx + 0x00000118];
+    _asm ret;
+}
+
+void HookOverlappingRailRemoval()
+{
+    RailManager::FixRailLinks();
+    RailManager::RemoveOverlapping();
+    /*typedef void(__cdecl* const pOverlappingRailRemoval)(); 
+    pOverlappingRailRemoval(0x00496090)();*/
+}
+
+__declspec(naked) void FixMemOpt1()
+{
+    static DWORD skip = 0x00496D20;
+    static DWORD jmpBack = 0x004967CD;
+    _asm je skip_label;
+    _asm mov edi, EndOfRail
+    _asm jmp [jmpBack];
+skip_label:
+    _asm jmp[skip];
+}
+
+__declspec(naked) void FixMemOpt2()
+{
+    static DWORD skip = 0x00496172;
+    static DWORD jmpBack = 0x00496163;
+    _asm je skip_label;
+    _asm mov edi, EndOfRail
+    _asm mov ecx, [esp + 18];
+    _asm jmp[jmpBack];
+skip_label:
+    _asm jmp[skip];
+}
+
+bool force_rail_check = false;
+void Skater::PointRail(const Vertex& rail_pos)
+{
+    // for a single node rail, we apply in a single frame all the effects of enteringand exiting the rail state;
+
+    /////////////////////////////////////////////////////
+    // Emulate entering the rail state (with horizontal dir direction)
+
+    // check for collision in moving from m_pos to rail_pos
+
+    startcol = *GetPosition();
+    endcol = rail_pos;
+    if (CollisionCheck())
+    {
+        // check distance from the rail to the collision point
+        Vertex temp = rail_pos - *(Vertex*)GetHitPoint();
+        if (temp.LengthSqr() > 6.0f * 6.0f)
+        {
+            return;
+        }
+    }
+
+    // check first if we are not moving much in the XY and if not, then se the XZ velocity to the matrix[Z], so we always go forward
+    if (fabsf(*GetVelocity()[X]) < 0.01f && fabsf(*GetVelocity()[Z]) < 0.01f)
+    {
+        *GetVelocity()[X] = GetMatrix().m[Z][X];
+        *GetVelocity()[Z] = GetMatrix().m[Z][Z];
+    }
+
+    if (((GetVelocity()->x * GetVelocity()->x) + (GetVelocity()->z * GetVelocity()->z)) > 100.0f)
+        ((Vertex*)GetVelocity())->RotateToPlane(Vertex(0, 1.0f, 0));
+
+
+    // rail direction is taken to always simply be along our horizontal velocity, rotated up
+    Vertex dir = *GetVelocity();
+    dir[Y] = 0.0f;
+    dir.Normalize();
+    float angle = DegToRad(Physics::Physics_Point_Rail_Kick_Upward_Angle);
+    float c = cosf(angle);
+    float s = sinf(angle);
+    Vertex boost_dir(c * dir[X], s, c * dir[Z]);
+
+
+    DWORD trigger_script = 0;
+    CStruct* pNode;
+
+    if (mp_rail_node->GetNode() != -1)
+    {
+        // get the rail node name
+        CArray* pNodeArray = Node::GetNodeArray();
+        pNode = pNodeArray->GetStructure(mp_rail_node->GetNode());
+        pNode->GetChecksum(Checksums::Name, &m_last_rail_node_name, QScript::ASSERT);
+
+        //TrickOffObject(m_last_rail_node_name);
+
+        // Now we want to see if the rail has a trigger, and if it does, trigger it....
+
+        // no need to call maybe_trip_rail_trigger for a single node rail
+        if (pNode->GetChecksum(Checksums::TriggerScript, &trigger_script))
+        {
+            TripTrigger(
+                Node::TRIGGER_LAND_ON,
+                trigger_script,
+                mp_rail_node->GetNode(),
+                pNode
+            );
+        }
+    }
+
+    *GetPosition() = rail_pos;
+    *GetOldPosition() = rail_pos;
+
+    // Now we'v got onto the rail, we need to:
+    // 1) kill velocity perpendicular to the rail
+    // 2) add a speed boost in the direction we are going.
+
+    SetFlag(&inVert, false);
+    SetFlag(&tracking, false);
+
+    // if we are transitioning from wall to rail, then snap him upright		
+    if (m_state == WALL)
+    {
+        D3DXVECTOR4 normal = D3DXVECTOR4(0.0f, 1.0f, 0.0f, 1.0f);
+        SetNormal(normal);
+        ResetLerpingMatrix();
+    }
+
+    SetState(RAIL);
+
+    set_terrain(mp_rail_node->GetTerrain());
+    //mp_sound_component->PlayLandSound(GetObject()->GetVel().Length() / GetSkater()->GetScriptedStat(CRCD(0xcc5f87aa, "Skater_Max_Max_Speed_Stat")), mp_state_component->m_terrain);
+
+    float old_y = *GetVelocity()[Y];
+    (*(Vertex*)GetVelocity()).ProjectToNormal(dir);	   							// kill perp velocity
+    *GetVelocity()[Y] = old_y;											// except for Y
+
+    *GetVelocity() += dir * Physics::Point_Rail_Speed_Boost;	// add speed boost			
+
+
+    // (Mick) Set m_rail_time, otherwise there is a single frame where it is invalid
+    // and this allows us to immediately re-rail and hence do the "insta-bail", since the triangle button will be held down   
+    m_rail_time = GetTime();
+    //_asm mov m_rail_time2, edx;
+
+    /////////////////////////////////////////////////////
+    // Emulate effects of rail state (with boost_dir direction)
+
+    Slerp::slerping = false;
+    Slerp::transfer = false;
+    Slerp::done = true;
+
+    (*(Vertex*)GetVelocity()).RotateToNormal(boost_dir);
+
+    /////////////////////////////////////////////////////
+    // Emulate exiting the rail state
+
+    // no need to call maybe_trip_rail_trigger for a single node rail
+    if (trigger_script)
+    {
+        TripTrigger(
+            Node::TRIGGER_SKATE_OFF,
+            trigger_script,
+            mp_rail_node->GetNode(),
+            pNode
+        );
+    }
+
+    SetState(AIR);
+    *GetPosition()[Y] += 1.0f;
+
+    /////////////////////////////////////////////////////
+    // Do extra point rail logic
+
+    // trigger the appropriate 
+    CStruct pStruct;
+    CScript pScript;
+
+    CStructHeader header;
+    header.Type = QBKeyHeader::LOCAL;
+    header.value.i = Checksum("Airborne");
+    pStruct.head = &header;
+    pStruct.tail = &header;
+
+    AddTrick("Kissed the Rail", 50, TrickType::Grind);
+    CallMemberFunction(Checksum("MakeSkaterGoto"), &pStruct, &pScript);
+
+    force_rail_check = true;
+    return;
+}
+
+extern DWORD GetElapsedTime(DWORD currentTime, LARGE_INTEGER last_time);
+bool Skater::will_take_rail()
+{
+
+
+    return (!force_rail_check || (GetElapsedTime(GetTime(), *(LARGE_INTEGER*)&m_rail_time) > 500))
+            && (m_state != RAIL 									// not already on a rail
+                && (!tracking || *GetVelocity()[Y] > 0.0f));		// must be not vert, or going up 
+}
+
+void Skater::got_rail_hook()
+{
+    typedef void(__thiscall* p_got_rail)(Skater* pThis);
+
+    if (will_take_rail())
+    {
+        force_rail_check = false;
+        p_got_rail(0x004A60F0)(this);
+    }
+}
+Vertex v;
+
+__declspec(naked) void CheckForPointRail_Hook()
+{
+    static DWORD jmpBack = 0x004A6571;
+    static DWORD ret = 0x004A6E6F;
+    static Skater* pSkater;
+    static DWORD terrain;
+    static DWORD pCall = 0x0049BA80;
+    static Vertex& param = v;
+
+    _asm mov pSkater, ecx;
+    _asm call pCall;
+    if (pSkater->mp_rail_node->GetNextLink())
+    {
+        _asm mov ecx, pSkater;
+        _asm jmp[jmpBack];
+    }
+    else
+    {
+        _asm add esp, 0x18;
+        _asm lea eax, [esp];
+        _asm sub esp, 0x18;
+        _asm mov param, eax;
+        pSkater->PointRail(param);
+        _asm jmp[ret];
+    }
+}
+
+void CheatDetected()
+{
+    CStruct params;
+    CStructHeader param(QBKeyHeader::STRING, Checksums::text, stat_cheat_message);
+    params.AddParam(&param);
+    ExecuteQBScript("LaunchGrafCounter", &params);
 }
 
 void InitLevelMod()
@@ -4136,8 +4438,306 @@ void InitLevelMod()
     *(BYTE*)0x004CEDED = 0x90;
     *(WORD*)0x004CEDEE = 0x9090;*/
 
-    BYTE oil_grind_fix[] = { 0x8D, 0xBE, 0x34, 0x03, 0x00, 0x00, 0xD9, 0x07, 0xD8, 0x1D, 0x5C, 0xD8, 0x58, 0x00, 0xDF, 0xE0, 0xF6, 0xC4, 0x44, 0x7A, 0x1B, 0xD9, 0x47, 0x08, 0xD8, 0x1D, 0x5C, 0xD8, 0x58, 0x00, 0xDF, 0xE0, 0xF6, 0xC4, 0x44, 0x7A, 0x0B, 0x8B, 0x47, 0x0, 0x8B, 0x4F, 0x48, 0x89, 0x07, 0x89, 0x4F, 0x08, 0xE8, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
+    //Change the RailNode size
+    BYTE optimize_grind[] = { 0xB8, 0x2C, 0x01, 0x00, 0x00, 0x89, 0x86, 0xB8, 0x84, 0x00, 0x00, 0xEB, 0x14, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0xD9 };
+    InjectHook(0x004A4C18, optimize_grind, sizeof(optimize_grind));
+    BYTE optimize_grind2[] = { 0xB8, 0xF4, 0x01, 0x00, 0x00, 0x53, 0x8D, 0x8E, 0x60, 0x83, 0x00, 0x00, 0x89, 0x86, 0xB8, 0x84, 0x00, 0x00, 0xEB, 0x14, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
+    InjectHook(0x004A4A8F, optimize_grind2, sizeof(optimize_grind2));
+    //004A60E1
 
+    HookFunction(0x004A8B1A, &Skater::got_rail_hook);
+    HookFunction(0x004A656D, &CheckForPointRail_Hook, 0xE9);
+    //Cheat detection
+    BYTE CheatDetection[]{ 0x8B, 0x44, 0x24, 0x04, 0x56, 0x8B, 0xF1, 0x81, 0xBC, 0x86, 0xD0, 0x83, 0x00, 0x00, 0x00, 0x00, 0x80, 0xBF, 0x75, 0x11, 0x6A, 0x01, 0x68, 0x78, 0x4C, 0x5C, 0x00, 0xE8, 0xEF, 0x6F, 0xF8, 0xFF, 0x83, 0xC4, 0x08, 0xEB, 0x2A, 0xD9, 0x84, 0x86, 0xD0, 0x83, 0x00, 0x00, 0xD8, 0x15, 0xFC, 0xF3, 0x49, 0x00, 0xDF, 0xE0, 0x66, 0xA9, 0x00, 0x41, 0x75, 0x15, 0x90, 0x90, 0x90, 0x90, 0x90, 0xEB, 0x0E, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x00, 0x00, 0x20, 0x41, 0xD9, 0x5C, 0x24, 0x08, 0x8B, 0xCE, 0x6A, 0xEC, 0xE8, 0x03, 0x5F, 0x01, 0x00, 0x84, 0xC0, 0x74, 0x08, 0xD9, 0x05, 0x3C, 0xF4, 0x49, 0x00, 0xEB, 0x04, 0xD9, 0x44, 0x24, 0x08, 0x8B, 0xB6, 0x68, 0x92, 0x00, 0x00, 0x85, 0xF6, 0x74, 0x0D, 0x8A, 0x46, 0x50, 0x84, 0xC0, 0x74, 0x06, 0xD8, 0x05, 0x38, 0xF4, 0x49, 0x00, 0x5E, 0xC2, 0x04, 0x00 , 0x00 , 0x00 , 0x40 , 0x40 , 0x00, 0x00 , 0x70 , 0x41 };
+    InjectHook(0x0049F3B1, CheatDetection, sizeof(CheatDetection));
+    HookFunction(0x0049F3EC, CheatDetected, 0xE8);
+    HookFunction(0x0049F563, 0x0049F3B1);
+    HookFunction(0x0049F5B8, 0x0049F3B1);
+    HookFunction(0x004AB187, 0x0049F3B1);
+    HookFunction(0x004AB1AB, 0x0049F3B1);
+    HookFunction(0x004AB1C9, 0x0049F3B1);
+    HookFunction(0x004AB1E7, 0x0049F3B1);
+    HookFunction(0x004AB205, 0x0049F3B1);
+    HookFunction(0x004AB223, 0x0049F3B1);
+    HookFunction(0x004AB241, 0x0049F3B1);
+    HookFunction(0x004AB25F, 0x0049F3B1);
+    HookFunction(0x004AB27D, 0x0049F3B1);
+    HookFunction(0x004AB29B, 0x0049F3B1);
+    //MessageBox(0, 0, 0, 0);
+
+    //Remove dublicate NodeArray loading...
+    BYTE nop_func[] = { 0x90, 0x90, 0x90, 0x90, 0x90 };
+    InjectHook(0x0043A6D6, nop_func, 5);
+    //InjectHook(0x00419D07, nop_func, 5);
+
+    InjectHook(0x0049D15D, nop_func, 5);
+    InjectHook(0x0049D180, nop_func, 5);
+
+    //Add RailNode to list
+    BYTE AddRailFix[] = { 0x50, 0x51, 0x52, 0x56, 0x57, 0xE8, 0x00, 0x00, 0x00, 0x00, 0x5A, 0x59, 0x58, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90};
+    VirtualProtect((LPVOID)0x00419AB5, sizeof(AddRailFix), PAGE_EXECUTE_READWRITE, &old);
+    memcpy((void*)0x00419AB5, AddRailFix, sizeof(AddRailFix));
+    HookFunction(0x00419ABB, &RailManager::AddRailNode);
+    
+    //Empty RailNode list
+    HookFunction(0x004198B8, HookEmptyRailNodeData);
+
+    //Remove overlapping rails and finalize RailNode list
+    HookFunction(0x00419BCF, HookOverlappingRailRemoval);
+
+    //This code is not really used....
+    BYTE MemOptFix1_array[] = { 0x83, 0xC6, 0x44, 0x39, 0xFE };
+    BYTE MemOptFix2_array[] = { 0x83, 0xC0, 0x44, 0x39, 0xF8 };
+    VirtualProtect((LPVOID)0x0049616B, sizeof(MemOptFix1_array), PAGE_EXECUTE_READWRITE, &old);
+    memcpy((void*)0x0049616B, MemOptFix2_array, sizeof(MemOptFix1_array));
+    VirtualProtect((LPVOID)0x00496CD8, sizeof(MemOptFix1_array), PAGE_EXECUTE_READWRITE, &old);
+    memcpy((void*)0x00496CD8, MemOptFix1_array, sizeof(MemOptFix1_array));
+    VirtualProtect((LPVOID)0x00496BAB, 1, PAGE_EXECUTE_READWRITE, &old);
+    *(BYTE*)0x00496BAB = 0x94;
+    VirtualProtect((LPVOID)0x00496BBC, 1, PAGE_EXECUTE_READWRITE, &old);
+    *(BYTE*)0x00496BBC = 0xD2;
+    HookFunction(0x004967C8, FixMemOpt1, 0xE9, 1);
+    HookFunction(0x0049615E, FixMemOpt2, 0xE9, 1);  
+
+    //New RailManager functions
+    HookFunction(0x004A480C, RailManager::StickToRail);
+    HookFunction(0x004A6246, RailManager::StickToRail);
+
+    HookFunction(0x004189CD, RailManager::SetActive);
+    HookFunction(0x00418C5F, RailManager::SetActive);
+
+    HookFunction(0x0041D1D4, RailManager::Cleanup);
+    HookFunction(0x00438344, RailManager::Cleanup);
+    HookFunction(0x00495711, RailManager::Cleanup);
+
+    HookFunction(0x004A540C, Skater::skate_off_rail);
+    //HookFunction(0x004A5424, maybe_skate_off_rail, 0xE9);
+
+    //This is needed to fix crash issue when multiple links to same RailNode
+    HookFunction(0x004A4A00, &Skater::maybe_trip_rail_trigger);
+    HookFunction(0x004A4C14, &Skater::maybe_trip_rail_trigger);
+    HookFunction(0x004A5403, &Skater::maybe_trip_rail_trigger);
+    HookFunction(0x004A5A6A, &Skater::maybe_trip_rail_trigger);
+    HookFunction(0x004A5BD1, &Skater::maybe_trip_rail_trigger);
+    HookFunction(0x004A6816, &Skater::maybe_trip_rail_trigger);
+    HookFunction(0x004A70BB, &Skater::maybe_trip_rail_trigger);
+    HookFunction(0x004B088C, &Skater::maybe_trip_rail_trigger);
+    HookFunction(0x00489C7F, &RailNode::ProbablyOnSameRailAs);
+
+    HookFunction(0x00403C13, GetTime);
+    HookFunction(0x00403D61, GetTime);
+    HookFunction(0x00403F29, GetTime);
+    HookFunction(0x00404086, GetTime);
+    HookFunction(0x0040409A, GetTime);
+    HookFunction(0x00405824, GetTime);
+    HookFunction(0x004058C1, GetTime);
+    HookFunction(0x0040864A, GetTime);
+    HookFunction(0x0040A1E7, GetTime);
+    HookFunction(0x0040A209, GetTime);
+    HookFunction(0x00417131, GetTime);
+    HookFunction(0x004171CA, GetTime);
+    HookFunction(0x00419764, GetTime);
+    HookFunction(0x004279BE, GetTime);
+    HookFunction(0x00428022, GetTime);
+    HookFunction(0x0042F0C4, GetTime);
+    HookFunction(0x0043A3DF, GetTime);
+    HookFunction(0x00441004, GetTime);
+    HookFunction(0x004615AF, GetTime);
+    HookFunction(0x0046E635, GetTime);
+    HookFunction(0x0046E788, GetTime);
+    HookFunction(0x0046E7E7, GetTime);
+    HookFunction(0x0046E933, GetTime);
+    HookFunction(0x0046E9D1, GetTime);
+    HookFunction(0x0046F4B9, GetTime);
+    HookFunction(0x004712F2, GetTime);
+    HookFunction(0x00471901, GetTime);
+    HookFunction(0x00473124, GetTime);
+    HookFunction(0x00473989, GetTime);
+    HookFunction(0x004740C6, GetTime);
+    HookFunction(0x0047418E, GetTime);
+    HookFunction(0x00474493, GetTime);
+    HookFunction(0x004745DD, GetTime);
+    HookFunction(0x00474649, GetTime);
+    HookFunction(0x004750B6, GetTime);
+    HookFunction(0x004751B9, GetTime);
+    HookFunction(0x004754F9, GetTime);
+    HookFunction(0x00475744, GetTime);
+    HookFunction(0x0047699C, GetTime);
+    HookFunction(0x00479098, GetTime);
+    HookFunction(0x0047BCF5, GetTime);
+    HookFunction(0x0047D172, GetTime);
+    HookFunction(0x0047D1A1, GetTime);
+    HookFunction(0x0047DEBF, GetTime);
+    HookFunction(0x0047E6B4, GetTime);
+    HookFunction(0x0047E72E, GetTime);
+    HookFunction(0x0047E757, GetTime);
+    HookFunction(0x0047EB75, GetTime);
+    HookFunction(0x0047F427, GetTime);
+    HookFunction(0x0047F449, GetTime);
+    HookFunction(0x0047FE62, GetTime);
+    HookFunction(0x0048154F, GetTime);
+    HookFunction(0x00481624, GetTime);
+    HookFunction(0x00487978, GetTime);
+    HookFunction(0x00487A4B, GetTime);
+    HookFunction(0x00487A63, GetTime);
+    HookFunction(0x00487C36, GetTime);
+    HookFunction(0x0048858E, GetTime);
+    HookFunction(0x00489E48, GetTime);
+    HookFunction(0x0048A026, GetTime);
+    HookFunction(0x0048E4F0, GetTime);
+    HookFunction(0x00498993, GetTime);
+    HookFunction(0x004989EB, GetTime);
+    HookFunction(0x00499AD9, GetTime);
+    HookFunction(0x00499ECA, GetTime);
+    HookFunction(0x00499EE9, GetTime);
+    HookFunction(0x0049AEE6, GetTime);
+    HookFunction(0x0049AFCF, GetTime);
+    HookFunction(0x0049B183, GetTime);
+    HookFunction(0x0049B282, GetTime);
+    HookFunction(0x0049B793, GetTime);
+    HookFunction(0x0049B85F, GetTime);
+    HookFunction(0x0049BA16, GetTime);
+    HookFunction(0x0049BAB6, GetTime);
+    HookFunction(0x0049BACD, GetTime);
+    HookFunction(0x0049BFB4, GetTime);
+    HookFunction(0x0049C222, GetTime);
+    HookFunction(0x0049C613, GetTime);
+    HookFunction(0x0049C63B, GetTime);
+    HookFunction(0x0049C686, GetTime);
+    HookFunction(0x0049C6B8, GetTime);
+    HookFunction(0x0049C6F6, GetTime);
+    HookFunction(0x0049C734, GetTime);
+    HookFunction(0x0049C767, GetTime);
+    HookFunction(0x0049C7A5, GetTime);
+    HookFunction(0x0049C910, GetTime);
+    HookFunction(0x0049CBB4, GetTime);
+    HookFunction(0x0049CBE1, GetTime);
+    HookFunction(0x0049D367, GetTime);
+    HookFunction(0x0049D386, GetTime);
+    HookFunction(0x0049D3A5, GetTime);
+    HookFunction(0x0049D3D5, GetTime);
+    HookFunction(0x0049D421, GetTime);
+    HookFunction(0x0049D666, GetTime);
+    HookFunction(0x0049D688, GetTime);
+    HookFunction(0x0049D6AA, GetTime);
+    HookFunction(0x0049D6E9, GetTime);
+    HookFunction(0x0049E3FA, GetTime);
+    HookFunction(0x0049EFC8, GetTime);
+    HookFunction(0x0049EFF7, GetTime);
+    HookFunction(0x0049F019, GetTime);
+    HookFunction(0x0049F035, GetTime);
+    HookFunction(0x0049F243, GetTime);
+    HookFunction(0x0049F35C, GetTime);
+    HookFunction(0x0049F37B, GetTime);
+    HookFunction(0x0049F6D6, GetTime);
+    HookFunction(0x0049F7C0, GetTime);
+    HookFunction(0x0049F912, GetTime);
+    HookFunction(0x0049F9BA, GetTime);
+    HookFunction(0x0049FB3B, GetTime);
+    HookFunction(0x004A11B1, GetTime);
+    HookFunction(0x004A11DA, GetTime);
+    HookFunction(0x004A19DB, GetTime);
+    HookFunction(0x004A2148, GetTime);
+    HookFunction(0x004A216A, GetTime);
+    HookFunction(0x004A218C, GetTime);
+    HookFunction(0x004A258E, GetTime);
+    HookFunction(0x004A2971, GetTime);
+    HookFunction(0x004A2999, GetTime);
+    HookFunction(0x004A29D8, GetTime);
+    HookFunction(0x004A3328, GetTime);
+    HookFunction(0x004A3653, GetTime);
+    HookFunction(0x004A38CA, GetTime);
+    HookFunction(0x004A54D5, GetTime);
+    HookFunction(0x004A61DB, GetTime);
+    HookFunction(0x004A6407, GetTime);
+    HookFunction(0x004A7C27, GetTime);
+    HookFunction(0x004A7C67, GetTime);
+    HookFunction(0x004A8B5A, GetTime);
+    HookFunction(0x004A90CD, GetTime);
+    HookFunction(0x004AA670, GetTime);
+    HookFunction(0x004AC942, GetTime);
+    HookFunction(0x004AC955, GetTime);
+    HookFunction(0x004ACA65, GetTime);
+    HookFunction(0x004ACAC7, GetTime);
+    HookFunction(0x004AD218, GetTime);
+    HookFunction(0x004ADD41, GetTime);
+    HookFunction(0x004AE5B1, GetTime);
+    HookFunction(0x004AE84B, GetTime);
+    HookFunction(0x004AF97C, GetTime);
+    HookFunction(0x004AF9A2, GetTime);
+    HookFunction(0x004AFBA2, GetTime);
+    HookFunction(0x004AFFB8, GetTime);
+    HookFunction(0x004B0797, GetTime);
+    HookFunction(0x004B0E52, GetTime);
+    HookFunction(0x004B1975, GetTime);
+    HookFunction(0x004B2FBD, GetTime);
+    HookFunction(0x004B3138, GetTime);
+    HookFunction(0x004B321B, GetTime);
+    HookFunction(0x004B3363, GetTime);
+    HookFunction(0x004B359F, GetTime);
+    HookFunction(0x004B389C, GetTime);
+    HookFunction(0x004B3B16, GetTime);
+    HookFunction(0x004B3C91, GetTime);
+    HookFunction(0x004B3DD2, GetTime);
+    HookFunction(0x004B3F5B, GetTime);
+    HookFunction(0x004B4147, GetTime);
+    HookFunction(0x004B43C1, GetTime);
+    HookFunction(0x004B45BD, GetTime);
+    HookFunction(0x004B486C, GetTime);
+    HookFunction(0x004B499E, GetTime);
+    HookFunction(0x004B49F4, GetTime);
+    HookFunction(0x004B4FCF, GetTime);
+    HookFunction(0x004C04AC, GetTime);
+    HookFunction(0x004D88E4, GetTime);
+    HookFunction(0x004D8ED3, GetTime);
+    HookFunction(0x004DA359, GetTime);
+    HookFunction(0x004DAAAA, GetTime);
+    HookFunction(0x004DD99D, GetTime);
+    HookFunction(0x004DD9B4, GetTime);
+    HookFunction(0x004DD9C4, GetTime);
+    HookFunction(0x004DFF25, GetTime);
+    HookFunction(0x004E062F, GetTime);
+    HookFunction(0x004E06DB, GetTime);
+    HookFunction(0x004E07D0, GetTime);
+    HookFunction(0x004EA1ED, GetTime);
+    HookFunction(0x004EA2C0, GetTime);
+    HookFunction(0x004EE836, GetTime);
+    HookFunction(0x004EF333, GetTime);
+    HookFunction(0x004F24BA, GetTime);
+    HookFunction(0x004F36F5, GetTime);
+    HookFunction(0x004F3BA1, GetTime);
+    HookFunction(0x004F3D07, GetTime);
+    HookFunction(0x004F40AB, GetTime);
+    HookFunction(0x004FA86D, GetTime);
+    HookFunction(0x00502BA0, GetTime);
+    HookFunction(0x00502BE2, GetTime);
+
+    HookFunction(0x0049FAA1, &Skater::PlayJumpSound);
+    HookFunction(0x0049FAC1, &Skater::PlayJumpSound);
+    HookFunction(0x0049FB1F, &Skater::PlayJumpSound);
+    HookFunction(0x004AEEBC, &Skater::PlayJumpSound);
+    HookFunction(0x004AEED1, &Skater::PlayJumpSound);
+
+    //Not really used?
+    *(BYTE*)0x004960E7 = 0xEB;
+    
+    //Remove the old memory "optimization"
+    VirtualProtect((LPVOID)0x00495750, 2, PAGE_EXECUTE_READWRITE, &old);
+    *(WORD*)0x00495750 = 0x90C3;
+
+    //Initialize the new RailManager
+    RailManager::Initialize();
+
+    //Sound pan volume fix
+    HookFunction(0x004130C0, &SfxManager::SetVolumeFromPos);
+    HookFunction(0x004AAD61, &SfxManager::SetVolumeFromPos);
+    HookFunction(0x004C4777, &SfxManager::SetVolumeFromPos);
+    HookFunction(0x004C5B36, &SfxManager::SetVolumeFromPos);
+    HookFunction(0x004C601E, &SfxManager::SetVolumeFromPos);
+    HookFunction(0x004C62E8, &SfxManager::SetVolumeFromPos);
+
+    //This fixes the grinding on the crane in OilRig
+    BYTE oil_grind_fix[] = { 0x8D, 0xBE, 0x34, 0x03, 0x00, 0x00, 0xD9, 0x07, 0xD8, 0x1D, 0x5C, 0xD8, 0x58, 0x00, 0xDF, 0xE0, 0xF6, 0xC4, 0x44, 0x7A, 0x1B, 0xD9, 0x47, 0x08, 0xD8, 0x1D, 0x5C, 0xD8, 0x58, 0x00, 0xDF, 0xE0, 0xF6, 0xC4, 0x44, 0x7A, 0x0B, 0x8B, 0x47, 0x0, 0x8B, 0x4F, 0x48, 0x89, 0x07, 0x89, 0x4F, 0x08, 0xE8, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
     VirtualProtect((LPVOID)0x004A66D0, sizeof(oil_grind_fix), PAGE_EXECUTE_READWRITE, &old);
     memcpy((void*)0x4a66d0, oil_grind_fix, sizeof(oil_grind_fix));
     HookFunction(0x004A6701, OilRigGrindPatch);
@@ -4170,6 +4770,11 @@ void InitLevelMod()
 
     //Fixing bug that produces duplicate TriggerScripts
     HookFunction(0x00499B48, TriggerScript, 0xE9);
+
+    for (DWORD i = 0; i < sizeof(optimized_grind) / sizeof(OptimizedGrind); i++)
+    {
+       optimized_grind[i].Optimize();
+    }
 
     //Optimize static checksum access
     for (DWORD i = 0; i < sizeof(optimized) / sizeof(OptimizedCRC); i++)
@@ -4219,8 +4824,8 @@ void InitLevelMod()
     //Currently used for alt+enter toggle windowed mode
     HookFunction(0x00403C75, proxy_GetAsyncKeyState, 0xE8, 1);
 
-    //Hook dinput
-    HookFunction(0x0040CA2B, proxy_Dinput_GetDeviceState);
+    /*//Hook dinput
+    HookFunction(0x0040CA2B, proxy_Dinput_GetDeviceState);*/
 
     //Used for stored windowed position
     *(BYTE*)0x004092AB = 0xBD;
@@ -4379,7 +4984,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
         Slerp::trying = false;
         Slerp::value = 0.0f;
         Slerp::wallplant = false;
-        Slerp::m_last_wallplant_time_stamp = 0;
+        Slerp::m_last_wallplant_time_stamp.QuadPart = 0;
         Slerp::realVelocity = Vertex(0.0f, 0.0f, 0.0f);
         Slerp::targetNormal = Vertex(0.0f, 0.0f, 0.0f);
         Slerp::target_normal = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -4487,6 +5092,8 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
 
 
         header = GetQBKeyHeader(crc32f("LM_HostOptions"));
+
+        LevelModSettings::SpineButton3 = KeyMap::GetVKeyCode(KeyMap::MappedKey::Unused);
 
         /*if (!bDebugMode)
         {
@@ -4675,6 +5282,10 @@ EXTERN QBKeyHeader* GetQBKeyHeader(unsigned long QBKey)
 }
 
 __restrict LPDIRECT3DDEVICE9 Gfx::pDevice = NULL;
+float Physics::Rail_Max_Snap = 40.0f;
+float Physics::Rail_Corner_Leave_Angle = 50.0f;
+float Physics::Physics_Point_Rail_Kick_Upward_Angle = 35.0f;
+float Physics::Point_Rail_Speed_Boost = 125.0f;
 
 void DrawLines()
 {
@@ -5457,7 +6068,7 @@ bool GetMaximumIndexScript(CStruct* pStruct, CScript* pScript)
     return true;
 }
 
-HRESULT PostRender(HRESULT hres)
+__declspec(noalias) HRESULT PostRender(HRESULT hres)
 {
 
     if (hres == D3D_OK && GameState::IsActive())
@@ -5533,9 +6144,8 @@ HRESULT PostRender(HRESULT hres)
     return hres;
 }
 
-void DrawFrame()
+__declspec(noalias) void DrawFrame()
 {
-    Gfx::frameCounter++;
     //MessageBox(0, 0, 0, 0);
     if (!m_font) [[unlikely]]
     {
@@ -5589,7 +6199,8 @@ void DrawFrame()
             //Skater * skater = Skater::Instance();
             if (Game::skater) [[likely]]
             {
-
+                Gfx::frameCounter++;
+                Gfx::uv_anim_timer += Game::skater->GetFrameLength();
                 if (LevelModSettings::bHookedControls && XINPUT::Player1->IsConnected())
                 {
                     if (XINPUT::vibrationFrames)
@@ -5872,6 +6483,89 @@ void DrawFrame()
             m_pIDirect3DDevice8->SetVertexShader(vShared);
             m_pIDirect3DDevice8->SetRenderState(D3DRS_ZFUNC, D3DCMP);
             m_pIDirect3DDevice8->SetStreamSource(0, oldBuffer, oldStride);*/
+
+
+if (GameState::GotSuperSectors && bbox_rails.size())
+{
+    DWORD old_factor;
+    DWORD old_ref;
+    DWORD old_blend;
+    DWORD old_z;
+    DWORD old_bias;
+    DWORD old_slope;
+
+    LPDIRECT3DSURFACE9 old_target;
+    D3DXMATRIX old_view, old_world;
+
+    Gfx::pDevice->GetRenderTarget(0, &old_target);
+
+    LPDIRECT3DSURFACE9 old_surface;
+    D3DVIEWPORT9 old_viewport;
+    Gfx::pDevice->GetDepthStencilSurface(&old_surface);
+    Gfx::pDevice->GetViewport(&old_viewport);
+    Gfx::pDevice->SetDepthStencilSurface(nullptr);
+
+
+    Gfx::pDevice->SetViewport(&Gfx::world_viewport);
+
+    Gfx::pDevice->SetRenderTarget(0, Gfx::world_rendertarget);
+
+    Gfx::pDevice->GetRenderState(D3DRS_BLENDFACTOR, &old_factor);
+    Gfx::pDevice->GetRenderState(D3DRS_ALPHAREF, &old_ref);
+    Gfx::pDevice->GetRenderState(D3DRS_ALPHABLENDENABLE, &old_blend);
+    Gfx::pDevice->GetRenderState(D3DRS_ZFUNC, &old_z);
+    Gfx::pDevice->GetRenderState(D3DRS_DEPTHBIAS, &old_bias);
+    Gfx::pDevice->GetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, &old_slope);
+
+    Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+    Gfx::pDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
+    Gfx::pDevice->SetRenderState(D3DRS_BLENDFACTOR, D3DXCOLOR(255, 255, 0, 255));
+    Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+    Gfx::pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+    Gfx::pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+    Gfx::pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+    Gfx::pDevice->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
+
+    /*for (auto object = bbox_rails.begin(); object != bbox_rails.end(); object++)
+    {*/
+    //SuperSector* sector = *object;
+    Gfx::pDevice->DrawPrimitiveUP(D3DPRIMITIVETYPE::D3DPT_LINELIST, bbox_rails.size() / 2, &bbox_rails.front(), 0);
+    /*
+    if (sector->flag & 6 && sector->state && sector->mesh)
+    {
+        DWORD numSplits = sector->GetNumSplits();
+
+        for (auto i = 0; i < numSplits; i++)
+        {
+            Mesh::MaterialSplit* split = &sector->mesh->splits[i];
+            if (split->numVertices && split->numIndices && split->material && split->material->texture)
+            {
+                split->material->SubmitTextureOnly();
+
+                //_printf("VertexShader %X stride %X\n", split->vertexShader, split->stride);
+                Gfx::pDevice->SetFVF(split->vertexShader);
+
+                Gfx::pDevice->SetStreamSource(0, split->vertexBuffer->GetProxyInterface(), 0, split->stride);
+                Gfx::pDevice->SetIndices(split->indexBuffer->GetProxyInterface());
+                Gfx::pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, split->baseIndex, 0, split->numVertices, 0, split->numIndices-2);
+            }
+        }
+    }*/
+    // }
+
+    Gfx::pDevice->SetRenderState(D3DRS_BLENDFACTOR, old_factor);
+    Gfx::pDevice->SetRenderState(D3DRS_ALPHAREF, old_ref);
+    Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, old_blend);
+    Gfx::pDevice->SetRenderState(D3DRS_ZFUNC, old_z);
+    Gfx::pDevice->SetRenderState(D3DRS_DEPTHBIAS, old_bias);
+    Gfx::pDevice->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, old_slope);
+
+
+
+    Gfx::pDevice->SetDepthStencilSurface(old_surface);
+    Gfx::pDevice->SetViewport(&old_viewport);
+    Gfx::pDevice->SetRenderTarget(0, old_target);
+}
 
             if (Gfx::world_rendertarget)
             {

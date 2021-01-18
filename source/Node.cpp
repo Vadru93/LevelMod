@@ -5,6 +5,7 @@
 #include "Node.h"
 
 
+CArray* __restrict NodeArray = NULL;
 EXTERN DWORD CArray::GetSize()
 {
     DWORD size = sizeof(CArray);

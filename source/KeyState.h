@@ -16,6 +16,7 @@ enum class KeyCode : BYTE
 
 enum class VirtualKeyCode : BYTE
 {
+    Undefined = 0,
     L_MOUSE = 0x1,
     R_MOUSE,
     CANCEL,
@@ -96,7 +97,7 @@ struct KeyMap
     {
         Pause,
         CameraToggle,
-        Unknown,
+        Unused,//probably used while developing the game, like maybe move camera or spawn something
         CameraLock,
         Grind,
         Grab,
@@ -179,6 +180,11 @@ public:
         return p_KeyboardState(code) & 0x80;
     }
 
+    static void SetKeyboardState(VirtualKeyCode code, DWORD value)
+    {
+        p_KeyboardState(code) = value;
+    }
+
     static bool GetOldKeyboardState(VirtualKeyCode code)
     {
         return p_OldKeyboardState(code) & 0x80;
@@ -187,6 +193,11 @@ public:
     static void Unpress(VirtualKeyCode code)
     {
         p_KeyboardState(code) = 0;
+    }
+
+    void Unpress()
+    {
+        pressed = 0;
     }
 
     static void Unpress(KeyCode key)

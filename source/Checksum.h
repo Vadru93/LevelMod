@@ -258,6 +258,12 @@ namespace Checksums
         X = COMPILE_CRC32("x"),
         Circle = COMPILE_CRC32("circle"),
 
+        Oil = COMPILE_CRC32("oil"),
+
+            Physics_vert_hang_Stat = COMPILE_CRC32("physics_vert_hang_stat"),
+            Skater_Max_Max_Speed_Stat = COMPILE_CRC32("skater_max_max_speed_stat"),
+
+
 
         //Trick_KFBackflip = 0xF7B4E0CB
 

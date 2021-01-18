@@ -33,6 +33,7 @@ void UpdateScriptConstants();
 //--------Script Stuff--------
 namespace QScript
 {
+    auto constexpr ASSERT = 1;
     enum ScriptToken
     {
         EndOfFile = 0x00,
@@ -182,10 +183,10 @@ namespace QScript
 //--------Script Stuff--------
 
 //calls a QB scripted function, remember to pass a CStruct.
-typedef void(__cdecl* const ExecuteScript)(const char* __restrict name, const CStruct* __restrict pParams, const CScript* __restrict pScript);
-__declspec(noalias) void inline ExecuteQBScript(const char* __restrict pScriptName, const CStruct* __restrict pParams, const CScript* __restrict pScript = NULL)
+typedef void(__cdecl* const ExecuteScript)(const char* __restrict name, const CStruct* __restrict pParams, const CScript* __restrict pScript, bool assert);
+__declspec(noalias) void inline ExecuteQBScript(const char* __restrict pScriptName, const CStruct* __restrict pParams = NULL, const CScript* __restrict pScript = NULL, bool assert = false)
 {
-    return ExecuteScript(0x00428240)(pScriptName, pParams, pScript);
+    return ExecuteScript(0x00428240)(pScriptName, pParams, pScript, assert);
 }
 
 //Add a QBkeyHeader to game array, this can be a value/function that you can acces/call in qb script.
@@ -607,6 +608,13 @@ struct EXTERN CStruct
         tail = head;
     }
 
+    DWORD GetName()
+    {
+        DWORD name = 0;
+        GetChecksum(Checksums::Name, &name);
+        return name;
+    }
+
     void RemoveParam(DWORD name);
 
 
@@ -729,6 +737,19 @@ struct EXTERN CStruct
         return rett;
     }
 
+    inline bool GetChecksum(DWORD checksum, DWORD* out_checksum, bool assert = false)
+    {
+        typedef bool(__thiscall* const pGetChecksum)(CStruct* pThis, DWORD checksum, DWORD* out_checksum, bool assert);
+        return pGetChecksum(0x00429D30)(this, checksum, out_checksum, assert);
+    }
+
+    inline bool ContainsFlag(DWORD checksum, bool assert = false)
+    {
+        typedef bool(__thiscall* const pContainsFlag)(CStruct* pThis, DWORD checksum, bool assert);
+        return pContainsFlag(0x00429F50)(this, checksum, assert);
+    }
+
+
     inline int GetChecksum(const char* Param, bool assert = false)//use ONLY if your sure you got the param
     {
         static const DWORD pGetChecksum = 0x00429840;
@@ -781,10 +802,15 @@ struct EXTERN CStruct
         return pint;
     }
 
-    typedef bool(__thiscall* getInt)(CStruct* pThis, int unk1, int* dest, int unk2);
+    typedef bool(__thiscall* getInt)(CStruct* pThis, DWORD unk1, BYTE* dest, bool assert);
+    inline bool GetEnum(DWORD checksum, BYTE* out_num, bool assert = false)
+    {
+        return getInt(0x00429890)(this,checksum, out_num, assert);
+    }
+
     inline bool GetInt(int* dest)
     {
-        return getInt(0x00429890)(this, 0, dest, 0);
+        return getInt(0x00429890)(this, 0, (BYTE*)dest, 0);
     }
 
     inline bool GetInt(const char* Param, int* dest)
@@ -936,17 +962,10 @@ struct EXTERN CStruct
         return rett;
     }
 
-    inline bool GetArray(const char* Param, const CArray** dest)
+    inline bool GetArray(const char* name, const CArray** dest, bool assert = false)
     {
-        bool rett;
-        static const DWORD pGetArray = 0x00429F00;
-        _asm push 0;
-        _asm push dest;
-        _asm push Param;
-        _asm mov ecx, this;
-        _asm call pGetArray;
-        _asm mov rett, al;
-        return rett;
+        typedef bool(__thiscall* pGetArray)(CStruct* pThis, const char* name, const CArray** dest, bool assert);
+        return pGetArray(0x00429F00)(this, name, dest, assert);
     }
 
 
@@ -1045,7 +1064,52 @@ struct EXTERN CStruct
         return false;
     }
 
-    bool ContainsFlag(DWORD checksum)
+    bool ContainsFlagDeep(DWORD checksum)
+    {
+        CStructHeader* pThis = head;
+        while(pThis && pThis != tail)
+        {
+            if (pThis->QBkey == checksum)
+            {
+                return true;
+            }
+            else if (pThis->Type == QBKeyHeader::LOCAL_STRUCT || pThis->Type == QBKeyHeader::STRUCT)
+            {
+                CStructHeader* header = pThis;
+                CStructHeader* pStruct = *(CStructHeader**)header->pStruct;
+
+                while (pStruct)
+                {
+                    if (pStruct->QBkey == checksum)
+                        return true;
+
+                    else if (pStruct->Type == QBKeyHeader::LOCAL_STRUCT || pStruct->Type == QBKeyHeader::STRUCT)
+                    {
+                        //Only 2 levels for now
+                        CStructHeader* pStruct2 = *(CStructHeader**)pStruct->pStruct;
+                        while (pStruct2)
+                        {
+                            if (pStruct2->QBkey == checksum)
+                                return true;
+                            pStruct2 = pStruct2->NextHeader;
+                        }
+                    }
+                    pStruct = pStruct->NextHeader;
+                }
+            }
+            if (pThis->NextHeader)
+                pThis = pThis->NextHeader;
+            else
+                pThis++;
+        }
+        if (pThis && pThis->QBkey == checksum)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    /*bool ContainsFlag(DWORD checksum)
     {
         CStructHeader* pThis = head;
         while (pThis && pThis != tail)
@@ -1064,10 +1128,86 @@ struct EXTERN CStruct
             return true;
         }
         return false;
+    }*/
+
+    DWORD GetChecksumDeep(DWORD checksum)
+    {
+        CStructHeader* pThis = head;
+        while (pThis && pThis != tail)
+        {
+            if (pThis->QBkey == checksum)
+                return pThis->Data;
+            else if (pThis->Type == QBKeyHeader::LOCAL_STRUCT || pThis->Type == QBKeyHeader::STRUCT)
+            {
+                CStructHeader* header = pThis;
+                CStructHeader* pStruct = *(CStructHeader**)header->pStruct;
+
+                while (pStruct)
+                {
+                    if (pStruct->QBkey == checksum)
+                        return pStruct->Data;
+
+                    else if (pStruct->Type == QBKeyHeader::LOCAL_STRUCT || pStruct->Type == QBKeyHeader::STRUCT)
+                    {
+                        //Only 2 levels for now
+                        CStructHeader* pStruct2 = *(CStructHeader**)pStruct->pStruct;
+                        while (pStruct2)
+                        {
+                            if (pStruct2->QBkey == checksum)
+                                return pStruct2->Data;
+                            pStruct2 = pStruct2->NextHeader;
+                        }
+                    }
+                    pStruct = pStruct->NextHeader;
+                }
+            }
+            /*else if (pThis->Type == QBKeyHeader::GLOBAL)
+            {
+                QBKeyHeader* header = GetQBKeyHeader(pThis->QBkey);
+                if (!header)
+                {
+                    header = GetQBKeyHeader(pThis->Data);
+                }
+                if (header && (header->type == QBKeyHeader::LOCAL_STRUCT || header->type == QBKeyHeader::STRUCT))
+                {
+                    CStructHeader* pStruct = *(CStructHeader**)header->pStruct;
+
+                    while (pStruct)
+                    {
+                        if (pStruct->QBkey == checksum)
+                            return pStruct->Data;
+
+                        else if (pStruct->Type == QBKeyHeader::LOCAL_STRUCT || pStruct->Type == QBKeyHeader::STRUCT)
+                        {
+                            //Only 2 levels for now
+                            CStructHeader* pStruct2 = *(CStructHeader**)pStruct->pStruct;
+                            while (pStruct2)
+                            {
+                                if (pStruct2->QBkey == checksum)
+                                    return pStruct2->Data;
+                                pStruct2 = pStruct2->NextHeader;
+                            }
+                        }
+                        pStruct = pStruct->NextHeader;
+                    }
+                }
+            }*/
+
+            if (pThis->NextHeader)
+                pThis = pThis->NextHeader;
+            else
+                pThis++;
+
+        }
+        if (pThis && pThis->QBkey == checksum)
+        {
+            return pThis->Data;
+        }
     }
 
     DWORD GetChecksum(DWORD checksum, bool assert = false)
     {
+        DWORD crc = 0;
         CStructHeader* pThis = head;
         while (pThis && pThis != tail)
         {
@@ -1087,7 +1227,62 @@ struct EXTERN CStruct
         }
         if (assert)
             MessageBox(0, "Need param...", FindChecksumName(checksum), 0);
-        return 0;
+        return crc;
+    }
+
+    bool GetStructDeep(DWORD checksum, CStructHeader** out_header)
+    {
+        CStructHeader* pThis = head;
+        while (pThis && pThis != tail)
+        {
+            if (pThis->QBkey == checksum)
+            {
+                *out_header = pThis;
+                return true;
+            }
+            else if (pThis->Type == QBKeyHeader::LOCAL_STRUCT || pThis->Type == QBKeyHeader::STRUCT)
+            {
+                CStructHeader* header = pThis;
+                CStructHeader* pStruct = *(CStructHeader**)header->pStruct;
+
+                while (pStruct)
+                {
+                    if (pStruct->QBkey == checksum)
+                    {
+                        *out_header = pThis;
+                        return true;
+                    }
+
+                    else if (pStruct->Type == QBKeyHeader::LOCAL_STRUCT || pStruct->Type == QBKeyHeader::STRUCT)
+                    {
+                        //Only 2 levels for now
+                        CStructHeader* pStruct2 = *(CStructHeader**)pStruct->pStruct;
+                        while (pStruct2)
+                        {
+                            if (pStruct2->QBkey == checksum)
+                            {
+                                *out_header = pThis;
+                                return true;
+                            }
+                            pStruct2 = pStruct2->NextHeader;
+                        }
+                    }
+                    pStruct = pStruct->NextHeader;
+                }
+            }
+            if (pThis->NextHeader)
+                pThis = pThis->NextHeader;
+            else
+                pThis++;
+
+        }
+        if (pThis && pThis->QBkey == checksum)
+        {
+            *out_header = pThis;
+            return true;
+        }
+        return false;
+        //return head->GetStruct(checksum, header);
     }
 
     bool GetStruct(DWORD checksum, CStructHeader** header)

@@ -50,4 +50,4 @@ Additional code used to be loaded in LevelMod.flt by integrated MSS plugin syste
 * [THPS3 Widescreen patch by thirteenAG](https://github.com/ThirteenAG/WidescreenFixesPack/releases/tag/thps3)
 * [X360CE For DirectInput gamepads](https://github.com/x360ce/x360ce/releases/latest)
 
-2011-2020, DCxDemo* and Vadru'Qc.
+2011-2021, DCxDemo* and Vadru'Qc.

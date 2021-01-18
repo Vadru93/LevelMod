@@ -29,6 +29,7 @@ namespace LevelModSettings
 
     extern int SpineButton;// = 7;
     extern int SpineButton2;// = -1;
+    extern VirtualKeyCode SpineButton3;
 
 
     struct OverrideOption

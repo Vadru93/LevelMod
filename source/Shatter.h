@@ -242,6 +242,7 @@ void ShatterSetParams(Vertex& velocity, float area_test, float velocity_variance
 
 std::vector<ShatterData*> shatterObjects;
 std::vector<SuperSector*> PointyObjects;
+std::vector<ColouredVertex> bbox_rails;
 
 
 void ShatterSuperSector(SuperSector* super_sector);

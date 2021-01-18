@@ -9,6 +9,9 @@
 /*#include <d3dx8.h>
 #include <d3dx8core.h>*/
 
+//same accuracy as th3
+#define DegToRad(degree) ((degree) * (3.14f * 0.01f))
+
 
 int ClampValue(int value, int min, int max, int outMin, int outMax);
 
@@ -23,6 +26,28 @@ inline	float	ClampMax(float v, float max)
         return v;
     }
 }
+
+struct ColouredVertex
+{
+    float x;
+    float y;
+    float z;
+    float r;
+    float g;
+    float b;
+    float a;
+
+    ColouredVertex(float _x, float _y, float _z)
+    {
+        x = _x;
+        y = _y;
+        z = _z;
+        r = 255;
+        g = 0;
+        b = 255;
+        a = 255;
+    }
+};
 
 inline	float	ClampMin(float v, float min)
 {
@@ -188,6 +213,15 @@ struct Vertex : D3DXVECTOR3
         *this = *(Vertex*)&v;
     }
 
+    inline	float	Distance(const Vertex& v2)
+    {
+
+
+        Vertex d = *this - v2;
+
+        return sqrtf(D3DXVec3Dot(&d, &d));
+    }
+
     /*Vertex& operator=	(const D3DXVECTOR3& v)
     {
         x = v.x;
@@ -337,7 +371,7 @@ struct Vertex : D3DXVECTOR3
         return *this;
     }
 
-    void Normalize()
+    Vertex Normalize()
     {
         float l = Length();
 
@@ -357,6 +391,7 @@ struct Vertex : D3DXVECTOR3
             this->z *= 0.5f;
             //MessageBox(0,("Normalizing vector of zero length"), "", 0);
         }
+        return *this;
     }
 
     float LengthSqr()
@@ -456,6 +491,10 @@ struct Vertex : D3DXVECTOR3
 
 };
 
+inline	Vertex	Lerp(const Vertex& v1, const Vertex& v2, const float val)
+{
+    return Vertex(v1 + (v2 - v1) * val);
+}
 
 Vertex CrossProduct(const Vertex* vec1, Vertex* vec2);
 
