@@ -21,6 +21,7 @@ LevelMod\optionsmenu.qb
 LevelMod\ped_oil.qb
 LevelMod\sk3_scripts.qb
 LevelMod\skater_m.qb
+LevelMod\terrain.qb
 LevelMod\tricks.qb
 LevelMod\settings.qb
 LevelMod\skater_sfx.qb
@@ -218,7 +219,6 @@ soundtest.qb
 statsmenu.qb
 strings.qb
 teamcheat.qb
-terrain.qb
 terrorist_a.qb
 trickmenu.qb
 tutorials.qb
