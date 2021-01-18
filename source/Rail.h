@@ -1055,7 +1055,7 @@ public:
                 // if neither is, then leave it, and maybe print a warning?
                 MessageBox(0, "RailManager: ERROR", "Multiple links but no DefaultLine", 0);*/
                 if (!p_from->pNextLink->GetFlag(RailNode::Flags::DEFAULT_LINE))
-                    MessageBox(0, "RailManager: ERROR", "Multiple links but no DefaultLine", 0);
+                    _printf("RailManager: ERROR", "Multiple links but no DefaultLine\n");
             }
         }
 
@@ -1565,7 +1565,6 @@ public:
 
             pRailNode->node = index;
             pRailNode->link = 0xFFFF;
-            pRailNode->terrain = 0;
             pRailNode->flags = 0;
             pRailNode->SetActive(pNodeStruct->ContainsFlag(Checksums::CreatedAtStart));
 

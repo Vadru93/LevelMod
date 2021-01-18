@@ -4178,8 +4178,8 @@ void HookOverlappingRailRemoval()
 {
     RailManager::FixRailLinks();
     RailManager::RemoveOverlapping();
-    typedef void(__cdecl* const pOverlappingRailRemoval)(); 
-    pOverlappingRailRemoval(0x00496090)();
+    /*typedef void(__cdecl* const pOverlappingRailRemoval)(); 
+    pOverlappingRailRemoval(0x00496090)();*/
 }
 
 __declspec(naked) void FixMemOpt1()
