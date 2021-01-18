@@ -8,7 +8,7 @@
 
  //#include "..\pch.h"
 #include "d3d8to9.hpp"
-#include "..\CustomShaders.h"
+#include "..\Render\CustomShaders.h"
 
 D3DPRESENT_PARAMETERS current_params;
 

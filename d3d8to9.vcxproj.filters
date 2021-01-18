@@ -63,91 +63,91 @@
     <ClCompile Include="source\d3d8to9\d3d8to9_volume.cpp">
       <Filter>d3d8to9</Filter>
     </ClCompile>
-    <ClCompile Include="source\Checksum.cpp">
-      <Filter>LevelMod\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\CXBOXController.cpp">
-      <Filter>LevelMod\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\debug.cpp">
-      <Filter>LevelMod\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Defines.cpp">
-      <Filter>LevelMod\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Extension.cpp">
-      <Filter>LevelMod\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Globals.cpp">
-      <Filter>LevelMod\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\IniReader.cpp">
-      <Filter>LevelMod\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\IniWriter.cpp">
-      <Filter>LevelMod\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\KeyState.cpp">
-      <Filter>LevelMod\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Memory.cpp">
-      <Filter>LevelMod\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Node.cpp">
-      <Filter>LevelMod\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Observe.cpp">
-      <Filter>LevelMod\Source</Filter>
-    </ClCompile>
     <ClCompile Include="source\pch.cpp">
-      <Filter>LevelMod\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Physics.cpp">
-      <Filter>LevelMod\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Script.cpp">
-      <Filter>LevelMod\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Settings.cpp">
-      <Filter>LevelMod\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\Skater.cpp">
       <Filter>LevelMod\Source</Filter>
     </ClCompile>
     <ClCompile Include="source\Source.cpp">
       <Filter>LevelMod\Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\SuperSectors.cpp">
-      <Filter>LevelMod\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\math.cpp">
-      <Filter>LevelMod\Header</Filter>
-    </ClCompile>
     <ClCompile Include="source\zip\unzip.cpp">
       <Filter>zip</Filter>
     </ClCompile>
-    <ClCompile Include="source\Bugfixes.cpp">
+    <ClCompile Include="source\Math\math.cpp">
+      <Filter>LevelMod\Header</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Hook\Bugfixes.cpp">
       <Filter>LevelMod\Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\Model.cpp">
+    <ClCompile Include="source\Script\Checksum.cpp">
       <Filter>LevelMod\Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\String.cpp">
+    <ClCompile Include="source\Render\CustomShaders.cpp">
       <Filter>LevelMod\Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\CustomShaders.cpp">
+    <ClCompile Include="source\Input\CXBOXController.cpp">
       <Filter>LevelMod\Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\Net.cpp">
+    <ClCompile Include="source\Debug\debug.cpp">
       <Filter>LevelMod\Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\GameMode.cpp">
+    <ClCompile Include="source\Extension\Defines.cpp">
       <Filter>LevelMod\Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\Shatter.cpp">
+    <ClCompile Include="source\Extension\Extension.cpp">
       <Filter>LevelMod\Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\Mesh.cpp">
+    <ClCompile Include="source\Game\GameMode.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Extension\Globals.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Settings\IniReader.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Settings\IniWriter.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Input\KeyState.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Memory\Memory.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Objects\Mesh.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Objects\Model.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Net\Net.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Objects\Node.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Game\Observe.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Physics\Physics.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\Script.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Settings\Settings.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Physics\Shatter.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Game\Skater.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Memory\String.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Objects\SuperSectors.cpp">
       <Filter>LevelMod\Source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -167,112 +167,112 @@
     <ClInclude Include="source\d3d8to9\d3d8to9.hpp">
       <Filter>d3d8to9</Filter>
     </ClInclude>
-    <ClInclude Include="source\_Math.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Checksum.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
     <ClInclude Include="source\Commands.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\CXBOXController.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Debug.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Defines.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Extension.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\framework.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Globals.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\HTTPRequest.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\IniReader.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\IniWriter.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\KeyState.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Memory.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Mesh.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Node.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Observe.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
     <ClInclude Include="source\pch.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
-    <ClInclude Include="source\Physics.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\QBKey.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Script.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Settings.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\SuperSectors.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
     <ClInclude Include="source\zip\unzip.h">
       <Filter>zip</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Skater.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Bugfixes.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\Model.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="source\String.h">
-      <Filter>LevelMod\Header</Filter>
     </ClInclude>
     <ClInclude Include="source\Collision.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
-    <ClInclude Include="source\CustomShaders.h">
+    <ClInclude Include="source\Math\_Math.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
-    <ClInclude Include="source\Net.h">
+    <ClInclude Include="source\Hook\Bugfixes.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
-    <ClInclude Include="source\SkateModule.h">
+    <ClInclude Include="source\Script\Checksum.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
-    <ClInclude Include="source\GameMode.h">
+    <ClInclude Include="source\Render\CustomShaders.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
-    <ClInclude Include="source\Shatter.h">
+    <ClInclude Include="source\Input\CXBOXController.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
-    <ClInclude Include="source\shadow.h">
+    <ClInclude Include="source\Debug\Debug.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
-    <ClInclude Include="source\Rail.h">
+    <ClInclude Include="source\Extension\Defines.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Extension\Extension.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Extension\framework.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Game\GameMode.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Extension\Globals.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Net\HTTPRequest.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Settings\IniReader.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Settings\IniWriter.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Input\KeyState.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Memory\Memory.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Objects\Mesh.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Objects\Model.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Net\Net.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Objects\Node.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Game\Observe.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Physics\Physics.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Script\QBKey.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Objects\Rail.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Script\Script.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Settings\Settings.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Render\shadow.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Physics\Shatter.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Game\SkateModule.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Game\Skater.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Memory\String.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Objects\SuperSectors.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
   </ItemGroup>

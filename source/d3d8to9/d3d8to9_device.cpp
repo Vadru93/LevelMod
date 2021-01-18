@@ -11,7 +11,7 @@
 #include "d3d8to9.hpp"
 #include <regex>
 #include <assert.h>
-#include "..\CustomShaders.h"
+#include "..\Render\CustomShaders.h"
 
 extern D3DMULTISAMPLE_TYPE DeviceMultiSampleType;
 extern bool CopyRenderTarget;

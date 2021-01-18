@@ -8,13 +8,13 @@
 #define PCH_H
 
 // add headers that you want to pre-compile here
-#include "framework.h"
-#include "Checksum.h"
-#include "Globals.h"
-#include "debug.h"
-#include "Memory.h"
-#include "Net.h"
-#include "GameMode.h"
-#include "SkateModule.h"
+#include "Extension\framework.h"
+#include "Script\Checksum.h"
+#include "Extension\Globals.h"
+#include "Debug\debug.h"
+#include "Memory\Memory.h"
+#include "Net\Net.h"
+#include "Game\GameMode.h"
+#include "Game\SkateModule.h"
 
 #endif //PCH_H

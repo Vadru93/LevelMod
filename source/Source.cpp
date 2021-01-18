@@ -3,7 +3,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "pch.h"
 #include "Commands.h"
-#include "Extension.h"
+#include "Extension\Extension.h"
 #include "zip\unzip.h"
 #include <conio.h>
 #include <stdio.h>
@@ -15,21 +15,21 @@
 #include "Shellapi.h"
 #include <sstream>
 #include "d3d9.h"
-#include "IniReader.h"
-#include "IniWriter.h"
-#include "Bugfixes.h"
-#include "String.h"
+#include "Settings\IniReader.h"
+#include "Settings\IniWriter.h"
+#include "Hook\Bugfixes.h"
+#include "Memory\String.h"
 #undef ONLY_SHADER
-#include "CustomShaders.h"
-#include "ObjParser.h"
+#include "Render\CustomShaders.h"
+#include "Objects\ObjParser.h"
 #include <string.h>
 #include <memory.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include "shadow.h"
+#include "Render\shadow.h"
 #include "dinput.h"
-#include "rail.h"
+#include "Objects\rail.h"
 /*0
 004F9B9E < -non semi
     8

@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "Node.h"
-#include "String.h"
+#include "Objects\Node.h"
+#include "Memory\String.h"
 
 
 DWORD showmessage = 0;

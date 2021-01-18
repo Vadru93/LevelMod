@@ -8,8 +8,8 @@
 
 #include "d3dx9.hpp"
 #include "d3d8to9.hpp"
-#include "..\QBKey.h"
-#include "..\CustomShaders.h"
+#include "..\Script\QBKey.h"
+#include "..\Render\CustomShaders.h"
 
 #define pRANDOM_SIZE 0x32000
 
