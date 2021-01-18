@@ -174,7 +174,7 @@ NewKickflipExtras = [
 	{ SCR_GRAB Trigger = { AirTrickLogic Circle Right 300 } Params = { TrickDef_KickflipToIndy EXTRA_TRICK } } 
 	{ SCR_GRAB Trigger = { AirTrickLogic Circle Up 300 } Params = { TrickDef_KickflipToCrail EXTRA_TRICK } } 
 	{ SCR_GRAB Trigger = { AirTrickLogic Circle Left 300 } Params = { TrickDef_KickflipToMelon EXTRA_TRICK } } 
-	{ SCR_FLIP Trigger = { Press Up 300 } Params = { TrickDef_KickflipUnderFlip EXTRA_TRICK Speed = 1.1 Score = 500 } }
+	{ SCR_FLIP Trigger = { Press Down 300 } Params = { TrickDef_KickflipUnderFlip EXTRA_TRICK Speed = 1.1 Score = 500 } }
 ]
 
 //DoubleKickflip = [ { EXTRA_FLIP Params = { TrickDef_DoubleKickflip EXTRA_TRICK } } ]
