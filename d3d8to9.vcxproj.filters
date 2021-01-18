@@ -123,9 +123,6 @@
     <ClCompile Include="source\Net\Net.cpp">
       <Filter>LevelMod\Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\Objects\Node.cpp">
-      <Filter>LevelMod\Source</Filter>
-    </ClCompile>
     <ClCompile Include="source\Game\Observe.cpp">
       <Filter>LevelMod\Source</Filter>
     </ClCompile>
@@ -148,6 +145,9 @@
       <Filter>LevelMod\Source</Filter>
     </ClCompile>
     <ClCompile Include="source\Objects\SuperSectors.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Script\Node.cpp">
       <Filter>LevelMod\Source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -236,9 +236,6 @@
     <ClInclude Include="source\Net\Net.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
-    <ClInclude Include="source\Objects\Node.h">
-      <Filter>LevelMod\Header</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Game\Observe.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
@@ -273,6 +270,9 @@
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
     <ClInclude Include="source\Objects\SuperSectors.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Script\Node.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
   </ItemGroup>

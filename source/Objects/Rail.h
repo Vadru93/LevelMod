@@ -2,7 +2,7 @@
 #ifndef RAIL_H
 #define RAIL_H
 #include "Script\Script.h"
-#include "Objects\Node.h"
+#include "Script\Node.h"
 
 
 #define MAX_RAIL_LINKS 4

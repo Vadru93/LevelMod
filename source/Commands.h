@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Objects\Node.h"
+#include "Script\Node.h"
 #include "Memory\String.h"
 
 

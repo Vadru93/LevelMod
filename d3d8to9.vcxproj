@@ -149,7 +149,7 @@
     <ClCompile Include="source\Objects\Mesh.cpp" />
     <ClCompile Include="source\Objects\Model.cpp" />
     <ClCompile Include="source\Net\Net.cpp" />
-    <ClCompile Include="source\Objects\Node.cpp" />
+    <ClCompile Include="source\Script\Node.cpp" />
     <ClCompile Include="source\Game\Observe.cpp" />
     <ClCompile Include="source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -191,7 +191,7 @@
     <ClInclude Include="source\Objects\Mesh.h" />
     <ClInclude Include="source\Objects\Model.h" />
     <ClInclude Include="source\Net\Net.h" />
-    <ClInclude Include="source\Objects\Node.h" />
+    <ClInclude Include="source\Script\Node.h" />
     <ClInclude Include="Source\Game\Observe.h" />
     <ClInclude Include="source\pch.h" />
     <ClInclude Include="source\Physics\Physics.h" />

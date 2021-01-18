@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Model.h"
-#include "Node.h"
+#include "Script\Node.h"
 #include "SuperSectors.h"
 
 

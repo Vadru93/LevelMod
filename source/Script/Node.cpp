@@ -2,7 +2,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "pch.h"
 #include "Extension\Defines.h"
-#include "Objects\Node.h"
+#include "Node.h"
 
 
 CArray* __restrict NodeArray = NULL;

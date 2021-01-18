@@ -4,7 +4,7 @@
 #include "Physics.h"
 #include <stdio.h>
 #include <math.h>
-#include "Objects\Node.h"
+#include "Script\Node.h"
 #include "Script\Script.h"
 #include "Settings\Settings.h"
 

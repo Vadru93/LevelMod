@@ -4,7 +4,7 @@
 #undef NO_DEFINES
 #include "Script\Checksum.h"
 #include "Objects\Mesh.h"
-#include "Objects\Node.h"
+#include "Script\Node.h"
 
 
 //Collision stuff 00501CE0

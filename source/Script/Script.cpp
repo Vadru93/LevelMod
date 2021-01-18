@@ -2,7 +2,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "pch.h"
 #include "Extension\Defines.h"
-#include "Objects\Node.h"
+#include "Script\Node.h"
 #include "Memory\String.h"
 #include "Render\CustomShaders.h"
 #include <stdlib.h>

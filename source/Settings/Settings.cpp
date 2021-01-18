@@ -5,7 +5,7 @@
 #include "Input\KeyState.h"
 #include "Settings\IniReader.h"
 #include "Settings\IniWriter.h"
-#include "Objects\Node.h"
+#include "Script\Node.h"
 #include "Memory\String.h"
 
 #define NO_EXTRA_INCLUDE
