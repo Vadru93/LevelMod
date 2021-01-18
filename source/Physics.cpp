@@ -2591,7 +2591,7 @@ float Skater::GetAirGravity()
     //we devide by Physics_vert_hang_Stat to get the final gravity
     //when you have full stats the value is 1.1
     //when stat is not full or you are king of the hill the stat is lower
-    float gravity = -1350.0f / this->GetScriptedStat("Physics_vert_hang_Stat");
+    float gravity = -1350.0f / this->GetScriptedStat(Checksums::Physics_vert_hang_Stat);
 
     //Check if moon gravity is on, if it's on multiply gravity by 0.5
     /*if (CheatIsOn(GetCheat(crc32f((unsigned char*)"CHEAT_MOON"))))

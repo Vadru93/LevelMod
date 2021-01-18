@@ -115,7 +115,7 @@ EXTERN struct SuperSector
         //each item is 12 bytes, the first 4 bytes is checksum, following 4 bytes is pointer to the SuperSector and last 4 bytes is link to next item(if it have collision)
         //since 2 or more checksums can have the same index we need to loop until we get a checksum match
         //if we find an uninitialized item before we get a checksum match it means the checksum is not in the list
-        while (pSectors != 0)//Continue until found an uninitialized item
+        while (pSectors != 0)// && (DWORD)pSectors > 0x0040000 && (DWORD)pSectors < 0x10000000 && (DWORD)pSectors != 0x3F800000)//Continue until found an uninitialized item
         {
             if (*pSectors == checksum)//Checksum match
             {

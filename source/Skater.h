@@ -7,6 +7,7 @@
 #include "Collision.h"
 
 bool GetZAngle(CStruct* pParams, CScript* pScript);
+bool GetZAngle(CStruct* pParams, CScript* pScript);
 bool GetSkaterLook(CStruct* pParams, CScript* pScript);
 bool StoreSkaterPos(CStruct* pParams, CScript* pScript);
 bool SetSkaterPos(CStruct* pParams, CScript* pScript);
@@ -22,6 +23,67 @@ struct Settings
     {
         return pIsTrue(0x004342E0)(this, name);
     }
+};
+
+struct Camera
+{
+    Matrix		    matrix;							// orientation matrix
+    Vector		    pos;						    // camera position
+    Matrix		    mat;						    // maybe old matrix?
+
+    //Not sure these exists in th3??
+    float			h_fov;							// horizontal field of view angle (degrees)
+    float			adj_h_fov;						// screen adjusted horizontal field of view angle (degrees)
+
+    float			near_clip;						// near clip plane
+    float			far_clip;						// far clip plane
+};
+
+struct CameraContainer
+{
+    DWORD unk;//probably refcount?
+    Camera* pCamera;
+};
+
+struct Viewport
+{
+    Vector rect;
+    CameraContainer* pCameraContainer;
+};
+
+struct ViewportManager
+{
+    static ViewportManager* Instance()
+    {
+        return *(ViewportManager**)0x008e1e78;
+    }
+
+    DWORD GetNumActiveCams()
+    {
+        return *(DWORD*)(0x0058d970 + *(int*)((int)this + 0xbc) * 4);
+    }
+
+    Viewport* GetViewport(DWORD index)
+    {
+        return *(Viewport**)((int)this + index * 4 + 0x6c);
+    }
+
+    Camera* GetCamera(DWORD index)
+    {
+        return GetViewport(index)->pCameraContainer->pCamera;
+    }
+};
+
+struct STerrainSoundInfo
+{
+    char* name;
+    DWORD checksum;
+    float maxPitch;
+    float minPitch;
+    float maxVol;
+    float minVol;
+    float loadPitch;
+    float loadVol;
 };
 
 struct SkaterProfile
@@ -68,6 +130,217 @@ struct Timer
     {
         return GetTickCount();
     }
+};
+
+struct Volume
+{
+    float lvol;
+    float rvol;
+
+    Volume()
+    {
+        lvol = 0;
+        rvol = 0;
+    }
+
+    bool IsSilent()
+    {
+        return lvol == 0 && rvol == 0;
+    }
+};
+
+struct SfxManager
+{
+
+    enum TerrainTable
+    {
+        SK3SFX_TABLE_WHEELROLL = 0,
+        SK3SFX_TABLE_GRIND,
+        SK3SFX_TABLE_JUMP,
+        SK3SFX_TABLE_LAND,
+        SK3SFX_TABLE_BONK,
+        SK3SFX_TABLE_GRINDJUMP,
+        SK3SFX_TABLE_GRINDLAND,
+        SK3SFX_TABLE_SLIDE,
+        SK3SFX_TABLE_SLIDEJUMP,
+        SK3SFX_TABLE_SLIDELAND,
+        SK3SFX_TABLE_CESS,
+    };
+
+
+    BYTE unk[0x10];
+    void* sound;
+    static SfxManager* Instace()
+    {
+        return *(SfxManager**)0x008ee4d0;
+    }
+
+    void PlaySound(DWORD sound_checksum, float volume, float pitch, float unk = 100.0f, DWORD unk2 = 0)
+    {
+        typedef void(__thiscall* const pPlaySound)(SfxManager* sfx_manager, DWORD sound_checksum, float volume, float pitch, float unk, DWORD unk2);
+        pPlaySound(0x004c4da0)(this, sound_checksum, volume, pitch, unk, unk2);
+    }
+
+    /*void SetVolumeFromPos(float* out_vol, float* out_pitch, Vector* soundSource, float dropoff)
+    {
+        typedef void(__thiscall* const pSetVolumeFromPos)(SfxManager* sfx_manager, float* out_vol, float* out_pitch, Vector* soundSource, float dropoff);
+        return pSetVolumeFromPos(0x004c5580)(this, out_vol, out_pitch, soundSource, dropoff);
+    }*/
+
+    void SetVolumeFromPos(float* lvol, float* rvol, Vector* soundSource, float dropoffDist)
+    {
+        Volume vol;
+        SetVolumeFromPos(vol, soundSource, dropoffDist);
+        if (vol.lvol > *lvol)
+            *lvol = vol.lvol;
+        if (vol.rvol > *rvol)
+            *rvol = vol.rvol;
+    }
+
+    void SetVolumeFromPos(Volume& out_vol, Vector* soundSource, float dropoffDist)
+    {
+        out_vol.lvol = 0;
+        out_vol.rvol = 0;
+        ViewportManager* viewport_manager = ViewportManager::Instance();
+        DWORD numCams = viewport_manager->GetNumActiveCams();
+        //_printf("NumCams %d\n", numCams);
+        float closest_dist = dropoffDist;
+        Camera* camera = NULL;
+
+        for (DWORD i = 0; i < numCams; i++)
+        {
+            Camera* temp_camera = viewport_manager->GetCamera(i);
+            Vertex pos = *(D3DXVECTOR3*)&temp_camera->pos;
+            //_printf("Sound %f %f %f cam %f %f %f\n", soundSource->x, soundSource->y, soundSource->z, temp_camera->pos.x, temp_camera->pos.y, temp_camera->pos.z);
+            float dist = pos.Distance(*(Vertex*)soundSource);
+            if (dist < closest_dist)
+            {
+                closest_dist = dist;
+                camera = temp_camera;
+            }
+            //_printf("dist %f\n", dist);
+        }
+        if (camera == NULL || closest_dist >= dropoffDist)
+            return;
+
+
+        float dropoff = closest_dist / dropoffDist;
+        float volume = (((1.0f - dropoff) * 3.0f + (1.0f - dropoff * dropoff))
+            * 0.25 * 100.0f);
+
+        if (volume > out_vol.lvol || volume > out_vol.rvol)
+        {
+
+            Vertex sound_dir = (*(Vertex*)soundSource) - (*(Vertex*)&camera->pos);
+            sound_dir.Normalize();
+            Vertex matrixY = *(Vertex*)&camera->matrix[Y];
+
+            float pan = (D3DXVec3Dot(&sound_dir, &matrixY) + 1.0f) * 0.5f;
+
+            float rvol = (1.0f - (pan * pan)) * volume;
+            pan = 1.0f - pan;
+            float lvol = (1.0f - (pan * pan)) * volume;
+
+            bool bVolumeChanged = false;
+
+            if (lvol > out_vol.lvol)
+            {
+                out_vol.lvol = lvol;
+                bVolumeChanged = true;
+            }
+            if (rvol > out_vol.rvol)
+            {
+                out_vol.rvol = rvol;
+                bVolumeChanged = true;
+            }
+            /*if (bVolumeChanged)
+            {
+                // If sound is behind the camera, set volume negative and it will sound out of phase.
+                Vertex camAtVector = *(Vertex*)&camera->matrix[Z];
+
+                float behindCamera = D3DXVec3Dot(&sound_pos_from_camera, &camAtVector);
+                if (behindCamera < 0.0f)
+                {
+                    // Just one channel needs to be reverse phased to get the effect.
+                    out_vol.rvol *= -1.0f;
+                }
+            }*/
+
+            /*Vertex temp2 = *(Vertex*)&soundSource - *(Vertex*)&camera->pos;
+            temp2.Normalize();
+            float orient = (temp2.x * camera->matrix[X][X] + temp2.y * camera->matrix[X][Y] + temp2.z * camera->matrix[X][Z] + 1.0f) * 0.5f;
+            float pitch = (1.0f - orient * orient) * vol;
+            vol = (1.0f - (1.0 - orient) * (1.0 - orient)) * vol;
+            _printf("orient % f vol % f\n", orient, vol);
+
+            if ( > *out_pitch)
+                *out_pitch = pitch;
+            if (vol > *out_vol)
+                *out_vol = vol;*/
+
+        }
+    }
+
+    float GetDropoffDist(DWORD sound_checksum)
+    {
+        typedef float(__thiscall* const pGetDropoffDist)(SfxManager* pThis, DWORD sound_checksum);
+        return pGetDropoffDist(0x004C5280)(this, sound_checksum);
+    }
+
+};
+
+struct TerrainManager
+{
+    static TerrainManager* Instance()
+    {
+        return *(TerrainManager**)0x085A4BC;
+    }
+
+    float GetVolPercent(STerrainSoundInfo* SoundInfo, float volPercent, bool cap_max)
+    {
+        if ((SoundInfo->minVol != 0.0f) || (SoundInfo->maxVol != 100.0f)) {
+            volPercent = (SoundInfo->maxVol - SoundInfo->minVol) * volPercent * 0.01f + SoundInfo->minVol;
+        }
+        if (cap_max)
+        {
+            if (volPercent > SoundInfo->maxVol)
+                volPercent = SoundInfo->maxVol;
+        }
+        return volPercent;
+    }
+
+    STerrainSoundInfo* GetSoundInfo(DWORD terrain, SfxManager::TerrainTable table)
+    {
+        typedef STerrainSoundInfo* (__thiscall* const pGetSoundInfo)(TerrainManager* pThis, DWORD terrain, SfxManager::TerrainTable table);
+        return pGetSoundInfo(0x00412E30)(this, terrain, table);
+    }
+
+    void PlayTerrainSound(SfxManager::TerrainTable table, DWORD terrain, Vector* position, float volPercent)
+    {
+        SfxManager* sfx_manager = SfxManager::Instace();
+        if (sfx_manager->sound == NULL)
+            return;
+
+        STerrainSoundInfo* SoundInfo = GetSoundInfo(terrain, table);
+        if (!SoundInfo)
+            return;
+
+        Volume vol;
+        float dropoff = sfx_manager->GetDropoffDist(SoundInfo->checksum);
+        sfx_manager->SetVolumeFromPos(vol, position, dropoff);
+        float percent = GetVolPercent(SoundInfo, volPercent, false);
+
+        _printf("pos vol (%f:%f) dropoff %f percent %f vel_vol %f\n", vol.lvol, vol.rvol, dropoff, percent, volPercent);
+        vol.lvol *= percent * 0.01f;
+        vol.rvol *= percent * 0.01f;
+        _printf("minVol %f maxVol %f final vol %f\n", SoundInfo->minVol, SoundInfo->maxVol, vol);
+
+        if (vol.IsSilent())
+            return;
+        sfx_manager->PlaySound(SoundInfo->checksum, vol.lvol, vol.rvol);
+
+    }
+
 };
 
 EXTERN struct Skater//GetSkaterInfo 004769D0
@@ -286,6 +559,28 @@ private:
     __inline void SetName(DWORD name)
     {
         checksumName = name;
+    }
+
+    float GetVolFromVelocity()
+    {
+        float max_speed = GetScriptedStat(Checksums::Skater_Max_Max_Speed_Stat);
+        return (*(Vertex*)&velocity).Length() / max_speed;
+    }
+
+    void PlayJumpSound(EStateType state, DWORD terrain)
+    {
+        SfxManager::TerrainTable table;
+        if (state == RAIL)
+            table = bRailSliding ? SfxManager::SK3SFX_TABLE_SLIDEJUMP : SfxManager::SK3SFX_TABLE_GRINDJUMP;
+        else
+            table = SfxManager::SK3SFX_TABLE_JUMP;
+
+        float old_y = velocity.y;
+        velocity.y = 0;
+        float volPercent = GetVolFromVelocity() * 100.0f;
+        velocity.y = old_y;
+
+        TerrainManager::Instance()->PlayTerrainSound(table, terrain, (Vector*)&position, volPercent);
     }
 
 
@@ -513,10 +808,17 @@ public:
     }
 
 
-    typedef float(__thiscall* const pGetScriptedStat)(Skater* pThis, const char* name);
     float GetScriptedStat(const char* name)
     {
+        typedef float(__thiscall* const pGetScriptedStat)(Skater* pThis, const char* name);
         return pGetScriptedStat(0x0049F670)(this, name);
+    }
+
+    float GetScriptedStat(DWORD name)
+    {
+        typedef float(__thiscall* const pCalculateScriptedStat)(Skater* pThis, const void* stat);
+        typedef void*(__cdecl* const pGetScriptedStat)(DWORD checksum);
+        return pCalculateScriptedStat(0x0049F530)(this, pGetScriptedStat(0x00426540)(name));
     }
 
 
@@ -582,14 +884,24 @@ public:
     {
         static const DWORD ptr = 0x005D06C0;
         VALIDATE_PTR((void*)ptr);
+        if (ptr == 0)
+            return NULL;
         DWORD pSkater = *(DWORD*)ptr + 0x580;
         VALIDATE_PTR((void*)pSkater);
+        if (pSkater == 0)
+            return NULL;
         pSkater = *(DWORD*)pSkater + 0x4;
         VALIDATE_PTR((void*)pSkater);
+        if (pSkater == 0)
+            return NULL;
         pSkater = *(DWORD*)pSkater + 0x2C;
         VALIDATE_PTR((void*)pSkater);
+        if (pSkater == 0 || pSkater == 43)
+            return NULL;
         pSkater = *(DWORD*)pSkater + 0x48;
         pSkater = *(DWORD*)pSkater;
+        if (pSkater == 0)
+            return NULL;
         VALIDATE_DATA((Skater*)pSkater, sizeof(Skater));
         /*char test_msg[59];
         sprintf(test_msg, "%X\n", &((Skater*)pSkater)->mp_rail_node);

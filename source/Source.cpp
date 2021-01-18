@@ -66,6 +66,7 @@ D3DXMATRIX lineWorld;
 
 vector<SuperSector*> EnvironmentObjects;
 extern vector<SuperSector*> PointyObjects;
+extern vector<ColouredVertex> bbox_rails;
 
 LPD3DXSPRITE eye_sprite;
 DWORD wheel_timer = 0;
@@ -161,6 +162,19 @@ void InjectHook(DWORD addr, BYTE* hook, DWORD size)
     memcpy((void*)addr, hook, size);
 }
 
+__inline void HookFunction(DWORD addr, void(SfxManager::* function)(float* lvol, float* rvol, Vector* soundSource, float dropoffDist), BYTE byteCode = 0, DWORD nopCount=0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+
 __inline void HookFunction(DWORD addr, bool (RailNode::* function )(int SearchNode), BYTE byteCode = 0, DWORD nopCount = 0)
 {
     DWORD old;
@@ -201,6 +215,19 @@ __inline void HookFunction(DWORD addr, void (Skater::* function)(DWORD type), BY
 }
 
 __inline void HookFunction(DWORD addr, void (Skater::* function)(D3DXVECTOR3 *off_point), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+
+__inline void HookFunction(DWORD addr, void (Skater::* function)(Skater::EStateType state, DWORD terrain), BYTE byteCode = 0, DWORD nopCount = 0)
 {
     DWORD old;
     VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
@@ -692,7 +719,7 @@ void __cdecl add_log(const char* string, ...)
     k = vsprintf(buf, string, args);
     va_end(args);
     char* p = buf;
-    if (pScript)
+    if (pScript && (DWORD)pScript > 0x00400000 && (DWORD)pScript < 0x10000000)
     {
         while (*p != 0x0)
         {
@@ -2969,113 +2996,6 @@ void LoadCustomShaderThread()
     Game::skater = Skater::UpdateSkater();
     while(!Game::skater) Skater::UpdateSkater();
 
-    Game::skater->Store();
-
-    //Try to find narrow objects for nata spin
-    for (auto object = EnvironmentObjects.begin(); object != EnvironmentObjects.end(); object++)
-    {
-        SuperSector* sector = *object;
-
-        //Get the width and height
-        float x_width = sector->bboxMax.x - sector->bboxMin.x;
-        float height = sector->bboxMax.y - sector->bboxMin.y;
-        float z_width = sector->bboxMax.z - sector->bboxMin.z;
-
-        //Super math... probably is a better way to do this
-        if (x_width < 35.0f && x_width > 3.0f && z_width < 35.0f && z_width > 3.0f && height > 15.0f)
-        {
-
-            //Now we found a narrow object, but we still need to check if there is another object ontop of it that will make the object unaccessable
-            //So we will make raytracing from object top position to slightly above and vice versa to combat CCW
-
-            //Get the middle topmomst point of the object, not 100% true but seems to be true enough
-            D3DXVECTOR3 top;
-            top.x = (sector->bboxMax.x + sector->bboxMin.x) / 2.0f;
-            top.y = sector->bboxMax.y;
-            top.z = (sector->bboxMax.z + sector->bboxMin.z) / 2.0f;
-
-            D3DXVECTOR3 end = top;
-            //Set end point sligthly above
-            end.y += 50.0f;
-            Game::skater->SetRay(top, end);
-            //Ignore hollow collision
-            if (Game::skater->CollisionCheck())
-                continue;
-
-            //We did not collide, but there still may be an object ontop of this object that has the same exact position as the topmost point
-            //So we need to check slightly below the topmost point
-            if (height > 20.0f)
-                top.y -= 20.0f;
-            else
-                top.y -= 8.0f;
-            Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name && Game::skater->GetHitPoint()->y >= top.y)
-                continue;
-
-            //Now we need to check again in reverse order to take care of CCW
-            Game::skater->SetRay(end, top);
-            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name && Game::skater->GetHitPoint()->y >= top.y)
-                continue;
-
-            //Now let's check in circle around, should use boundingsphere collision checking instead of raytracing here
-            top.y = sector->bboxMax.y+1.0f;
-            end.y = top.y;
-            end.x += 50.0f;
-            Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
-                continue;
-
-            end.z += 50.0f;
-            Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
-                continue;
-
-            end.x -= 50.0f;
-            Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
-                continue;
-
-            end.x -= 50.0f;
-            Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
-                continue;
-
-            end.z -= 50.0f;
-            Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
-                continue;
-
-            end.z -= 50.0f;
-            Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
-                continue;
-
-            end.x += 50.0f;
-            Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
-                continue;
-
-            end.x += 50.0f;
-            Game::skater->SetRay(top, end);
-            if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
-                continue;
-
-            //We have a narrow object that seems to be accessible
-            for (auto i = 0; i < sector->numVertices; i++)
-            {
-                //Decrease b and g value, keep r value = make object more red
-                SuperSector::Color* colors = sector->GetColors();
-                colors[i].g *= 0.2f;
-                colors[i].b *= 0.2f;
-            }
-            
-            //Tell engine to update the VertexBuffer to vram
-            sector->Update();
-            //PointyObjects.push_back(sector);
-        }
-    }
-    Game::skater->Restore();
-    
     //Then check if we are host and if we are, send the HostOptions to clients
     Network::NetHandler* net_handler = Network::NetHandler::Instance();
 
@@ -3095,30 +3015,6 @@ bool OnPostLevelLoad(CStruct* pStruct, CScript* pScript)
 {
     _printf("OnPostLevelLoad...\n");
     oldSkater = Game::skater;
-
-    CArray* NodeArray = Node::GetNodeArray();
-    for (auto i = 0; i < NodeArray->GetNumItems(); i++)
-    {
-        CStruct* pStruct = NodeArray->GetStructure(i);
-
-        CStructHeader* Class = NULL;
-        if (pStruct->GetStruct(Checksums::Class, &Class))
-        {
-            if (Class->Data == Checksums::EnvironmentObject)
-            {
-                CStructHeader* Name = NULL;
-                if (pStruct->GetStruct(Checksums::Name, &Name))
-                {
-                    SuperSector* sector = SuperSector::GetSuperSector(Name->Data);
-                    if (sector)
-                    {
-                        EnvironmentObjects.push_back(sector);
-                    }
-                }
-            }
-        }
-    }
-
 
     CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)LoadCustomShaderThread, NULL, NULL, NULL);
     return true;
@@ -4282,8 +4178,8 @@ void HookOverlappingRailRemoval()
 {
     RailManager::FixRailLinks();
     RailManager::RemoveOverlapping();
-    /*typedef void(__cdecl* const pOverlappingRailRemoval)(); 
-    pOverlappingRailRemoval(0x00496090)();*/
+    typedef void(__cdecl* const pOverlappingRailRemoval)(); 
+    pOverlappingRailRemoval(0x00496090)();
 }
 
 __declspec(naked) void FixMemOpt1()
@@ -4338,6 +4234,9 @@ void Skater::PointRail(const Vertex& rail_pos)
         *GetVelocity()[Z] = GetMatrix().m[Z][Z];
     }
 
+    if (((GetVelocity()->x * GetVelocity()->x) + (GetVelocity()->z * GetVelocity()->z)) > 100.0f)
+        ((Vertex*)GetVelocity())->RotateToPlane(Vertex(0, 1.0f, 0));
+
 
     // rail direction is taken to always simply be along our horizontal velocity, rotated up
     Vertex dir = *GetVelocity();
@@ -4348,29 +4247,35 @@ void Skater::PointRail(const Vertex& rail_pos)
     float s = sinf(angle);
     Vertex boost_dir(c * dir[X], s, c * dir[Z]);
 
-    // get the rail node name
-    CArray* pNodeArray = Node::GetNodeArray();
-    CStruct* pNode = pNodeArray->GetStructure(mp_rail_node->GetNode());
-    pNode->GetChecksum(Checksums::Name, &m_last_rail_node_name, QScript::ASSERT);
-
-    //TrickOffObject(m_last_rail_node_name);
-
-    // Now we want to see if the rail has a trigger, and if it does, trigger it....
 
     DWORD trigger_script = 0;
+    CStruct* pNode;
 
-    // no need to call maybe_trip_rail_trigger for a single node rail
-    if (pNode->GetChecksum(Checksums::TriggerScript, &trigger_script))
+    if (mp_rail_node->GetNode() != -1)
     {
-        TripTrigger(
-            Node::TRIGGER_LAND_ON,
-            trigger_script,
-            mp_rail_node->GetNode(),
-            pNode
-        );
+        // get the rail node name
+        CArray* pNodeArray = Node::GetNodeArray();
+        pNode = pNodeArray->GetStructure(mp_rail_node->GetNode());
+        pNode->GetChecksum(Checksums::Name, &m_last_rail_node_name, QScript::ASSERT);
+
+        //TrickOffObject(m_last_rail_node_name);
+
+        // Now we want to see if the rail has a trigger, and if it does, trigger it....
+
+        // no need to call maybe_trip_rail_trigger for a single node rail
+        if (pNode->GetChecksum(Checksums::TriggerScript, &trigger_script))
+        {
+            TripTrigger(
+                Node::TRIGGER_LAND_ON,
+                trigger_script,
+                mp_rail_node->GetNode(),
+                pNode
+            );
+        }
     }
 
     *GetPosition() = rail_pos;
+    *GetOldPosition() = rail_pos;
 
     // Now we'v got onto the rail, we need to:
     // 1) kill velocity perpendicular to the rail
@@ -4433,8 +4338,18 @@ void Skater::PointRail(const Vertex& rail_pos)
     /////////////////////////////////////////////////////
     // Do extra point rail logic
 
-    // trigger the appropriate script
-    FlagException("Grind");//"PointRail");
+    // trigger the appropriate 
+    CStruct pStruct;
+    CScript pScript;
+
+    CStructHeader header;
+    header.Type = QBKeyHeader::LOCAL;
+    header.value.i = Checksum("Airborne");
+    pStruct.head = &header;
+    pStruct.tail = &header;
+
+    AddTrick("Kissed the Rail", 50, TrickType::Grind);
+    CallMemberFunction(Checksum("MakeSkaterGoto"), &pStruct, &pScript);
 
     force_rail_check = true;
     return;
@@ -4590,6 +4505,10 @@ void InitLevelMod()
 
     HookFunction(0x004189CD, RailManager::SetActive);
     HookFunction(0x00418C5F, RailManager::SetActive);
+
+    HookFunction(0x0041D1D4, RailManager::Cleanup);
+    HookFunction(0x00438344, RailManager::Cleanup);
+    HookFunction(0x00495711, RailManager::Cleanup);
 
     HookFunction(0x004A540C, Skater::skate_off_rail);
     //HookFunction(0x004A5424, maybe_skate_off_rail, 0xE9);
@@ -4793,6 +4712,12 @@ void InitLevelMod()
     HookFunction(0x00502BA0, GetTime);
     HookFunction(0x00502BE2, GetTime);
 
+    HookFunction(0x0049FAA1, &Skater::PlayJumpSound);
+    HookFunction(0x0049FAC1, &Skater::PlayJumpSound);
+    HookFunction(0x0049FB1F, &Skater::PlayJumpSound);
+    HookFunction(0x004AEEBC, &Skater::PlayJumpSound);
+    HookFunction(0x004AEED1, &Skater::PlayJumpSound);
+
     //Not really used?
     *(BYTE*)0x004960E7 = 0xEB;
     
@@ -4802,6 +4727,14 @@ void InitLevelMod()
 
     //Initialize the new RailManager
     RailManager::Initialize();
+
+    //Sound pan volume fix
+    HookFunction(0x004130C0, &SfxManager::SetVolumeFromPos);
+    HookFunction(0x004AAD61, &SfxManager::SetVolumeFromPos);
+    HookFunction(0x004C4777, &SfxManager::SetVolumeFromPos);
+    HookFunction(0x004C5B36, &SfxManager::SetVolumeFromPos);
+    HookFunction(0x004C601E, &SfxManager::SetVolumeFromPos);
+    HookFunction(0x004C62E8, &SfxManager::SetVolumeFromPos);
 
     //This fixes the grinding on the crane in OilRig
     BYTE oil_grind_fix[] = { 0x8D, 0xBE, 0x34, 0x03, 0x00, 0x00, 0xD9, 0x07, 0xD8, 0x1D, 0x5C, 0xD8, 0x58, 0x00, 0xDF, 0xE0, 0xF6, 0xC4, 0x44, 0x7A, 0x1B, 0xD9, 0x47, 0x08, 0xD8, 0x1D, 0x5C, 0xD8, 0x58, 0x00, 0xDF, 0xE0, 0xF6, 0xC4, 0x44, 0x7A, 0x0B, 0x8B, 0x47, 0x0, 0x8B, 0x4F, 0x48, 0x89, 0x07, 0x89, 0x4F, 0x08, 0xE8, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
@@ -6550,6 +6483,89 @@ __declspec(noalias) void DrawFrame()
             m_pIDirect3DDevice8->SetVertexShader(vShared);
             m_pIDirect3DDevice8->SetRenderState(D3DRS_ZFUNC, D3DCMP);
             m_pIDirect3DDevice8->SetStreamSource(0, oldBuffer, oldStride);*/
+
+
+if (GameState::GotSuperSectors && bbox_rails.size())
+{
+    DWORD old_factor;
+    DWORD old_ref;
+    DWORD old_blend;
+    DWORD old_z;
+    DWORD old_bias;
+    DWORD old_slope;
+
+    LPDIRECT3DSURFACE9 old_target;
+    D3DXMATRIX old_view, old_world;
+
+    Gfx::pDevice->GetRenderTarget(0, &old_target);
+
+    LPDIRECT3DSURFACE9 old_surface;
+    D3DVIEWPORT9 old_viewport;
+    Gfx::pDevice->GetDepthStencilSurface(&old_surface);
+    Gfx::pDevice->GetViewport(&old_viewport);
+    Gfx::pDevice->SetDepthStencilSurface(nullptr);
+
+
+    Gfx::pDevice->SetViewport(&Gfx::world_viewport);
+
+    Gfx::pDevice->SetRenderTarget(0, Gfx::world_rendertarget);
+
+    Gfx::pDevice->GetRenderState(D3DRS_BLENDFACTOR, &old_factor);
+    Gfx::pDevice->GetRenderState(D3DRS_ALPHAREF, &old_ref);
+    Gfx::pDevice->GetRenderState(D3DRS_ALPHABLENDENABLE, &old_blend);
+    Gfx::pDevice->GetRenderState(D3DRS_ZFUNC, &old_z);
+    Gfx::pDevice->GetRenderState(D3DRS_DEPTHBIAS, &old_bias);
+    Gfx::pDevice->GetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, &old_slope);
+
+    Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+    Gfx::pDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
+    Gfx::pDevice->SetRenderState(D3DRS_BLENDFACTOR, D3DXCOLOR(255, 255, 0, 255));
+    Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+    Gfx::pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+    Gfx::pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+    Gfx::pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
+    Gfx::pDevice->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
+
+    /*for (auto object = bbox_rails.begin(); object != bbox_rails.end(); object++)
+    {*/
+    //SuperSector* sector = *object;
+    Gfx::pDevice->DrawPrimitiveUP(D3DPRIMITIVETYPE::D3DPT_LINELIST, bbox_rails.size() / 2, &bbox_rails.front(), 0);
+    /*
+    if (sector->flag & 6 && sector->state && sector->mesh)
+    {
+        DWORD numSplits = sector->GetNumSplits();
+
+        for (auto i = 0; i < numSplits; i++)
+        {
+            Mesh::MaterialSplit* split = &sector->mesh->splits[i];
+            if (split->numVertices && split->numIndices && split->material && split->material->texture)
+            {
+                split->material->SubmitTextureOnly();
+
+                //_printf("VertexShader %X stride %X\n", split->vertexShader, split->stride);
+                Gfx::pDevice->SetFVF(split->vertexShader);
+
+                Gfx::pDevice->SetStreamSource(0, split->vertexBuffer->GetProxyInterface(), 0, split->stride);
+                Gfx::pDevice->SetIndices(split->indexBuffer->GetProxyInterface());
+                Gfx::pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, split->baseIndex, 0, split->numVertices, 0, split->numIndices-2);
+            }
+        }
+    }*/
+    // }
+
+    Gfx::pDevice->SetRenderState(D3DRS_BLENDFACTOR, old_factor);
+    Gfx::pDevice->SetRenderState(D3DRS_ALPHAREF, old_ref);
+    Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, old_blend);
+    Gfx::pDevice->SetRenderState(D3DRS_ZFUNC, old_z);
+    Gfx::pDevice->SetRenderState(D3DRS_DEPTHBIAS, old_bias);
+    Gfx::pDevice->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, old_slope);
+
+
+
+    Gfx::pDevice->SetDepthStencilSurface(old_surface);
+    Gfx::pDevice->SetViewport(&old_viewport);
+    Gfx::pDevice->SetRenderTarget(0, old_target);
+}
 
             if (Gfx::world_rendertarget)
             {

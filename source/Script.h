@@ -183,10 +183,10 @@ namespace QScript
 //--------Script Stuff--------
 
 //calls a QB scripted function, remember to pass a CStruct.
-typedef void(__cdecl* const ExecuteScript)(const char* __restrict name, const CStruct* __restrict pParams, const CScript* __restrict pScript);
-__declspec(noalias) void inline ExecuteQBScript(const char* __restrict pScriptName, const CStruct* __restrict pParams, const CScript* __restrict pScript = NULL)
+typedef void(__cdecl* const ExecuteScript)(const char* __restrict name, const CStruct* __restrict pParams, const CScript* __restrict pScript, bool assert);
+__declspec(noalias) void inline ExecuteQBScript(const char* __restrict pScriptName, const CStruct* __restrict pParams = NULL, const CScript* __restrict pScript = NULL, bool assert = false)
 {
-    return ExecuteScript(0x00428240)(pScriptName, pParams, pScript);
+    return ExecuteScript(0x00428240)(pScriptName, pParams, pScript, assert);
 }
 
 //Add a QBkeyHeader to game array, this can be a value/function that you can acces/call in qb script.

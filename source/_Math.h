@@ -27,6 +27,28 @@ inline	float	ClampMax(float v, float max)
     }
 }
 
+struct ColouredVertex
+{
+    float x;
+    float y;
+    float z;
+    float r;
+    float g;
+    float b;
+    float a;
+
+    ColouredVertex(float _x, float _y, float _z)
+    {
+        x = _x;
+        y = _y;
+        z = _z;
+        r = 255;
+        g = 0;
+        b = 255;
+        a = 255;
+    }
+};
+
 inline	float	ClampMin(float v, float min)
 {
     if (v < min)
@@ -189,6 +211,15 @@ struct Vertex : D3DXVECTOR3
     Vertex(const D3DXVECTOR3& v)
     {
         *this = *(Vertex*)&v;
+    }
+
+    inline	float	Distance(const Vertex& v2)
+    {
+
+
+        Vertex d = *this - v2;
+
+        return sqrtf(D3DXVec3Dot(&d, &d));
     }
 
     /*Vertex& operator=	(const D3DXVECTOR3& v)

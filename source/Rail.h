@@ -7,6 +7,13 @@
 
 #define MAX_RAIL_LINKS 4
 #define MAX_RAIL_NODES 10000
+
+vector<RailNode> pointy_rails;
+
+typedef void(__cdecl* const pRail_ComputeBB)(Vector& pos1, Vector& pos2, Vector& bb_min, Vector& bb_max);
+#define Rail_ComputeBB pRail_ComputeBB(0x004957F0)
+extern vector<ColouredVertex> bbox_rails;
+
 class RailNode
 {
     friend class RailManager;
@@ -25,8 +32,8 @@ protected:
     //RailNode* pNext;
     RailNode* pNextLink;
     RailNode* pPrevLink;
-    WORD node;
-    WORD link;
+    signed short node;
+    signed short link;
     BYTE terrain;
     bool bActive;
     WORD flags;
@@ -61,6 +68,26 @@ private:
     }
 
 public:
+
+    RailNode(const Vertex pos)
+    {
+        *(Vertex*)&vPos = pos;
+        vPos.w = 1.0f;
+        //Rail_ComputeBB(vPos, vPos, vBBMin, vBBMax);
+        vBBMin.x = vPos.x - 5.0f;
+        vBBMin.y = vPos.y - 5.0f;
+        vBBMin.z = vPos.z - 5.0f;
+        vBBMax.x = vPos.x + 5.0f;
+        vBBMax.y = vPos.y + 5.0f;
+        vBBMax.z = vPos.z + 5.0f;
+        pNextLink = NULL;
+        pPrevLink = NULL;
+        node = -1;
+        link = -1;
+        terrain = 0;
+        bActive = true;
+        flags = 0;
+    }
     // Added by Ken.
 // Returns true if the passed Node is on the same rail as the rail node.
 // Note, with the "merging" rails, where two nodes can link to
@@ -149,9 +176,9 @@ public:
 
         return false;
     }
-    DWORD GetNode() const
+    int GetNode() const
     {
-        return (DWORD)node;
+        return (int)node;
     }
     DWORD GetTerrain() const
     {
@@ -241,9 +268,6 @@ class	RailLinks
     signed short m_link[MAX_RAIL_LINKS];	// link numbers	
 };
 
-typedef void(__cdecl* const pRail_ComputeBB)(Vector& pos1, Vector& pos2, Vector& bb_min, Vector& bb_max);
-#define Rail_ComputeBB pRail_ComputeBB(0x004957F0)
-
 struct Line2d
 {
     Vector start;
@@ -279,6 +303,7 @@ public:
         return bUsingCustomPark;
     }
 };
+extern vector<SuperSector*> PointyObjects;
 
 class RailManager
 {
@@ -296,6 +321,25 @@ public:
         first_node = NULL;
     }
 
+    static void Cleanup()
+    {
+        if(first_node)
+            *first_node = NULL;
+        if (mp_nodes)
+            freex(mp_nodes);
+        mp_nodes = NULL;
+        if (temp_nodes)
+            freex(temp_nodes);
+        temp_nodes = NULL;
+
+        if(PointyObjects.size())
+          PointyObjects.clear();
+        if(bbox_rails.size())
+          bbox_rails.clear();
+        if(pointy_rails.size())
+          pointy_rails.clear();
+    }
+
     static void AllocateTempRailData(RailNode** first)
     {
         Node::UpdateNodeArray();//00419BC9
@@ -304,6 +348,11 @@ public:
         numNodes = 0;
 
 
+
+        Game::skater = Skater::UpdateSkater();
+        if(Game::skater)
+            Game::skater->Store();
+
         CArray* node_array = Node::GetNodeArray();
         numNodes = node_array->GetNumItems();
         for (int i = 0; i < numNodes; i++)
@@ -311,9 +360,131 @@ public:
             CStruct* pStruct = node_array->GetStructure(i);
 
             DWORD class_checksum;
-            if ((pStruct->GetChecksum(Checksums::Class, &class_checksum) && !SkateMod::ShouldBeAbsentNode(pStruct)) && (class_checksum == Checksum("RailNode") || class_checksum == Checksum("ClimbingNode")))
+            if (pStruct->GetChecksum(Checksums::Class, &class_checksum) && !SkateMod::ShouldBeAbsentNode(pStruct))
             {
-                numRailNodes++;
+                if ((class_checksum == Checksum("RailNode") || class_checksum == Checksum("ClimbingNode")))
+                {
+                    numRailNodes++;
+                }
+                else if (class_checksum == Checksums::EnvironmentObject)
+                {
+                    DWORD name;
+                    if (pStruct->GetChecksum(Checksums::Name, &name) && GameState::GotSuperSectors && Game::skater)
+                    {
+                        SuperSector* sector = SuperSector::GetSuperSector(name);
+                        if (sector)
+                        {
+                            //Get the width and height
+                            float x_width = sector->bboxMax.x - sector->bboxMin.x;
+                            float height = sector->bboxMax.y - sector->bboxMin.y;
+                            float z_width = sector->bboxMax.z - sector->bboxMin.z;
+
+                            //Super math... probably is a better way to do this
+                            if (x_width < 35.0f && x_width > 3.0f && z_width < 35.0f && z_width > 3.0f && height > 15.0f)
+                            {
+
+                                //Now we found a narrow object, but we still need to check if there is another object ontop of it that will make the object unaccessable
+                                //So we will make raytracing from object top position to slightly above and vice versa to combat CCW
+
+                                //Get the middle topmomst point of the object, not 100% true but seems to be true enough
+                                D3DXVECTOR3 top;
+                                top.x = (sector->bboxMax.x + sector->bboxMin.x) / 2.0f;
+                                top.y = sector->bboxMax.y;
+                                top.z = (sector->bboxMax.z + sector->bboxMin.z) / 2.0f;
+
+                                D3DXVECTOR3 end = top;
+                                //Set end point sligthly above
+                                end.y += 50.0f;
+                                Game::skater->SetRay(top, end);
+                                //Ignore hollow collision
+                                if (Game::skater->CollisionCheck())
+                                    continue;
+
+                                //We did not collide, but there still may be an object ontop of this object that has the same exact position as the topmost point
+                                //So we need to check slightly below the topmost point
+                                if (height > 20.0f)
+                                    top.y -= 20.0f;
+                                else
+                                    top.y -= 8.0f;
+                                Game::skater->SetRay(top, end);
+                                if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name && Game::skater->GetHitPoint()->y >= top.y)
+                                    continue;
+
+                                //Now we need to check again in reverse order to take care of CCW
+                                Game::skater->SetRay(end, top);
+                                if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name && Game::skater->GetHitPoint()->y >= top.y)
+                                    continue;
+
+                                //Now let's check in circle around, should use boundingsphere collision checking instead of raytracing here
+                                top.y = sector->bboxMax.y + 1.0f;
+                                end.y = top.y;
+                                end.x += 50.0f;
+                                Game::skater->SetRay(top, end);
+                                if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
+                                    continue;
+
+                                end.z += 50.0f;
+                                Game::skater->SetRay(top, end);
+                                if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
+                                    continue;
+
+                                end.x -= 50.0f;
+                                Game::skater->SetRay(top, end);
+                                if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
+                                    continue;
+
+                                end.x -= 50.0f;
+                                Game::skater->SetRay(top, end);
+                                if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
+                                    continue;
+
+                                end.z -= 50.0f;
+                                Game::skater->SetRay(top, end);
+                                if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
+                                    continue;
+
+                                end.z -= 50.0f;
+                                Game::skater->SetRay(top, end);
+                                if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
+                                    continue;
+
+                                end.x += 50.0f;
+                                Game::skater->SetRay(top, end);
+                                if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
+                                    continue;
+
+                                end.x += 50.0f;
+                                Game::skater->SetRay(top, end);
+                                if (Game::skater->CollisionCheck() && Game::skater->GetCollisionName() != sector->name)
+                                    continue;
+
+                                //We have a narrow object that seems to be accessible
+                                for (auto j = 0; j < sector->numVertices; j++)
+                                {
+                                    //Decrease b and g value, keep r value = make object more red
+                                    SuperSector::Color* colors = sector->GetColors();
+                                    colors[j].g *= 0.2f;
+                                    colors[j].b *= 0.2f;
+                                }
+
+                                //Tell engine to update the VertexBuffer to vram
+                                sector->Update();
+                                float highestPoint = -FLT_MAX;
+                                for (DWORD j = 0; j < sector->numVertices; j++)
+                                {
+                                    if (sector->vertices[j].y > highestPoint)
+                                        highestPoint = sector->vertices[j].y;
+                                }
+
+                                top.y = highestPoint + 1.0f;
+                                _printf("Auto-gen RailNode Obj %s pos %f %f %f\n", FindChecksumName(sector->name), top.x, top.y, top.z);
+                                pointy_rails.push_back(RailNode(top));
+                                pointy_rails.back().link = i;
+                                PointyObjects.push_back(sector);
+                            }
+                        }
+                    }
+                }
             }
         }
         if (mp_nodes)
@@ -321,11 +492,15 @@ public:
         if (temp_nodes)
             freex(temp_nodes);
 
+        if(Game::skater)
+            Game::skater->Restore();
+
+
         _printf("NumRails %d<\n", numRailNodes);
 
         if (numRailNodes)
         {
-            temp_nodes = (RailNode*)mallocx(sizeof(RailNode) * numRailNodes+1);
+            temp_nodes = (RailNode*)mallocx(sizeof(RailNode) * (numRailNodes+1));
             if (!temp_nodes)
                 MessageBox(0, 0, 0, 0);
             EndOfRail = (DWORD)&temp_nodes[numRailNodes];
@@ -654,7 +829,9 @@ public:
             freex(pp_railnodes);
             freex(temp_links);
 
-            mp_nodes = (RailNode*)mallocx(current_node * sizeof(RailNode));
+            pointy_rails.clear();
+            PointyObjects.clear();
+            mp_nodes = (RailNode*)mallocx((current_node + pointy_rails.size())* sizeof(RailNode));
             DWORD temp_counter = 0;
 
             vector<RailNode*> alreadyAdded;
@@ -751,8 +928,97 @@ public:
                     }
                 }
             }
+            for (DWORD i = 0; i < pointy_rails.size(); i++)
+            {
+                bool found = false;
+                for (DWORD j = 0; j < temp_counter; j++)
+                {
+                    D3DXVECTOR3 dist = *(D3DXVECTOR3*)&mp_nodes[j].vPos - *(D3DXVECTOR3*)&pointy_rails[i].vPos;
+                    if (D3DXVec3Length(&dist) < 5.0f)
+                    {
+                        CArray* NodeArray = Node::GetNodeArray();
+                        CStruct* pStruct = NodeArray->GetStructure(pointy_rails[i].link);
+                        DWORD name = 0;
+                        if (pStruct->GetChecksum(Checksums::Name, &name) && GameState::GotSuperSectors)
+                        {
+                            SuperSector* sector = SuperSector::GetSuperSector(name);
+                            for (DWORD k = 0; k < PointyObjects.size(); k++)
+                            {
+                                if (PointyObjects[k] == sector)
+                                {
+                                    _printf("Removing auto-gen rail %s\n", FindChecksumName(name));
+                                    PointyObjects.erase(PointyObjects.begin() + k);
+                                    break;
+                                }
+                            }
+                        }
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    mp_nodes[temp_counter] = pointy_rails[i];
+                    temp_counter++;
+                    current_node++;
+                }
+            }
+
+            for (DWORD i = 0; i < pointy_rails.size(); i++)
+            {
+                CArray* NodeArray = Node::GetNodeArray();
+                CStruct* pStruct = NodeArray->GetStructure(pointy_rails[i].link);
+                DWORD name = 0;
+                if (pStruct->GetChecksum(Checksums::Name, &name) && GameState::GotSuperSectors)
+                {
+                    SuperSector* sector = SuperSector::GetSuperSector(name);
+                    if (sector)
+                    {
+                        /*bbox_rails.push_back(ColouredVertex(sector->bboxMin.x, sector->bboxMin.y, sector->bboxMin.z));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMax.x, sector->bboxMin.y, sector->bboxMin.z));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMax.x, sector->bboxMax.y, sector->bboxMin.z));
+
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMax.x, sector->bboxMax.y, sector->bboxMin.z));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMax.x, sector->bboxMin.y, sector->bboxMin.z));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMin.x, sector->bboxMax.y, sector->bboxMin.z));
+
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMax.x, sector->bboxMin.y, sector->bboxMin.z));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMin.x, sector->bboxMax.y, sector->bboxMin.z));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMin.x, sector->bboxMin.y, sector->bboxMin.z));
+
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMax.x, sector->bboxMin.y, sector->bboxMin.z));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMin.x, sector->bboxMax.y, sector->bboxMin.z));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMin.x, sector->bboxMin.y, sector->bboxMax.z));*/
+
+
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMin.x-50.0f, sector->bboxMin.y-50.0f, sector->bboxMin.z-50.0f));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMax.x+50.0f, sector->bboxMin.y-50.0f, sector->bboxMin.z-50.0f));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMax.x+50.0f, sector->bboxMin.y-50.0f, sector->bboxMin.z-50.0f));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMax.x+50.0f, sector->bboxMax.y+50.0f, sector->bboxMin.z-50.0f));
+
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMax.x+50.0f, sector->bboxMax.y+50.0f, sector->bboxMin.z-50.0f));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMin.x-50.0f, sector->bboxMax.y+50.0f, sector->bboxMin.z-50.0f));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMin.x-50.0f, sector->bboxMax.y+50.0f, sector->bboxMin.z-50.0f));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMin.x-50.0f, sector->bboxMin.y-50.0f, sector->bboxMin.z-50.0f));
+
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMin.x-50.0f, sector->bboxMin.y-50.0f, sector->bboxMax.z-50.0f));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMax.x+50.0f, sector->bboxMin.y-50.0f, sector->bboxMax.z+50.0f));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMax.x+50.0f, sector->bboxMin.y-50.0f, sector->bboxMax.z+50.0f));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMax.x, sector->bboxMax.y, sector->bboxMax.z));
+
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMax.x+50.0f, sector->bboxMax.y+50.0f, sector->bboxMax.z+50.0f));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMin.x-50.0f, sector->bboxMax.y+50.0f, sector->bboxMax.z+50.0f));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMin.x-50.f, sector->bboxMax.y+50.0f, sector->bboxMax.z+50.0f));
+                        bbox_rails.push_back(ColouredVertex(sector->bboxMin.x-50.f, sector->bboxMin.y-50.0f, sector->bboxMax.z+50.0f));
+                    }
+                }
+            }
+
+            pointy_rails.clear();
             freex(temp_nodes);
             temp_nodes = NULL;
+            ExecuteQBScript("LoadTerrain");
         }
     }
 
@@ -1290,7 +1556,7 @@ public:
 
             pRailNode->terrain = 0;
             if (!pNodeStruct->GetEnum(Checksums::TerrainType, &pRailNode->terrain, false))
-                MessageBox(0, "Terrain not found", "", 0);
+                _printf("Terrain not found\n");
 
             for (int i = 0; i < MAX_RAIL_LINKS; i++)
             {
