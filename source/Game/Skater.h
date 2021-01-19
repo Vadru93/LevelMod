@@ -187,14 +187,12 @@ struct SfxManager
         return pSetVolumeFromPos(0x004c5580)(this, out_vol, out_pitch, soundSource, dropoff);
     }*/
 
-    void SetVolumeFromPos(float* lvol, float* rvol, Vector* soundSource, float dropoffDist)
+    void SetVolumeFromPosHook(float* lvol, float* rvol, Vector* soundSource, float dropoffDist)
     {
         Volume vol;
         SetVolumeFromPos(vol, soundSource, dropoffDist);
-        if (vol.lvol > *lvol)
-            *lvol = vol.lvol;
-        if (vol.rvol > *rvol)
-            *rvol = vol.rvol;
+        *lvol = vol.lvol;
+        *rvol = vol.rvol;
     }
 
     void SetVolumeFromPos(Volume& out_vol, Vector* soundSource, float dropoffDist)
@@ -210,23 +208,28 @@ struct SfxManager
         for (DWORD i = 0; i < numCams; i++)
         {
             Camera* temp_camera = viewport_manager->GetCamera(i);
-            Vertex pos = *(D3DXVECTOR3*)&temp_camera->pos;
-            //_printf("Sound %f %f %f cam %f %f %f\n", soundSource->x, soundSource->y, soundSource->z, temp_camera->pos.x, temp_camera->pos.y, temp_camera->pos.z);
-            float dist = pos.Distance(*(Vertex*)soundSource);
-            if (dist < closest_dist)
+            if (temp_camera)
             {
-                closest_dist = dist;
-                camera = temp_camera;
+                Vertex pos = *(D3DXVECTOR3*)&temp_camera->pos;
+                //_printf("Sound %f %f %f cam %f %f %f\n", soundSource->x, soundSource->y, soundSource->z, temp_camera->pos.x, temp_camera->pos.y, temp_camera->pos.z);
+                float dist = pos.Distance(*(Vertex*)soundSource);
+                if (dist < closest_dist)
+                {
+                    closest_dist = dist;
+                    camera = temp_camera;
+                }
+                //_printf("dist %f\n", dist);
             }
-            //_printf("dist %f\n", dist);
         }
-        if (camera == NULL || closest_dist >= dropoffDist)
+        if (dropoffDist == 0)
+            dropoffDist = 1020.0f;
+        if (closest_dist >= dropoffDist)
             return;
 
 
         float dropoff = closest_dist / dropoffDist;
         float volume = (((1.0f - dropoff) * 3.0f + (1.0f - dropoff * dropoff))
-            * 0.25 * 100.0f);
+            * 0.25f * 100.0f);
 
         if (volume > out_vol.lvol || volume > out_vol.rvol)
         {
@@ -520,25 +523,25 @@ private:
     //8810
     float un2;
     //8814
-    public:
+public:
     float normallerp;//m_tap_turns
-    private:
+private:
     //8818
     BYTE u[0x18];
     //8830
-        public:
+public:
     DWORD m_rail_time;
     DWORD m_rail_time2;
     //8838
     RailNode* mp_rail_node;
-    private:
+private:
     //883c
     BYTE un[0xA2c];
     //9268
     void* trickFont;//not sure?
     //926c
     BYTE un3[0x8C];
-    public:
+public:
     //92F8
     DWORD m_last_rail_node_name;
 
@@ -613,7 +616,7 @@ private:
         pSetGraffitiTrickStarted(0x004b5220)(this, bStart);
     }
 
-//#pragma pop(pack)
+    //#pragma pop(pack)
 public:
 
     enum class TrickType : BYTE
@@ -628,7 +631,7 @@ public:
     };
 
     /*void SetState(EStateType state)
-        
+
     {
         DWORD time;
         if (state != m_state)
@@ -744,7 +747,7 @@ public:
     {
         static const DWORD timer = 0x00409AE0;
         _asm call timer
-        static DWORD temp = 0;  
+        static DWORD temp = 0;
         _asm mov temp, eax
         return temp;
     }*/
@@ -817,7 +820,7 @@ public:
     float GetScriptedStat(DWORD name)
     {
         typedef float(__thiscall* const pCalculateScriptedStat)(Skater* pThis, const void* stat);
-        typedef void*(__cdecl* const pGetScriptedStat)(DWORD checksum);
+        typedef void* (__cdecl* const pGetScriptedStat)(DWORD checksum);
         return pCalculateScriptedStat(0x0049F530)(this, pGetScriptedStat(0x00426540)(name));
     }
 
@@ -914,7 +917,7 @@ public:
         return *(Matrix*)&lerp;
     }
 
-    D3DXMATRIX & const __restrict GetMatrix()
+    D3DXMATRIX& const __restrict GetMatrix()
     {
         return matrix;
     }
@@ -945,7 +948,7 @@ public:
         return &normal;
     }
 
-    void PointRail(const Vertex & rail_pos);
+    void PointRail(const Vertex& rail_pos);
 
 
 
@@ -970,7 +973,7 @@ public:
 
 
     //call this before CheckCollision to set the ray for raytracing.
-    EXTERN void SetRay(const D3DXVECTOR3 & start, const D3DXVECTOR3 & end);
+    EXTERN void SetRay(const D3DXVECTOR3& start, const D3DXVECTOR3& end);
     void FlipDirection()
     {
         D3DXVECTOR3 temp = this->startcol;
@@ -985,14 +988,14 @@ public:
     }
 
     __inline void SkateOffRail();
-    __inline void MaybeSkateOffRail(bool last_segment, Vertex & extra_dist, RailNode* pFrom, RailNode* pOnto);
+    __inline void MaybeSkateOffRail(bool last_segment, Vertex& extra_dist, RailNode* pFrom, RailNode* pOnto);
 
     static void skate_off_rail()
     {
         Game::skater->SkateOffRail();
         _asm mov ecx, Game::skater;
     }
-  
+
     //clear 
     typedef void(__thiscall* const pFlagException)(Skater* pThis, const char* name, DWORD unk2);
     void FlagException(const char* name, DWORD unk2 = 0)

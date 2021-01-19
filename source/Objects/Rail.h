@@ -1018,7 +1018,7 @@ public:
             pointy_rails.clear();
             freex(temp_nodes);
             temp_nodes = NULL;
-            ExecuteQBScript("LoadTerrain");
+            //ExecuteQBScript("LoadTerrain");
         }
     }
 
