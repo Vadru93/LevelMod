@@ -143,7 +143,8 @@ LevelModOptions = [
 	{ name = "LM_GFX_eBuffering" value = 2 max = 3 } //"Off" "Double" "Triple"
 	{ name = "LM_GFX_eAntiAlias" value = 4 max = 5 } //"Off" "auto" "2x" "4x" "8x"
 	{ name = "LM_GFX_bFiltering" value = 1 }
-	{ name = "LM_GFX_bFixStutter" value = 1 }
+	{ name = "LM_GFX_eFixStutter" value = 1 max = 4 } //"Off" "Exact" "Hybrid" "Sleep"
+	{ name = "LM_GFX_bVSync" value = 1 }
 	{ name = "LM_GFX_bWindowed" value = 0 }
 ]
 
@@ -540,8 +541,8 @@ SCRIPT AddOptions
 ENDSCRIPT
 
 SCRIPT LM_SetOption_Do
-GoTo <Do> params = <params>
 LM_SetOption <...>
+GoTo <Do> params = <params>
 ENDSCRIPT
 
 SCRIPT LM_SetOption_Slider
@@ -849,7 +850,8 @@ game_menu_items = [
 	{ IsEnum text = "MSAA Level" 		option_id = LM_GFX_eAntiAlias_id option = LM_GFX_eAntiAlias 	toggle_id = item2_toggle cat_gfx TextValues = [ "Off" "auto" "2x" "4x" "8x" ] Do = sLaunchGFXCommand } 
 	{ IsBool text = "Windowed"          option_id = item213 option = LM_GFX_bWindowed   toggle_id = item3_toggle cat_gfx Do = sLaunchGFXCommand params = { command = ToggleWindowed } }
 	{ IsBool text = "Texture Filtering" option_id = item215 option = LM_GFX_bFiltering 	toggle_id = item5_toggle cat_gfx } 
-	{ IsBool text = "Fix Stuttering" 	option_id = item216 option = LM_GFX_bFixStutter toggle_id = item6_toggle cat_gfx } 
+	{ IsBool text = "Enable VSync" 	option_id = item216 option = LM_GFX_bVSync toggle_id = item6_toggle cat_gfx Do = sLaunchGFXCommand } 
+	{ IsEnum text = "Stutter Fix" 	option_id = LM_GFX_eFixStutter_id option = LM_GFX_eFixStutter toggle_id = item7_toggle cat_gfx TextValues = [ "Off" "Exact" "Hybrid" "Sleep" ] Do = sLaunchGFXCommand params = { command = FixStutter } } 
 ]
 
 

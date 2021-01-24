@@ -180,7 +180,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateAdditionalSwapChain(D3DPRESENT_
     UpdatePresentParameterForMultisample(&d3dpp, DeviceMultiSampleType);
 
     d3dpp.BackBufferCount = Gfx::numBackBuffers; //(d3dpp.BackBufferCount) ? d3dpp.BackBufferCount : 1;
-    if (Gfx::fps_fix)
+    if (Gfx::bVSync)
     {
         d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
         d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
@@ -248,7 +248,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::Reset(D3DPRESENT_PARAMETERS8* pPresen
     D3DPRESENT_PARAMETERS PresentParams;
     ConvertPresentParameters(*pPresentationParameters, PresentParams);
 
-    if (Gfx::fps_fix)
+    if (Gfx::bVSync)
     {
         PresentParams.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
         PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;

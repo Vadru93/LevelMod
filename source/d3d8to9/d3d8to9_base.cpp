@@ -239,7 +239,7 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
 
     IDirect3DDevice9* DeviceInterface = nullptr;
 
-    if (Gfx::fps_fix)
+    if (Gfx::bVSync)
     {
         PresentParams.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
         PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;

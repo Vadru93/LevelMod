@@ -89,11 +89,13 @@ namespace Gfx
         ChangeResolution = 2,
         ToggleFiltering = 3,
         Reset = 4,
+        FixStutter = 5,
     };
     extern DWORD numBackBuffers;
     extern DWORD AntiAliasing;
     extern bool filtering;
-    extern bool fps_fix;
+    extern BYTE fps_fix;
+    extern bool bVSync;
     extern __restrict LPDIRECT3DDEVICE9 pDevice;
     extern bool bOnReset;
     extern HWND hFocusWindow;

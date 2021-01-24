@@ -76,6 +76,7 @@ BYTE eye_state = 0;
 DWORD actual_timer = 0;
 DWORD last_state;
 bool rotating = false;
+double framelength;
 
 void SetTagLimit(DWORD limit);
 
@@ -148,6 +149,8 @@ FILE* debugFile = NULL;
 
 //Used for custom ObserveMode
 extern ObserveMode* pObserve;
+
+void FixStutter();
 
 //Used for graf tag counter
 char tags[256] = "Tags: 0";
@@ -1216,9 +1219,13 @@ void ReadFirstOptions()
     //_printf("value %d\n", Gfx::filtering);
 
     //_printf("Reading from ini file %s, default %d ", "LM_GFX_bFixStutter", Gfx::fps_fix);
-    new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_bFixStutter", Gfx::fps_fix);
-    if (new_value < 2)
+    new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_eFixStutter", Gfx::fps_fix);
+    if (new_value < 4)
         Gfx::fps_fix = new_value;
+
+    new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_eFixStutter", Gfx::bVSync);
+    if (new_value < 2)
+        Gfx::bVSync = new_value;
     //_printf("value %d\n", Gfx::fps_fix);
     //CreateConsole();
 
@@ -4060,10 +4067,17 @@ DWORD __cdecl GetTime()
     return truncated;
 }
 
-DWORD TimerElapsed()
+DWORD framestep;
+
+void TimerElapsed()
 {
-    QueryPerformanceCounter(&endTime);
-    if (endTime.HighPart == startTime.HighPart)
+    LARGE_INTEGER targetTime;
+    targetTime.QuadPart = startTime.QuadPart + framestep;
+    while (endTime.QuadPart < targetTime.QuadPart)
+    {
+        QueryPerformanceCounter(&endTime);
+    }
+    /*if (endTime.HighPart == startTime.HighPart)
     {
         //elapsedTime.LowPart = (endTime.LowPart - startTime.LowPart);
         _asm xor edx, edx
@@ -4071,10 +4085,7 @@ DWORD TimerElapsed()
         ms += 0.55f;
 
         DWORD truncated = ms;
-        /*double test = ms - (double)truncated;
-        if (ms - test >= 0.45)
-            truncated++;*/
-
+        //004F9462
         return truncated;// (elapsedTime.LowPart * 1000) / freq.LowPart;
     }
     else
@@ -4087,7 +4098,64 @@ DWORD TimerElapsed()
 
         DWORD truncated = ms;
         return truncated;
+    }*/
+}
+
+//50% sleep 50% loop
+void TimerElapsed_Hybrid()
+{
+    QueryPerformanceCounter(&endTime);
+    LARGE_INTEGER elapsedTime;
+    elapsedTime.QuadPart = (endTime.QuadPart - startTime.QuadPart);
+    double ms = ((double)(elapsedTime.LowPart) * fFreq);
+
+    DWORD truncated = ((16.0-ms) * 0.5);
+    if (truncated && truncated < 15)
+    {
+        Sleep(truncated);
     }
+
+    LARGE_INTEGER targetTime;
+    targetTime.QuadPart = startTime.QuadPart + framestep;
+    while (endTime.QuadPart < targetTime.QuadPart)
+    {
+        QueryPerformanceCounter(&endTime);
+    }
+}
+
+DWORD TimerElapsed_Sleep()
+{
+    QueryPerformanceCounter(&endTime);
+    /*if (endTime.HighPart == startTime.HighPart)
+    {
+        //elapsedTime.LowPart = (endTime.LowPart - startTime.LowPart);
+        _asm xor edx, edx
+        double ms = (double((endTime.LowPart - startTime.LowPart)) * fFreq);
+        ms += 0.55f;
+
+        DWORD truncated = ms;
+        //004F9462
+        return truncated;// (elapsedTime.LowPart * 1000) / freq.LowPart;
+    }
+    else
+    {
+        elapsedTime.LowPart = 0xFFFFFFFF - startTime.LowPart + endTime.LowPart;
+        _asm xor edx, edx
+        //return (elapsedTime.LowPart * 1000) / freq.LowPart;
+        double ms = (double(elapsedTime.LowPart) * fFreq);
+        ms += 0.55f;
+
+        DWORD truncated = ms;
+        return truncated;
+    }*/
+
+    LARGE_INTEGER elapsedTime;
+    elapsedTime.QuadPart = (endTime.QuadPart - startTime.QuadPart);
+    double ms = ((double)(elapsedTime.LowPart) * fFreq);
+    ms += 0.55f;
+
+    DWORD truncated = ms;
+    return truncated;
 }
 
 /*DWORD TimerElapsed()
@@ -4108,45 +4176,71 @@ DWORD TimerElapsed()
     }
 }*/
 
-DWORD old_start = 0;
+LARGE_INTEGER old_start;
 DWORD timer_lock = 0x10;
+
+__declspec(naked) void UpdateFrameLength()
+{
+    *(float*)0x00850FD0 = (float)(framelength);
+    *(double*)0x00850FD8 = framelength;
+    _asm ret;
+}
 
 LARGE_INTEGER TimerStart()
 {
-    old_start = startTime.LowPart;
+    old_start = startTime;
 
 
     QueryPerformanceCounter(&startTime);
-    double ms = (double((startTime.LowPart - old_start)) * fFreq);
-    //_printf("2nd %f ", ms);
+    old_start.QuadPart = startTime.QuadPart - old_start.QuadPart;
+    double ms = (double((old_start.LowPart)) * fFreq);
+    if (ms < 32.0)
+    {
+        framelength = ms;
+    }
+    return startTime;
+}
 
-    //We need to cap FPS around 60 because else some physics and scripts will not work correctly
-    //Also this is the most fair in a game heavily dependant on speed etc
-    //Maybe in the future can change this so can have more FPS
-    //Vsync is always on when we are using the new timer
-    //So on a screen with 60hz this will not matter too much because we will get perfect 60 FPS
-    //However on my screen with 144hz it's pretty hard to get consistent 60 FPS
-    //Currently worst case scenario is 59.9-65 and it's usually around 63-64
-    //For some reason it's more consistent in window mode than in fullscreen mode
-    if (ms >= 16.39) // ~61.01 FPS
+LARGE_INTEGER TimerStart_Sleep()
+{
+    old_start = startTime;
+
+
+    QueryPerformanceCounter(&startTime);
+    old_start.QuadPart = startTime.QuadPart - old_start.QuadPart;
+    double ms = (double((old_start.LowPart)) * fFreq);
+    if (ms < 32.0)
     {
-        BYTE target_ms = p_target_ms;
-        if (target_ms > 1)
+        framelength = ms;
+        //_printf("2nd %f ", ms);
+
+        //We need to cap FPS around 60 because else some physics and scripts will not work correctly
+        //Also this is the most fair in a game heavily dependant on speed etc
+        //Maybe in the future can change this so can have more FPS
+        //Vsync is always on when we are using the new timer
+        //So on a screen with 60hz this will not matter too much because we will get perfect 60 FPS
+        //However on my screen with 144hz it's pretty hard to get consistent 60 FPS
+        //Currently worst case scenario is 59.9-65 and it's usually around 63-64
+        //For some reason it's more consistent in window mode than in fullscreen mode
+        if (ms >= 16.39) // ~61.01 FPS
         {
-            target_ms--;
-            p_target_ms = target_ms;
+            BYTE target_ms = p_target_ms;
+            if (target_ms > 1)
+            {
+                target_ms--;
+                p_target_ms = target_ms;
+            }
+        }
+        else if (ms < 15.38) // ~65.02 FPS
+        {
+            BYTE target_ms = p_target_ms;
+            if (target_ms < timer_lock)
+            {
+                target_ms++;
+                p_target_ms = target_ms;
+            }
         }
     }
-    else if (ms < 15.38) // ~65.02 FPS
-    {
-        BYTE target_ms = p_target_ms;
-        if (target_ms < timer_lock)
-        {
-            target_ms++;
-            p_target_ms = target_ms;
-        }
-    }
-    
     return startTime;
 }
 
@@ -4420,6 +4514,11 @@ void InitLevelMod()
     //Initializing the new timer
     QueryPerformanceFrequency(&freq);
     fFreq = 1000.0 / (double)freq.QuadPart;
+    framestep = (DWORD)(16666.666666666 / (1000000.0 / (double)freq.QuadPart));
+    DWORD framestep2 = (DWORD)(16.666666666 / fFreq);
+    DWORD framestep3 = 0.0166666666 / (1.0 / (double)freq.QuadPart);
+
+    _printf("f1 %u f2 %u f3 %u\n", framestep, framestep2, framestep3);
 
     if (!p_bWindowed)
         timer_lock = 0x0D;
@@ -4430,6 +4529,7 @@ void InitLevelMod()
 
     DWORD old;
     //HookFunction(0x004C04F0, TimerElapsed);
+    HookFunction(0x004F9463, UpdateFrameLength);
 
     //Fix menu crashing
     VirtualProtect((LPVOID)0x004CEDE4, 8, PAGE_EXECUTE_READWRITE, &old);
@@ -4742,23 +4842,7 @@ void InitLevelMod()
     memcpy((void*)0x4a66d0, oil_grind_fix, sizeof(oil_grind_fix));
     HookFunction(0x004A6701, OilRigGrindPatch);
 
-    if (Gfx::fps_fix)
-    {
-        BYTE timer[] = { 0xE8, 0x98, 0xF4, 0xF7, 0x79, 0xB9, 0x0E, 0x00, 0x00, 0x00, 0x39, 0xC8, 0x73, 0x27, 0x29, 0xC1, 0x51, 0xE8, 0xD7, 0x29, 0x8C, 0x75, 0xA1, 0x00, 0x00, 0x00, 0x00, 0x85, 0xC0, 0x75, 0x16, 0xE8, 0x00, 0x00, 0x00, 0x00, 0xEB, 0x0F };
-
-        *(DWORD*)&timer[1] = (PtrToUlong(TimerElapsed) - 0x004C04E4) - 4;
-        HookFunction(0x004C0519, TimerStart);
-        *(bool**)&timer[23] = &show_loading_screen;
-        *(BYTE*)&timer[31] = 0x90;
-        *(DWORD*)&timer[32] = 0x90909090;// (PtrToUlong(DrawEye) - (0x004C04E4 + 31)) - 4;
-
-        VirtualProtect((LPVOID)0x004C04E3, sizeof(timer), PAGE_EXECUTE_READWRITE, &old);
-        memcpy((void*)0x004C04E3, timer, sizeof(timer));
-
-
-        static const DWORD addr = (DWORD)GetProcAddress(GetModuleHandle("KERNELBASE.dll"), "Sleep");
-        HookFunction(0x004C04F5, (void*)addr);
-    }
+    FixStutter();
 
     VirtualProtect((LPVOID)0x00400019, 6, PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((LPVOID)0x0042FA0D, 9, PAGE_EXECUTE_READWRITE, &old);
@@ -6034,6 +6118,61 @@ bool RestoreGoBackScript(CStruct* pStruct, CScript* pScript)
     return true;
 }
 
+BYTE original_timer[38];
+bool bTimerBackedup = false;
+
+void FixStutter()
+{
+    DWORD old;
+    if (Gfx::fps_fix)
+    {
+        BYTE timer[] = { 0xE8, 0x98, 0xF4, 0xF7, 0x79, 0xB9, 0x0E, 0x00, 0x00, 0x00, 0x39, 0xC8, 0x73, 0x27, 0x29, 0xC1, 0x51, 0xE8, 0xD7, 0x29, 0x8C, 0x75, 0xA1, 0x00, 0x00, 0x00, 0x00, 0x85, 0xC0, 0x75, 0x16, 0xE8, 0x00, 0x00, 0x00, 0x00, 0xEB, 0x0F };
+
+        switch (Gfx::fps_fix)
+        {
+        case 1:
+            *(DWORD*)&timer[1] = (PtrToUlong(TimerElapsed) - 0x004C04E4) - 4;
+            break;
+        case 2:
+            *(DWORD*)&timer[1] = (PtrToUlong(TimerElapsed_Hybrid) - 0x004C04E4) - 4;
+            break;
+        case 3:
+            *(DWORD*)&timer[1] = (PtrToUlong(TimerElapsed_Sleep) - 0x004C04E4) - 4;
+            break;
+        }
+        if (Gfx::fps_fix == 3)
+            HookFunction(0x004C0519, TimerStart_Sleep);
+        else
+            HookFunction(0x004C0519, TimerStart);
+        *(bool**)&timer[23] = &show_loading_screen;
+        *(BYTE*)&timer[31] = 0x90;
+        *(DWORD*)&timer[32] = 0x90909090;// (PtrToUlong(DrawEye) - (0x004C04E4 + 31)) - 4;
+        if (Gfx::fps_fix != 3)
+            *(WORD*)&timer[5] = 0x2EEB;
+
+        VirtualProtect((LPVOID)0x004C04E3, sizeof(timer), PAGE_EXECUTE_READWRITE, &old);
+        memcpy((void*)0x004C04E3, timer, sizeof(timer));
+
+
+        static const DWORD addr = (DWORD)GetProcAddress(GetModuleHandle("KERNELBASE.dll"), "Sleep");
+        HookFunction(0x004C04F5, (void*)addr);
+    }
+    else
+    {
+        if (bTimerBackedup)
+        {
+            VirtualProtect((LPVOID)0x004C04E3, sizeof(original_timer), PAGE_EXECUTE_READWRITE, &old);
+            memcpy((void*)0x004C04E3, original_timer, sizeof(original_timer));
+        }
+        else
+        {
+            VirtualProtect((LPVOID)0x004C04E3, sizeof(original_timer), PAGE_EXECUTE_READWRITE, &old);
+            memcpy(original_timer, (void*)0x004C04E3, sizeof(original_timer));
+            bTimerBackedup = true;
+        }
+    }
+}
+
 bool LaunchGFXCommand(CStruct* pStruct, CScript* pScript)
 {
     for (auto header = pStruct->head; header != NULL; header = header->NextHeader)
@@ -6043,12 +6182,14 @@ bool LaunchGFXCommand(CStruct* pStruct, CScript* pScript)
             switch (header->Data)
             {
             case Checksums::Reset:
-                MessageBox(0, 0, 0, 0);
                 Gfx::command = Gfx::Command::Reset;
                     break;
             case Checksums::ToggleWindowed:
                 if(IsOptionOn("LM_GFX_bWindowed") == (*(BYTE*)0x00851094 & 1))
                     Gfx::command = Gfx::Command::ToggleWindowed;
+                break;
+            case Checksums::FixStutter:
+                Gfx::command = Gfx::Command::FixStutter;
                 break;
             }
 
@@ -6125,12 +6266,28 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
                 return D3DERR_DEVICELOST;
 
             case Gfx::Command::Reset:
+                option = GetOption(crc32f("LM_GFX_bVSync"));
+                if (option)
+                    Gfx::bVSync = option->value;
+
                 option = GetOption(crc32f("LM_GFX_eBuffering"));
                 if(option)
                     Gfx::numBackBuffers = option->value;
 
                 option = GetOption(crc32f("LM_GFX_eAntiAlias"));
                     Gfx::AntiAliasing = option->value;
+                break;
+
+            case Gfx::Command::FixStutter:
+                option = GetOption(crc32f("LM_GFX_eFixStutter"));
+                if (option)
+                {
+                    Gfx::fps_fix = option->value;
+                    _printf("fps_fix %d\n", Gfx::fps_fix);
+                }
+                else
+                    _printf("NO OPT\n");
+                FixStutter();
                 break;
             }
 
