@@ -39,6 +39,7 @@ bool LevelModSettings::bTeleFix = true;
 bool LevelModSettings::bGrafCounter = true;
 DWORD LevelModSettings::MemorySize = 0xFA000;
 bool LevelModSettings::bHookedControls = false;
+BYTE LevelModSettings::original_timer[38];
 std::map<DWORD, Option> LevelModSettings::options;
 std::map<DWORD, OverrideOption> LevelModSettings::overrideOptions;
 

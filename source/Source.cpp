@@ -150,7 +150,7 @@ FILE* debugFile = NULL;
 //Used for custom ObserveMode
 extern ObserveMode* pObserve;
 
-void FixStutter();
+void MaybeFixStutter();
 
 //Used for graf tag counter
 char tags[256] = "Tags: 0";
@@ -4842,7 +4842,11 @@ void InitLevelMod()
     memcpy((void*)0x4a66d0, oil_grind_fix, sizeof(oil_grind_fix));
     HookFunction(0x004A6701, OilRigGrindPatch);
 
-    FixStutter();
+    //backup the original fps limiter timer
+    VirtualProtect((LPVOID)0x004C04E3, sizeof(LevelModSettings::original_timer), PAGE_EXECUTE_READWRITE, &old);
+    memcpy(LevelModSettings::original_timer, (void*)0x004C04E3, sizeof(LevelModSettings::original_timer));
+    //Fix stutter if it's enabled
+    MaybeFixStutter();
 
     VirtualProtect((LPVOID)0x00400019, 6, PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((LPVOID)0x0042FA0D, 9, PAGE_EXECUTE_READWRITE, &old);
@@ -6118,12 +6122,8 @@ bool RestoreGoBackScript(CStruct* pStruct, CScript* pScript)
     return true;
 }
 
-BYTE original_timer[38];
-bool bTimerBackedup = false;
-
-void FixStutter()
+void MaybeFixStutter()
 {
-    DWORD old;
     if (Gfx::fps_fix)
     {
         BYTE timer[] = { 0xE8, 0x98, 0xF4, 0xF7, 0x79, 0xB9, 0x0E, 0x00, 0x00, 0x00, 0x39, 0xC8, 0x73, 0x27, 0x29, 0xC1, 0x51, 0xE8, 0xD7, 0x29, 0x8C, 0x75, 0xA1, 0x00, 0x00, 0x00, 0x00, 0x85, 0xC0, 0x75, 0x16, 0xE8, 0x00, 0x00, 0x00, 0x00, 0xEB, 0x0F };
@@ -6150,27 +6150,14 @@ void FixStutter()
         if (Gfx::fps_fix != 3)
             *(WORD*)&timer[5] = 0x2EEB;
 
-        VirtualProtect((LPVOID)0x004C04E3, sizeof(timer), PAGE_EXECUTE_READWRITE, &old);
         memcpy((void*)0x004C04E3, timer, sizeof(timer));
 
 
         static const DWORD addr = (DWORD)GetProcAddress(GetModuleHandle("KERNELBASE.dll"), "Sleep");
         HookFunction(0x004C04F5, (void*)addr);
     }
-    else
-    {
-        if (bTimerBackedup)
-        {
-            VirtualProtect((LPVOID)0x004C04E3, sizeof(original_timer), PAGE_EXECUTE_READWRITE, &old);
-            memcpy((void*)0x004C04E3, original_timer, sizeof(original_timer));
-        }
-        else
-        {
-            VirtualProtect((LPVOID)0x004C04E3, sizeof(original_timer), PAGE_EXECUTE_READWRITE, &old);
-            memcpy(original_timer, (void*)0x004C04E3, sizeof(original_timer));
-            bTimerBackedup = true;
-        }
-    }
+    else//Set back original
+        memcpy((void*)0x004C04E3, LevelModSettings::original_timer, sizeof(LevelModSettings::original_timer));
 }
 
 bool LaunchGFXCommand(CStruct* pStruct, CScript* pScript)
@@ -6287,7 +6274,7 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
                 }
                 else
                     _printf("NO OPT\n");
-                FixStutter();
+                MaybeFixStutter();
                 break;
             }
 
