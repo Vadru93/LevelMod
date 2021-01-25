@@ -4067,12 +4067,12 @@ DWORD __cdecl GetTime()
     return truncated;
 }
 
-DWORD framestep;
+DWORD frameticks;
 
 void TimerElapsed()
 {
     LARGE_INTEGER targetTime;
-    targetTime.QuadPart = startTime.QuadPart + framestep;
+    targetTime.QuadPart = startTime.QuadPart + frameticks;
     while (endTime.QuadPart < targetTime.QuadPart)
     {
         QueryPerformanceCounter(&endTime);
@@ -4122,7 +4122,7 @@ void TimerElapsed_Hybrid()
         _printf("Use exact\n");
 
     LARGE_INTEGER targetTime;
-    targetTime.QuadPart = startTime.QuadPart + framestep;
+    targetTime.QuadPart = startTime.QuadPart + frameticks;
     while (endTime.QuadPart < targetTime.QuadPart)
     {
         QueryPerformanceCounter(&endTime);
@@ -4223,6 +4223,16 @@ LARGE_INTEGER TimerStart()
     double ms = (double((old_start.LowPart)) * fFreq);
     if (ms < 32.0)
     {
+        if (ms > 16.675)//59,97 fps
+        {
+            _printf("Dec\n");
+            frameticks-=2;
+        }
+        else if (ms < 16.61)//60,20 fps
+        {
+            _printf("Inc\n");
+            frameticks++;
+        }
         framelength = ms;
     }
     return startTime;
@@ -4541,11 +4551,13 @@ void InitLevelMod()
     //Initializing the new timer
     QueryPerformanceFrequency(&freq);
     fFreq = 1000.0 / (double)freq.QuadPart;
-    framestep = (DWORD)(16666.666666666 / (1000000.0 / (double)freq.QuadPart));
-    DWORD framestep2 = (DWORD)(16.666666666 / fFreq);
-    DWORD framestep3 = 0.0166666666 / (1.0 / (double)freq.QuadPart);
+    frameticks = (DWORD)(16666.666666666 / (1000000.0 / (double)freq.QuadPart));
+    //Add some headroom for hardware delay and rounding errors, probably should add this to ini for platform specific stored value
+    frameticks -= 750;
+    DWORD frameticks2 = (DWORD)(16.666666666 / fFreq);
+    DWORD frameticks3 = 0.0166666666 / (1.0 / (double)freq.QuadPart);
 
-    _printf("f1 %u f2 %u f3 %u\n", framestep, framestep2, framestep3);
+    _printf("f1 %u f2 %u f3 %u\n", frameticks, frameticks2, frameticks3);
 
     if (!p_bWindowed)
         timer_lock = 0x0D;
