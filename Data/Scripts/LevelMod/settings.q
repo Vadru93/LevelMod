@@ -11,7 +11,7 @@ LM_HostOptions = [
 	{ LM_HostOption_MenuItem  name = LM_HostOption_bBank Value = 1 id = LM_HostOption_bBank_id override_true = LM_Control_bBank params = { name = LM_HostOption_bBank id = LM_HostOption_bBank_id on = "Bank Drop: Allowed" off = "Bank Drop: Disallowed" } }
 	{ LM_HostOption_MenuItem  name = LM_HostOption_bAcid Value = 1 id = LM_HostOption_bAcid_id override_true = LM_Control_bAcid params = { name = LM_HostOption_bAcid id = LM_HostOption_bAcid_id on = "Acid Drop: Allowed" off = "Acid Drop: Disallowed" } }
 	{ LM_HostOption_MenuItem  name = LM_HostOption_bExtraTricks Value = 1 id = LM_HostOption_bExtraTricks_id override_true = LM_Control_bExtraTricks params = { name = LM_HostOption_bExtraTricks id = LM_HostOption_bExtraTricks_id on = "ExtraTricks: Allowed" off = "ExtraTricks: Disallowed" } }
-	{ LM_HostOption_MenuItem  name = LM_HostOption_bLimitTags Value = 0 id = LM_HostOption_bLimitTags_id override_false = LM_GameOption_bLimitTags  params = { name = LM_HostOption_bLimitTags id = LM_HostOption_bLimitTags_id off = "32 TagFix: Allowed" on = "32 TagFix: Disallowed" } }
+	{ LM_HostOption_MenuItem  name = LM_HostOption_bUnLimitTags Value = 1 id = LM_HostOption_bUnLimitTags_id override_true = LM_GameOption_bUnLimitTags  params = { name = LM_HostOption_bUnLimitTags id = LM_HostOption_bUnLimitTags_id on = "32 TagFix: Allowed" off = "32 TagFix: Disallowed" } }
 	{ LM_HostOption_MenuItem  name = LM_HostOption_bWallplant Value = 1 id = LM_HostOption_bWallplant_id override_true = LM_Control_bWallplant  params = { name = LM_HostOption_bWallplant id = LM_HostOption_bWallplant_id on = "Wallplant: Allowed" off = "Wallplant: Disallowed" } }
     { LM_HostOption_MenuItem  name = LM_HostOption_bWalliePlant Value = 1 id = LM_HostOption_bWalliePlant_id override_true = LM_Control_bWalliePlant  params = { name = LM_HostOption_bWalliePlant id = LM_HostOption_bWalliePlant_id on = "Wallieplant: Allowed" off = "Wallieplant: Disallowed" } }
 	{ LM_HostOption_MenuItem  name = LM_HostOption_bBoostPlant Value = 1 id = LM_HostOption_bBoostPlant_id override_true = LM_Control_bBoostPlant  params = { name = LM_HostOption_bBoostPlant id = LM_HostOption_bBoostPlant_id on = "Boostplant: Allowed" off = "Boostplant: Disallowed" } }
@@ -127,7 +127,7 @@ LevelModOptions = [
 	{ name = "LM_BugFix_bTeleFix" Value = 1 }
 	{ name = "LM_BugFix_bSoundFix" Value = 1 }
 	
-	{ name = "LM_GameOption_bLimitTags" Value = 0 }
+	{ name = "LM_GameOption_bUnLimitTags" Value = 1 }
 	{ name = "LM_GameOption_bGrass" Value = 1 StartGame Do = UpdateGrass }
 	{ name = "LM_GameOption_bExtraLayer" Value = 1 StartGame Do = UpdateExtraLayer }
 	{ name = "LM_GameOption_bNetSky" Value = 0 StartGame Do = UpdateNetSky }
@@ -829,7 +829,7 @@ back_menu_item = {
 game_menu_items = [
 	{ IsBool text = "251x Patch" 		option_id = item1	option = LM_GameOption_b251Patch 		toggle_id = item1_toggle cat_game }
 	{ IsBool text = "No BW Manual"		option_id = item2	option = LM_GameOption_bFixBWManual 	toggle_id = item2_toggle cat_game }
-	{ IsBool text = "Unlimited Tags" 	option_id = item3	option = LM_GameOption_bLimitTags 		toggle_id = item3_toggle cat_game }
+	{ IsBool text = "Unlimited Tags" 	option_id = item3	option = LM_GameOption_bUnLimitTags 		toggle_id = item3_toggle cat_game }
 	{ IsBool text = "Tele Stance Fix" 	option_id = item4	option = LM_BugFix_bTeleFix 			toggle_id = item4_toggle cat_game }
 	{ IsBool text = "Ped Props"			option_id = item5	option = LM_Gameplay_bPedProps 			toggle_id = item5_toggle cat_game }
 	{ IsBool text = "Debug Console" 	option_id = item6	option = LM_DebugOption_bDebugMode 		toggle_id = item6_toggle cat_game }

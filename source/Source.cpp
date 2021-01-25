@@ -2126,7 +2126,7 @@ const CompiledScript scripts[] =
     { "AddToGlobal", AddToGlobal },
     { "FreezeCamera", FreezeCamera },
     { "UnfreezeCamera", UnfreezeCamera },
-    { "GrafStarted", GrafStarted },
+    //{ "GrafStarted", GrafStarted },
     { "ChangeValues", ChangeValues },
     { "CreatePair", CreatePair },
     { "GetSliderValue", GetSliderValue },

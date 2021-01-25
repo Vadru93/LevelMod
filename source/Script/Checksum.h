@@ -170,7 +170,7 @@ namespace Checksums
         LM_BugFix_bTeleFix = COMPILE_CRC32("lm_bugfix_btelefix"),
         LM_BugFix_bSoundFix = COMPILE_CRC32("lm_bugfix_bsoundfix"),
 
-        LM_GameOption_bLimitTags = COMPILE_CRC32("lm_gameoption_blimittags"),
+        LM_GameOption_bUnLimitTags = COMPILE_CRC32("lm_gameoption_bunlimittags"),
         LM_GameOption_bGrass = COMPILE_CRC32("lm_gameoption_bgrass"),
         LM_DebugOption_bDebugMode = COMPILE_CRC32("lm_debugoption_bdebugmode"),
 

@@ -409,12 +409,12 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
         bDebugMode = true;
         break;
 
-    case (DWORD)Checksums::LM_GameOption_bLimitTags://casting to DWORD to prevent compiler warning, code actually works without this cast
+    case (DWORD)Checksums::LM_GameOption_bUnLimitTags://casting to DWORD to prevent compiler warning, code actually works without this cast
         if (value)
             SetTagLimit(200);
         else
             SetTagLimit(32);
-        LevelModSettings::bUnlimitedGraf = !value;
+        //LevelModSettings::bUnlimitedGraf = value;
         break;
 
 

@@ -294,9 +294,9 @@ SCRIPT GameFlow_StartRun
 			ENDIF
 		ENDIF
 	ENDIF
-	IF GameModeChecksumEquals netgraffiti
-		GrafStarted
-	ENDIF
+	//IF GameModeChecksumEquals netgraffiti
+		//GrafStarted
+	//ENDIF
 	//Added to load custom shaders
 	OnPostLevelLoad
 	LeaveObserveMode2
