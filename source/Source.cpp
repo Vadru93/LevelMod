@@ -4101,6 +4101,9 @@ void TimerElapsed()
     }*/
 }
 
+
+double hybrid_limit = 16.0;
+
 //50% sleep 50% loop
 void TimerElapsed_Hybrid()
 {
@@ -4109,11 +4112,14 @@ void TimerElapsed_Hybrid()
     elapsedTime.QuadPart = (endTime.QuadPart - startTime.QuadPart);
     double ms = ((double)(elapsedTime.LowPart) * fFreq);
 
-    DWORD truncated = ((16.0-ms) * 0.5);
-    if (truncated && truncated < 15)
+    if (hybrid_limit > 3.0)
     {
-        Sleep(truncated);
+        DWORD truncated = ((hybrid_limit - ms) * 0.5);
+        if (truncated && truncated < 14)
+            Sleep(truncated);
     }
+    else
+        _printf("Use exact\n");
 
     LARGE_INTEGER targetTime;
     targetTime.QuadPart = startTime.QuadPart + framestep;
@@ -4184,6 +4190,27 @@ __declspec(naked) void UpdateFrameLength()
     *(float*)0x00850FD0 = (float)(framelength);
     *(double*)0x00850FD8 = framelength;
     _asm ret;
+}
+
+LARGE_INTEGER TimerStart_Hybrid()
+{
+    old_start = startTime;
+
+
+    QueryPerformanceCounter(&startTime);
+    old_start.QuadPart = startTime.QuadPart - old_start.QuadPart;
+    double ms = (double((old_start.LowPart)) * fFreq);
+    if (ms < 32.0)
+    {
+        framelength = ms;
+
+        if (ms >= 16.8) // ~59.88
+        {
+            if(hybrid_limit)
+                hybrid_limit--;
+        }
+    }
+    return startTime;
 }
 
 LARGE_INTEGER TimerStart()
@@ -6132,18 +6159,21 @@ void MaybeFixStutter()
         {
         case 1:
             *(DWORD*)&timer[1] = (PtrToUlong(TimerElapsed) - 0x004C04E4) - 4;
+            HookFunction(0x004C0519, TimerStart);
             break;
         case 2:
             *(DWORD*)&timer[1] = (PtrToUlong(TimerElapsed_Hybrid) - 0x004C04E4) - 4;
+            HookFunction(0x004C0519, TimerStart_Hybrid);
             break;
         case 3:
             *(DWORD*)&timer[1] = (PtrToUlong(TimerElapsed_Sleep) - 0x004C04E4) - 4;
+            HookFunction(0x004C0519, TimerStart_Sleep);
             break;
         }
-        if (Gfx::fps_fix == 3)
+        /*if (Gfx::fps_fix == 3)
             HookFunction(0x004C0519, TimerStart_Sleep);
         else
-            HookFunction(0x004C0519, TimerStart);
+            HookFunction(0x004C0519, TimerStart);*/
         *(bool**)&timer[23] = &show_loading_screen;
         *(BYTE*)&timer[31] = 0x90;
         *(DWORD*)&timer[32] = 0x90909090;// (PtrToUlong(DrawEye) - (0x004C04E4 + 31)) - 4;
