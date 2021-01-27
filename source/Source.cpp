@@ -3837,121 +3837,12 @@ struct OptimizedGrind
     }
 };
 
-
-//To optimize CRC we put the checksum in eax instead of calling Checksum("string")
-//string here means pointer in memory where string is pushed to stack
-//eax means pointer to where function is called and should be replaced with eax
-//esp means where stack is changed, since we remove the push string we need to decrease add esp with 4
-struct OptimizedCRC
-{
-    DWORD string;
-    DWORD eax;
-    DWORD esp;
-
-    void Optimize()
-    {
-        DWORD old;
-        VirtualProtect((LPVOID)string, 5 + 5 + 3 + eax + esp, PAGE_EXECUTE_READWRITE, &old);
-
-        DWORD ptr = string;
-        char error[256];
-        sprintf(error, "%X %d", string, esp);
-        ptr++;
-        char* c = *(char**)ptr;
-
-        *(BYTE*)string = 0x90;
-        string++;
-        ptr += 4;
-
-        //If trying to access esp we need to decrease by 4
-        if (*(BYTE*)ptr == 0xC7 || *(BYTE*)ptr == 0xC6)
-            *(BYTE*)(ptr + 3) -= 4;
-        else if (*(BYTE*)ptr == 0x88 || *(BYTE*)ptr == 0x89)
-            *(BYTE*)(ptr + 3) -= 4;
-        ptr += eax;
-        if (*(BYTE*)ptr != 0xE8)
-            MessageBox(0, "Wrong eax", "", 0);
-        *(BYTE*)ptr = 0xB8;
-        ptr++;
-        _printf("Optimizing checksum access: %s\n", c);
-        *(DWORD*)ptr = crc32f(c);
-
-        //Replace push string with nop
-        *(DWORD*)string = 0x90909090;
-        ptr += 4;
-
-        //If trying to access esp we need to decrease by 4
-        if (*(BYTE*)ptr == 0x8B && (*(BYTE*)(ptr+1) != 0x8F && *(BYTE*)(ptr+1) != 0x8E && *(BYTE*)(ptr+1) != 0x0E && *(BYTE*)(ptr+1) != 0x4E))
-        {
-            *(BYTE*)(ptr + 3) -= 4;
-            if (*(BYTE*)(ptr + 3) == 0)
-                *(BYTE*)(ptr + 3) = 0x90;
-        }
-        ptr += esp;
-        if (*(BYTE*)ptr != 0x83)
-        {
-            MessageBox(0, "Wrong esp", error, 0);
-        }
-
-        //If add esp, 4 replace it with nop
-        if (*(BYTE*)(ptr + 2) == 4)
-        {
-            *(BYTE*)ptr = 0x90;
-            ptr++;
-            *(BYTE*)ptr = 0x90;
-            ptr++;
-            *(BYTE*)ptr = 0x90;
-        }
-        //Else reduce by 4
-        else
-        {
-            *(BYTE*)(ptr + 2) -= 4;
-        }
-    }
-};
-
 OptimizedGrind optimized_grind[] = { {0x00489CCB, 3}, {0x004A507C, 2}, {0x004A5316, 2}, {0x004A5384, 2}, {0x004A5395, 2},
     {0x004A53F5, 2}, {0x004A538E, 2}, {0x004A537B, 2}, {0x004A5071, 2}, {0x004A4EC1, 2}, {0x004A4ECC, 2 }, {0x004A530B, 2}, 
     {0x004A50D3, 2},  {0x004A5059, 2}, {0x004A4F23, 2}, {0x004A4CA1, 2},  {0x004A5AFF, 3}, {0x004A6566,2}, {0x004A633E, 2}, 
     {0x004A6341, 2}, {0x004A6306, 2}, {0x004A62CE, 2}, {0x004A6278, 2}, {0x004A626F, 2}, {0x004A6735, 2},  {0x004A657E, 2},
     {0x004A5985, 2},  {0x004A596D, 2}, {0x004A542C, 2},  };
 
-OptimizedCRC optimized[] = { {0x00401B3F, 5, 9},  {0x00401E0C, 4, 9}, {0x004021DA, 4, 9}, {0x00404C50, 8, 0}, {0x00404C71, 0, 0},  
-    {0x00404C89, 0, 0},  {0x00404CA1, 0, 0}, {0x00405240, 16, 0}, {0x00405640, 8, 0}, {0x0041525F, 0, 0}, {0x0041527A, 0, 0},
-    {0x00405660, 0, 0}, {0x00405678, 0, 0},  {0x0040BBA7, 0, 4},  {0x0040BBBD, 0, 4},  {0x0040BBD3, 0, 4},  {0x0040BBE9,0, 4},
- {0x0040BBFF, 0, 4},  {0x00413C97, 0, 0},  {0x00413FB4, 0, 0},  {0x00413FD6, 0, 0},  {0x0041417E, 0, 0},   {0x0041419D, 0, 0},
- {0x004141E7, 0, 0},  {0x00414206, 0, 0},  {0x004143BD, 0, 0},  {0x004146A4,8, 0 },  {0x004151A8, 0, 0},   {0x00415295, 0, 0},
- {0x004152B2, 0, 0},  {0x004152D0, 0, 0},  {0x004152EC, 0, 0},  {0x00415374, 0, 0},  {0x00415397, 0, 0},   {0x004153BA, 0, 0}, 
-{0x004153E0, 0, 0}, {0x0041545B, 0, 0}, {0x00415476, 0, 0}, {0x00415491, 0, 0}, {0x004154A9, 0, 4}, {0x00416291, 8, 0},
-{0x004162DA, 0, 0}, {0x0041631B, 0, 0}, {0x004163A4, 0, 0}, {0x00416823, 8, 0}, {0x00416A52, 0, 9}, {0x00416A89, 0, 9},
-{0x00416AC0, 0, 9}, {0x00416AF3, 0, 9}, {0x00416B45, 0, 9}, {0x00416B75, 0, 9}, {0x00416BA5, 0, 9}, {0x00416C11, 0, 9},
-{0x00416C58, 0, 9}, {0x00416C7D, 0, 9}, {0x00416CA9, 0, 0}, {0x0041AA22, 0, 0}, {0x0041AC0C, 0, 0}, {0x0041AC3F, 0, 0},
-{0x0041B04A, 0, 0}, {0x0041D258, 0, 22}, {0x0041D268, 0, 6}, {0x0041F7B3, 8, 0}, {0x0041FF8C, 0, 0}, {0x00420051, 0, 0},
-{0x00421C41, 0, 0}, {0x00421C5D, 0, 0}, {0x0042216F, 8, 0}, {0x00422D31, 2, 0}, {0x00422D70, 0, 0}, {0x00422D7E, 0, 0},
-    {0x00422DB2, 0, 0}, {0x00422DC0, 0, 0}, {0x00422DD5, 2, 0}, {0x00422DE5, 0, 0}, {0x00422EF4, 0, 0}, {0x00422F0D, 0, 0},
-    {0x00422F23, 0, 0}, {0x00422FD9, 4, 0}, {0x004242CE, 8, 0}, {0x00424A05, 5, 9}, {0x00424BD8, 2, 0}, {0x00424BF9, 2, 0},
-    {0x00424EA5, 0, 0}, {0x0042556C, 0, 4}, {0x0042560F, 2, 0}, {0x00425639, 0, 4}, {0x004256BF, 2, 0}, {0x004256E9, 0, 4},
-    {0x0042576F, 2, 0}, {0x00425799, 0, 4}, {0x0042590F, 2, 0}, {0x00425939, 0, 4}, {0x00425A6F, 0, 21}, {0x00425A79, 4, 7},
-    {0x004265AB, 0, 0}, {0x0042C8B5, 0, 6}, {0x0042D59E, 11, 0}, {0x00431ED1, 11, 0}, {0x00433FF5, 0, 13}, {0x004341E8, 2, 0},
-    {0x00434212, 0, 4}, {0x00434236, 0, 4}, {0x00434508, 0, 0}, {0x00434531, 0, 0}, {0x0043484D, 0, 0}, {0x00434FCA, 0, 0},
-{0x004375B3, 0, 0}, {0x0043766C, 0, 0}, {0x004378E5, 2, 0}, {0x004380A5, 30, 0}, {0x004380ED, 6, 0}, {0x0043883C, 0, 0},
-    {0x00438BBA, 2, 4}, {0x00438E2D, 4, 4}, {0x00438E82, 0, 0}, {0x00438E9A, 0, 0}, {0x00438F9C, 0, 0}, {0x00438FC2, 0, 0}, 
-    {0x00438FDF, 0, 0}, {0x00438FFD, 0, 0}, {0x0043901B, 0, 0}, {0x00439528, 0, 0}, {0x00439585, 0, 0}, {0x004395F3, 0, 0}, 
-    {0x0043969B, 0, 0}, {0x0043972A, 0, 6}, {0x004399A9, 0, 0}, {0x004399BE, 0, 6}, {0x00439AE7, 0, 6}, {0x00439B6B, 2, 0},
-    {0x00439B8D, 0, 6}, {0x0043A342, 0, 4}, {0x0043A596, 0, 4}, {0x0043B229, 0, 4}, {0x0043B28C, 0, 0}, {0x0043CFF0, 5, 0},
-    {0x0043D00A, 0, 0}, {0x0043D01A, 0, 0}, {0x0043D039, 0, 0}, {0x0043D25C, 0, 0}, {0x0043D271, 0, 0}, {0x0043D281, 0, 0},
-    {0x0043D2C3, 4, 0}, {0x0043DA4A, 0, 0}, {0x0043DD79, 0, 3}, {0x0043DE11, 0, 0}, {0x0043DEF4, 5, 0}, {0x0043DF0E, 0, 0},
-    {0x0043769F, 0, 0}, {0x0043DF1E, 0, 0}, {0x0043DF3A, 0, 0}, {0x0043DFDA, 0, 0}, {0x0043E0E2, 0, 0}, {0x0043E0FB, 0, 0},
-    {0x0043E111, 0, 0}, {0x0043E144, 0, 2}, {0x0043E15D, 0, 0}, {0x0043FDAE, 0, 0}, {0x0043FF67, 0, 0}, {0x0043FFB9, 0, 0},
-    {0x004404EA, 5, 0}, {0x004409C0, 0, 9}, {0x00440A34, 0, 9}, {0x00440AB9, 4, 9}, {0x00440B1F, 8, 0}, {0x00440B4D, 0, 9},
-    {0x00440BC0, 0, 9}, {0x00440CF4, 0, 0}, {0x00440E25, 8, 9}, {0x0044114D, 3, 0}, {0x0044125E, 3, 0}, {0x00441412, 3, 0},
-    {0x00441570, 2, 0}, {0x00441592, 0, 0}, {0x004415B2, 0, 0}, {0x004415D2, 0, 0}, {0x004415F2, 0, 0}, {0x00441612, 0, 0},
-    {0x00441632, 0, 0}, {0x00441652, 0, 0}, {0x00441672, 0, 0}, {0x00441692, 0, 0}, {0x004416B2, 0, 0}, {0x004416D2, 0, 0},
-    {0x004416F2, 0, 0}, {0x00441712, 0, 0}, {0x00441732, 0, 0}, {0x00441752, 0, 0}, {0x00441772, 0, 0}, {0x00441792, 0, 0},
-    {0x004417B2, 0, 0}, {0x0044301E, 5, 0}, {0x0044306C, 5, 0}, {0x004430BD, 5, 0}, {0x004431FD, 0, 0}, {0x004432A8, 8, 0},
-    {0x004432C0, 0, 0}, {0x00443377, 8, 0}, {0x0044338F, 0, 0}, {0x00443464, 4, 0}, {0x00443501, 4, 0}, {0x00443626, 0, 0},
-    {0x00443644, 5, 9}, {0x004438DE, 5, 0}, {0x0044393B, 0, 34}, {0x00443945, 6, 18}, {0x00443FE4, 8, 0}, {0x004440FE, 16, 0}
-  };
 DWORD optimized2[] = { 0x0040100F, 0x00401D40, 0x00402478, 0x0041117C, 0x00411589, 0x00413A31, 0x00413A3D, 0x00413AEF,
 0x00413AFB, 0x004155B2, 0x004194EC, 0x0041963B, 0x0041A6CA, 0x0041AC5A, 0x004201CD, 0x004251F9, 0x00425250, 0x0042527D,
 0x0042528B, 0x004263CA, 0x0042641A, 0x0042646A, 0x004264BA, 0x0042651F, 0x0042657A, 0x004265DA, 0x004273F2, 0x00428254,
@@ -4228,7 +4119,7 @@ LARGE_INTEGER TimerStart()
             _printf("Dec\n");
             frameticks-=2;
         }
-        else if (ms < 16.61)//60,20 fps
+        else if (ms < 16.60)//60,24 fps
         {
             _printf("Inc\n");
             frameticks++;
@@ -4902,15 +4793,6 @@ void InitLevelMod()
     {
        optimized_grind[i].Optimize();
     }
-
-    //Optimize static checksum access
-    for (DWORD i = 0; i < sizeof(optimized) / sizeof(OptimizedCRC); i++)
-    {
-        optimized[i].Optimize();
-    }
-
-    *(DWORD*)0x0044410E -= 4;
-
 
     //BouncyObject fixes
     BYTE codeCaveBouncyObject[] = { 0x84, 0xC0, 0x0F, 0x84, 0xA0, 0x3E, 0x08, 0x00, 0x8A, 0x84, 0x24, 0x00, 0x01, 0x00, 0x00, 0x24, 0x40, 0x74, 0x0D, 0x8B, 0x84, 0x24, 0x14, 0x01, 0x00, 0x00, 0x89, 0x05, 0xCB, 0x03, 0x40, 0x00, 0x8A, 0x84, 0x24, 0x00, 0x01, 0x00, 0x00, 0x90, 0x90, 0x90, 0x90, 0x90, 0x24, 0x10, 0x0F, 0x85, 0x74, 0x3E, 0x08, 0x00, 0xE9, 0x0D, 0x3A, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -6671,91 +6553,10 @@ __declspec(noalias) void DrawFrame()
             m_pIDirect3DDevice8->SetStreamSource(0, oldBuffer, oldStride);*/
 
 
-if (GameState::GotSuperSectors && bbox_rails.size())
-{
-    DWORD old_factor;
-    DWORD old_ref;
-    DWORD old_blend;
-    DWORD old_z;
-    DWORD old_bias;
-    DWORD old_slope;
-
-    LPDIRECT3DSURFACE9 old_target;
-    D3DXMATRIX old_view, old_world;
-
-    Gfx::pDevice->GetRenderTarget(0, &old_target);
-
-    LPDIRECT3DSURFACE9 old_surface;
-    D3DVIEWPORT9 old_viewport;
-    Gfx::pDevice->GetDepthStencilSurface(&old_surface);
-    Gfx::pDevice->GetViewport(&old_viewport);
-    Gfx::pDevice->SetDepthStencilSurface(nullptr);
-
-
-    Gfx::pDevice->SetViewport(&Gfx::world_viewport);
-
-    Gfx::pDevice->SetRenderTarget(0, Gfx::world_rendertarget);
-
-    Gfx::pDevice->GetRenderState(D3DRS_BLENDFACTOR, &old_factor);
-    Gfx::pDevice->GetRenderState(D3DRS_ALPHAREF, &old_ref);
-    Gfx::pDevice->GetRenderState(D3DRS_ALPHABLENDENABLE, &old_blend);
-    Gfx::pDevice->GetRenderState(D3DRS_ZFUNC, &old_z);
-    Gfx::pDevice->GetRenderState(D3DRS_DEPTHBIAS, &old_bias);
-    Gfx::pDevice->GetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, &old_slope);
-
-    Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-    Gfx::pDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
-    Gfx::pDevice->SetRenderState(D3DRS_BLENDFACTOR, D3DXCOLOR(255, 255, 0, 255));
-    Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-    Gfx::pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
-    Gfx::pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-    Gfx::pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
-    Gfx::pDevice->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
-
-    /*for (auto object = bbox_rails.begin(); object != bbox_rails.end(); object++)
-    {*/
-    //SuperSector* sector = *object;
-    Gfx::pDevice->DrawPrimitiveUP(D3DPRIMITIVETYPE::D3DPT_LINELIST, bbox_rails.size() / 2, &bbox_rails.front(), 0);
-    /*
-    if (sector->flag & 6 && sector->state && sector->mesh)
-    {
-        DWORD numSplits = sector->GetNumSplits();
-
-        for (auto i = 0; i < numSplits; i++)
-        {
-            Mesh::MaterialSplit* split = &sector->mesh->splits[i];
-            if (split->numVertices && split->numIndices && split->material && split->material->texture)
-            {
-                split->material->SubmitTextureOnly();
-
-                //_printf("VertexShader %X stride %X\n", split->vertexShader, split->stride);
-                Gfx::pDevice->SetFVF(split->vertexShader);
-
-                Gfx::pDevice->SetStreamSource(0, split->vertexBuffer->GetProxyInterface(), 0, split->stride);
-                Gfx::pDevice->SetIndices(split->indexBuffer->GetProxyInterface());
-                Gfx::pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, split->baseIndex, 0, split->numVertices, 0, split->numIndices-2);
-            }
-        }
-    }*/
-    // }
-
-    Gfx::pDevice->SetRenderState(D3DRS_BLENDFACTOR, old_factor);
-    Gfx::pDevice->SetRenderState(D3DRS_ALPHAREF, old_ref);
-    Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, old_blend);
-    Gfx::pDevice->SetRenderState(D3DRS_ZFUNC, old_z);
-    Gfx::pDevice->SetRenderState(D3DRS_DEPTHBIAS, old_bias);
-    Gfx::pDevice->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, old_slope);
-
-
-
-    Gfx::pDevice->SetDepthStencilSurface(old_surface);
-    Gfx::pDevice->SetViewport(&old_viewport);
-    Gfx::pDevice->SetRenderTarget(0, old_target);
-}
-
             if (Gfx::world_rendertarget)
             {
                 Gfx::world_rendertarget->Release();
+                Gfx::world_rendertarget = NULL;
             }
             return;
 }

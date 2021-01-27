@@ -365,10 +365,10 @@ void __stdcall RenderShatterObjects()
     if (lastFrameCount != Gfx::frameCounter)
     {
 
-        Gfx::pDevice->GetRenderTarget(0, &Gfx::world_rendertarget);
-        Gfx::pDevice->GetViewport(&Gfx::world_viewport);
+        /*Gfx::pDevice->GetRenderTarget(0, &Gfx::world_rendertarget);
+        Gfx::pDevice->GetViewport(&Gfx::world_viewport);*/
 
-        if (GameState::GotSuperSectors && bbox_rails.size())
+        /*if (GameState::GotSuperSectors && bbox_rails.size())
         {
             DWORD old_factor;
             DWORD old_ref;
@@ -395,32 +395,8 @@ void __stdcall RenderShatterObjects()
             Gfx::pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_BLENDFACTOR);
             Gfx::pDevice->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
 
-            /*for (auto object = bbox_rails.begin(); object != bbox_rails.end(); object++)
-            {*/
-                //SuperSector* sector = *object;
-                Gfx::pDevice->DrawPrimitiveUP(D3DPRIMITIVETYPE::D3DPT_LINELIST, bbox_rails.size()/2, &bbox_rails.front(), 0);
-                /*
-                if (sector->flag & 6 && sector->state && sector->mesh)
-                {
-                    DWORD numSplits = sector->GetNumSplits();
+            Gfx::pDevice->DrawPrimitiveUP(D3DPRIMITIVETYPE::D3DPT_LINELIST, bbox_rails.size() / 2, &bbox_rails.front(), 0);
 
-                    for (auto i = 0; i < numSplits; i++)
-                    {
-                        Mesh::MaterialSplit* split = &sector->mesh->splits[i];
-                        if (split->numVertices && split->numIndices && split->material && split->material->texture)
-                        {
-                            split->material->SubmitTextureOnly();
-
-                            //_printf("VertexShader %X stride %X\n", split->vertexShader, split->stride);
-                            Gfx::pDevice->SetFVF(split->vertexShader);
-
-                            Gfx::pDevice->SetStreamSource(0, split->vertexBuffer->GetProxyInterface(), 0, split->stride);
-                            Gfx::pDevice->SetIndices(split->indexBuffer->GetProxyInterface());
-                            Gfx::pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, split->baseIndex, 0, split->numVertices, 0, split->numIndices-2);
-                        }
-                    }
-                }*/
-           // }
 
             Gfx::pDevice->SetRenderState(D3DRS_BLENDFACTOR, old_factor);
             Gfx::pDevice->SetRenderState(D3DRS_ALPHAREF, old_ref);
@@ -428,7 +404,7 @@ void __stdcall RenderShatterObjects()
             Gfx::pDevice->SetRenderState(D3DRS_ZFUNC, old_z);
             Gfx::pDevice->SetRenderState(D3DRS_DEPTHBIAS, old_bias);
             Gfx::pDevice->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, old_slope);
-        }
+        }*/
 
         if (shatterObjects.size())
         {
