@@ -1,11 +1,10 @@
 *.bkp.q
 
 # Build results
-[Bb]in/
+old/
+intermediate/
 [Oo]bj/
 [Bb]uild/
-[Dd]ebug/
-[Rr]elease/
 .vs/
 
 # Visual Studio cache files
