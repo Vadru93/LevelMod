@@ -160,7 +160,7 @@ EXTERN struct SuperSector
                 SetPosition(D3DXVECTOR3(0, 0, 0));
         }
         else
-            _printf("Couldn't find Node %s in " __FUNCTION__ "\n");
+            debug_print("Couldn't find Node %s in " __FUNCTION__ "\n");
     }
 
     //Used in the scripts create/kill/shatter/visible/invisible, the state will get updated the next frame
@@ -241,7 +241,7 @@ struct MovingObject
 
     MovingObject(SuperSector* _sector, D3DXVECTOR3& _goal, CScript* _pScript)
     {
-        _printf("MOVE_TO_NODE\n");
+        debug_print("MOVE_TO_NODE\n");
         state = MeshState::create;
         Type = MOVE_TO_NODE;
         link = NULL;
@@ -266,7 +266,7 @@ struct MovingObject
 
     MovingObject(SuperSector* _sector, D3DXVECTOR3& _angle, CScript* _pScript, DWORD checksum)
     {
-        _printf("ANGLULAR_VELOCITY\n");
+        debug_print("ANGLULAR_VELOCITY\n");
         state = MeshState::create;
         Type = ANGULAR_VELOCITY;
         sector = _sector;
@@ -338,7 +338,7 @@ struct MovingObject
 
     MovingObject(SuperSector* _sector, D3DXVECTOR3& _pos, D3DXVECTOR3& _goal, CScript* _pScript, CStructHeader* _node)
     {
-        _printf("FOLLOW_PATH_LINKED\n");
+        debug_print("FOLLOW_PATH_LINKED\n");
         Type = FOLLOW_PATH_LINKED;
         state = MeshState::create;
         sector = _sector;
@@ -389,10 +389,10 @@ struct MovingObject
     //goalAngle += angle;
 
     /*D3DXVECTOR3 lookAt = goalAngle - angle;
-                _printf("current lookAt %f %f %f\n", lookAt.x, lookAt.y, lookAt.z);
+                debug_print("current lookAt %f %f %f\n", lookAt.x, lookAt.y, lookAt.z);
                 D3DXVec3Normalize(&lookAt, &lookAt);
                 lookAt *= delta;
-                _printf("delta lookAt %f %f %f\n", lookAt.x, lookAt.y, lookAt.z);*/
+                debug_print("delta lookAt %f %f %f\n", lookAt.x, lookAt.y, lookAt.z);*/
                 /*(*(Matrix*)&orient).RotateYLocal(goalAngle.y);
                 (*(Matrix*)&orient).OrthoNormalizeAbout2(Y);*/
 
@@ -462,7 +462,7 @@ struct MovingObject
 
         //pos = (sector->bboxMax + sector->bboxMin) / 2.0f;
         angle = goalAngle;
-        _printf("Generated new MovingObject pos %f %f %f goal %f %f %f goalAngle %f speed %f\n", pos.x, pos.y, pos.z, goal.x, goal.y, goal.z, goalAngle.y, speed);
+        debug_print("Generated new MovingObject pos %f %f %f goal %f %f %f goalAngle %f speed %f\n", pos.x, pos.y, pos.z, goal.x, goal.y, goal.z, goalAngle.y, speed);
     }
 
 

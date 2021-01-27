@@ -119,32 +119,32 @@ void CommandGetInfo(const char* message)
 
     }
 
-    _printf("Number of headers %d(MAX %d) with total size %X\n Header only size %X(max %X)\n", numQBKeyHeaders, MAX_TRIGGERS, totalSize, numQBKeyHeaders * sizeof(QBKeyHeader), OTHER_SIZE);
-    _printf("Number of ints %d with total size %X\n", numInts, intSize);
-    _printf("Number of floats %d with total size %X\n", numFloats, floatSize);
-    _printf("Number of arrays %d with total size %X\n", numArrays, arraySize);
-    _printf("Number of pairs %d with total size %X\n", numPairs, pairSize);
-    _printf("Number of structs %d with total size %X\n", numStructs, structSize);
-    _printf("Number of locals %d with total size %X\n", numLocals, localSize);
-    _printf("Number of strings %d with total size %X\n", numStrings, stringSize);
-    _printf("Number of CFuncs %d with total size %X\n", numCompiled, compiledSize);
-    _printf("Number of Scripts %d with total size %X\n", numScripts, scriptSize);
-    _printf("Number of Vectors %d with total size %X\n", numVec, vectorSize);
+    debug_print("Number of headers %d(MAX %d) with total size %X\n Header only size %X(max %X)\n", numQBKeyHeaders, MAX_TRIGGERS, totalSize, numQBKeyHeaders * sizeof(QBKeyHeader), OTHER_SIZE);
+    debug_print("Number of ints %d with total size %X\n", numInts, intSize);
+    debug_print("Number of floats %d with total size %X\n", numFloats, floatSize);
+    debug_print("Number of arrays %d with total size %X\n", numArrays, arraySize);
+    debug_print("Number of pairs %d with total size %X\n", numPairs, pairSize);
+    debug_print("Number of structs %d with total size %X\n", numStructs, structSize);
+    debug_print("Number of locals %d with total size %X\n", numLocals, localSize);
+    debug_print("Number of strings %d with total size %X\n", numStrings, stringSize);
+    debug_print("Number of CFuncs %d with total size %X\n", numCompiled, compiledSize);
+    debug_print("Number of Scripts %d with total size %X\n", numScripts, scriptSize);
+    debug_print("Number of Vectors %d with total size %X\n", numVec, vectorSize);
     //numQBKeyHeaders -= (numInts + numFloats + numArrays + numPairs + numStructs + numLocals + numStrings + numCompiled + numScripts + numVec);
     if (numUndef)
     {
         //t//otalSize -= undefSize
-        _printf("Number of Undefineed %d with total size %X\n", numUndef, undefSize);
+        debug_print("Number of Undefineed %d with total size %X\n", numUndef, undefSize);
     }
     Node::PrintNodeArrayInfo();
     extern BYTE hashTable[HASH_SIZE];
-    _printf("NodeHashTable %X\n\n", hashTable);
-    _printf("Total number of permanent strings %d(MAX %d)\n", String::GetNumStringsTotal(), String::GetNumMaxStringsTotal());
-    _printf("Original PermanentHeap %d %X(MAX %X)\n", String::GetNumStrings(String::HEAP::ORIGINAL), String::GetHeapSize(String::HEAP::ORIGINAL), String::GeHeapMaxSize(String::HEAP::ORIGINAL));
-    _printf("New PermanentHeap(no extra memory) %d %X(MAX %X)\n", String::GetNumStrings(String::HEAP::NEW_NOEXTRA), String::GetHeapSize(String::HEAP::NEW_NOEXTRA), String::GeHeapMaxSize(String::HEAP::NEW_NOEXTRA));
-    _printf("New PermanentHeap(extra memory) %d %X(MAX %X)\n\n", String::GetNumStrings(String::HEAP::NEW_EXTRA), String::GetHeapSize(String::HEAP::NEW_EXTRA), String::GeHeapMaxSize(String::HEAP::NEW_EXTRA));
-    _printf("Level specific strings: \n");
-    _printf("LevelPermanentHeap %d %X(MAX %X)\n\n", String::GetNumStrings(String::HEAP::LEVEL), String::GetHeapSize(String::HEAP::LEVEL), String::GeHeapMaxSize(String::HEAP::LEVEL));
+    debug_print("NodeHashTable %X\n\n", hashTable);
+    debug_print("Total number of permanent strings %d(MAX %d)\n", String::GetNumStringsTotal(), String::GetNumMaxStringsTotal());
+    debug_print("Original PermanentHeap %d %X(MAX %X)\n", String::GetNumStrings(String::HEAP::ORIGINAL), String::GetHeapSize(String::HEAP::ORIGINAL), String::GeHeapMaxSize(String::HEAP::ORIGINAL));
+    debug_print("New PermanentHeap(no extra memory) %d %X(MAX %X)\n", String::GetNumStrings(String::HEAP::NEW_NOEXTRA), String::GetHeapSize(String::HEAP::NEW_NOEXTRA), String::GeHeapMaxSize(String::HEAP::NEW_NOEXTRA));
+    debug_print("New PermanentHeap(extra memory) %d %X(MAX %X)\n\n", String::GetNumStrings(String::HEAP::NEW_EXTRA), String::GetHeapSize(String::HEAP::NEW_EXTRA), String::GeHeapMaxSize(String::HEAP::NEW_EXTRA));
+    debug_print("Level specific strings: \n");
+    debug_print("LevelPermanentHeap %d %X(MAX %X)\n\n", String::GetNumStrings(String::HEAP::LEVEL), String::GetHeapSize(String::HEAP::LEVEL), String::GeHeapMaxSize(String::HEAP::LEVEL));
     //MessageBox(0, 0, 0, 0);
 
     using namespace Network;
@@ -245,7 +245,7 @@ inline void ReadChat()
           {
           case 4:
           CreateConsole();
-          _printf("Welcome to Console!!!!\n\n");
+          debug_print("Welcome to Console!!!!\n\n");
           *(BYTE*)0x00478983 = 0x75;
           break;
           case 5:
@@ -465,7 +465,7 @@ __declspec(naked) void ReadChatHook(void)
 void CommandConsole(const char* message)
 {
     CreateConsole();
-    _printf("Welcome to Console!!!!\n\n");
+    debug_print("Welcome to Console!!!!\n\n");
     *(BYTE*)0x00478983 = 0x75;
 }
 
@@ -502,7 +502,7 @@ DWORD CrownCount = 0, ZoneCount = 0, RestartCount = 0;
 
 void CommandAdd(const char* message)
 {
-    _printf("CommandAdd - %s\n", message);
+    debug_print("CommandAdd - %s\n", message);
     message += 4;
 
 
@@ -521,7 +521,7 @@ void CommandAdd(const char* message)
     if (j)
     {
         command[j] = 0x00;
-        _printf("Param %s\n", command);
+        debug_print("Param %s\n", command);
         Vertex vertex = *GetSkaterPos();
 
         DWORD chc = crc32f(command);
@@ -602,7 +602,7 @@ void CommandShowCommands(const char* message)
     }
     msg[k] = '\n';
     msg[k] = 0;
-    _printf(msg);
+    debug_print(msg);
 
     sprintf(download_message, msg);
     showmessage = 1000;

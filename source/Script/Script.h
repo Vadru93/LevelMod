@@ -125,7 +125,7 @@ namespace QScript
             else
                 strcpy(fileName, file);
 
-            _printf("[%d]QBFile: %s crc %X size %X\n", level, fileName, checksum, size);
+            debug_print("[%d]QBFile: %s crc %X size %X\n", level, fileName, checksum, size);
         }
 
         bool ContentChanged(bool level = false);
@@ -260,19 +260,19 @@ struct EXTERN CScript
 
     static void DumpScripts()
     {
-        _printf("###########################################################\n\n");
-        _printf("All the CScripts that currently exist ...\n\n");
+        debug_print("###########################################################\n\n");
+        debug_print("All the CScripts that currently exist ...\n\n");
 
         CScript* p_scr = GetNextScript();
 
         while (p_scr)
         {
-            _printf("CScript %s %X\n", FindChecksumName(p_scr->scriptChecksum), p_scr);
+            debug_print("CScript %s %p\n", FindChecksumName(p_scr->scriptChecksum), p_scr);
 
             p_scr = GetNextScript(p_scr);
 
         }
-        _printf("\n");
+        debug_print("\n");
     }
 
     bool AddCStruct(CStructHeader* pStruct, bool allocate = true);
@@ -408,7 +408,7 @@ struct CStructHeader
     {
         if (this->QBkey == checksum)
         {
-            _printf("Array? %p %p\n", this, this->pArray);
+            debug_print("Array? %p %p\n", this, this->pArray);
             return this->pArray;
         }
         CStructHeader* header = this->NextHeader;
@@ -416,7 +416,7 @@ struct CStructHeader
         {
             if (header->QBkey == checksum)
             {
-                _printf("Array? %p %p\n", header, header->pArray);
+                debug_print("Array? %p %p\n", header, header->pArray);
                 return header->pArray;
             }
             header = header->NextHeader;
@@ -520,7 +520,7 @@ struct CStructHeader
 
     bool SetFloat(DWORD checksum, float value)
     {
-        _printf("SetFloat %p\n", this);
+        debug_print("SetFloat %p\n", this);
         CStructHeader* header = this;
         while (header)
         {

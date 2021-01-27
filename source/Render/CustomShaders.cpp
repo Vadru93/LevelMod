@@ -71,7 +71,7 @@ void Mesh::AddShader(ShaderObject* shader, DWORD matIndex)
 {
     //matIndex++;
     DWORD pShader = (DWORD)this;
-    _printf("pShader %X inedx %d\n", pShader, matIndex);
+    debug_print("pShader %X inedx %d\n", pShader, matIndex);
     pShader += 0x2C;//
     if (matIndex)
     {
@@ -95,7 +95,7 @@ void Mesh::AddShader(ShaderObject* shader, DWORD matIndex)
         pShader = *(DWORD*)retry;
         if (!pShader)
         {
-            _printf("Unloaded texture?\n");
+            debug_print("Unloaded texture?\n");
             return;
         }
     }
@@ -123,7 +123,7 @@ void Gfx::LoadCustomShaders(char* path)
     /*NULL_MAT = &NULLMAT;
     ZeroMemory(NULL_MAT, sizeof(D3DMATERIAL9));
     loadingShaders = true;
-    _printf("OpenShader: %s\n", path);
+    debug_print("OpenShader: %s\n", path);
     FILE* f = fopen(path, "rb");
     bool first = true;
     if (f)
@@ -140,7 +140,7 @@ void Gfx::LoadCustomShaders(char* path)
         numMaterials = 0;
         if (materials)
             delete [] materials;
-        _printf("Number of Materials %d\n", numMats);
+        debug_print("Number of Materials %d\n", numMats);
         if (numMats)
         {
             materials = new D3DMATERIAL9[numMats];
@@ -157,7 +157,7 @@ void Gfx::LoadCustomShaders(char* path)
         numAnimations = 0;
         if (animations)
             delete [] animations;
-        _printf("Number of Animations %d\n", numAnims);
+        debug_print("Number of Animations %d\n", numAnims);
         if (numMaterials)
         {
             animations = new Animation[numAnims];
@@ -172,7 +172,7 @@ void Gfx::LoadCustomShaders(char* path)
 
 
         DWORD numShaderObjects = ReadDWORD();
-        _printf("numShaders %d\n", numShaderObjects);
+        debug_print("numShaders %d\n", numShaderObjects);
         if (numShaderObjects)
         {
             shaders = new ShaderObject[numShaderObjects * 4];
@@ -180,7 +180,7 @@ void Gfx::LoadCustomShaders(char* path)
             for (DWORD i = 0; i < numShaderObjects; i++)
             {
                 DWORD checksum = ReadDWORD();
-                _printf("Trying to find SuperSector %s...\n", FindChecksumName(checksum));
+                debug_print("Trying to find SuperSector %s...\n", FindChecksumName(checksum));
                 DWORD numSplits = ReadDWORD();
 
                 SuperSector* sector = SuperSector::GetSuperSector(checksum);
@@ -192,12 +192,12 @@ void Gfx::LoadCustomShaders(char* path)
                         DWORD retries = 0;
                         while (!sector->mesh && retries < 50)
                         {
-                            _printf("Waiting for matsplits to load %d(50)...\n", retries + 1);
+                            debug_print("Waiting for matsplits to load %d(50)...\n", retries + 1);
                             retries++;
                             Sleep(100);
                             if (GameState::GotSuperSectors == false)
                             {
-                                _printf("Unloading shaders...\n");
+                                debug_print("Unloading shaders...\n");
                                 UnloadShaders();
                                 return;
                             }
@@ -205,7 +205,7 @@ void Gfx::LoadCustomShaders(char* path)
                         Sleep(500);
                         first = false;
                     }
-                    _printf("Found sector numSplits %d\n", numSplits);
+                    debug_print("Found sector numSplits %d\n", numSplits);
 
                     __assume(numSplits < 5);//To prevent warnings
                     for (DWORD j = 0; j < numSplits; j++)
@@ -236,7 +236,7 @@ void Gfx::LoadCustomShaders(char* path)
                             sector->mesh->AddShader(&shaders[numShaders], matIndex);
                         else
                         {
-                            _printf("No Mesh? %p\n", &sector->mesh);
+                            debug_print("No Mesh? %p\n", &sector->mesh);
                             for (DWORD k = 0; k < 3; k++)
                             {
                                 Sleep(2);
@@ -262,15 +262,15 @@ void Gfx::LoadCustomShaders(char* path)
                                 if (FAILED(hres))
                                 {
                                     shaders[numShaders].textures[k].texture = NULL;
-                                    _printf("FAILED TO CREATE TEXTURE %s\n", (char*)pFile);
+                                    debug_print("FAILED TO CREATE TEXTURE %s\n", (char*)pFile);
                                 }
                                 pFile += len;
-                                _printf("LOCATION %X\n", pFile);
+                                debug_print("LOCATION %X\n", pFile);
                             }
                         }
                         else
                         {
-                            _printf("fixed alpha? %X\n", pFile);
+                            debug_print("fixed alpha? %X\n", pFile);
                             shaders[numShaders].alphaRef = ReadDWORD();
                         }
                         numShaders++;
@@ -279,7 +279,7 @@ void Gfx::LoadCustomShaders(char* path)
                 }
                 else
                 {
-                    _printf("Couldn't find sector %s %X\n", FindChecksumName(checksum), pFile);
+                    debug_print("Couldn't find sector %s %X\n", FindChecksumName(checksum), pFile);
                     for (DWORD j = 0; j < numSplits; j++)
                     {
                         pFile += 9 * 4;
@@ -304,7 +304,7 @@ void Gfx::LoadCustomShaders(char* path)
 
             delete[] oldFile;
             //Sleep(1000);
-            _printf("Finished loading shaders\n");
+            debug_print("Finished loading shaders\n");
      fclose(f);
             loadedShaders = true;
         //}
@@ -457,7 +457,7 @@ __declspec(noalias) void SubmitShader(ShaderObject2* __restrict pShader, Texture
         if (texture && pMesh->indexBuffer && pMesh->vertexBuffer && pMesh->numIndices && pMesh->numVertices)
         {
             texture->data->alpha = 0;
-            /*_printf("Render 2nd pass\n");
+            /*debug_print("Render 2nd pass\n");
             DWORD target = p_target_texstage(D3DTSS_ADDRESSU);
             p_current_texstage(D3DTSS_ADDRESSU) = target;
             pDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, target);

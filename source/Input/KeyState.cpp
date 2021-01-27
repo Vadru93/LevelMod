@@ -186,9 +186,9 @@ void AddVibration(CStruct* pStruct, CScript* pScript)
     if (pStruct)
     {
         if (pScript)
-            _printf("Adding vibration from script %s location %p\n", FindChecksumName(pScript->scriptChecksum), pScript->address);
+            debug_print("Adding vibration from script %s location %p\n", FindChecksumName(pScript->scriptChecksum), pScript->address);
         else
-            _printf("Adding vibration from unknown script??\n");
+            debug_print("Adding vibration from unknown script??\n");
 
         CStructHeader* pActuator, * pPercent, * pDuration = NULL;
 
@@ -211,16 +211,16 @@ void AddVibration(CStruct* pStruct, CScript* pScript)
         //The percent is value between 0-100
         if (pStruct->GetStruct(Checksums::Percent, &pPercent))
         {
-            _printf("GotParam Percent %d\n", pPercent->value.i);
+            debug_print("GotParam Percent %d\n", pPercent->value.i);
             double vibrationLevel = 65535.0;
             vibrationLevel *= (((double)pPercent->value.i / 100.0));
 
             *motor = (WORD)(vibrationLevel + 0.5);
-            _printf("Setting vibration to %f(%d) on motor %d\n", vibrationLevel, *motor, rightMotor);
+            debug_print("Setting vibration to %f(%d) on motor %d\n", vibrationLevel, *motor, rightMotor);
         }
         else
         {
-            _printf("Setting vibration to MAX on motor %d\n", rightMotor);
+            debug_print("Setting vibration to MAX on motor %d\n", rightMotor);
             *motor = 65535;
         }
 
@@ -232,17 +232,17 @@ void AddVibration(CStruct* pStruct, CScript* pScript)
         if (pStruct->GetStruct(Checksums::Duration, &pDuration))
         {
             XINPUT::vibrationFrames = (DWORD)(pDuration->value.f * 1000.0f);
-            _printf("Vibration for %d frames\n", XINPUT::vibrationFrames);
+            debug_print("Vibration for %d frames\n", XINPUT::vibrationFrames);
 
         }
         else
-            _printf("Vibration until Off is called\n");
+            debug_print("Vibration until Off is called\n");
 
     }
     else if (pScript)
-        _printf("no params for vibration?\nIn script %s location %p\n", FindChecksumName(pScript->scriptChecksum), pScript->address);
+        debug_print("no params for vibration?\nIn script %s location %p\n", FindChecksumName(pScript->scriptChecksum), pScript->address);
     else
-        _printf("Wrong pointers in " __FUNCTION__ "\n");
+        debug_print("Wrong pointers in " __FUNCTION__ "\n");
 
 }
 
@@ -285,7 +285,7 @@ void HookVibrate()
 
 DWORD UpdateKeyState(KeyState* state, DWORD press)
 {
-    //_printf("Updaing state %p\n", state);
+    //debug_print("Updaing state %p\n", state);
     if (!XINPUT::Player1->IsConnected())
         return press;
 
@@ -380,7 +380,7 @@ DWORD UpdateKeyState(KeyState* state, DWORD press)
         break;
 
     default:
-        _printf("Unknown button press %s(%X)", FindChecksumName(state->GetChecksum()));
+        debug_print("Unknown button press %s(%X)", FindChecksumName(state->GetChecksum()));
         break;
     }
     //MessageBox(0, "THIS IS NOT GOOD", "", 0);
@@ -413,7 +413,7 @@ BYTE UpdateKeyState2(DWORD button, BYTE pressed)
     if (!GameState::GotSuperSectors || !XINPUT::Player1->IsConnected() || button > 16)
     {
         if (pressed)
-            _printf("Unhandled keypress %d pressed %d\n", button, pressed);
+            debug_print("Unhandled keypress %d pressed %d\n", button, pressed);
         return pressed;
     }
     Skater* skater = Skater::Instance();
@@ -681,7 +681,7 @@ EXTERN void ProxyPad(Skater* skater)
 {
     if (XINPUT::Player1->IsConnected()) [[unlikely]]
     {
-        //_printf("Player1 Is Connected.\n going to update...\n");
+        //debug_print("Player1 Is Connected.\n going to update...\n");
         skater->UpdateKeyState(KeyState::OLLIE, (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A) * 0xFF);
         skater->UpdateKeyState(KeyState::GRAB, (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B) * 0xFF);
         skater->UpdateKeyState(KeyState::FLIP, (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_X) * 0xFF);

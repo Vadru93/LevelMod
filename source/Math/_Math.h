@@ -773,23 +773,23 @@ struct Matrix : D3DXMATRIX
         {
             if (hip_transfer) [[unlikely]]//hip_transfer, keeep both rotations
             {
-                _printf("An unlikely event..\n");
+                debug_print("An unlikely event..\n");
                 /*vTwoSinThetaAxis.x = m[UP][Z] - m[AT][Y];
                  vTwoSinThetaAxis.z = m[UP][X] - m[RIGHT][Y];*/
             }
             else//need to check if we just drifted or if this is a non vertical ramp
             {
-                _printf("drifted?");
+                debug_print("drifted?");
                 if (xDiff > zDiff)
                 {
                     if ((xDiff - zDiff) > 80.0f)//we just drifted, so rotate ONLY on the longest distance
                     {
                         vTwoSinThetaAxis.x = 0.0f;
-                        _printf(" YES\n");
+                        debug_print(" YES\n");
                     }
                     else
                     {
-                        _printf(" NO 1\n");
+                        debug_print(" NO 1\n");
                         //vTwoSinThetaAxis.x = m[UP][Z] - m[AT][Y];
                         //vTwoSinThetaAxis.y = m[AT][X] - m[RIGHT][Z];
                         ///vTwoSinThetaAxis.z = 0;// m[UP][X] - m[RIGHT][Y];
@@ -804,12 +804,12 @@ struct Matrix : D3DXMATRIX
                     if ((zDiff - xDiff) > 80.0f)//we just drifted, so rotate ONLY on the longest distance
                     {
                         vTwoSinThetaAxis.z = 0.0f;
-                        _printf(" YES\n");
+                        debug_print(" YES\n");
                     }
                     else
                     {
                         //reverse = true;
-                        _printf(" NO 2\n");
+                        debug_print(" NO 2\n");
                         vTwoSinThetaAxis.x = m[UP][Z] - m[AT][Y];
                         vTwoSinThetaAxis.y = m[AT][X] - m[RIGHT][Z];
                         vTwoSinThetaAxis.z = m[RIGHT][Y] - m[UP][X];
@@ -828,7 +828,7 @@ struct Matrix : D3DXMATRIX
         vTwoSinThetaAxis.y = 0;// -m[UP][Z] - m[AT][Y];
         vTwoSinThetaAxis.z = 0;// -m[UP][Z] - m[AT][Y];*/
         // 0.0f;// m[RIGHT][Y] - m[UP][X];
-        _printf("theta %f %f %f\nstart %f %f\nend %f %f\n", vTwoSinThetaAxis.x, vTwoSinThetaAxis.y, vTwoSinThetaAxis.z, start.x, start.z, end.x, end.z);
+        debug_print("theta %f %f %f\nstart %f %f\nend %f %f\n", vTwoSinThetaAxis.x, vTwoSinThetaAxis.y, vTwoSinThetaAxis.z, start.x, start.z, end.x, end.z);
 
         /*
 
@@ -856,13 +856,13 @@ struct Matrix : D3DXMATRIX
 
             /*if ((vTwoSinThetaAxis.x < -0.75f && vTwoSinThetaAxis.x >= -1.0f))
             {
-                _printf("Inverting theta\n");
+                debug_print("Inverting theta\n");
                 vTwoSinThetaAxis.x = 0.0f;// m[UP][Z] - m[AT][Y];
                 vTwoSinThetaAxis.y = 0.0f;// m[AT][X] - m[RIGHT][Z];
                 vTwoSinThetaAxis.z = m[RIGHT][Y] - m[UP][X];
             }*/
 
-        _printf("theta %f %f %f\n", vTwoSinThetaAxis.x, vTwoSinThetaAxis.y, vTwoSinThetaAxis.z);
+        debug_print("theta %f %f %f\n", vTwoSinThetaAxis.x, vTwoSinThetaAxis.y, vTwoSinThetaAxis.z);
 
         // Gary:  There used to be a magic patch added by Dave
         // (basically negating the axis) which made it work with
@@ -892,7 +892,7 @@ struct Matrix : D3DXMATRIX
         (*pRadians) = (float)atan2(nTwoSinTheta, nTwoCosTheta);
         if ((nTwoSinTheta <= 0.01f) && (nTwoCosTheta <= 0.0f))
         {
-            _printf("\n\nERROR THETA\n\n");
+            debug_print("\n\nERROR THETA\n\n");
             /*
             * sin theta is 0; cos theta is -1; theta is 180 degrees
             * vTwoSinThetaAxis was degenerate

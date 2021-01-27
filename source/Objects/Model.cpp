@@ -115,12 +115,12 @@ void BouncyObj_OnBounce(Model* mdl)
         {
             CStructHeader* name;
             if (node->GetStruct(Checksums::Name, &name))
-                _printf("BouncyObj_OnBounce: %s\n", FindChecksumName(name->Data));
+                debug_print("BouncyObj_OnBounce: %s\n", FindChecksumName(name->Data));
             CStructHeader* BounceScript;
 
             if (node->GetStruct(Checksums::BounceScript, &BounceScript))//BounceScript exists, let's spawn it!
             {
-                _printf("Going to spawn BounceScript %s\n", FindChecksumName(BounceScript->Data));
+                debug_print("Going to spawn BounceScript %s\n", FindChecksumName(BounceScript->Data));
                 QScript::SpawnScript(BounceScript->Data, 0, mdl->GetNodeIndex());
             }
 
@@ -128,7 +128,7 @@ void BouncyObj_OnBounce(Model* mdl)
 
             if (node->GetStruct(Checksums::BounceSound, &BounceSound) && BounceSound->Data)
             {
-                _printf("BounceSound %s\n", FindChecksumName(BounceSound->Data));
+                debug_print("BounceSound %s\n", FindChecksumName(BounceSound->Data));
                 CScript script;
                 CStruct params(QBKeyHeader::LOCAL, BounceSound->Data);
                 Game::PlaySound(&params, &script);
@@ -140,7 +140,7 @@ void BouncyObj_OnBounce(Model* mdl)
     DWORD trigger = p_trigger_node;
     if (trigger)//We have hit a trigger poly
     {
-        _printf("BouncyObj has hit a trigger poly\n");
+        debug_print("BouncyObj has hit a trigger poly\n");
         p_trigger_node = 0;//Reset the trigger checksum so we only trigger once
         DWORD index = 0;
 
@@ -213,7 +213,7 @@ void BouncyObj_OnBounce(Model* mdl)
                             if (key == Checksums::Shatter || key == Checksums::ShatterAndDie || key == trigger)
                             {
                                 //This is probably going to Shatter something, let's spawn the TriggerScript
-                                _printf("Going to spawn TriggerScript %s\n", FindChecksumName(TriggerScript->Data));
+                                debug_print("Going to spawn TriggerScript %s\n", FindChecksumName(TriggerScript->Data));
                                 QScript::SpawnScript(TriggerScript->Data, 0, index);
                                 return;
                             }
@@ -236,7 +236,7 @@ void BouncyObj_OnBounce(Model* mdl)
 
                         default:
                             //Should add all the unhandled opcodes to prevent crashing and other issues
-                            _printf("%X @ %p\n", opcode, pScript);
+                            debug_print("%X @ %p\n", opcode, pScript);
                             MessageBox(0, "Unhandled opcode...", __FUNCTION__, 0);
                             break;
                         }
@@ -249,14 +249,14 @@ void BouncyObj_OnBounce(Model* mdl)
 
         }
         else
-            _printf("Couldn't find Node %s\n", trigger);
+            debug_print("Couldn't find Node %s\n", trigger);
 
     }
 }
 
 void BouncyObj_Go(Model* mdl)
 {
-    _printf("Model %p\n", mdl);
+    debug_print("Model %p\n", mdl);
     //A BouncyObject has been hit by a skater
     //Now we need to check if there are any scripts to be called, or shadows to be removed
     CStructHeader* node = Node::GetNodeStructByIndex(mdl->GetNodeIndex());
@@ -270,21 +270,21 @@ void BouncyObj_Go(Model* mdl)
             SuperSector* sector = SuperSector::GetSuperSector(collide->Data);
             if (sector)
             {
-                _printf("Killing Shadow %s\n", FindChecksumName(collide->Data));
+                debug_print("Killing Shadow %s\n", FindChecksumName(collide->Data));
                 sector->SetState(MeshState::kill);
             }
             else
-                _printf(__FUNCTION__ " Couldn't find sector %s\n", FindChecksumName(collide->Data));
+                debug_print(__FUNCTION__ " Couldn't find sector %s\n", FindChecksumName(collide->Data));
         }
 
         if (node->GetStruct(Checksums::CollideScript, &collide))//Found a CollideScript, let's spawn it!
         {
-            _printf("Going to spawn script %s\n", FindChecksumName(collide->Data));
+            debug_print("Going to spawn script %s\n", FindChecksumName(collide->Data));
             QScript::SpawnScript(collide->Data, NULL, mdl->GetNodeIndex());
         }
     }
     else
-        _printf(__FUNCTION__ " Couldn't find Node[%d]\n", mdl->GetNodeIndex());
+        debug_print(__FUNCTION__ " Couldn't find Node[%d]\n", mdl->GetNodeIndex());
 }
 
 
@@ -300,25 +300,25 @@ void Obj_MoveToNode(Model* mdl, CStruct* pStruct)
             SuperSector* sector = SuperSector::GetSuperSector(collision->Data);
             if (sector)
             {
-                _printf(__FUNCTION__ " -> Going to move collision...\n");
+                debug_print(__FUNCTION__ " -> Going to move collision...\n");
 
                 CStructHeader* pNode;
                 if (pStruct->GetStruct(Checksums::Name, &pNode))
                     sector->MoveToNode(pNode->Data);
                 else
-                    _printf("Need param <Name> in " __FUNCTION__ "\n");
+                    debug_print("Need param <Name> in " __FUNCTION__ "\n");
 
             }
             else
             {
-                _printf("Couldn't find SuperSector %s in " __FUNCTION__ "\n", FindChecksumName(collision->Data));
+                debug_print("Couldn't find SuperSector %s in " __FUNCTION__ "\n", FindChecksumName(collision->Data));
             }
         }
         /*else
-            //_printf("No Collision found %X?\n", node);*/
+            //debug_print("No Collision found %X?\n", node);*/
     }
     else
-        _printf("Couldn't find NodeIndex %d in " __FUNCTION__ "\n", mdl->GetNodeIndex());
+        debug_print("Couldn't find NodeIndex %d in " __FUNCTION__ "\n", mdl->GetNodeIndex());
 }
 
 void Obj_FollowPathLinked(Model* mdl, CStruct* pStruct)
@@ -333,8 +333,8 @@ void Obj_FollowPathLinked(Model* mdl, CStruct* pStruct)
             SuperSector* sector = SuperSector::GetSuperSector(collision->Data);
             if (sector)
             {
-                _printf("model %X\n", mdl);
-                _printf(__FUNCTION__ " -> Going to move collision...\n");
+                debug_print("model %X\n", mdl);
+                debug_print(__FUNCTION__ " -> Going to move collision...\n");
 
                 movingObjects.push_back(MovingObject(sector, mdl));
 
@@ -350,10 +350,10 @@ void Obj_FollowPathLinked(Model* mdl, CStruct* pStruct)
             }
             else
             {
-                _printf("Couldn't find SuperSector %s in " __FUNCTION__ "\n", FindChecksumName(collision->Data));
+                debug_print("Couldn't find SuperSector %s in " __FUNCTION__ "\n", FindChecksumName(collision->Data));
             }
         }
     }
     else
-        _printf("Couldn't find NodeIndex %d in " __FUNCTION__ "\n", mdl->GetNodeIndex());
+        debug_print("Couldn't find NodeIndex %d in " __FUNCTION__ "\n", mdl->GetNodeIndex());
 }

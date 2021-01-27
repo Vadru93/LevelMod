@@ -27,7 +27,7 @@ namespace Network
 
     int Handle_HostOption_Changed(HostOptionMsg* msg)
     {
-        _printf("Recived Host msg %p\n", msg);
+        debug_print("Recived Host msg %p\n", msg);
         NetHandler* net_handler = NetHandler::Instance();
         if (!net_handler->OnServer())
         {
@@ -35,7 +35,7 @@ namespace Network
             auto it = LevelModSettings::overrideOptions.find(msg->option);
             if (it != LevelModSettings::overrideOptions.end())
             {
-                _printf("Host sent HostOption %s %d\n", FindChecksumName(msg->option), msg->value);
+                debug_print("Host sent HostOption %s %d\n", FindChecksumName(msg->option), msg->value);
 
                 //If the current override value equals the recieved override value we don't need to do anything
                 if (it->second.value != msg->value)
@@ -47,14 +47,14 @@ namespace Network
                 }
             }
             else
-                _printf("Couldn't find HostOption %s...\n", FindChecksumName(msg->option));
+                debug_print("Couldn't find HostOption %s...\n", FindChecksumName(msg->option));
         }
         return HANDLER_CONTINUE;
     }
 
     int Handle_Test(NetMessage* msg)
     {
-        _printf("Host sent testmsg %s\nApp %p Conn %p %X %X\n%X %X\n", msg->msg, msg->app, msg->conn, msg->id, msg->flags, msg->client, msg->retAddr);
+        debug_print("Host sent testmsg %s\nApp %p Conn %p %X %X\n%X %X\n", msg->msg, msg->app, msg->conn, msg->id, msg->flags, msg->client, msg->retAddr);
         return HANDLER_CONTINUE;
     }
 

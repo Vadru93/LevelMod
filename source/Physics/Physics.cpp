@@ -23,7 +23,7 @@ DWORD GetElapsedTime(DWORD currentTime, LARGE_INTEGER last_time)
 bool WallplantTimeGreaterThan(CStruct* pParams, CScript* pScript)
 {
     int time = pParams->GetInt();
-    //_printf("targetTime %d timeLapsed %d currentTime %d\n", time, diff, currentTime);
+    //debug_print("targetTime %d timeLapsed %d currentTime %d\n", time, diff, currentTime);
     return GetElapsedTime(GetTime(), Slerp::m_last_wallplant_time_stamp) > time;
 }
 
@@ -58,7 +58,7 @@ __declspec(naked) void handle_post_transfer_limit_overrides_naked()
 
 void ResetTransfer(Skater* skater)
 {
-    _printf("landing from transfer\n");
+    debug_print("landing from transfer\n");
     skater->ResetLerpingMatrix();
 
     if (!Slerp::landing)
@@ -110,7 +110,7 @@ void ResetTransfer(Skater* skater)
 
     /*QBKeyHeader* header = GetQBKeyHeader(Checksum("SetSpeed"));
     if (header)
-        _printf("Set Speed%p  TYPE %s Vel %f %f %f\n", header->pFunction, QBTypes[header->type], skater->GetVelocity()->x, skater->GetVelocity()->y, skater->GetVelocity()->z);
+        debug_print("Set Speed%p  TYPE %s Vel %f %f %f\n", header->pFunction, QBTypes[header->type], skater->GetVelocity()->x, skater->GetVelocity()->y, skater->GetVelocity()->z);
     else
         MessageBox(0, "hmm", "", 0);
     CStruct CSpeed;
@@ -124,7 +124,7 @@ void ResetTransfer(Skater* skater)
 
 
 
-    _printf("Set Speed%p  Vel %f %f %f\n", header->pFunction, skater->GetVelocity()->x, skater->GetVelocity()->y, skater->GetVelocity()->z);*/
+    debug_print("Set Speed%p  Vel %f %f %f\n", header->pFunction, skater->GetVelocity()->x, skater->GetVelocity()->y, skater->GetVelocity()->z);*/
 }
 
 __declspec(naked) void ResetTransfer_naked()
@@ -135,7 +135,7 @@ __declspec(naked) void ResetTransfer_naked()
 
     _asm pushad;
     //_asm pushfd;
-    //_printf("inside resettransfer\n");
+    //debug_print("inside resettransfer\n");
 
     if (Slerp::transfer && skater) [[unlikely]]
     {
@@ -149,7 +149,7 @@ __declspec(naked) void ResetTransfer_naked()
 
 inline bool is_vert_for_transfers(const Vertex* normal)
 {
-    //_printf("Vert, %f %f %f\n", normal->x, normal->y, normal->z);
+    //debug_print("Vert, %f %f %f\n", normal->x, normal->y, normal->z);
     // cull out non-vert vert polys when looking for spine transfer and acid drop triggers; allows designers to be a little sloppier
     return fabsf(normal->y) < 0.707f;
 }
@@ -184,7 +184,7 @@ __declspec(noalias) bool look_for_transfer_target(const D3DXVECTOR3& search_dir,
         skater->SetRay(*(D3DXVECTOR3*)&start, *(D3DXVECTOR3*)&end);
         if (skater->CollisionCheck(Collision::Flags::Vert) && is_vert_for_transfers((Vertex*)skater->GetCollisionNormal()))
         {
-            _printf("Found Vert\n");
+            debug_print("Found Vert\n");
             Vertex horizontal_normal = *(Vertex*)skater->GetCollisionNormal();
             horizontal_normal.y = 0.0f;
             horizontal_normal.Normalize();
@@ -193,7 +193,7 @@ __declspec(noalias) bool look_for_transfer_target(const D3DXVECTOR3& search_dir,
             {
                 target = *(Vertex*)skater->GetHitPoint();
                 target_normal = *(Vertex*)skater->GetCollisionNormal();
-                //_printf("Target %f %f %f normal %f %f %f\n", target.x, target.y, target.z, target_normal.x, target_normal.y, target_normal.z);
+                //debug_print("Target %f %f %f normal %f %f %f\n", target.x, target.y, target.z, target_normal.x, target_normal.y, target_normal.z);
 
                 hip_transfer = dot > -0.866f;//same as in thug1src
                 if (hip_transfer)
@@ -202,10 +202,10 @@ __declspec(noalias) bool look_for_transfer_target(const D3DXVECTOR3& search_dir,
                     //Without this check you wil hip transfer to ramps that are on the same horizon as you...
                     if (dot >= 0.4f && Sgn(start_normal.x) == Sgn(horizontal_normal.x) && Sgn(start_normal.z) == Sgn(horizontal_normal.z))
                     {
-                        _printf("HIP with too low angle?\n");
+                        debug_print("HIP with too low angle?\n");
                         return false;
                     }
-                    _printf("dot %f\nstart %f %f, target %f %f\n", dot, start_normal.x, start_normal.z, horizontal_normal.x, horizontal_normal.z);
+                    debug_print("dot %f\nstart %f %f, target %f %f\n", dot, start_normal.x, start_normal.z, horizontal_normal.x, horizontal_normal.z);
                 }
 
                 return true;
@@ -214,7 +214,7 @@ __declspec(noalias) bool look_for_transfer_target(const D3DXVECTOR3& search_dir,
             {
                 target = *(Vertex*)skater->GetHitPoint();
                 target_normal = *(Vertex*)skater->GetCollisionNormal();
-                _printf("FAlSE Target dot %f\n%f %f %f normal %f %f %f\n", dot, target.x, target.y, target.z, target_normal.x, target_normal.y, target_normal.z);
+                debug_print("FAlSE Target dot %f\n%f %f %f normal %f %f %f\n", dot, target.x, target.y, target.z, target_normal.x, target_normal.y, target_normal.z);
 
             }
         }
@@ -371,7 +371,7 @@ bool Skater::CheckForSpine()
     SetRay(start, end);
     if (CollisionCheck(Collision::Flags::Vert))
     {
-        _printf("found target -\n");
+        debug_print("found target -\n");
 
         //MessageBox(0, "found wall", "", 0);
         wall_pos = *(Vertex*)GetHitPoint();
@@ -404,7 +404,7 @@ bool Skater::CheckForSpine()
     }
     else
     {
-        _printf("Retrying\n");
+        debug_print("Retrying\n");
         D3DXVECTOR3 start = (*GetPosition() - wall_out * 0.5f);
         D3DXVECTOR3 end = (*GetPosition() - wall_out * 0.5f);
         end.y -= 4500.0f;
@@ -412,7 +412,7 @@ bool Skater::CheckForSpine()
         SetRay(start, end);
         if (CollisionCheck(Collision::Flags::Vert))
         {
-            _printf("found target +\n");
+            debug_print("found target +\n");
 
             //MessageBox(0, "found wall", "", 0);
             wall_pos = *(Vertex*)GetHitPoint();
@@ -445,7 +445,7 @@ bool Skater::CheckForSpine()
         }
         else
         {
-            _printf("Retrying\n");
+            debug_print("Retrying\n");
             D3DXVECTOR3 start = (*GetPosition());
             D3DXVECTOR3 end = (*GetPosition());
             end.y -= 4500.0f;
@@ -453,7 +453,7 @@ bool Skater::CheckForSpine()
             SetRay(start, end);
             if (CollisionCheck(Collision::Flags::Vert))
             {
-                _printf("found target\n");
+                debug_print("found target\n");
 
                 //MessageBox(0, "found wall", "", 0);
                 wall_pos = *(Vertex*)GetHitPoint();
@@ -565,7 +565,7 @@ bool Skater::CheckForSpine()
     // otherwise, just do a little pop over, and allow them to recover						  
     if (dist > 24.0f && speed * speed > ((Vertex*)GetVelocity())->LengthSqr() + 50.0f)
     {
-        _printf("not enough speed\n");
+        debug_print("not enough speed\n");
 
         return false;
     }
@@ -581,7 +581,7 @@ bool Skater::CheckForSpine()
     SetRay(start, end);
     if (CollisionCheck())
     {
-        _printf("too early\n");
+        debug_print("too early\n");
         // don't do anything.  We have a valid transfer but we can wait until we get high enough before we try for it
         return true;
     }
@@ -598,11 +598,11 @@ bool Skater::CheckForSpine()
         /*land_facing = *(Vertex*)&(target - *(Vertex*)GetPosition());
         land_facing.y = -(land_facing.x * target_normal.x + land_facing.z * target_normal.z) / target_normal.y;
         land_facing.Normalize();*/
-        _printf("land_facing X %f Y %f\n", Slerp::facing.x, Slerp::facing.y);
+        debug_print("land_facing X %f Y %f\n", Slerp::facing.x, Slerp::facing.y);
     }
     else
     {
-        _printf("\nHIP TRANSFER\n");
+        debug_print("\nHIP TRANSFER\n");
         Vertex offset = Vertex(target - *(Vertex*)GetPosition());
         offset.y = 0.0f;
         offset.Normalize();
@@ -610,12 +610,12 @@ bool Skater::CheckForSpine()
         if (dot < 0.0f)
         {
             Slerp::facing = Vertex(0.0f, -1.0f, 0.0f);
-            _printf("land_facing +\n");
+            debug_print("land_facing +\n");
         }
         else
         {
             Slerp::facing = Vertex(0.0f, -1.0f, 0.0f);
-            _printf("land_facing -\n");
+            debug_print("land_facing -\n");
         }
     }
 
@@ -700,27 +700,27 @@ bool Skater::CheckForSpine()
     //If we have rotation on both X and Z it means we do a hip_transfer, or our velocity made us drift in the QP
     if (Slerp::axis[X] && Slerp::axis[Z]) [[unlikely]]
     {
-        _printf("Both Axis...\n");
+        debug_print("Both Axis...\n");
         if (hip_transfer) [[unlikely]]//hip_transfer, keeep both rotations
         {
-            _printf("An unlikely event..\n");
+            debug_print("An unlikely event..\n");
         /*vTwoSinThetaAxis.x = m[UP][Z] - m[AT][Y];
         vTwoSinThetaAxis.z = m[UP][X] - m[RIGHT][Y];*/
             }
             else//need to check if we just drifted or if this is a non vertical ramp
             {
-                _printf("drifted?");
+                debug_print("drifted?");
                 if (xDiff > zDiff)
                 {
                     if ((xDiff - zDiff) > 180.0f || fabsf(start.y - end.y) > 100)//we just drifted, so rotate ONLY on the longest distance
                     {
                          Slerp::axis[X] = 0;
                          (*(Vertex*)&Slerp::axis).Normalize();
-                         printf(" YES wall %f %f\n", wall_out.x, wall_out.z);
+                         debug_print(" YES wall %f %f\n", wall_out.x, wall_out.z);
                     }
                     else
                     {
-                        printf(" NO 1 wall %f %f\n", wall_out.x, wall_out.z);
+                        debug_print(" NO 1 wall %f %f\n", wall_out.x, wall_out.z);
                         //vTwoSinThetaAxis.x = m[UP][Z] - m[AT][Y];
                         //vTwoSinThetaAxis.y = m[AT][X] - m[RIGHT][Z];
                         ///vTwoSinThetaAxis.z = 0;// m[UP][X] - m[RIGHT][Y];
@@ -736,12 +736,12 @@ bool Skater::CheckForSpine()
                      {
                          Slerp::axis[Z] = 0;
                          (*(Vertex*)&Slerp::axis).Normalize();
-                         printf(" YES wall %f %f\n", wall_out.x, wall_out.z);
+                         debug_print(" YES wall %f %f\n", wall_out.x, wall_out.z);
                      }
                      else
                             {
                          //reverse = true;
-                         printf(" NO 2 wall %f %f\n", wall_out.x, wall_out.z);
+                         debug_print(" NO 2 wall %f %f\n", wall_out.x, wall_out.z);
                          /*vTwoSinThetaAxis.x = m[UP][Z] - m[AT][Y];
                          vTwoSinThetaAxis.y = m[AT][X] - m[RIGHT][Z];
                          vTwoSinThetaAxis.z = m[RIGHT][Y] - m[UP][X];*/
@@ -757,7 +757,7 @@ bool Skater::CheckForSpine()
 
     }
     else
-        _printf("1 axis\n");
+        debug_print("1 axis\n");
     /*if (fabsf(Slerp::axis[Z]) > (fabsf(Slerp::axis[X]) + 0.05f))
     {
         if (fabsf(Slerp::axis[X]) < 0.045f)
@@ -773,12 +773,12 @@ bool Skater::CheckForSpine()
     Slerp::radians = (float)atan2(nTwoSinTheta, nTwoCosTheta);*/
     Slerp::radians = 3.0f;
     //Slerp::axis[Y] = 0;
-    _printf("\nStart %f %f\nend %f %f\n", start.x, start.z, end.x, end.z);
-    _printf("\nUp %f %f\ntarget_norm %f %f\n", skater_up.x, skater_up.z, target_normal.x, target_normal.z);
-    _printf("Radian %f Axis %f %f\n", Slerp::radians, Slerp::axis.x, Slerp::axis.z);
+    debug_print("\nStart %f %f\nend %f %f\n", start.x, start.z, end.x, end.z);
+    debug_print("\nUp %f %f\ntarget_norm %f %f\n", skater_up.x, skater_up.z, target_normal.x, target_normal.z);
+    debug_print("Radian %f Axis %f %f\n", Slerp::radians, Slerp::axis.x, Slerp::axis.z);
     (*(Vertex*)&(Slerp::axis)).Normalize();
-    _printf("Normalized Axis %f %f\n", Slerp::axis.x, Slerp::axis.z);
-    _printf("diffY %f\n", normal_diff[Y]);
+    debug_print("Normalized Axis %f %f\n", Slerp::axis.x, Slerp::axis.z);
+    debug_print("diffY %f\n", normal_diff[Y]);
     normal_diff[Y] = 0.0f;
     normal_diff.Normalize();
     Matrix slerp_test;
@@ -786,13 +786,13 @@ bool Skater::CheckForSpine()
 
     if (slerp_test.m[Y][Y] < 0.0f)
     {
-        _printf("Inverting Skater\n");
+        debug_print("Inverting Skater\n");
 
         Slerp::axis = -Slerp::axis;
         Slerp::radians = (2.0f * D3DX_PI) - Slerp::radians;
     }
 
-    _printf("test_angle %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
+    debug_print("test_angle %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
     if (!hip_transfer && Slerp::axis[X] && Slerp::axis[Z])//hip transfer seems to not be bugged?
     {
 
@@ -805,7 +805,7 @@ bool Skater::CheckForSpine()
             int best = 1;
             Slerp::radians = 3.0f;
             D3DXVECTOR3 Optimal = Slerp::axis;
-            _printf("goint to find optimum\n");
+            debug_print("goint to find optimum\n");
             D3DXMatrixIdentity(&slerp_test);
             Slerp::axis[X] = normal_diff[Z];
             Slerp::axis[Z] = -normal_diff[X];
@@ -816,7 +816,7 @@ bool Skater::CheckForSpine()
                 Optimal = Slerp::axis;
                 best++;
             }
-            _printf("test_angle2 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
+            debug_print("test_angle2 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
 
             D3DXMatrixIdentity(&slerp_test);
             Slerp::axis[X] = normal_diff[Z];
@@ -828,7 +828,7 @@ bool Skater::CheckForSpine()
                 Optimal = Slerp::axis;
                 best = 3;
             }
-            _printf("test_angle3 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
+            debug_print("test_angle3 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
 
             D3DXMatrixIdentity(&slerp_test);
             Slerp::axis[X] = -normal_diff[Z];
@@ -840,7 +840,7 @@ bool Skater::CheckForSpine()
                 Optimal = Slerp::axis;
                 best = 4;
             }
-            _printf("test_angle4 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
+            debug_print("test_angle4 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
 
             D3DXMatrixIdentity(&slerp_test);
             Slerp::axis[X] = normal_diff[X];
@@ -852,7 +852,7 @@ bool Skater::CheckForSpine()
                 Optimal = Slerp::axis;
                 best = 5;
             }
-            _printf("test_angle5 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
+            debug_print("test_angle5 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
 
             D3DXMatrixIdentity(&slerp_test);
             Slerp::axis[X] = -normal_diff[X];
@@ -864,7 +864,7 @@ bool Skater::CheckForSpine()
                 Optimal = Slerp::axis;
                 best = 6;
             }
-            _printf("test_angle6 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
+            debug_print("test_angle6 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
 
             D3DXMatrixIdentity(&slerp_test);
             Slerp::axis[X] = -normal_diff[X];
@@ -876,7 +876,7 @@ bool Skater::CheckForSpine()
                 Optimal = Slerp::axis;
                 best = 7;
             }
-            _printf("test_angle7 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
+            debug_print("test_angle7 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
 
             D3DXMatrixIdentity(&slerp_test);
             Slerp::axis[X] = normal_diff[X];
@@ -888,7 +888,7 @@ bool Skater::CheckForSpine()
                 Optimal = Slerp::axis;
                 best = 8;
             }
-            _printf("test_angle8 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
+            debug_print("test_angle8 %f %f %f\n", slerp_test.m[Y][X], slerp_test.m[Y][Y], slerp_test.m[Y][Z]);
 
             Slerp::axis = Optimal;
 
@@ -896,33 +896,33 @@ bool Skater::CheckForSpine()
             float angDiffX = fabsf(slerp_test[Y][X] - target_normal[Z]);
             float angDiffZ = fabsf(slerp_test[Y][Z] - target_normal[X]);
 
-            printf("angDiff %f %f\nNormalY %f\n", angDiffX, angDiffZ, target_normal[Y]);
-            printf("final axis %f %f\nBestAngle %d\n", Slerp::axis[X], Slerp::axis[Z], best);
+            debug_print("angDiff %f %f\nNormalY %f\n", angDiffX, angDiffZ, target_normal[Y]);
+            debug_print("final axis %f %f\nBestAngle %d\n", Slerp::axis[X], Slerp::axis[Z], best);
 
 
             TestInterporlator(&slerp_test, 0.5f);
             if (slerp_test.m[Y][Y] < 0.95f)//still not straight enough, let's try scaling...
             {
-                _printf("Scaling axis: ");
+                debug_print("Scaling axis: ");
                 if (Slerp::axis[X] > Slerp::axis[Z])
                 {
-                    _printf("X\n");
+                    debug_print("X\n");
                     Slerp::axis[X] /= 2;
                     Slerp::axis[Z] += Slerp::axis[X];
                 }
                 else if (Slerp::axis[X] < Slerp::axis[Z])
                 {
-                    _printf("Z\n");
+                    debug_print("Z\n");
                     Slerp::axis[X] /= 2;
                     Slerp::axis[Z] += Slerp::axis[X];
                 }
                 else
-                    _printf("Equal?\n");
+                    debug_print("Equal?\n");
             }
             /*TestInterporlator(&slerp_test, 0.5f);
             if (slerp_test.m[Y][Y] < 0.0f)
             {
-                _printf("Inverting Skater\n");
+                debug_print("Inverting Skater\n");
 
                 Slerp::axis = -Slerp::axis;
                 Slerp::radians = (2.0f * D3DX_PI) - Slerp::radians;
@@ -978,11 +978,11 @@ bool Skater::CheckForSpine()
     // no late jumps during a transfer
     //"ollied"....
 
-    _printf("spinning target %f vel %f %f duration %f\n", target.z, Slerp::vel.x, Slerp::vel.z, Slerp::duration);
+    debug_print("spinning target %f vel %f %f duration %f\n", target.z, Slerp::vel.x, Slerp::vel.z, Slerp::duration);
 
     Slerp::transfer = true;	// flag in spin physics, to do the lean forward, and also allow downcoming lip tricks
     Slerp::speed = GetSpeed((Vertex*)GetVelocity());
-    _printf("\nVel %f %f %f Speed %f\n", GetVelocity()->x, GetVelocity()->y, GetVelocity()->z, Slerp::speed);
+    debug_print("\nVel %f %f %f Speed %f\n", GetVelocity()->x, GetVelocity()->y, GetVelocity()->z, Slerp::speed);
     inVert = true;
     static const DWORD timer = 0x00409AE0;
     _asm call timer
@@ -1344,7 +1344,7 @@ __declspec(noalias) void EnterAcid(const SAcidDropData& data)
     DEBUGSTART()
     {
         Skater* __restrict const skater = Skater::Instance();
-        _printf("EnterAcid\n");
+        debug_print("EnterAcid\n");
 
         //Slerp::done = false;
         //oldMatrix = this->matrix;
@@ -1373,23 +1373,23 @@ __declspec(noalias) void EnterAcid(const SAcidDropData& data)
             Slerp::duration = CalculateDuration(true_target_height, (skater->GetPosition())->y, (skater->GetVelocity())->y, skater);
         else
             Slerp::duration = CalculateDuration(target_pos.y, (skater->GetPosition())->y, (skater->GetVelocity())->y, skater);
-        _printf("duration %f target %f vel %f\n", Slerp::duration, target_pos.y, (skater->GetVelocity())->y);
+        debug_print("duration %f target %f vel %f\n", Slerp::duration, target_pos.y, (skater->GetVelocity())->y);
 
         //Slerp::transfer = false;
         float reqspeed = distance / Slerp::duration;
 
-        printf("reqspeed %f dropdirr %f %f\n", reqspeed, dropdirr.x, dropdirr.z);
+        debug_print("reqspeed %f dropdirr %f %f\n", reqspeed, dropdirr.x, dropdirr.z);
         Slerp::vel = Vertex(reqspeed * dropdirr.x, 0.0f, reqspeed * dropdirr.z);
         //Slerp::vel.y = 0.0f;
         Slerp::height = target_pos.y;
-        printf("vel %f %f %f %f\n", Slerp::vel.x, Slerp::vel.z, reqspeed * dropdirr.x, reqspeed * dropdirr.z);
+        debug_print("vel %f %f %f %f\n", Slerp::vel.x, Slerp::vel.z, (reqspeed * dropdirr.x), (reqspeed * dropdirr.z));
 
         //MessageBox(0, "VertTrue?", "", 0);
         skater->SetVertAir(true);
         //MessageBox(0, "Ya", "", 0);
         Slerp::transfer = true;
         Slerp::speed = GetSpeed((Vertex*)skater->GetVelocity());
-        _printf("\nVelocity %f %f %f Speed %f\n", skater->GetVelocity()->x, skater->GetVelocity()->y, skater->GetVelocity()->z, Slerp::speed);
+        debug_print("\nVelocity %f %f %f Speed %f\n", skater->GetVelocity()->x, skater->GetVelocity()->y, skater->GetVelocity()->z, Slerp::speed);
         //MessageBox(0, "Ya2", "", 0);
 
         ((Vertex*)skater->GetVelocity())->x = 0.0f;
@@ -1576,7 +1576,7 @@ __declspec(noalias) bool TestForAcid(CStruct* pParams, CScript* pScript)
 
             Slerp::transfer = true;
             Slerp::slerping = true;
-            _printf("No Spine Target...\n");
+            debug_print("No Spine Target...\n");
             skater->Restore();
             Slerp::last = *(Vertex*)skater->GetVelocity();
             skater->SetVertAir(false);
@@ -1704,7 +1704,7 @@ __declspec(noalias) bool TestForAcid(CStruct* pParams, CScript* pScript)
                     Vertex vel = *(Vertex*)skater->GetVelocity();
                     Vertex target = *(Vertex*)skater->GetHitPoint();
                     Vertex truetarget = target;
-                    //_printf("above\n");
+                    //debug_print("above\n");
 
 
                     if (!TestForClearPath(target, vel, pos, skater))
@@ -1731,7 +1731,7 @@ __declspec(noalias) bool TestForAcid(CStruct* pParams, CScript* pScript)
                     // otherwise, just do a little pop over, and allow them to recover
                     if (dist > 24.0f && speed * speed > skater->GetVelocity()->LengthSqr())
                     {
-                      _printf("not enough speed\n");
+                      debug_print("not enough speed\n");
                       continue;
                     }*/
 
@@ -1745,12 +1745,12 @@ __declspec(noalias) bool TestForAcid(CStruct* pParams, CScript* pScript)
                         Vertex vel = *skater->GetVelocity();
                         Vertex target = *skater->GetHitPoint();
                         Vertex truetarget = target;
-                        _printf("above\n");
+                        debug_print("above\n");
                         fflush(stdout);*/
 
                         if (TestForClearPath(target, vel, pos, skater))
                         {
-                            _printf("above\n");
+                            debug_print("above\n");
                             skater->Restore();
                             Slerp::inAcid = true;
                             Slerp::type = ACID;
@@ -1769,7 +1769,7 @@ __declspec(noalias) bool TestForAcid(CStruct* pParams, CScript* pScript)
                             return true;
                         }
                         else
-                            _printf("no clear path?\n");
+                            debug_print("no clear path?\n");
                     }
                 }
 
@@ -1825,7 +1825,7 @@ __declspec(noalias) bool TestForAcid(CStruct* pParams, CScript* pScript)
                     Vertex vel = *(Vertex*)skater->GetVelocity();
                     Vertex target = *(Vertex*)skater->GetHitPoint();
                     Vertex truetarget = target;
-                    //_printf("above\n");
+                    //debug_print("above\n");
 
 
                     /*if (!TestForClearPath(target, vel, pos, skater))
@@ -1839,11 +1839,11 @@ __declspec(noalias) bool TestForAcid(CStruct* pParams, CScript* pScript)
                     float absnorm = fabsf(target_normal.y);
                     if (absnorm > 0.48f && absnorm < 0.98f)
                     {
-                        //_printf("norm %f %f vel %f %f", vel_normal.x, vel_normal.z, velocity.x, velocity.z);
+                        //debug_print("norm %f %f vel %f %f", vel_normal.x, vel_normal.z, velocity.x, velocity.z);
                         float test = ((vel_normal.x - target_normal.x) + (vel_normal.z - target_normal.z));
                         if (fabsf(test) < 0.82f)
                         {
-                            _printf("above\n");
+                            debug_print("above\n");
 
                             /*num_hits++;
 
@@ -1854,7 +1854,7 @@ __declspec(noalias) bool TestForAcid(CStruct* pParams, CScript* pScript)
                             Vertex vel = *skater->GetVelocity();
                             Vertex target = *skater->GetHitPoint();
                             Vertex truetarget = target;
-                            _printf("above\n");
+                            debug_print("above\n");
                             fflush(stdout);*/
 
                             if (TestForClearPath(target, vel, pos, skater))
@@ -1877,7 +1877,7 @@ __declspec(noalias) bool TestForAcid(CStruct* pParams, CScript* pScript)
                                 return true;
                             }
                             else
-                                _printf("no clear path?\n");
+                                debug_print("no clear path?\n");
 
                             /*skater->Restore();
                             Slerp::inAcid = true;
@@ -1940,7 +1940,7 @@ __declspec(noalias) void MaybeAcid()
         if ((GetElapsedTime(GetTime(), Slerp::m_last_wallplant_time_stamp)) > Physics_Wallplant_Duration)
         {
             skater->SetState(Skater::AIR);
-            _printf("Wallplant wait time done - Applying velocity\n");
+            debug_print("Wallplant wait time done - Applying velocity\n");
             *skater->GetVelocity() = Slerp::realVelocity;
             Slerp::wallplant = false;
         }
@@ -1963,7 +1963,7 @@ __declspec(noalias) void MaybeAcid()
             (LevelModSettings::SpineButton2 == KeyState::NONE || skater->GetKeyState(LevelModSettings::SpineButton2)->IsPressed()) ) 
         ))
     {
-        _printf("trying acid\n");
+        debug_print("trying acid\n");
 
         /*if (skater->maybe_acid_drop(false, *skater->GetPosition(), *skater->GetOldPosition(), *skater->GetVelocity(), acid_drop_data))
           skater->EnterAcid(acid_drop_data);
@@ -1971,7 +1971,7 @@ __declspec(noalias) void MaybeAcid()
           {*/
         if (TestForAcid(NULL, NULL))
         {
-            _printf("acid returned true\n");
+            debug_print("acid returned true\n");
 
             Slerp::trying = true;
             Slerp::done = false;
@@ -2012,7 +2012,7 @@ bool Skater::CheckForWallpant()
     if (!(LevelModSettings::AllowNewTricks & LevelModSettings::ALLOW_WALLPLANT))
         return false;
     //Check that we are standing "up"
-    _printf("%f\n", GetMatrix().m[Y][Y]);
+    debug_print("%f\n", GetMatrix().m[Y][Y]);
     //if(GetMatrix()[Y][Y] < -0.90f) return false;
 
     DWORD currentTime = GetTime();
@@ -2022,7 +2022,7 @@ bool Skater::CheckForWallpant()
 
     Slerp::m_last_wallplant_time_stamp.LowPart = currentTime;
     Slerp::m_last_wallplant_time_stamp.HighPart = currentTime2;
-    _printf("Timer passed, height %f!\n", height);
+    debug_print("Timer passed, height %f!\n", height);
 
     if (height < Physics_Min_Wallplant_Height) return false;
 
@@ -2032,7 +2032,7 @@ bool Skater::CheckForWallpant()
     Vertex* velocity = (Vertex*)GetVelocity();
 
     float speed = velocity->Length();
-    _printf("Speed %f\n", speed);
+    debug_print("Speed %f\n", speed);
     if (speed < 0.01f) return false;
 
     Vertex forward = Vertex(*velocity / speed);
@@ -2046,11 +2046,11 @@ bool Skater::CheckForWallpant()
     horiz_normal.y = 0;
     horiz_normal.Normalize();
 
-    _printf("Angle %f min aproach %f\n", D3DXVec3Dot(&horiz_forward, &horiz_normal), -sinf(Physics_Wallplant_Min_Approach_Angle * D3DX_PI / 180.0f));
+    debug_print("Angle %f min aproach %f\n", D3DXVec3Dot(&horiz_forward, &horiz_normal), -sinf(Physics_Wallplant_Min_Approach_Angle * D3DX_PI / 180.0f));
 
     if (D3DXVec3Dot(&horiz_forward, &horiz_normal) > -sinf(Physics_Wallplant_Min_Approach_Angle * 180 / D3DX_PI)) return false;
 
-    _printf("Angle passed\n");
+    debug_print("Angle passed\n");
 
     if (velocity->y > 0.0f && GetKeyState(KeyState::GRIND)->IsPressed()) [[unlikely]]
     {
@@ -2072,7 +2072,7 @@ bool Skater::CheckForWallpant()
     CArray* p_trick_query_array = GetQBKeyHeader(Checksum("Wallplant_Trick"))->pArray;
     if (p_trick_query_array == NULL)
     {
-        _printf("couldn't find array Wallplant_Trick\n");
+        debug_print("couldn't find array Wallplant_Trick\n");
         return false;
     }
     bool triggered = false;
@@ -2142,7 +2142,7 @@ bool Skater::CheckForWallpant()
     Slerp::wallplant = true;
     //blockspin = true;
     autoturn = false;
-    _printf("returning true\n");
+    debug_print("returning true\n");
     return true;
 }
 
@@ -2174,7 +2174,7 @@ __declspec(naked) void MaybeAcid_naked()
 {
     static const DWORD jmpBack = 0x004A8AE0 + 4;
     _asm pushad;
-    /*_printf("inside maybeacidd\n");
+    /*debug_print("inside maybeacidd\n");
     fflush(stdout);*/
     MaybeAcid();
     _asm popad;
@@ -2210,7 +2210,7 @@ __declspec(naked) void CheckForTransfer_naked()
         ok = true;
         //_asm pushad;
         //_asm pushfd;
-        //_printf("inside checkfortransfer\n");
+        //debug_print("inside checkfortransfer\n");
         skater->ResetLerpingMatrix();
         //_asm popfd;
         //_asm popad
@@ -2230,11 +2230,11 @@ __declspec(naked) void ResetTransferVel_naked()
     static const DWORD jmpBack = 0x004A27B5 + 4;
     _asm pushad;
     //_asm pushfd;
-    //_printf("inside resettrasnferver\n");
+    //debug_print("inside resettrasnferver\n");
     //_asm popfd;
     if (Slerp::transfer && Slerp::addedvel && velocity)
     {
-        //_printf("Reset velocity %f %f\nvel %f %f\n", velocity->x, velocity->z, Slerp::vel.x, Slerp::vel.z);
+        //debug_print("Reset velocity %f %f\nvel %f %f\n", velocity->x, velocity->z, Slerp::vel.x, Slerp::vel.z);
         *velocity -= Slerp::vel;
     }
     _asm popad;
@@ -2251,7 +2251,7 @@ __declspec(naked) void Slerp_naked()
     _asm mov skater, ebp
     static const DWORD jmpBack = 0x004A25D9 + 4;
     //_asm pushfd;
-    //_printf("inside slerp\n");
+    //debug_print("inside slerp\n");
     if (!Slerp::transfer)// && skater->InVert())
     {
         static DWORD lean = 0x0049CB60;
@@ -2290,7 +2290,7 @@ __declspec(noalias) void OnGround()
         Skater* __restrict const skater = Skater::Instance();
         if (skater == NULL)
             return;
-        _printf("landed from transfer 2\n");
+        debug_print("landed from transfer 2\n");
         //fflush(stdout);
         QBKeyHeader* header = GetQBKeyHeader(Checksums::Normal_Lerp_Speed);
         if (header)
@@ -2335,7 +2335,7 @@ __declspec(noalias) void OnGround()
 
 
 
-             _printf("Set Speed%p  Vel %f %f %f\n", header, skater->GetVelocity()->x, skater->GetVelocity()->y, skater->GetVelocity()->z);*/
+             debug_print("Set Speed%p  Vel %f %f %f\n", header, skater->GetVelocity()->x, skater->GetVelocity()->y, skater->GetVelocity()->z);*/
         }
     }
 }
@@ -2346,7 +2346,7 @@ __declspec(naked) void OnGround_naked()
     static const DWORD jmpBack = 0x004A21AF + 4;
     _asm pushad;
     _asm pushfd;
-    //_printf("inside onground\n");
+    //debug_print("inside onground\n");
     OnGround();
     _asm popfd;
     _asm popad;
@@ -2357,7 +2357,7 @@ __declspec(naked) void OnGround_naked()
 
 __declspec(noalias) DWORD GrindParamHook(char* str, int unk)
 {
-    //_printf("OnGrind?\n");
+    //debug_print("OnGrind?\n");
     Slerp::OnGrind = true;
     Slerp::wallplant = false;
     if ((Slerp::transfer)) [[unlikely]]
@@ -2366,7 +2366,7 @@ __declspec(noalias) DWORD GrindParamHook(char* str, int unk)
         Skater* __restrict const skater = Skater::Instance();
         if (skater)
         {
-            _printf("OnGrind while inside transfer\nReseting transfer...\n");
+            debug_print("OnGrind while inside transfer\nReseting transfer...\n");
             QBKeyHeader* header = GetQBKeyHeader(Checksums::Normal_Lerp_Speed);
             if (header)
                 header->value.f = Slerp::value;

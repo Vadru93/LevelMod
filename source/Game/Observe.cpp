@@ -111,17 +111,17 @@ void ObserveMode::Next(DWORD time)
         current = first;
         UpdateInfo();
     }
-    _printf("NewObserver: %s\n", name);
+    debug_print("NewObserver: %s\n", name);
 }
 
 void ObserveMode::Update()
 {
-    //_printf("Update camera\n");
+    //debug_print("Update camera\n");
     static Vertex oldOffset;
 
     if (PlayerExist())
     {
-        //_printf("Player Exists\n");
+        //debug_print("Player Exists\n");
         /*static const DWORD ptr = 0x008E1E90;
         if (InvalidReadPtr((void*)ptr))
             return;
@@ -147,7 +147,7 @@ void ObserveMode::Update()
             camMode = *(DWORD*)camMode + 0x882c;*/
         DWORD camMode = GetCamModeAddress();// Skater::GetCamModeAddress();
         *(DWORD*)camMode = 2;
-        //_printf("Got CamMode\n");
+        //debug_print("Got CamMode\n");
 
 
         //Get camera matrix
@@ -349,12 +349,12 @@ void ObserveMode::InterpolateCamera()
 
     if ((fabsf(fabsf(oldAngle) - fabsf(angle)) <= 0.08f && fabsf(oldAngle - angle) < 1.5f))
     {
-        //_printf("too small\n");
+        //debug_print("too small\n");
         return;
     }
 
 
-    //_printf("angle: %f old angle: %f x: %f z %f\n", angle, oldAngle, x, z);
+    //debug_print("angle: %f old angle: %f x: %f z %f\n", angle, oldAngle, x, z);
     /*bool nulling = false;
     if (angle>=3.14f || angle<=-3.14f)
     nulling = true;
@@ -367,7 +367,7 @@ void ObserveMode::InterpolateCamera()
 
     angle -= oldAngle;
 
-    _printf("oldAngle(%f) deltaAngle(%f) skaterAngle(%f)\n", oldAngle, angle, angle + oldAngle);
+    debug_print("oldAngle(%f) deltaAngle(%f) skaterAngle(%f)\n", oldAngle, angle, angle + oldAngle);
 
     if (angle >= 3.1f || angle <= -3.1f)
     {
@@ -409,7 +409,7 @@ void ObserveMode::InterpolateCamera()
             }
             else
                 angle += absAng;
-            //_printf("reversing with angle %f old(%f) angl(%f)\n", angle, oldAngle, (atan2f(z, x) + 0.03f));
+            //debug_print("reversing with angle %f old(%f) angl(%f)\n", angle, oldAngle, (atan2f(z, x) + 0.03f));
 
         }
         else
@@ -431,7 +431,7 @@ void ObserveMode::InterpolateCamera()
     angle = 0.0f;
     else
     angle = -angle;
-    _printf("reversing cause angle is 3.14\n");
+    debug_print("reversing cause angle is 3.14\n");
     }
     else if (angle <= -3.141f)
     {
@@ -439,7 +439,7 @@ void ObserveMode::InterpolateCamera()
     angle = 0.0f;
     else
     angle = -angle;
-    _printf("reversing cause angle is 3.14\n");
+    debug_print("reversing cause angle is 3.14\n");
     }*/
 
     if (!first)
@@ -459,7 +459,7 @@ void ObserveMode::InterpolateCamera()
         else
         {
             return;
-            //_printf("nulling cause smaller than 0.02\n");
+            //debug_print("nulling cause smaller than 0.02\n");
         }
     }
     if (angle == 0.0f)
@@ -521,7 +521,7 @@ void ObserveMode::InterpolateCamera()
     }
     else
     angle += absAng;
-    //_printf("reversing with angle %f old(%f) angl(%f)\n", angle, oldAngle, (atan2f(z, x) + 0.03f));
+    //debug_print("reversing with angle %f old(%f) angl(%f)\n", angle, oldAngle, (atan2f(z, x) + 0.03f));
 
     }
     }
@@ -758,7 +758,7 @@ bool EnterObserveMode(CStruct* pParams, CScript* pScript)
     }
     pObserve = new ObserveMode;
     pObserve->Enter();
-    _printf("Entered ObserveMode, Observing player: %s\n", pObserve->name);
+    debug_print("Entered ObserveMode, Observing player: %s\n", pObserve->name);
     return pObserve->current != NULL;
     return true;
 }

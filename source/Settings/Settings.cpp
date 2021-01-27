@@ -7,6 +7,7 @@
 #include "Settings\IniWriter.h"
 #include "Script\Node.h"
 #include "Memory\String.h"
+#include <tlhelp32.h>
 
 #define NO_EXTRA_INCLUDE
 #include "Extension\Extension.h"
@@ -141,12 +142,12 @@ bool IsOptionOverriden(CStruct* pStruct, CScript* pScript)
                     CStructHeader* pOption;
                     if (!pScript->params->GetStruct(Checksum("option_id"), &pOption))
                     {
-                        _printf("couldn't find option_id, going to auto-generate it...\n");
+                        debug_print("couldn't find option_id, going to auto-generate it...\n");
                         //Add the option_id
                         CStructHeader* pParam = pScript->params->AllocateCStruct();
                         if (!pParam)
                         {
-                            _printf(__FUNCTION__ "couldn't Allocate CStruct...\n");
+                            debug_print(__FUNCTION__ "couldn't Allocate CStruct...\n");
                             return false;
                         }
 
@@ -164,7 +165,7 @@ bool IsOptionOverriden(CStruct* pStruct, CScript* pScript)
                         pParam->QBkey = Checksum("option_id");
                         char name[128] = "";
                         sprintf(name, "%s_id", FindChecksumName(header->Data, false));
-                        _printf("Generated: %s\n", name);
+                        debug_print("Generated: %s\n", name);
                         pParam->Data = Checksum(name);
                         pParam->NextHeader = NULL;
                     }
@@ -176,13 +177,13 @@ bool IsOptionOverriden(CStruct* pStruct, CScript* pScript)
             else
             {
                 //Should not happen
-                _printf(__FUNCTION__ " Couldn't find option %s\nRemember to add the option the the list\nCheck settings.q for more info\n", FindChecksumName(header->Data));
+                debug_print(__FUNCTION__ " Couldn't find option %s\nRemember to add the option the the list\nCheck settings.q for more info\n", FindChecksumName(header->Data));
             }
 
         }
         header = header->NextHeader;
     }
-    _printf(__FUNCTION__" No Param? %s\n", FindChecksumName(pScript->scriptChecksum));
+    debug_print(__FUNCTION__" No Param? %s\n", FindChecksumName(pScript->scriptChecksum));
     return false;
 }
 
@@ -219,13 +220,13 @@ bool IsOptionOn(CStruct* pStruct, CScript* pScript)
             else
             {
                 //Should not happen
-                _printf(__FUNCTION__ " Couldn't find option %s\nRemember to add the option the the list\nCheck settings.q for more info\n", FindChecksumName(header->Data));
+                debug_print(__FUNCTION__ " Couldn't find option %s\nRemember to add the option the the list\nCheck settings.q for more info\n", FindChecksumName(header->Data));
             }
 
         }
         header = header->NextHeader;
     }
-    _printf(__FUNCTION__" No Param? %s\n", FindChecksumName(pScript->scriptChecksum));
+    debug_print(__FUNCTION__" No Param? %s\n", FindChecksumName(pScript->scriptChecksum));
     return false;
 }
 
@@ -236,7 +237,7 @@ bool IsOptionOff(CStruct* pStruct, CScript* pScript)
 
 void SetAirTrickSpeed(DWORD speed)
 {
-    _printf("Setting AirTrickSpeed to %d\n", speed);
+    debug_print("Setting AirTrickSpeed to %d\n", speed);
     for (int i = 0; i < sizeof(trickSpeed) / sizeof(TrickSpeed); i++)
     {
         QBKeyHeader* header = GetQBKeyHeader(trickSpeed[i].TrickName);
@@ -246,29 +247,29 @@ void SetAirTrickSpeed(DWORD speed)
             {
             case 0:
                 if (!header->SetFloat(Checksums::Speed, trickSpeed[i].fOriginalSpeed))
-                    _printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].TrickName));
+                    debug_print("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].TrickName));
                 break;
             case 1:
                 if (!header->SetFloat(Checksums::Speed, trickSpeed[i].fTh4Speed))
-                    _printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].TrickName));
+                    debug_print("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].TrickName));
                 break;
             case 2:
                 if (!header->SetFloat(Checksums::Speed, trickSpeed[i].fFastAir))
-                    _printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].TrickName));
+                    debug_print("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].TrickName));
                 break;
             case 3:
             case 4:
                 if (!header->SetFloat(Checksums::Speed, trickSpeed[i].fOriginalSpeed * ((speed - 2) * 0.1f + 1.0f)))
-                    _printf("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].TrickName));
+                    debug_print("Couldn't find variable speed in struct %s\n", FindChecksumName(trickSpeed[i].TrickName));
                 break;
 
             default:
-                _printf("Wrong value in option LM_Control_AirTrickSpeed\nValue should be between 0-4\n");
+                debug_print("Wrong value in option LM_Control_AirTrickSpeed\nValue should be between 0-4\n");
                 break;
             }
         }
         else
-            _printf("Couldn't find trick %s[%d]\n", FindChecksumName(trickSpeed[i].TrickName), i);
+            debug_print("Couldn't find trick %s[%d]\n", FindChecksumName(trickSpeed[i].TrickName), i);
     }
 }
 
@@ -276,7 +277,7 @@ void SetAirTrickSpeed(DWORD speed)
 void UpdateOption(DWORD checksum, int value)//, bool HostOption)
 {
     DWORD old = 0;//used for VirtualProtect
-    _printf("Updating Option %s %d\n", FindChecksumName(checksum), value);
+    debug_print("Updating Option %s %d\n", FindChecksumName(checksum), value);
 
     /*if (!HostOption)
     {
@@ -339,7 +340,77 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
         {
             int result = MessageBox(0, "Do you want to exit now?", "This option requires restart", MB_YESNO);
             if (result == IDYES)
+            {
+                extern char IniPath[MAX_PATH];
+                char temp[MAX_PATH] = "";
+                GetCurrentDirectory(MAX_PATH, temp);
+                if(value)
+                    sprintf(IniPath, "%s\\Skate3_debug.exe", temp);
+                else
+                    sprintf(IniPath, "%s\\Skate3.exe -windowed", temp);
+                PROCESS_INFORMATION ProcessInfo; //This is what we get as an [out] parameter
+
+                STARTUPINFO StartupInfo; //This is an [in] parameter-
+                ZeroMemory(&StartupInfo, sizeof(StartupInfo));
+                StartupInfo.cb = sizeof StartupInfo; //Only compulsory field
+                bool bCreated = false;
+
+                if ((value && !CreateProcess("skate3_debug.exe", LPSTR("skate3_debug.exe -windowed"),
+                    NULL, NULL, FALSE, 0, NULL,
+                    NULL, &StartupInfo, &ProcessInfo)) || (!value && !CreateProcess("skate3.exe", LPSTR("skate3.exe"),
+                        NULL, NULL, FALSE, 0, NULL,
+                        NULL, &StartupInfo, &ProcessInfo)))
+                {
+                    if (CreateProcess(IniPath, NULL,
+                        NULL, NULL, FALSE, 0, NULL,
+                        NULL, &StartupInfo, &ProcessInfo))
+                    {
+                        bCreated = true;
+                    }
+                }
+                else
+                {
+                    bCreated = true;
+                }
+
+                HANDLE h = NULL;
+                DWORD retry = 0;
+                while (!h && retry < 50000)
+                {
+                    if(value)
+                        h = OpenMutexA(0x1f0001, 0, "thps3_debug");
+                    else
+                        h = OpenMutexA(0x1f0001, 0, "thps3_mutex");
+                    retry++;
+                }
+                if(h)
+                    CloseHandle(h);
+
+                /*for (;;)
+                {
+                    HANDLE hSnapShot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+                    PROCESSENTRY32 processInfo;
+                    bool bRunningNow = false;
+
+                    while (Process32Next(hSnapShot, &processInfo) != FALSE)
+                    {
+                        if (!strcmp(processInfo.szExeFile, strAppName))
+                        {
+                            bRunningNow = true;
+                            break;
+                        }
+                    }
+                    CloseHandle(hSnapShot);
+                    if (bRunningNow)
+                        break;
+                }*/
+                if (bCreated)
+                {
+                    CloseHandle(ProcessInfo.hThread);
+                    CloseHandle(ProcessInfo.hProcess);
+                }
                 ExitProcess(0);
+            }
             else
                 return;
         }
@@ -366,7 +437,7 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
         }
 
         /*CreateConsole();
-        _printf("Welcome to DebugMode\n");*/
+        debug_print("Welcome to DebugMode\n");*/
 
         //Check if qbTable exist, if it doesn't exists
         //new Script() will generate qbTable from all .qb files found in qdir
@@ -532,7 +603,7 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
         default:
             LevelModSettings::SpineButton = KeyState::REVERT;
             LevelModSettings::SpineButton2 = KeyState::NONE;
-            _printf("Invalid SpineButton %d defaulting to revert\nPlease check LevelMod.ini\nValue should be between 0-5\n", value);
+            debug_print("Invalid SpineButton %d defaulting to revert\nPlease check LevelMod.ini\nValue should be between 0-5\n", value);
             break;
         }
         break;
@@ -556,7 +627,7 @@ void MaybeUpdateOption(DWORD overriden_option, DWORD HostOption, DWORD value)
                 MessageBox(0, "This is not good aswell", "HostOption badly linked...", 0);
         }
 
-        _printf("Now we updating..\n");
+        debug_print("Now we updating..\n");
 
         //If the override value equals the actual option value, or option is overriden we need to update the option(aka apply the option)
         if (value == option->value || option->Overriden())
@@ -572,7 +643,7 @@ int AddOption(char* name, int value, bool update, DWORD overriden_option, BYTE t
     DWORD checksum = crc32f(name);
     if (update)
     {
-        _printf("Updating ini file %s value %d\n", name, value);
+        debug_print("Updating ini file %s value %d\n", name, value);
         OptionWriter->WriteInt("Script_Settings", name, value);
     }
     else
@@ -584,16 +655,16 @@ int AddOption(char* name, int value, bool update, DWORD overriden_option, BYTE t
         else
         {
 
-            _printf("Reading from ini file %s, default %d ", name, value);
+            debug_print("Reading from ini file %s, default %d ", name, value);
             int new_value = OptionReader->ReadInt("Script_Settings", name, value);
 
             if (new_value < maximum)
                 value = new_value;
                 
             else
-                _printf("Too high value in ini file option %s\n Setting to default %d\n", name, value);
+                debug_print("Too high value in ini file option %s\n Setting to default %d\n", name, value);
 
-            _printf("value %d\n", value);
+            debug_print("value %d\n", value);
         }
         if (options.find(checksum) == options.end())
             options.insert(std::pair<DWORD, Option>(checksum, Option(value)));
@@ -612,14 +683,14 @@ int AddOption(char* name, int value, bool update, DWORD overriden_option, BYTE t
             QScript::Scripts = new QScript::QBScript(false);
         }
 
-        //_printf("Adding to QBTable %s\n");
+        //debug_print("Adding to QBTable %s\n");
         /*char* tempName = new char[strlen(name) + 1];
         memcpy(tempName, name, strlen(name) + 1);*/
 
         if (QScript::Scripts->qbTable.find(checksum) == QScript::Scripts->qbTable.end())
             QScript::Scripts->qbTable.insert(std::pair<DWORD, char*>(checksum, String::AddString(name)));
         else
-            _printf("This string already exists..\n");
+            debug_print("This string already exists..\n");
         //MessageBox(0, FindChecksumName(checksum), "", 0);
 
     }
@@ -631,9 +702,9 @@ int AddOption(char* name, int value, bool update, DWORD overriden_option, BYTE t
     {
         if (GameState::GotSuperSectors)
         {
-            _printf("Going to update HostOption %d\n", value);
+            debug_print("Going to update HostOption %d\n", value);
             SendHostOptionChanged(checksum, value);
-            _printf("Sent message\n");
+            debug_print("Sent message\n");
 
             MaybeUpdateOption(overriden_option, checksum, value);
         }
@@ -649,14 +720,14 @@ bool GetParamScript(CStruct* pStruct, CScript* pScript)
     {
         if (header->Type == QBKeyHeader::LOCAL)
         {
-            _printf("Searching for: %s)\n", FindChecksumName(header->Data));
+            debug_print("Searching for: %s)\n", FindChecksumName(header->Data));
             CStructHeader* param = pScript->GetParam(header->Data);
             if (param)
             {
                 CStructHeader* pParam = pScript->params->AllocateCStruct();
                 if (!pParam)
                 {
-                    _printf(__FUNCTION__ "couldn't Allocate CStruct...\n");
+                    debug_print(__FUNCTION__ "couldn't Allocate CStruct...\n");
                     return false;
                 }
 
@@ -676,13 +747,13 @@ bool GetParamScript(CStruct* pStruct, CScript* pScript)
                 pParam->NextHeader = NULL;
                 /*if (param->Type == QBKeyHeader::STRING)
                 {
-                    _printf("Removing old string...\n%s\n", param->pStr);
+                    debug_print("Removing old string...\n%s\n", param->pStr);
                     param->Data = 0;
                     param->QBkey = 0;
                     param->Type = QBKeyHeader::LOCAL;
                     pParam->NextHeader = NULL;
                 }*/
-                _printf("Found it!!\nAdding Param to pScript...\nName %s(%X) Data %s(%X) Type %s\n", FindChecksumName(param->QBkey), param->QBkey, param->Type == QBKeyHeader::STRING ? param->pStr : FindChecksumName(param->Data), param->Data, QScript::QBTypes[param->Type]);
+                debug_print("Found it!!\nAdding Param to pScript...\nName %s(%X) Data %s(%X) Type %s\n", FindChecksumName(param->QBkey), param->QBkey, param->Type == QBKeyHeader::STRING ? param->pStr : FindChecksumName(param->Data), param->Data, QScript::QBTypes[param->Type]);
                 param->Data = 0;
                 param->QBkey = 0;
                 param->Type = QBKeyHeader::LOCAL;
@@ -705,18 +776,18 @@ bool LM_GotParamScript(CStruct* pStruct, CScript* pScript)
             bool b = pScript->GotParam(header->Data);
             if (b)
             {
-                _printf("LM_GotParam returning true\n");
+                debug_print("LM_GotParam returning true\n");
                 return true;
             }
             else
             {
-                _printf("LM_GotParam returning false\n");
+                debug_print("LM_GotParam returning false\n");
                 return false;
             }
         }
         header = header->NextHeader;
     }
-    _printf("couldn't find param, LM_GotParam returning false\n");
+    debug_print("couldn't find param, LM_GotParam returning false\n");
     return false;
 }
 
@@ -763,11 +834,11 @@ bool SetOption(CStruct* pStruct, CScript* pScript)
                     if (!it->second.pOverride || !it->second.Overriden())
                     {
                         it->second.value = value->value.i;
-                        _printf("Setting option %s to %d\n", ok, it->second.value);
+                        debug_print("Setting option %s to %d\n", ok, it->second.value);
                         AddOption(ok, it->second.value, true);
                     }
                     else
-                        _printf("Option %s is overriden\n", ok);
+                        debug_print("Option %s is overriden\n", ok);
                     return true;
                 }
                 else
@@ -783,27 +854,27 @@ bool SetOption(CStruct* pStruct, CScript* pScript)
                         if (!it->second.pOverride || !it->second.Overriden())
                         {
                             it->second.value = value;//header->NextHeader->value.i;
-                            _printf("Setting option %s to %d\n", ok, it->second);
+                            debug_print("Setting option %s to %d\n", ok, it->second);
 
                             AddOption(ok, it->second.value, true);
                         }
                         else
-                            _printf("Option %s is overriden\n", ok);
+                            debug_print("Option %s is overriden\n", ok);
                         return true;
                     }
                     else
                     {
-                        _printf("coulnd't get value for %s\n", id);
+                        debug_print("coulnd't get value for %s\n", id);
                         return false;
                     }
                 }
             }
             else
-                _printf("couldn't find option %s\nMake Sure to add the option first\n", FindChecksumName(header->QBkey));
+                debug_print("couldn't find option %s\nMake Sure to add the option first\n", FindChecksumName(header->QBkey));
         }
         header = header->NextHeader;
     }
-    _printf(__FUNCTION__ " No param?\n");
+    debug_print(__FUNCTION__ " No param?\n");
     return false;
 }
 
@@ -822,24 +893,24 @@ bool ToggleHostOption(CStruct* pStruct, CScript* pScript)
                 if(option)
                     option->value = !option->value;
                 else
-                    _printf("couldn't find option %s\nMake Sure to add the option first\n", FindChecksumName(header->Data));
+                    debug_print("couldn't find option %s\nMake Sure to add the option first\n", FindChecksumName(header->Data));
                 override->second.value = !override->second.value;
                 char* ok = FindChecksumName(header->Data, false);
 
                 static char tempChar[MAX_PATH + 1] = "";
                 memcpy(tempChar, ok, strlen(ok) + 1);
-                _printf("Toggling HostOption %s %d\n", tempChar, override->second.value);
+                debug_print("Toggling HostOption %s %d\n", tempChar, override->second.value);
 
                 AddOption(tempChar, override->second.value, true, override->second.option);
 
                 return true;
             }
             else
-                _printf("couldn't find HostOption %s\nMake Sure to add the option first\n", FindChecksumName(header->Data));
+                debug_print("couldn't find HostOption %s\nMake Sure to add the option first\n", FindChecksumName(header->Data));
         }
         header = header->NextHeader;
     }
-    _printf(__FUNCTION__ " No param?\n");
+    debug_print(__FUNCTION__ " No param?\n");
     return false;
 }
 
@@ -861,19 +932,19 @@ bool ToggleOption(CStruct* pStruct, CScript* pScript)
                 {
                     static char tempChar[MAX_PATH + 1] = "";
                     memcpy(tempChar, ok, strlen(ok) + 1);
-                    _printf("Toggling option %s\n", tempChar);
+                    debug_print("Toggling option %s\n", tempChar);
                     AddOption(ok, it->second.value, true);
                 }
                 else
-                    _printf("Option %s is overriden\n", ok);
+                    debug_print("Option %s is overriden\n", ok);
                 return true;
             }
             else
-                _printf("couldn't find option %s\nMake Sure to add the option first\n", FindChecksumName(header->Data));
+                debug_print("couldn't find option %s\nMake Sure to add the option first\n", FindChecksumName(header->Data));
         }
         header = header->NextHeader;
     }
-    _printf(__FUNCTION__ " No param?\n");
+    debug_print(__FUNCTION__ " No param?\n");
     return false;
 }
 
@@ -897,13 +968,13 @@ bool GetOptionText(CStruct* pStruct, CScript* pScript)
                 if (it != options.end())
                 {
                     char* pText = pArray->GetString(it->second.value);
-                    _printf("Got Option Text %p ", pText);
-                    _printf("%s\n", pText);
+                    debug_print("Got Option Text %p ", pText);
+                    debug_print("%s\n", pText);
                     //MessageBox(0, pText, pText, 0);
                     CStructHeader* pParam = pScript->params->AllocateCStruct();
                     if (!pParam)
                     {
-                        _printf(__FUNCTION__ "couldn't Allocate CStruct...\n");
+                        debug_print(__FUNCTION__ "couldn't Allocate CStruct...\n");
                         return false;
                     }
 
@@ -917,25 +988,25 @@ bool GetOptionText(CStruct* pStruct, CScript* pScript)
                         pScript->params->head = pParam;
                         pScript->params->tail = pParam;
                     }
-                    _printf("Going to Add String\n");
+                    debug_print("Going to Add String\n");
                     pParam->Type = QBKeyHeader::STRING;
                     pParam->QBkey = Checksums::text;
-                    _printf("Going to MALLOCX\n");
+                    debug_print("Going to MALLOCX\n");
                     pParam->pStr = (char*)mallocx(strlen(pText) + 1);
                     memcpy(pParam->pStr, pText, strlen(pText) + 1);
                     pParam->NextHeader = NULL;
-                    _printf(__FUNCTION__ " Returning true\n");
+                    debug_print(__FUNCTION__ " Returning true\n");
                     return true;
                 }
             }
             else
-                _printf("Couldn't find option %s\nRemember to add the option first, check settings.qb\n", FindChecksumName(option->Data));
+                debug_print("Couldn't find option %s\nRemember to add the option first, check settings.qb\n", FindChecksumName(option->Data));
         }
         else
-            _printf("Need param text in function " __FUNCTION__ "\n");
+            debug_print("Need param text in function " __FUNCTION__ "\n");
     }
     else
-        _printf("Need param text in function " __FUNCTION__ "\n");
+        debug_print("Need param text in function " __FUNCTION__ "\n");
     return false;
 }
 
@@ -955,21 +1026,21 @@ bool AddOption(CStruct* pStruct, CScript* pScript)
                 CStructHeader* DEFAULT = NULL;
                 if (pStruct->GetStruct(Checksums::Value, &DEFAULT))
                 {
-                    _printf("Adding option %s default %d\n", name->pStr, DEFAULT->value.i);
+                    debug_print("Adding option %s default %d\n", name->pStr, DEFAULT->value.i);
                     pStruct->GetStruct(crc32f("max"), &pMax);
                     AddOption(name->pStr, DEFAULT->value.i);
                 }
                 else
-                    _printf("Need Param #DEFAULT " __FUNCTION__ "\n");
+                    debug_print("Need Param #DEFAULT " __FUNCTION__ "\n");
             }
             else
-                _printf("Option already in list..\n");
+                debug_print("Option already in list..\n");
         }
         else
-            _printf("Param #Name needs to be a string " __FUNCTION__ "\n");
+            debug_print("Param #Name needs to be a string " __FUNCTION__ "\n");
     }
     else
-        _printf("Need param #Name " __FUNCTION__ "\n");
+        debug_print("Need param #Name " __FUNCTION__ "\n");
 
     return false;
 }

@@ -131,7 +131,7 @@ namespace String
                 if ((*(DWORD*)0x008E1E0C + len) >= 0x008E1DF0)//Actually F0, but we keep some memory just in case we will reload QB files etc
                 {
                     char  msg[256] = "";
-                    _printf(("ExtraMemory reached @ %d strings"), GetNumStrings() + numExtraStrings);
+                    debug_print(("ExtraMemory reached @ %d strings"), GetNumStrings() + numExtraStrings);
                     //MessageBox(0, msg, msg, 0);
                     useExtraMemory = true;
                     StringHeapTop = (char*)0x0087D8FC;
@@ -155,7 +155,7 @@ namespace String
 
             if ((ExtraMemoryTop + len) >= ExtraMemoryBottom + OLD_OTHER_SIZE)
             {
-                _printf("Out of memory in permanent heap...\nGoing to use new heap\n");
+                debug_print("Out of memory in permanent heap...\nGoing to use new heap\n");
                 PermanentHeapTop += len;
                 StringHeapTop = PermanentHeapBottom;
                 outOfMemory = true;
@@ -213,16 +213,16 @@ namespace String
             {
                 if (strings[i].checksum == checksum)
                 {
-                    _printf("Returning old String %s\n", strings[i].pStr);
+                    debug_print("Returning old String %s\n", strings[i].pStr);
                     if (strcmp(strings[i].pStr, str))
-                        _printf("String missmatch? %s %s\n", strings[i].pStr, str);
+                        debug_print("String missmatch? %s %s\n", strings[i].pStr, str);
                     return strings[i].pStr;
                 }
             }
             if (crc32f(strings[i].pStr) == checksum_non_case)
             {
                 if (_stricmp(strings[i].pStr, str))
-                    _printf("String missmatch? %s %s\n", strings[i].pStr, str);
+                    debug_print("String missmatch? %s %s\n", strings[i].pStr, str);
                 return strings[i].pStr;
             }
         }
@@ -234,7 +234,7 @@ namespace String
             {
                 if (_stricmp(strings[i].pStr, str))
                     MessageBox(0, strings[i].pStr, str, 0);
-                _printf("Returning optimized string %s\n", strings[i].pStr);
+                debug_print("Returning optimized string %s\n", strings[i].pStr);
                 return strings[i].pStr;
             }
         }*/
@@ -255,7 +255,7 @@ namespace String
             {
                 if (_stricmp(levelStrings[i].pStr, str))
                     MessageBox(0, levelStrings[i].pStr, str, 0);
-                _printf("Returning optimized level string %s\n", levelStrings[i].pStr);
+                debug_print("Returning optimized level string %s\n", levelStrings[i].pStr);
                 return levelStrings[i].pStr;
             }
         }
@@ -306,14 +306,14 @@ namespace String
             if (strings[i].checksum == checksum)
             {
                 if (strcmp(strings[i].pStr, str))
-                    _printf("String missmatch? %s %s\n", strings[i].pStr, str);
-                _printf("Returning old String %s\n", strings[i].pStr);
+                    debug_print("String missmatch? %s %s\n", strings[i].pStr, str);
+                debug_print("Returning old String %s\n", strings[i].pStr);
                 return strings[i].pStr;
             }
             else if (crc32f(strings[i].pStr) == checksum_non_case)
             {
                 if (_stricmp(strings[i].pStr, str))
-                    _printf("String missmatch? %s %s\n", strings[i].pStr, str);
+                    debug_print("String missmatch? %s %s\n", strings[i].pStr, str);
                 return strings[i].pStr;
             }
         }*/
@@ -327,7 +327,7 @@ namespace String
             {
                 if (_stricmp(permanentStrings[i].pStr, str))
                     MessageBox(0, permanentStrings[i].pStr, str, 0);
-                _printf("Returning optimized string %s\n", permanentStrings[i].pStr);
+                debug_print("Returning optimized string %s\n", permanentStrings[i].pStr);
                 return strings[i].pStr;
             }
         }*/

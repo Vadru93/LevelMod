@@ -59,14 +59,14 @@ void sTriSubdivideStack::Pop(void* p_data)
 const void* sTriSubdivideStack::Peek(DWORD index)
 {
     int offset = index * m_block_size;
-    if (offset >= m_offset) _printf("Index %d is beyond end offset %d", index, m_offset);
+    if (offset >= m_offset) debug_print("Index %d is beyond end offset %d", index, m_offset);
 
     return m_data + offset;
 }
 
 bool NewShatterScript(CStruct* pStruct, CScript* pScript)
 {
-    _printf("NewShatterScript...\n");
+    debug_print("NewShatterScript...\n");
     // Need to read some params from the script here.
     float		area = 0.0f;
     float		variance = 0.0f;
@@ -99,7 +99,7 @@ bool NewShatterScript(CStruct* pStruct, CScript* pScript)
 
     int name = pStruct->GetChecksum(Checksums::Name);
 
-    _printf("Name %s area %f variance %f spread %f life %f bounce %f bounce_amp %f\n", FindChecksumName(name), area, variance, spread, life, bounce, bounce_amp);
+    debug_print("Name %s area %f variance %f spread %f life %f bounce %f bounce_amp %f\n", FindChecksumName(name), area, variance, spread, life, bounce, bounce_amp);
 
     if (name)
     {
@@ -111,10 +111,10 @@ bool NewShatterScript(CStruct* pStruct, CScript* pScript)
             ShatterSuperSector(sector);
         }
         else
-            _printf("Couldn't find sector %s\n", FindChecksumName(name));
+            debug_print("Couldn't find sector %s\n", FindChecksumName(name));
     }
     else
-        _printf("Need name param " __FUNCTION__);
+        debug_print("Need name param " __FUNCTION__);
     return true;
 }
 
@@ -138,30 +138,30 @@ void ShatterSuperSector(SuperSector* super_sector)
     if (super_sector->mesh)
     {
         DWORD stride = super_sector->mesh->splits[0].stride;
-        //_printf("SuperSector %p normals %p color_offset %p uv_offset %p numVErts %d\n", super_sector, super_sector->normals, super_sector->color_offset, super_sector->uv_offset, super_sector->numVertices);
+        //debug_print("SuperSector %p normals %p color_offset %p uv_offset %p numVErts %d\n", super_sector, super_sector->normals, super_sector->color_offset, super_sector->uv_offset, super_sector->numVertices);
         //BYTE* p_vert_data = new BYTE[super_sector->numVertices * stride];
         /*for (DWORD i = 0; i < super_sector->numVertices; i++)
         {
             *(D3DXVECTOR3*)&(p_vert_data[i * stride]) = super_sector->vertices[i];
             if (super_sector->normals)
             {
-                _printf("Adding normal %d/%d\n", i+1, super_sector->numVertices);
+                debug_print("Adding normal %d/%d\n", i+1, super_sector->numVertices);
                 *(D3DXVECTOR3*)&(p_vert_data[i * stride + 12]) = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
             }
             if (super_sector->color_offset)
             {
-                _printf("Adding color %d/%d\n", i + 1, super_sector->numVertices);
+                debug_print("Adding color %d/%d\n", i + 1, super_sector->numVertices);
                 *(DWORD*)&(p_vert_data[i * stride + (DWORD)super_sector->color_offset - (DWORD)super_sector->vertices]) = super_sector->color_offset[i];
             }
             if (super_sector->uv_offset)
             {
-                _printf("Adding uv %d/%d\n", i + 1, super_sector->numVertices);
+                debug_print("Adding uv %d/%d\n", i + 1, super_sector->numVertices);
                 *(DWORD*)&(p_vert_data[i * stride + (DWORD)super_sector->uv_offset - (DWORD)super_sector->vertices]) = super_sector->uv_offset[i * 2];
                 *(DWORD*)&(p_vert_data[i * stride + (DWORD)super_sector->uv_offset - (DWORD)super_sector->vertices + 1]) = super_sector->uv_offset[i * 2 + 1];
             }
         }*/
 
-        _printf("Sector %p stride %X\n", sector, stride);
+        debug_print("Sector %p stride %X\n", sector, stride);
         for (DWORD m = 0; m < sector->numSplits; ++m)
         {
             CSector::MaterialSplit* mesh = &sector->splits[m];
@@ -169,11 +169,11 @@ void ShatterSuperSector(SuperSector* super_sector)
 
             stride = split->stride;
             BYTE* p_vert_data;
-            _printf("Mesh %p\n", mesh);
+            debug_print("Mesh %p\n", mesh);
             if (mesh->numIndices >= 3)
             {
 
-                _printf("Mesh %s Split %d/%d\n", FindChecksumName(super_sector->name), m + 1, sector->numSplits);
+                debug_print("Mesh %s Split %d/%d\n", FindChecksumName(super_sector->name), m + 1, sector->numSplits);
                 split->vertexBuffer->GetProxyInterface()->Lock(split->baseIndex * stride/*0*/, 0, (void**)&p_vert_data, D3DLOCK_READONLY);
                 D3DXVECTOR3 bboxMax = D3DXVECTOR3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
                 D3DXVECTOR3 bboxMin = D3DXVECTOR3(FLT_MAX, FLT_MAX, FLT_MAX);
@@ -197,7 +197,7 @@ void ShatterSuperSector(SuperSector* super_sector)
                         bboxMin.z = v.z;
                 }
 
-                //_printf("TargetShatterArea %f numSplits %d numIndices %d stide %X\n", shatterAreas[m], sector->numSplits, mesh->numIndices, stride);
+                //debug_print("TargetShatterArea %f numSplits %d numIndices %d stide %X\n", shatterAreas[m], sector->numSplits, mesh->numIndices, stride);
                 //MessageBox(0, 0, 0, 0);
 
                 // Set the block size for this mesh.
@@ -261,7 +261,7 @@ void ShatterSuperSector(SuperSector* super_sector)
                     continue;
                 }
 
-                _printf("Worst case scenario %d tris\n", valid_tris);
+                debug_print("Worst case scenario %d tris\n", valid_tris);
 
                 // Create a tracking structure for this mesh.
                 ShatterData* p_shatter = new ShatterData(super_sector, &super_sector->mesh->splits[m], valid_tris * 4);
@@ -273,7 +273,7 @@ void ShatterSuperSector(SuperSector* super_sector)
                 float base_speed = shatterVelocity.Length();
 
                 spread_center += *Game::skater->GetHitPoint();//(bboxMax + bboxMin) * 0.5f;//
-                //_printf("Got hit point\n");
+                //debug_print("Got hit point\n");
 
                 // Process-subdivide the entire stack.
                 BYTE* p_copy_vertex = p_write_vertex;
@@ -284,7 +284,7 @@ void ShatterSuperSector(SuperSector* super_sector)
                 }*/
                 while (subdivide_tri_stack(&p_write_vertex, super_sector, targetShatterArea[rand() % 5], p_shatter->numTris));//  );
 
-                _printf("Going to allocate %d tris\n", p_shatter->numTris);
+                debug_print("Going to allocate %d tris\n", p_shatter->numTris);
                 p_shatter->Allocate();
                 //p_shatter->numTris--;
                 //p_shatter->numTris = ((DWORD)p_write_vertex - (DWORD)p_copy_vertex) / stride / 3;
@@ -292,7 +292,7 @@ void ShatterSuperSector(SuperSector* super_sector)
                 while (p_copy_vertex < p_write_vertex)
                 {
 
-                    //_printf("p_copy_vertex %p p_write_vertex %p details_index %d/%d\n", p_copy_vertex, p_write_vertex, details_index+1, valid_tris);
+                    //debug_print("p_copy_vertex %p p_write_vertex %p details_index %d/%d\n", p_copy_vertex, p_write_vertex, details_index+1, valid_tris);
                     D3DXVECTOR3* p_vert0 = (D3DXVECTOR3*)(p_copy_vertex + (stride * 0));
                     D3DXVECTOR3* p_vert1 = (D3DXVECTOR3*)(p_copy_vertex + (stride * 1));
                     D3DXVECTOR3* p_vert2 = (D3DXVECTOR3*)(p_copy_vertex + (stride * 2));
@@ -317,17 +317,17 @@ void ShatterSuperSector(SuperSector* super_sector)
                     ++details_index;
                 }
 
-                _printf("Going to push...\n");
+                debug_print("Going to push...\n");
                 shatterObjects.push_back(p_shatter);
-                _printf("Pushed...\n");
+                debug_print("Pushed...\n");
                 super_sector->mesh->splits[m].vertexBuffer->GetProxyInterface()->Unlock();
-                _printf("Unlocked\n");
+                debug_print("Unlocked\n");
             }
         }
-        //_printf("Going to delete p_data\n");
+        //debug_print("Going to delete p_data\n");
         //delete[] p_vert_data;
     }
-    //_printf("Finished\n");
+    //debug_print("Finished\n");
 }
 
 bool rendering = false;

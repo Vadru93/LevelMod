@@ -19,18 +19,18 @@ struct EXTERN CArray
     const int& operator[] (int x) const {
         if (Type != 1)
         {
-            _printf("Unsupported ArrayType\n");
+            debug_print("Unsupported ArrayType\n");
             return x;
         }
         if (x >= NumItems)
         {
-            _printf("###TOOO HIGH INDEX IN CARRAY(%d)!!!###\n", x);
+            debug_print("###TOOO HIGH INDEX IN CARRAY(%d)!!!###\n", x);
             x = (NumItems - 1);
         }
 
         if (NumItems > 1)
         {
-            _printf("NODE %p NumItms %d RANDOM(%d)\n\n", this, NumItems, x);
+            debug_print("NODE %p NumItms %d RANDOM(%d)\n\n", this, NumItems, x);
             //MessageBox(0, "", "", 0);
         }
         return  *(indices + x);
@@ -74,7 +74,7 @@ struct EXTERN CArray
 
     char* GetString(int index)
     {
-        //_printf("ArrayType %d %p\n", Type, Items[index]);
+        //debug_print("ArrayType %d %p\n", Type, Items[index]);
         return (char*)Items[index];
     }
 
@@ -148,15 +148,15 @@ struct EXTERN CArray
     {
         if (Type != 0xA && Type != 0xB)
         {
-            _printf("WARNING " __FUNCTION__ " Wrong array Type(%d)\n", Type);
-            _printf("Index %d(%d) %p in CArray %p\n CalledFrom %s\n", index, GetNumItems(), Items[index], this, functionName ? functionName : __FUNCTION__);
+            debug_print("WARNING " __FUNCTION__ " Wrong array Type(%d)\n", Type);
+            debug_print("Index %d(%d) %p in CArray %p\n CalledFrom %s\n", index, GetNumItems(), Items[index], this, functionName ? functionName : __FUNCTION__);
             //index = 0;
             //return (CStructHeader*)Items[index];
         }
         if (index >= 0xFFFF)
         {
-            _printf("###WARNING INDEX TOO HIGH###\n");
-            _printf("Index %d(%d) %p in CArray %p\n CalledFrom %s\n", index, GetNumItems(), Items[index], this, functionName ? functionName : __FUNCTION__);
+            debug_print("###WARNING INDEX TOO HIGH###\n");
+            debug_print("Index %d(%d) %p in CArray %p\n CalledFrom %s\n", index, GetNumItems(), Items[index], this, functionName ? functionName : __FUNCTION__);
             index = (NumItems - 1);
         }
         //
@@ -224,7 +224,7 @@ struct Node
     {
         extern CArray* __restrict NodeArray;
         typedef CArray* (__cdecl* const pGetNodeArray)(DWORD checksum, DWORD param);
-        //_printf("NodeArray %p\n", pGetNodeArray(0x00426590)(0xC472ECC5, 1));
+        //debug_print("NodeArray %p\n", pGetNodeArray(0x00426590)(0xC472ECC5, 1));
         NodeArray = pGetNodeArray(0x00426590)(0xC472ECC5, 1);
     }
 
@@ -327,18 +327,18 @@ struct Node
 
 
         }
-        _printf("---NodeArray---\n");
-        _printf("Numer of Nodes %d CStructs %d (MAX %d) size %X(Max %X)\n", NodeArray->GetNumItems(), numCStructs, HASH_SIZE / 12, numCStructs * 12, HASH_SIZE);
-        _printf("Number of ints %d with total size %X\n", numInts, intSize);
-        _printf("Number of floats %d with total size %X\n", numFloats, floatSize);
-        _printf("Number of arrays %d with total size %X\n", numArrays, arraySize);
-        _printf("Number of pairs %d with total size %X\n", numPairs, pairSize);
-        _printf("Number of structs %d with total size %X\n", numStructs, structSize);
-        _printf("Number of locals %d with total size %X\n", numLocals, localSize);
-        _printf("Number of strings %d with total size %X\n", numStrings, stringSize);
-        _printf("Number of CFuncs %d with total size %X\n", numCompiled, compiledSize);
-        _printf("Number of Scripts %d with total size %X\n", numScripts, scriptSize);
-        _printf("Number of Vectors %d with total size %X\n", numVec, vectorSize);
+        debug_print("---NodeArray---\n");
+        debug_print("Numer of Nodes %d CStructs %d (MAX %d) size %X(Max %X)\n", NodeArray->GetNumItems(), numCStructs, HASH_SIZE / 12, numCStructs * 12, HASH_SIZE);
+        debug_print("Number of ints %d with total size %X\n", numInts, intSize);
+        debug_print("Number of floats %d with total size %X\n", numFloats, floatSize);
+        debug_print("Number of arrays %d with total size %X\n", numArrays, arraySize);
+        debug_print("Number of pairs %d with total size %X\n", numPairs, pairSize);
+        debug_print("Number of structs %d with total size %X\n", numStructs, structSize);
+        debug_print("Number of locals %d with total size %X\n", numLocals, localSize);
+        debug_print("Number of strings %d with total size %X\n", numStrings, stringSize);
+        debug_print("Number of CFuncs %d with total size %X\n", numCompiled, compiledSize);
+        debug_print("Number of Scripts %d with total size %X\n", numScripts, scriptSize);
+        debug_print("Number of Vectors %d with total size %X\n", numVec, vectorSize);
     }
 
     //Gets the CStructHeader of a node

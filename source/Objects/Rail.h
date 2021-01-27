@@ -477,7 +477,7 @@ public:
                                 }
 
                                 top.y = highestPoint + 1.0f;
-                                _printf("Auto-gen RailNode Obj %s pos %f %f %f\n", FindChecksumName(sector->name), top.x, top.y, top.z);
+                                debug_print("Auto-gen RailNode Obj %s pos %f %f %f\n", FindChecksumName(sector->name), top.x, top.y, top.z);
                                 pointy_rails.push_back(RailNode(top));
                                 pointy_rails.back().link = i;
                                 PointyObjects.push_back(sector);
@@ -496,7 +496,7 @@ public:
             Game::skater->Restore();
 
 
-        _printf("NumRails %d<\n", numRailNodes);
+        debug_print("NumRails %d<\n", numRailNodes);
 
         if (numRailNodes)
         {
@@ -761,7 +761,7 @@ public:
     		}
     		else*/
             {
-                _printf("%X\n", &Game::skater->mp_rail_node);
+                debug_print("%X\n", &Game::skater->mp_rail_node);
                 *p_point = closest_point;
                 *pp_rail_node = p_closest_rail;
             }
@@ -946,7 +946,7 @@ public:
                             {
                                 if (PointyObjects[k] == sector)
                                 {
-                                    _printf("Removing auto-gen rail %s\n", FindChecksumName(name));
+                                    debug_print("Removing auto-gen rail %s\n", FindChecksumName(name));
                                     PointyObjects.erase(PointyObjects.begin() + k);
                                     break;
                                 }
@@ -1055,7 +1055,7 @@ public:
                 // if neither is, then leave it, and maybe print a warning?
                 MessageBox(0, "RailManager: ERROR", "Multiple links but no DefaultLine", 0);*/
                 if (!p_from->pNextLink->GetFlag(RailNode::Flags::DEFAULT_LINE))
-                    _printf("RailManager: ERROR", "Multiple links but no DefaultLine\n");
+                    debug_print("RailManager: ERROR", "Multiple links but no DefaultLine\n");
             }
         }
 
@@ -1142,7 +1142,7 @@ public:
     {
         if (!ParkEditor::Instance()->UsingCustomPark())
             return;
-        _printf("Starting overlapping rail removal\n");
+        debug_print("Starting overlapping rail removal\n");
 
         int	removed = 0;
         //	CRailNode *pRailNode = mp_first_node;
@@ -1272,7 +1272,7 @@ public:
             }
             //		pRailNode = pRailNode->m_pNext;
         }
-        _printf("Done overlapping rail removal, removed %d\n", removed);
+        debug_print("Done overlapping rail removal, removed %d\n", removed);
 
         for (int node = 0; node < current_node; node++)
         {
@@ -1329,7 +1329,7 @@ public:
         if (!ParkEditor::Instance()->UsingCustomPark()) 		// is it a custom park???
         {
 #ifdef		DEBUG_EDITOR_RAILS
-            printf("not in editor\n");
+            debug_print("not in editor\n");
 #endif
             // if not a custom park, then everything is valid.
             return true;
@@ -1357,7 +1357,7 @@ public:
         if (Game::skater->CollisionCheck())
         {
 #ifdef		DEBUG_EDITOR_RAILS
-            printf("l-r above collision, invalid\n");
+            debug_print("l-r above collision, invalid\n");
             feeler.DebugLine(255, 0, 0);
 #endif
             return false;
@@ -1556,7 +1556,7 @@ public:
 
             pRailNode->terrain = 0;
             if (!pNodeStruct->GetEnum(Checksums::TerrainType, &pRailNode->terrain, false))
-                _printf("Terrain not found\n");
+                debug_print("Terrain not found\n");
 
             for (int i = 0; i < MAX_RAIL_LINKS; i++)
             {
@@ -1660,7 +1660,7 @@ void Skater::maybe_trip_rail_trigger(DWORD type)
 
     if (trigger)
     {
-        _printf("%s -> %s\n", FindChecksumName(pNode->GetName()), FindChecksumName(trigger));
+        debug_print("%s -> %s\n", FindChecksumName(pNode->GetName()), FindChecksumName(trigger));
 
         DWORD node_name;
         pNode->GetChecksum(Checksums::Name, &node_name, QScript::ASSERT);
@@ -1699,7 +1699,7 @@ bool skated_off_rail = false;
 
 __inline void Skater::MaybeSkateOffRail(bool last_segment, Vertex& extra_dist, RailNode* pFrom, RailNode* pOnto)
 {
-    //_printf("MaybeSkateOffRail last_segment %X extra_dist%X\n", &last_segment, &extra_dist);
+    //debug_print("MaybeSkateOffRail last_segment %X extra_dist%X\n", &last_segment, &extra_dist);
     // recalculate start, end, dir, as we might be on a new segment
     const RailNode* pStart = mp_rail_node;
     const RailNode* pEnd = pStart->GetNextLink();
@@ -1845,7 +1845,7 @@ __inline void Skater::MaybeSkateOffRail(bool last_segment, Vertex& extra_dist, R
 
         if (deltaZ >= 0.01f && deltaX >= 0.01f)
         {
-            _printf("This is not normal\n");
+            debug_print("This is not normal\n");
             last_segment = false;
         }
     }
@@ -1865,8 +1865,8 @@ __inline void Skater::MaybeSkateOffRail(bool last_segment, Vertex& extra_dist, R
             // if in the park editor, then ignore collision with invisible surfaces 
             if (!ParkEditor::Instance()->UsingCustomPark() || normal.y < 0.5f)// || (!ParkEditor::Instance()->UsingCustomPark() && fabsf(D3DXVec3Length(&extra_dist)<0.5f)))
             {
-                _printf("COllided offrail\n");
-                //_printf("OffRail.... %f normal.y %f off %d\n", fabsf(D3DXVec3Length(&extra_dist)), normal.y, skated_off_rail);
+                debug_print("COllided offrail\n");
+                //debug_print("OffRail.... %f normal.y %f off %d\n", fabsf(D3DXVec3Length(&extra_dist)), normal.y, skated_off_rail);
                 maybe_trip_rail_trigger(Node::TRIGGER_SKATE_OFF);
                 // don't let him make this movement!!
                 *GetPosition() = *GetOldPosition();

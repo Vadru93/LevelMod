@@ -212,7 +212,7 @@ namespace Network
 
         void* GetHandler()
         {
-            _printf("Connection %p %p\n", this, (void*)(*(DWORD*)this + 0x3C));
+            debug_print("Connection %p %p\n", this, (void*)(*(DWORD*)this + 0x3C));
             return (void*)(*(DWORD*)this + 0x3C);
         }
 
@@ -238,7 +238,7 @@ namespace Network
 
         void* GetConnHandler()
         {
-            _printf("Skater? %p\n", skater);
+            debug_print("Skater? %p\n", skater);
             if (conn)
                 return conn->GetHandler();
             else
@@ -330,13 +330,13 @@ namespace Network
 
         bool OnServer()
         {
-            //_printf("Flags %p %X OnServer %d\n", (DWORD)this + 0x000001A8,  *(DWORD*)((DWORD)this + 0x000001A8), *(DWORD*)((DWORD)this + 0x000001A8) & 1);
+            //debug_print("Flags %p %X OnServer %d\n", (DWORD)this + 0x000001A8,  *(DWORD*)((DWORD)this + 0x000001A8), *(DWORD*)((DWORD)this + 0x000001A8) & 1);
             return *(BYTE*)((DWORD)this + 0x000001A8) & 1;
         }
 
         bool InNetGame()
         {
-            //_printf("Flags %p %X InNetGame %d\n", (DWORD)this + 0x000001A8 , *(DWORD*)((DWORD)this + 0x000001A8), (*(DWORD*)((DWORD)this + 0x000001A8) & 0xC));
+            //debug_print("Flags %p %X InNetGame %d\n", (DWORD)this + 0x000001A8 , *(DWORD*)((DWORD)this + 0x000001A8), (*(DWORD*)((DWORD)this + 0x000001A8) & 0xC));
             return (*(BYTE*)((DWORD)this + 0x000001A8) & 0xC);
         }
 

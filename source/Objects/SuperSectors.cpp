@@ -10,7 +10,7 @@ EXTERN std::vector<MovingObject> movingObjects;//List of Objects on the move
 
 MovingObject::MovingObject(SuperSector* _sector, Model* mdl)
 {
-    _printf("FOLLOW_MODEL\n");
+    debug_print("FOLLOW_MODEL\n");
     model = mdl;
     state = MeshState::create;
     Type = FOLLOW_MODEL;
@@ -38,7 +38,7 @@ bool MovingObject::Update(float delta)
     //D3DXMatrixIdentity(&orient);
 
 
-    //_printf("MovingObject on the move(%f %f %f) dt:%f timer:%f end:%f\n", pos.x, pos.y, pos.z, delta, timer, end);
+    //debug_print("MovingObject on the move(%f %f %f) dt:%f timer:%f end:%f\n", pos.x, pos.y, pos.z, delta, timer, end);
 
     timer += delta;
     switch (Type)
@@ -60,7 +60,7 @@ bool MovingObject::Update(float delta)
             }
 
             RemoveMovingObject(sector);
-            _printf("MovingObject final destination\n");
+            debug_print("MovingObject final destination\n");
             return update;
         }
 
@@ -102,7 +102,7 @@ bool MovingObject::Update(float delta)
             if (!links)
             {
                 RemoveMovingObject(sector);
-                _printf("MovingObject final destination\n");
+                debug_print("MovingObject final destination\n");
                 return update;
             }
 
@@ -115,7 +115,7 @@ bool MovingObject::Update(float delta)
             if (!link)
             {
                 RemoveMovingObject(sector);
-                _printf("Couldn't find link[%d]...\n", (*links)[0]);
+                debug_print("Couldn't find link[%d]...\n", (*links)[0]);
                 return update;
             }
 
@@ -184,7 +184,7 @@ bool MovingObject::Update(float delta)
             }
 
             RemoveMovingObject(sector);
-            _printf("Couldn't find node -> position[%d]...\n", (*links)[0]);
+            debug_print("Couldn't find node -> position[%d]...\n", (*links)[0]);
             return update;
         }
         else
@@ -334,7 +334,7 @@ bool MovingObject::Update(float delta)
             float velocityAngle = max(goalAngle.x, 0.001f);//clamp the angle to be minimum 0.001
             angle.x += velocityAngle;//add the velocity to current angle
             //the final angle now is 89.657394, but why is the object moving??
-            printf("currentAngle %f\n", angle.x * 180 / D3DX_PI);// , velocityAngle);
+            debug_print("currentAngle %f\n", angle.x * 180 / D3DX_PI);// , velocityAngle);
 
             D3DXMatrixRotationYawPitchRoll(&nodeRotation, 0, angle.x, 0);
 

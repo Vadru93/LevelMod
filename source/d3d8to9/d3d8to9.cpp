@@ -84,6 +84,16 @@ PFN_D3DXLoadSurfaceFromSurface D3DXLoadSurfaceFromSurface = nullptr;
 std::ofstream LOG;
 #endif
 
+#ifndef debug_print
+#ifdef _DEBUG
+#define debug_print(fmt, ...) \
+            do { if (_DEBUG && bDebugMode) printf(fmt, __VA_ARGS__); } while (0)
+#else
+#define debug_print(fmt, ...)
+#endif
+#endif
+
+
 extern unsigned long crc32f(const char* buf);
 //To optimize CRC we put the checksum in eax instead of calling Checksum("string")
 //string here means pointer in memory where string is pushed to stack
@@ -119,7 +129,7 @@ struct OptimizedCRC
             {
                 if (temp_ptr > (ptr + eax))
                 {
-                    printf("temp_ptr %X ptr %X start %X\n", temp_ptr, ptr, string - 1);
+                    debug_print("temp_ptr %X ptr %X start %X\n", temp_ptr, ptr, string - 1);
                     MessageBox(0, 0, 0, 0);
                     break;
                 }
@@ -149,7 +159,7 @@ struct OptimizedCRC
             MessageBox(0, "Wrong eax", "", 0);
         *(BYTE*)ptr = 0xB8;
         ptr++;
-        printf("Optimizing checksum access: %s\n", c);
+        debug_print("Optimizing checksum access: %s\n", c);
         *(DWORD*)ptr = crc32f(c);
 
         //Replace push string with nop

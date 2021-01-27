@@ -146,7 +146,7 @@ void CStruct::AddCompressedNode(DWORD checksum, QBKeyInfoContainer* container)
                     while (header != this->tail && header)
                     {
 
-                        _printf("CONTAINER:.:..\n");
+                        debug_print("CONTAINER:.:..\n");
                         typedef DWORD(__cdecl* const pShiftQBKey)(DWORD qbKey);
                         DWORD shifted = pShiftQBKey(0x00426DB0)(header->Data);
 
@@ -162,7 +162,7 @@ void CStruct::AddCompressedNode(DWORD checksum, QBKeyInfoContainer* container)
                     }
                 }
             }
-            _printf("Added Comp Node: %X %X COMP %X\n", checksum, this, &compNodes[i]);
+            debug_print("Added Comp Node: %X %X COMP %X\n", checksum, this, &compNodes[i]);
 
 
             break;
@@ -424,20 +424,20 @@ CStructHeader* CScript::GetParam(DWORD name)
         }
         else if (header->Type == QBKeyHeader::ARRAY)
         {
-            _printf("Parsing array...\n");
+            debug_print("Parsing array...\n");
             CArray* pArray = header->pArray;
 
             for (int i = 0; i < pArray->GetNumItems(); i++)
             {
                 if (pArray->Type == 0xA || pArray->Type == 0xB)
                 {
-                    //_printf("Index %d of %d\n", i, pArray->GetNumItems());
+                    //debug_print("Index %d of %d\n", i, pArray->GetNumItems());
                     CStructHeader* pStruct = pArray->GetCStruct(i);
 
                     while (pStruct)
                     {
-                        _printf("pStruct %p NextHeader %p\n", pStruct, pStruct->NextHeader);
-                        _printf("Name %s Data %X\n", FindChecksumName(pStruct->QBkey), pStruct->Data);
+                        debug_print("pStruct %p NextHeader %p\n", pStruct, pStruct->NextHeader);
+                        debug_print("Name %s Data %X\n", FindChecksumName(pStruct->QBkey), pStruct->Data);
                         if (pStruct->QBkey == name)
                             return pStruct;
                         else if (pStruct->Type == QBKeyHeader::LOCAL_STRUCT || pStruct->Type == QBKeyHeader::STRUCT)
@@ -493,20 +493,20 @@ bool CScript::GotParam(DWORD name)
         }
         else if (header->Type == QBKeyHeader::ARRAY)
         {
-            _printf("Parsing array...\n");
+            debug_print("Parsing array...\n");
             CArray* pArray = header->pArray;
 
             for (int i = 0; i < pArray->GetNumItems(); i++)
             {
                 if (pArray->Type == 0xA || pArray->Type == 0xB)
                 {
-                    //_printf("Index %d of %d\n", i, pArray->GetNumItems());
+                    //debug_print("Index %d of %d\n", i, pArray->GetNumItems());
                     CStructHeader* pStruct = pArray->GetCStruct(i);
 
                     while (pStruct)
                     {
-                        _printf("pStruct %p NextHeader %p\n", pStruct, pStruct->NextHeader);
-                        _printf("Name %s Data %X\n", FindChecksumName(pStruct->QBkey), pStruct->Data);
+                        debug_print("pStruct %p NextHeader %p\n", pStruct, pStruct->NextHeader);
+                        debug_print("Name %s Data %X\n", FindChecksumName(pStruct->QBkey), pStruct->Data);
                         if (pStruct->QBkey == name)
                             return true;
                         else if (pStruct->Type == QBKeyHeader::LOCAL_STRUCT || pStruct->Type == QBKeyHeader::STRUCT)
@@ -543,7 +543,7 @@ void QBScript::CreateQBTable(BYTE* table, bool level)
         int key = *(int*)table;
         table += 4;
         char* name = (char*)table;
-        //_printf("QbNAme %s\n", name);
+        //debug_print("QbNAme %s\n", name);
         DWORD len = strlen(name) + 1;
         name = new char[len];
         if (!name)
@@ -551,7 +551,7 @@ void QBScript::CreateQBTable(BYTE* table, bool level)
         memcpy(name, (char*)table, len);
 
 
-        //_printf("QbAllocated %s\n", name);
+        //debug_print("QbAllocated %s\n", name);
         map<DWORD, char*>::iterator it = qbTable.find(key);
 
         if (it == qbTable.end())
@@ -561,7 +561,7 @@ void QBScript::CreateQBTable(BYTE* table, bool level)
             fprintf(debugFile, "AddingKey %s %X, in file %s\r\n", name, key, fileName);
             printf("AddingKey %s %X, in file %s\r\n", name, key, fileName);
             fclose(debugFile);*/
-            //_printf("AddChecksum %s 0x%X\n", name, key);
+            //debug_print("AddChecksum %s 0x%X\n", name, key);
             if (!level)
             {
                 qbTable.insert(pair<DWORD, char*>(key, String::AddString(name)));
@@ -585,9 +585,9 @@ void QBScript::CreateQBTable(BYTE* table, bool level)
             fclose(debugFile);
 
         }*/
-        //_printf("inserted\n");
+        //debug_print("inserted\n");
         table += len;
-        //_printf("added\n");
+        //debug_print("added\n");
     }
 }
 
@@ -701,7 +701,7 @@ char* CheckForMatch(char* fileName, char* qbFiles)
     {
         if (CheckForMatch_stub(fileName, qbFiles))
         {
-            //_printf("FileExists: %s\n", fileName);
+            //debug_print("FileExists: %s\n", fileName);
             return qbFiles;
         }
 
@@ -711,7 +711,7 @@ char* CheckForMatch(char* fileName, char* qbFiles)
         }
     }
 
-    _printf("New File: %s\n", fileName);
+    debug_print("New File: %s\n", fileName);
     return NULL;
 }
 
@@ -748,7 +748,7 @@ bool QBFile::ContentChanged(bool level)
         return true;
 
     }
-    //_printf("%s %s\n", path, fileName);
+    //debug_print("%s %s\n", path, fileName);
 
     /*if (FastCRC::CFastCRC32::Calculate(&crc, dir) != 0)
         MessageBox(0, "Error calculating checksum for file", dir, 0);*/
@@ -761,7 +761,7 @@ bool QBFile::ContentChanged(bool level)
     if (changed)
     {
         checksum = crc;
-        _printf("Contents changed in file: %s\n", fileName);
+        debug_print("Contents changed in file: %s\n", fileName);
     }
 
     return changed;
@@ -773,7 +773,7 @@ void QBScript::OpenScript(char* path, bool level)
     if (FileHandler::reloading)
         level = FileHandler::reloading == RELOAD_LEVEL;
     fileName = path;
-    _printf("OpenScript: %s\n", path);
+    debug_print("OpenScript: %s\n", path);
     FILE* f = fopen(path, "rb+");
     if (!f)
     {
@@ -872,7 +872,7 @@ void QBScript::OpenScript(char* path, bool level)
 
         case ScriptToken::EndOfFile:
         case ScriptToken::Table:
-            _printf("parsing qbTable %X\n", pFile);
+            debug_print("parsing qbTable %X\n", pFile);
             goto done;
 
         case 0x47:
@@ -882,7 +882,7 @@ void QBScript::OpenScript(char* path, bool level)
             break;
 
         default:
-            //_printf("default: %X\n", *pFile);
+            //debug_print("default: %X\n", *pFile);
             /*char def[2];
             sprintf(def, "%X", *pFile);
             MessageBox(0,"default", def, 0);*/
@@ -906,7 +906,7 @@ void QBScript::OpenScript(char* path, bool level)
     }
 done:
     CreateQBTable(pFile, level);
-    _printf("END OpenScript\n");
+    debug_print("END OpenScript\n");
     delete[] oldData;
     if (FileHandler::reloading == RELOAD_LEVEL)
     {
@@ -932,7 +932,7 @@ bool QScript::FileExists(char* file)
         if (!_stricmp(qbFiles[i].fileName, file))
             return true;
     }
-    _printf("New File %s\n", file);
+    debug_print("New File %s\n", file);
     return false;
 }
 
@@ -951,7 +951,7 @@ void CheckForNodeArrayUpdates()
     }
     installPath[j] = 0x0;
 
-    _printf("New Level Path %s qb %s\n", installPath, levelPath);
+    debug_print("New Level Path %s qb %s\n", installPath, levelPath);
 
 
     DWORD dwWaitStatus;
@@ -992,7 +992,7 @@ void CheckForNodeArrayUpdates()
             if (levelQB.ContentChanged(true))
             {
                 typedef void(__cdecl* const pReloadNodeArray)(CStruct*, CScript*);
-                _printf("Reloading node array %s..", levelQB.fileName);
+                debug_print("Reloading node array %s..", levelQB.fileName);
                 //pReloadNodeArray(0x00419D50)(NULL, NULL);
                 FileHandler::reloading = RELOAD_LEVEL;
                 SpawnScript(Checksum("ReloadNodeArray_Script"));
@@ -1007,7 +1007,7 @@ void CheckForNodeArrayUpdates()
             break;
 
         case WAIT_OBJECT_0+1:
-            _printf("ChangeLevel event\n");
+            debug_print("ChangeLevel event\n");
             CloseHandle(dwLevelChangeHandles[0]);
             CloseHandle(dwLevelChangeHandles[1]);
             dwLevelChangeHandles[1] = NULL;
@@ -1135,7 +1135,7 @@ bool TestReloadQB(CStruct* pStruct, CScript* pScript)
         }
 
         dir[i] = 0;
-        //_printf("CheckingFile: %s\n", &dir[5]);
+        //debug_print("CheckingFile: %s\n", &dir[5]);
 
         if (!FileExists(&dir[5]))
         {

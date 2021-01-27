@@ -167,7 +167,7 @@ public:
     {
         DWORD numKeys = GetNumKeyPress();
 
-        for (auto press = 0; press < numKeys; press++)
+        for (DWORD press = 0; press < numKeys; press++)
         {
             if (GetKeyPress(press) == key)
                 return true;
@@ -204,7 +204,7 @@ public:
     {
         DWORD numKeys = GetNumKeyPress();
 
-        for (auto press = 0; press < numKeys; press++)
+        for (DWORD press = 0; press < numKeys; press++)
         {
             if (GetKeyPress(press) == key)
                 Unpress(press);
@@ -227,7 +227,7 @@ public:
     //the press is between 0x0-0xFF, press below or equal to 0x40 is deadzone
     void Update(DWORD time, DWORD press)
     {
-        _printf("press %X\nKeyState %p %s(%X)\n", press, this, FindChecksumName(this->checksum), this->checksum);
+        debug_print("press %X\nKeyState %p %s(%X)\n", press, this, FindChecksumName(this->checksum), this->checksum);
         //the press is between 0x0-0xFF, press below or equal to 0x40 is deadzone
         if (press > 0x40)
         {

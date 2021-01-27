@@ -201,7 +201,7 @@ struct SfxManager
         out_vol.rvol = 0;
         ViewportManager* viewport_manager = ViewportManager::Instance();
         DWORD numCams = viewport_manager->GetNumActiveCams();
-        //_printf("NumCams %d\n", numCams);
+        //debug_print("NumCams %d\n", numCams);
         float closest_dist = dropoffDist;
         Camera* camera = NULL;
 
@@ -211,14 +211,14 @@ struct SfxManager
             if (temp_camera)
             {
                 Vertex pos = *(D3DXVECTOR3*)&temp_camera->pos;
-                //_printf("Sound %f %f %f cam %f %f %f\n", soundSource->x, soundSource->y, soundSource->z, temp_camera->pos.x, temp_camera->pos.y, temp_camera->pos.z);
+                //debug_print("Sound %f %f %f cam %f %f %f\n", soundSource->x, soundSource->y, soundSource->z, temp_camera->pos.x, temp_camera->pos.y, temp_camera->pos.z);
                 float dist = pos.Distance(*(Vertex*)soundSource);
                 if (dist < closest_dist)
                 {
                     closest_dist = dist;
                     camera = temp_camera;
                 }
-                //_printf("dist %f\n", dist);
+                //debug_print("dist %f\n", dist);
             }
         }
         if (dropoffDist == 0)
@@ -274,7 +274,7 @@ struct SfxManager
             float orient = (temp2.x * camera->matrix[X][X] + temp2.y * camera->matrix[X][Y] + temp2.z * camera->matrix[X][Z] + 1.0f) * 0.5f;
             float pitch = (1.0f - orient * orient) * vol;
             vol = (1.0f - (1.0 - orient) * (1.0 - orient)) * vol;
-            _printf("orient % f vol % f\n", orient, vol);
+            debug_print("orient % f vol % f\n", orient, vol);
 
             if ( > *out_pitch)
                 *out_pitch = pitch;
@@ -333,10 +333,10 @@ struct TerrainManager
         sfx_manager->SetVolumeFromPos(vol, position, dropoff);
         float percent = GetVolPercent(SoundInfo, volPercent, false);
 
-        _printf("pos vol (%f:%f) dropoff %f percent %f vel_vol %f\n", vol.lvol, vol.rvol, dropoff, percent, volPercent);
+        debug_print("pos vol (%f:%f) dropoff %f percent %f vel_vol %f\n", vol.lvol, vol.rvol, dropoff, percent, volPercent);
         vol.lvol *= percent * 0.01f;
         vol.rvol *= percent * 0.01f;
-        _printf("minVol %f maxVol %f final vol %f\n", SoundInfo->minVol, SoundInfo->maxVol, vol);
+        debug_print("minVol %f maxVol %f final vol %f\n", SoundInfo->minVol, SoundInfo->maxVol, vol);
 
         if (vol.IsSilent())
             return;
@@ -759,7 +759,7 @@ public:
         GetKeyState(key)->Update(GetTime()/*this->GetCurrentTime()*/, press);
 
 
-        //_printf("Updating press %d\nKeyState %p chc %X\n", press, this, this->checksum);
+        //debug_print("Updating press %d\nKeyState %p chc %X\n", press, this, this->checksum);
         /*typedef void(__thiscall* const pUpdate)(KeyState* pThis, DWORD press);
         pUpdate(0x0049BAA0)(this, press);*/
     }
@@ -829,7 +829,7 @@ public:
     bool CallMemberFunction(DWORD checksum, CStruct* pStruct = NULL, CScript* pScript = NULL)
     {
         DWORD* pMemberFunction = memberFunctions[1];
-        _printf("Skater -> MemberFunction %p\nName %s pStruct %p pScript %p\n", pMemberFunction, FindChecksumName(checksum), pStruct, pScript);
+        debug_print("Skater -> MemberFunction %p\nName %s pStruct %p pScript %p\n", pMemberFunction, FindChecksumName(checksum), pStruct, pScript);
         return pCallMemberFunction((DWORD)pMemberFunction)(this, checksum, pStruct, pScript);
     }
 

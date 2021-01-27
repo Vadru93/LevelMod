@@ -37,7 +37,7 @@ extern bool bAddedOptions, bDebugMode, bHooked;
 { \
 if (bDebugMode && InvalidReadPtr(p)) \
 { \
-  _printf( _T("Parameter ") _T(#p) \
+  debug_print( _T("Parameter ") _T(#p) \
   _T(" is not a valid read pointer\r\n") \
   _T("CFUNC ")  __FUNCTION__ _T("\r\n")); return NULL; \
 } \
@@ -48,11 +48,20 @@ if (bDebugMode && InvalidReadPtr(p)) \
 { \
 if (bDebugMode && InvalidReadPtr(p, s)) \
 { \
-  _printf( _T("Parameter ") _T(#p) \
+  debug_print( _T("Parameter ") _T(#p) \
   _T(" is not a valid read area\r\n") \
   _T("CFUNC ") __FUNCTION__ _T("\r\n")); return NULL; \
 } \
 }
+
+#ifndef debug_print
+#ifdef _DEBUG
+#define debug_print(fmt, ...) \
+            do { if (_DEBUG && bDebugMode) printf(fmt, __VA_ARGS__); } while (0)
+#else
+#define debug_print(fmt, ...)
+#endif
+#endif
 
 void _printf(const char* str, ...);
 #endif

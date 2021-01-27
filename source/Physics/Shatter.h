@@ -62,7 +62,7 @@ struct ShatterData
 
     ~ShatterData()
     {
-        _printf("Deleting ShatterObject %s\n", FindChecksumName(sector->name));
+        debug_print("Deleting ShatterObject %s\n", FindChecksumName(sector->name));
         delete[] verts;
         delete[]pos;
         delete[]vel;
@@ -76,25 +76,25 @@ struct ShatterData
         //printf("Split %p Material %X\n", split, split->material);
         if (split->material && split->material->texture)
         {
-            //_printf("Going to submit material\n");
+            //debug_print("Going to submit material\n");
             split->material->Submit();
 
-            //_printf("VertexShader %X stride %X\n", split->vertexShader, split->stride);
+            //debug_print("VertexShader %X stride %X\n", split->vertexShader, split->stride);
             Gfx::pDevice->SetFVF(split->vertexShader);
 
-            /*_printf("VBuffer %p IBuffer %p stride %X primCount %d vertCount %d\n", split->vertexBuffer->GetProxyInterface(), split->indexBuffer->GetProxyInterface(), split->stride, split->numIndices, split->numVertices);
+            /*debug_print("VBuffer %p IBuffer %p stride %X primCount %d vertCount %d\n", split->vertexBuffer->GetProxyInterface(), split->indexBuffer->GetProxyInterface(), split->stride, split->numIndices, split->numVertices);
             Gfx::pDevice->SetStreamSource(0, split->vertexBuffer->GetProxyInterface(), 0, split->stride);
             Gfx::pDevice->SetIndices(split->indexBuffer->GetProxyInterface());
             Gfx::pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, split->baseIndex, 0, split->numVertices, 0, split->numIndices);*/
-            //_printf("Going to Draw\n");
+            //debug_print("Going to Draw\n");
             Gfx::pDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, numTris, verts, split->stride);
-            //_printf("Finished rendering, sucessfully :)\n");
+            //debug_print("Finished rendering, sucessfully :)\n");
         }
     }
 
     void Update(float framelength)
     {
-        //_printf("NewShatter: Going to update %s (delta:%f)\n", FindChecksumName(sector->name), framelength);
+        //debug_print("NewShatter: Going to update %s (delta:%f)\n", FindChecksumName(sector->name), framelength);
         BYTE* p_vert_data = verts;
         DWORD stride = split->stride;
 
@@ -165,7 +165,7 @@ struct ShatterData
                 p_v2 = (D3DXVECTOR3*)(((BYTE*)p_v2) + (stride * 3));
             }
         }*/
-        //_printf("Finished updating, now going to render..\n");
+        //debug_print("Finished updating, now going to render..\n");
     }
 
     ShatterData(SuperSector* _sector, Mesh::MaterialSplit* _split, int numTriangles)
@@ -190,7 +190,7 @@ struct ShatterData
         life = shatterLifetime * Gfx::shatter_life_factor;
         bounce = shatterBounce;
         bounceAmp = shatterBounceAmplitude;
-        _printf("Allocated memory\n");
+        debug_print("Allocated memory\n");
     }
 
     void Allocate()
@@ -200,9 +200,9 @@ struct ShatterData
         matrices = new Matrix[numTris];
 
         if (pos && vel && matrices)
-            _printf("Memory alllocated successfully\n");
+            debug_print("Memory alllocated successfully\n");
         else
-            _printf("Memory did not allocate...\n");
+            debug_print("Memory did not allocate...\n");
     }
 
     void UpdateParameters(int index, float timestep)
@@ -274,7 +274,7 @@ bool subdivide_tri_stack(BYTE** p_write, SuperSector* sector, float targetShatte
     // If there are elements on the stack, pop off the top three vertices and subdivide if necessary.
     if (triSubdivideStack.IsEmpty())
     {
-        _printf("triStack empty\n");
+        debug_print("triStack empty\n");
         return false;
     }
 
@@ -295,7 +295,7 @@ bool subdivide_tri_stack(BYTE** p_write, SuperSector* sector, float targetShatte
 
     if (area_squared > targetShatterArea)
     {
-        _printf("subdividing tri\n");
+        debug_print("subdividing tri\n");
         // We need to subdivide this tri. Calculate the three intermediate points.
         int block_size = triSubdivideStack.GetBlockSize();
 

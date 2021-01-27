@@ -334,7 +334,7 @@ EXTERN void Skater::MultiplyMatrix(const D3DXMATRIX& delta)
 
 void Skater::Slerping()
 {
-    //_printf("Slerping\n");
+    //debug_print("Slerping\n");
     //MessageBox(0, "trying to slerp", "", 0);
 
     //KeyState* state = this->GetKeyState(KeyState::UP);
@@ -386,7 +386,7 @@ void Skater::Slerping()
         }
         else
         {
-            _printf("FINAL\n");
+            debug_print("FINAL\n");
             Slerp::slerping = false;
             //tracking = true;
             /*QBKeyHeader* header = GetQBKeyHeader(crc32f((unsigned char*)"Normal_Lerp_Speed"));

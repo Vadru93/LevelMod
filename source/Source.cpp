@@ -336,7 +336,7 @@ struct Hook
             MessageBox(0, "no d3d8 found", "", 0);
         DWORD ptr = *(DWORD*)0x00970E48;
         DWORD_PTR* vTable = (DWORD*)*(DWORD*)(ptr);
-        _printf("vTable %X\n", vTable);
+        debug_print("vTable %X\n", vTable);
         //DWORD_PTR* vTable = GetD3D8VTable(addr, 0x0001A4F4);//0x128000);
         if (vTable == NULL)
         {
@@ -345,7 +345,7 @@ struct Hook
         }
 
         addr = (DWORD)vTable[vTableIndex];
-        _printf("addr %X", addr);
+        debug_print("addr %X", addr);
         /*BYTE jmp[6] = { 0xe9,			//jmp
         0x00, 0x00, 0x00, 0x00,		//address
         0xc3 };						//retn
@@ -444,7 +444,7 @@ struct D3D_PARAMS
 
 void NotGood(DWORD checksum, CScript* pScript)
 {
-    _printf("Called a function that doesn't exsits..\nName %s(%X) in function %s(%X) location %p\n", FindChecksumName(checksum), checksum, FindChecksumName(pScript->scriptChecksum), pScript->scriptChecksum, pScript->address);
+    debug_print("Called a function that doesn't exsits..\nName %s(%X) in function %s(%X) location %p\n", FindChecksumName(checksum), checksum, FindChecksumName(pScript->scriptChecksum), pScript->scriptChecksum, pScript->address);
     MessageBox(0, "This means your Scripts are trashed or old", "Called a function that don't exists", 0);
 }
 
@@ -559,7 +559,7 @@ bool WallplantScript(CStruct* pParams, CScript* pScript)
         pAngle = *(DWORD*)pAngle + 0x40;
         VALIDATE_DATA((float*)pAngle, sizeof(float));
         (*(float*)pAngle) *= -1.0f;//float angle = *(float*)pAngle*(180.0f / 3.14159f);
-        _printf("speedx %f speedz %f anglez %f\n", speed.x, speed.z, *(float*)pAngle);*/
+        debug_print("speedx %f speedz %f anglez %f\n", speed.x, speed.z, *(float*)pAngle);*/
 
         void* first = (void*)*(DWORD*)(*(DWORD*)0x008E2498 + 0x13C);
         void* last = (void*)*(DWORD*)(*(DWORD*)0x008E2498 + 0x140);
@@ -571,7 +571,7 @@ bool WallplantScript(CStruct* pParams, CScript* pScript)
         {
             pos = (Vertex*)(*(DWORD*)((DWORD)current + 20) + 0x18);
             speed = *((Vertex*)(*(DWORD*)((DWORD)current + 20) + 0x18 + 16));
-            _printf("pos %f oldPos %f", pos->x, speed.x);
+            debug_print("pos %f oldPos %f", pos->x, speed.x);
 
             /*speed.x -= pos->x;
             speed.z -= pos->z;*/
@@ -622,10 +622,10 @@ bool WallplantScript(CStruct* pParams, CScript* pScript)
         pPos += 8;
         //float oldf = *(float*)pPos;
         //*((float*)pPos) = (cameraAngle / 0.5f / 3.14159f) - 1.0f;
-        //_printf("new %f camAngle%f old %f ", *((float*)pPos), cameraAngle, oldf);
+        //debug_print("new %f camAngle%f old %f ", *((float*)pPos), cameraAngle, oldf);
         //*((float*)pPos) *= -1.0f;*/
         *((float*)pPos) = oldAngle2;
-        //_printf("newnew %f posX %f speedX %f\n", *((float*)pPos), pos->x, speed.x);
+        //debug_print("newnew %f posX %f speedX %f\n", *((float*)pPos), pos->x, speed.x);
     }
     DEBUGEND()
         return true;
@@ -664,7 +664,7 @@ void DestroySuperSectors()
     PointyObjects.clear();
     String::RemoveLevelStrings();
     QScript::Scripts->ClearLevelTable();
-    _printf("Going to remove MovingObjects\n");
+    debug_print("Going to remove MovingObjects\n");
     GameState::GotSuperSectors = false;
     extern void UnloadShatterObjects();
     UnloadShatterObjects();
@@ -677,7 +677,7 @@ void DestroySuperSectors()
 }
 void CreateSuperSectors()
 {
-    _printf("Going to create MovingObjects\n");
+    debug_print("Going to create MovingObjects\n");
     GameState::GotSuperSectors = true;
     KeyMap::UpdateKeyMap();
     *(bool*)0x00400020 = true;
@@ -734,8 +734,8 @@ void __cdecl add_log(const char* string, ...)
             p++;
         }
     }
-    _printf(buf);
-    _printf("\n");
+    debug_print(buf);
+    debug_print("\n");
     return;
 }
 
@@ -889,7 +889,7 @@ struct Message
 
 void SendMessage(Message* msg)
 {
-    _printf("sending msg!!\n");
+    debug_print("sending msg!!\n");
 
     DWORD timeSpent = 0;
     while (timeSpent <= TIME_TIMED)
@@ -899,7 +899,7 @@ void SendMessage(Message* msg)
         timeSpent += TIME_STEP;
         Sleep(TIME_STEP);
     }
-    _printf("disconnecting client: %d.%d.%d.%d!!\n", ((BYTE*)&msg->ip)[0], ((BYTE*)&msg->ip)[1], ((BYTE*)&msg->ip)[2], ((BYTE*)&msg->ip)[3]);
+    debug_print("disconnecting client: %d.%d.%d.%d!!\n", ((BYTE*)&msg->ip)[0], ((BYTE*)&msg->ip)[1], ((BYTE*)&msg->ip)[2], ((BYTE*)&msg->ip)[3]);
 
     closesocket(msg->socket);
 }
@@ -913,7 +913,7 @@ struct StructScript
 
 DWORD GetServerAddress()
 {
-    _printf("getting server address!!\n");
+    debug_print("getting server address!!\n");
 
     /*DWORD addr=0x05D0968;
     addr = *(DWORD*)addr+0xB8;
@@ -944,12 +944,12 @@ void StartedGraf(StructScript* pStructScript)
         SOCKET serverSocket = socket(AF_INET, SOCK_STREAM, 0);
         if (serverSocket == -1)//error couldn't create valid socket
         {
-            _printf("socket failure\n");
+            debug_print("socket failure\n");
             if (!IsHosting(pStructScript->pStruct, pStructScript->pScript))//not hosting, so limit graf for now
             {
                 if (oldLimit != 32)
                 {
-                    _printf("temporarly limiting graf\n");//MessageBox(0,"limiting graf","",0);
+                    debug_print("temporarly limiting graf\n");//MessageBox(0,"limiting graf","",0);
 
                     CStruct pStruct;//= new CStruct;
                     CStructHeader head;
@@ -977,7 +977,7 @@ void StartedGraf(StructScript* pStructScript)
         server.sin_port = htons( 6500 );*/
         if (IsHosting(pStructScript->pStruct, pStructScript->pScript))//host trying to send info that graf is unlimited
         {
-            _printf("hosting!!\n");
+            debug_print("hosting!!\n");
 
             SOCKADDR_IN sin;
             sin.sin_family = AF_INET;
@@ -985,11 +985,11 @@ void StartedGraf(StructScript* pStructScript)
             sin.sin_addr.s_addr = INADDR_ANY;
             if (bind(serverSocket, (LPSOCKADDR)&sin, sizeof(sin)) < 0)
             {
-                _printf("bind error: ");
+                debug_print("bind error: ");
 
                 char error[256];
                 sprintf(error, "%d\n", WSAGetLastError());
-                _printf(error);
+                debug_print(error);
 
                 closesocket(serverSocket);
                 WSACleanup();
@@ -998,23 +998,23 @@ void StartedGraf(StructScript* pStructScript)
 
             if (listen(serverSocket, 8) < 0)
             {
-                _printf("listen error: ");
+                debug_print("listen error: ");
 
                 char error[256];
                 sprintf(error, "%d\n", WSAGetLastError());
-                _printf(error);
+                debug_print(error);
 
                 closesocket(serverSocket);
                 WSACleanup();
                 return;
             }
-            _printf("opening connection!!\n");
+            debug_print("opening connection!!\n");
 
             FD_SET fdSet;
             //shutdown(serverSocket, SD_RECEIVE);
             if (oldLimit == 32)
             {
-                _printf("setting taglimit to 200");
+                debug_print("setting taglimit to 200");
 
                 CStruct pStruct;//= new CStruct;
                 CStructHeader head;
@@ -1032,7 +1032,7 @@ void StartedGraf(StructScript* pStructScript)
             timer.tv_usec = 0;
             for (DWORD i = 0; i < 8; i++)//while(timeSpent<=TIME_TIMED)
             {
-                _printf("checking for connections %u/8\n", i + 1);
+                debug_print("checking for connections %u/8\n", i + 1);
 
                 FD_ZERO(&fdSet);
                 FD_SET(serverSocket, &fdSet);
@@ -1040,19 +1040,19 @@ void StartedGraf(StructScript* pStructScript)
                 {
                     char error[256];
                     sprintf(error, "%d\n", WSAGetLastError());
-                    _printf("SelectError: ");
-                    _printf(error);
+                    debug_print("SelectError: ");
+                    debug_print(error);
 
                 }
                 if (FD_ISSET(serverSocket, &fdSet))
                 {
-                    _printf("trying to accept connection\n");
+                    debug_print("trying to accept connection\n");
 
                     sockaddr_in clientInfo;
                     SOCKET connectionSocket = ::accept(serverSocket, (sockaddr*)&clientInfo, NULL);
                     if (connectionSocket != INVALID_SOCKET)
                     {
-                        _printf("connected to client: %d.%d.%d.%d!!\n", ((BYTE*)&clientInfo.sin_addr)[0], ((BYTE*)&clientInfo.sin_addr)[1], ((BYTE*)&clientInfo.sin_addr)[2], ((BYTE*)&clientInfo.sin_addr)[3]);
+                        debug_print("connected to client: %d.%d.%d.%d!!\n", ((BYTE*)&clientInfo.sin_addr)[0], ((BYTE*)&clientInfo.sin_addr)[1], ((BYTE*)&clientInfo.sin_addr)[2], ((BYTE*)&clientInfo.sin_addr)[3]);
                         Message msg(connectionSocket, (const char*)&LevelModSettings::bUnlimitedGraf, 1, clientInfo.sin_addr);
                         HANDLE hRequestThread = ::CreateThread(NULL, 4, (LPTHREAD_START_ROUTINE)SendMessage, (LPVOID)&msg, 0/*CREATE_SUSPENDED*/, NULL);
                     }
@@ -1060,8 +1060,8 @@ void StartedGraf(StructScript* pStructScript)
                     {
                         char error[256];
                         sprintf(error, "%d\n", WSAGetLastError());
-                        _printf("Error: ");
-                        _printf(error);
+                        debug_print("Error: ");
+                        debug_print(error);
 
                     }
                 }
@@ -1072,13 +1072,13 @@ void StartedGraf(StructScript* pStructScript)
         }
         else//client trying to get info from host, if no info received graf will remain limited
         {
-            _printf("client!!\n");
+            debug_print("client!!\n");
 
             //shutdown(serverSocket, SD_SEND);
             //MessageBox(0,"your client","",0);
             sockaddr_in server;
             DWORD address = GetServerAddress();
-            _printf("server address: %d.%d.%d.%d\n", ((BYTE*)&address)[0], ((BYTE*)&address)[1], ((BYTE*)&address)[2], ((BYTE*)&address)[3]);
+            debug_print("server address: %d.%d.%d.%d\n", ((BYTE*)&address)[0], ((BYTE*)&address)[1], ((BYTE*)&address)[2], ((BYTE*)&address)[3]);
 
             server.sin_addr.s_addr = address;
             server.sin_family = AF_INET;
@@ -1088,18 +1088,18 @@ void StartedGraf(StructScript* pStructScript)
             for (DWORD i = 0; i < 2; i++)
             {
                 int err = 0;
-                _printf("trying to connect\n");
+                debug_print("trying to connect\n");
 
                 if (err = connect(serverSocket, (sockaddr*)&server, sizeof(sockaddr)) >= 0)
                 {
-                    _printf("connected!!\n");
+                    debug_print("connected!!\n");
 
                     timeSpent = 0;
                     while (timeSpent <= TIME_TIMED)
                     {
                         if (recv(serverSocket, (char*)&unlimitedGraf, 1, 0) >= 0)
                         {
-                            _printf("recieved!!\n");
+                            debug_print("recieved!!\n");
 
                             //shutdown(serverSocket, SD_RECEIVE);
                             break;
@@ -1113,8 +1113,8 @@ void StartedGraf(StructScript* pStructScript)
                 {
                     char error[256];
                     sprintf(error, "%d\n", WSAGetLastError());
-                    _printf("Error: ");
-                    _printf(error);
+                    debug_print("Error: ");
+                    debug_print(error);
 
                 }
                 /*timeSpent+=TIME_STEP;
@@ -1122,7 +1122,7 @@ void StartedGraf(StructScript* pStructScript)
             }
             if (unlimitedGraf)
             {
-                _printf("unlimiting graf!!\n");
+                debug_print("unlimiting graf!!\n");
 
                 if (oldLimit == 32)
                 {
@@ -1138,7 +1138,7 @@ void StartedGraf(StructScript* pStructScript)
             }
             else if (oldLimit != 32)
             {
-                _printf("limiting graf!!\n");
+                debug_print("limiting graf!!\n");
 
                 //MessageBox(0,"limiting graf","",0);
                 CStruct pStruct;//= new CStruct;
@@ -1153,17 +1153,17 @@ void StartedGraf(StructScript* pStructScript)
             }
             else
             {
-                _printf("graf already limited!!\n");
+                debug_print("graf already limited!!\n");
             }
         }
-        _printf("closing connection!!\n");
+        debug_print("closing connection!!\n");
 
         closesocket(serverSocket);
         WSACleanup();
     }
     else if (oldLimit != 32)//couldn't initialize game function pointer, so will need to limit graf....
     {
-        _printf("NO PTR TO OnServer!!\n");
+        debug_print("NO PTR TO OnServer!!\n");
         CStruct pStruct;//= new CStruct;
         CStructHeader head;
         pStruct.head = &head;//new CStructHeader;
@@ -1200,25 +1200,25 @@ void ReadFirstOptions()
     OptionReader = new CIniReader(IniPath);
 
 
-    //_printf("Reading from ini file %s, default %d ", "LM_GFX_eBuffering", Gfx::numBackBuffers);
+    //debug_print("Reading from ini file %s, default %d ", "LM_GFX_eBuffering", Gfx::numBackBuffers);
     DWORD new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_eBuffering", Gfx::numBackBuffers);
     if (new_value < 3)
         Gfx::numBackBuffers = new_value;
-    //_printf("value %d\n", Gfx::numBackBuffers);
+    //debug_print("value %d\n", Gfx::numBackBuffers);
 
-    //_printf("Reading from ini file %s, default %d ", "LM_GFX_eAntiAlias", Gfx::AntiAliasing);
+    //debug_print("Reading from ini file %s, default %d ", "LM_GFX_eAntiAlias", Gfx::AntiAliasing);
     new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_eAntiAlias", Gfx::AntiAliasing);
     if (new_value < 5)
         Gfx::AntiAliasing = new_value;
-    //_printf("value %d\n", Gfx::AntiAliasing);
+    //debug_print("value %d\n", Gfx::AntiAliasing);
 
-    //_printf("Reading from ini file %s, default %d ", "LM_GFX_bFiltering", Gfx::filtering);
+    //debug_print("Reading from ini file %s, default %d ", "LM_GFX_bFiltering", Gfx::filtering);
     new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_bFiltering", Gfx::filtering);
     if (new_value < 2)
         Gfx::filtering= new_value;
-    //_printf("value %d\n", Gfx::filtering);
+    //debug_print("value %d\n", Gfx::filtering);
 
-    //_printf("Reading from ini file %s, default %d ", "LM_GFX_bFixStutter", Gfx::fps_fix);
+    //debug_print("Reading from ini file %s, default %d ", "LM_GFX_bFixStutter", Gfx::fps_fix);
     new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_eFixStutter", Gfx::fps_fix);
     if (new_value < 4)
         Gfx::fps_fix = new_value;
@@ -1226,18 +1226,64 @@ void ReadFirstOptions()
     new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_eFixStutter", Gfx::bVSync);
     if (new_value < 2)
         Gfx::bVSync = new_value;
-    //_printf("value %d\n", Gfx::fps_fix);
+    //debug_print("value %d\n", Gfx::fps_fix);
     //CreateConsole();
 
-    //_printf("Reading from ini file %s, default %d ", "LM_DebugOption_bDebugMode", debug);
+    //debug_print("Reading from ini file %s, default %d ", "LM_DebugOption_bDebugMode", debug);
     new_value = OptionReader->ReadInt("Script_Settings", "LM_DebugOption_bDebugMode", debug);
     if (new_value < 2)
        debug = new_value;
-    //_printf("value %d\n", debug);
+    //debug_print("value %d\n", debug);
     if (debug)
     {
+        DWORD retry = 0;
+        HANDLE h = NULL;
+        while (!h && retry < 50000)
+        {
+            h = OpenMutexA(0x1f0001, 0, "thps3_debug");
+            retry++;
+        }
+        if (!h)
+        {
+            char temp[MAX_PATH] = "";
+            GetCurrentDirectory(MAX_PATH, temp);
+            sprintf(IniPath, "%s\\Skate3_debug.exe", temp);
+            PROCESS_INFORMATION ProcessInfo; //This is what we get as an [out] parameter
+
+            STARTUPINFO StartupInfo; //This is an [in] parameter-
+            ZeroMemory(&StartupInfo, sizeof(StartupInfo));
+            StartupInfo.cb = sizeof StartupInfo; //Only compulsory field
+            bool bCreated = false;
+
+            if (!CreateProcess("skate3_debug.exe", LPSTR("skate3_debug.exe -windowed"),
+                NULL, NULL, FALSE, 0, NULL,
+                NULL, &StartupInfo, &ProcessInfo))
+            {
+                if (CreateProcess(IniPath, NULL,
+                    NULL, NULL, FALSE, 0, NULL,
+                    NULL, &StartupInfo, &ProcessInfo))
+                {
+                    bCreated = true;
+                }
+            }
+            else
+            {
+                bCreated = true;
+            }
+
+            if (bCreated)
+            {
+                CloseHandle(ProcessInfo.hThread);
+                CloseHandle(ProcessInfo.hProcess);
+                ExitProcess(0);
+            }
+        }
+        else
+            CloseHandle(h);
+
+
         CreateConsole();
-        _printf("Welcome to DebugMode\n");
+        debug_print("Welcome to DebugMode\n");
     }
 }
 
@@ -1782,7 +1828,7 @@ void ExecuteQBThread()
 
 EXTERN bool QBKeyHeader::SetFloat(DWORD checksum, float value)
 {
-    _printf("Seting Name %s\n", FindChecksumName(checksum));
+    debug_print("Seting Name %s\n", FindChecksumName(checksum));
     if (this->type == QBKeyHeader::STRUCT || this->type == QBKeyHeader::LOCAL_STRUCT)
     {
         CStructHeader* pStruct = *(CStructHeader**)this->pStruct;
@@ -1797,7 +1843,7 @@ EXTERN bool QBKeyHeader::SetFloat(DWORD checksum, float value)
             else
                 if (pStruct->QBkey == checksum)
                 {
-                    _printf("FloatVal %s(%f)\n", FindChecksumName(pStruct->QBkey), value);
+                    debug_print("FloatVal %s(%f)\n", FindChecksumName(pStruct->QBkey), value);
                     pStruct->value.f = value;
                     return true;
                 }
@@ -1811,7 +1857,7 @@ EXTERN bool QBKeyHeader::SetFloat(DWORD checksum, float value)
 
 bool ChangeParamToUnnamedScript(CStruct* pStruct, CScript* pScript)
 {
-    _printf("UnnamedScript ");
+    debug_print("UnnamedScript ");
     CStructHeader* pFunc = NULL;
     if (pStruct->GetStruct(Checksums::FUNCTION, &pFunc))
     {
@@ -1829,8 +1875,8 @@ bool ChangeParamToUnnamedScript(CStruct* pStruct, CScript* pScript)
                 pStructParam->AddParam(0, QBKeyHeader::STRING, pParam->pStr);
                 /*pStruct.head = &header;
                 pStruct.tail = &header;*/
-                _printf(pFunc->pStr);
-                _printf("\n");
+                debug_print(pFunc->pStr);
+                debug_print("\n");
                 memcpy(funcName, pFunc->pStr, strlen(pFunc->pStr) + 1);
                 funcParam = pStructParam;
                 CreateThread(0, 0, (LPTHREAD_START_ROUTINE)ExecuteQBThread, 0, 0, 0);
@@ -1839,7 +1885,7 @@ bool ChangeParamToUnnamedScript(CStruct* pStruct, CScript* pScript)
             }
         }
     }
-    _printf("couldn't find function\n");
+    debug_print("couldn't find function\n");
     return false;
 }
 
@@ -1865,7 +1911,7 @@ bool CallWithNoNameScript(CStruct* pStruct, CScript* pScript)
             return true;
         }
 
-        _printf("Invalid call to %s\nNeed param String|Int\n", __FUNCTION__);
+        debug_print("Invalid call to %s\nNeed param String|Int\n", __FUNCTION__);
         return false;
     }
     else
@@ -1892,29 +1938,29 @@ bool MoveObjectScript(CStruct* pStruct, CScript* pScript)
     /*DEBUGSTART()
     {*/
     int name = 0;
-    _printf("Maybe Move pScript %p CalledFrom %p\n", pScript, pScript->address);
+    debug_print("Maybe Move pScript %p CalledFrom %p\n", pScript, pScript->address);
     if (pStruct->GetScript("Name", &name))
     {
         SuperSector* sector = SuperSector::GetSuperSector(name);
         if (sector)
         {
-            _printf("Got Name %X\n", name);
+            debug_print("Got Name %X\n", name);
             CStructHeader* param = NULL;
 
             if (pStruct->GetStruct(Checksums::Type, &param))
             {
-                _printf("Got Type: ");
+                debug_print("Got Type: ");
                 switch (param->value.i)
                 {
                 case Checksums::ANGULAR_VELOCITY:
-                    _printf("ANGULAR_VELOCITY\n");
+                    debug_print("ANGULAR_VELOCITY\n");
                     if (pStruct->GetStruct(Checksums::ORIENT, &param))
                     {
                         for (DWORD i = 0; i < movingObjects.size(); i++)
                         {
                             if (movingObjects[i].sector == sector)
                             {
-                                _printf("ORIENT\n");
+                                debug_print("ORIENT\n");
                                 D3DXVECTOR3 angle = *param->pVec * D3DX_PI / 2048.0f;
                                 //angle.y += D3DX_PI;
                                 movingObjects[i].goalAngle = angle;
@@ -1939,7 +1985,7 @@ bool MoveObjectScript(CStruct* pStruct, CScript* pScript)
                             {
                                 if (movingObjects[i].sector == sector)
                                 {
-                                    _printf("updating sector\n");
+                                    debug_print("updating sector\n");
                                     D3DXVECTOR3 angle = *param->pVec * D3DX_PI / 2048.0f;
                                     //angle += D3DX_PI;
                                     movingObjects[i].acceleration = angle;
@@ -1958,13 +2004,13 @@ bool MoveObjectScript(CStruct* pStruct, CScript* pScript)
                             }
                             return true;
                         }
-                    _printf("Need to pass param 'ANGULAR_VELOCITY'\n");
+                    debug_print("Need to pass param 'ANGULAR_VELOCITY'\n");
                     return false;
                 case Checksums::MOVE_TO_POS:
-                    _printf("MOVE_TO_POS\n");
+                    debug_print("MOVE_TO_POS\n");
                     if (pStruct->GetStruct(Checksums::Relpos, &param))
                     {
-                        _printf("Going to mov Object -> Relpos %f %f %f pScript %p\n", param->pVec->x, param->pVec->y, param->pVec->z, pScript);
+                        debug_print("Going to mov Object -> Relpos %f %f %f pScript %p\n", param->pVec->x, param->pVec->y, param->pVec->z, pScript);
 
 
                         for (DWORD i = 0; i < movingObjects.size(); i++)
@@ -1985,21 +2031,21 @@ bool MoveObjectScript(CStruct* pStruct, CScript* pScript)
                         }*/
                         return true;
                     }
-                    _printf("Need to pass param 'Relpos'\n");
+                    debug_print("Need to pass param 'Relpos'\n");
                     return false;
                 default:
-                    _printf("Defaulting to FOLLOW_PATH_LINKED\n");
+                    debug_print("Defaulting to FOLLOW_PATH_LINKED\n");
                     for (DWORD i = 0; i < movingObjects.size(); i++)
                     {
                         if (movingObjects[i].sector == sector)
                             return false;
                     }
-                    _printf("Going to mov Object -> FollowPathLinked pScript %p\n", pScript);
+                    debug_print("Going to mov Object -> FollowPathLinked pScript %p\n", pScript);
 
                     CArray* links = pScript->node->GetNodeStruct()->GetArray(Checksums::Links);
                     if (links)
                     {
-                        _printf("Links %p", links);
+                        debug_print("Links %p", links);
                         D3DXVECTOR3 position = (sector->bboxMax + sector->bboxMin) / 2.0f;
                         CStructHeader* pos = NULL;
                         CStructHeader* link = NULL;
@@ -2022,13 +2068,13 @@ bool MoveObjectScript(CStruct* pStruct, CScript* pScript)
                                 }
                                 return true;
                             }
-                            _printf("couldn't find node->position\n");
+                            debug_print("couldn't find node->position\n");
                             return false;
                         }
-                        _printf("couldn't find link in NodeArray\n");
+                        debug_print("couldn't find link in NodeArray\n");
                         return false;
                     }
-                    _printf("Couldn't find node->links\n");
+                    debug_print("Couldn't find node->links\n");
                     return false;
                 }
             }
@@ -2048,28 +2094,28 @@ bool MoveObjectScript(CStruct* pStruct, CScript* pScript)
                     fclose(f);
 
                  }*/
-                _printf("No Type, defaulting to FOLLOW_PATH_LINKED\n");
+                debug_print("No Type, defaulting to FOLLOW_PATH_LINKED\n");
                 for (DWORD i = 0; i < movingObjects.size(); i++)
                 {
-                    _printf("What's going on?[%d][%d] sector %p\n", i, movingObjects.size(), movingObjects[i].sector);
+                    debug_print("What's going on?[%d][%d] sector %p\n", i, movingObjects.size(), movingObjects[i].sector);
                     if (movingObjects[i].sector == sector)
                     {
-                        _printf("returning false..\n");
+                        debug_print("returning false..\n");
                         return false;
                     }
                 }
-                _printf("Going to mov Object %X -> FollowPathLinked Node %X \n", name, pScript->node->name);
+                debug_print("Going to mov Object %X -> FollowPathLinked Node %X \n", name, pScript->node->name);
 
                 CArray* links = pScript->node->GetNodeStruct()->GetArray(Checksums::Links);
                 if (links)
                 {
-                    _printf("Links %p\n", links);
+                    debug_print("Links %p\n", links);
                     D3DXVECTOR3 position = (sector->bboxMax + sector->bboxMin) / 2.0f;
                     CStructHeader* pos = NULL;
                     CStructHeader* link = Node::GetNodeStructByIndex((*links)[0]);
                     if (link->GetStruct(Checksums::Position, &pos))
                     {
-                        _printf("position %f %f %f pos %f %f %f\n", position.x, position.y, position.z, pos->pVec->x, pos->pVec->y, pos->pVec->z);
+                        debug_print("position %f %f %f pos %f %f %f\n", position.x, position.y, position.z, pos->pVec->x, pos->pVec->y, pos->pVec->z);
                         //position += *pos->pVec;
                         movingObjects.push_back(MovingObject(sector, position, *pos->pVec, pScript, link));
                         MovingObject& obj = movingObjects.back();
@@ -2081,14 +2127,14 @@ bool MoveObjectScript(CStruct* pStruct, CScript* pScript)
                         }
                         return true;
                     }
-                    _printf("couldn't find node->position\n");
+                    debug_print("couldn't find node->position\n");
                     return false;
                 }
-                _printf("Couldn't find node->links\n");
+                debug_print("Couldn't find node->links\n");
             }
         }
         else
-            _printf("Couldn't find SuperSector(0x%X)", name);
+            debug_print("Couldn't find SuperSector(0x%X)", name);
     }
     /*}
     DEBUGEND()*/
@@ -2443,7 +2489,7 @@ bool DownloadAndInstall(std::string& path, float build, SOCKADDR* service)
         GetCurrentDirectory(MAX_PATH, installPath);
         char final[MAX_PATH * 2 + 100];
         sprintf(final, "%s/LevelMod-Installer.exe", installPath);
-        _printf("%s", final);
+        debug_print("%s", final);
         STARTUPINFO si;
         PROCESS_INFORMATION pi;
 
@@ -2788,11 +2834,11 @@ void TestForAcid()
             float absnorm = fabsf(skater->GetCollisionNormal()->y);
             if (absnorm > 0.48f && absnorm < 0.98f)
             {
-                //_printf("norm %f %f vel %f %f", vel_normal.x, vel_normal.z, velocity.x, velocity.z);
+                //debug_print("norm %f %f vel %f %f", vel_normal.x, vel_normal.z, velocity.x, velocity.z);
                 float test = ((vel_normal.x - skater->GetCollisionNormal()->x) + (vel_normal.z - skater->GetCollisionNormal()->z));
                 if (fabsf(test) < 0.82f)
                 {
-                    _printf("above\n");
+                    debug_print("above\n");
                     skater->CallMemberFunction(Checksum("DoNextTrick"));
                     skater->FlagException("AcidDrop");
                     break;
@@ -2815,7 +2861,7 @@ void AddCompressedNodes()
     FILE* f = fopen(qbPath, "r+b");
     if (f)
     {
-        _printf("Opened: %s\n", qbPath);
+        debug_print("Opened: %s\n", qbPath);
         fseek(f, 0, SEEK_END);
         DWORD size = ftell(f);
 
@@ -2845,7 +2891,7 @@ void AddCompressedNodes()
                 /*sprintf(msg, "P %X", opcode);
                 MessageBox(0, msg, msg, 0);*/
                 DWORD name = *(DWORD*)pFile;
-                _printf("Name %X\n", name);
+                debug_print("Name %X\n", name);
                 pFile += 4;
 
 
@@ -2865,7 +2911,7 @@ void AddCompressedNodes()
                 CStructHeader* header = comp->first;
                 comp->last = header;
 
-                _printf("chc %X comp %X\n", name, comp);
+                debug_print("chc %X comp %X\n", name, comp);
                 while (*pFile != 0 && *pFile != 1)
                 {
                     pFile++;
@@ -2911,7 +2957,7 @@ void AddCompressedNodes()
                             header->NextHeader = &compressedStructs.back();
                             /*pMap = pMap->NextHeader;
                             *(CStructHeader**)0x008E1E04 = pMap;
-                            _printf("pMap %X\n", pMap);*/
+                            debug_print("pMap %X\n", pMap);*/
                             header = header->NextHeader;
                         }
                         else
@@ -2968,7 +3014,7 @@ void HookedFopen(char* p)
 
                 if (bDebugMode)
                 {
-                    _printf("Fopen: %s\n", p);
+                    debug_print("Fopen: %s\n", p);
                     memcpy(qbPath, p, strlen(p) + 1);
                     qbPath[strlen(qbPath) - 1] = 0x0;
 
@@ -3020,7 +3066,7 @@ void LoadCustomShaderThread()
 
 bool OnPostLevelLoad(CStruct* pStruct, CScript* pScript)
 {
-    _printf("OnPostLevelLoad...\n");
+    debug_print("OnPostLevelLoad...\n");
     oldSkater = Game::skater;
 
     CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)LoadCustomShaderThread, NULL, NULL, NULL);
@@ -3035,16 +3081,16 @@ bool ChangeLocalScript(CStruct* pStruct, CScript* pScript)
         CStructHeader* param = pScript->GetParam(header->QBkey);
         if (param)
         {
-            _printf("param %s value %d header %s value %d\n", FindChecksumName(param->QBkey), param->value.i, FindChecksumName(header->QBkey), header->value.i);
-            _printf("param_type %s header_type %s\n", QScript::QBTypes[param->Type], QScript::QBTypes[header->Type]);
+            debug_print("param %s value %d header %s value %d\n", FindChecksumName(param->QBkey), param->value.i, FindChecksumName(header->QBkey), header->value.i);
+            debug_print("param_type %s header_type %s\n", QScript::QBTypes[param->Type], QScript::QBTypes[header->Type]);
             param->Data = header->Data;
             return true;
         }
         else
-            _printf(__FUNCTION__ "Couldn't find %s in script %s\n", FindChecksumName(header->QBkey), FindChecksumName(pScript->scriptChecksum));
+            debug_print(__FUNCTION__ "Couldn't find %s in script %s\n", FindChecksumName(header->QBkey), FindChecksumName(pScript->scriptChecksum));
     }
 
-    _printf("No param passed to Local_Param? in script %s\n", FindChecksumName(pScript->scriptChecksum));
+    debug_print("No param passed to Local_Param? in script %s\n", FindChecksumName(pScript->scriptChecksum));
     return false;
 }
 
@@ -3122,7 +3168,7 @@ void AddChecksum(int key, char* name, void* retAddr)
             fprintf(debugFile, "AddingKey %s %X, CalledFrom %p\r\n", name, key, retAddr);
             printf("AddingKey %s %X, CalledFrom %p\r\n", name, key, retAddr);
             fclose(debugFile);*/
-            //_printf("AddChecksum %s 0x%X\n", name, key);
+            //debug_print("AddChecksum %s 0x%X\n", name, key);
             QScript::Scripts->qbTable.insert(std::pair<DWORD, char*>(key, String::AddString(name)));
             QScript::qbKeys.push_back(key);
         }
@@ -3198,7 +3244,7 @@ __declspec(naked) void Fopen_naked()
 
 FILE* __cdecl _fopen(const char* p, const char* b)
 {
-    _printf("Fopen: %s\n");
+    debug_print("Fopen: %s\n");
     if (p[strlen(p) - 1] == 'b' && p[strlen(p) - 2] == 'q' && p[strlen(p) - 3] == '.' && game)
     {
 
@@ -3264,7 +3310,7 @@ FILE* Dump;
 
 void AddDump(const char* dump, ...)
 {
-    _printf("Dumping %s", dump);
+    debug_print("Dumping %s", dump);
     Dump = fopen("dump.txt", "w+t");
     fseek(Dump, 0, SEEK_END);
     va_list va_alist;
@@ -3577,7 +3623,7 @@ void GetMotd()
 
 void FixMessage()
 {
-    printf("Fixing Messages\n");
+    debug_print("Fixing Messages\n");
 
 
 
@@ -3617,7 +3663,7 @@ void FixMessage()
             header->pStr[i] = motd[i];
         }
     }*/
-    printf("FixMessage DONE\n");
+    debug_print("FixMessage DONE\n");
     init2 = true;
 }
 
@@ -3863,7 +3909,7 @@ struct OptimizedArrayCRC
         ptr++;
         VirtualProtect((LPVOID)ptr, 4, PAGE_EXECUTE_READWRITE, &old);
         char* c = *(char**)ptr;
-        _printf("Optimizing array access: %s\n", c);
+        debug_print("Optimizing array access: %s\n", c);
         *(DWORD*)ptr = crc32f(c);
         if (string == 0x004B8306 || string == 0x004B830D)
             return;
@@ -4010,7 +4056,7 @@ void TimerElapsed_Hybrid()
             Sleep(truncated);
     }
     else
-        _printf("Use exact\n");
+        debug_print("Use exact\n");
 
     LARGE_INTEGER targetTime;
     targetTime.QuadPart = startTime.QuadPart + frameticks;
@@ -4116,12 +4162,12 @@ LARGE_INTEGER TimerStart()
     {
         if (ms > 16.675)//59,97 fps
         {
-            _printf("Dec\n");
+            debug_print("Dec\n");
             frameticks-=2;
         }
         else if (ms < 16.60)//60,24 fps
         {
-            _printf("Inc\n");
+            debug_print("Inc\n");
             frameticks++;
         }
         framelength = ms;
@@ -4140,7 +4186,7 @@ LARGE_INTEGER TimerStart_Sleep()
     if (ms < 32.0)
     {
         framelength = ms;
-        //_printf("2nd %f ", ms);
+        //debug_print("2nd %f ", ms);
 
         //We need to cap FPS around 60 because else some physics and scripts will not work correctly
         //Also this is the most fair in a game heavily dependant on speed etc
@@ -4271,7 +4317,7 @@ void Skater::PointRail(const Vertex& rail_pos)
 
 
     DWORD trigger_script = 0;
-    CStruct* pNode;
+    CStruct* pNode = NULL;
 
     if (mp_rail_node->GetNode() != -1)
     {
@@ -4344,7 +4390,7 @@ void Skater::PointRail(const Vertex& rail_pos)
     // Emulate exiting the rail state
 
     // no need to call maybe_trip_rail_trigger for a single node rail
-    if (trigger_script)
+    if (trigger_script && pNode)
     {
         TripTrigger(
             Node::TRIGGER_SKATE_OFF,
@@ -4448,12 +4494,12 @@ void InitLevelMod()
     DWORD frameticks2 = (DWORD)(16.666666666 / fFreq);
     DWORD frameticks3 = 0.0166666666 / (1.0 / (double)freq.QuadPart);
 
-    _printf("f1 %u f2 %u f3 %u\n", frameticks, frameticks2, frameticks3);
+    debug_print("f1 %u f2 %u f3 %u\n", frameticks, frameticks2, frameticks3);
 
     if (!p_bWindowed)
         timer_lock = 0x0D;
 
-    /*_printf("%d %f", freq.LowPart, fFreq);
+    /*debug_print("%d %f", freq.LowPart, fFreq);
     MessageBox(0, 0, 0, 0);*/
 
 
@@ -5042,7 +5088,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
 
         //MessageBox(0, "INIT", "", 0);
         init = false;
-        _printf("Going to init\n");
+        debug_print("Going to init\n");
         //MessageBox(0, "Going to Init", "", 0);
 
         InitLevelMod();
@@ -5078,7 +5124,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
             //logFile = fopen("loggers.txt", "w+t");*/
         }
 
-        printf("Init DONE\n");
+        debug_print("Init DONE\n");
         return true;
 
     }
@@ -5089,7 +5135,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
         //MessageBox(0, "GOING TO ADD HOSTOPTIONS", "", 0);
         CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CheckForScriptUpdates, NULL, 0/*CREATE_SUSPENDED*/, NULL);
         using namespace LevelModSettings;
-        _printf("Already inited\n");
+        debug_print("Already inited\n");
 
         bAddedOptions = true;
 
@@ -5150,63 +5196,63 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
                             if (HostOption->GetStruct(crc32f("OVERRIDE_TRUE"), &override))
                             {
                                 type = OverrideOption::Type::OVERRIDE_TRUE;
-                                _printf("OVERRIDE TRUE ");
+                                debug_print("OVERRIDE TRUE ");
                             }
                             else if (HostOption->GetStruct(crc32f("OVERRIDE_FALSE"), &override))
                             {
                                 type = OverrideOption::Type::OVERRIDE_FALSE;
-                                _printf("OVERRIDE FALSE ");
+                                debug_print("OVERRIDE FALSE ");
 
                             }
                             else if (HostOption->GetStruct(crc32f("OVERRIDE"), &override))
                             {
                                 type = OverrideOption::Type::OVERRIDE;
-                                _printf("OVERRIDE ");
+                                debug_print("OVERRIDE ");
                             }
                             else
                             {
-                                _printf("Need param #OVERRIDE/#OVERRIDE_FALSE/#OVERRIDE_TRUE in HostOption %s\n", OptionName);
+                                debug_print("Need param #OVERRIDE/#OVERRIDE_FALSE/#OVERRIDE_TRUE in HostOption %s\n", OptionName);
                                 return true;
                             }
-                            _printf("%s\n", FindChecksumName(override->Data));
+                            debug_print("%s\n", FindChecksumName(override->Data));
                             AddOption(OptionName, Value->value.i, false, override->Data, (BYTE)type);
 
                         }
                         else
                         {
-                            _printf("Need param #Value in HostOption %s\n", OptionName);
+                            debug_print("Need param #Value in HostOption %s\n", OptionName);
                         }
                     }
                 }
 
             }
 
-            _printf("Going to Store OverrideData\n");
+            debug_print("Going to Store OverrideData\n");
             for (auto override = overrideOptions.begin(); override != overrideOptions.end(); ++override)
             {
                 auto it = options.find(override->second.option);
                 if (it != options.end())
                 {
-                    _printf("OK2\n");
+                    debug_print("OK2\n");
                     it->second.pOverride = &override->second;
                 }
                 else
-                    _printf("Option %s not found in HostOption %s\n", FindChecksumName(override->second.option), FindChecksumName(override->first));
+                    debug_print("Option %s not found in HostOption %s\n", FindChecksumName(override->second.option), FindChecksumName(override->first));
             }
-            _printf("Finished storing OverrideData\n");
+            debug_print("Finished storing OverrideData\n");
 
-            _printf("Truncating IniFile %s\n", IniPath);
+            debug_print("Truncating IniFile %s\n", IniPath);
             FILE* f = fopen(IniPath, "w");
             fclose(f);
             for (auto it = options.begin(); it != options.end(); ++it)
             {
                 char* name = FindChecksumName(it->first, false);
-                _printf("Adding Option to Ini %s\n", name);
+                debug_print("Adding Option to Ini %s\n", name);
                 OptionWriter->WriteInt("Script_Settings", name, it->second.value);
             }
         }
         else
-            _printf("Couldn't find HostOptions\n");
+            debug_print("Couldn't find HostOptions\n");
     }
 
     /*int id = -255;
@@ -5225,7 +5271,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
         init2 = false;
 
     }*/
-    _printf("Already inited\n");
+    debug_print("Already inited\n");
     //MessageBox(0, "Already Inited", "", 0);
     return true;
 }
@@ -5320,7 +5366,7 @@ void OnRelease()
 {
     if (!init)
     {
-        _printf("OnRelease\n");
+        debug_print("OnRelease\n");
         if (m_font)
         {
             m_font->Release();
@@ -5350,7 +5396,7 @@ void OnRelease()
 
 void OnLost()
 {
-    _printf("OnLost\n");
+    debug_print("OnLost\n");
     if (m_font)
     {
         m_font->OnLostDevice();
@@ -5360,7 +5406,7 @@ void OnLost()
 
 void OnReset()
 {
-    _printf("OnReset\n");
+    debug_print("OnReset\n");
     if (m_font)
     {
         m_font->OnResetDevice();
@@ -6194,10 +6240,10 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
                 if (option)
                 {
                     Gfx::fps_fix = option->value;
-                    _printf("fps_fix %d\n", Gfx::fps_fix);
+                    debug_print("fps_fix %d\n", Gfx::fps_fix);
                 }
                 else
-                    _printf("NO OPT\n");
+                    debug_print("NO OPT\n");
                 MaybeFixStutter();
                 break;
             }
@@ -6289,16 +6335,16 @@ __declspec(noalias) void DrawFrame()
             updatingObjects = true;
             for (DWORD i = 0; i < movingObjects.size(); i++) [[unlikely]]
             {
-                //_printf("Killed?...");
+                //debug_print("Killed?...");
                 if (!(movingObjects[i].state & MeshState::kill)) [[likely]]
                 {
-                    //_printf("FALSE\n");
+                    //debug_print("FALSE\n");
                     if (movingObjects[i].Update(Game::skater->GetFrameLength()))
                         movingObjects[i].sector->Update();//Send state to update vertexbuffer
                 }
                 else
                 {
-                    _printf("SuperSector->Killed(): TRUE\n");
+                    debug_print("SuperSector->Killed(): TRUE\n");
                     movingObjects.erase(movingObjects.begin() + i);
                     i--;
                 }

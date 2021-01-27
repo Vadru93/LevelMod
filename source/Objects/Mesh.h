@@ -170,7 +170,7 @@ struct Texture
 
     IDirect3DBaseTexture9* GetBaseTexture()
     {
-        //_printf("tex %p p_unk %X base %X\n", this, p_unk[0], *(DWORD*)(p_unk[0] + 0x34));
+        //debug_print("tex %p p_unk %X base %X\n", this, p_unk[0], *(DWORD*)(p_unk[0] + 0x34));
         if (data)
         {
             Direct3DBaseTexture8* pTexture = data->base;
@@ -212,7 +212,7 @@ struct Material
 
     void SubmitTextureOnly()
     {
-        //_printf("BaseTexture %p material %p\n", texture->GetBaseTexture(), this);
+        //debug_print("BaseTexture %p material %p\n", texture->GetBaseTexture(), this);
         //Submit_Original(texture);
         texture->Submit();
 
@@ -234,7 +234,7 @@ struct Material
 
     void Submit()
     {
-        //_printf("BaseTexture %p material %p\n", texture->GetBaseTexture(), this);
+        //debug_print("BaseTexture %p material %p\n", texture->GetBaseTexture(), this);
         //Submit_Original(texture);
         texture->Submit();
 
@@ -254,7 +254,7 @@ struct Material
 
         if (texture->shader.flags != 0x30303030)
         {
-            //_printf("%X\n", texture->shader.flags);
+            //debug_print("%X\n", texture->shader.flags);
             if (p_current_renderstate(D3DRS_BLENDOP) != texture->shader.blend_op)
             {
                 //Set old blend_op

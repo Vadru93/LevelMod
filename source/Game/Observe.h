@@ -56,9 +56,9 @@ struct ObserveMode
 
     DWORD GetCamModeAddress()
     {
-        _printf("Getting camera addr ");
+        debug_print("Getting camera addr ");
         DWORD addr = *(DWORD*)((DWORD)first + 0x14);
-        _printf("%p\n", addr);
+        debug_print("%p\n", addr);
         addr += 0x882C;
         return addr;
     }
@@ -68,7 +68,7 @@ struct ObserveMode
     {
         if (current && (!bDebugMode || !InvalidReadPtr(current)) && *(DWORD*)current == 0x0058E504 && *(DWORD*)((DWORD)current + 4) != 0xFFFFFFFF && skater)
         {
-            _printf("wtf no exist\n");
+            debug_print("wtf no exist\n");
             return true;
         }
 
