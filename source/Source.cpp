@@ -4541,7 +4541,7 @@ void InitLevelMod()
     HookFunction(0x004AB29B, 0x0049F3B1);
     //MessageBox(0, 0, 0, 0);
 
-    //Remove dublicate NodeArray loading...
+    //Remove dublicate NodeArray loading
     BYTE nop_func[] = { 0x90, 0x90, 0x90, 0x90, 0x90 };
     InjectHook(0x0043A6D6, nop_func, 5);
     //InjectHook(0x00419D07, nop_func, 5);
