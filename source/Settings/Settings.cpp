@@ -123,11 +123,8 @@ TrickSpeed trickSpeed[] = {
 
 bool IsOptionOverriden(CStruct* pStruct, CScript* pScript)
 {
-    CStructHeader* header = pStruct->head;
-
-    while (header)
-    {
-        if (header->Type == QBKeyHeader::LOCAL)
+    auto header = pStruct->GetHeader();
+        if (header)
         {
             auto it = options.find(header->Data);
             if (it != options.end())
@@ -181,52 +178,43 @@ bool IsOptionOverriden(CStruct* pStruct, CScript* pScript)
             }
 
         }
-        header = header->NextHeader;
-    }
-    debug_print(__FUNCTION__" No Param? %s\n", FindChecksumName(pScript->scriptChecksum));
     return false;
 }
 
 bool IsOptionOn(CStruct* pStruct, CScript* pScript)
 {
-    CStructHeader* header = pStruct->head;
-
-    while (header)
+    auto header = pStruct->GetHeader();
+    if (header)
     {
-        if (header->Type == QBKeyHeader::LOCAL)
+        auto it = options.find(header->Data);
+        if (it != options.end())
         {
-            auto it = options.find(header->Data);
-            if (it != options.end())
+            if (it->second.pOverride == NULL)
             {
-                if (it->second.pOverride == NULL)
+                //Option is not linked to a HostOption, so return original value   
+                return it->second.value;
+            }
+            else
+            {
+
+                if (!it->second.Overriden())
                 {
-                    //Option is not linked to a HostOption, so return original value   
                     return it->second.value;
                 }
                 else
                 {
-
-                    if (!it->second.Overriden())
-                    {
-                        return it->second.value;
-                    }
-                    else
-                    {
-                        return it->second.pOverride->value;
-                    }
-
+                    return it->second.pOverride->value;
                 }
-            }
-            else
-            {
-                //Should not happen
-                debug_print(__FUNCTION__ " Couldn't find option %s\nRemember to add the option the the list\nCheck settings.q for more info\n", FindChecksumName(header->Data));
-            }
 
+            }
         }
-        header = header->NextHeader;
+        else
+        {
+            //Should not happen
+            debug_print(__FUNCTION__ " Couldn't find option %s\nRemember to add the option the the list\nCheck settings.q for more info\n", FindChecksumName(header->Data));
+        }
+
     }
-    debug_print(__FUNCTION__" No Param? %s\n", FindChecksumName(pScript->scriptChecksum));
     return false;
 }
 
@@ -715,10 +703,8 @@ int AddOption(char* name, int value, bool update, DWORD overriden_option, BYTE t
 
 bool GetParamScript(CStruct* pStruct, CScript* pScript)
 {
-    CStructHeader* header = pStruct->head;
-    while (header)
-    {
-        if (header->Type == QBKeyHeader::LOCAL)
+    auto header = pStruct->GetHeader();
+        if (header)
         {
             debug_print("Searching for: %s)\n", FindChecksumName(header->Data));
             CStructHeader* param = pScript->GetParam(header->Data);
@@ -761,31 +747,25 @@ bool GetParamScript(CStruct* pStruct, CScript* pScript)
             }
             return false;
         }
-        header = header->NextHeader;
-    }
     return false;
 }
 
 bool LM_GotParamScript(CStruct* pStruct, CScript* pScript)
 {
-    CStructHeader* header = pStruct->head;
-    while (header)
+    auto header = pStruct->GetHeader();
+    if (header)
     {
-        if (header->Type == QBKeyHeader::LOCAL)
+        bool b = pScript->GotParam(header->Data);
+        if (b)
         {
-            bool b = pScript->GotParam(header->Data);
-            if (b)
-            {
-                debug_print("LM_GotParam returning true\n");
-                return true;
-            }
-            else
-            {
-                debug_print("LM_GotParam returning false\n");
-                return false;
-            }
+            debug_print("LM_GotParam returning true\n");
+            return true;
         }
-        header = header->NextHeader;
+        else
+        {
+            debug_print("LM_GotParam returning false\n");
+            return false;
+        }
     }
     debug_print("couldn't find param, LM_GotParam returning false\n");
     return false;
@@ -801,17 +781,15 @@ LevelModSettings::Option* GetOption(DWORD option)
 
 bool GetOptionValue(CStruct* pStruct, CScript* pScript)
 {
-    for(auto header = pStruct->head; header != NULL; header = header->NextHeader)
+    auto header = pStruct->GetHeader();
+    if (header)
     {
-        if (header->Type == QBKeyHeader::LOCAL)
+        auto it = options.find(header->Data);
+        if (it != options.end())
         {
-            auto it = options.find(header->Data);
-            if (it != options.end())
-            {
-                auto param = pScript->params->AddParam("OptionValue", QBKeyHeader::QBKeyType::INT);
-                param->Data = it->second.value;
-                return true;
-            }
+            auto param = pScript->params->AddParam("OptionValue", QBKeyHeader::QBKeyType::INT);
+            param->Data = it->second.value;
+            return true;
         }
     }
     return false;
@@ -819,10 +797,8 @@ bool GetOptionValue(CStruct* pStruct, CScript* pScript)
 
 bool SetOption(CStruct* pStruct, CScript* pScript)
 {
-    CStructHeader* header = pStruct->head;
-    while (header)
-    {
-        if (header->Type == QBKeyHeader::LOCAL)
+    auto header = pStruct->GetHeader();
+        if (header)
         {
             auto it = options.find(header->Data);
             if (it != options.end())
@@ -872,19 +848,14 @@ bool SetOption(CStruct* pStruct, CScript* pScript)
             else
                 debug_print("couldn't find option %s\nMake Sure to add the option first\n", FindChecksumName(header->QBkey));
         }
-        header = header->NextHeader;
-    }
-    debug_print(__FUNCTION__ " No param?\n");
     return false;
 }
 
 
 bool ToggleHostOption(CStruct* pStruct, CScript* pScript)
 {
-    CStructHeader* header = pStruct->head;
-    while (header)
-    {
-        if (header->Type == QBKeyHeader::LOCAL)
+    auto header = pStruct->GetHeader();
+        if (header)
         {
             auto override = overrideOptions.find(header->Data);
             if (override != overrideOptions.end())
@@ -908,9 +879,6 @@ bool ToggleHostOption(CStruct* pStruct, CScript* pScript)
             else
                 debug_print("couldn't find HostOption %s\nMake Sure to add the option first\n", FindChecksumName(header->Data));
         }
-        header = header->NextHeader;
-    }
-    debug_print(__FUNCTION__ " No param?\n");
     return false;
 }
 
@@ -918,10 +886,8 @@ bool ToggleHostOption(CStruct* pStruct, CScript* pScript)
 
 bool ToggleOption(CStruct* pStruct, CScript* pScript)
 {
-    CStructHeader* header = pStruct->head;
-    while (header)
-    {
-        if (header->Type == QBKeyHeader::LOCAL)
+    auto header = pStruct->GetHeader();
+    if (header)
         {
             auto it = options.find(header->Data);
             if (it != options.end())
@@ -942,9 +908,6 @@ bool ToggleOption(CStruct* pStruct, CScript* pScript)
             else
                 debug_print("couldn't find option %s\nMake Sure to add the option first\n", FindChecksumName(header->Data));
         }
-        header = header->NextHeader;
-    }
-    debug_print(__FUNCTION__ " No param?\n");
     return false;
 }
 

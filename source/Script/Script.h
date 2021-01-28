@@ -572,8 +572,10 @@ struct CStructHeader
             case QBKeyHeader::QBKeyType::LOCAL_STRUCT:
             case QBKeyHeader::QBKeyType::STRUCT:
                 value->pStruct[0]->SetValues(values);
+                break;
             case QBKeyHeader::QBKeyType::ARRAY:
                 SetArrayValues(value->pArray, values);
+                break;
             }
             value = value->NextHeader;
         }
@@ -590,6 +592,7 @@ struct CStructHeader
 //CStructHeader Container.
 struct EXTERN CStruct
 {
+
     CStructHeader* head;//the first added header aka parent = SOF CStruct
     CStructHeader* tail;//the last added header = EOF CStruct
 
@@ -623,6 +626,45 @@ struct EXTERN CStruct
     //if the .q file exists and starts with 0xAA, it will try to generate the compressed nodes
     BYTE* MaybeAddCompressed(DWORD qbKey, BYTE* pFile, QBKeyInfoContainer* other);
     void AddCompressedNode(DWORD checksum, QBKeyInfoContainer* container);
+
+#ifdef _DEBUG
+    __inline __declspec(noalias)CStructHeader const* __restrict GetHeader_debug(const char* func, const char* file, QBKeyHeader::QBKeyType type = QBKeyHeader::LOCAL) const
+    {
+        if (!head)
+        {
+            debug_print("%s No Param? in script %s\n", func, file);
+            return NULL;
+        }
+
+        for (auto header = head; header != NULL; header = header->NextHeader)
+        {
+            if (header->Type == type)
+                return header;
+        }
+
+        debug_print("%s couldn't find param type %s in script %s\n", func, QScript::QBTypes[type], file);
+        return NULL;
+}
+#define CREATE_1(x) GetHeader_debug(__FUNCTION__, FindChecksumName(pScript->scriptChecksum), x)
+#define CREATE_0() GetHeader_debug(__FUNCTION__, FindChecksumName(pScript->scriptChecksum))
+#define FUNC_CHOOSER(_f1, _f2, _f3, ...) _f3
+#define FUNC_RECOMPOSER(argsWithParentheses) FUNC_CHOOSER argsWithParentheses
+#define CHOOSE_FROM_ARG_COUNT(...) FUNC_RECOMPOSER((__VA_ARGS__, CREATE_2, CREATE_1, ))
+#define NO_ARG_EXPANDER() ,,CREATE_0
+#define MACRO_CHOOSER(...) CHOOSE_FROM_ARG_COUNT(NO_ARG_EXPANDER __VA_ARGS__ ())
+#define GetHeader(...) MACRO_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
+#else
+    __inline __declspec(noalias) CStructHeader const* __restrict GetHeader(QBKeyHeader::QBKeyType type = QBKeyHeader::LOCAL) const
+    {
+        for (auto header = head; header != NULL; header = header->NextHeader)
+        {
+            if (header->Type == type)
+                return header;
+        }
+        return NULL;
+    }
+#endif
+
 
 
     CStructHeader* AddParam(const char* name, QBKeyHeader::QBKeyType type);
@@ -1203,6 +1245,7 @@ struct EXTERN CStruct
         {
             return pThis->Data;
         }
+        return 0;
     }
 
     DWORD GetChecksum(DWORD checksum, bool assert = false)

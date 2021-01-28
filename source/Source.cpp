@@ -1699,11 +1699,9 @@ bool AddParamScript(CStruct* pStruct, CScript* pScript)
 
 bool NotScript(CStruct* pStruct, CScript* pScript)
 {
-    CStructHeader* header = pStruct->head;
-    while (header)
+    auto header = pStruct->GetHeader();
+    if (header)
     {
-        if (header->Type == QBKeyHeader::LOCAL)
-        {
             QBKeyHeader* Header = GetQBKeyHeader(header->Data);
             if (Header && Header->type == QBKeyHeader::COMPILED_FUNCTION)
             {
@@ -1717,10 +1715,8 @@ bool NotScript(CStruct* pStruct, CScript* pScript)
                 pStruct->tail=NULL;*/
                 return !Header->CallScript(&params, pScript);
             }
-            break;
+
         }
-        header = header->NextHeader;
-    }
     return true;
 }
 
@@ -3116,12 +3112,9 @@ bool RemoveLights(CStruct* pStruct, CScript* pScript)
 
 bool AddLights(CStruct* pStruct, CScript* pScript)
 {
-    CStructHeader* header = pStruct->head;
-
-    while (header)
+    auto header = pStruct->GetHeader(QBKeyHeader::ARRAY);
+    if (header)
     {
-        if (header->Type = QBKeyHeader::QBKeyType::ARRAY)
-        {
             for (DWORD i = 0; i < header->pArray->GetNumItems(); i++)
             {
                 D3DXVECTOR3 position = D3DXVECTOR3(1000.0f, 8000.0f, 1000.0f);
@@ -3144,8 +3137,6 @@ bool AddLights(CStruct* pStruct, CScript* pScript)
             }
             return true;
         }
-        header = header->NextHeader;
-    }
     return false;
 }
 

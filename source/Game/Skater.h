@@ -579,7 +579,8 @@ public:
             table = SfxManager::SK3SFX_TABLE_JUMP;
 
         float old_y = velocity.y;
-        velocity.y = 0;
+        if(!InVert() && collFlags != (DWORD)Collision::Flags::Vert)
+            velocity.y = 0;
         float volPercent = GetVolFromVelocity() * 100.0f;
         velocity.y = old_y;
 
