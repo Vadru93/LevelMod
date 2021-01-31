@@ -90,6 +90,7 @@ namespace Gfx
         ToggleFiltering = 3,
         Reset = 4,
         FixStutter = 5,
+        TargetFPS = 6,
     };
     extern DWORD numBackBuffers;
     extern DWORD AntiAliasing;

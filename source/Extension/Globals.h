@@ -86,6 +86,19 @@ namespace Gfx
     extern D3DXVECTOR3 sun_position;
     extern bool bOnReset;
     extern float uv_anim_timer;
+    extern double exact_high_diff;
+    extern double exact_high;
+    extern double exact_low_diff;
+    extern double exact_low;
+    extern double hybrid_high_diff;
+    extern double hybrid_high;
+    extern double hybrid_low_diff;
+    extern double hybrid_low;
+    extern double sleep_high_diff;
+    extern double sleep_high;
+    extern double sleep_low_diff;
+    extern double sleep_low;
+    extern double target_fps;
 };
 
 namespace Physics

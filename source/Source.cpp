@@ -139,6 +139,7 @@ void SetStructValues(CStructHeader* pStruct, CStructHeader* values);
 void SetArrayValues(CArray* pArray, CStructHeader* values);
 bool InvalidReadPtr(const void* const __restrict ptr, const DWORD size);
 bool InvalidReadPtr(const void* const __restrict ptr);
+void CalculateFPSTimers();
 
 //Current version
 #define VERSION 4.8f
@@ -1223,9 +1224,14 @@ void ReadFirstOptions()
     if (new_value < 4)
         Gfx::fps_fix = new_value;
 
-    new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_eFixStutter", Gfx::bVSync);
+    new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_bVSync", Gfx::bVSync);
     if (new_value < 2)
         Gfx::bVSync = new_value;
+
+    new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_TargetFPS", (int)Gfx::target_fps);
+    if (new_value <= 300 && new_value >= 60)
+        Gfx::target_fps = (double)new_value;
+
     //debug_print("value %d\n", Gfx::fps_fix);
     //CreateConsole();
 
@@ -4132,7 +4138,7 @@ LARGE_INTEGER TimerStart_Hybrid()
     {
         framelength = ms;
 
-        if (ms >= 16.8) // ~59.88
+        if (ms >= Gfx::hybrid_high) // ~59.88
         {
             if(hybrid_limit)
                 hybrid_limit--;
@@ -4149,14 +4155,14 @@ LARGE_INTEGER TimerStart()
     QueryPerformanceCounter(&startTime);
     old_start.QuadPart = startTime.QuadPart - old_start.QuadPart;
     double ms = (double((old_start.LowPart)) * fFreq);
-    if (ms < 32.0)
+    if (ms < 30.0)
     {
-        if (ms > 16.675)//59,97 fps
+        if (ms > Gfx::exact_high)//59,97 fps
         {
             debug_print("Dec\n");
             frameticks-=2;
         }
-        else if (ms < 16.60)//60,24 fps
+        else if (ms < Gfx::exact_low)//60,24 fps
         {
             debug_print("Inc\n");
             frameticks++;
@@ -4187,7 +4193,7 @@ LARGE_INTEGER TimerStart_Sleep()
         //However on my screen with 144hz it's pretty hard to get consistent 60 FPS
         //Currently worst case scenario is 59.9-65 and it's usually around 63-64
         //For some reason it's more consistent in window mode than in fullscreen mode
-        if (ms >= 16.39) // ~61.01 FPS
+        if (ms >= Gfx::sleep_high) // ~61.01 FPS
         {
             BYTE target_ms = p_target_ms;
             if (target_ms > 1)
@@ -4196,7 +4202,7 @@ LARGE_INTEGER TimerStart_Sleep()
                 p_target_ms = target_ms;
             }
         }
-        else if (ms < 15.38) // ~65.02 FPS
+        else if (ms < Gfx::sleep_low) // ~65.02 FPS
         {
             BYTE target_ms = p_target_ms;
             if (target_ms < timer_lock)
@@ -4471,6 +4477,27 @@ void CheatDetected()
     ExecuteQBScript("LaunchGrafCounter", &params);
 }
 
+void CalculateFPSTimers()
+{
+    DWORD frameticks2 = (DWORD)(16666.666666666 / (1000000.0 / (double)freq.QuadPart));
+    frameticks = (DWORD)((1000.0 / Gfx::target_fps) / fFreq);
+    //Add some headroom for hardware delay and rounding errors, probably should add this to ini for platform specific stored value
+    frameticks -= 750;
+    DWORD frameticks3 = 0.0166666666 / (1.0 / (double)freq.QuadPart);
+    debug_print("f1 %u f2 %u f3 %u\n", frameticks, frameticks2, frameticks3);
+
+    //Special anim speed and maybe more gui speed stuff? 
+    //is 0.058 on original 60 fps lock
+    *(float*)0x00458B68 = (float)((60.0 / Gfx::target_fps) * 0.058);//Stack value
+    *(float*)0x0058E100 = (float)((60.0 / Gfx::target_fps) * 0.058);//Memory value
+
+    Gfx::exact_high = (1000.0 / Gfx::target_fps) + Gfx::exact_high_diff;
+    Gfx::exact_low = (1000.0 / Gfx::target_fps) - Gfx::exact_low_diff;
+    Gfx::hybrid_high = (1000.0 / Gfx::target_fps) + Gfx::hybrid_high_diff;
+    Gfx::sleep_high = (1000.0 / Gfx::target_fps) - Gfx::sleep_high_diff;
+    Gfx::sleep_low = (1000.0 / Gfx::target_fps) - Gfx::sleep_low_diff;
+}
+
 void InitLevelMod()
 {
     //HookControls();
@@ -4479,13 +4506,6 @@ void InitLevelMod()
     //Initializing the new timer
     QueryPerformanceFrequency(&freq);
     fFreq = 1000.0 / (double)freq.QuadPart;
-    frameticks = (DWORD)(16666.666666666 / (1000000.0 / (double)freq.QuadPart));
-    //Add some headroom for hardware delay and rounding errors, probably should add this to ini for platform specific stored value
-    frameticks -= 750;
-    DWORD frameticks2 = (DWORD)(16.666666666 / fFreq);
-    DWORD frameticks3 = 0.0166666666 / (1.0 / (double)freq.QuadPart);
-
-    debug_print("f1 %u f2 %u f3 %u\n", frameticks, frameticks2, frameticks3);
 
     if (!p_bWindowed)
         timer_lock = 0x0D;
@@ -4504,6 +4524,11 @@ void InitLevelMod()
     *(DWORD*)0x004CEDE9 = 0x0000008E;
     *(BYTE*)0x004CEDED = 0x90;
     *(WORD*)0x004CEDEE = 0x9090;*/
+
+    //Fix special animation speed
+    VirtualProtect((LPVOID)0x00458B68, 4, PAGE_EXECUTE_READWRITE, &old);
+    VirtualProtect((LPVOID)0x0058E100, 4, PAGE_EXECUTE_READWRITE, &old);
+    CalculateFPSTimers();
 
     //Change the RailNode size
     BYTE optimize_grind[] = { 0xB8, 0x2C, 0x01, 0x00, 0x00, 0x89, 0x86, 0xB8, 0x84, 0x00, 0x00, 0xEB, 0x14, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0xD9 };
@@ -6139,6 +6164,14 @@ bool LaunchGFXCommand(CStruct* pStruct, CScript* pScript)
             case Checksums::FixStutter:
                 Gfx::command = Gfx::Command::FixStutter;
                 break;
+            case Checksums::TargetFPS:
+                auto option = GetOption(crc32f("LM_GFX_TargetFPS"));
+                if (option)
+                {
+                    Gfx::target_fps = option->value;
+                }
+                CalculateFPSTimers();
+                break;
             }
 
             return true;
@@ -6236,6 +6269,14 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
                 else
                     debug_print("NO OPT\n");
                 MaybeFixStutter();
+                break;
+            case Gfx::Command::TargetFPS:
+                option = GetOption(crc32f("LM_GFX_TargetFPS"));
+                if (option)
+                {
+                    Gfx::target_fps = option->value;
+                }
+                CalculateFPSTimers();
                 break;
             }
 

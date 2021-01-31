@@ -245,6 +245,7 @@ namespace Checksums
         Reset = COMPILE_CRC32("reset"),
         ToggleWindowed = COMPILE_CRC32("togglewindowed"),
         FixStutter = COMPILE_CRC32("fixstutter"),
+        TargetFPS = COMPILE_CRC32("targetfps"),
 
         Down = COMPILE_CRC32("down"),
         Left = COMPILE_CRC32("left"),

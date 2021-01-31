@@ -144,8 +144,9 @@ LevelModOptions = [
 	{ name = "LM_GFX_eAntiAlias" value = 4 max = 5 } //"Off" "auto" "2x" "4x" "8x"
 	{ name = "LM_GFX_bFiltering" value = 1 }
 	{ name = "LM_GFX_eFixStutter" value = 1 max = 4 } //"Off" "Exact" "Hybrid" "Sleep"
-	{ name = "LM_GFX_bVSync" value = 1 }
+	{ name = "LM_GFX_bVSync" value = 0 }
 	{ name = "LM_GFX_bWindowed" value = 0 }
+	{ name = "LM_GFX_TargetFPS" value = 60 max = 300 }
 ]
 
 
@@ -348,7 +349,7 @@ ENDSCRIPT
 
 
 SCRIPT CreateLevelModMenus
-	Settings_CreateOptionsMenu //items = game_menu_items
+Settings_CreateOptionsMenu //items = game_menu_items
 
 	
 	//adds levelmod menus
@@ -541,13 +542,15 @@ SCRIPT AddOptions
 ENDSCRIPT
 
 SCRIPT LM_SetOption_Do
-LM_SetOption <...>
-GoTo <Do> params = <params>
+    LM_SetOption <...>
+    GoTo <Do> params = <params>
 ENDSCRIPT
 
 SCRIPT LM_SetOption_Slider
-SetSliderText id = <id> enum = <TextFromValue>
-LM_SetOption <...>
+    if GotParam TextFromValue
+        SetSliderText id = <id> enum = <TextFromValue>
+    endif
+    LM_SetOption <...>
 ENDSCRIPT
  
 SCRIPT LM_SetOption
@@ -851,6 +854,7 @@ game_menu_items = [
 	{ IsBool text = "Windowed"          option_id = item213 option = LM_GFX_bWindowed   toggle_id = item3_toggle cat_gfx Do = sLaunchGFXCommand params = { command = ToggleWindowed } }
 	{ IsBool text = "Texture Filtering" option_id = item215 option = LM_GFX_bFiltering 	toggle_id = item5_toggle cat_gfx } 
 	{ IsBool text = "Enable VSync" 	option_id = item216 option = LM_GFX_bVSync toggle_id = item6_toggle cat_gfx Do = sLaunchGFXCommand } 
+	{ IsInt text = "FPS Lock:"     option_id = LM_GFX_TargetFPS_id option = LM_GFX_TargetFPS toggle_id = item7_toggle cat_gfx min = 60 max = 300  Do = sLaunchGFXCommand params = { command = TargetFPS } }
 	{ IsEnum text = "Stutter Fix" 	option_id = LM_GFX_eFixStutter_id option = LM_GFX_eFixStutter toggle_id = item7_toggle cat_gfx TextValues = [ "Off" "Exact" "Hybrid" "Sleep" ] Do = sLaunchGFXCommand params = { command = FixStutter } } 
 ]
 
@@ -906,6 +910,46 @@ script populate_game_options
 	ENDIF
 endscript
 
+script AddEnum
+    GetMaximumIndex array = <TextValues>
+	GetOptionValue <option>
+	AddLine { 
+	    parent = game_options_names_menu 
+	    Type = slidermenuelement 
+	    id = <option_id> 
+	    text = <text> 
+	    lower = 0 upper = <max> delta = 1 start = <OptionValue> wrap = 1 right_side_w = 100
+	    eventhandlers = [ {Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextFromValue = <TextValues> TextOnly } }{ Type = ContentsChangedEventHandler target = "LM_SetOption_Do" params = { Do = <Do> params = <params> name = <option> id = <option_id> TextFromValue = <TextValues> } } ]
+	}
+	//if GotParam toggle_id
+				//GetOptionText option = <option> text = <TextValues>
+				//SetMenuElementText id = <toggle_id> <text>
+	//endif
+endscript
+
+script AddBool
+    AddLine { 
+	    parent = game_options_names_menu 
+		Type = textmenuelement 
+		id = <option_id>
+		text = <text>
+	}
+		
+	AttachEventHandler { Type = ChooseEventHandler object = <option_id> target = "Settings_ToggleOption" params = { option = <option> toggle_id = <toggle_id> <...> } }
+	Settings_UpdateBoolText { option = <option> toggle_id = <toggle_id> }
+endscript
+
+script AddInt
+    GetOptionValue <option>
+    AddLine { 
+	    parent = game_options_names_menu 
+	    Type = slidermenuelement 
+	    id = <option_id> 
+	    text = <text> 
+	    lower = <min> upper = <max> delta = 1 start = <OptionValue> wrap = 1 right_side_w = 100
+	    eventhandlers = [ {Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextOnly } }{ Type = ContentsChangedEventHandler target = "LM_SetOption_Do" params = { Do = <Do> params = <params> name = <option> id = <option_id>  } } ]
+	}
+endscript
 
 //to avoid multiple nested IFs
 //should rewrite this func in switch-case-ish logic
@@ -923,63 +967,36 @@ script Settings_AddLine params = {}
 				link = <link>
 				w = 300.0
 			}
-		else
-		    if GotParam IsEnum
-			    GetMaximumIndex array = <TextValues>
-				GetOptionValue <option>
-			    AddLine { 
-				parent = game_options_names_menu 
-				Type = slidermenuelement 
-				id = <option_id> 
-				text = <text> 
-				lower = 0 upper = <max> delta = 1 start = <OptionValue> wrap = 1 right_side_w = 100
-				eventhandlers = [ {Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextFromValue = <TextValues> TextOnly } }{ Type = ContentsChangedEventHandler target = "LM_SetOption_Do" params = { Do = <Do> params = <params> name = <option> id = <option_id> TextFromValue = <TextValues> } } ]
-				
-				}
-			else
-			    AddLine { 
-				    parent = game_options_names_menu 
+		else	
+		    if GotParam toggle_id
+			    AddLine {
+				    parent = game_options_on_off_menu 
 				    Type = textmenuelement 
-				    id = <option_id>
-				    text = <text>
+				    id = <toggle_id>
+				    text = " "
 			    }
-			endif
-		endif
+		    else
+			    AddLine {
+			        parent = game_options_on_off_menu 
+				    Type = textmenuelement 
+				    auto_id
+				    text = " "
+			    }
+		    endif
 		
-		if GotParam toggle_id
-			if GotParam IsEnum
-				AddLine {
-					parent = game_options_on_off_menu 
-					Type = textmenuelement 
-					id = <toggle_id>
-					text = " "
-				}
-				//GetOptionText option = <option> text = <TextValues>
-				//SetMenuElementText id = <toggle_id> <text>
+		    if GotParam IsEnum
+			    AddEnum <...>
 			else
-				AddLine {
-					parent = game_options_on_off_menu 
-					Type = textmenuelement 
-					id = <toggle_id>
-					text = " "
-				}
+			    if GotParam IsInt
+				    AddInt <...>
+			    else
+				    AddBool <...>
+				endif
 			endif
-		else
-				AddLine {
-					parent = game_options_on_off_menu 
-					Type = textmenuelement 
-					auto_id
-					text = " "
-				}
-		endif
-		
-		if GotParam option
-			LM_MaybeMakeStatic option = <option> option_id = <option_id>
 		endif
 
-		if GotParam IsBool
-			AttachEventHandler { Type = ChooseEventHandler object = <option_id> target = "Settings_ToggleOption" params = { option = <option> toggle_id = <toggle_id> <...> } }
-			Settings_UpdateBoolText { option = <option> toggle_id = <toggle_id> }
+		if GotParam option
+			LM_MaybeMakeStatic option = <option> option_id = <option_id>
 		endif
 	endif
 endscript
