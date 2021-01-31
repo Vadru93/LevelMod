@@ -459,16 +459,19 @@ public:
                                     continue;
 
                                 //We have a narrow object that seems to be accessible
-                                for (auto j = 0; j < sector->numVertices; j++)
+                                if (bDebugMode)
                                 {
-                                    //Decrease b and g value, keep r value = make object more red
-                                    SuperSector::Color* colors = sector->GetColors();
-                                    colors[j].g *= 0.2f;
-                                    colors[j].b *= 0.2f;
-                                }
+                                    for (auto j = 0; j < sector->numVertices; j++)
+                                    {
+                                        //Decrease b and g value, keep r value = make object more red
+                                        SuperSector::Color* colors = sector->GetColors();
+                                        colors[j].g *= 0.2f;
+                                        colors[j].b *= 0.2f;
+                                    }
 
-                                //Tell engine to update the VertexBuffer to vram
-                                sector->Update();
+                                    //Tell engine to update the VertexBuffer to vram
+                                    sector->Update();
+                                }
                                 float highestPoint = -FLT_MAX;
                                 for (DWORD j = 0; j < sector->numVertices; j++)
                                 {

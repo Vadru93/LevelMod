@@ -6195,6 +6195,7 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
 
     if (hres == D3D_OK && GameState::IsActive())
     {
+        extern D3DPRESENT_PARAMETERS current_params;
         if (bToggleWindowed)
         {
 
@@ -6249,7 +6250,18 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
             case Gfx::Command::Reset:
                 option = GetOption(crc32f("LM_GFX_bVSync"));
                 if (option)
+                {
                     Gfx::bVSync = option->value;
+                    if (Gfx::bVSync)
+                    {
+                        d3dpp->FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+                        d3dpp->FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+                    }
+                    else
+                    {
+                        d3dpp->FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+                    }
+                }
 
                 option = GetOption(crc32f("LM_GFX_eBuffering"));
                 if(option)
@@ -6257,6 +6269,7 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
 
                 option = GetOption(crc32f("LM_GFX_eAntiAlias"));
                     Gfx::AntiAliasing = option->value;
+                    CopyMemory(&current_params, d3dpp, sizeof(D3DPRESENT_PARAMETERS));
                 break;
 
             case Gfx::Command::FixStutter:
