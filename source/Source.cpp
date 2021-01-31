@@ -4477,6 +4477,15 @@ void CheatDetected()
     ExecuteQBScript("LaunchGrafCounter", &params);
 }
 
+DWORD GetTerrain(SuperSector* sector, DWORD index)
+{
+    typedef DWORD(__cdecl* const pGetTerrain)(SuperSector* sector, DWORD index);
+    DWORD terrain = pGetTerrain(0x00412530)(sector, index);
+    if (!terrain)
+        terrain = 1;
+    return terrain;
+}
+
 void CalculateFPSTimers()
 {
     DWORD frameticks2 = (DWORD)(16666.666666666 / (1000000.0 / (double)freq.QuadPart));
@@ -4517,6 +4526,10 @@ void InitLevelMod()
     DWORD old;
     //HookFunction(0x004C04F0, TimerElapsed);
     HookFunction(0x004F9463, UpdateFrameLength);
+
+    //Fix no terrain sound on missing terrain flag objects
+    HookFunction(0x0041272F, GetTerrain);
+    HookFunction(0x412800, GetTerrain);
 
     //Fix menu crashing
     VirtualProtect((LPVOID)0x004CEDE4, 8, PAGE_EXECUTE_READWRITE, &old);
