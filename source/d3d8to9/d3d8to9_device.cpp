@@ -183,9 +183,9 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateAdditionalSwapChain(D3DPRESENT_
     if (Gfx::bVSync)
     {
         d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-        d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+        //d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
         PresentParams.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-        PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+        //PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
     }
     else
     {
@@ -256,7 +256,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::Reset(D3DPRESENT_PARAMETERS8* pPresen
     if (Gfx::bVSync)
     {
         PresentParams.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-        PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+        //PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
     }
     else
     {

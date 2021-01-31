@@ -6043,27 +6043,32 @@ void ToggleWindowed()
     d3dpp->Windowed = !d3dpp->Windowed;
     //Toggle windowed mode flag
     d3dpp->Windowed ? *(BYTE*)0x00851094 &= ~1 : *(BYTE*)0x00851094 |= 1;
+    extern D3DPRESENT_PARAMETERS current_params;
+    current_params.Windowed = d3dpp->Windowed;
 
     RECT rect;
     rect.left = 0;
     rect.top = 0;
-    rect.right = d3dpp->BackBufferWidth;
-    rect.bottom = d3dpp->BackBufferHeight;
+    rect.right = *(DWORD*)0x00851084;
+    rect.bottom = *(DWORD*)0x00851088;
 
     if (d3dpp->Windowed)
     {
 
         ShowWindow(Gfx::hFocusWindow, SW_NORMAL);
         SetFocus(Gfx::hFocusWindow);
+        d3dpp->FullScreen_RefreshRateInHz = 0;
+        current_params.FullScreen_RefreshRateInHz = 0;
 
         SetWindowLongPtr(Gfx::hFocusWindow, GWL_STYLE, WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE);
         AdjustWindowRect(&rect, WS_CAPTION | WS_POPUPWINDOW, FALSE);
-        SetWindowPos(Gfx::hFocusWindow, HWND_NOTOPMOST, 0, 0, d3dpp->BackBufferWidth, d3dpp->BackBufferHeight, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+        SetWindowPos(Gfx::hFocusWindow, HWND_NOTOPMOST, 0, 0, *(DWORD*)0x00851084, *(DWORD*)0x00851088, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
         //MoveWindow(Gfx::hFocusWindow, 0, 0, rect.right - rect.left, rect.bottom - rect.top, TRUE);
 
     }
     else
     {
+        d3dpp->FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
         POINT Point = { 0 };
         HMONITOR Monitor = MonitorFromPoint(Point, MONITOR_DEFAULTTONEAREST);
         MONITORINFO MonitorInfo = { sizeof(MonitorInfo) };
@@ -6195,7 +6200,6 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
 
     if (hres == D3D_OK && GameState::IsActive())
     {
-        extern D3DPRESENT_PARAMETERS current_params;
         if (bToggleWindowed)
         {
 
@@ -6255,7 +6259,6 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
                     if (Gfx::bVSync)
                     {
                         d3dpp->FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-                        d3dpp->FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
                     }
                     else
                     {
@@ -6269,7 +6272,6 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
 
                 option = GetOption(crc32f("LM_GFX_eAntiAlias"));
                     Gfx::AntiAliasing = option->value;
-                    CopyMemory(&current_params, d3dpp, sizeof(D3DPRESENT_PARAMETERS));
                 break;
 
             case Gfx::Command::FixStutter:
@@ -6296,6 +6298,10 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
 
             ShowWindow(Gfx::hFocusWindow, SW_NORMAL);
             SetFocus(Gfx::hFocusWindow);
+            if (d3dpp->Windowed)
+            {
+                SetWindowPos(Gfx::hFocusWindow, HWND_NOTOPMOST, 0, 0, *(DWORD*)0x00851084, *(DWORD*)0x00851088, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+            }
             return D3DERR_DEVICELOST;
         }
 

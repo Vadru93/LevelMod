@@ -242,7 +242,7 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
     if (Gfx::bVSync)
     {
         PresentParams.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-        PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+        //PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
     }
     else
     {
