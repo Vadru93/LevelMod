@@ -233,7 +233,9 @@ SCRIPT GameFlow_StartRun
 		PauseMusic 1
 	ELSE
 		printf "starting a run....skip tracks and crank up the music"
-		LM_PrintInfo
+		IF IsOptionOn LM_DebugOption_bDebugMode
+		    LM_PrintInfo
+	    ENDIF
 		IF GameModeEquals is_horse
 		ELSE
 			SkipMusicTrack
