@@ -498,7 +498,7 @@ SCRIPT ShowNextRecordRight
 								Goto Skater_RecordsDisplay Params = { level = LevelNum_Tokyo Heading = "Tokyo" }
 							ELSE
 								IF IntegerEquals a = <level> b = LevelNum_Tokyo
-									Goto Skater_RecordsDisplay Params = { level = LevelNum_Ship Heading = "Ship" }
+									Goto Skater_RecordsDisplay Params = { level = LevelNum_Ship Heading = "Cruise Ship" }
 								ELSE
 									IF IntegerEquals a = <level> b = LevelNum_Ship
 										Goto Skater_RecordsDisplay Params = { level = LevelNum_Warehouse Heading = "Warehouse" }
