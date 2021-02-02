@@ -272,7 +272,7 @@ script SetTerrainWoodFlimsy
   SetTerrainSfxProperties OllieWood { Terrain = TERRAIN_WOODFLIMSY Table = SK3SFX_TABLE_JUMP OllieWoodValues }
   SetTerrainSfxProperties LandWood { Terrain = TERRAIN_WOODFLIMSY Table = SK3SFX_TABLE_LAND LandWoodValues }
   SetTerrainSfxProperties BonkWood { Terrain = TERRAIN_WOODFLIMSY Table = SK3SFX_TABLE_BONK BonkWoodValues }
-  SetTerrainSfxProperties RevertWood { Terrain = TERRAIN_WOODFLIMSY Table = SK3SFX_TABLE_CESSCessValues }
+  SetTerrainSfxProperties RevertWood { Terrain = TERRAIN_WOODFLIMSY Table = SK3SFX_TABLE_CESS CessValues }
 endscript
 
 script SetTerrainWoodShingle
