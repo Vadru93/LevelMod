@@ -107,7 +107,9 @@ script CheckForAnyPro_Unlock
 endscript
 
 script add_level_menu_item2
+
   if GotParam <mask>
+
     VerifyParam param = level_name func = add_level_menu_item <...>
     VerifyParam param = load_script func = add_level_menu_item <...>
     VerifyParam param = target_script func = add_level_menu_item <...>
@@ -119,17 +121,22 @@ script add_level_menu_item2
 	    AddParam static
 	endif
 	
-    if GotParam static
-      CreateAndAttachMenu { type = textmenuelement id = <level_id> text = <level_name> target = <target_script> static kill_menu params = { level = <load_script> string = <level_name> } parent = <parent_menu> }
-    else
-      if IsCareerMode
-        if GotParam NoCareer
+    if IsCareerMode
+      if GotParam NoCareer
+      else
+        if GotParam static
+          CreateAndAttachMenu { type = textmenuelement id = <level_id> text = <level_name> target = <target_script> static kill_menu params = { level = <load_script> string = <level_name> } parent = <parent_menu> }
         else
           CreateAndAttachMenu { type = textmenuelement id = <level_id> text = <level_name> target = <target_script> kill_menu params = { level = <load_script> string = <level_name> } parent = <parent_menu> }
         endif
+      endif
+    else
+      if GotParam static
+        CreateAndAttachMenu { type = textmenuelement id = <level_id> text = <level_name> target = <target_script> static params = { level = <load_script> string = <level_name> } parent = <parent_menu> }
       else
         CreateAndAttachMenu { type = textmenuelement id = <level_id> text = <level_name> target = <target_script> params = { level = <load_script> string = <level_name> } parent = <parent_menu> }
       endif
     endif
+
   endif
 endscript
