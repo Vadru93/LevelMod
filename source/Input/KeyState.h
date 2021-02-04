@@ -211,6 +211,12 @@ public:
         }
     }
 
+    static void Press(KeyCode key)
+    {
+        p_key_state(p_num_keys) = key;
+        p_num_keys = p_num_keys + 1;
+    }
+
     DWORD GetChecksum()
     {
         return checksum;

@@ -61,52 +61,87 @@ __declspec(noalias) bool __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYT
         //Then check if the the key is already pressed on keyboard
         //If it's not pressed check if it's pressed on controller
         KeyMap* __restrict key = &map[(BYTE)KeyMap::MappedKey::Pause];
-        if(!buffer[key->DIK_KeyCode])
-            buffer[key->DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_START) * 0x80;
+        if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_START))
+        {
+            buffer[key->DIK_KeyCode] = 0x80;
+            KeyState::Press(KeyCode::ENTER);
+            KeyState::SetKeyboardState(VirtualKeyCode::ENTER, 0x80);
+        }
         //Set stack boolean to know if Pause key is pressed
         bool pause = (buffer[key->DIK_KeyCode] == 0x80);
 
         key = &map[(BYTE)KeyMap::MappedKey::CameraToggle];
-        if (!buffer[key->DIK_KeyCode])
-            buffer[key->DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) * 0x80;
+        if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK))
+        {
+            buffer[key->DIK_KeyCode] = 0x80;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::CameraToggle), 0x80);
+        }
         //Set stack boolean to know if CameraToggle key is pressed
         bool start = (buffer[key->DIK_KeyCode] == 0x80);
 
+        //For now camera lock is pause + start maybe should be L3 or R3(does it even exist on xbox??)
         key = &map[(BYTE)KeyMap::MappedKey::CameraLock];
-        if (!buffer[key->DIK_KeyCode])
-            buffer[key->DIK_KeyCode] = (pause && start);
+        if (!buffer[key->DIK_KeyCode] && (pause && start))
+        {
+            buffer[key->DIK_KeyCode] = 0x80;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::CameraToggle), 0x80);
+        }
 
         key = &map[(BYTE)KeyMap::MappedKey::Grind];
-        if (!buffer[key->DIK_KeyCode])
-            buffer[key->DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_Y) * 0x80;
+        if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_Y))
+        {
+            buffer[key->DIK_KeyCode] = 0x80;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Grind), 0x80);
+        }
 
         key = &map[(BYTE)KeyMap::MappedKey::Grab];
-        if (!buffer[key->DIK_KeyCode])
-            buffer[key->DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_B) * 0x80;
+        if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_B))
+        {
+            buffer[key->DIK_KeyCode] = 0x80;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Grab), 0x80);
+        }
 
         key = &map[(BYTE)KeyMap::MappedKey::Ollie];
-        if (!buffer[key->DIK_KeyCode])
-            buffer[key->DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_A) * 0x80;
+        if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_A))
+        {
+            buffer[key->DIK_KeyCode] = 0x80;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Ollie), 0x80);
+        }
 
         key = &map[(BYTE)KeyMap::MappedKey::Flip];
-        if (!buffer[key->DIK_KeyCode])
-            buffer[key->DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_X) * 0x80;
+        if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_X))
+        {
+            buffer[key->DIK_KeyCode] = 0x80;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Flip), 0x80);
+        }
 
         key = &map[(BYTE)KeyMap::MappedKey::SpinLeft];
-        if (!buffer[key->DIK_KeyCode])
-            buffer[key->DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) * 0x80;
+        if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER))
+        {
+            buffer[key->DIK_KeyCode] = 0x80;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::SpinLeft), 0x80);
+        }
 
         key = &map[(BYTE)KeyMap::MappedKey::SpinRight];
-        if (!buffer[key->DIK_KeyCode])
-            buffer[key->DIK_KeyCode] = (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) * 0x80;
+        if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER))
+        {
+            buffer[key->DIK_KeyCode] = 0x80;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::SpinRight), 0x80);
+        }
 
         key = &map[(BYTE)KeyMap::MappedKey::Nollie];
-        if (!buffer[key->DIK_KeyCode])
-            buffer[key->DIK_KeyCode] = ((state.Gamepad.bLeftTrigger) > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) ? 0x80 : 0;
+        if (!buffer[key->DIK_KeyCode] && ((state.Gamepad.bLeftTrigger) > XINPUT_GAMEPAD_TRIGGER_THRESHOLD))
+        {
+            buffer[key->DIK_KeyCode] = 0x80;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Nollie), 0x80);
+        }
 
         key = &map[(BYTE)KeyMap::MappedKey::Revert];
-        if (!buffer[key->DIK_KeyCode])
-            buffer[key->DIK_KeyCode] = ((state.Gamepad.bRightTrigger) > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) ? 0x80 : 0;
+        if (!buffer[key->DIK_KeyCode] && ((state.Gamepad.bRightTrigger) > XINPUT_GAMEPAD_TRIGGER_THRESHOLD))
+        {
+            buffer[key->DIK_KeyCode] = 0x80;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Revert), 0x80);
+        }
 
         key = &map[(BYTE)KeyMap::MappedKey::Right];
         if (!buffer[key->DIK_KeyCode])
@@ -119,10 +154,10 @@ __declspec(noalias) bool __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYT
                 {
                     buffer[key->DIK_KeyCode] = 0x80;// ClampValue(state.Gamepad.sThumbLX, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF);
                 }
-                else
-                    buffer[key->DIK_KeyCode] = 0;
 
             }
+            if(buffer[key->DIK_KeyCode])
+                KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Right), 0x80);
         }
 
         key = &map[(BYTE)KeyMap::MappedKey::Left];
@@ -136,9 +171,9 @@ __declspec(noalias) bool __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYT
                 {
                     buffer[key->DIK_KeyCode] = 0x80;// ClampValue(state.Gamepad.sThumbLX, -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, -32767, 0x40, 0xFF);
                 }
-                else
-                    buffer[key->DIK_KeyCode] = 0;
             }
+            if (buffer[key->DIK_KeyCode])
+                KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Left), 0x80);
         }
 
         key = &map[(BYTE)KeyMap::MappedKey::Up];
@@ -152,9 +187,9 @@ __declspec(noalias) bool __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYT
                 {
                     buffer[key->DIK_KeyCode] = 0x80;// ClampValue(state.Gamepad.sThumbLY, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF);
                 }
-                else
-                    buffer[key->DIK_KeyCode] = 0;
             }
+            if (buffer[key->DIK_KeyCode])
+                KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Right), 0x80);
         }
 
         key = &map[(BYTE)KeyMap::MappedKey::Down];
@@ -168,9 +203,10 @@ __declspec(noalias) bool __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYT
                 {
                     buffer[key->DIK_KeyCode] = 0x80;// ClampValue(state.Gamepad.sThumbLY, -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF);
                 }
-                else
-                    buffer[key->DIK_KeyCode] = 0;
+
             }
+            if (buffer[key->DIK_KeyCode])
+                KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Right), 0x80);
         }
 
     }
@@ -293,7 +329,7 @@ DWORD UpdateKeyState(KeyState* state, DWORD press)
     //DWORD time = _GetCurrentTime();
     switch (state->GetChecksum())
     {
-    case Checksums::X:
+    /*case Checksums::X:
         press = (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A) * 0xFF;
         break;
     case Checksums::Circle:
@@ -323,59 +359,44 @@ DWORD UpdateKeyState(KeyState* state, DWORD press)
         else
             press = 0;
         break;
-
+        */
     case Checksums::Right:
         //state->Update(time, press);
-        if (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT)
-            press = 0xFF;
-        else
+        if(!(XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT))
         {
             if (XINPUT::Player1->GetState().Gamepad.sThumbLX >= XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
             {
                 press = ClampValue(XINPUT::Player1->GetState().Gamepad.sThumbLX, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF);
             }
-            else
-                press = 0;
         }
         break;
     case (DWORD)Checksums::Left:
-        if (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT)
-            press = 0xFF;
-        else
+        if(!(XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT))
         {
             if (XINPUT::Player1->GetState().Gamepad.sThumbLX <= -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
             {
                 press = ClampValue(XINPUT::Player1->GetState().Gamepad.sThumbLX, -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, -32767, 0x40, 0xFF);
             }
-            else
-                press = 0;
         }
         break;
 
     case (DWORD)Checksums::Up:
-        if (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP)
-            press = 0xFF;
-        else
+        if (!(XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP))
         {
             if (XINPUT::Player1->GetState().Gamepad.sThumbLY >= XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
             {
                 press = ClampValue(XINPUT::Player1->GetState().Gamepad.sThumbLY, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF);
             }
-            else
-                press = 0;
         }
         break;
     case (DWORD)Checksums::Down:
-        if (XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN)
-            press = 0xFF;
-        else
+        
+        if (!(XINPUT::Player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN))
         {
             if (XINPUT::Player1->GetState().Gamepad.sThumbLY <= -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
             {
                 press = ClampValue(XINPUT::Player1->GetState().Gamepad.sThumbLY, -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF);
             }
-            else
-                press = 0;
         }
         break;
 
