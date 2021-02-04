@@ -6,14 +6,14 @@
 LM_HostOption_MenuItem = { Type = textmenuelement text = "Foo" target = "LM_ToggleHostOption" }
 
 LM_HostOptions = [
-    { Type = textmenuelement auto_id text = "LevelMod HostOptions" static dont_gray drawer = title }
+	{ Type = textmenuelement auto_id text = "LevelMod HostOptions" static dont_gray drawer = title }
 	{ LM_HostOption_MenuItem  name = LM_HostOption_bSpine Value = 1 id = LM_HostOption_bSpine_id override_true = LM_Control_bSpine params = { name = LM_HostOption_bSpine id = LM_HostOption_bSpine_id on = "Spine: Allowed" off = "Spine: Disallowed" } }
 	{ LM_HostOption_MenuItem  name = LM_HostOption_bBank Value = 1 id = LM_HostOption_bBank_id override_true = LM_Control_bBank params = { name = LM_HostOption_bBank id = LM_HostOption_bBank_id on = "Bank Drop: Allowed" off = "Bank Drop: Disallowed" } }
 	{ LM_HostOption_MenuItem  name = LM_HostOption_bAcid Value = 1 id = LM_HostOption_bAcid_id override_true = LM_Control_bAcid params = { name = LM_HostOption_bAcid id = LM_HostOption_bAcid_id on = "Acid Drop: Allowed" off = "Acid Drop: Disallowed" } }
 	{ LM_HostOption_MenuItem  name = LM_HostOption_bExtraTricks Value = 1 id = LM_HostOption_bExtraTricks_id override_true = LM_Control_bExtraTricks params = { name = LM_HostOption_bExtraTricks id = LM_HostOption_bExtraTricks_id on = "ExtraTricks: Allowed" off = "ExtraTricks: Disallowed" } }
 	{ LM_HostOption_MenuItem  name = LM_HostOption_bUnLimitTags Value = 1 id = LM_HostOption_bUnLimitTags_id override_true = LM_GameOption_bUnLimitTags  params = { name = LM_HostOption_bUnLimitTags id = LM_HostOption_bUnLimitTags_id on = "32 TagFix: Allowed" off = "32 TagFix: Disallowed" } }
 	{ LM_HostOption_MenuItem  name = LM_HostOption_bWallplant Value = 1 id = LM_HostOption_bWallplant_id override_true = LM_Control_bWallplant  params = { name = LM_HostOption_bWallplant id = LM_HostOption_bWallplant_id on = "Wallplant: Allowed" off = "Wallplant: Disallowed" } }
-    { LM_HostOption_MenuItem  name = LM_HostOption_bWalliePlant Value = 1 id = LM_HostOption_bWalliePlant_id override_true = LM_Control_bWalliePlant  params = { name = LM_HostOption_bWalliePlant id = LM_HostOption_bWalliePlant_id on = "Wallieplant: Allowed" off = "Wallieplant: Disallowed" } }
+	{ LM_HostOption_MenuItem  name = LM_HostOption_bWalliePlant Value = 1 id = LM_HostOption_bWalliePlant_id override_true = LM_Control_bWalliePlant  params = { name = LM_HostOption_bWalliePlant id = LM_HostOption_bWalliePlant_id on = "Wallieplant: Allowed" off = "Wallieplant: Disallowed" } }
 	{ LM_HostOption_MenuItem  name = LM_HostOption_bBoostPlant Value = 1 id = LM_HostOption_bBoostPlant_id override_true = LM_Control_bBoostPlant  params = { name = LM_HostOption_bBoostPlant id = LM_HostOption_bBoostPlant_id on = "Boostplant: Allowed" off = "Boostplant: Disallowed" } }
 	{ LM_HostOption_MenuItem  name = LM_HostOption_bButtSlap Value = 1 id = LM_HostOption_bButtSlap_id override_true = LM_Control_bButtSlap  params = { name = LM_HostOption_bButtSlap id = LM_HostOption_bButtSlap_id on = "Buttslap: Allowed" off = "Buttslap: Disallowed" } }
 	
@@ -23,7 +23,7 @@ LM_HostOptions = [
 //maybe move to shader.q, when enough code for shaders??
 
 BlendModes = [
-    //Oringial th4+ blendmodes, in order 0-15
+	//Oringial th4+ blendmodes, in order 0-15
 	
 	// ( 0 - 0 ) * 0 + Src
 	//DIFFUSE = { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_ONE dest_blend = D3DBLEND_ZERO }
@@ -34,7 +34,7 @@ BlendModes = [
 	// ( Src - 0 ) * Fixed + Dst
 	//ADD_FIXED = { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_CONSTANTALPHA dest_blend = D3DBLEND_ONE }
 	
-    // ( 0 - Src ) * Src + Dst
+	// ( 0 - Src ) * Src + Dst
 	//SUBTRACT = { blend_op = D3DBLENDOP_REVSUBTRACT src_blend = D3DBLEND_SRCALPHA dest_blend = D3DBLEND_ONE }
 	
 	// ( 0 - Src ) * Fixed + Dst
@@ -68,7 +68,7 @@ BlendModes = [
 	//BLEND_PREVIOUS_MASK = { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_DESTALPHA dest_blend = D3DBLEND_INVDESTALPHA }
 				
 	// Meaningless unless destination alpha is enabled.
-    //BLEND_INVERSE_PREVIOUS_MASK = { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_INVDESTALPHA dest_blend = D3DBLEND_DESTALPHA }
+	//BLEND_INVERSE_PREVIOUS_MASK = { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_INVDESTALPHA dest_blend = D3DBLEND_DESTALPHA }
 							
 	//ONE_INV_SRC_ALPHA = { blend_op = D3DBLENDOP_ADD src_blend = D3DBLEND_ONE dest_blend = D3DBLEND_INVSRCALPHA }
 	
@@ -179,9 +179,9 @@ LM_Menu_Shared_Back = {
 //=======================levelmod settings menus============================
 
 SCRIPT MaybeAddHostOption
-    RestoreGoBack
-    IF OnServer
-	    AddLine parent = Levelmod_menu_root Type = textmenuelement id = lm_hostoption_id text = "Host Options" link = levelmod_HostOptions_root
+	RestoreGoBack
+	IF OnServer
+		AddLine parent = Levelmod_menu_root Type = textmenuelement id = lm_hostoption_id text = "Host Options" link = levelmod_HostOptions_root
 	ENDIF
 
 	AddLine parent = Levelmod_menu_root Type = textmenuelement id = back_id text = "Back" target = "go_back" Params = { id = Levelmod_menu_root } 
@@ -196,7 +196,7 @@ Levelmod_menu_root = {
 }
 
 SCRIPT sFixGoBack
-    FixGoBack
+	FixGoBack
 ENDSCRIPT
 
 levelmod_menu_root_children = [
@@ -274,7 +274,7 @@ levelmod_menu_air_items = [
 	{ Type = textmenuelement auto_id text = "Air" static dont_gray drawer = title }
 	
 	//option to disable buttslap
-    { LM_Menu_Shared_Bool id = LM_Control_bButtSlap_id params = { name = LM_Control_bButtSlap id = LM_Control_bButtSlap_id on = "Buttslap: on" off = "Buttslap: off" } }
+	{ LM_Menu_Shared_Bool id = LM_Control_bButtSlap_id params = { name = LM_Control_bButtSlap id = LM_Control_bButtSlap_id on = "Buttslap: on" off = "Buttslap: off" } }
 	
 	//Sets spine button
 	//0 = Revert
@@ -332,19 +332,19 @@ levelmod_HostOptions_root = {
 }
 
 SCRIPT AddHostOption
-    printf "Adding HostOption"
-    IF GotParam On
-        AddLine parent = levelmod_HostOptions_root Type = textmenuelement id = <id> text = <On>
+	printf "Adding HostOption"
+	IF GotParam On
+		AddLine parent = levelmod_HostOptions_root Type = textmenuelement id = <id> text = <On>
 	ELSE
-	    GetParam On
+		GetParam On
 		GetParam id
-	    AddLine parent = levelmod_HostOptions_root Type = textmenuelement id = <id> text = <On>
+		AddLine parent = levelmod_HostOptions_root Type = textmenuelement id = <id> text = <On>
 	ENDIF
 ENDSCRIPT
 
 SCRIPT UpdateHostOptions
-    printf "OnShow"
-    ForEachIn LM_HostOptions do = AddHostOption params = { <...> }
+	printf "OnShow"
+	ForEachIn LM_HostOptions do = AddHostOption params = { <...> }
 ENDSCRIPT
 
 
@@ -383,8 +383,8 @@ ENDSCRIPT
 //toggle functions
 
 SCRIPT UpdateGrass
-    printf "Spawned Script UpdateGras..."
-    IF IsOptionOn LM_GameOption_bGrass
+	printf "Spawned Script UpdateGras..."
+	IF IsOptionOn LM_GameOption_bGrass
 		Create prefix = "3DGrassMesh"
 		printf "Grass On"
 	ELSE
@@ -394,8 +394,8 @@ SCRIPT UpdateGrass
 ENDSCRIPT
 
 SCRIPT UpdateExtraLayer
-    printf "Spawned Script UpdateExtraLayer..."
-    IF IsOptionOn LM_GameOption_bExtraLayer
+	printf "Spawned Script UpdateExtraLayer..."
+	IF IsOptionOn LM_GameOption_bExtraLayer
 		Create prefix = "ExtraLayer"
 	ELSE
 		
@@ -412,8 +412,8 @@ SCRIPT UpdateNetName
 ENDSCRIPT
 
 SCRIPT UpdateShowHUD
-    printf "Spawned Script UpdateShowHUD..."
-    IF IsOptionOn LM_GUI_bShowHud
+	printf "Spawned Script UpdateShowHUD..."
+	IF IsOptionOn LM_GUI_bShowHud
 		TogglePanel 1
 	ELSE
 		TogglePanel 0
@@ -507,11 +507,11 @@ ENDSCRIPT
 
 SCRIPT OptionsOnChangeLevel
    IF GotParam ChangeLevel
-       printf "Going to spawn Script"
+	   printf "Going to spawn Script"
 	   IF GotParam do
-           Goto <do>
+		   Goto <do>
 	   ELSE
-	       GetParam do
+		   GetParam do
 		   Goto <do>
 	   ENDIF
    ENDIF
@@ -519,22 +519,22 @@ ENDSCRIPT
 
 SCRIPT OptionsOnStartGame
    IF GotParam StartGame
-       printf "Going to spawn Script"
+	   printf "Going to spawn Script"
 	   IF GotParam do
-           Goto <do>
+		   Goto <do>
 	   ELSE
-	       GetParam do
+		   GetParam do
 		   Goto <do>
 	   ENDIF
    ENDIF
 ENDSCRIPT
 
 SCRIPT sLaunchGFXCommand command = Reset
-    LaunchGFXCommand <command> params = <params>
+	LaunchGFXCommand <command> params = <params>
 ENDSCRIPT
 
 SCRIPT sAddOption max = 2
-    AddOption Name = <Name> Value = <Value> max = <max>
+	AddOption Name = <Name> Value = <Value> max = <max>
 ENDSCRIPT
 
 SCRIPT AddOptions
@@ -542,15 +542,15 @@ SCRIPT AddOptions
 ENDSCRIPT
 
 SCRIPT LM_SetOption_Do
-    LM_SetOption <...>
-    GoTo <Do> params = <params>
+	LM_SetOption <...>
+	GoTo <Do> params = <params>
 ENDSCRIPT
 
 SCRIPT LM_SetOption_Slider
-    if GotParam TextFromValue
-        SetSliderText id = <id> enum = <TextFromValue>
-    endif
-    LM_SetOption <...>
+	if GotParam TextFromValue
+		SetSliderText id = <id> enum = <TextFromValue>
+	endif
+	LM_SetOption <...>
 ENDSCRIPT
  
 SCRIPT LM_SetOption
@@ -560,35 +560,35 @@ SCRIPT LM_SetOption
 		GetParam id
 		printf "Going to set option"
 		IF LM_GotParam TextOnly
-		    SetSliderValue option = <name>
+			SetSliderValue option = <name>
 			IF LM_GotParam UpdateText
-			    GetParam TextFromValue
-			    GetOptionText option = <name> text = <TextFromValue>
-			    printf "setting menu element text"
-			    SetMenuElementText id = <id> <text>
+				GetParam TextFromValue
+				GetOptionText option = <name> text = <TextFromValue>
+				printf "setting menu element text"
+				SetMenuElementText id = <id> <text>
 			ENDIF
 			LM_MaybeMakeStatic option = <name>
 		ELSE
-		    IF LM_GotParam Value
-			    GetParam Value
+			IF LM_GotParam Value
+				GetParam Value
 				//Sets option from value
 				IF SetOption <name> value = <Value>
-				    IF LM_GotParam UpdateText
-				        GetParam TextFromValue
-					    GetOptionText option = <name> text = <TextFromValue>
-					    SetMenuElementText id = <id> <text>
+					IF LM_GotParam UpdateText
+						GetParam TextFromValue
+						GetOptionText option = <name> text = <TextFromValue>
+						SetMenuElementText id = <id> <text>
 					ENDIF
 				ENDIF
 			ELSE
-			    //Sets option from slider
+				//Sets option from slider
 				IF SetOption <name>
-				    IF LM_GotParam UpdateText
-					    printf "Getting option text"
-					    GetParam TextFromValue
-					    GetOptionText option = <name> text = <TextFromValue>
-					    printf "setting menu element text"
-					    SetMenuElementText id = <id> <text>
-			        ENDIF
+					IF LM_GotParam UpdateText
+						printf "Getting option text"
+						GetParam TextFromValue
+						GetOptionText option = <name> text = <TextFromValue>
+						printf "setting menu element text"
+						SetMenuElementText id = <id> <text>
+					ENDIF
 				ENDIF
 			ENDIF
 		ENDIF
@@ -618,11 +618,11 @@ LM_Control_SpineButton_Text = [
 SCRIPT LM_MaybeMakeStatic
 //IsOptionOverriden will auto-generate an option_id if none is found
 //It will generate it using syntax "[OptionName]_id"
-    IF IsOptionOverriden <option>
-	    MakeTextMenuElementStatic <option_id>
+	IF IsOptionOverriden <option>
+		MakeTextMenuElementStatic <option_id>
 	ELSE
-	    IF GotParam option_id
-		    MakeTextMenuElementStatic <option_id> nonstatic = 1
+		IF GotParam option_id
+			MakeTextMenuElementStatic <option_id> nonstatic = 1
 		ENDIF
 	ENDIF
 ENDSCRIPT
@@ -655,16 +655,16 @@ SCRIPT LM_ToggleHostOption
 				//GetParam will move the param from the struct to the script stack
 				GetParam id
 				IF LM_GotParam name
-				    GetParam name
+					GetParam name
 				ENDIF
 				IF LM_GotParam TextFromValue
 					printf "Updating TextFromValue"
 					GetParam TextFromValue
 					IF LM_GotParam option
-					    GetParam option
-					    GetOptionText option = <option> text = <TextFromValue>
+						GetParam option
+						GetOptionText option = <option> text = <TextFromValue>
 					ELSE
-					    GetOptionText option = <name> text = <TextFromValue>
+						GetOptionText option = <name> text = <TextFromValue>
 					ENDIF
 					SetMenuElementText id = <id> <text>
 				ELSE
@@ -683,21 +683,21 @@ SCRIPT LM_ToggleHostOption
 			ENDIF
 		ENDIF
 		IF GotParam LinkedTo
-		    IF IsOptionOn <LinkedTo>
-		        MakeTextMenuElementStatic <id> nonstatic = 1
+			IF IsOptionOn <LinkedTo>
+				MakeTextMenuElementStatic <id> nonstatic = 1
 			ELSE
-			    MakeTextMenuElementStatic <id>
+				MakeTextMenuElementStatic <id>
 			ENDIF
 		ELSE
-		    IF LM_GotParam LinkedTo_id
+			IF LM_GotParam LinkedTo_id
 				IF GotParam Name
-		            IF IsOptionOn <name>
-			            MakeTextMenuElementStatic <LinkedTo_id> nonstatic = 1
+					IF IsOptionOn <name>
+						MakeTextMenuElementStatic <LinkedTo_id> nonstatic = 1
 					ELSE
-					    MakeTextMenuElementStatic <LinkedTo_id> 
-			        ENDIF
+						MakeTextMenuElementStatic <LinkedTo_id> 
+					ENDIF
 				ENDIF
-		    ENDIF
+			ENDIF
 		ENDIF
 	ENDIF
 	
@@ -728,19 +728,19 @@ SCRIPT LM_ToggleOption
 				ToggleOption <name>
 				
 				IF GotParam TextFromValue
-				    printf "Updating TextFromValue"
+					printf "Updating TextFromValue"
 					IF GotParam option
-					    GetOptionText option = <option> text = <TextFromValue>
+						GetOptionText option = <option> text = <TextFromValue>
 					ELSE
-					    GetOptionText option = <name> text = <TextFromValue>
-				    ENDIF
+						GetOptionText option = <name> text = <TextFromValue>
+					ENDIF
 					SetMenuElementText id = <id> <text>
 				ELSE
-				    IF IsOptionOn <name>
-					    SetMenuElementText id = <id> <on>
+					IF IsOptionOn <name>
+						SetMenuElementText id = <id> <on>
 						printf "on"
 					ELSE
-					    SetMenuElementText id = <id> <off>
+						SetMenuElementText id = <id> <off>
 					ENDIF
 				ENDIF
 			ELSE
@@ -753,29 +753,29 @@ SCRIPT LM_ToggleOption
 				//GetParam will move the param from the struct to the script stack
 				GetParam id
 				IF LM_GotParam name
-				    GetParam name
+					GetParam name
 				ENDIF
 				IF LM_GotParam TextFromValue
 					printf "Updating TextFromValue"
 					GetParam TextFromValue
 					IF LM_GotParam option
-					    GetParam option
-					    GetOptionText option = <option> text = <TextFromValue>
+						GetParam option
+						GetOptionText option = <option> text = <TextFromValue>
 					ELSE
-					    GetOptionText option = <name> text = <TextFromValue>
+						GetOptionText option = <name> text = <TextFromValue>
 					ENDIF
 					SetMenuElementText id = <id> <text>
 				ELSE
-				    IF GotParam name
-					    IF IsOptionOn <name>
-						    GetParam on
-						    SetMenuElementText id = <id> <on>
-						    printf "on"
-					    ELSE
-						    GetParam off
-						    SetMenuElementText id = <id> <off>
-						    printf "off"
-					    ENDIF
+					IF GotParam name
+						IF IsOptionOn <name>
+							GetParam on
+							SetMenuElementText id = <id> <on>
+							printf "on"
+						ELSE
+							GetParam off
+							SetMenuElementText id = <id> <off>
+							printf "off"
+						ENDIF
 					ENDIF
 				ENDIF
 				LM_MaybeMakeStatic option = <name>
@@ -785,21 +785,21 @@ SCRIPT LM_ToggleOption
 			ENDIF
 		ENDIF
 		IF GotParam LinkedTo
-		    IF IsOptionOn <LinkedTo>
-		        MakeTextMenuElementStatic <id> nonstatic = 1
+			IF IsOptionOn <LinkedTo>
+				MakeTextMenuElementStatic <id> nonstatic = 1
 			ELSE
-			    MakeTextMenuElementStatic <id>
+				MakeTextMenuElementStatic <id>
 			ENDIF
 		ELSE
-		    IF LM_GotParam LinkedTo_id
+			IF LM_GotParam LinkedTo_id
 				IF GotParam Name
-		            IF IsOptionOn <name>
-			            MakeTextMenuElementStatic <LinkedTo_id> nonstatic = 1
+					IF IsOptionOn <name>
+						MakeTextMenuElementStatic <LinkedTo_id> nonstatic = 1
 					ELSE
-					    MakeTextMenuElementStatic <LinkedTo_id> 
-			        ENDIF
+						MakeTextMenuElementStatic <LinkedTo_id> 
+					ENDIF
 				ENDIF
-		    ENDIF
+			ENDIF
 		ENDIF
 	ENDIF
 	
@@ -835,7 +835,9 @@ game_menu_items = [
 	{ IsBool text = "Unlimited Tags" 	option_id = item3	option = LM_GameOption_bUnLimitTags 		toggle_id = item3_toggle cat_game }
 	{ IsBool text = "Tele Stance Fix" 	option_id = item4	option = LM_BugFix_bTeleFix 			toggle_id = item4_toggle cat_game }
 	{ IsBool text = "Ped Props"			option_id = item5	option = LM_Gameplay_bPedProps 			toggle_id = item5_toggle cat_game }
-	{ IsBool text = "Debug Console" 	option_id = item6	option = LM_DebugOption_bDebugMode 		toggle_id = item6_toggle cat_game }
+	
+	//since debug is now a separate dll, don't need this right?
+	//{ IsBool text = "Debug Console" 	option_id = item6	option = LM_DebugOption_bDebugMode 		toggle_id = item6_toggle cat_game }
 
 	{ 		 text = "Air"			option_id = item11 link = levelmod_menu_air toggle_id = item1_toggle  cat_control }	
 	{ 		 text = "Wall"			option_id = item12 link = levelmod_menu_wall toggle_id = item2_toggle cat_control }	
@@ -851,10 +853,10 @@ game_menu_items = [
 	
 	{ IsEnum text = "Buffering" 		option_id = LM_GFX_eBuffering_id option = LM_GFX_eBuffering 	toggle_id = item1_toggle cat_gfx TextValues = [ "Off" "Double" "Triple" ] Do = sLaunchGFXCommand } 
 	{ IsEnum text = "MSAA Level" 		option_id = LM_GFX_eAntiAlias_id option = LM_GFX_eAntiAlias 	toggle_id = item2_toggle cat_gfx TextValues = [ "Off" "auto" "2x" "4x" "8x" ] Do = sLaunchGFXCommand } 
-	{ IsBool text = "Windowed"          option_id = item213 option = LM_GFX_bWindowed   toggle_id = item3_toggle cat_gfx Do = sLaunchGFXCommand params = { command = ToggleWindowed } }
+	{ IsBool text = "Windowed"		  option_id = item213 option = LM_GFX_bWindowed   toggle_id = item3_toggle cat_gfx Do = sLaunchGFXCommand params = { command = ToggleWindowed } }
 	{ IsBool text = "Texture Filtering" option_id = item215 option = LM_GFX_bFiltering 	toggle_id = item5_toggle cat_gfx } 
 	{ IsBool text = "Enable VSync" 	option_id = item216 option = LM_GFX_bVSync toggle_id = item6_toggle cat_gfx Do = sLaunchGFXCommand } 
-	{ IsInt text = "FPS Lock:"     option_id = LM_GFX_TargetFPS_id option = LM_GFX_TargetFPS toggle_id = item7_toggle cat_gfx min = 60 max = 300  Do = sLaunchGFXCommand params = { command = TargetFPS } }
+	{ IsInt text = "FPS Lock:"	 option_id = LM_GFX_TargetFPS_id option = LM_GFX_TargetFPS toggle_id = item7_toggle cat_gfx min = 60 max = 300  Do = sLaunchGFXCommand params = { command = TargetFPS } }
 	{ IsEnum text = "Stutter Fix" 	option_id = LM_GFX_eFixStutter_id option = LM_GFX_eFixStutter toggle_id = item7_toggle cat_gfx TextValues = [ "Off" "Exact" "Hybrid" "Sleep" ] Do = sLaunchGFXCommand params = { command = FixStutter } } 
 ]
 
@@ -906,20 +908,20 @@ script populate_game_options
 	ForeachIn <items> do = Settings_AddLine params = { <...> }
 	Settings_AddLine back_menu_item target = "go_back" Params = { id = game_options_names_menu } 
 	IF GotParam OnShow
-	    Goto <OnShow>
+		Goto <OnShow>
 	ENDIF
 endscript
 
 script AddEnum
-    GetMaximumIndex array = <TextValues>
+	GetMaximumIndex array = <TextValues>
 	GetOptionValue <option>
 	AddLine { 
-	    parent = game_options_names_menu 
-	    Type = slidermenuelement 
-	    id = <option_id> 
-	    text = <text> 
-	    lower = 0 upper = <max> delta = 1 start = <OptionValue> wrap = 1 right_side_w = 100
-	    eventhandlers = [ {Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextFromValue = <TextValues> TextOnly } }{ Type = ContentsChangedEventHandler target = "LM_SetOption_Do" params = { Do = <Do> params = <params> name = <option> id = <option_id> TextFromValue = <TextValues> } } ]
+		parent = game_options_names_menu 
+		Type = slidermenuelement 
+		id = <option_id> 
+		text = <text> 
+		lower = 0 upper = <max> delta = 1 start = <OptionValue> wrap = 1 right_side_w = 100
+		eventhandlers = [ {Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextFromValue = <TextValues> TextOnly } }{ Type = ContentsChangedEventHandler target = "LM_SetOption_Do" params = { Do = <Do> params = <params> name = <option> id = <option_id> TextFromValue = <TextValues> } } ]
 	}
 	//if GotParam toggle_id
 				//GetOptionText option = <option> text = <TextValues>
@@ -928,8 +930,8 @@ script AddEnum
 endscript
 
 script AddBool
-    AddLine { 
-	    parent = game_options_names_menu 
+	AddLine { 
+		parent = game_options_names_menu 
 		Type = textmenuelement 
 		id = <option_id>
 		text = <text>
@@ -940,14 +942,14 @@ script AddBool
 endscript
 
 script AddInt
-    GetOptionValue <option>
-    AddLine { 
-	    parent = game_options_names_menu 
-	    Type = slidermenuelement 
-	    id = <option_id> 
-	    text = <text> 
-	    lower = <min> upper = <max> delta = 1 start = <OptionValue> wrap = 1 right_side_w = 100
-	    eventhandlers = [ {Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextOnly } }{ Type = ContentsChangedEventHandler target = "LM_SetOption_Do" params = { Do = <Do> params = <params> name = <option> id = <option_id>  } } ]
+	GetOptionValue <option>
+	AddLine { 
+		parent = game_options_names_menu 
+		Type = slidermenuelement 
+		id = <option_id> 
+		text = <text> 
+		lower = <min> upper = <max> delta = 1 start = <OptionValue> wrap = 1 right_side_w = 100
+		eventhandlers = [ {Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextOnly } }{ Type = ContentsChangedEventHandler target = "LM_SetOption_Do" params = { Do = <Do> params = <params> name = <option> id = <option_id>  } } ]
 	}
 endscript
 
@@ -968,29 +970,29 @@ script Settings_AddLine params = {}
 				w = 300.0
 			}
 		else	
-		    if GotParam toggle_id
-			    AddLine {
-				    parent = game_options_on_off_menu 
-				    Type = textmenuelement 
-				    id = <toggle_id>
-				    text = " "
-			    }
-		    else
-			    AddLine {
-			        parent = game_options_on_off_menu 
-				    Type = textmenuelement 
-				    auto_id
-				    text = " "
-			    }
-		    endif
-		
-		    if GotParam IsEnum
-			    AddEnum <...>
+			if GotParam toggle_id
+				AddLine {
+					parent = game_options_on_off_menu 
+					Type = textmenuelement 
+					id = <toggle_id>
+					text = " "
+				}
 			else
-			    if GotParam IsInt
-				    AddInt <...>
-			    else
-				    AddBool <...>
+				AddLine {
+					parent = game_options_on_off_menu 
+					Type = textmenuelement 
+					auto_id
+					text = " "
+				}
+			endif
+		
+			if GotParam IsEnum
+				AddEnum <...>
+			else
+				if GotParam IsInt
+					AddInt <...>
+				else
+					AddBool <...>
 				endif
 			endif
 		endif
@@ -1009,7 +1011,11 @@ script Settings_ToggleOption params = { }
 	endif
 endscript
 
+//Updates menu item text based on boolean setting
 script Settings_UpdateBoolText
+	VerifyParam param = option func = Settings_UpdateBoolText <...>
+	VerifyParam param = toggle_id func = Settings_UpdateBoolText <...>
+	
 	if IsOptionOn <option>
 		SetMenuElementText "On" id = <toggle_id> 
 	else
