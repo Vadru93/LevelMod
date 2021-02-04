@@ -36,6 +36,8 @@ VirtualKeyCode KeyMap::GetVKeyCode(MappedKey key)
     return (VirtualKeyCode)MapVirtualKeyA((UINT)keyMap[(BYTE)key].DIK_KeyCode, MAPVK_VSC_TO_VK);
 }
 
+bool held_pause = false;
+bool held_select = false;
 
 __declspec(noalias) bool __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYTE data)
 {
@@ -61,21 +63,27 @@ __declspec(noalias) bool __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYT
         //Then check if the the key is already pressed on keyboard
         //If it's not pressed check if it's pressed on controller
         KeyMap* __restrict key = &map[(BYTE)KeyMap::MappedKey::Pause];
-        if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_START))
+        if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_START) && !held_pause)
         {
             buffer[key->DIK_KeyCode] = 0x80;
-            KeyState::Press(KeyCode::ENTER);
-            KeyState::SetKeyboardState(VirtualKeyCode::ENTER, 0x80);
+            KeyState::Press(VirtualKeyCode::ESC);
+            KeyState::SetKeyboardState(VirtualKeyCode::ESC, 0x80);
+            held_pause = true;
         }
+        else if (!(state.Gamepad.wButtons & XINPUT_GAMEPAD_START))
+            held_pause = false;
         //Set stack boolean to know if Pause key is pressed
         bool pause = (buffer[key->DIK_KeyCode] == 0x80);
 
         key = &map[(BYTE)KeyMap::MappedKey::CameraToggle];
-        if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK))
+        if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) && !held_select)
         {
             buffer[key->DIK_KeyCode] = 0x80;
             KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::CameraToggle), 0x80);
+            held_select = true;
         }
+        else if (!(state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK))
+            held_select = false;
         //Set stack boolean to know if CameraToggle key is pressed
         bool start = (buffer[key->DIK_KeyCode] == 0x80);
 

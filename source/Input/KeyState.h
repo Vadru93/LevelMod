@@ -217,6 +217,26 @@ public:
         p_num_keys = p_num_keys + 1;
     }
 
+    static void Press(VirtualKeyCode key)
+    {
+        DWORD idx = (DWORD)key;
+        BYTE code = *(BYTE*)(0x005B44A6 + idx + idx * 2);
+        if (code & 1)
+        {
+            if (code & 4 || code & 2)
+            {
+                Press(*(KeyCode*)(0x005B44A5 + idx + idx * 2));
+                return;
+            }
+            else
+            {
+                Press(*(KeyCode*)(0x005B44A4 + idx + idx * 2));
+                return;
+            }
+        }
+
+    }
+
     DWORD GetChecksum()
     {
         return checksum;
