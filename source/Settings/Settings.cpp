@@ -711,6 +711,9 @@ int AddOption(char* name, int value, bool update, DWORD overriden_option, BYTE t
 
 bool GetParamScript(CStruct* pStruct, CScript* pScript)
 {
+    if (QScript::GotParam(pStruct, pScript))
+        return true;
+
     auto header = pStruct->GetHeader();
         if (header)
         {

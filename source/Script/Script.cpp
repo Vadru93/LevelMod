@@ -80,6 +80,7 @@ const char* QScript::QBTypes[] = {
      "Unknown",
      "Unknown"
 };
+bool(*QScript::GotParam)(CStruct*, CScript*) = NULL;
 QScript::QBScript* QScript::Scripts=NULL;
 std::vector<QScript::CompressedNode> QScript::compNodes;
 std::vector<DWORD> QScript::qbKeys;

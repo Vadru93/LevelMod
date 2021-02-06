@@ -3819,6 +3819,7 @@ void AddFunctions()
     }
 
     header = GetQBKeyHeader(Checksums::Shatter);
+    QScript::GotParam = GetQBKeyHeader(Checksum("GotParam"))->pFunction;
     if (header)
         header->pFunction = NewShatterScript;
 }

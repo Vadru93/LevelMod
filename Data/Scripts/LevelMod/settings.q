@@ -207,15 +207,15 @@ levelmod_menu_root_children = [
 
 	//game options that affect gameplay
 	{ Type = textmenuelement auto_id text = "Game Options" link = newSettingsMenu  
-	target = "populate_game_options" params = { mask = cat_game items = game_menu_items title = "Game Options" } }
+	target = "populate_game_options" params = { mask = cat_game items = game_menu_items title = "Game Options" OnShow = sFixGoBack } }
 	
 	//GUI options, like Show HUD, show GrafCounter, etc
 	{ Type = textmenuelement auto_id text = "GUI Options" link = newSettingsMenu  
-	target = "populate_game_options" params = { mask = cat_gui items = game_menu_items title = "GUI Options" } }
+	target = "populate_game_options" params = { mask = cat_gui items = game_menu_items title = "GUI Options" OnShow = sFixGoBack } }
 	
 	//hardware graphics options (AA, filtering, 
 	{ Type = textmenuelement auto_id text = "Graphics Options" link = newSettingsMenu  
-	target = "populate_game_options" params = { mask = cat_gfx items = game_menu_items title = "Graphics Options" OnShow = sFixGoBack  } }
+	target = "populate_game_options" params = { mask = cat_gfx items = game_menu_items title = "Graphics Options" OnShow = sFixGoBack } }
 	
 	
 	//Options that affect certain parts of th level
@@ -223,7 +223,7 @@ levelmod_menu_root_children = [
 		
 	//Control options, like spine transfer, acid drop, etc
 	{ Type = textmenuelement auto_id text = "Control Options" link = newSettingsMenu  
-	target = "populate_game_options" params = { mask = cat_control items = game_menu_items title = "Control Options" } }
+	target = "populate_game_options" params = { mask = cat_control items = game_menu_items title = "Control Options" OnShow = sFixGoBack } }
 ]
 
 
@@ -270,6 +270,7 @@ LevelMod_menu_air = {
 	id = LevelMod_menu_air
 	eventhandler = { Type = showeventhandler target = "UpdateMenuText" params = LevelMod_menu_air }
 	children = levelmod_menu_air_items
+	RestoreBack
 }
 
 levelmod_menu_air_items = [
@@ -307,6 +308,7 @@ LevelMod_menu_wall = {
 	id = LevelMod_menu_wall
 	eventhandler = { Type = showeventhandler target = "UpdateMenuText" params = LevelMod_menu_wall }
 	children = levelmod_menu_wall_items
+	RestoreBack
 }
 
 levelmod_menu_wall_items = [
@@ -335,13 +337,9 @@ levelmod_HostOptions_root = {
 
 SCRIPT AddHostOption
 	printf "Adding HostOption"
-	IF GotParam On
-		AddLine parent = levelmod_HostOptions_root Type = textmenuelement id = <id> text = <On>
-	ELSE
-		GetParam On
-		GetParam id
-		AddLine parent = levelmod_HostOptions_root Type = textmenuelement id = <id> text = <On>
-	ENDIF
+	GetParam On
+	GetParam id
+	AddLine parent = levelmod_HostOptions_root Type = textmenuelement id = <id> text = <On>
 ENDSCRIPT
 
 SCRIPT UpdateHostOptions
@@ -510,10 +508,7 @@ ENDSCRIPT
 SCRIPT OptionsOnChangeLevel
    IF GotParam ChangeLevel
 	   printf "Going to spawn Script"
-	   IF GotParam do
-		   Goto <do>
-	   ELSE
-		   GetParam do
+	   IF GetParam do
 		   Goto <do>
 	   ENDIF
    ENDIF
@@ -522,10 +517,7 @@ ENDSCRIPT
 SCRIPT OptionsOnStartGame
    IF GotParam StartGame
 	   printf "Going to spawn Script"
-	   IF GotParam do
-		   Goto <do>
-	   ELSE
-		   GetParam do
+	   IF GetParam do
 		   Goto <do>
 	   ENDIF
    ENDIF
@@ -557,8 +549,7 @@ ENDSCRIPT
  
 SCRIPT LM_SetOption
 	printf "Setting option"
-	IF LM_GotParam name
-		GetParam name
+	IF GetParam name
 		GetParam id
 		printf "Going to set option"
 		IF LM_GotParam TextOnly
@@ -571,8 +562,7 @@ SCRIPT LM_SetOption
 			ENDIF
 			LM_MaybeMakeStatic option = <name>
 		ELSE
-			IF LM_GotParam Value
-				GetParam Value
+			IF GetParam Value
 				//Sets option from value
 				IF SetOption <name> value = <Value>
 					IF LM_GotParam UpdateText
@@ -650,20 +640,14 @@ SCRIPT LM_ToggleHostOption
 			ENDIF
 			
 			//update text if we have item id
-			//We need to use LM_GotParam because our param is inside a struct
-			//And the normal GotParam function can't find it
-			IF LM_GotParam id
-			
-				//GetParam will move the param from the struct to the script stack
-				GetParam id
-				IF LM_GotParam name
-					GetParam name
-				ENDIF
+			//GetParam will move the param from the struct to the script stack and return true if it's found
+			IF GetParam id
+				GetParam name
+
 				IF LM_GotParam TextFromValue
 					printf "Updating TextFromValue"
 					GetParam TextFromValue
-					IF LM_GotParam option
-						GetParam option
+					IF GetParam option
 						GetOptionText option = <option> text = <TextFromValue>
 					ELSE
 						GetOptionText option = <name> text = <TextFromValue>
@@ -748,20 +732,12 @@ SCRIPT LM_ToggleOption
 			ELSE
 			
 			//update text if we have item id
-			//We need to use LM_GotParam because our param is inside a struct
-			//And the normal GotParam function can't find it
-			IF LM_GotParam id
-			
-				//GetParam will move the param from the struct to the script stack
-				GetParam id
-				IF LM_GotParam name
-					GetParam name
-				ENDIF
-				IF LM_GotParam TextFromValue
+			//GetParam will move the param from the struct to the script stack and return true if it's found
+			IF GetParam id
+				GetParam name
+				IF GetParam TextFromValue
 					printf "Updating TextFromValue"
-					GetParam TextFromValue
-					IF LM_GotParam option
-						GetParam option
+					IF GetParam option
 						GetOptionText option = <option> text = <TextFromValue>
 					ELSE
 						GetOptionText option = <name> text = <TextFromValue>
@@ -812,8 +788,12 @@ ENDSCRIPT
 
 //intented to loop through list items and update item text based on selected option
 SCRIPT UpdateMenuText
+    IF GotParam RestoreBack
+	    RestoreGoBack
+	ENDIF
 	ForEachIn <children> do = LM_ToggleOption params = { <...> TextOnly }
 	printf "menu text init done"
+	
 ENDSCRIPT
 
 
@@ -834,15 +814,15 @@ back_menu_item = {
 game_menu_items = [
 	{ IsBool text = "251x Patch" 		option_id = item1	option = LM_GameOption_b251Patch 		toggle_id = item1_toggle cat_game }
 	{ IsBool text = "No BW Manual"		option_id = item2	option = LM_GameOption_bFixBWManual 	toggle_id = item2_toggle cat_game }
-	{ IsBool text = "Unlimited Tags" 	option_id = item3	option = LM_GameOption_bUnLimitTags 		toggle_id = item3_toggle cat_game }
+	{ IsBool text = "Unlimited Tags" 	option_id = item3	option = LM_GameOption_bUnLimitTags 	toggle_id = item3_toggle cat_game }
 	{ IsBool text = "Tele Stance Fix" 	option_id = item4	option = LM_BugFix_bTeleFix 			toggle_id = item4_toggle cat_game }
 	{ IsBool text = "Ped Props"			option_id = item5	option = LM_Gameplay_bPedProps 			toggle_id = item5_toggle cat_game }
 	
 	//since debug is now a separate dll, don't need this right?
 	//{ IsBool text = "Debug Console" 	option_id = item6	option = LM_DebugOption_bDebugMode 		toggle_id = item6_toggle cat_game }
 
-	{ 		 text = "Air"			option_id = item11 link = levelmod_menu_air toggle_id = item1_toggle  cat_control }	
-	{ 		 text = "Wall"			option_id = item12 link = levelmod_menu_wall toggle_id = item2_toggle cat_control }	
+	{ 		 text = "Air"			option_id = item11  link = levelmod_menu_air            toggle_id = item1_toggle cat_control }	
+	{ 		 text = "Wall"			option_id = item12  link = levelmod_menu_wall           toggle_id = item2_toggle cat_control }	
 	{ IsBool text = "Reverts" 		option_id = item13	option = LM_Control_bRevert 		toggle_id = item3_toggle cat_control }
 	{ IsBool text = "Extra tricks"	option_id = item14	option = LM_Control_bExtraTricks 	toggle_id = item4_toggle cat_control }
 	{ IsBool text = "XInput" 		option_id = item15	option = LM_Control_bXinput 		toggle_id = item5_toggle cat_control }
@@ -855,13 +835,13 @@ game_menu_items = [
 	{ IsBool text = "New Net Menu" 		option_id = item24 option = LM_GUI_bNewMenu 			toggle_id = item4_toggle cat_gui } 
 	{ IsBool text = "GrafCounter" 		option_id = item25 option = LM_GUI_bShowGrafCounter 	toggle_id = item5_toggle cat_gui } 
 	
-	{ IsEnum text = "Buffering" 		option_id = LM_GFX_eBuffering_id option = LM_GFX_eBuffering 	toggle_id = item1_toggle cat_gfx TextValues = [ "Off" "Double" "Triple" ] Do = sLaunchGFXCommand } 
-	{ IsEnum text = "MSAA Level" 		option_id = LM_GFX_eAntiAlias_id option = LM_GFX_eAntiAlias 	toggle_id = item2_toggle cat_gfx TextValues = [ "Off" "auto" "2x" "4x" "8x" ] Do = sLaunchGFXCommand } 
-	{ IsBool text = "Windowed"		  option_id = item213 option = LM_GFX_bWindowed   toggle_id = item3_toggle cat_gfx Do = sLaunchGFXCommand params = { command = ToggleWindowed } }
-	{ IsBool text = "Texture Filtering" option_id = item215 option = LM_GFX_bFiltering 	toggle_id = item5_toggle cat_gfx } 
-	{ IsBool text = "Enable VSync" 	option_id = item216 option = LM_GFX_bVSync toggle_id = item6_toggle cat_gfx Do = sLaunchGFXCommand } 
-	{ IsInt text = "FPS Lock:"	 option_id = LM_GFX_TargetFPS_id option = LM_GFX_TargetFPS toggle_id = item7_toggle cat_gfx min = 60 max = 300  Do = sLaunchGFXCommand params = { command = TargetFPS } }
-	{ IsEnum text = "Stutter Fix" 	option_id = LM_GFX_eFixStutter_id option = LM_GFX_eFixStutter toggle_id = item7_toggle cat_gfx TextValues = [ "Off" "Exact" "Hybrid" "Sleep" ] Do = sLaunchGFXCommand params = { command = FixStutter } } 
+	{ IsEnum text = "Buffering" 		option_id = LM_GFX_eBuffering_id  option = LM_GFX_eBuffering 	toggle_id = item1_toggle cat_gfx TextValues = [ "Off" "Double" "Triple" ] Do = sLaunchGFXCommand } 
+	{ IsEnum text = "MSAA Level" 		option_id = LM_GFX_eAntiAlias_id  option = LM_GFX_eAntiAlias 	toggle_id = item2_toggle cat_gfx TextValues = [ "Off" "auto" "2x" "4x" "8x" ] Do = sLaunchGFXCommand } 
+	{ IsBool text = "Windowed"		    option_id = item33                option = LM_GFX_bWindowed     toggle_id = item3_toggle cat_gfx Do = sLaunchGFXCommand params = { command = ToggleWindowed } }
+	{ IsBool text = "Texture Filtering" option_id = item34                option = LM_GFX_bFiltering 	toggle_id = item5_toggle cat_gfx } 
+	{ IsBool text = "Enable VSync" 	    option_id = item35                option = LM_GFX_bVSync        toggle_id = item6_toggle cat_gfx Do = sLaunchGFXCommand } 
+	{ IsInt  text = "FPS Lock:"	        option_id = LM_GFX_TargetFPS_id   option = LM_GFX_TargetFPS     toggle_id = item7_toggle cat_gfx min = 60 max = 300  Do = sLaunchGFXCommand params = { command = TargetFPS } }
+	{ IsEnum text = "Stutter Fix" 	    option_id = LM_GFX_eFixStutter_id option = LM_GFX_eFixStutter   toggle_id = item8_toggle cat_gfx TextValues = [ "Off" "Exact" "Hybrid" "Sleep" ] Do = sLaunchGFXCommand params = { command = FixStutter } } 
 ]
 
 
@@ -962,6 +942,23 @@ endscript
 //like if isEnum call enum func, if IsBool call bool func etc.
 script Settings_AddLine params = {}
 	if GotParam <mask>
+	    		
+		if GotParam toggle_id
+			AddLine {
+				parent = game_options_on_off_menu 
+				Type = textmenuelement 
+				id = <toggle_id>
+				text = " "
+			}
+		else
+			AddLine {
+				parent = game_options_on_off_menu 
+				Type = textmenuelement 
+				auto_id
+				text = " "
+			}
+		endif
+
 		if GotParam link
 			AddLine { 
 				parent = game_options_names_menu 
@@ -973,33 +970,19 @@ script Settings_AddLine params = {}
 				link = <link>
 				w = 300.0
 			}
-		else	
-			if GotParam toggle_id
-				AddLine {
-					parent = game_options_on_off_menu 
-					Type = textmenuelement 
-					id = <toggle_id>
-					text = " "
-				}
-			else
-				AddLine {
-					parent = game_options_on_off_menu 
-					Type = textmenuelement 
-					auto_id
-					text = " "
-				}
-			endif
-		
-			if GotParam IsEnum
-				AddEnum <...>
-			else
-				if GotParam IsInt
-					AddInt <...>
-				else
-					AddBool <...>
-				endif
-			endif
-		endif
+		else
+		    if GotParam IsEnum
+			    AddEnum <...>
+		    else
+			    if GotParam IsInt
+				    AddInt <...>
+			    else
+			        if GotParam IsBool
+				       AddBool <...>
+				    endif
+			    endif
+		    endif
+		endif	
 
 		if GotParam option
 			LM_MaybeMakeStatic option = <option> option_id = <option_id>

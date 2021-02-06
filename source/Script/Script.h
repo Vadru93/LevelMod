@@ -33,6 +33,7 @@ void UpdateScriptConstants();
 //--------Script Stuff--------
 namespace QScript
 {
+    extern bool(*GotParam)(CStruct*, CScript*);
     auto constexpr ASSERT = 1;
     enum ScriptToken
     {
