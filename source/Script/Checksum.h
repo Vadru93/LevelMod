@@ -161,6 +161,8 @@ namespace Checksums
         LM_Control_SpineButton = COMPILE_CRC32("lm_control_spinebutton"),
         LM_Control_AirTrickSpeed = COMPILE_CRC32("lm_control_airtrickspeed"),
         LM_Control_bWallplant = COMPILE_CRC32("lm_control_bwallplant"),
+        LM_Control_bInvertedY = COMPILE_CRC32("lm_control_binvertedy"),
+        LM_Control_bInvertedX = COMPILE_CRC32("lm_control_binvertedx"),
 
 
         LM_GUI_bShowGrafCounter = COMPILE_CRC32("lm_gui_bshowgrafcounter"),

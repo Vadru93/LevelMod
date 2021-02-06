@@ -48,6 +48,8 @@ std::map<DWORD, OverrideOption> LevelModSettings::overrideOptions;
 int LevelModSettings::SpineButton = 7;
 int LevelModSettings::SpineButton2 = -1;
 VirtualKeyCode LevelModSettings::SpineButton3 = VirtualKeyCode::Undefined;
+bool LevelModSettings::bInvertedY = false;
+bool LevelModSettings::bInvertedX = false;
 
 
 
@@ -318,6 +320,12 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
         break;
     case Checksums::LM_Control_AirTrickSpeed:
         SetAirTrickSpeed(value);
+        break;
+    case (DWORD)Checksums::LM_Control_bInvertedY:
+        LevelModSettings::bInvertedY = value;
+        break;
+    case (DWORD)Checksums::LM_Control_bInvertedX:
+        LevelModSettings::bInvertedX = value;
         break;
     case (DWORD)Checksums::LM_DebugOption_bDebugMode:
         //casting to DWORD to prevent compiler warning, code actually works without this cast

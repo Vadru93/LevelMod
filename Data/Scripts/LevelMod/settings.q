@@ -117,6 +117,8 @@ LevelModOptions = [
 	{ name = "LM_Control_bButtSlap" value = 1 }
 	{ name = "LM_Control_bBoostPlant" value = 0 }
 	{ name = "LM_Control_bWallplant" value = 1 }
+	{ name = "LM_Control_bInvertedX" value = 0 }
+	{ name = "LM_Control_bInvertedY" value = 0 }
 
 	{ name = "LM_GUI_bShowHud" Value = 1 StartGame Do = UpdateShowHUD }
 	{ name = "LM_GUI_bNewMenu" Value = 1 }
@@ -844,6 +846,8 @@ game_menu_items = [
 	{ IsBool text = "Reverts" 		option_id = item13	option = LM_Control_bRevert 		toggle_id = item3_toggle cat_control }
 	{ IsBool text = "Extra tricks"	option_id = item14	option = LM_Control_bExtraTricks 	toggle_id = item4_toggle cat_control }
 	{ IsBool text = "XInput" 		option_id = item15	option = LM_Control_bXinput 		toggle_id = item5_toggle cat_control }
+	{ IsBool text = "Invert Cam X"  option_id = item16	option = LM_Control_bInvertedX 		toggle_id = item5_toggle cat_control }
+	{ IsBool text = "Invert Cam Y"  option_id = item17	option = LM_Control_bInvertedY 		toggle_id = item5_toggle cat_control }
 
 	{ IsBool text = "Extra Messages" 	option_id = item21 option = LM_GUI_bTrickNotifications 	toggle_id = item1_toggle cat_gui } 
 	{ IsBool text = "Show HUD" 			option_id = item22 option = LM_GUI_bShowHud 			toggle_id = item2_toggle cat_gui Do = UpdateShowHUD } 

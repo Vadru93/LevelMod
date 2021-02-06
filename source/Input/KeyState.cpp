@@ -6,6 +6,7 @@
 #include "Game\Skater.h"
 #include "Script\Checksum.h"
 #include "dinput.h"
+#include "Settings\Settings.h"
 
 bool XINPUT::vibrating = false;
 XINPUT_VIBRATION XINPUT::vibration;
@@ -220,6 +221,31 @@ __declspec(noalias) bool __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYT
     }
 
     return suceeded;
+}
+
+WORD KeyState::XINPUT_UpdateCamera_Hook(BYTE gamestate, BYTE* game_config)
+{
+    if (XINPUT::Player1 && XINPUT::Player1->IsConnected())
+    {
+        BYTE* gamepad = *(BYTE**)(game_config + 0x18);
+
+        if (gamepad)
+        {
+            XINPUT_STATE state = XINPUT::Player1->GetState();
+
+            if (state.Gamepad.sThumbRX >= XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+                gamepad[CameraMovement::RightLeft] = LevelModSettings::bInvertedX ? CameraMovement::Left : CameraMovement::Right;
+            else if (state.Gamepad.sThumbRX <= -XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+                gamepad[CameraMovement::RightLeft] = LevelModSettings::bInvertedX ? CameraMovement::Right : CameraMovement::Left;
+            if (state.Gamepad.sThumbRY >= XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+                gamepad[CameraMovement::UpDown] = LevelModSettings::bInvertedY ? CameraMovement::Down : CameraMovement::Up;
+            else if (state.Gamepad.sThumbRY <= -XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+                gamepad[CameraMovement::UpDown] = LevelModSettings::bInvertedY ? CameraMovement::Up : CameraMovement::Down;
+        }
+    }
+
+    typedef WORD(__thiscall* const pUpdate)(KeyState* pThis, BYTE state, BYTE* key_data);
+    return pUpdate(0x00498800)(this, gamestate, game_config);
 }
 
 
@@ -588,7 +614,7 @@ void HookControls()
     HookVibrate();
     //Hook dinput
     HookFunction(0x0040CA2B, proxy_Dinput_GetDeviceState);
-    //For camera
+    //For camera controll
     HookFunction(0x00498F39, &KeyState::XINPUT_UpdateCamera_Hook);
 
     return;

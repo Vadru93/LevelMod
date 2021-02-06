@@ -10,12 +10,12 @@ CXBOXController::CXBOXController(int playerNumber)
 
 XINPUT_STATE CXBOXController::GetState()
 {
-    // Zeroise the state
+    /*// Zeroise the state
     ZeroMemory(&_controllerState, sizeof(XINPUT_STATE));
 
     // Get the state
     XInputGetState(_controllerNum, &_controllerState);
-
+    */
     return _controllerState;
 }
 

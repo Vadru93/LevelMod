@@ -31,6 +31,8 @@ namespace LevelModSettings
     extern int SpineButton;// = 7;
     extern int SpineButton2;// = -1;
     extern VirtualKeyCode SpineButton3;
+    extern bool bInvertedY;
+    extern bool bInvertedX;
 
 
     struct OverrideOption
