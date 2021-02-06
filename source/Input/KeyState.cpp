@@ -39,6 +39,10 @@ VirtualKeyCode KeyMap::GetVKeyCode(MappedKey key)
 bool held_pause = false;
 bool held_select = false;
 
+//Game uses a hybrid between dinput and GetAsyncKeyState
+//here we intercept the call to dinput GetDeveiceState and change both dinput and GetAsyncKeyState result according to our controller state
+//there is also a buffer of pressed keys since last frame that seems to only be needed for a very few events, like menu navigations
+//currently only 1 map is added to this buffer(start -> esc) and it seems to work
 __declspec(noalias) bool __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYTE data)
 {
     typedef bool(__stdcall* pDinput_GetDeviceState)(DWORD size, LPBYTE data);
@@ -65,156 +69,152 @@ __declspec(noalias) bool __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYT
         KeyMap* __restrict key = &map[(BYTE)KeyMap::MappedKey::Pause];
         if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_START) && !held_pause)
         {
-            buffer[key->DIK_KeyCode] = 0x80;
+            buffer[key->DIK_KeyCode] = KeyState::Down;
             KeyState::Press(VirtualKeyCode::ESC);
-            KeyState::SetKeyboardState(VirtualKeyCode::ESC, 0x80);
+            KeyState::SetKeyboardState(VirtualKeyCode::ESC, KeyState::Down);
             held_pause = true;
         }
         else if (!(state.Gamepad.wButtons & XINPUT_GAMEPAD_START))
             held_pause = false;
-        //Set stack boolean to know if Pause key is pressed
-        bool pause = (buffer[key->DIK_KeyCode] == 0x80);
 
         key = &map[(BYTE)KeyMap::MappedKey::CameraToggle];
         if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) && !held_select)
         {
-            buffer[key->DIK_KeyCode] = 0x80;
-            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::CameraToggle), 0x80);
+            buffer[key->DIK_KeyCode] = KeyState::Down;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::CameraToggle), KeyState::Down);
             held_select = true;
         }
         else if (!(state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK))
             held_select = false;
-        //Set stack boolean to know if CameraToggle key is pressed
-        bool start = (buffer[key->DIK_KeyCode] == 0x80);
 
-        //For now camera lock is pause + start maybe should be L3 or R3(does it even exist on xbox??)
+        //Is this really R3?
         key = &map[(BYTE)KeyMap::MappedKey::CameraLock];
-        if (!buffer[key->DIK_KeyCode] && (pause && start))
+        if (!buffer[key->DIK_KeyCode] && state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB)
         {
-            buffer[key->DIK_KeyCode] = 0x80;
-            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::CameraToggle), 0x80);
+            buffer[key->DIK_KeyCode] = KeyState::Down;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::CameraLock), KeyState::Down);
         }
 
         key = &map[(BYTE)KeyMap::MappedKey::Grind];
         if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_Y))
         {
-            buffer[key->DIK_KeyCode] = 0x80;
-            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Grind), 0x80);
+            buffer[key->DIK_KeyCode] = KeyState::Down;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Grind), KeyState::Down);
         }
 
         key = &map[(BYTE)KeyMap::MappedKey::Grab];
         if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_B))
         {
-            buffer[key->DIK_KeyCode] = 0x80;
-            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Grab), 0x80);
+            buffer[key->DIK_KeyCode] = KeyState::Down;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Grab), KeyState::Down);
         }
 
         key = &map[(BYTE)KeyMap::MappedKey::Ollie];
         if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_A))
         {
-            buffer[key->DIK_KeyCode] = 0x80;
-            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Ollie), 0x80);
+            buffer[key->DIK_KeyCode] = KeyState::Down;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Ollie), KeyState::Down);
         }
 
         key = &map[(BYTE)KeyMap::MappedKey::Flip];
         if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_X))
         {
-            buffer[key->DIK_KeyCode] = 0x80;
-            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Flip), 0x80);
+            buffer[key->DIK_KeyCode] = KeyState::Down;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Flip), KeyState::Down);
         }
 
         key = &map[(BYTE)KeyMap::MappedKey::SpinLeft];
         if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER))
         {
-            buffer[key->DIK_KeyCode] = 0x80;
-            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::SpinLeft), 0x80);
+            buffer[key->DIK_KeyCode] = KeyState::Down;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::SpinLeft), KeyState::Down);
         }
 
         key = &map[(BYTE)KeyMap::MappedKey::SpinRight];
         if (!buffer[key->DIK_KeyCode] && (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER))
         {
-            buffer[key->DIK_KeyCode] = 0x80;
-            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::SpinRight), 0x80);
+            buffer[key->DIK_KeyCode] = KeyState::Down;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::SpinRight), KeyState::Down);
         }
 
         key = &map[(BYTE)KeyMap::MappedKey::Nollie];
         if (!buffer[key->DIK_KeyCode] && ((state.Gamepad.bLeftTrigger) > XINPUT_GAMEPAD_TRIGGER_THRESHOLD))
         {
-            buffer[key->DIK_KeyCode] = 0x80;
-            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Nollie), 0x80);
+            buffer[key->DIK_KeyCode] = KeyState::Down;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Nollie), KeyState::Down);
         }
 
         key = &map[(BYTE)KeyMap::MappedKey::Revert];
         if (!buffer[key->DIK_KeyCode] && ((state.Gamepad.bRightTrigger) > XINPUT_GAMEPAD_TRIGGER_THRESHOLD))
         {
-            buffer[key->DIK_KeyCode] = 0x80;
-            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Revert), 0x80);
+            buffer[key->DIK_KeyCode] = KeyState::Down;
+            KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Revert), KeyState::Down);
         }
 
         key = &map[(BYTE)KeyMap::MappedKey::Right];
         if (!buffer[key->DIK_KeyCode])
         {
             if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT)
-                buffer[key->DIK_KeyCode] = 0x80;
+                buffer[key->DIK_KeyCode] = KeyState::Down;
             else
             {
                 if (state.Gamepad.sThumbLX >= XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
                 {
-                    buffer[key->DIK_KeyCode] = 0x80;// ClampValue(state.Gamepad.sThumbLX, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF);
+                    buffer[key->DIK_KeyCode] = KeyState::Down;// ClampValue(state.Gamepad.sThumbLX, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF);
                 }
 
             }
             if(buffer[key->DIK_KeyCode])
-                KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Right), 0x80);
+                KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Right), KeyState::Down);
         }
 
         key = &map[(BYTE)KeyMap::MappedKey::Left];
         if (!buffer[key->DIK_KeyCode])
         {
             if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT)
-                buffer[key->DIK_KeyCode] = 0x80;
+                buffer[key->DIK_KeyCode] = KeyState::Down;
             else
             {
                 if (state.Gamepad.sThumbLX <= -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
                 {
-                    buffer[key->DIK_KeyCode] = 0x80;// ClampValue(state.Gamepad.sThumbLX, -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, -32767, 0x40, 0xFF);
+                    buffer[key->DIK_KeyCode] = KeyState::Down;// ClampValue(state.Gamepad.sThumbLX, -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, -32767, 0x40, 0xFF);
                 }
             }
             if (buffer[key->DIK_KeyCode])
-                KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Left), 0x80);
+                KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Left), KeyState::Down);
         }
 
         key = &map[(BYTE)KeyMap::MappedKey::Up];
         if (!buffer[key->DIK_KeyCode])
         {
             if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP)
-                buffer[key->DIK_KeyCode] = 0x80;
+                buffer[key->DIK_KeyCode] = KeyState::Down;
             else
             {
                 if (state.Gamepad.sThumbLY >= XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
                 {
-                    buffer[key->DIK_KeyCode] = 0x80;// ClampValue(state.Gamepad.sThumbLY, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF);
+                    buffer[key->DIK_KeyCode] = KeyState::Down;// ClampValue(state.Gamepad.sThumbLY, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF);
                 }
             }
             if (buffer[key->DIK_KeyCode])
-                KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Right), 0x80);
+                KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Up), KeyState::Down);
         }
 
         key = &map[(BYTE)KeyMap::MappedKey::Down];
         if (!buffer[key->DIK_KeyCode])
         {
             if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN)
-                buffer[key->DIK_KeyCode] = 0x80;
+                buffer[key->DIK_KeyCode] = KeyState::Down;
             else
             {
                 if (state.Gamepad.sThumbLY <= -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
                 {
-                    buffer[key->DIK_KeyCode] = 0x80;// ClampValue(state.Gamepad.sThumbLY, -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF);
+                    buffer[key->DIK_KeyCode] = KeyState::Down;// ClampValue(state.Gamepad.sThumbLY, -XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, 32767, 0x40, 0xFF);
                 }
 
             }
             if (buffer[key->DIK_KeyCode])
-                KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Right), 0x80);
+                KeyState::SetKeyboardState(KeyMap::GetVKeyCode(KeyMap::MappedKey::Down), KeyState::Down);
         }
 
     }
@@ -555,6 +555,20 @@ __declspec(naked) void __cdecl UpdateKeyState2_naked()
     _asm ret 8;*/
 }
 
+__inline void HookFunction(DWORD addr, WORD(KeyState::* function)(BYTE gamestate, BYTE* key_data), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    addr += 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+
 __inline void HookFunction(DWORD addr, void* function, BYTE byteCode = 0, DWORD nopCount = 0)
 {
     DWORD old;
@@ -574,6 +588,8 @@ void HookControls()
     HookVibrate();
     //Hook dinput
     HookFunction(0x0040CA2B, proxy_Dinput_GetDeviceState);
+    //For camera
+    HookFunction(0x00498F39, &KeyState::XINPUT_UpdateCamera_Hook);
 
     return;
     DWORD old;

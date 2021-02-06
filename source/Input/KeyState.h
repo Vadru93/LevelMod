@@ -111,7 +111,7 @@ struct KeyMap
         Left,
         Up,
         Down
-    };  
+    };
 
     static VirtualKeyCode GetVKeyCode(MappedKey key);
 
@@ -132,6 +132,11 @@ struct Skater;
 //EXTERN char* FindChecksumName(DWORD checksum, bool only_debug = true);
 struct KeyState
 {
+    enum State
+    {
+        Up = 0,
+        Down = 0x80,
+    };
 private:
     DWORD pressed;
     DWORD timepress;
@@ -163,128 +168,153 @@ public:
         return p_num_keys;
     }
 
-    static bool IsPressed(KeyCode key)
+    WORD XINPUT_UpdateCamera_Hook(BYTE gamestate, BYTE* key_config)
     {
-        DWORD numKeys = GetNumKeyPress();
-
-        for (DWORD press = 0; press < numKeys; press++)
+        if (XINPUT::Player1 && XINPUT::Player1->IsConnected())
         {
-            if (GetKeyPress(press) == key)
-                return true;
-        }
-        return false;
-    }
+            BYTE* key_data = *(BYTE**)(key_config + 0x18);
 
-    static bool GetKeyboardState(VirtualKeyCode code)
-    {
-        return p_KeyboardState(code) & 0x80;
-    }
-
-    static void SetKeyboardState(VirtualKeyCode code, DWORD value)
-    {
-        p_KeyboardState(code) = value;
-    }
-
-    static bool GetOldKeyboardState(VirtualKeyCode code)
-    {
-        return p_OldKeyboardState(code) & 0x80;
-    }
-
-    static void Unpress(VirtualKeyCode code)
-    {
-        p_KeyboardState(code) = 0;
-    }
-
-    void Unpress()
-    {
-        pressed = 0;
-    }
-
-    static void Unpress(KeyCode key)
-    {
-        DWORD numKeys = GetNumKeyPress();
-
-        for (DWORD press = 0; press < numKeys; press++)
-        {
-            if (GetKeyPress(press) == key)
-                Unpress(press);
-        }
-    }
-
-    static void Press(KeyCode key)
-    {
-        p_key_state(p_num_keys) = key;
-        p_num_keys = p_num_keys + 1;
-    }
-
-    static void Press(VirtualKeyCode key)
-    {
-        DWORD idx = (DWORD)key;
-        BYTE code = *(BYTE*)(0x005B44A6 + idx + idx * 2);
-        if (code & 1)
-        {
-            if (code & 4 || code & 2)
+            if (key_data)
             {
-                Press(*(KeyCode*)(0x005B44A5 + idx + idx * 2));
-                return;
-            }
-            else
-            {
-                Press(*(KeyCode*)(0x005B44A4 + idx + idx * 2));
-                return;
+                XINPUT_STATE state = XINPUT::Player1->GetState();
+
+                if (state.Gamepad.sThumbRX >= XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+                    key_data[0] = 0xFF;
+                else if (state.Gamepad.sThumbRX <= -XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+                    key_data[0] = 1;
+                if (state.Gamepad.sThumbRY >= XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+                    key_data[1] = 1;
+                else if (state.Gamepad.sThumbRY <= -XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+                    key_data[1] = 0xFF;
             }
         }
 
-    }
+    typedef WORD(__thiscall* const pUpdate)(KeyState* pThis, BYTE state, BYTE* key_data);
+    return pUpdate(0x00498800)(this, gamestate, key_config);
+}
 
-    DWORD GetChecksum()
+static bool IsPressed(KeyCode key)
+{
+    DWORD numKeys = GetNumKeyPress();
+
+    for (DWORD press = 0; press < numKeys; press++)
     {
-        return checksum;
+        if (GetKeyPress(press) == key)
+            return true;
     }
+    return false;
+}
 
-    //original game function
-    void Update(DWORD press)
+static bool GetKeyboardState(VirtualKeyCode code)
+{
+    return p_KeyboardState(code) & 0x80;
+}
+
+static void SetKeyboardState(VirtualKeyCode code, DWORD value)
+{
+    p_KeyboardState(code) = value;
+}
+
+static bool GetOldKeyboardState(VirtualKeyCode code)
+{
+    return p_OldKeyboardState(code) & 0x80;
+}
+
+static void Unpress(VirtualKeyCode code)
+{
+    p_KeyboardState(code) = 0;
+}
+
+void Unpress()
+{
+    pressed = 0;
+}
+
+static void Unpress(KeyCode key)
+{
+    DWORD numKeys = GetNumKeyPress();
+
+    for (DWORD press = 0; press < numKeys; press++)
     {
-        typedef void(__thiscall* const pUpdate)(KeyState* pThis, DWORD press);
-        pUpdate(0x0049BAA0)(this, press);
+        if (GetKeyPress(press) == key)
+            Unpress(press);
     }
+}
 
+static void Press(KeyCode key)
+{
+    p_key_state(p_num_keys) = key;
+    p_num_keys = p_num_keys + 1;
+}
 
-    //the press is between 0x0-0xFF, press below or equal to 0x40 is deadzone
-    void Update(DWORD time, DWORD press)
+static void Press(VirtualKeyCode key)
+{
+    DWORD idx = (DWORD)key;
+    BYTE code = *(BYTE*)(0x005B44A6 + idx + idx * 2);
+    if (code & 1)
     {
-        debug_print("press %X\nKeyState %p %s(%X)\n", press, this, FindChecksumName(this->checksum), this->checksum);
-        //the press is between 0x0-0xFF, press below or equal to 0x40 is deadzone
-        if (press > 0x40)
+        if (code & 4 || code & 2)
         {
-            pressed = 1;
-            timepress = time;
-            holding = press;
+            Press(*(KeyCode*)(0x005B44A5 + idx + idx * 2));
+            return;
         }
         else
         {
-            pressed = 0;
-            timerelease = time;
-            holding = press;
+            Press(*(KeyCode*)(0x005B44A4 + idx + idx * 2));
+            return;
         }
-
     }
 
+}
 
-    DWORD GetReleasedTime()
+DWORD GetChecksum()
+{
+    return checksum;
+}
+
+//original game function
+void Update(DWORD press)
+{
+    typedef void(__thiscall* const pUpdate)(KeyState* pThis, DWORD press);
+    pUpdate(0x0049BAA0)(this, press);
+}
+
+
+//the press is between 0x0-0xFF, press below or equal to 0x40 is deadzone
+void Update(DWORD time, DWORD press)
+{
+    debug_print("press %X\nKeyState %p %s(%X)\n", press, this, FindChecksumName(this->checksum), this->checksum);
+    //the press is between 0x0-0xFF, press below or equal to 0x40 is deadzone
+    if (press > 0x40)
     {
-        return timerelease;
+        pressed = 1;
+        timepress = time;
+        holding = press;
+    }
+    else
+    {
+        pressed = 0;
+        timerelease = time;
+        holding = press;
     }
 
-    DWORD GetPressedTime()
-    {
-        return timepress;
-    }
+}
 
-    bool IsPressed()
-    {
-        return pressed != 0;
-    }
+
+DWORD GetReleasedTime()
+{
+    return timerelease;
+}
+
+DWORD GetPressedTime()
+{
+    return timepress;
+}
+
+bool IsPressed()
+{
+    return pressed != 0;
+}
 
 };
 
