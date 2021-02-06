@@ -233,6 +233,15 @@ WORD KeyState::XINPUT_UpdateCamera_Hook(BYTE gamestate, BYTE* game_config)
         {
             XINPUT_STATE state = XINPUT::Player1->GetState();
 
+            //Maybe this is actually interpolated between 0x1-0x7F and 0xFF-0x81?
+            //For now let's leave it at the standard values the keyboard use
+            //For all buttons:
+            //0x80 = no button pressed
+            //For the sticks:
+            //0x1 = positive button pressed
+            //0xFF = negative button pressed
+            //For Normal buttons(ie Flip, Grab etc):
+            //0x7F
             if (state.Gamepad.sThumbRX >= XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
                 gamepad[CameraMovement::RightLeft] = LevelModSettings::bInvertedX ? CameraMovement::Left : CameraMovement::Right;
             else if (state.Gamepad.sThumbRX <= -XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
