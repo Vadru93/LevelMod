@@ -252,6 +252,31 @@ WORD KeyState::XINPUT_UpdateCamera_Hook(BYTE gamestate, BYTE* game_config)
                 gamepad[CameraMovement::UpDown] = LevelModSettings::bInvertedY ? CameraMovement::Up : CameraMovement::Down;
         }
     }
+    else
+    {
+        if (LevelModSettings::bInvertedX || LevelModSettings::bInvertedY)
+        {
+            BYTE* gamepad = *(BYTE**)(game_config + 0x18);
+
+            if (gamepad)
+            {
+                if (LevelModSettings::bInvertedX)
+                {
+                    if (gamepad[CameraMovement::RightLeft] == CameraMovement::Left)
+                        gamepad[CameraMovement::RightLeft] = CameraMovement::Right;
+                    else if(gamepad[CameraMovement::RightLeft] == CameraMovement::Right)
+                        gamepad[CameraMovement::RightLeft] = CameraMovement::Left;
+                }
+                if (LevelModSettings::bInvertedY)
+                {
+                    if (gamepad[CameraMovement::UpDown] == CameraMovement::Up)
+                        gamepad[CameraMovement::UpDown] = CameraMovement::Down;
+                    else if (gamepad[CameraMovement::UpDown] == CameraMovement::Down)
+                        gamepad[CameraMovement::UpDown] = CameraMovement::Up;
+                }
+            }
+        }
+    }
 
     typedef WORD(__thiscall* const pUpdate)(KeyState* pThis, BYTE state, BYTE* key_data);
     return pUpdate(0x00498800)(this, gamestate, game_config);
@@ -623,8 +648,6 @@ void HookControls()
     HookVibrate();
     //Hook dinput
     HookFunction(0x0040CA2B, proxy_Dinput_GetDeviceState);
-    //For camera controll
-    HookFunction(0x00498F39, &KeyState::XINPUT_UpdateCamera_Hook);
 
     return;
     DWORD old;

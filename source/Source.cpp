@@ -165,6 +165,19 @@ void InjectHook(DWORD addr, BYTE* hook, DWORD size)
     VirtualProtect((void*)addr, size, PAGE_EXECUTE_READWRITE, &old);
     memcpy((void*)addr, hook, size);
 }
+__inline void HookFunction(DWORD addr, WORD(KeyState::* function)(BYTE gamestate, BYTE* key_data), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    addr += 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
 
 __inline void HookFunction(DWORD addr, void(SfxManager::* function)(float* lvol, float* rvol, Vector* soundSource, float dropoffDist), BYTE byteCode = 0, DWORD nopCount=0)
 {
@@ -1239,6 +1252,9 @@ void ReadFirstOptions()
     new_value = OptionReader->ReadInt("Script_Settings", "LM_DebugOption_bDebugMode", debug);
     if (new_value < 2)
        debug = new_value;
+#ifdef _DEBUG
+    debug = true;
+#endif
     //debug_print("value %d\n", debug);
     if (debug)
     {
@@ -4527,6 +4543,9 @@ void InitLevelMod()
     DWORD old;
     //HookFunction(0x004C04F0, TimerElapsed);
     HookFunction(0x004F9463, UpdateFrameLength);
+
+    //For camera controll
+    HookFunction(0x00498F39, &KeyState::XINPUT_UpdateCamera_Hook);
 
     //Fix no terrain sound on missing terrain flag objects
     HookFunction(0x0041272F, GetTerrain);
