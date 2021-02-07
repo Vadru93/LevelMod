@@ -708,10 +708,23 @@ int AddOption(char* name, int value, bool update, DWORD overriden_option, BYTE t
     return value;
 }
 
+bool MessageBoxScript(CStruct* pStruct, CScript* pScript)
+{
+    char msg[256] = "";
+    for (auto header = pStruct->head; header != NULL; header = header->NextHeader)
+    {
+        char temp_msg[50] = "";
+        sprintf(temp_msg, "Param %s Value %s\n", FindChecksumName(header->QBkey, false), FindChecksumName(header->Data, false));
+        strcat(msg, temp_msg);
+    }
+    MessageBox(0, msg, msg, 0);
+    return true;
+}
 
 bool GetParamScript(CStruct* pStruct, CScript* pScript)
 {
-    if (QScript::GotParam(pStruct, pScript))
+    auto update = pStruct->GetHeader(Checksums::ForceUpdate);
+    if (!update && QScript::GotParam(pStruct, pScript))
         return true;
 
     auto header = pStruct->GetHeader();
@@ -727,6 +740,10 @@ bool GetParamScript(CStruct* pStruct, CScript* pScript)
                     debug_print(__FUNCTION__ "couldn't Allocate CStruct...\n");
                     return false;
                 }
+
+                /*char tst_msg[256];
+                sprintf(tst_msg, "%p %s", pScript, FindChecksumName(pScript->scriptChecksum, false));
+                MessageBox(0, tst_msg, tst_msg, 0);*/
 
                 if (pScript->params->head)
                 {

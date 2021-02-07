@@ -664,6 +664,15 @@ struct EXTERN CStruct
         }
         return NULL;
     }
+    __inline __declspec(noalias)CStructHeader const* __restrict GetHeader(DWORD name) const
+    {
+        for (auto header = head; header != NULL; header = header->NextHeader)
+        {
+            if (header->QBkey == name)
+                return header;
+        }
+        return NULL;
+    }
 #endif
 
 

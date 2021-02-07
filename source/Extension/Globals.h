@@ -191,6 +191,8 @@ bool GetMaximumIndexScript(CStruct* pStruct, CScript* pScript);
 bool GetOptionValue(CStruct* pStruct, CScript* pScript);
 
 bool LaunchGFXCommand(CStruct* pStruct, CScript* pScript);
+
+bool MessageBoxScript(CStruct* pStruct, CScript* pScript);
 //--------Functions callable from script--------
 
 //--------Functions NOT callable from script--------

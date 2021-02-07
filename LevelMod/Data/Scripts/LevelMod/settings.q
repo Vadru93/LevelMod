@@ -169,6 +169,12 @@ LM_Menu_Shared_Bool = {
 	target = "LM_ToggleOption"
 }
 
+LM_Menu_Shared_HostOption = {
+    Type = textmenuelement
+	text = "Foo"
+	target = "LM_ToggleHostOption"
+}
+
 //shared option for a back menu item
 LM_Menu_Shared_Back = {
 	Type = textmenuelement 
@@ -334,18 +340,6 @@ levelmod_HostOptions_root = {
 	eventhandler = { Type = showeventhandler target = "UpdateMenuText" params = levelmod_HostOptions_root }
 	children = LM_HostOptions
 }
-
-SCRIPT AddHostOption
-	printf "Adding HostOption"
-	GetParam On
-	GetParam id
-	AddLine parent = levelmod_HostOptions_root Type = textmenuelement id = <id> text = <On>
-ENDSCRIPT
-
-SCRIPT UpdateHostOptions
-	printf "OnShow"
-	ForEachIn LM_HostOptions do = AddHostOption params = { <...> }
-ENDSCRIPT
 
 
 SCRIPT CreateLevelModMenus
@@ -550,7 +544,7 @@ ENDSCRIPT
 SCRIPT LM_SetOption
 	printf "Setting option"
 	IF GetParam name
-		GetParam id
+		GetParam id ForceUpdate
 		printf "Going to set option"
 		IF LM_GotParam TextOnly
 			SetSliderValue option = <name>
@@ -620,165 +614,111 @@ SCRIPT LM_MaybeMakeStatic
 ENDSCRIPT
 
 SCRIPT LM_ToggleHostOption 
-	//Check if this is the top item
-	IF LM_GotParam auto_id
-	 printf "LM_ToggleHost"
-	ELSE
-	
-		//Is this a special menu?
-		IF LM_GotParam link
-			//Todo handle linked menus
-			printf "Link"
-			
-		ELSE
-			printf "called LM_ToggleHostOption"
-		
-			//give textonly param if we only want to update text
-			IF #"Not" GotParam TextOnly
-				printf "Toggle"
-				ToggleHostOption <name>
-			ENDIF
-			
-			//update text if we have item id
-			//GetParam will move the param from the struct to the script stack and return true if it's found
-			IF GetParam id
-				GetParam name
-
-				IF LM_GotParam TextFromValue
-					printf "Updating TextFromValue"
-					GetParam TextFromValue
-					IF GetParam option
-						GetOptionText option = <option> text = <TextFromValue>
-					ELSE
-						GetOptionText option = <name> text = <TextFromValue>
-					ENDIF
-					SetMenuElementText id = <id> <text>
-				ELSE
-					IF IsOptionOn <name>
-						GetParam on
-						SetMenuElementText id = <id> <on>
-						printf "on"
-					ELSE
-						GetParam off
-						SetMenuElementText id = <id> <off>
-						printf "off"
-					ENDIF
-				ENDIF
-			ELSE
-				printf "without menu id!"
-			ENDIF
-		ENDIF
-		IF GotParam LinkedTo
-			IF IsOptionOn <LinkedTo>
-				MakeTextMenuElementStatic <id> nonstatic = 1
-			ELSE
-				MakeTextMenuElementStatic <id>
-			ENDIF
-		ELSE
-			IF LM_GotParam LinkedTo_id
-				IF GotParam Name
-					IF IsOptionOn <name>
-						MakeTextMenuElementStatic <LinkedTo_id> nonstatic = 1
-					ELSE
-						MakeTextMenuElementStatic <LinkedTo_id> 
-					ENDIF
-				ENDIF
-			ENDIF
-		ENDIF
-	ENDIF
-	
-	IF GotParam action
-		<action>
-	ENDIF
-	printf "Done"
+	printf "called LM_ToggleHostOption"
+    LM_ToggleOption  HostOption <...>
 ENDSCRIPT
 
 //a generic toggle func to take option, item id and on off text
 SCRIPT LM_ToggleOption 
 	//Check if this is the top item
 	IF LM_GotParam auto_id
-	 printf "LevelModSettings"
+	    printf "LevelModSettings"
 	ELSE
-	
-		//Is this a special menu?
-		IF LM_GotParam link
-			//Todo handle linked menus
+		    IF GetParam id ForceUpdate
+			    GetParam name
+				//Is this a special menu?
+				IF LM_GotParam link
+					//Todo handle linked menus
 			
 			
-		ELSE
-			printf "called LM_ToggleOption"
+				ELSE
+					printf "called LM_ToggleOption"
 		
-			//give textonly param if we only want to update text
-			IF #"Not" GotParam TextOnly
-				printf "Toggle"
-				ToggleOption <name>
-				
-				IF GotParam TextFromValue
-					printf "Updating TextFromValue"
-					IF GotParam option
-						GetOptionText option = <option> text = <TextFromValue>
-					ELSE
-						GetOptionText option = <name> text = <TextFromValue>
-					ENDIF
-					SetMenuElementText id = <id> <text>
-				ELSE
-					IF IsOptionOn <name>
-						SetMenuElementText id = <id> <on>
-						printf "on"
-					ELSE
-						SetMenuElementText id = <id> <off>
-					ENDIF
-				ENDIF
-			ELSE
-			
-			//update text if we have item id
-			//GetParam will move the param from the struct to the script stack and return true if it's found
-			IF GetParam id
-				GetParam name
-				IF GetParam TextFromValue
-					printf "Updating TextFromValue"
-					IF GetParam option
-						GetOptionText option = <option> text = <TextFromValue>
-					ELSE
-						GetOptionText option = <name> text = <TextFromValue>
-					ENDIF
-					SetMenuElementText id = <id> <text>
-				ELSE
-					IF GotParam name
-						IF IsOptionOn <name>
-							GetParam on
-							SetMenuElementText id = <id> <on>
-							printf "on"
+					//give textonly param if we only want to update text
+					IF NotTrue GotParam TextOnly
+						printf "Toggle"
+						IF GotParam HostOption
+				   		    ToggleHostOption <name>
 						ELSE
-							GetParam off
-							SetMenuElementText id = <id> <off>
-							printf "off"
+				    		ToggleOption <name>
 						ENDIF
-					ENDIF
-				ENDIF
-				LM_MaybeMakeStatic option = <name>
+				
+						IF GotParam TextFromValue
+							printf "Updating TextFromValue"
+							IF GotParam option
+								GetOptionText option = <option> text = <TextFromValue>
+							ELSE
+								GetOptionText option = <name> text = <TextFromValue>
+							ENDIF
+							SetMenuElementText id = <id> <text>
+						ELSE
+							IF IsOptionOn <name>
+								SetMenuElementText id = <id> <on>
+								printf "on"
+							ELSE
+								SetMenuElementText id = <id> <off>
+							ENDIF
+						ENDIF
+					ELSE
+
+				        IF GetParam TextFromValue
+					    	printf "Updating TextFromValue"
+
+					    	IF GetParam option
+						    	GetOptionText option = <option> text = <TextFromValue>
+					    	ELSE
+								GetOptionText option = <name> text = <TextFromValue>
+							ENDIF
+							SetMenuElementText id = <id> <text>
+						ELSE
+						    //MessageBox id = <id> name = <name> option = <option>
+						    IF GotParam name
+							    IF IsOptionOn <name>
+								    GetParam on
+								    SetMenuElementText id = <id> <on>
+								    printf "on"
+						        ELSE
+							        GetParam off
+							        SetMenuElementText id = <id> <off>
+							        printf "off"
+						        ENDIF
+							ELSE
+							    GetParam option
+								IF IsOptionOn <option>
+								    GetParam on
+								    SetMenuElementText id = <id> <on>
+								    printf "on"
+						        ELSE
+							        GetParam off
+							        SetMenuElementText id = <id> <off>
+							        printf "off"
+						        ENDIF
+							ENDIF
+					    ENDIF
+				    ENDIF
+					
+					//Make menu static if option is overriden or otherwise disabled
+				    LM_MaybeMakeStatic option = <name>
+		
+		            IF GotParam LinkedTo
+			            IF IsOptionOn <LinkedTo>
+				            MakeTextMenuElementStatic <id> nonstatic = 1
+					    ELSE
+						    MakeTextMenuElementStatic <id>
+					    ENDIF
+				    ELSE
+					    IF LM_GotParam LinkedTo_id
+						    IF IsOptionOn <name>
+								MakeTextMenuElementStatic <LinkedTo_id> nonstatic = 1
+						    ELSE
+							    MakeTextMenuElementStatic <LinkedTo_id> 
+							ENDIF
+					    ENDIF
+				    ENDIF
+				ENDIF	
 			ELSE
 				printf "without menu id!"
 			ENDIF
-			ENDIF
-		ENDIF
-		IF GotParam LinkedTo
-			IF IsOptionOn <LinkedTo>
-				MakeTextMenuElementStatic <id> nonstatic = 1
-			ELSE
-				MakeTextMenuElementStatic <id>
-			ENDIF
-		ELSE
-			IF LM_GotParam LinkedTo_id
-				IF GotParam Name
-					IF IsOptionOn <name>
-						MakeTextMenuElementStatic <LinkedTo_id> nonstatic = 1
-					ELSE
-						MakeTextMenuElementStatic <LinkedTo_id> 
-					ENDIF
-				ENDIF
-			ENDIF
-		ENDIF
 	ENDIF
 	
 	IF GotParam action
@@ -788,12 +728,11 @@ ENDSCRIPT
 
 //intented to loop through list items and update item text based on selected option
 SCRIPT UpdateMenuText
-    IF GotParam RestoreBack
+	ForEachIn <children> do = LM_ToggleOption params = { TextOnly <...> }
+	printf "menu text init done"
+	IF GotParam RestoreBack
 	    RestoreGoBack
 	ENDIF
-	ForEachIn <children> do = LM_ToggleOption params = { <...> TextOnly }
-	printf "menu text init done"
-	
 ENDSCRIPT
 
 

@@ -267,6 +267,8 @@ namespace Checksums
             Physics_vert_hang_Stat = COMPILE_CRC32("physics_vert_hang_stat"),
             Skater_Max_Max_Speed_Stat = COMPILE_CRC32("skater_max_max_speed_stat"),
 
+            ForceUpdate = COMPILE_CRC32("forceupdate"),
+
 
 
         //Trick_KFBackflip = 0xF7B4E0CB

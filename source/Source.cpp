@@ -458,9 +458,12 @@ struct D3D_PARAMS
 
 void NotGood(DWORD checksum, CScript* pScript)
 {
+    char err_code[128];
     debug_print("Called a function that doesn't exsits..\nName %s(%X) in function %s(%X) location %p\n", FindChecksumName(checksum), checksum, FindChecksumName(pScript->scriptChecksum), pScript->scriptChecksum, pScript->address);
-    MessageBox(0, "This means your Scripts are trashed or old", "Called a function that don't exists", 0);
+    sprintf(err_code, "This means your Scripts are trashed or old\nFunction to Call: %s\nCalled From: %s", FindChecksumName(checksum, false), FindChecksumName(pScript->scriptChecksum, false));
+    MessageBox(0, err_code, "Called a function that don't exists", 0);
 }
+
 
 __declspec(naked)  void __cdecl NotGood_naked()
 {
@@ -1303,7 +1306,7 @@ void ReadFirstOptions()
         else
             CloseHandle(h);
 
-
+        
         CreateConsole();
         debug_print("Welcome to DebugMode\n");
     }
@@ -2213,6 +2216,7 @@ const CompiledScript scripts[] =
 {"ToggleHostOption", ToggleHostOption},
     {"LM_GotParam", LM_GotParamScript },
     {"GetParam", GetParamScript},
+    {"MessageBox", MessageBoxScript},
     {"SetOption", SetOption},
     {"GetOptionText", GetOptionText},
     {"LM_PrintInfo", GetInfoScript },
