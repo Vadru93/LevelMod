@@ -17,15 +17,15 @@ LevelMod features:
 
 ### How to install
 **Important!** *The mod requires original game to be installed on your computer. You cannot play the mod without original files. You also need the [1.01 patch](#links)*
-1. Make sure you have the last LevelMod Full release installed from [Chapter-3.net thread](#links)
+1. Make sure you have the latest LevelMod Full release installed from [Chapter-3.net thread](#links)
 2. Look for Levelmod.flt file and remove it if found
-3. Download [latest release](#links)
+3. Download [latest release from repo](#links)
 4. Extract to your game folder and replace all the files if asked. However, for the first install it shouldn't require to replace any existing files
 5. Make sure you have [Visual Studio Redist x86 2019](#links) installed
 6. For people with enabled UAC, run as admin, or make sure you have write permissions for THPS3 folder and folder is not set to read-only
 
 * *If you want to restore the original game, you can just rename d3d8.dll and the game becomes vanilla untouched. All the mod scripts are now stored in a LevelMod subfolder.*
-* *If you want to use latest commit, you can do so by downloading d3d8.dll and scripts folder directly from the repo.*
+* *If you want to use latest commit, you can do so by downloading the [LevelMod folder](https://github.com/Vadru93/LevelMod/tree/master/LevelMod) and copy it's content to game folder.*
 
 **Recommended additional downloads**
 1. [Widescreen patch by thirteenAG](#links) - adds custom resolutions and proper widescreen support
