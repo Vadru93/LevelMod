@@ -169,12 +169,6 @@ LM_Menu_Shared_Bool = {
 	target = "LM_ToggleOption"
 }
 
-LM_Menu_Shared_HostOption = {
-    Type = textmenuelement
-	text = "Foo"
-	target = "LM_ToggleHostOption"
-}
-
 //shared option for a back menu item
 LM_Menu_Shared_Back = {
 	Type = textmenuelement 
@@ -671,6 +665,11 @@ SCRIPT LM_ToggleOption
 							ENDIF
 							SetMenuElementText id = <id> <text>
 						ELSE
+						    //This is a new script that I added to be able to get debug info easier
+							//Each param will get printed on a new line in the MessageBox
+							//If you get Unknown string it means the qbtable for the param is not found
+							//In non debugmode only settings.qb is loaded to save loading time and memory
+							//So if you use MessageBox outside settings.qb you need to launch game in DebugMode
 						    //MessageBox id = <id> name = <name> option = <option>
 						    IF GotParam name
 							    IF IsOptionOn <name>
