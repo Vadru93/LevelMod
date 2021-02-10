@@ -459,119 +459,97 @@ SCRIPT Skater_RecordsDisplay level = LevelNum_Foundry Heading = "Foundry"
 	REPEAT
 ENDSCRIPT
 
-SCRIPT MaybeShowShip
-	Goto Skater_RecordsDisplay Params = { level = LevelNum_Ship Heading = "Ship" }
-ENDSCRIPT
+//SCRIPT MaybeShowShip
+//	Goto Skater_RecordsDisplay Params = { level = LevelNum_Ship Heading = "Ship" }
+//ENDSCRIPT
 
-SCRIPT MaybeShowWarehouse
-	Goto Skater_RecordsDisplay Params = { level = LevelNum_Warehouse Heading = "Warehouse" }
-ENDSCRIPT
+//SCRIPT MaybeShowWarehouse
+//	Goto Skater_RecordsDisplay Params = { level = LevelNum_Warehouse Heading = "Warehouse" }
+//ENDSCRIPT
 
-SCRIPT MaybeShowBurnside
-	Goto Skater_RecordsDisplay Params = { level = LevelNum_Burnside Heading = "Burnside" }
-ENDSCRIPT
+//SCRIPT MaybeShowBurnside
+//	Goto Skater_RecordsDisplay Params = { level = LevelNum_Burnside Heading = "Burnside" }
+//ENDSCRIPT
 
-SCRIPT MaybeShowRoswell
-	Goto Skater_RecordsDisplay Params = { level = LevelNum_Roswell Heading = "Roswell" }
-ENDSCRIPT
+//SCRIPT MaybeShowRoswell
+//	Goto Skater_RecordsDisplay Params = { level = LevelNum_Roswell Heading = "Roswell" }
+//ENDSCRIPT
 
 SCRIPT ShowNextRecordRight
 	IF IntegerEquals a = <level> b = LevelNum_Foundry
 		Goto Skater_RecordsDisplay Params = { level = LevelNum_Canada Heading = "Canada" }
-	ELSE
-		IF IntegerEquals a = <level> b = LevelNum_Canada
-			Goto Skater_RecordsDisplay Params = { level = LevelNum_Rio Heading = "Rio" }
-		ELSE
-			IF IntegerEquals a = <level> b = LevelNum_Rio
-				Goto Skater_RecordsDisplay Params = { level = LevelNum_Suburbia Heading = "Suburbia" }
-			ELSE
-				IF IntegerEquals a = <level> b = LevelNum_Suburbia
-					Goto Skater_RecordsDisplay Params = { level = LevelNum_Airport Heading = "Airport" }
-				ELSE
-					IF IntegerEquals a = <level> b = LevelNum_Airport
-						Goto Skater_RecordsDisplay Params = { level = LevelNum_SkaterIsland Heading = "Skater Island" }
-					ELSE
-						IF IntegerEquals a = <level> b = LevelNum_SkaterIsland
-							Goto Skater_RecordsDisplay Params = { level = LevelNum_LA Heading = "Los Angeles" }
-						ELSE
-							IF IntegerEquals a = <level> b = LevelNum_LA
-								Goto Skater_RecordsDisplay Params = { level = LevelNum_Tokyo Heading = "Tokyo" }
-							ELSE
-								IF IntegerEquals a = <level> b = LevelNum_Tokyo
-									Goto Skater_RecordsDisplay Params = { level = LevelNum_Ship Heading = "Cruise Ship" }
-								ELSE
-									IF IntegerEquals a = <level> b = LevelNum_Ship
-										Goto Skater_RecordsDisplay Params = { level = LevelNum_Warehouse Heading = "Warehouse" }
-									ELSE
-										IF IntegerEquals a = <level> b = LevelNum_Warehouse
-											Goto Skater_RecordsDisplay Params = { level = LevelNum_Burnside Heading = "Burnside" }
-										ELSE
-											IF IntegerEquals a = <level> b = LevelNum_Burnside
-												Goto Skater_RecordsDisplay Params = { level = LevelNum_Roswell Heading = "Roswell" }
-											ELSE
-												IF IntegerEquals a = <level> b = LevelNum_Roswell
-													Goto Skater_RecordsDisplay Params = { level = LevelNum_Oil Heading = "Oil Rig" }
-												ENDIF
-											ENDIF
-										ENDIF
-									ENDIF
-								ENDIF
-							ENDIF
-						ENDIF
-					ENDIF
-				ENDIF
-			ENDIF
-		ENDIF
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_Canada
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_Rio Heading = "Rio" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_Rio
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_Suburbia Heading = "Suburbia" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_Suburbia
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_Airport Heading = "Airport" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_Airport
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_SkaterIsland Heading = "Skater Island" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_SkaterIsland
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_LA Heading = "Los Angeles" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_LA
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_Tokyo Heading = "Tokyo" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_Tokyo
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_Ship Heading = "Cruise Ship" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_Ship
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_Warehouse Heading = "Warehouse" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_Warehouse
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_Burnside Heading = "Burnside" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_Burnside
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_Roswell Heading = "Roswell" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_Roswell
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_Oil Heading = "Oil Rig" }
 	ENDIF
 ENDSCRIPT
 
 SCRIPT ShowNextRecordLeft
 	IF IntegerEquals a = <level> b = LevelNum_Canada
 		Goto Skater_RecordsDisplay Params = { level = LevelNum_Foundry Heading = "Foundry" }
-	ELSE
-		IF IntegerEquals a = <level> b = LevelNum_Rio
-			Goto Skater_RecordsDisplay Params = { level = LevelNum_Canada Heading = "Canada" }
-		ELSE
-			IF IntegerEquals a = <level> b = LevelNum_Suburbia
-				Goto Skater_RecordsDisplay Params = { level = LevelNum_Rio Heading = "Rio" }
-			ELSE
-				IF IntegerEquals a = <level> b = LevelNum_Airport
-					Goto Skater_RecordsDisplay Params = { level = LevelNum_Suburbia Heading = "Suburbia" }
-				ELSE
-					IF IntegerEquals a = <level> b = LevelNum_SkaterIsland
-						Goto Skater_RecordsDisplay Params = { level = LevelNum_Airport Heading = "Airport" }
-					ELSE
-						IF IntegerEquals a = <level> b = LevelNum_LA
-							Goto Skater_RecordsDisplay Params = { level = LevelNum_SkaterIsland Heading = "Skater Island" }
-						ELSE
-							IF IntegerEquals a = <level> b = LevelNum_Tokyo
-								Goto Skater_RecordsDisplay Params = { level = LevelNum_LA Heading = "Los Angeles" }
-							ELSE
-								IF IntegerEquals a = <level> b = LevelNum_Ship
-									Goto Skater_RecordsDisplay Params = { level = LevelNum_Tokyo Heading = "Tokyo" }
-								ELSE
-									IF IntegerEquals a = <level> b = LevelNum_Warehouse
-										Goto Skater_RecordsDisplay Params = { level = LevelNum_Ship Heading = "Cruise Ship" }
-									ELSE
-										IF IntegerEquals a = <level> b = LevelNum_Burnside
-											Goto Skater_RecordsDisplay Params = { level = LevelNum_Warehouse Heading = "Warehouse" }
-										ELSE
-											IF IntegerEquals a = <level> b = LevelNum_Roswell
-												Goto Skater_RecordsDisplay Params = { level = LevelNum_Burnside Heading = "Burnside" }
-											ELSE
-												IF IntegerEquals a = <level> b = LevelNum_Oil
-													Goto Skater_RecordsDisplay Params = { level = LevelNum_Roswell Heading = "Roswell" }
-												ENDIF
-											ENDIF
-										ENDIF
-									ENDIF
-								ENDIF
-							ENDIF
-						ENDIF
-					ENDIF
-				ENDIF
-			ENDIF
-		ENDIF
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_Rio
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_Canada Heading = "Canada" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_Suburbia
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_Rio Heading = "Rio" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_Airport
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_Suburbia Heading = "Suburbia" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_SkaterIsland
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_Airport Heading = "Airport" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_LA
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_SkaterIsland Heading = "Skater Island" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_Tokyo
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_LA Heading = "Los Angeles" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_Ship
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_Tokyo Heading = "Tokyo" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_Warehouse
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_Ship Heading = "Cruise Ship" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_Burnside
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_Warehouse Heading = "Warehouse" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_Roswell
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_Burnside Heading = "Burnside" }
+	ENDIF
+	IF IntegerEquals a = <level> b = LevelNum_Oil
+		Goto Skater_RecordsDisplay Params = { level = LevelNum_Roswell Heading = "Roswell" }
 	ENDIF
 ENDSCRIPT
 

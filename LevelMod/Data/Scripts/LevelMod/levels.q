@@ -262,64 +262,6 @@ SCRIPT Load_Foo
 ENDSCRIPT
 
 
-//=========================================THUG2===============================================
-
-SCRIPT Load_AU_ug2
-	AddMusicTrack "ambience\thug2\AU"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug2\AU\AU.bsp" lev_sky = "levels_ug2\AU\AU_sky.bsp" lev_qb = "levels_ug2\AU\AU.qb" loadscr = "images\load\ug2_au.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_NO_ug2
-	AddMusicTrack "ambience\thug2\NO"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug2\NO\NO.bsp" lev_sky = "levels_ug2\NO\NO_sky.bsp" lev_qb = "levels_ug2\NO\NO.qb" loadscr = "images\load\ug2_no.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_BA_ug2
-	AddMusicTrack "ambience\thug2\BA"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug2\BA\BA.bsp" lev_sky = "levels_ug2\BA\BA_sky.bsp" lev_qb = "levels_ug2\BA\BA.qb" loadscr = "images\load\ug2_ba.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_BE_ug2
-	AddMusicTrack "ambience\thug2\BE"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug2\BE\BE.bsp" lev_sky = "levels_ug2\BE\BE_sky.bsp" lev_qb = "levels_ug2\BE\BE.qb" loadscr = "images\load\ug2_be.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_BO_ug2
-	AddMusicTrack "ambience\thug2\BO"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug2\BO\BO.bsp" lev_sky = "levels_ug2\BO\BO_sky.bsp" lev_qb = "levels_ug2\BO\BO.qb" loadscr = "images\load\ug2_bo.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_SE_ug2
-	AddMusicTrack "ambience\thug2\se"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug2\se\se.bsp" lev_sky = "levels_ug2\se\se_sky.bsp" lev_qb = "levels_ug2\se\se.qb" loadscr = "images\load\ug2_se.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_SE2_ug2
-	AddMusicTrack "ambience\thug2\SE2"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug2\SE2\SE2.bsp" lev_sky = "levels_ug2\SE2\SE2_sky.bsp" lev_qb = "levels_ug2\SE2\SE2.qb" loadscr = "images\load\ug2_se2.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
-ENDSCRIPT
-
-SCRIPT Load_ST_ug2
-	AddMusicTrack "ambience\thug2\ST"
-	SetUpRioDeJaneiroLights
-	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug2\ST\ST.bsp" lev_sky = "levels_ug2\ST\ST_sky.bsp" lev_qb = "levels_ug2\ST\ST.qb" loadscr = "images\load\ug2_st.png"
-	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
-ENDSCRIPT
-
 
 //don't think default params are actually needed
 //if it crashes, fix the struct. we don't want to like load foundry if something's wrong.
@@ -1762,6 +1704,85 @@ SCRIPT Load_SE
 	Load_Level_Func { Def_SE }
 ENDSCRIPT
 
+//THUG2 AUSTRALIA
+
+Def_AU = { 
+	level_name = "Australia" 
+	location = "Bondi Beach"
+	level_id = AU_id
+	levelnum = Levelnum_New
+
+	ug2_level regular_level NoCareer online_modes
+
+	lev_bsp = "levels_ug2\AU\AU.bsp" 
+	lev_sky = "levels_ug2\AU\AU_sky.bsp" 
+	lev_qb = "levels_ug2\AU\AU.qb" 
+	lev_amb = "ambience\thug2\AU"
+	loadscr = "images\load\ug2_au.png"
+
+	r = 165 g = 180 b = 202 a = 0 
+	default_clipping_params
+
+	load_script = Load_AU
+}
+
+SCRIPT Load_AU
+	Load_Level_Func { Def_AU }
+ENDSCRIPT
+
+//=========================================THUG2===============================================
+
+SCRIPT Load_NO_ug2
+	AddMusicTrack "ambience\thug2\NO"
+	SetUpRioDeJaneiroLights
+	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug2\NO\NO.bsp" lev_sky = "levels_ug2\NO\NO_sky.bsp" lev_qb = "levels_ug2\NO\NO.qb" loadscr = "images\load\ug2_no.png"
+	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
+ENDSCRIPT
+
+SCRIPT Load_BA_ug2
+	AddMusicTrack "ambience\thug2\BA"
+	SetUpRioDeJaneiroLights
+	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug2\BA\BA.bsp" lev_sky = "levels_ug2\BA\BA_sky.bsp" lev_qb = "levels_ug2\BA\BA.qb" loadscr = "images\load\ug2_ba.png"
+	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
+ENDSCRIPT
+
+SCRIPT Load_BE_ug2
+	AddMusicTrack "ambience\thug2\BE"
+	SetUpRioDeJaneiroLights
+	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug2\BE\BE.bsp" lev_sky = "levels_ug2\BE\BE_sky.bsp" lev_qb = "levels_ug2\BE\BE.qb" loadscr = "images\load\ug2_be.png"
+	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
+ENDSCRIPT
+
+SCRIPT Load_BO_ug2
+	AddMusicTrack "ambience\thug2\BO"
+	SetUpRioDeJaneiroLights
+	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug2\BO\BO.bsp" lev_sky = "levels_ug2\BO\BO_sky.bsp" lev_qb = "levels_ug2\BO\BO.qb" loadscr = "images\load\ug2_bo.png"
+	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
+ENDSCRIPT
+
+SCRIPT Load_SE_ug2
+	AddMusicTrack "ambience\thug2\se"
+	SetUpRioDeJaneiroLights
+	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug2\se\se.bsp" lev_sky = "levels_ug2\se\se_sky.bsp" lev_qb = "levels_ug2\se\se.qb" loadscr = "images\load\ug2_se.png"
+	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
+ENDSCRIPT
+
+SCRIPT Load_SE2_ug2
+	AddMusicTrack "ambience\thug2\SE2"
+	SetUpRioDeJaneiroLights
+	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug2\SE2\SE2.bsp" lev_sky = "levels_ug2\SE2\SE2_sky.bsp" lev_qb = "levels_ug2\SE2\SE2.qb" loadscr = "images\load\ug2_se2.png"
+	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
+ENDSCRIPT
+
+SCRIPT Load_ST_ug2
+	AddMusicTrack "ambience\thug2\ST"
+	SetUpRioDeJaneiroLights
+	Load_Level_Func levelnum = LevelNum_New lev_bsp = "levels_ug2\ST\ST.bsp" lev_sky = "levels_ug2\ST\ST_sky.bsp" lev_qb = "levels_ug2\ST\ST.qb" loadscr = "images\load\ug2_st.png"
+	PrepareLevelFog r = 84 g = 84 b = 150 a = 0 cnear = 13 cfar = 20000
+ENDSCRIPT
+
+
+
 master_level_list = [
 	//THPS3
 	{ Def_Foun } { Def_Can } { Def_Rio } { Def_Sub } { Def_Ap }
@@ -1795,7 +1816,7 @@ master_level_list = [
 	{ level_name = "Boston" load_script = Load_BO_ug2 level_id = BO_id NoCareer regular_level ug2_level supports_ctf supports_own supports_bball }
 	{ level_name = "Barcelona" load_script = Load_BA_ug2 level_id = BA_id NoCareer regular_level ug2_level supports_ctf supports_own supports_bball }
 	{ level_name = "Berlin" load_script = Load_BE_ug2 level_id = BE_id NoCareer regular_level ug2_level supports_ctf supports_own supports_bball }
-	{ level_name = "Australia" load_script = Load_AU_ug2 level_id = AU_id NoCareer regular_level ug2_level supports_ctf supports_own supports_bball }
+	{ Def_AU }
 	{ level_name = "New Orleans" load_script = Load_NO_ug2 level_id = NO_id NoCareer regular_level ug2_level supports_ctf supports_own supports_bball }	
 	{ level_name = "Skatopia" load_script = Load_ST_ug2 level_id = ST_id NoCareer regular_level ug2_level supports_ctf supports_own supports_bball }
 	{ level_name = "Pro Skater" load_script = Load_SE_ug2 level_id = SE_id NoCareer regular_level ug2_level supports_ctf supports_own supports_bball }
