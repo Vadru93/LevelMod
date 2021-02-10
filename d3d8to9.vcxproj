@@ -101,6 +101,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Collision.cpp" />
     <ClCompile Include="source\Hook\Bugfixes.cpp" />
     <ClCompile Include="source\Script\Checksum.cpp" />
     <ClCompile Include="source\Input\CXBOXController.cpp" />

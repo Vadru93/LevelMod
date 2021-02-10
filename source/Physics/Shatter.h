@@ -54,6 +54,9 @@ struct ShatterData
     Matrix* matrices;
     //BYTE* tris;
     int numTris;
+    D3DXVECTOR3 shatter_point;
+    DWORD numShatteredTris;
+    int* shatteredTris;
 
     float life;
     float gravity;
@@ -112,29 +115,35 @@ struct ShatterData
             // 4) add new position to each vertex
 
             // The matrix holds 3 vectors at once.
-            Matrix m;
-            m[X].Set(p_v0->x - pos[i][X], p_v0->y - pos[i][Y], p_v0->z - pos[i][Z]);
-            m[Y].Set(p_v1->x - pos[i][X], p_v1->y - pos[i][Y], p_v1->z - pos[i][Z]);
-            m[Z].Set(p_v2->x - pos[i][X], p_v2->y - pos[i][Y], p_v2->z - pos[i][Z]);
+            /*D3DXVECTOR3* p_v0 = (D3DXVECTOR3*)(((BYTE*)base_p_v0) + ((stride * 3) * shatteredTris[i]));
+            D3DXVECTOR3* p_v1 = (D3DXVECTOR3*)(((BYTE*)base_p_v1) + ((stride * 3) * shatteredTris[i]));
+            D3DXVECTOR3* p_v2 = (D3DXVECTOR3*)(((BYTE*)base_p_v2) + ((stride * 3) * shatteredTris[i]));
+            if (true)
+            {*/
+                Matrix m;
+                m[X].Set(p_v0->x - pos[i][X], p_v0->y - pos[i][Y], p_v0->z - pos[i][Z]);
+                m[Y].Set(p_v1->x - pos[i][X], p_v1->y - pos[i][Y], p_v1->z - pos[i][Z]);
+                m[Z].Set(p_v2->x - pos[i][X], p_v2->y - pos[i][Y], p_v2->z - pos[i][Z]);
 
-            m[X].Rotate(matrices[i]);
-            m[Y].Rotate(matrices[i]);
-            m[Z].Rotate(matrices[i]);
+                m[X].Rotate(matrices[i]);
+                m[Y].Rotate(matrices[i]);
+                m[Z].Rotate(matrices[i]);
 
-            // Update the position and velocity of the shatter piece, dealing with bouncing if necessary.
-            UpdateParameters(i, framelength);
+                // Update the position and velocity of the shatter piece, dealing with bouncing if necessary.
+                UpdateParameters(i, framelength);
 
-            *(D3DXVECTOR3*)&m[X] += pos[i];
-            *(D3DXVECTOR3*)&m[Y] += pos[i];
-            *(D3DXVECTOR3*)&m[Z] += pos[i];
+                *(D3DXVECTOR3*)&m[X] += pos[i];
+                *(D3DXVECTOR3*)&m[Y] += pos[i];
+                *(D3DXVECTOR3*)&m[Z] += pos[i];
 
-            p_v0->x = m[X][X]; p_v0->y = m[X][Y]; p_v0->z = m[X][Z];
-            p_v1->x = m[Y][X]; p_v1->y = m[Y][Y]; p_v1->z = m[Y][Z];
-            p_v2->x = m[Z][X]; p_v2->y = m[Z][Y]; p_v2->z = m[Z][Z];
+                p_v0->x = m[X][X]; p_v0->y = m[X][Y]; p_v0->z = m[X][Z];
+                p_v1->x = m[Y][X]; p_v1->y = m[Y][Y]; p_v1->z = m[Y][Z];
+                p_v2->x = m[Z][X]; p_v2->y = m[Z][Y]; p_v2->z = m[Z][Z];
 
-            p_v0 = (D3DXVECTOR3*)(((BYTE*)p_v0) + (stride * 3));
-            p_v1 = (D3DXVECTOR3*)(((BYTE*)p_v1) + (stride * 3));
-            p_v2 = (D3DXVECTOR3*)(((BYTE*)p_v2) + (stride * 3));
+                p_v0 = (D3DXVECTOR3*)(((BYTE*)p_v0) + (stride * 3));
+                p_v1 = (D3DXVECTOR3*)(((BYTE*)p_v1) + (stride * 3));
+                p_v2 = (D3DXVECTOR3*)(((BYTE*)p_v2) + (stride * 3));
+            //}
         }
 
         // Also process normals if they exist.
@@ -260,7 +269,7 @@ bool subdivide_tri_stack(BYTE** p_write, SuperSector* sector, float targetShatte
 {
 
     static float dividers[4] = { 0.5f, 0.6f, 0.2f, 0.33f };
-    float divider = dividers[rand() % 3];
+    float divider = dividers[0/*rand() % 3*/];
     // Three temporary buffers.
     static BYTE v0[256];
     static BYTE v1[256];

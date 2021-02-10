@@ -203,6 +203,13 @@ struct Texture
 struct Material
 {
     Texture* texture;
+    DWORD color;
+    DWORD unk;
+    float unk2[3];
+    bool unk4;
+    bool unk5;
+    BYTE flag;//8 = 2sided 0x10 = always visible
+
 
     static void Submit_Original(Texture* tex)
     {
@@ -281,6 +288,7 @@ struct Material
         }
         else
         {
+
             DWORD target = p_target_renderstate(D3DRS_BLENDOP);
             if (p_current_renderstate(D3DRS_BLENDOP) != target)
             {
@@ -302,11 +310,15 @@ struct Material
                 Gfx::pDevice->SetRenderState(D3DRS_DESTBLEND, target);
             }
 
-            target = p_target_renderstate(D3DRS_CULLMODE);
+            if (flag)
+                target = D3DCULL_NONE;
+            else
+                target = D3DCULL_CW;
+
             if (p_current_renderstate(D3DRS_CULLMODE) != target)
             {
                 p_current_renderstate(D3DRS_CULLMODE) = target;
-                Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, target);
+                    Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, target);
             }
         }
     }

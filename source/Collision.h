@@ -1,3 +1,5 @@
+#ifndef COLLISION_H
+#define COLLISION_H
 namespace Collision
 {
 
@@ -15,4 +17,8 @@ namespace Collision
         Trigger = 0x40,
         Skatable = 0x80,
     };
+
+    bool TriangleIntersectingSphere(D3DXVECTOR3 A, D3DXVECTOR3 B, D3DXVECTOR3 C, D3DXVECTOR3 P, float R);
+    bool TriangleInsideSphere(D3DXVECTOR3 A, D3DXVECTOR3 B, D3DXVECTOR3 C, D3DXVECTOR3 P, float R);
 };
+#endif

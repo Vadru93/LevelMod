@@ -664,7 +664,8 @@ struct EXTERN CStruct
         }
         return NULL;
     }
-    __inline __declspec(noalias)CStructHeader const* __restrict GetHeader(DWORD name) const
+#endif
+    __inline __declspec(noalias)CStructHeader const* __restrict GetNamedHeader(DWORD name) const
     {
         for (auto header = head; header != NULL; header = header->NextHeader)
         {
@@ -673,7 +674,6 @@ struct EXTERN CStruct
         }
         return NULL;
     }
-#endif
 
 
 

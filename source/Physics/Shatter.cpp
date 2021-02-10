@@ -236,12 +236,12 @@ void ShatterSuperSector(SuperSector* super_sector)
                         Vertex q(p_vert2->x - p_vert0->x, p_vert2->y - p_vert0->y, p_vert2->z - p_vert0->z);
                         Vertex r((p[Y] * q[Z]) - (q[Y] * p[Z]), (p[Z] * q[X]) - (q[Z] * p[X]), (p[X] * q[Y]) - (q[X] * p[Y]));
                         float area_squared = r.LengthSqr();
-                        if (area_squared > targetShatterArea[0])
+                        if (area_squared > targetShatterArea[4])
                         {
                             // We will need to subdivide - each subdivision will result in an area one quarter the previous area
                             // (and thusly the square of the area will be one sixteenth the previous area).
                             int num_extra_tris = 1;
-                            while (area_squared > targetShatterArea[0])
+                            while (area_squared > targetShatterArea[4])
                             {
                                 num_extra_tris *= 4;
                                 area_squared *= (1.0f / 16.0f);
@@ -282,7 +282,7 @@ void ShatterSuperSector(SuperSector* super_sector)
                 {
                     numTris = subdivide_tri_stack(&p_write_vertex, super_sector, targetShatterArea[0]);//  targetShatterArea[rand() % 5]);
                 }*/
-                while (subdivide_tri_stack(&p_write_vertex, super_sector, targetShatterArea[rand() % 5], p_shatter->numTris));//  );
+                while (subdivide_tri_stack(&p_write_vertex, super_sector, targetShatterArea[4/*rand() % 5*/], p_shatter->numTris));//  );
 
                 debug_print("Going to allocate %d tris\n", p_shatter->numTris);
                 p_shatter->Allocate();
@@ -318,6 +318,29 @@ void ShatterSuperSector(SuperSector* super_sector)
                 }
 
                 debug_print("Going to push...\n");
+                p_shatter->shatter_point = *Game::skater->GetPosition();
+                /*p_shatter->shatteredTris = new int[p_shatter->numTris];
+                BYTE* p_vert_data = p_shatter->verts;
+                DWORD stride = p_shatter->split->stride;
+                D3DXVECTOR3* p_v0 = (D3DXVECTOR3*)(p_vert_data);
+                D3DXVECTOR3* p_v1 = (D3DXVECTOR3*)(p_vert_data + stride);
+                D3DXVECTOR3* p_v2 = (D3DXVECTOR3*)(p_vert_data + (2 * stride));
+                p_shatter->numShatteredTris = 0;
+
+                for (int i = 0; i < p_shatter->numTris; i++)
+                {
+                    //if (Collision::TriangleIntersectingSphere(*p_v0, *p_v1, *p_v2, p_shatter->shatter_point, 200.0f))
+                    
+                    if(fabsf((*(Vertex*)&p_shatter->shatter_point).Distance(*(Vertex*)p_v0)) < 200.0f || fabsf((*(Vertex*)&p_shatter->shatter_point).Distance(*(Vertex*)p_v1)) < 200.0f || fabsf((*(Vertex*)&p_shatter->shatter_point).Distance(*(Vertex*)p_v2)) < 200.0f)
+                    {
+                        p_shatter->shatteredTris[p_shatter->numShatteredTris] = i;
+                        p_shatter->numShatteredTris++;
+
+                        p_v0 = (D3DXVECTOR3*)(((BYTE*)p_v0) + (stride * 3));
+                        p_v1 = (D3DXVECTOR3*)(((BYTE*)p_v1) + (stride * 3));
+                        p_v2 = (D3DXVECTOR3*)(((BYTE*)p_v2) + (stride * 3));
+                    }
+                }*/
                 shatterObjects.push_back(p_shatter);
                 debug_print("Pushed...\n");
                 super_sector->mesh->splits[m].vertexBuffer->GetProxyInterface()->Unlock();

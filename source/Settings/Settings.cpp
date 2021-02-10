@@ -723,8 +723,7 @@ bool MessageBoxScript(CStruct* pStruct, CScript* pScript)
 
 bool GetParamScript(CStruct* pStruct, CScript* pScript)
 {
-    auto update = pStruct->GetHeader(Checksums::ForceUpdate);
-    if (!update && QScript::GotParam(pStruct, pScript))
+    if (!pStruct->GetNamedHeader(Checksums::ForceUpdate) && QScript::GotParam(pStruct, pScript))
         return true;
 
     auto header = pStruct->GetHeader();

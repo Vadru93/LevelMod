@@ -150,6 +150,9 @@
     <ClCompile Include="source\Script\Node.cpp">
       <Filter>LevelMod\Source</Filter>
     </ClCompile>
+    <ClCompile Include="source\Collision.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="res\resource.h">
