@@ -286,7 +286,8 @@ SCRIPT GameFlow_StartRun
 		ENDIF
 	ENDIF
 	IF InNetGame
-		LoadMultiplayerSounds
+		//moved mp sounds to perm array, any downsides? there are like just 10 sounds.
+		//LoadMultiplayerSounds
 		IF GameModeEquals is_lobby
 			IF IsTrue FirstTimeInGameFlow_Startup
 				change FirstTimeInGameFlow_Startup = 0
@@ -307,7 +308,7 @@ SCRIPT GameFlow_StartRun
 ENDSCRIPT
 
 SCRIPT GameFlow_PlayRun
-	Wait 10 gameframe
+	Wait 10 gameframe //was 3 in original
 	IF InMultiPlayerGame
 		UseBothPadsInFrontEnd
 	ELSE
@@ -455,6 +456,8 @@ SCRIPT GameFlow_End
 		SwitchToMenu menu = winner_screen
 	ENDIF
 	IF InNetGame
+		//there was this func here in original, any reason it was removed?
+		//ResetClock
 		IF OnServer
 			Wait 5 gameframes
 			LoadPendingPlayers
@@ -571,26 +574,6 @@ SCRIPT Splitscreen_StartupScript
 	ENDIF
 ENDSCRIPT
 
+//leaving it in case it's used anywhere else
 SCRIPT LoadMultiplayerSounds
-	IF GameModeChecksumEquals ctf
-		LoadSound "MP\ctf_flag_captured1_crowd" vol = 100
-		LoadSound "MP\ctf_flag_captured2_crowd" vol = 100
-		LoadSound "MP\ctf_flag_dropped" vol = 100
-		LoadSound "MP\ctf_flag_returned" vol = 100
-		LoadSound "MP\ctf_flag_taken1_crowd" vol = 100
-		LoadSound "MP\ctf_flag_taken2_crowd" vol = 100
-	ENDIF
-	IF GameModeChecksumEquals ownthezone
-		LoadSound "MP\zone_control_all" vol = 100
-		LoadSound "MP\zone_control_zone" vol = 100
-		LoadSound "MP\zone_drop_key" vol = 100
-		LoadSound "MP\zone_get_key" vol = 100
-		LoadSound "MP\zone_lose_all" vol = 100
-		LoadSound "MP\zone_lose_zone" vol = 100
-	ENDIF
-	IF GameModeChecksumEquals beachball
-		LoadSound "MP\beach_ball_bounce" vol = 100
-		LoadSound "MP\beach_ball_dropped" vol = 100
-		LoadSound "MP\beach_ball_taken" vol = 100
-	ENDIF
 ENDSCRIPT

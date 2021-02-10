@@ -83,6 +83,25 @@ master_sfx_list = [
 	{ path = "Skater\GUI_type02" vol = 100 }
 	{ path = "Skater\horselose" vol = 100 }
 	{ path = "Skater\GUI_buzzer01" vol = 100 }
+
+	//multiplayer sounds
+	{ path = "MP\ctf_flag_captured1_crowd" vol = 100 mask = ctf }
+	{ path = "MP\ctf_flag_captured2_crowd" vol = 100 mask = ctf }
+	{ path = "MP\ctf_flag_dropped" vol = 100 mask = ctf }
+	{ path = "MP\ctf_flag_returned" vol = 100 mask = ctf }
+	{ path = "MP\ctf_flag_taken1_crowd" vol = 100 mask = ctf }
+	{ path = "MP\ctf_flag_taken2_crowd" vol = 100 mask = ctf }
+	
+	{ path = "MP\zone_control_all" vol = 100 mask = ownthezone }
+	{ path = "MP\zone_control_zone" vol = 100 mask = ownthezone }
+	{ path = "MP\zone_drop_key" vol = 100 mask = ownthezone }
+	{ path = "MP\zone_get_key" vol = 100 mask = ownthezone }
+	{ path = "MP\zone_lose_all" vol = 100 mask = ownthezone }
+	{ path = "MP\zone_lose_zone" vol = 100 mask = ownthezone }
+	
+	{ path = "MP\beach_ball_bounce" vol = 100 mask = beachball }
+	{ path = "MP\beach_ball_dropped" vol = 100 mask = beachball }
+	{ path = "MP\beach_ball_taken" vol = 100 mask = beachball }
 	
 	//extra sounds used in LevelMod
 	{ path = "LM\ExtraTrick" vol = 100 }
