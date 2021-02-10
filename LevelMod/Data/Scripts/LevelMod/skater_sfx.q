@@ -104,6 +104,7 @@ master_sfx_list = [
 	{ path = "MP\beach_ball_taken" vol = 100 mask = beachball }
 	
 	//extra sounds used in LevelMod
+	//Should add toggle for this since some people complained about it
 	{ path = "LM\ExtraTrick" vol = 100 }
 ]
 
@@ -113,14 +114,12 @@ SCRIPT LoadPermSounds
 ENDSCRIPT
 
 script LoadSfx
-	if LM_GotParam path
-		GetParam path
-		if LM_GotParam vol
-			GetParam vol
+//GetParam will return true if the param is found so don't need to call LM_GotParam before GetParam
+	if GetParam path
+		if GetParam vol
 			LoadSound <path> FLAG_PERM vol = <vol>
 		else
-			if LM_GotParam pitch
-				GetParam pitch
+			if GetParam pitch
 				LoadSound <path> FLAG_PERM pitch = <pitch>
 			else
 				LoadSound <path> FLAG_PERM
@@ -132,10 +131,8 @@ script LoadSfx
 endscript
 
 script LoadSong
-	if LM_GotParam path
-		GetParam path
-		if LM_GotParam Title
-			GetParam Title
+	if GetParam path
+		if GetParam Title
 			AddMusicTrack <path> FLAG_PERM TrackTitle = <Title>
 		endif
 	else
