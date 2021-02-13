@@ -288,6 +288,8 @@ struct Material
         }
         else
         {
+            typedef void(__cdecl* pSetTargetRenderStates)(BYTE state, BYTE pass);
+            pSetTargetRenderStates(0x0055CE10)(8, 0);
 
             DWORD target = p_target_renderstate(D3DRS_BLENDOP);
             if (p_current_renderstate(D3DRS_BLENDOP) != target)
@@ -318,7 +320,7 @@ struct Material
             if (p_current_renderstate(D3DRS_CULLMODE) != target)
             {
                 p_current_renderstate(D3DRS_CULLMODE) = target;
-                    Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, target);
+                Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, target);
             }
         }
     }

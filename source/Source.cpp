@@ -3031,6 +3031,8 @@ void HookedFopen(char* p)
                 memcpy(temp_level, &p[pos + 1], strlen(p) - 3 - (pos + 1));
                 temp_level[strlen(p) - 3 - (pos + 1)] = 0x00;
                 Game::level_checksum = Checksum(temp_level);
+                typedef void(__cdecl* pResetTimers)();
+                pResetTimers(0x00409870)();
                 //MessageBox(0, temp_level, Level, 0);
 
 
@@ -4005,14 +4007,16 @@ DWORD __cdecl GetTime()
 
 
     QueryPerformanceCounter(&timer_time);
+    timer_time.QuadPart -= *(unsigned long long*)0x00850fb0;
+
     double ms = double(timer_time.LowPart)* fFreq;
-    ms += 0.5f;
+    ms += 0.5;
     DWORD truncated = ms;
 
     if (timer_time.HighPart)
     {
         ms = double(timer_time.HighPart) * fFreq;
-        ms += 0.5f;
+        ms += 0.5;
         DWORD truncated2 = ms;
         _asm mov edx, truncated2;
     }
