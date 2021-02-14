@@ -5190,6 +5190,8 @@ void OnRelease()
 
 void OnLost()
 {
+    QueryPerformanceCounter(&startTime);
+    NewTimer::ResetTime();
     debug_print("OnLost\n");
     if (m_font)
     {
@@ -5200,6 +5202,8 @@ void OnLost()
 
 void OnReset()
 {
+    QueryPerformanceCounter(&startTime);
+    NewTimer::ResetTime();
     debug_print("OnReset\n");
     if (m_font)
     {

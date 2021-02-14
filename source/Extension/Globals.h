@@ -26,6 +26,8 @@
 
 #define p_bWindowed *(bool*)0x008510a9
 
+#define isActive *(bool*)0x00850F74
+
 extern DWORD NewTimer::GetTime();
 
 //--------Spine and Acid--------
