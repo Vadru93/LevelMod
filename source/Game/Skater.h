@@ -757,7 +757,7 @@ public:
     void UpdateKeyState(BYTE key, DWORD press)
     {
 
-        GetKeyState(key)->Update(GetTime()/*this->GetCurrentTime()*/, press);
+        GetKeyState(key)->Update(NewTimer::GetTime()/*this->GetCurrentTime()*/, press);
 
 
         //debug_print("Updating press %d\nKeyState %p chc %X\n", press, this, this->checksum);

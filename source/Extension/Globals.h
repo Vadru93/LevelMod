@@ -5,6 +5,7 @@
 #include "Script\QBKey.h"
 #include "Input\CXBOXController.h"
 #include "Math\_Math.h"
+#include "Timer\Timer.h"
 
 #define p_trigger_node *(DWORD*)0x004003CB
 
@@ -25,7 +26,7 @@
 
 #define p_bWindowed *(bool*)0x008510a9
 
-extern DWORD GetTime();
+extern DWORD NewTimer::GetTime();
 
 //--------Spine and Acid--------
 enum TransferType

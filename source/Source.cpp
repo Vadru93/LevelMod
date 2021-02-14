@@ -75,6 +75,7 @@ LPDIRECT3DTEXTURE9 wheel_texture[12];
 BYTE eye_state = 0;
 DWORD actual_timer = 0;
 DWORD last_state;
+DWORD reset_time = 0;
 bool rotating = false;
 double framelength;
 
@@ -139,7 +140,6 @@ void SetStructValues(CStructHeader* pStruct, CStructHeader* values);
 void SetArrayValues(CArray* pArray, CStructHeader* values);
 bool InvalidReadPtr(const void* const __restrict ptr, const DWORD size);
 bool InvalidReadPtr(const void* const __restrict ptr);
-void CalculateFPSTimers();
 
 //Current version
 #define VERSION 4.8f
@@ -3034,6 +3034,7 @@ void HookedFopen(char* p)
                 /*typedef void(__cdecl* pResetTimers)();
                 pResetTimers(0x00409870)();*/
                 QueryPerformanceCounter((LARGE_INTEGER*)0x00850FB0);
+                NewTimer::ResetTime();
                 //MessageBox(0, temp_level, Level, 0);
 
 
@@ -3961,11 +3962,7 @@ OptimizedArrayCRC optimized3[] = { 0x00412035, 0x004142C2, 0x00418869, 0x00418BA
 0x004A6011, 0x004B50E9, 0x004B54C3, 0x004B5502, 0x004B5AC7, 0x004B6A37, 0x004B73C3, 0x004B8316, 0x004B8306, 0x004B830D, 
 0x004BB741, 0x004BC052,
 0x004BD32C, 0x004BDB05, 0x004BDE7A, 0x004BEA69, 0x004E3145, 0x004E31B2, 0x004E4E55, 0x004F07C5, };
-LARGE_INTEGER freq;
-double fFreq;
-LARGE_INTEGER endTime;
-#define startTime (*(LARGE_INTEGER*)0x008E8E18)
-LARGE_INTEGER elapsedTime;
+
 //void HookControls();
 DWORD old_trigger;
 DWORD old_trigger_frame;
@@ -3997,248 +3994,6 @@ __declspec(naked) void TriggerScript()
     _asm pop eax;
     _asm mov ecx, oldECX;
     _asm ret;
-}
-
-LARGE_INTEGER timer_time;
-DWORD timer_old_start;
-
-DWORD __cdecl GetTime()
-{
-    //timer_old_start = timer_time.LowPart;
-
-
-    QueryPerformanceCounter(&timer_time);
-    timer_time.QuadPart -= *(LONGLONG*)0x00850fb0;
-
-    double ms = double(timer_time.LowPart)* fFreq;
-    ms += 0.5;
-    DWORD truncated = ms;
-
-    if (timer_time.HighPart)
-    {
-        ms = double(timer_time.HighPart) * fFreq;
-        ms += 0.5;
-        DWORD truncated2 = ms;
-        _asm mov edx, truncated2;
-    }
-    else
-        _asm xor edx, edx
-
-    return truncated;
-}
-
-DWORD frameticks;
-
-void TimerElapsed()
-{
-    LARGE_INTEGER targetTime;
-    targetTime.QuadPart = startTime.QuadPart + frameticks;
-    while (endTime.QuadPart < targetTime.QuadPart)
-    {
-        QueryPerformanceCounter(&endTime);
-    }
-    /*if (endTime.HighPart == startTime.HighPart)
-    {
-        //elapsedTime.LowPart = (endTime.LowPart - startTime.LowPart);
-        _asm xor edx, edx
-        double ms = (double((endTime.LowPart - startTime.LowPart)) * fFreq);
-        ms += 0.55f;
-
-        DWORD truncated = ms;
-        //004F9462
-        return truncated;// (elapsedTime.LowPart * 1000) / freq.LowPart;
-    }
-    else
-    {
-        elapsedTime.LowPart = 0xFFFFFFFF - startTime.LowPart + endTime.LowPart;
-        _asm xor edx, edx
-        //return (elapsedTime.LowPart * 1000) / freq.LowPart;
-        double ms = (double(elapsedTime.LowPart) * fFreq);
-        ms += 0.55f;
-
-        DWORD truncated = ms;
-        return truncated;
-    }*/
-}
-
-
-double hybrid_limit = 16.0;
-
-//50% sleep 50% loop
-void TimerElapsed_Hybrid()
-{
-    QueryPerformanceCounter(&endTime);
-    LARGE_INTEGER elapsedTime;
-    elapsedTime.QuadPart = (endTime.QuadPart - startTime.QuadPart);
-    double ms = ((double)(elapsedTime.LowPart) * fFreq);
-
-    if (hybrid_limit > 3.0)
-    {
-        DWORD truncated = ((hybrid_limit - ms) * 0.5);
-        if (truncated && truncated < 14)
-            Sleep(truncated);
-    }
-    else
-        debug_print("Use exact\n");
-
-    LARGE_INTEGER targetTime;
-    targetTime.QuadPart = startTime.QuadPart + frameticks;
-    while (endTime.QuadPart < targetTime.QuadPart)
-    {
-        QueryPerformanceCounter(&endTime);
-    }
-}
-
-DWORD TimerElapsed_Sleep()
-{
-    QueryPerformanceCounter(&endTime);
-    /*if (endTime.HighPart == startTime.HighPart)
-    {
-        //elapsedTime.LowPart = (endTime.LowPart - startTime.LowPart);
-        _asm xor edx, edx
-        double ms = (double((endTime.LowPart - startTime.LowPart)) * fFreq);
-        ms += 0.55f;
-
-        DWORD truncated = ms;
-        //004F9462
-        return truncated;// (elapsedTime.LowPart * 1000) / freq.LowPart;
-    }
-    else
-    {
-        elapsedTime.LowPart = 0xFFFFFFFF - startTime.LowPart + endTime.LowPart;
-        _asm xor edx, edx
-        //return (elapsedTime.LowPart * 1000) / freq.LowPart;
-        double ms = (double(elapsedTime.LowPart) * fFreq);
-        ms += 0.55f;
-
-        DWORD truncated = ms;
-        return truncated;
-    }*/
-
-    LARGE_INTEGER elapsedTime;
-    elapsedTime.QuadPart = (endTime.QuadPart - startTime.QuadPart);
-    double ms = ((double)(elapsedTime.LowPart) * fFreq);
-    ms += 0.55;
-
-    DWORD truncated = ms;
-    return truncated;
-}
-
-/*DWORD TimerElapsed()
-{
-    QueryPerformanceCounter(&endTime);
-
-    if (endTime.HighPart == startTime.HighPart)
-    {
-        elapsedTime.LowPart = (endTime.LowPart - startTime.LowPart);
-        _asm xor edx, edx;
-        return (DWORD)((float)elapsedTime.LowPart * fFreq);
-    }
-    else
-    {
-        elapsedTime.LowPart = 0xFFFFFFFF - startTime.LowPart + endTime.LowPart;
-        _asm xor edx, edx
-        return (DWORD)((float)elapsedTime.LowPart * fFreq);
-    }
-}*/
-
-LARGE_INTEGER old_start;
-DWORD timer_lock = 0x10;
-
-__declspec(naked) void UpdateFrameLength()
-{
-    *(float*)0x00850FD0 = (float)(framelength);
-    *(double*)0x00850FD8 = framelength;
-    _asm ret;
-}
-
-LARGE_INTEGER TimerStart_Hybrid()
-{
-    old_start = startTime;
-
-
-    QueryPerformanceCounter(&startTime);
-    old_start.QuadPart = startTime.QuadPart - old_start.QuadPart;
-    double ms = (double((old_start.LowPart)) * fFreq);
-    if (ms < 32.0)
-    {
-        framelength = ms;
-
-        if (ms >= Gfx::hybrid_high) // ~59.88
-        {
-            if(hybrid_limit)
-                hybrid_limit--;
-        }
-    }
-    return startTime;
-}
-
-LARGE_INTEGER TimerStart()
-{
-    old_start = startTime;
-
-
-    QueryPerformanceCounter(&startTime);
-    old_start.QuadPart = startTime.QuadPart - old_start.QuadPart;
-    double ms = (double((old_start.LowPart)) * fFreq);
-    if (ms < 30.0)
-    {
-        if (ms > Gfx::exact_high)//59,97 fps
-        {
-            debug_print("Dec\n");
-            frameticks-=2;
-        }
-        else if (ms < Gfx::exact_low)//60,24 fps
-        {
-            debug_print("Inc\n");
-            frameticks++;
-        }
-        framelength = ms;
-    }
-    return startTime;
-}
-
-LARGE_INTEGER TimerStart_Sleep()
-{
-    old_start = startTime;
-
-
-    QueryPerformanceCounter(&startTime);
-    old_start.QuadPart = startTime.QuadPart - old_start.QuadPart;
-    double ms = (double((old_start.LowPart)) * fFreq);
-    if (ms < 32.0)
-    {
-        framelength = ms;
-        //debug_print("2nd %f ", ms);
-
-        //We need to cap FPS around 60 because else some physics and scripts will not work correctly
-        //Also this is the most fair in a game heavily dependant on speed etc
-        //Maybe in the future can change this so can have more FPS
-        //Vsync is always on when we are using the new timer
-        //So on a screen with 60hz this will not matter too much because we will get perfect 60 FPS
-        //However on my screen with 144hz it's pretty hard to get consistent 60 FPS
-        //Currently worst case scenario is 59.9-65 and it's usually around 63-64
-        //For some reason it's more consistent in window mode than in fullscreen mode
-        if (ms >= Gfx::sleep_high) // ~61.01 FPS
-        {
-            BYTE target_ms = p_target_ms;
-            if (target_ms > 1)
-            {
-                target_ms--;
-                p_target_ms = target_ms;
-            }
-        }
-        else if (ms < Gfx::sleep_low) // ~65.02 FPS
-        {
-            BYTE target_ms = p_target_ms;
-            if (target_ms < timer_lock)
-            {
-                target_ms++;
-                p_target_ms = target_ms;
-            }
-        }
-    }
-    return startTime;
 }
 
 void OilRigGrindPatch()
@@ -4397,7 +4152,7 @@ void Skater::PointRail(const Vertex& rail_pos)
 
     // (Mick) Set m_rail_time, otherwise there is a single frame where it is invalid
     // and this allows us to immediately re-rail and hence do the "insta-bail", since the triangle button will be held down   
-    m_rail_time = GetTime();
+    m_rail_time = NewTimer::GetTime();
     //_asm mov m_rail_time2, edx;
 
     /////////////////////////////////////////////////////
@@ -4451,7 +4206,7 @@ bool Skater::will_take_rail()
 {
 
 
-    return (!force_rail_check || (GetElapsedTime(GetTime(), *(LARGE_INTEGER*)&m_rail_time) > 500))
+    return (!force_rail_check || (GetElapsedTime(NewTimer::GetTime(), *(LARGE_INTEGER*)&m_rail_time) > 500))
             && (m_state != RAIL 									// not already on a rail
                 && (!tracking || *GetVelocity()[Y] > 0.0f));		// must be not vert, or going up 
 }
@@ -4512,38 +4267,19 @@ DWORD GetTerrain(SuperSector* sector, DWORD index)
     return terrain;
 }
 
-void CalculateFPSTimers()
+__declspec(naked) void UpdateFrameLength()
 {
-    DWORD frameticks2 = (DWORD)(16666.666666666 / (1000000.0 / (double)freq.QuadPart));
-    frameticks = (DWORD)((1000.0 / Gfx::target_fps) / fFreq);
-    //Add some headroom for hardware delay and rounding errors, probably should add this to ini for platform specific stored value
-    frameticks -= 750;
-    DWORD frameticks3 = 0.0166666666 / (1.0 / (double)freq.QuadPart);
-    debug_print("f1 %u f2 %u f3 %u\n", frameticks, frameticks2, frameticks3);
-
-    //Special anim speed and maybe more gui speed stuff? 
-    //is 0.058 on original 60 fps lock
-    *(float*)0x00458B68 = (float)((60.0 / Gfx::target_fps) * 0.058);//Stack value
-    *(float*)0x0058E100 = (float)((60.0 / Gfx::target_fps) * 0.058);//Memory value
-
-    Gfx::exact_high = (1000.0 / Gfx::target_fps) + Gfx::exact_high_diff;
-    Gfx::exact_low = (1000.0 / Gfx::target_fps) - Gfx::exact_low_diff;
-    Gfx::hybrid_high = (1000.0 / Gfx::target_fps) + Gfx::hybrid_high_diff;
-    Gfx::sleep_high = (1000.0 / Gfx::target_fps) - Gfx::sleep_high_diff;
-    Gfx::sleep_low = (1000.0 / Gfx::target_fps) - Gfx::sleep_low_diff;
+    *(float*)0x00850FD0 = (float)(NewTimer::framelength);
+    *(double*)0x00850FD8 = NewTimer::framelength;
+    _asm ret;
 }
 
 void InitLevelMod()
 {
     //HookControls();
 
-
     //Initializing the new timer
-    QueryPerformanceFrequency(&freq);
-    fFreq = 1000.0 / (double)freq.QuadPart;
-
-    if (!p_bWindowed)
-        timer_lock = 0x0D;
+    NewTimer::Initialize();
 
     /*debug_print("%d %f", freq.LowPart, fFreq);
     MessageBox(0, 0, 0, 0);*/
@@ -4570,7 +4306,7 @@ void InitLevelMod()
     //Fix special animation speed
     VirtualProtect((LPVOID)0x00458B68, 4, PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((LPVOID)0x0058E100, 4, PAGE_EXECUTE_READWRITE, &old);
-    CalculateFPSTimers();
+    NewTimer::CalculateFPSTimers();
 
     //Change the RailNode size
     BYTE optimize_grind[] = { 0xB8, 0x2C, 0x01, 0x00, 0x00, 0x89, 0x86, 0xB8, 0x84, 0x00, 0x00, 0xEB, 0x14, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0xD9 };
@@ -4658,193 +4394,193 @@ void InitLevelMod()
     HookFunction(0x004B088C, &Skater::maybe_trip_rail_trigger);
     HookFunction(0x00489C7F, &RailNode::ProbablyOnSameRailAs);
 
-    HookFunction(0x00403C13, GetTime);
-    HookFunction(0x00403D61, GetTime);
-    HookFunction(0x00403F29, GetTime);
-    HookFunction(0x00404086, GetTime);
-    HookFunction(0x0040409A, GetTime);
-    HookFunction(0x00405824, GetTime);
-    HookFunction(0x004058C1, GetTime);
-    HookFunction(0x0040864A, GetTime);
-    HookFunction(0x0040A1E7, GetTime);
-    HookFunction(0x0040A209, GetTime);
-    HookFunction(0x00417131, GetTime);
-    HookFunction(0x004171CA, GetTime);
-    HookFunction(0x00419764, GetTime);
-    HookFunction(0x004279BE, GetTime);
-    HookFunction(0x00428022, GetTime);
-    HookFunction(0x0042F0C4, GetTime);
-    HookFunction(0x0043A3DF, GetTime);
-    HookFunction(0x00441004, GetTime);
-    HookFunction(0x004615AF, GetTime);
-    HookFunction(0x0046E635, GetTime);
-    HookFunction(0x0046E788, GetTime);
-    HookFunction(0x0046E7E7, GetTime);
-    HookFunction(0x0046E933, GetTime);
-    HookFunction(0x0046E9D1, GetTime);
-    HookFunction(0x0046F4B9, GetTime);
-    HookFunction(0x004712F2, GetTime);
-    HookFunction(0x00471901, GetTime);
-    HookFunction(0x00473124, GetTime);
-    HookFunction(0x00473989, GetTime);
-    HookFunction(0x004740C6, GetTime);
-    HookFunction(0x0047418E, GetTime);
-    HookFunction(0x00474493, GetTime);
-    HookFunction(0x004745DD, GetTime);
-    HookFunction(0x00474649, GetTime);
-    HookFunction(0x004750B6, GetTime);
-    HookFunction(0x004751B9, GetTime);
-    HookFunction(0x004754F9, GetTime);
-    HookFunction(0x00475744, GetTime);
-    HookFunction(0x0047699C, GetTime);
-    HookFunction(0x00479098, GetTime);
-    HookFunction(0x0047BCF5, GetTime);
-    HookFunction(0x0047D172, GetTime);
-    HookFunction(0x0047D1A1, GetTime);
-    HookFunction(0x0047DEBF, GetTime);
-    HookFunction(0x0047E6B4, GetTime);
-    HookFunction(0x0047E72E, GetTime);
-    HookFunction(0x0047E757, GetTime);
-    HookFunction(0x0047EB75, GetTime);
-    HookFunction(0x0047F427, GetTime);
-    HookFunction(0x0047F449, GetTime);
-    HookFunction(0x0047FE62, GetTime);
-    HookFunction(0x0048154F, GetTime);
-    HookFunction(0x00481624, GetTime);
-    HookFunction(0x00487978, GetTime);
-    HookFunction(0x00487A4B, GetTime);
-    HookFunction(0x00487A63, GetTime);
-    HookFunction(0x00487C36, GetTime);
-    HookFunction(0x0048858E, GetTime);
-    HookFunction(0x00489E48, GetTime);
-    HookFunction(0x0048A026, GetTime);
-    HookFunction(0x0048E4F0, GetTime);
-    HookFunction(0x00498993, GetTime);
-    HookFunction(0x004989EB, GetTime);
-    HookFunction(0x00499AD9, GetTime);
-    HookFunction(0x00499ECA, GetTime);
-    HookFunction(0x00499EE9, GetTime);
-    HookFunction(0x0049AEE6, GetTime);
-    HookFunction(0x0049AFCF, GetTime);
-    HookFunction(0x0049B183, GetTime);
-    HookFunction(0x0049B282, GetTime);
-    HookFunction(0x0049B793, GetTime);
-    HookFunction(0x0049B85F, GetTime);
-    HookFunction(0x0049BA16, GetTime);
-    HookFunction(0x0049BAB6, GetTime);
-    HookFunction(0x0049BACD, GetTime);
-    HookFunction(0x0049BFB4, GetTime);
-    HookFunction(0x0049C222, GetTime);
-    HookFunction(0x0049C613, GetTime);
-    HookFunction(0x0049C63B, GetTime);
-    HookFunction(0x0049C686, GetTime);
-    HookFunction(0x0049C6B8, GetTime);
-    HookFunction(0x0049C6F6, GetTime);
-    HookFunction(0x0049C734, GetTime);
-    HookFunction(0x0049C767, GetTime);
-    HookFunction(0x0049C7A5, GetTime);
-    HookFunction(0x0049C910, GetTime);
-    HookFunction(0x0049CBB4, GetTime);
-    HookFunction(0x0049CBE1, GetTime);
-    HookFunction(0x0049D367, GetTime);
-    HookFunction(0x0049D386, GetTime);
-    HookFunction(0x0049D3A5, GetTime);
-    HookFunction(0x0049D3D5, GetTime);
-    HookFunction(0x0049D421, GetTime);
-    HookFunction(0x0049D666, GetTime);
-    HookFunction(0x0049D688, GetTime);
-    HookFunction(0x0049D6AA, GetTime);
-    HookFunction(0x0049D6E9, GetTime);
-    HookFunction(0x0049E3FA, GetTime);
-    HookFunction(0x0049EFC8, GetTime);
-    HookFunction(0x0049EFF7, GetTime);
-    HookFunction(0x0049F019, GetTime);
-    HookFunction(0x0049F035, GetTime);
-    HookFunction(0x0049F243, GetTime);
-    HookFunction(0x0049F35C, GetTime);
-    HookFunction(0x0049F37B, GetTime);
-    HookFunction(0x0049F6D6, GetTime);
-    HookFunction(0x0049F7C0, GetTime);
-    HookFunction(0x0049F912, GetTime);
-    HookFunction(0x0049F9BA, GetTime);
-    HookFunction(0x0049FB3B, GetTime);
-    HookFunction(0x004A11B1, GetTime);
-    HookFunction(0x004A11DA, GetTime);
-    HookFunction(0x004A19DB, GetTime);
-    HookFunction(0x004A2148, GetTime);
-    HookFunction(0x004A216A, GetTime);
-    HookFunction(0x004A218C, GetTime);
-    HookFunction(0x004A258E, GetTime);
-    HookFunction(0x004A2971, GetTime);
-    HookFunction(0x004A2999, GetTime);
-    HookFunction(0x004A29D8, GetTime);
-    HookFunction(0x004A3328, GetTime);
-    HookFunction(0x004A3653, GetTime);
-    HookFunction(0x004A38CA, GetTime);
-    HookFunction(0x004A54D5, GetTime);
-    HookFunction(0x004A61DB, GetTime);
-    HookFunction(0x004A6407, GetTime);
-    HookFunction(0x004A7C27, GetTime);
-    HookFunction(0x004A7C67, GetTime);
-    HookFunction(0x004A8B5A, GetTime);
-    HookFunction(0x004A90CD, GetTime);
-    HookFunction(0x004AA670, GetTime);
-    HookFunction(0x004AC942, GetTime);
-    HookFunction(0x004AC955, GetTime);
-    HookFunction(0x004ACA65, GetTime);
-    HookFunction(0x004ACAC7, GetTime);
-    HookFunction(0x004AD218, GetTime);
-    HookFunction(0x004ADD41, GetTime);
-    HookFunction(0x004AE5B1, GetTime);
-    HookFunction(0x004AE84B, GetTime);
-    HookFunction(0x004AF97C, GetTime);
-    HookFunction(0x004AF9A2, GetTime);
-    HookFunction(0x004AFBA2, GetTime);
-    HookFunction(0x004AFFB8, GetTime);
-    HookFunction(0x004B0797, GetTime);
-    HookFunction(0x004B0E52, GetTime);
-    HookFunction(0x004B1975, GetTime);
-    HookFunction(0x004B2FBD, GetTime);
-    HookFunction(0x004B3138, GetTime);
-    HookFunction(0x004B321B, GetTime);
-    HookFunction(0x004B3363, GetTime);
-    HookFunction(0x004B359F, GetTime);
-    HookFunction(0x004B389C, GetTime);
-    HookFunction(0x004B3B16, GetTime);
-    HookFunction(0x004B3C91, GetTime);
-    HookFunction(0x004B3DD2, GetTime);
-    HookFunction(0x004B3F5B, GetTime);
-    HookFunction(0x004B4147, GetTime);
-    HookFunction(0x004B43C1, GetTime);
-    HookFunction(0x004B45BD, GetTime);
-    HookFunction(0x004B486C, GetTime);
-    HookFunction(0x004B499E, GetTime);
-    HookFunction(0x004B49F4, GetTime);
-    HookFunction(0x004B4FCF, GetTime);
-    HookFunction(0x004C04AC, GetTime);
-    HookFunction(0x004D88E4, GetTime);
-    HookFunction(0x004D8ED3, GetTime);
-    HookFunction(0x004DA359, GetTime);
-    HookFunction(0x004DAAAA, GetTime);
-    HookFunction(0x004DD99D, GetTime);
-    HookFunction(0x004DD9B4, GetTime);
-    HookFunction(0x004DD9C4, GetTime);
-    HookFunction(0x004DFF25, GetTime);
-    HookFunction(0x004E062F, GetTime);
-    HookFunction(0x004E06DB, GetTime);
-    HookFunction(0x004E07D0, GetTime);
-    HookFunction(0x004EA1ED, GetTime);
-    HookFunction(0x004EA2C0, GetTime);
-    HookFunction(0x004EE836, GetTime);
-    HookFunction(0x004EF333, GetTime);
-    HookFunction(0x004F24BA, GetTime);
-    HookFunction(0x004F36F5, GetTime);
-    HookFunction(0x004F3BA1, GetTime);
-    HookFunction(0x004F3D07, GetTime);
-    HookFunction(0x004F40AB, GetTime);
-    HookFunction(0x004FA86D, GetTime);
-    HookFunction(0x00502BA0, GetTime);
-    HookFunction(0x00502BE2, GetTime);
+    HookFunction(0x00403C13, NewTimer::GetTime);
+    HookFunction(0x00403D61, NewTimer::GetTime);
+    HookFunction(0x00403F29, NewTimer::GetTime);
+    HookFunction(0x00404086, NewTimer::GetTime);
+    HookFunction(0x0040409A, NewTimer::GetTime);
+    HookFunction(0x00405824, NewTimer::GetTime);
+    HookFunction(0x004058C1, NewTimer::GetTime);
+    HookFunction(0x0040864A, NewTimer::GetTime);
+    HookFunction(0x0040A1E7, NewTimer::GetTime);
+    HookFunction(0x0040A209, NewTimer::GetTime);
+    HookFunction(0x00417131, NewTimer::GetTime);
+    HookFunction(0x004171CA, NewTimer::GetTime);
+    HookFunction(0x00419764, NewTimer::GetTime);
+    HookFunction(0x004279BE, NewTimer::GetTime);
+    HookFunction(0x00428022, NewTimer::GetTime);
+    HookFunction(0x0042F0C4, NewTimer::GetTime);
+    HookFunction(0x0043A3DF, NewTimer::GetTime);
+    HookFunction(0x00441004, NewTimer::GetTime);
+    HookFunction(0x004615AF, NewTimer::GetTime);
+    HookFunction(0x0046E635, NewTimer::GetTime);
+    HookFunction(0x0046E788, NewTimer::GetTime);
+    HookFunction(0x0046E7E7, NewTimer::GetTime);
+    HookFunction(0x0046E933, NewTimer::GetTime);
+    HookFunction(0x0046E9D1, NewTimer::GetTime);
+    HookFunction(0x0046F4B9, NewTimer::GetTime);
+    HookFunction(0x004712F2, NewTimer::GetTime);
+    HookFunction(0x00471901, NewTimer::GetTime);
+    HookFunction(0x00473124, NewTimer::GetTime);
+    HookFunction(0x00473989, NewTimer::GetTime);
+    HookFunction(0x004740C6, NewTimer::GetTime);
+    HookFunction(0x0047418E, NewTimer::GetTime);
+    HookFunction(0x00474493, NewTimer::GetTime);
+    HookFunction(0x004745DD, NewTimer::GetTime);
+    HookFunction(0x00474649, NewTimer::GetTime);
+    HookFunction(0x004750B6, NewTimer::GetTime);
+    HookFunction(0x004751B9, NewTimer::GetTime);
+    HookFunction(0x004754F9, NewTimer::GetTime);
+    HookFunction(0x00475744, NewTimer::GetTime);
+    HookFunction(0x0047699C, NewTimer::GetTime);
+    HookFunction(0x00479098, NewTimer::GetTime);
+    HookFunction(0x0047BCF5, NewTimer::GetTime);
+    HookFunction(0x0047D172, NewTimer::GetTime);
+    HookFunction(0x0047D1A1, NewTimer::GetTime);
+    HookFunction(0x0047DEBF, NewTimer::GetTime);
+    HookFunction(0x0047E6B4, NewTimer::GetTime);
+    HookFunction(0x0047E72E, NewTimer::GetTime);
+    HookFunction(0x0047E757, NewTimer::GetTime);
+    HookFunction(0x0047EB75, NewTimer::GetTime);
+    HookFunction(0x0047F427, NewTimer::GetTime);
+    HookFunction(0x0047F449, NewTimer::GetTime);
+    HookFunction(0x0047FE62, NewTimer::GetTime);
+    HookFunction(0x0048154F, NewTimer::GetTime);
+    HookFunction(0x00481624, NewTimer::GetTime);
+    HookFunction(0x00487978, NewTimer::GetTime);
+    HookFunction(0x00487A4B, NewTimer::GetTime);
+    HookFunction(0x00487A63, NewTimer::GetTime);
+    HookFunction(0x00487C36, NewTimer::GetTime);
+    HookFunction(0x0048858E, NewTimer::GetTime);
+    HookFunction(0x00489E48, NewTimer::GetTime);
+    HookFunction(0x0048A026, NewTimer::GetTime);
+    HookFunction(0x0048E4F0, NewTimer::GetTime);
+    HookFunction(0x00498993, NewTimer::GetTime);
+    HookFunction(0x004989EB, NewTimer::GetTime);
+    HookFunction(0x00499AD9, NewTimer::GetTime);
+    HookFunction(0x00499ECA, NewTimer::GetTime);
+    HookFunction(0x00499EE9, NewTimer::GetTime);
+    HookFunction(0x0049AEE6, NewTimer::GetTime);
+    HookFunction(0x0049AFCF, NewTimer::GetTime);
+    HookFunction(0x0049B183, NewTimer::GetTime);
+    HookFunction(0x0049B282, NewTimer::GetTime);
+    HookFunction(0x0049B793, NewTimer::GetTime);
+    HookFunction(0x0049B85F, NewTimer::GetTime);
+    HookFunction(0x0049BA16, NewTimer::GetTime);
+    HookFunction(0x0049BAB6, NewTimer::GetTime);
+    HookFunction(0x0049BACD, NewTimer::GetTime);
+    HookFunction(0x0049BFB4, NewTimer::GetTime);
+    HookFunction(0x0049C222, NewTimer::GetTime);
+    HookFunction(0x0049C613, NewTimer::GetTime);
+    HookFunction(0x0049C63B, NewTimer::GetTime);
+    HookFunction(0x0049C686, NewTimer::GetTime);
+    HookFunction(0x0049C6B8, NewTimer::GetTime);
+    HookFunction(0x0049C6F6, NewTimer::GetTime);
+    HookFunction(0x0049C734, NewTimer::GetTime);
+    HookFunction(0x0049C767, NewTimer::GetTime);
+    HookFunction(0x0049C7A5, NewTimer::GetTime);
+    HookFunction(0x0049C910, NewTimer::GetTime);
+    HookFunction(0x0049CBB4, NewTimer::GetTime);
+    HookFunction(0x0049CBE1, NewTimer::GetTime);
+    HookFunction(0x0049D367, NewTimer::GetTime);
+    HookFunction(0x0049D386, NewTimer::GetTime);
+    HookFunction(0x0049D3A5, NewTimer::GetTime);
+    HookFunction(0x0049D3D5, NewTimer::GetTime);
+    HookFunction(0x0049D421, NewTimer::GetTime);
+    HookFunction(0x0049D666, NewTimer::GetTime);
+    HookFunction(0x0049D688, NewTimer::GetTime);
+    HookFunction(0x0049D6AA, NewTimer::GetTime);
+    HookFunction(0x0049D6E9, NewTimer::GetTime);
+    HookFunction(0x0049E3FA, NewTimer::GetTime);
+    HookFunction(0x0049EFC8, NewTimer::GetTime);
+    HookFunction(0x0049EFF7, NewTimer::GetTime);
+    HookFunction(0x0049F019, NewTimer::GetTime);
+    HookFunction(0x0049F035, NewTimer::GetTime);
+    HookFunction(0x0049F243, NewTimer::GetTime);
+    HookFunction(0x0049F35C, NewTimer::GetTime);
+    HookFunction(0x0049F37B, NewTimer::GetTime);
+    HookFunction(0x0049F6D6, NewTimer::GetTime);
+    HookFunction(0x0049F7C0, NewTimer::GetTime);
+    HookFunction(0x0049F912, NewTimer::GetTime);
+    HookFunction(0x0049F9BA, NewTimer::GetTime);
+    HookFunction(0x0049FB3B, NewTimer::GetTime);
+    HookFunction(0x004A11B1, NewTimer::GetTime);
+    HookFunction(0x004A11DA, NewTimer::GetTime);
+    HookFunction(0x004A19DB, NewTimer::GetTime);
+    HookFunction(0x004A2148, NewTimer::GetTime);
+    HookFunction(0x004A216A, NewTimer::GetTime);
+    HookFunction(0x004A218C, NewTimer::GetTime);
+    HookFunction(0x004A258E, NewTimer::GetTime);
+    HookFunction(0x004A2971, NewTimer::GetTime);
+    HookFunction(0x004A2999, NewTimer::GetTime);
+    HookFunction(0x004A29D8, NewTimer::GetTime);
+    HookFunction(0x004A3328, NewTimer::GetTime);
+    HookFunction(0x004A3653, NewTimer::GetTime);
+    HookFunction(0x004A38CA, NewTimer::GetTime);
+    HookFunction(0x004A54D5, NewTimer::GetTime);
+    HookFunction(0x004A61DB, NewTimer::GetTime);
+    HookFunction(0x004A6407, NewTimer::GetTime);
+    HookFunction(0x004A7C27, NewTimer::GetTime);
+    HookFunction(0x004A7C67, NewTimer::GetTime);
+    HookFunction(0x004A8B5A, NewTimer::GetTime);
+    HookFunction(0x004A90CD, NewTimer::GetTime);
+    HookFunction(0x004AA670, NewTimer::GetTime);
+    HookFunction(0x004AC942, NewTimer::GetTime);
+    HookFunction(0x004AC955, NewTimer::GetTime);
+    HookFunction(0x004ACA65, NewTimer::GetTime);
+    HookFunction(0x004ACAC7, NewTimer::GetTime);
+    HookFunction(0x004AD218, NewTimer::GetTime);
+    HookFunction(0x004ADD41, NewTimer::GetTime);
+    HookFunction(0x004AE5B1, NewTimer::GetTime);
+    HookFunction(0x004AE84B, NewTimer::GetTime);
+    HookFunction(0x004AF97C, NewTimer::GetTime);
+    HookFunction(0x004AF9A2, NewTimer::GetTime);
+    HookFunction(0x004AFBA2, NewTimer::GetTime);
+    HookFunction(0x004AFFB8, NewTimer::GetTime);
+    HookFunction(0x004B0797, NewTimer::GetTime);
+    HookFunction(0x004B0E52, NewTimer::GetTime);
+    HookFunction(0x004B1975, NewTimer::GetTime);
+    HookFunction(0x004B2FBD, NewTimer::GetTime);
+    HookFunction(0x004B3138, NewTimer::GetTime);
+    HookFunction(0x004B321B, NewTimer::GetTime);
+    HookFunction(0x004B3363, NewTimer::GetTime);
+    HookFunction(0x004B359F, NewTimer::GetTime);
+    HookFunction(0x004B389C, NewTimer::GetTime);
+    HookFunction(0x004B3B16, NewTimer::GetTime);
+    HookFunction(0x004B3C91, NewTimer::GetTime);
+    HookFunction(0x004B3DD2, NewTimer::GetTime);
+    HookFunction(0x004B3F5B, NewTimer::GetTime);
+    HookFunction(0x004B4147, NewTimer::GetTime);
+    HookFunction(0x004B43C1, NewTimer::GetTime);
+    HookFunction(0x004B45BD, NewTimer::GetTime);
+    HookFunction(0x004B486C, NewTimer::GetTime);
+    HookFunction(0x004B499E, NewTimer::GetTime);
+    HookFunction(0x004B49F4, NewTimer::GetTime);
+    HookFunction(0x004B4FCF, NewTimer::GetTime);
+    HookFunction(0x004C04AC, NewTimer::GetTime);
+    HookFunction(0x004D88E4, NewTimer::GetTime);
+    HookFunction(0x004D8ED3, NewTimer::GetTime);
+    HookFunction(0x004DA359, NewTimer::GetTime);
+    HookFunction(0x004DAAAA, NewTimer::GetTime);
+    HookFunction(0x004DD99D, NewTimer::GetTime);
+    HookFunction(0x004DD9B4, NewTimer::GetTime);
+    HookFunction(0x004DD9C4, NewTimer::GetTime);
+    HookFunction(0x004DFF25, NewTimer::GetTime);
+    HookFunction(0x004E062F, NewTimer::GetTime);
+    HookFunction(0x004E06DB, NewTimer::GetTime);
+    HookFunction(0x004E07D0, NewTimer::GetTime);
+    HookFunction(0x004EA1ED, NewTimer::GetTime);
+    HookFunction(0x004EA2C0, NewTimer::GetTime);
+    HookFunction(0x004EE836, NewTimer::GetTime);
+    HookFunction(0x004EF333, NewTimer::GetTime);
+    HookFunction(0x004F24BA, NewTimer::GetTime);
+    HookFunction(0x004F36F5, NewTimer::GetTime);
+    HookFunction(0x004F3BA1, NewTimer::GetTime);
+    HookFunction(0x004F3D07, NewTimer::GetTime);
+    HookFunction(0x004F40AB, NewTimer::GetTime);
+    HookFunction(0x004FA86D, NewTimer::GetTime);
+    HookFunction(0x00502BA0, NewTimer::GetTime);
+    HookFunction(0x00502BE2, NewTimer::GetTime);
 
     HookFunction(0x0049FAA1, &Skater::PlayJumpSound);
     HookFunction(0x0049FAC1, &Skater::PlayJumpSound);
@@ -6161,16 +5897,16 @@ void MaybeFixStutter()
         switch (Gfx::fps_fix)
         {
         case 1:
-            *(DWORD*)&timer[1] = (PtrToUlong(TimerElapsed) - 0x004C04E4) - 4;
-            HookFunction(0x004C0519, TimerStart);
+            *(DWORD*)&timer[1] = (PtrToUlong(NewTimer::TimerElapsed) - 0x004C04E4) - 4;
+            HookFunction(0x004C0519, NewTimer::TimerStart);
             break;
         case 2:
-            *(DWORD*)&timer[1] = (PtrToUlong(TimerElapsed_Hybrid) - 0x004C04E4) - 4;
-            HookFunction(0x004C0519, TimerStart_Hybrid);
+            *(DWORD*)&timer[1] = (PtrToUlong(NewTimer::TimerElapsed_Hybrid) - 0x004C04E4) - 4;
+            HookFunction(0x004C0519, NewTimer::TimerStart_Hybrid);
             break;
         case 3:
-            *(DWORD*)&timer[1] = (PtrToUlong(TimerElapsed_Sleep) - 0x004C04E4) - 4;
-            HookFunction(0x004C0519, TimerStart_Sleep);
+            *(DWORD*)&timer[1] = (PtrToUlong(NewTimer::TimerElapsed_Sleep) - 0x004C04E4) - 4;
+            HookFunction(0x004C0519, NewTimer::TimerStart_Sleep);
             break;
         }
         /*if (Gfx::fps_fix == 3)
@@ -6217,7 +5953,7 @@ bool LaunchGFXCommand(CStruct* pStruct, CScript* pScript)
                 {
                     Gfx::target_fps = option->value;
                 }
-                CalculateFPSTimers();
+                NewTimer::CalculateFPSTimers();
                 break;
             }
 
@@ -6333,7 +6069,7 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
                 {
                     Gfx::target_fps = option->value;
                 }
-                CalculateFPSTimers();
+                NewTimer::CalculateFPSTimers();
                 break;
             }
 

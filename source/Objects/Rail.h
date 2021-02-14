@@ -1277,7 +1277,7 @@ public:
         }
         debug_print("Done overlapping rail removal, removed %d\n", removed);
 
-        for (int node = 0; node < current_node; node++)
+        for (DWORD node = 0; node < current_node; node++)
         {
             RailNode* pRailNode = &mp_nodes[node];
 
