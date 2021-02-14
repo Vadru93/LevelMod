@@ -12,7 +12,7 @@ namespace NewTimer
     LARGE_INTEGER elapsedTime;
     LARGE_INTEGER old_start;
     DWORD timer_lock = 0x10;
-    double framelength = Gfx::target_fps/1000.0;
+    double framelength = 1000.0/Gfx::target_fps;
     DWORD frameticks = 0;
     double hybrid_limit = 16.0;
     DWORD time = 0;
@@ -37,7 +37,7 @@ namespace NewTimer
         Gfx::sleep_high = (1000.0 / Gfx::target_fps) - Gfx::sleep_high_diff;
         Gfx::sleep_low = (1000.0 / Gfx::target_fps) - Gfx::sleep_low_diff;
 
-        framelength = Gfx::target_fps / 1000.0;
+        framelength = 1000.0 / Gfx::target_fps;
     }
 
     void Initialize()
@@ -54,7 +54,7 @@ namespace NewTimer
 
     void ResetTime()
     {
-        framelength = Gfx::target_fps / 1000.0;
+        framelength = 1000.0 / Gfx::target_fps;
         reset_time = timeGetTime();
     }
 

@@ -77,7 +77,6 @@ DWORD actual_timer = 0;
 DWORD last_state;
 DWORD reset_time = 0;
 bool rotating = false;
-double framelength;
 
 void SetTagLimit(DWORD limit);
 
@@ -4274,6 +4273,27 @@ __declspec(naked) void UpdateFrameLength()
     _asm ret;
 }
 
+
+__declspec(naked) void CalibrateScore()
+{
+    static int score;
+    static double fScore;
+    static const DWORD pCalculateScorePot = 0x00436300;
+    if (Gfx::target_fps > 60.0)
+    {
+        _asm mov score, edx;
+        _asm pushad;
+        fScore = score;
+        fScore *= (NewTimer::framelength / (1000.0 / 60.0));
+        score = (int)fScore;
+        _asm popad;
+        _asm mov edx, score;
+    }
+    _asm add [eax], edx;
+    _asm jmp[pCalculateScorePot]
+}
+
+
 void InitLevelMod()
 {
     //HookControls();
@@ -4393,6 +4413,11 @@ void InitLevelMod()
     HookFunction(0x004A70BB, &Skater::maybe_trip_rail_trigger);
     HookFunction(0x004B088C, &Skater::maybe_trip_rail_trigger);
     HookFunction(0x00489C7F, &RailNode::ProbablyOnSameRailAs);
+
+    //Fix Score above 60 fps
+    VirtualProtect((LPVOID)0x00435992, 2, PAGE_EXECUTE_READWRITE, &old);
+    *(WORD*)0x00435992 = 0x9090;
+    HookFunction(0x00435995, CalibrateScore);
 
     HookFunction(0x00403C13, NewTimer::GetTime);
     HookFunction(0x00403D61, NewTimer::GetTime);
