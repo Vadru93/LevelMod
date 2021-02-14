@@ -12,7 +12,7 @@ namespace NewTimer
     LARGE_INTEGER elapsedTime;
     LARGE_INTEGER old_start;
     DWORD timer_lock = 0x10;
-    double framelength = 0;
+    double framelength = Gfx::target_fps/1000.0;
     DWORD frameticks = 0;
     double hybrid_limit = 16.0;
     DWORD time = 0;
@@ -36,6 +36,8 @@ namespace NewTimer
         Gfx::hybrid_high = (1000.0 / Gfx::target_fps) + Gfx::hybrid_high_diff;
         Gfx::sleep_high = (1000.0 / Gfx::target_fps) - Gfx::sleep_high_diff;
         Gfx::sleep_low = (1000.0 / Gfx::target_fps) - Gfx::sleep_low_diff;
+
+        framelength = Gfx::target_fps / 1000.0;
     }
 
     void Initialize()
@@ -52,6 +54,7 @@ namespace NewTimer
 
     void ResetTime()
     {
+        framelength = Gfx::target_fps / 1000.0;
         reset_time = timeGetTime();
     }
 
@@ -100,10 +103,9 @@ namespace NewTimer
         QueryPerformanceCounter(&startTime);
         old_start.QuadPart = startTime.QuadPart - old_start.QuadPart;
         double ms = (double((old_start.LowPart)) * fFreq);
+        framelength = ms;
         if (ms < 32.0 && isActive)
         {
-            framelength = ms;
-
             if (ms >= Gfx::hybrid_high) // ~59.88
             {
                 if (hybrid_limit)
@@ -122,12 +124,13 @@ namespace NewTimer
         QueryPerformanceCounter(&startTime);
         old_start.QuadPart = startTime.QuadPart - old_start.QuadPart;
         double ms = (double((old_start.LowPart)) * fFreq);
-        if (ms < 30.0 && isActive)
+        framelength = ms;
+        if (ms < 32.0 && isActive)
         {
             if (ms > Gfx::exact_high)//59,97 fps
             {
                 debug_print("Dec\n");
-                if(frameticks>2)
+                if(frameticks > 2)
                    frameticks -= 2;
             }
             else if (ms < Gfx::exact_low)//60,24 fps
@@ -135,7 +138,6 @@ namespace NewTimer
                 debug_print("Inc\n");
                 frameticks++;
             }
-            framelength = ms;
         }
         return startTime;
     }
@@ -148,9 +150,9 @@ namespace NewTimer
         QueryPerformanceCounter(&startTime);
         old_start.QuadPart = startTime.QuadPart - old_start.QuadPart;
         double ms = (double((old_start.LowPart)) * fFreq);
+        framelength = ms;
         if (ms < 32.0 && isActive)
         {
-            framelength = ms;
             //debug_print("2nd %f ", ms);
 
             //We need to cap FPS around 60 because else some physics and scripts will not work correctly
