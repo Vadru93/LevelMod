@@ -4279,17 +4279,20 @@ __declspec(naked) void CalibrateScore()
     static int score;
     static double fScore;
     static const DWORD pCalculateScorePot = 0x00436300;
-    if (Gfx::target_fps > 60.0)
+    _asm mov score, edx;
+    if (score)
     {
-        _asm mov score, edx;
-        _asm pushad;
-        fScore = score;
-        fScore *= (NewTimer::framelength / (1000.0 / 60.0));
-        score = (int)fScore;
-        _asm popad;
-        _asm mov edx, score;
+        if (Gfx::target_fps > 60.0)
+        {
+            _asm pushad;
+            fScore = score;
+            fScore *= (NewTimer::framelength / (1000.0 / 60.0));
+            score = (int)(fScore + 0.45);
+            _asm popad;
+            _asm mov edx, score;
+        }
+        _asm add[eax], edx;
     }
-    _asm add [eax], edx;
     _asm jmp[pCalculateScorePot]
 }
 
