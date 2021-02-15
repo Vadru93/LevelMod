@@ -10,13 +10,13 @@
 
 DWORD GetElapsedTime(DWORD currentTime, LARGE_INTEGER last_time)
 {
-    DWORD currentTime2;
+    /*DWORD currentTime2;
     _asm mov currentTime2, edx;
     if (currentTime2 == last_time.HighPart)
-    {
+    {*/
         return currentTime - last_time.LowPart;
-    }
-    return (0xFFFFFFFF - last_time.LowPart + currentTime);
+    /*}
+    return (0xFFFFFFFF - last_time.LowPart + currentTime);*/
 }
 
 

@@ -20,6 +20,35 @@ void Tracer(LPCSTR format, ...)
     }
 }
 
+#ifdef _DEBUG
+namespace LevelModSettings
+{
+    extern bool bLogging;
+}
+#endif
+
+extern FILE* logFile;
+extern CRITICAL_SECTION critical;
+void DebugPrint(const char* file, DWORD line, const char* date, const char* string, ...)
+{
+    EnterCriticalSection(&critical);
+    static char debug_msg[MAX_PATH];
+    va_list myargs;
+    va_start(myargs, string);
+    vsprintf(debug_msg, string, myargs);
+    va_end(myargs);
+    printf(debug_msg);
+
+    if (logFile)
+    {
+        if (*debug_msg != '\n')
+            fprintf(logFile, "File %s line %u compiled %s\n", file, line, date);
+        fprintf(logFile, debug_msg);
+        fflush(logFile);
+    }
+    LeaveCriticalSection(&critical);
+}
+
 char* AddressToMappedName(HANDLE hOwner, PVOID pAddress, char* szBuffer, int iSize)
 {
     if (szBuffer && (iSize > 0))

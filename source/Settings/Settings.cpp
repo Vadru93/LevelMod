@@ -51,6 +51,10 @@ VirtualKeyCode LevelModSettings::SpineButton3 = VirtualKeyCode::Undefined;
 bool LevelModSettings::bInvertedY = false;
 bool LevelModSettings::bInvertedX = false;
 
+#ifdef _DEBUG
+bool LevelModSettings::bLogging = false;
+#endif
+
 
 
 struct TrickSpeed
@@ -411,7 +415,8 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
                 return;
         }
 
-        if (bDebugMode || !value)//If we are already debugMode or value is false just return
+        extern DWORD debug;
+        if (bDebugMode || (!value && !debug))//If we are already debugMode or value is false just return
         {
             //If we are not in debugmode we need to add the checksums from settings.qb to be able to toggle options correctly
             char* dir = QScript::GetScriptDir();

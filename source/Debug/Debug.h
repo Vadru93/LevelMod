@@ -14,6 +14,7 @@
 
 
 void Tracer(LPCSTR format, ...);
+void DebugPrint(const char* file, DWORD line, const char* date, const char* string, ...);
 
 
 // ****************************************************************************

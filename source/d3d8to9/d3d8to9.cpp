@@ -88,7 +88,7 @@ extern bool bDebugMode;
 #ifndef debug_print
 #ifdef _DEBUG
 #define debug_print(fmt, ...) \
-            do { if (_DEBUG && bDebugMode) printf(fmt, __VA_ARGS__); } while (0)
+            do { printf(fmt, __VA_ARGS__); } while (0)
 #else
 #define debug_print(fmt, ...)
 #endif
@@ -276,8 +276,46 @@ OptimizedCRC optimized[] = { {0x00401B3F, 5, 9},  {0x00401E0C, 4, 9}, {0x004021D
     {0x00443644, 5, 9}, {0x004438DE, 5, 0}, {0x0044393B, 0, 34}, {0x00443945, 6, 18}, {0x00443FE4, 8, 0}, {0x004440FE, 16, 0}
 };
 
+#ifdef _DEBUG
+namespace LevelModSettings
+{
+    extern bool bLogging;
+}
+#endif
+
+CRITICAL_SECTION critical;
+extern FILE* logFile;
 extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 {
+#ifdef _DEBUG
+    /*static char** ppArgs;
+    static DWORD num_args;
+    _asm mov eax, [esp+0x890+0xDC];
+    _asm mov ppArgs, eax;
+    _asm mov eax, [esp+0x8A0+0xDC];
+    _asm mov num_args, eax;
+    */
+    InitializeCriticalSection(&critical);
+    LPTSTR cmd = GetCommandLine();
+    cmd++;
+    while (*cmd != '"')
+        ++cmd;
+    cmd++;
+    while (isspace(*cmd))
+        cmd++;
+
+    while (*cmd == '-')
+    {
+        if (!_stricmp(cmd, "-log"))
+        {
+            LevelModSettings::bLogging = true;
+            logFile = fopen("LM_Log.txt", "w");
+            break;
+        }
+        else
+            cmd += strlen(cmd) + 1;
+    }
+#endif
     //MessageBox(0, 0, 0, 0);
     memcpy((char*)0x5BBAF8, "Scripts\\qdir_lm.txt", 20);
 

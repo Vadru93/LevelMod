@@ -1715,7 +1715,7 @@ __inline void Skater::MaybeSkateOffRail(bool last_segment, Vertex& extra_dist, R
     // sign is which way we are going along the rail
     float sign = Sgn(D3DXVec3Dot(&dir, GetVelocity()));
 
-    m_rail_time = GetCurrentTime();
+    m_rail_time = NewTimer::GetTime();
 
     ((Vertex*)GetVelocity())->RotateToNormal(dir);
     random = 0;

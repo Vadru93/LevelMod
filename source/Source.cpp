@@ -699,7 +699,7 @@ void CreateSuperSectors()
     *(bool*)0x00400020 = true;
     //Game::skater = Skater::UpdateSkater();
 }
-FILE* logFile;
+FILE* logFile = NULL;
 void __cdecl add_log(const char* string, ...)
 {
     if (string == (const char*)0x005B6120) [[unlikely]]
@@ -4945,6 +4945,10 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
             }
             //logFile = fopen("loggers.txt", "w+t");*/
         }
+        /*if (LevelModSettings::bLogging)
+        {
+            logFile = fopen("LM_Log.txt", "w+t");
+        }*/
 
         debug_print("Init DONE\n");
         return true;
@@ -5207,6 +5211,8 @@ void OnRelease()
         if (OptionReader)
             delete OptionReader;
         OptionReader = NULL;
+        if(logFile)
+           fclose(logFile);
 
         /*for (DWORD i = 0; i < 6; i++)
         {
@@ -6014,7 +6020,7 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
         {
 
             //Make sure we toggle only 1 per 2 sec
-            DWORD time = GetCurrentTime();
+            DWORD time = NewTimer::GetTime();
             if (time < lastTime + 2000)
                 return false;
             lastTime = time;

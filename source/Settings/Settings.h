@@ -34,6 +34,10 @@ namespace LevelModSettings
     extern bool bInvertedY;
     extern bool bInvertedX;
 
+#ifdef _DEBUG
+    extern bool bLogging;
+#endif
+
 
     struct OverrideOption
     {

@@ -13,6 +13,7 @@
 
 bool EXTERN InvalidReadPtr(const void* const __restrict ptr, const DWORD size);
 bool EXTERN InvalidReadPtr(const void* const __restrict ptr);
+void DebugPrint(const char* file, DWORD line, const char* date, const char* string, ...);
 
 enum enum_matrix
 {
@@ -56,8 +57,15 @@ if (bDebugMode && InvalidReadPtr(p, s)) \
 
 #ifndef debug_print
 #ifdef _DEBUG
+#ifndef LevelModSettings
+namespace LevelModSettings
+{
+    extern bool bLogging;
+}
+#endif
 #define debug_print(fmt, ...) \
-            do { if (_DEBUG && bDebugMode) printf(fmt, __VA_ARGS__); } while (0)
+              do { if(LevelModSettings::bLogging) DebugPrint(__FILE__, __LINE__, __DATE__, fmt, __VA_ARGS__); \
+              else printf(fmt, __VA_ARGS__); } while (0)
 #else
 #define debug_print(fmt, ...)
 #endif
