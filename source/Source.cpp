@@ -4273,24 +4273,44 @@ __declspec(naked) void UpdateFrameLength()
     _asm ret;
 }
 
-
+//Tricks that add points every frame will add too much if we increase fps
+//This function tries to calibrate it to be as close to original @ any given fps lock
+//Currently it may add slightly less score if using higher than 60 fps
+//Atleast it will never add too high score and @ 60 fps lock it uses 100% original values
+//So it will never be unfair advantage to have a higher fps lock
+//If change score to be double it would be even more accurate @ all fps locks
+//However this might reduce performance on poor PCs and might reduce maximum score
 __declspec(naked) void CalibrateScore()
 {
     static int score;
     static double fScore;
     static const DWORD pCalculateScorePot = 0x00436300;
     _asm mov score, edx;
+
+    //score here is the score added every frame
     if (score)
     {
+        //Only modify if fps lock is above 60
         if (Gfx::target_fps > 60.0)
         {
+            //need to store all CPU registers to not trash anything since we will be using SSE instructions
             _asm pushad;
+
+            //convert delta score to double
             fScore = score;
+
+            //divide our current framelength with original 60 fps framelength
             fScore *= (NewTimer::framelength / (1000.0 / 60.0));
+
+            //add 0.45 to get less rounding errors
             score = (int)(fScore + 0.45);
+
+            //restore all CPU registers and the new delta score
             _asm popad;
             _asm mov edx, score;
         }
+
+        //add the delta to the actual base score
         _asm add[eax], edx;
     }
     _asm jmp[pCalculateScorePot]

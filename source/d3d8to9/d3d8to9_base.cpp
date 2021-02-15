@@ -267,7 +267,7 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
         QualityLevels = 0;
 
         // Check AntiAliasing quality
-        for (int x = Gfx::AntiAliasing == 1 ? 16 : min(16, Gfx::AntiAliasing); x > 0; x--)
+        for (int x = Gfx::AntiAliasing == 1 ? 16 : min(16, Gfx::AntiAliasing); x > 1; x--)
         {
             if (SUCCEEDED(ProxyInterface->CheckDeviceMultiSampleType(Adapter,
                 DeviceType, (d3dpp.BackBufferFormat) ? d3dpp.BackBufferFormat : D3DFMT_A8R8G8B8, d3dpp.Windowed,

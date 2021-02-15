@@ -202,7 +202,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateAdditionalSwapChain(D3DPRESENT_
         D3DDEVICE_CREATION_PARAMETERS CreationParams;
         ProxyInterface->GetCreationParameters(&CreationParams);
 
-        for (int x = min((Gfx::AntiAliasing == 1 ? 16 : Gfx::AntiAliasing), 16); x > 0; x--)
+        for (int x = min((Gfx::AntiAliasing == 1 ? 16 : Gfx::AntiAliasing), 16); x > 1; x--)
         {
             d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)x;
             DWORD QualityLevels = 0;

@@ -209,13 +209,9 @@ struct ShatterData
         matrices = new Matrix[numTris];
 
         if (pos && vel && matrices)
-        {
             debug_print("Memory alllocated successfully\n");
-        }
         else
-        {
             debug_print("Memory did not allocate...\n");
-        }
     }
 
     void UpdateParameters(int index, float timestep)
