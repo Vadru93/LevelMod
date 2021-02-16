@@ -312,7 +312,7 @@ public:
 
     static void Initialize()
     {
-        Slerp::m_last_wallplant_time_stamp.QuadPart = 0;
+        Slerp::m_last_wallplant_time_stamp = 0;
         temp_nodes = NULL;
         temp_links = NULL;
         current_node = 0;
@@ -1633,6 +1633,11 @@ void Skater::maybe_trip_rail_trigger(DWORD type)
 
     CStruct* pNode = pNodeArray->GetStructure(mp_rail_node->GetNode());
 
+    /*if (type == Node::TRIGGER_SKATE_OFF)
+    {
+        m_rail_time = NewTimer::GetTime();
+    }*/
+
     // find a rail node that has a "TriggerScript" in it
     DWORD trigger = 0;
     if (pNode->GetChecksum(Checksums::TriggerScript, &trigger))
@@ -1663,7 +1668,7 @@ void Skater::maybe_trip_rail_trigger(DWORD type)
 
     if (trigger)
     {
-        debug_print("%s -> %s\n", FindChecksumName(pNode->GetName()), FindChecksumName(trigger));
+        debug_print("%s -> %s Type %d\n", FindChecksumName(pNode->GetName()), FindChecksumName(trigger), type);
 
         DWORD node_name;
         pNode->GetChecksum(Checksums::Name, &node_name, QScript::ASSERT);
@@ -1880,12 +1885,14 @@ __inline void Skater::MaybeSkateOffRail(bool last_segment, Vertex& extra_dist, R
 
                 SetState(AIR);			// knocked off rail, as something in front
                 FlagException("OffRail");
+                debug_print("OffRail(Collision) %s\n", FindChecksumName(Node::GetNodeArray()->GetStructure(mp_rail_node->GetNode())->GetName()));
             }
         }
     }
     skated_off_rail = false;
 }
 
+extern bool force_rail_check;
 void Skater::SkateOffRail()
 {
     skated_off_rail = true;
@@ -1981,6 +1988,7 @@ void Skater::SkateOffRail()
                 && mp_rail_node->GetPrevLink() != pNode
                 )))
         {
+            debug_print("NewRail %s From %s\n", FindChecksumName(Node::GetNodeArray()->GetStructure(pNode->GetNode())->GetName()), FindChecksumName(Node::GetNodeArray()->GetStructure(mp_rail_node->GetNode())->GetName()));
             const RailNode* pNewStart = pNode;
             const RailNode* pNewEnd = pNewStart->GetNextLink();
 
@@ -2042,11 +2050,15 @@ void Skater::SkateOffRail()
                 *GetVelocity() *= sign;
 
                 mp_rail_node = pNode;		// oh yes, this is the node
+                *GetOldPosition() = *GetPosition();
+                force_rail_check = true;
                 *GetPosition() = rail_pos;			// move to closest position on the line
                 maybe_trip_rail_trigger(Node::TRIGGER_SKATE_ONTO);
                 set_terrain(mp_rail_node->GetTerrain());
+                debug_print("Really NewRail %s\n", FindChecksumName(Node::GetNodeArray()->GetStructure(mp_rail_node->GetNode())->GetName()));
 
                 really_off = false;
+                m_rail_time = NewTimer::GetTime();
             }
             else
             {
@@ -2069,6 +2081,7 @@ void Skater::SkateOffRail()
     SetState(Skater::AIR);
     *GetPosition()[Y] += 1.0f;
     FlagException("OffRail");
+    debug_print("OffRail %s\n", FindChecksumName(Node::GetNodeArray()->GetStructure(mp_rail_node->GetNode())->GetName()));
 }
 
 

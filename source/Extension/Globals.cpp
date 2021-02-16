@@ -34,7 +34,7 @@ bool Slerp::done = false;
 bool Slerp::trying = false;
 float Slerp::value = 0.0f;
 bool Slerp::wallplant = false;
-LARGE_INTEGER Slerp::m_last_wallplant_time_stamp;
+DWORD Slerp::m_last_wallplant_time_stamp;
 Vertex Slerp::realVelocity = Vertex(0, 0, 0);
 TransferType Slerp::type = ACID;
 Vertex Slerp::targetNormal = Vertex(0, 0, 0);

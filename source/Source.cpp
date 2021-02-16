@@ -4051,6 +4051,14 @@ skip_label:
 }
 
 bool force_rail_check = false;
+bool force_rail_check2 = false;
+
+DWORD ForceRailCheck()
+{
+    force_rail_check2 = true;
+    return NewTimer::GetTime();
+}
+
 void Skater::PointRail(const Vertex& rail_pos)
 {
     // for a single node rail, we apply in a single frame all the effects of enteringand exiting the rail state;
@@ -4102,6 +4110,7 @@ void Skater::PointRail(const Vertex& rail_pos)
         CArray* pNodeArray = Node::GetNodeArray();
         pNode = pNodeArray->GetStructure(mp_rail_node->GetNode());
         pNode->GetChecksum(Checksums::Name, &m_last_rail_node_name, QScript::ASSERT);
+        debug_print("PointRail %s\n", FindChecksumName(m_last_rail_node_name));
 
         //TrickOffObject(m_last_rail_node_name);
 
@@ -4200,12 +4209,12 @@ void Skater::PointRail(const Vertex& rail_pos)
     return;
 }
 
-extern DWORD GetElapsedTime(DWORD currentTime, LARGE_INTEGER last_time);
+extern DWORD GetElapsedTime(DWORD currentTime, DWORD lastTime);
 bool Skater::will_take_rail()
 {
 
 
-    return (!force_rail_check || (GetElapsedTime(NewTimer::GetTime(), *(LARGE_INTEGER*)&m_rail_time) > 500))
+    return (!force_rail_check || (GetElapsedTime(NewTimer::GetTime(), m_rail_time) > 200))
             && (m_state != RAIL 									// not already on a rail
                 && (!tracking || *GetVelocity()[Y] > 0.0f));		// must be not vert, or going up 
 }
@@ -4360,6 +4369,10 @@ void InitLevelMod()
 
     HookFunction(0x004A8B1A, &Skater::got_rail_hook);
     HookFunction(0x004A656D, &CheckForPointRail_Hook, 0xE9);
+    
+    //Fix multiple rerail bugs
+    VirtualProtect((LPVOID)0x004A54D5, 4, PAGE_EXECUTE_READWRITE, &old);
+    HookFunction(0x004A54D5, &ForceRailCheck);
     //Cheat detection
     BYTE CheatDetection[]{ 0x8B, 0x44, 0x24, 0x04, 0x56, 0x8B, 0xF1, 0x81, 0xBC, 0x86, 0xD0, 0x83, 0x00, 0x00, 0x00, 0x00, 0x80, 0xBF, 0x75, 0x11, 0x6A, 0x01, 0x68, 0x78, 0x4C, 0x5C, 0x00, 0xE8, 0xEF, 0x6F, 0xF8, 0xFF, 0x83, 0xC4, 0x08, 0xEB, 0x2A, 0xD9, 0x84, 0x86, 0xD0, 0x83, 0x00, 0x00, 0xD8, 0x15, 0xFC, 0xF3, 0x49, 0x00, 0xDF, 0xE0, 0x66, 0xA9, 0x00, 0x41, 0x75, 0x15, 0x90, 0x90, 0x90, 0x90, 0x90, 0xEB, 0x0E, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x00, 0x00, 0x20, 0x41, 0xD9, 0x5C, 0x24, 0x08, 0x8B, 0xCE, 0x6A, 0xEC, 0xE8, 0x03, 0x5F, 0x01, 0x00, 0x84, 0xC0, 0x74, 0x08, 0xD9, 0x05, 0x3C, 0xF4, 0x49, 0x00, 0xEB, 0x04, 0xD9, 0x44, 0x24, 0x08, 0x8B, 0xB6, 0x68, 0x92, 0x00, 0x00, 0x85, 0xF6, 0x74, 0x0D, 0x8A, 0x46, 0x50, 0x84, 0xC0, 0x74, 0x06, 0xD8, 0x05, 0x38, 0xF4, 0x49, 0x00, 0x5E, 0xC2, 0x04, 0x00 , 0x00 , 0x00 , 0x40 , 0x40 , 0x00, 0x00 , 0x70 , 0x41 };
     InjectHook(0x0049F3B1, CheatDetection, sizeof(CheatDetection));
@@ -4881,7 +4894,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
         Slerp::trying = false;
         Slerp::value = 0.0f;
         Slerp::wallplant = false;
-        Slerp::m_last_wallplant_time_stamp.QuadPart = 0;
+        Slerp::m_last_wallplant_time_stamp = 0;
         Slerp::realVelocity = Vertex(0.0f, 0.0f, 0.0f);
         Slerp::targetNormal = Vertex(0.0f, 0.0f, 0.0f);
         Slerp::target_normal = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f);

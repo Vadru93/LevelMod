@@ -8,13 +8,13 @@
 #include "Script\Script.h"
 #include "Settings\Settings.h"
 
-DWORD GetElapsedTime(DWORD currentTime, LARGE_INTEGER last_time)
+DWORD GetElapsedTime(DWORD currentTime, DWORD lastTime)
 {
     /*DWORD currentTime2;
     _asm mov currentTime2, edx;
     if (currentTime2 == last_time.HighPart)
     {*/
-        return currentTime - last_time.LowPart;
+        return currentTime - lastTime;
     /*}
     return (0xFFFFFFFF - last_time.LowPart + currentTime);*/
 }
@@ -2020,8 +2020,8 @@ bool Skater::CheckForWallpant()
     _asm mov currentTime2, edx;
     if (GetElapsedTime(currentTime, Slerp::m_last_wallplant_time_stamp) < Physics_Disallow_Rewallplant_Duration) return false;
 
-    Slerp::m_last_wallplant_time_stamp.LowPart = currentTime;
-    Slerp::m_last_wallplant_time_stamp.HighPart = currentTime2;
+    Slerp::m_last_wallplant_time_stamp = currentTime;
+    //Slerp::m_last_wallplant_time_stamp.HighPart = currentTime2;
     debug_print("Timer passed, height %f!\n", height);
 
     if (height < Physics_Min_Wallplant_Height) return false;
