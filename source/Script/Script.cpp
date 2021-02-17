@@ -81,6 +81,7 @@ const char* QScript::QBTypes[] = {
      "Unknown"
 };
 bool(*QScript::GotParam)(CStruct*, CScript*) = NULL;
+bool(*QScript::ResetClock)(CStruct*, CScript*) = NULL;
 QScript::QBScript* QScript::Scripts=NULL;
 std::vector<QScript::CompressedNode> QScript::compNodes;
 std::vector<DWORD> QScript::qbKeys;
@@ -580,7 +581,8 @@ void QBScript::CreateQBTable(BYTE* table, bool level)
         }
         /*else if (__stricmp(it->second, name))
         {
-            FILE* debugFile = fopen("debug.txt", "r+t");
+            FILE* debugFile = fopen("
+            ", "r+t");
             fseek(debugFile, 0, SEEK_END);
             fprintf(debugFile, "found collision %s %s\r\n", it->second, name);
             fclose(debugFile);

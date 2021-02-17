@@ -164,6 +164,8 @@ namespace Checksums
         LM_Control_bInvertedY = COMPILE_CRC32("lm_control_binvertedy"),
         LM_Control_bInvertedX = COMPILE_CRC32("lm_control_binvertedx"),
 
+        LM_GFX_eNumThreads = COMPILE_CRC32("lm_gfx_enumthreads"),
+
 
         LM_GUI_bShowGrafCounter = COMPILE_CRC32("lm_gui_bshowgrafcounter"),
         LM_GUI_bShowHud = COMPILE_CRC32("lm_gui_bshowhud"),

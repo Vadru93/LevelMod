@@ -331,6 +331,10 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
     case (DWORD)Checksums::LM_Control_bInvertedX:
         LevelModSettings::bInvertedX = value;
         break;
+    case (DWORD)Checksums::LM_GFX_eNumThreads:
+        Gfx::num_threads = value+1;
+        debug_print("NumThreads %d\n", Gfx::num_threads);
+        break;
     case (DWORD)Checksums::LM_DebugOption_bDebugMode:
         //casting to DWORD to prevent compiler warning, code actually works without this cast
         //This could be prevented all together if use DWORD constexpr instead of enum for the compile-time checksums

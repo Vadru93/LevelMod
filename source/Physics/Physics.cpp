@@ -2108,6 +2108,10 @@ bool Skater::CheckForWallpant()
     // move to just outside the wall, insuring that there is no additional collision along the line to that point
     SetRay(*GetHitPoint(), *GetHitPoint() + Physics_Wallplant_Distance_From_Wall * wall_normal);
 
+#ifdef _DEBUG
+    LARGE_INTEGER start;
+    QueryPerformanceCounter(&start);
+#endif
     if (CollisionCheck())
     {
         *GetPosition() = *GetHitPoint() + 0.1f * wall_normal;
@@ -2116,6 +2120,12 @@ bool Skater::CheckForWallpant()
     {
         *GetPosition() = endcol;
     }
+#ifdef _DEBUG
+    LARGE_INTEGER end;
+    QueryPerformanceCounter(&end);
+    end.QuadPart -= start.QuadPart;
+    debug_print("Ms %f\n", (double)end.LowPart * NewTimer::fFreq);
+#endif
 
     /**(Vertex*)&GetMatrix()[Z] = *velocity;
     GetMatrix()[Z][Y] = 0.0f;

@@ -21,6 +21,7 @@ namespace NewTimer
     void CalculateFPSTimers();
     void Initialize();
     void ResetTime();
+    bool ResetTimeScript(CStruct* pStruct, CScript* pScript);
 
     DWORD __cdecl GetTime();
 

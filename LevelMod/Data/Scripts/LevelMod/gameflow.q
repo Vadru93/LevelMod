@@ -457,7 +457,9 @@ SCRIPT GameFlow_End
 	ENDIF
 	IF InNetGame
 		//there was this func here in original, any reason it was removed?
-		//ResetClock
+		//Not sure I will uncomment this now
+		//I also made so that FPS and logic timers are reset when this clock is reset
+		ResetClock
 		IF OnServer
 			Wait 5 gameframes
 			LoadPendingPlayers

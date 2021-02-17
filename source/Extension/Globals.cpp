@@ -87,6 +87,7 @@ double Gfx::sleep_high = (1000.0 / Gfx::target_fps) - Gfx::sleep_high_diff;
 double Gfx::sleep_low_diff = 1.286666666666666666666666666667;
 double Gfx::sleep_low = (1000.0 / Gfx::target_fps) - Gfx::sleep_low_diff;
 double Gfx::target_fps = 60.0;
+DWORD Gfx::num_threads = 1;
 
 bool GameState::IsActive()
 {

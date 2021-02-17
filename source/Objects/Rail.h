@@ -3,6 +3,7 @@
 #define RAIL_H
 #include "Script\Script.h"
 #include "Script\Node.h"
+#include <thread>
 
 
 #define MAX_RAIL_LINKS 4
@@ -288,6 +289,11 @@ static DWORD numNodes;
 static RailNode** first_node;
 static DWORD EndOfRail;
 
+static float closest_dist_thread[8];
+static RailNode* __restrict p_closest_rail_thread[8];
+static Vertex closest_point_thread[8];
+
+
 class ParkEditor
 {
     BYTE unk[0x60];
@@ -532,7 +538,7 @@ public:
 
 #define EPS  0.00001f
 
-    static bool LineLineIntersect(Line2d& l1, Line2d& l2, Vertex* pa, Vertex* pb, float* mua, float* mub, bool clamp = true)
+    static bool LineLineIntersect(const Line2d& l1, Line2d& l2, Vertex* pa, Vertex* pb, float* mua, float* mub, bool clamp = true)
     {
 
         Vertex& p1 = *(Vertex*)&l1.start;
@@ -585,36 +591,15 @@ public:
         return(true);
     }
 
-    // see if we can stick to a rail	
-    static bool StickToRail(const Vertex& pos1, const Vertex& pos2, Vertex* p_point, RailNode** pp_rail_node, const RailNode* p_ignore_node, float min_dot, int side)
+    __declspec(noalias) static void StickToRail_Thread(const int tNum, const Vertex pos1, const Vertex pos2, const RailNode* __restrict p_ignore_node, const float min_dot, const int side, const Line2d movement, const DWORD first_node, const DWORD last_node, const Vector bb_min, const Vector bb_max, float snap_dist)
     {
-
-        // Go through all the rail segments, and find the shortest distance to line
-        // and there is your rail
-
-
-        Line2d movement;
-
-        *(Vertex*)&movement.start = pos1;
-        *(Vertex*)&movement.end = pos2;
-
-        // find bounding box for skater
-        Vector bb_min, bb_max;
-        Rail_ComputeBB(movement.start, movement.end, bb_min, bb_max);
-        float snap_dist = Physics::Rail_Max_Snap;
-        bb_min.Set(bb_min.x - snap_dist, bb_min.y - snap_dist, bb_min.z - snap_dist);
-        bb_max.Set(bb_max.x + snap_dist, bb_max.y + snap_dist, bb_max.z + snap_dist);
-
-        float		closest_dist = 10000000.0f;
-        RailNode* p_closest_rail = NULL;
-        Vertex		closest_point;
-
-        bool	found = false;
-
+        //debug_print("Thread %d launched\n", tNum+1);
+        closest_dist_thread[tNum] = 10000000.0f;
+        p_closest_rail_thread[tNum] = NULL;
 
         //	CRailNode *pRailNode = mp_first_node;
         //	while (pRailNode)
-        for (int check_node = 0; check_node < current_node; check_node++)
+        for (DWORD check_node = first_node; check_node < last_node; check_node++)
         {
             RailNode* const __restrict pRailNode = &mp_nodes[check_node];
             if (!pRailNode->GetFlag(RailNode::Flags::ONLY_CLIMBING) && pRailNode != p_ignore_node && pRailNode->IsActive())
@@ -687,7 +672,7 @@ public:
                                                     }
 
 
-                                                    if (dist < closest_dist)
+                                                    if (dist < closest_dist_thread[tNum])
                                                     {
                                                         bool close = true;
                                                         // if we have a maximum dot, then check we don't go over it
@@ -705,16 +690,14 @@ public:
                                                                 // there is a good rail, but too far away
                                                                 // so kill any rail we've found so far00
                                                                 // and make this the new target
-                                                                closest_dist = dist;
-                                                                found = false;
+                                                                closest_dist_thread[tNum] = dist;
                                                             }
                                                             else
                                                             {
                                                                 // good rail, and close enough
-                                                                closest_dist = dist;
-                                                                closest_point = p2;
-                                                                p_closest_rail = pRailNode;
-                                                                found = true;
+                                                                closest_dist_thread[tNum] = dist;
+                                                                closest_point_thread[tNum] = p2;
+                                                                p_closest_rail_thread[tNum] = pRailNode;
                                                             }
                                                         }
                                                     }
@@ -741,12 +724,11 @@ public:
                         if (distance > snap_dist) continue;
 
                         // single node rails count as twice the distance when looking for the closest rail
-                        if (closest_dist < 2.0f * distance) continue;
+                        if (closest_dist_thread[tNum] < 2.0f * distance) continue;
 
-                        closest_dist = 2.0f * distance;
-                        closest_point = *(D3DXVECTOR3*)&pRailNode->vPos;
-                        p_closest_rail = pRailNode;
-                        found = true;
+                        closest_dist_thread[tNum] = 2.0f * distance;
+                        closest_point_thread[tNum] = *(D3DXVECTOR3*)&pRailNode->vPos;
+                        p_closest_rail_thread[tNum] = pRailNode;
                     }
                 }
             } // end if (active && etc)
@@ -754,22 +736,234 @@ public:
             //pRailNode = pRailNode->m_pNext;
         }
 
-        if (found)
+    }
+
+    // see if we can stick to a rail	
+    static bool StickToRail(const Vertex& pos1, const Vertex& pos2, Vertex* p_point, RailNode** pp_rail_node, const RailNode* p_ignore_node, float min_dot, int side)
+    {
+
+/*#ifdef _DEBUG
+        LARGE_INTEGER start;
+        QueryPerformanceCounter(&start);
+#endif*/
+        // Go through all the rail segments, and find the shortest distance to line
+        // and there is your rail
+
+
+        Line2d movement;
+
+        *(Vertex*)&movement.start = pos1;
+        *(Vertex*)&movement.end = pos2;
+
+        // find bounding box for skater
+        Vector bb_min, bb_max;
+        Rail_ComputeBB(movement.start, movement.end, bb_min, bb_max);
+        float snap_dist = Physics::Rail_Max_Snap;
+        bb_min.Set(bb_min.x - snap_dist, bb_min.y - snap_dist, bb_min.z - snap_dist);
+        bb_max.Set(bb_max.x + snap_dist, bb_max.y + snap_dist, bb_max.z + snap_dist);
+
+        float		closest_dist = 10000000.0f;
+        RailNode* p_closest_rail = NULL;
+        Vertex		closest_point;
+
+        /*if (Gfx::num_threads > 1)
+        {
+            std::thread th[8];
+            DWORD part = current_node / Gfx::num_threads;
+            DWORD first_node = 0;
+            DWORD last_node = part;
+            DWORD numThreads = Gfx::num_threads - 1;
+            for (DWORD t = 0; t < numThreads; t++)
+            {
+                th[t] = std::thread(StickToRail_Thread, t, pos1, pos2, p_ignore_node, min_dot, side, movement, first_node, last_node, bb_min, bb_max, snap_dist);
+                first_node = last_node;
+                last_node += part;
+            }
+
+            th[numThreads] = std::thread(StickToRail_Thread, numThreads, pos1, pos2, p_ignore_node, min_dot, side, movement, first_node, current_node, bb_min, bb_max, snap_dist);
+            
+            for (DWORD t = 0; t < Gfx::num_threads; t++)
+            {
+                th[t].join();
+            }
+
+            for (DWORD i = 0; i < Gfx::num_threads; i++)
+            {
+                if (p_closest_rail_thread[i] && closest_dist_thread[i] < closest_dist)
+                {
+                    p_closest_rail = p_closest_rail_thread[i];
+                    closest_dist = closest_dist_thread[i];
+                    closest_point = closest_point_thread[i];
+                    found = true;
+                }
+            }
+        }
+        else
+        {*/
+            //CRailNode* pRailNode = mp_first_node;
+            //	while (pRailNode)
+            for (int check_node = 0; check_node < current_node; check_node++)
+            {
+                RailNode* const __restrict pRailNode = &mp_nodes[check_node];
+                if (!pRailNode->GetFlag(RailNode::Flags::ONLY_CLIMBING) && pRailNode != p_ignore_node && pRailNode->IsActive())
+                {
+                    if (pRailNode->pNextLink)
+                    {
+                        // First do bounding box test, before time-intensive LineLineIntersect test
+
+                        if (!(bb_min.x > pRailNode->vBBMax.x))
+                            if (!(bb_max.x < pRailNode->vBBMin.x))
+                                if (!(bb_min.z > pRailNode->vBBMax.z))
+                                    if (!(bb_max.z < pRailNode->vBBMin.z))
+                                        if (!(bb_min.y > pRailNode->vBBMax.y))
+                                            if (!(bb_max.y < pRailNode->vBBMin.y))
+                                            {
+                                                // we have a rail segment with a BB match
+                                                // so see if we are close to it
+                                                Line2d segment;
+                                                segment.start = pRailNode->vPos;
+                                                segment.end = pRailNode->pNextLink->vPos;
+
+                                                if (true)//Rail_ValidInEditor(pRailNode->vPos, pRailNode->pNextLink->vPos))
+                                                {
+                                                    D3DXVECTOR3 p1, p2;
+                                                    float  f1, f2;
+                                                    if (LineLineIntersect(movement, segment, (Vertex*)&p1, (Vertex*)&p2, &f1, &f2))
+                                                    {
+
+                                                        Vertex to_rail = p2 - p1;
+                                                        float 	dist = to_rail.Length();
+                                                        float	old_dist = dist;
+
+                                                        // calculate the dot product of the
+                                                        // the movement and the rail in the XZ plane
+                                                        Vertex v1, v2;
+                                                        v1 = *(D3DXVECTOR3*)&segment.end - *(D3DXVECTOR3*)&segment.start;
+                                                        v2 = pos2 - pos1;
+                                                        v1[Y] = 0.0f;
+                                                        v2[Y] = 0.0f;
+                                                        v1.Normalize();
+                                                        v2.Normalize();
+                                                        float dot = fabsf(D3DXVec3Dot((D3DXVECTOR3*)&v1, (D3DXVECTOR3*)&v2));
+
+                                                        // if now v2 (the skater's movement vector) is all zero
+                                                        // and the dot is 0.0f
+                                                        // then that means we were going precisely straght up
+                                                        // so we set the dot to 1,
+                                                        // as normally (if we we slightly left or right)
+                                                        // we would be going along the rail at the top of the pipe
+                                                        // in the XZ plane (albeit slowly)
+                                                        if (v2[X] == 0.0f && v2[Z] == 0.0f && dot == 0.0f)
+                                                        {
+                                                            dot = 1.0f;
+                                                        }
+
+
+                                                        dist = dist * (0.122f + 1.0f - dot);		// was (50 + (4096-dist)) on PS1
+                                                        old_dist = old_dist * (2.0f - dot);		// was (8192-dot) on PS1
+
+                                //						printf ("dot=%.2f, dist=%.2f, old_dist=%.2f, min_dot=%.2f\n",dot,dist,old_dist,min_dot);
+
+                                                        if (side)
+                                                        {
+                                                            D3DXVECTOR3 vel = pos2 - pos1;
+                                                            if (pRailNode->Side(vel) != side)
+                                                            {
+                                                                dist *= 2.0f;
+                                                                //								printf ("side change, dist doubled to %.2f\n",dist);
+                                                            }
+                                                        }
+
+
+                                                        if (dist < closest_dist)
+                                                        {
+                                                            bool close = true;
+                                                            // if we have a maximum dot, then check we don't go over it
+                                                            if (min_dot != 1.0f)
+                                                            {
+                                                                if (fabsf(dot) < min_dot)
+                                                                {
+                                                                    close = false;
+                                                                }
+                                                            }
+                                                            if (close)
+                                                            {
+                                                                if (old_dist > snap_dist)
+                                                                {
+                                                                    // there is a good rail, but too far away
+                                                                    // so kill any rail we've found so far00
+                                                                    // and make this the new target
+                                                                    closest_dist = dist;
+                                                                }
+                                                                else
+                                                                {
+                                                                    // good rail, and close enough
+                                                                    closest_dist = dist;
+                                                                    closest_point = p2;
+                                                                    p_closest_rail = pRailNode;
+                                                                }
+                                                            }
+                                                        }
+                                                    } // end if (bb_test && Mth::LineLineIntersect(movement, segment, &p1, &p2, &f1, &f2))
+                                                } // end if (Rail_ValidInEditor(pRailNode->m_pos,pRailNode->m_pNextLink->m_pos))
+                                            } // end whole big bounding box test
+                    } // end if (pRailNode->m_pNextLink)
+                    else if (!pRailNode->pPrevLink && !pRailNode->pNextLink)
+                    {
+                        // special logic for a single node rail
+                        if (!(bb_min.x > pRailNode->vBBMax.x) &&
+                            (!(bb_max.x < pRailNode->vBBMin.x)) &&
+                            (!(bb_min.z > pRailNode->vBBMax.z)) &&
+                            (!(bb_max.z < pRailNode->vBBMin.z)) &&
+                            (!(bb_min.y > pRailNode->vBBMax.y)) &&
+                            (!(bb_max.y) < pRailNode->vBBMin.y))
+                        {
+                            // calculate the distance from the movement to the rail point
+                            D3DXVECTOR3 offset = *(D3DXVECTOR3*)&pRailNode->vPos - pos1;
+                            D3DXVECTOR3 movement_direction = ((static_cast<Vertex>(pos2 - pos1)).Normalize());
+                            offset -= D3DXVec3Dot(&offset, &movement_direction) * movement_direction;
+                            float distance = (*(Vertex*)&(offset)).Length();
+
+                            if (distance > snap_dist) continue;
+
+                            // single node rails count as twice the distance when looking for the closest rail
+                            if (closest_dist < 2.0f * distance) continue;
+
+                            closest_dist = 2.0f * distance;
+                            closest_point = *(D3DXVECTOR3*)&pRailNode->vPos;
+                            p_closest_rail = pRailNode;
+                        }
+                    }
+                } // end if (active && etc)
+
+                //pRailNode = pRailNode->m_pNext;
+            }
+        //}
+
+        if (p_closest_rail)
         {
             // note, the line from pos1 to closest_point will not reflect the line segment found above
             // as the line segment will actually start somewhere between pos1 and pos2, and not always on pos1
-    		/*if ( closest_dist > 40.0f)
-    		{
-    			found = false;
-    		}
-    		else*/
+            /*if ( closest_dist > 40.0f)
             {
-                debug_print("%X\n", &Game::skater->mp_rail_node);
+                found = false;
+            }
+            else*/
+            {
+                if(Game::skater->mp_rail_node)
+                    debug_print("StickToRail old %s\n", FindChecksumName(Game::skater->mp_rail_node->GetNode()));
+                debug_print("StickToRail new %s\n", FindChecksumName(p_closest_rail->GetNode()));
                 *p_point = closest_point;
                 *pp_rail_node = p_closest_rail;
             }
         }
-        return found;
+/*#ifdef _DEBUG
+        LARGE_INTEGER end;
+        QueryPerformanceCounter(&end);
+        end.QuadPart -= start.QuadPart;
+        debug_print("Ms %f\n", (double)end.LowPart * NewTimer::fFreq);
+#endif*/
+        return p_closest_rail != NULL;
     }
 
 

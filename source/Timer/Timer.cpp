@@ -52,10 +52,17 @@ namespace NewTimer
         ResetTime();
     }
 
+    bool ResetTimeScript(CStruct* pStruct, CScript* pScript)
+    {
+        ResetTime();
+        return QScript::ResetClock(pStruct, pScript);
+    }
     void ResetTime()
     {
         framelength = 1000.0 / Gfx::target_fps;
+        timeBeginPeriod(1);
         reset_time = timeGetTime();
+        timeEndPeriod(1);
     }
 
     void UpdateTimer()

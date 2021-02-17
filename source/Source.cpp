@@ -3845,6 +3845,46 @@ void AddFunctions()
     QScript::GotParam = GetQBKeyHeader(Checksum("GotParam"))->pFunction;
     if (header)
         header->pFunction = NewShatterScript;
+
+    header = GetQBKeyHeader(Checksum("ResetClock"));
+    if (header)
+    {
+        QScript::ResetClock = header->pFunction;
+        header->pFunction = NewTimer::ResetTimeScript;
+    }
+
+#ifdef _DEBUG
+    FILE* f = fopen("func_info.txt", "w");
+    fprintf(f, "| Function | Params | Returns | Example | Description |\n");
+    fprintf(f, "| :- | :- | :- | :- | :- |\n");
+
+    CompiledScript* pEnd = (CompiledScript*)0x005B83D8;
+    for(auto pScript = (CompiledScript*)0x005B7510; pScript != pEnd; pScript++)
+    {
+        fprintf(f, "| %s | ? | ? | ? | ? |\n", pScript->name);
+    }
+
+    fprintf(f, "| Member Function | Params | Returns | Example | Description |\n");
+    fprintf(f, "| :- | :- | :- | :- | :- |\n");
+    
+    for (char** name = (char**)pEnd; name != (char**)0x005B8868; name += 4)
+    {
+        fprintf(f, "| %s | ? | ? | ? | ? |\n", *name);
+    }
+
+    fprintf(f, "| More Info | Checksum | Address | References |\n");
+    fprintf(f, "| :- | :- | :- | :- | :- |\n");
+
+    for (auto pScript = (CompiledScript*)0x005B7510; pScript != pEnd; pScript++)
+    {
+        fprintf(f, "| %s | 0x%X | 0x%p | ? |\n", pScript->name, Checksum(pScript->name), pScript->pFunction);
+    }
+    for (char** name = (char**)pEnd; name != (char**)0x005B8868; name += 4)
+    {
+        fprintf(f, "| %s | 0x%X | ? | ? |\n", *name, Checksum(*name));
+    }
+    fclose(f);
+#endif
 }
 
 bool __stdcall proxy_FixGoBack(BYTE unk1, BYTE unk2, BYTE unk3, BYTE unk4)
