@@ -283,6 +283,21 @@ namespace LevelModSettings
 }
 #endif
 
+
+void PatchOpenSpy(DWORD address)
+{
+    DWORD old;
+    VirtualProtect((void*)address, 11, PAGE_EXECUTE_READWRITE, &old);
+    if (!strcmp((char*)address, "gamespy.com") && !strcmp((char*)address, "openspy.org"))
+    {
+        MessageBox(0, "Unknown exe detected", "Please install official 1.01 patch", 0);
+    }
+    else
+    {
+        char OpenSpy[] = "openspy.org";
+        memcpy((void*)address, OpenSpy, 11);
+    }
+}
 CRITICAL_SECTION critical;
 extern FILE* logFile;
 extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
@@ -321,6 +336,11 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 
     ReadFirstOptions();
     DWORD old;
+
+    PatchOpenSpy(0x5CAEFD);
+    PatchOpenSpy(0x5CB46F);
+    PatchOpenSpy(0x5CB6DB);
+
     VirtualProtect((void*)0x0042B247, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((void*)0x0042B250, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((void*)0x0042B2C1, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
