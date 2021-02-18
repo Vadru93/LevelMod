@@ -19,7 +19,7 @@ rem - copy debug files
 rem - pack to zip
 
 	del levelmod_debug.zip
-	%sevenz% a -tzip levelmod_debug.zip %target%
+	%sevenz% a -tzip levelmod_debug.zip .\%target%\*
 
 rem - remove temp dirs
 
@@ -38,7 +38,7 @@ rem - copy debug files
 rem - pack to zip
 
 	del levelmod.zip
-	%sevenz% a -tzip levelmod.zip %target%
+	%sevenz% a -tzip -r levelmod.zip .\%target%\*
 
 
 rem - remove temp dirs
