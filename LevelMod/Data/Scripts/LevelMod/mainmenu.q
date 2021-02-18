@@ -62,6 +62,8 @@ SCRIPT AutoLoad
 	ENDIF
 	SwitchToMenu menu = frontend_menu DoNotMakeRoot
 	change DoAutoLoad = 0
+	//populate level menu after save file is loaded, else th3 levels will be locked
+	LM_PopulateLevelMenu
 	goto main_menu_first_frame
 ENDSCRIPT
 

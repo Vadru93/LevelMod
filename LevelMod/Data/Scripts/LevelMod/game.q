@@ -574,13 +574,11 @@ SCRIPT Client_Select_No
 	helper_select_choose_back_centered
 ENDSCRIPT
 
-
 SCRIPT LM_PopulateLevelMenu mask = th3_level menu = ChangeLevelMenuList
 	printf "populating level menu"
 	DepopulateMenu id = <menu>
 	ForEachIn master_level_list do = add_level_menu_item params = { mask = <mask> target_script = "change_level" parent_menu = <menu> }
 ENDSCRIPT
-
 
 GameChangeLevelMenu = { 
 	Type = verticalmenu 
@@ -591,7 +589,7 @@ GameChangeLevelMenu = {
 		{ Type = textmenuelement auto_id text = "Select Level" static dont_gray drawer = title }
 		{ Type = menucontainer id = level_menu_container show_all_children eventhandler = { Type = leftrightcontroller Left = lmc_level_menu_container Right = rmc_level_menu_container } } 
 	]
-	eventhandler = { Type = showeventhandler target = "LM_PopulateLevelMenu" }
+	//eventhandler = { Type = showeventhandler target = "LM_PopulateLevelMenu" }
 	parent = contain1 
 }
 
@@ -641,6 +639,7 @@ SCRIPT CreateNewChangeLevelMenu
 	
 	CreateMenu { Type = verticalmenu id = ChangeLevelMenuList x = 280.0 y = 0.0 w = 280.0 h = 224.0 not_rounded right_side_icon children = [ ] }
 	AttachChild parent = rmc_level_menu_container child = ChangeLevelMenuList
+	LM_PopulateLevelMenu
 ENDSCRIPT
 
 
