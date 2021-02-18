@@ -1,3 +1,7 @@
+# Acrchives
+*.zip
+
+# qscripted backup files
 *.bkp.q
 
 # Build results
