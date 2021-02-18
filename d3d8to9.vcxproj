@@ -48,7 +48,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_ALLOW_RTCc_IN_STL;WIN32_LEAN_AND_MEAN;_WINSOCK_DEPRECATED_NO_WARNINGS;_DEBUG;EXPORTING;_CRT_SECURE_NO_WARNINGS;D3D_DEBUG_INFO;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ALLOW_RTCc_IN_STL;WIN32_LEAN_AND_MEAN;_WINSOCK_DEPRECATED_NO_WARNINGS;_DEBUG;EXPORTING;_CRT_SECURE_NO_WARNINGS;D3D_DEBUG_INFO;__DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SmallerTypeCheck>true</SmallerTypeCheck>
       <ControlFlowGuard>false</ControlFlowGuard>
       <FloatingPointExceptions>true</FloatingPointExceptions>
