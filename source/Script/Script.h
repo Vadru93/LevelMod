@@ -4,7 +4,7 @@
 #undef NO_DEFINES
 #define _CRT_SECURE_NO_WARNINGS
 #include "pch.h"
-#include "Defines.h"
+#include "Extension\Defines.h"
 #include "QBKey.h"
 
 
@@ -99,6 +99,8 @@ namespace QScript
         }
     };
 
+    char* FindReference(DWORD checksum);
+    char* FindReference(char* file_name, DWORD checksumm, bool levelmod);
     //I'm not sure about the AbsentInNetGames, but the function calling this function did AbsentInNetGames = !NetEnabled, could be something else...
     void SpawnScript(DWORD checksum, CStruct* params = NULL, DWORD node = 0xFFFFFFFF, DWORD callback = 0, CStruct* callback_params = NULL, bool AbsentInNetGames = false, bool NetEnabled = true, bool Permanent = true);
 

@@ -28,6 +28,10 @@
 
 #define isActive *(bool*)0x00850F74
 
+#define p_framedelta *(float*)0x00850FD8
+
+#define p_slomo *(float*)0x005B4E68
+
 extern DWORD NewTimer::GetTime();
 
 //--------Spine and Acid--------

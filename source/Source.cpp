@@ -3855,7 +3855,7 @@ void AddFunctions()
 
 #ifdef _DEBUG
     FILE* f = fopen("func_info.txt", "w");
-    fprintf(f, "| Function | Params | Returns | Example | Description |\n");
+    fprintf(f, "# Functions\n| Name | Params | Returns | Example | Description |\n");
     fprintf(f, "| :- | :- | :- | :- | :- |\n");
 
     CompiledScript* pEnd = (CompiledScript*)0x005B83D8;
@@ -3864,25 +3864,28 @@ void AddFunctions()
         fprintf(f, "| %s | ? | ? | ? | ? |\n", pScript->name);
     }
 
-    fprintf(f, "| Member Function | Params | Returns | Example | Description |\n");
+    fprintf(f, "# Member Functions\n| Name | Params | Returns | Example | Description |\n");
     fprintf(f, "| :- | :- | :- | :- | :- |\n");
     
-    for (char** name = (char**)pEnd; name != (char**)0x005B8868; name += 4)
+    for (char** name = (char**)pEnd; name != (char**)0x005B8868; name += 1)
     {
         fprintf(f, "| %s | ? | ? | ? | ? |\n", *name);
     }
 
-    fprintf(f, "| More Info | Checksum | Address | References |\n");
-    fprintf(f, "| :- | :- | :- | :- | :- |\n");
+    fprintf(f, "# More Info\n| Name | Checksum | Address | References |\n");
+    fprintf(f, "| :- | :- | :- | :- |\n");
 
     for (auto pScript = (CompiledScript*)0x005B7510; pScript != pEnd; pScript++)
     {
-        fprintf(f, "| %s | 0x%X | 0x%p | ? |\n", pScript->name, Checksum(pScript->name), pScript->pFunction);
+        DWORD checksum = Checksum(pScript->name);
+        fprintf(f, "| %s | 0x%X | 0x%p | %s |\n", pScript->name, checksum, pScript->pFunction, QScript::FindReference(checksum));
     }
-    for (char** name = (char**)pEnd; name != (char**)0x005B8868; name += 4)
+    for (char** name = (char**)pEnd; name != (char**)0x005B8868; name += 1)
     {
-        fprintf(f, "| %s | 0x%X | ? | ? |\n", *name, Checksum(*name));
+        DWORD checksum = Checksum(*name);
+        fprintf(f, "| %s | 0x%X | ? | %s |\n", *name, checksum, QScript::FindReference(checksum));
     }
+
     fclose(f);
 #endif
 }
@@ -4322,8 +4325,8 @@ DWORD GetTerrain(SuperSector* sector, DWORD index)
 
 __declspec(naked) void UpdateFrameLength()
 {
-    *(float*)0x00850FD0 = (float)(NewTimer::framelength);
-    *(double*)0x00850FD8 = NewTimer::framelength;
+    //p_slomo is float that is set by slomo cheat, normally this is 1.0
+    p_framedelta = (float)(NewTimer::framelength  * 0.000001) * p_slomo;
     _asm ret;
 }
 
@@ -4494,6 +4497,12 @@ void InitLevelMod()
     HookFunction(0x004A70BB, &Skater::maybe_trip_rail_trigger);
     HookFunction(0x004B088C, &Skater::maybe_trip_rail_trigger);
     HookFunction(0x00489C7F, &RailNode::ProbablyOnSameRailAs);
+
+    //Improve accuracy and performance of franelength math
+    VirtualProtect((LPVOID)0x00409B90, 7, PAGE_EXECUTE_READWRITE, &old);
+    *(WORD*)0x00409B90 = 0x05D9;
+    *(DWORD*)0x00409B92 = 0x00850FD8;
+    *(BYTE*)0x00409B96 = 0xC3;
 
     //Fix Score above 60 fps
     VirtualProtect((LPVOID)0x00435992, 2, PAGE_EXECUTE_READWRITE, &old);

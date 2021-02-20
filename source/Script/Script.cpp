@@ -8,6 +8,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <tchar.h>
+#include <fstream>
+#include <iostream>
+
 //#include "FastCRC.h"
 
 #define RELOAD_LEVEL 1
@@ -263,9 +266,11 @@ EXTERN CStructHeader* CStruct::AddParam(const char* name, QBKeyHeader::QBKeyType
                 prevparam = param;
                 param = param->NextHeader;
             }
-            prevparam->NextHeader = AllocateCStruct();
-            param = prevparam->NextHeader;
-            tail->NextHeader = param;
+            if (prevparam)
+            {
+                prevparam->NextHeader = AllocateCStruct();
+                param = prevparam->NextHeader;
+            }
             tail = param;
             tail->Type = type;
             tail->SetName(name);
@@ -613,6 +618,166 @@ char* QScript::GetScriptDir(bool second)
         return dir2;
 }
 
+
+char* QScript::FindReference(char* file_name, DWORD checksum, bool levelmod)
+{
+    static char reference[528];
+    FILE* f = fopen(file_name, "r+b");
+    file_name[strlen(file_name) - 1] = 0x0;
+    if (f)
+    {
+        fseek(f, 0, SEEK_END);
+        DWORD size = ftell(f);
+
+        fseek(f, 0, SEEK_SET);
+        BYTE* pFile = new BYTE[size + 1];
+        fread(pFile, size, 1, f);
+        fclose(f);
+        BYTE* oldData = pFile;
+
+
+        DWORD pos = std::string(file_name).find_last_of('\\');
+        DWORD line = 1;
+        while (true)
+        {
+            switch (*pFile)
+            {
+            case ScriptToken::NewLine:
+                pFile++;
+                line++;
+                break;
+            case ScriptToken::NewLineNumber:
+                pFile += 5;
+                line++;
+                break;
+            case ScriptToken::Int:
+            case ScriptToken::Float:
+            case 0x2E:
+                pFile += 5;
+                break;
+
+            case ScriptToken::QBKey:
+                pFile++;
+                if (*(DWORD*)pFile == checksum)
+                {
+                    if (levelmod)
+                        sprintf(reference, "[%s](https://github.com/Vadru93/LevelMod/blob/master/LevelMod/Data/Scripts/LevelMod/%s#L%u) ", &file_name[pos + 1], &file_name[pos +1], line);
+                    else
+                        sprintf(reference, "%sb Line %u ", &file_name[pos + 1], line);
+                    delete[] oldData;
+                    return reference;
+                }
+                pFile += 4;
+                break;
+
+            case ScriptToken::String:
+            case ScriptToken::LocalString:
+                pFile++;
+                pFile += *(int*)pFile + 4;
+                break;
+
+            case ScriptToken::Vector:
+                pFile += 13;
+                break;
+
+            case ScriptToken::Pair:
+                pFile += 9;
+                break;
+
+            case ScriptToken::EndOfFile:
+            case ScriptToken::Table:
+                delete[] oldData;
+                return NULL;
+
+            case 0x47:
+            case 0x48:
+            case 0x49:
+                pFile += 3;
+                break;
+
+            default:
+                //debug_print("default: %X\n", *pFile);
+                /*char def[2];
+                sprintf(def, "%X", *pFile);
+                MessageBox(0,"default", def, 0);*/
+                pFile++;
+                break;
+
+            case 0x2F:
+            case 0x37:
+            case 0x40:
+            case 0x41:
+                pFile++;
+                int count = *(int*)pFile;
+                pFile += 4;
+                /*if (*(int*)pFile == 65537 || (count == 1 && *(WORD*)pFile == 1))
+                {
+                    pFile += 2 * count;
+                }*/
+                pFile += count * 4;
+                break;
+            }
+        }
+        delete[] oldData;
+    }
+    return NULL;
+}
+char* QScript::FindReference(DWORD checksum)
+{
+    static char references[MAX_PATH*500] = "";
+    sprintf(references, "");
+
+    char* dir = GetScriptDir();
+    FILE* f = fopen(dir, "rb+");
+
+
+    fseek(f, 0, SEEK_END);
+    DWORD size = ftell(f);
+
+    fseek(f, 0, SEEK_SET);
+    BYTE* pFile = new BYTE[size + 1];
+    fread(pFile, size, 1, f);
+    fclose(f);
+    BYTE* oldData = pFile;
+
+    //MessageBox(0, dir, "going to parse", 0);
+    char* file;
+    while (pFile < (oldData + size - 5))
+    {
+        file = NULL;
+        unsigned int i = 13;
+        while (pFile < (oldData + size) && *pFile != 0x0A && *pFile != 0x0D)
+        {
+            if (!file)
+                file = (char*)pFile;
+            dir[i] = *pFile;
+            dir[i + 1] = 0;
+            i++;
+            pFile++;
+        }
+
+        dir[i] = 0;
+
+        if (file)
+        {
+            char* ref = FindReference(dir, checksum, strstr(file, "LevelMod"));
+            if (ref)
+                strcat(references, ref);
+        }
+        pFile++;
+        while (pFile < (oldData + size) && (*pFile == 0x0D || *pFile == 0x0A))
+            pFile++;
+    }
+    delete[] oldData;
+    if (strlen(references))
+        return references;
+    else
+    {
+        sprintf(references, "None");
+        return references;
+    }
+}
+
 void QBScript::AddScripts()
 {
     char* dir = GetScriptDir();
@@ -673,9 +838,6 @@ char* QBScript::GetQBKeyName(int checksum)
         printf("couldn't find QBKey %X\n", checksum);*/
     return NULL;
 }
-
-#include <fstream>
-#include <iostream>
 
 bool CheckForMatch_stub(char* file1, char*& file2)
 {
@@ -875,7 +1037,7 @@ void QBScript::OpenScript(char* path, bool level)
 
         case ScriptToken::EndOfFile:
         case ScriptToken::Table:
-            debug_print("parsing qbTable %X\n", pFile);
+            debug_print("parsing qbTable %p\n", pFile);
             goto done;
 
         case 0x47:

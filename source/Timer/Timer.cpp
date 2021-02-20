@@ -12,15 +12,15 @@ namespace NewTimer
     LARGE_INTEGER elapsedTime;
     LARGE_INTEGER old_start;
     DWORD timer_lock = 0x10;
-    double framelength = 1000.0/Gfx::target_fps;
+    double framelength = 1000000.0 / Gfx::target_fps;
     DWORD frameticks = 0;
     double hybrid_limit = 16.0;
     DWORD time = 0;
 
     void CalculateFPSTimers()
     {
-        DWORD frameticks2 = (DWORD)(16666.666666666 / (1000000.0 / (double)freq.QuadPart));
-        frameticks = (DWORD)((1000.0 / Gfx::target_fps) / fFreq);
+        DWORD frameticks2 = (DWORD)(16666.666666666 / (1000.0 / (double)freq.QuadPart));
+        frameticks = (DWORD)((1000000.0 / Gfx::target_fps) / fFreq);
         //Add some headroom for hardware delay and rounding errors, probably should add this to ini for platform specific stored value
         frameticks -= 750;
         DWORD frameticks3 = (DWORD)(0.0166666666 / (1.0 / (double)freq.QuadPart));
@@ -31,20 +31,21 @@ namespace NewTimer
         *(float*)0x00458B68 = (float)((60.0 / Gfx::target_fps) * 0.058);//Stack value
         *(float*)0x0058E100 = (float)((60.0 / Gfx::target_fps) * 0.058);//Memory value
 
-        Gfx::exact_high = (1000.0 / Gfx::target_fps) + Gfx::exact_high_diff;
-        Gfx::exact_low = (1000.0 / Gfx::target_fps) - Gfx::exact_low_diff;
-        Gfx::hybrid_high = (1000.0 / Gfx::target_fps) + Gfx::hybrid_high_diff;
-        Gfx::sleep_high = (1000.0 / Gfx::target_fps) - Gfx::sleep_high_diff;
-        Gfx::sleep_low = (1000.0 / Gfx::target_fps) - Gfx::sleep_low_diff;
+        Gfx::exact_high = (1000000.0 / Gfx::target_fps) + Gfx::exact_high_diff;
+        Gfx::exact_low = (1000000.0 / Gfx::target_fps) - Gfx::exact_low_diff;
+        Gfx::hybrid_high = (1000000.0 / Gfx::target_fps) + Gfx::hybrid_high_diff;
+        Gfx::sleep_high = (1000000.0 / Gfx::target_fps) - Gfx::sleep_high_diff;
+        Gfx::sleep_low = (1000000.0 / Gfx::target_fps) - Gfx::sleep_low_diff;
 
-        framelength = 1000.0 / Gfx::target_fps;
+        *(float*)0x00850FD0 = (float)(1000.0 / Gfx::target_fps);
+        framelength = 1000000.0 / Gfx::target_fps;
     }
 
     void Initialize()
     {
         QueryPerformanceCounter(&startTime);
         QueryPerformanceFrequency(&freq);
-        fFreq = 1000.0 / (double)freq.QuadPart;
+        fFreq = 1000000.0 / (double)freq.QuadPart;
 
         if (!p_bWindowed)
             timer_lock = 0x0D;
@@ -59,7 +60,8 @@ namespace NewTimer
     }
     void ResetTime()
     {
-        framelength = 1000.0 / Gfx::target_fps;
+        *(float*)0x00850FD0 = (float)(1000.0 / Gfx::target_fps);
+        framelength = 1000000 / Gfx::target_fps;
         timeBeginPeriod(1);
         reset_time = timeGetTime();
         timeEndPeriod(1);
@@ -111,7 +113,7 @@ namespace NewTimer
         old_start.QuadPart = startTime.QuadPart - old_start.QuadPart;
         double ms = (double((old_start.LowPart)) * fFreq);
         framelength = ms;
-        if (ms < 32.0 && isActive)
+        if (ms < 32000.0 && isActive)
         {
             if (ms >= Gfx::hybrid_high) // ~59.88
             {
@@ -132,7 +134,7 @@ namespace NewTimer
         old_start.QuadPart = startTime.QuadPart - old_start.QuadPart;
         double ms = (double((old_start.LowPart)) * fFreq);
         framelength = ms;
-        if (ms < 32.0 && isActive)
+        if (ms < 32000.0 && isActive)
         {
             if (ms > Gfx::exact_high)//59,97 fps
             {
@@ -158,7 +160,7 @@ namespace NewTimer
         old_start.QuadPart = startTime.QuadPart - old_start.QuadPart;
         double ms = (double((old_start.LowPart)) * fFreq);
         framelength = ms;
-        if (ms < 32.0 && isActive)
+        if (ms < 32000.0 && isActive)
         {
             //debug_print("2nd %f ", ms);
 
@@ -234,6 +236,7 @@ namespace NewTimer
 
         if (hybrid_limit > 3.0)
         {
+            ms *= 0.001;
             DWORD truncated = (DWORD)(((hybrid_limit - ms) * 0.5));
             if (truncated && truncated < 14)
                 Sleep(truncated);
@@ -278,7 +281,7 @@ namespace NewTimer
         LARGE_INTEGER elapsedTime;
         elapsedTime.QuadPart = (endTime.QuadPart - startTime.QuadPart);
         double ms = ((double)(elapsedTime.LowPart) * fFreq);
-        ms += 0.55;
+        ms *= 0.0055;
 
         DWORD truncated = (DWORD)ms;
         return truncated;
