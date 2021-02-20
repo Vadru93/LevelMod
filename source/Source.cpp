@@ -4357,7 +4357,7 @@ __declspec(naked) void CalibrateScore()
             fScore = score;
 
             //divide our current framelength with original 60 fps framelength
-            fScore *= (NewTimer::framelength / (1000.0 / 60.0));
+            fScore *= (NewTimer::framelength / (1000000.0 / 60.0));
 
             //add 0.45 to get less rounding errors
             score = (int)(fScore + 0.45);
