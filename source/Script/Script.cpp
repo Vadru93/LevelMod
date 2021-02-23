@@ -618,6 +618,19 @@ char* QScript::GetScriptDir(bool second)
         return dir2;
 }
 
+void QScript::CallCFunction(DWORD checksum, void* param, QBKeyHeader::QBKeyType type)
+{
+    auto pFunctionHeader = GetQBKeyHeader(checksum);
+    if (pFunctionHeader)
+    {
+        CScript script;
+        CStruct params;
+        CStructHeader header(type, 0, param);
+        params.AddParam(&header);
+        pFunctionHeader->pFunction(&params, &script);
+    }
+}
+
 
 char* QScript::FindReference(char* file_name, DWORD checksum, bool levelmod)
 {

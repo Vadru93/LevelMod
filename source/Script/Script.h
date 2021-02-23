@@ -178,8 +178,10 @@ namespace QScript
         {
             ClearMap();
         }
+
     };
 
+    extern void CallCFunction(DWORD checksum, void* param, QBKeyHeader::QBKeyType type = QBKeyHeader::QBKeyType::STRING);
 
     extern QBScript* Scripts;
     extern const char* QBTypes[19];
@@ -613,6 +615,18 @@ struct EXTERN CStruct
         header = CStructHeader(type, value);
         head = &header;
         tail = head;
+    }
+
+    CStruct(QBKeyHeader::QBKeyType type, void* value)
+    {
+        CStructHeader param(type, 0, value);
+        AddParam(&param);
+    }
+
+    CStruct(const char* text)
+    {
+        CStructHeader param(QBKeyHeader::QBKeyType::STRING, 0, (void*)text);
+        AddParam(&param);
     }
 
     DWORD GetName()

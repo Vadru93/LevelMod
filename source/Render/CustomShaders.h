@@ -103,6 +103,7 @@ namespace Gfx
     extern DWORD width;
     extern DWORD height;
     extern Command command;
+    extern bool bOldWindowed;
 };
 //--------Custom Shaders--------
 

@@ -5929,9 +5929,14 @@ SHORT __stdcall proxy_GetAsyncKeyState(int key)
 {
     if (KeyState::GetKeyboardState(VirtualKeyCode::ALT) && KeyState::GetKeyboardState(VirtualKeyCode::ENTER) && !KeyState::GetOldKeyboardState(VirtualKeyCode::ENTER))//alt + enter
     {
-        //Unpress the enter KeyboardState
-        KeyState::Unpress(VirtualKeyCode::ENTER);
-        bToggleWindowed = true;
+        if (!Gfx::bOldWindowed)
+        {
+            //Unpress the enter KeyboardState
+            KeyState::Unpress(VirtualKeyCode::ENTER);
+            bToggleWindowed = true;
+        }
+        else
+            QScript::CallCFunction(Checksum("LaunchPanelMessage"), (void*)"Please launch game in Fullscreen mode");
     }
     else
         bToggleWindowed = false;
@@ -6029,7 +6034,10 @@ void ToggleWindowed()
 
 bool ToggleWindowedScript(CStruct* pStruct, CScript* pScript)
 {
-    Gfx::command = Gfx::Command::ToggleWindowed;
+    if(!Gfx::bOldWindowed)
+        Gfx::command = Gfx::Command::ToggleWindowed;
+    else
+        QScript::CallCFunction(Checksum("LaunchPanelMessage"), (void*)"Please launch game in Fullscreen mode");
     return true;
 }
 
@@ -6094,6 +6102,8 @@ void MaybeFixStutter()
 
 bool LaunchGFXCommand(CStruct* pStruct, CScript* pScript)
 {
+    LevelModSettings::Option* option;
+
     for (auto header = pStruct->head; header != NULL; header = header->NextHeader)
     {
         if (header->Type == QBKeyHeader::LOCAL)
@@ -6103,20 +6113,25 @@ bool LaunchGFXCommand(CStruct* pStruct, CScript* pScript)
             case Checksums::Reset:
                 Gfx::command = Gfx::Command::Reset;
                     break;
-            case Checksums::ToggleWindowed:
-                if(IsOptionOn("LM_GFX_bWindowed") == (*(BYTE*)0x00851094 & 1))
-                    Gfx::command = Gfx::Command::ToggleWindowed;
-                break;
             case Checksums::FixStutter:
                 Gfx::command = Gfx::Command::FixStutter;
                 break;
             case Checksums::TargetFPS:
-                auto option = GetOption(crc32f("LM_GFX_TargetFPS"));
+                option = GetOption(crc32f("LM_GFX_TargetFPS"));
                 if (option)
                 {
                     Gfx::target_fps = option->value;
                 }
                 NewTimer::CalculateFPSTimers();
+                break;
+            case Checksums::ToggleWindowed:
+                if (!Gfx::bOldWindowed)
+                {
+                    if (IsOptionOn("LM_GFX_bWindowed") == (*(BYTE*)0x00851094 & 1))
+                        Gfx::command = Gfx::Command::ToggleWindowed;
+                }
+                else
+                    QScript::CallCFunction(Checksum("LaunchPanelMessage"), (void*)"Please launch game in Fullscreen mode");
                 break;
             }
 
