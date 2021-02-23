@@ -197,7 +197,7 @@ public:
     {
         Vertex Start = *(D3DXVECTOR3*)&vPos;
         Vertex End = *(D3DXVECTOR3*)&pNextLink->vPos;
-        Game::skater->Store();
+        //Game::skater->Store();
 
 
         // Find a point "Mid", which is 1/4 of the way along the rail   
@@ -221,15 +221,16 @@ public:
         // if collision above me, left to right
         D3DXVECTOR3 temp1 = Mid + Side;
         D3DXVECTOR3 temp2 = Mid - Side;
-        Game::skater->SetRay(temp1, temp2);
-        if (Game::skater->CollisionCheck())
+        Collision::CFeeler feeler(temp1, temp2);
+        if (feeler.GetCollision())
         {
             left = true;
         }
 
         // if collision above me, right to left
-        Game::skater->FlipDirection();
-        if (Game::skater->CollisionCheck())
+        feeler.FlipDirection();
+        feeler.SetIgnore();
+        if (feeler.GetCollision())
         {
             right = true;
         }
@@ -257,7 +258,7 @@ public:
             side = -side;
         }
 
-        Game::skater->Restore();
+        //Game::skater->Restore();
         return side;
     }
 

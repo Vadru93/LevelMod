@@ -27,8 +27,8 @@ char* AddressToMappedName(HANDLE hOwner, PVOID pAddress, char* szBuffer, int iSi
 
 bool ReportException(LPCTSTR pszFunction, LPEXCEPTION_POINTERS pExceptionInfo);
 #ifdef _DEBUG
-#define DEBUGSTART() __try {
-#define DEBUGEND()   }__except(ReportException(__FUNCTION__, GetExceptionInformation())){}
+#define DEBUGSTART() debug_print("Enter" __FUNCTION__ "\n"); __try { 
+#define DEBUGEND()   debug_print("Leave" __FUNCTION__ "\n"); }__except(ReportException(__FUNCTION__, GetExceptionInformation())){}
 #else
 #define DEBUGSTART()
 #define DEBUGEND()

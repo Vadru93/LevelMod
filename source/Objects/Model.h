@@ -3,6 +3,20 @@
 #define MODEL_H
 #include "Extension\defines.h"
 #include "Script\Script.h"
+#include "RenderWare\RenderWare.h"
+
+struct SkinModel
+{
+    DWORD** memberFunctions;
+    BYTE unk[0x27C];
+    RpAtomic* first;
+    RpAtomic last;
+    DWORD padding;
+    RpAtomicContainer atomics[0x14];
+    DWORD numAtomics;
+    DWORD unk1;//Always NULL?
+    DWORD checksum;
+};
 
 struct Model
 {

@@ -823,6 +823,7 @@ bool GetOptionValue(CStruct* pStruct, CScript* pScript)
         auto it = options.find(header->Data);
         if (it != options.end())
         {
+            debug_print("OptionValue %s: %d\n", FindChecksumName(header->Data), it->second.value);
             auto param = pScript->params->AddParam("OptionValue", QBKeyHeader::QBKeyType::INT);
             param->Data = it->second.value;
             return true;

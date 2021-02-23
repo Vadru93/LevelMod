@@ -193,7 +193,8 @@ struct Texture
 
     TextureData* data;
     BYTE* p_unk[3];
-    char tex_name[256];
+    char tex_name[128];
+    char mask_name[128];
     DWORD unk[2];
     DWORD uAddress;
     DWORD vAddress;

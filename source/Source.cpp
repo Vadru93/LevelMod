@@ -1246,6 +1246,7 @@ void ReadFirstOptions()
     new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_TargetFPS", (int)Gfx::target_fps);
     if (new_value <= 300 && new_value >= 60)
         Gfx::target_fps = (double)new_value;
+    //NewTimer::CalculateFPSTimers();
 
     //debug_print("value %d\n", Gfx::fps_fix);
     //CreateConsole();
@@ -3243,10 +3244,12 @@ __declspec(naked) void Checksum_naked()
     _asm ret;
 }
 
-__declspec(naked) void Fopen_naked()
+static DWORD fopemn;// = *(DWORD*)0x0058D0B0;
+static DWORD jmpBack;// = fopen + 5;
+__declspec(naked) void Fopen_naked() noexcept
 {
-    static DWORD fopen = *(DWORD*)0x0058D0B0;
-    static const DWORD jmpBack = fopen + 5;
+    fopemn = *(DWORD*)0x0058D0B0;
+    jmpBack = fopemn + 5;
     _asm mov fopen_path, esp;
     _asm pushad;
     _asm pushfd;
@@ -3853,7 +3856,7 @@ void AddFunctions()
         header->pFunction = NewTimer::ResetTimeScript;
     }
 
-#ifdef _DEBUG
+#ifdef _DEBUG && 0
     FILE* f = fopen("func_info.txt", "w");
     fprintf(f, "# Functions\n| Name | Params | Returns | Example | Description |\n");
     fprintf(f, "| :- | :- | :- | :- | :- |\n");
@@ -4330,6 +4333,30 @@ __declspec(naked) void UpdateFrameLength()
     _asm ret;
 }
 
+bool safe;
+
+__declspec(naked) void FixUberFrig()
+{
+    static DWORD jmpBack_uber = 0x004A76D7;
+    static DWORD jmpBack_uber2 = 0x004A770B;
+    static DWORD caller = 0x0045D330;
+    _asm pushad;
+    _asm pushfd;
+    safe = Game::skater->UberFrigFix();
+    _asm popfd;
+    _asm popad;
+    if (!safe)
+    {
+        _asm call[caller];
+        _asm jmp[jmpBack_uber];
+    }
+    else
+    {
+        _asm add esp, 4;
+        _asm jmp[jmpBack_uber2];
+    }
+}
+
 //Tricks that add points every frame will add too much if we increase fps
 //This function tries to calibrate it to be as close to original @ any given fps lock
 //Currently it may add slightly less score if using higher than 60 fps
@@ -4446,6 +4473,17 @@ void InitLevelMod()
 
     InjectHook(0x0049D15D, nop_func, 5);
     InjectHook(0x0049D180, nop_func, 5);
+
+    
+    //Fix UberFrig
+    HookFunction(0x004A76D3, FixUberFrig, 0xE9);
+
+    //Optimize Vertex equal function
+    //Before it was loading each float to FPU
+    //Now it simply does cpu memory check
+    BYTE OptimizedVertexFunc[] = { 0x8B, 0x54, 0x24, 0x04, 0x8B, 0x02, 0x3B, 0x01, 0x75, 0x20, 0x8B, 0x42, 0x04, 0x3B, 0x41, 0x04, 0x75, 0x18, 0x8B, 0x42, 0x08, 0x3B, 0x41, 0x08, 0x75, 0x10, 0x8B, 0x41, 0x0C, 0x3B, 0x41, 0x0C, 0x75, 0x08, 0xB8, 0x01, 0x00, 0x00, 0x00, 0xC2, 0x04, 0x00, 0x31, 0xC0, 0xC2, 0x04, 0x00 };
+    VirtualProtect((LPVOID)0x0049EA70, sizeof(OptimizedVertexFunc), PAGE_EXECUTE_READWRITE, &old);
+    memcpy((void*)0x0049EA70, OptimizedVertexFunc, sizeof(OptimizedVertexFunc));
 
     //Add RailNode to list
     BYTE AddRailFix[] = { 0x50, 0x51, 0x52, 0x56, 0x57, 0xE8, 0x00, 0x00, 0x00, 0x00, 0x5A, 0x59, 0x58, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90};

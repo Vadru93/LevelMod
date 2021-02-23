@@ -14,6 +14,8 @@ namespace NewTimer
     DWORD timer_lock = 0x10;
     double framelength = 1000000.0 / Gfx::target_fps;
     DWORD frameticks = 0;
+    DWORD max_frame_ticks = 0;
+    DWORD min_frame_ticks = 0;
     double hybrid_limit = 16.0;
     DWORD time = 0;
 
@@ -21,6 +23,8 @@ namespace NewTimer
     {
         DWORD frameticks2 = (DWORD)(16666.666666666 / (1000.0 / (double)freq.QuadPart));
         frameticks = (DWORD)((1000000.0 / Gfx::target_fps) / fFreq);
+        max_frame_ticks = frameticks + 1000;
+        min_frame_ticks = frameticks - 1000;
         //Add some headroom for hardware delay and rounding errors, probably should add this to ini for platform specific stored value
         frameticks -= 750;
         DWORD frameticks3 = (DWORD)(0.0166666666 / (1.0 / (double)freq.QuadPart));
@@ -136,16 +140,19 @@ namespace NewTimer
         framelength = ms;
         if (ms < 32000.0 && isActive)
         {
-            if (ms > Gfx::exact_high)//59,97 fps
+            if (ms > Gfx::exact_high && frameticks > min_frame_ticks)//59,97 fps
             {
-                debug_print("Dec\n");
+                /*DWORD diff = (DWORD)((ms - (1000000 / Gfx::target_fps))* 0.005);
+                diff += 4;
+                diff & 20;
+                debug_print("Dec %u\n", diff);*/
                 if(frameticks > 2)
-                   frameticks -= 2;
+                   frameticks -= 1;
             }
-            else if (ms < Gfx::exact_low)//60,24 fps
+            else if (ms < Gfx::exact_low && frameticks < max_frame_ticks)//60,24 fps
             {
                 debug_print("Inc\n");
-                frameticks++;
+                frameticks+=2;
             }
         }
         return startTime;

@@ -58,6 +58,7 @@
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <ExceptionHandling>Async</ExceptionHandling>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -83,6 +84,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <ExceptionHandling>Sync</ExceptionHandling>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
@@ -160,21 +163,30 @@
     <ClCompile Include="source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="source\Physics\Physics.cpp" />
+    <ClCompile Include="source\Physics\Physics.cpp">
+      <FloatingPointModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Fast</FloatingPointModel>
+    </ClCompile>
     <ClCompile Include="source\Script\Script.cpp" />
     <ClCompile Include="source\Settings\Settings.cpp" />
-    <ClCompile Include="source\Physics\Shatter.cpp" />
+    <ClCompile Include="source\Physics\Shatter.cpp">
+      <FloatingPointModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Fast</FloatingPointModel>
+    </ClCompile>
     <ClCompile Include="source\Game\Skater.cpp" />
-    <ClCompile Include="source\Source.cpp" />
+    <ClCompile Include="source\Source.cpp">
+      <FloatingPointModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Fast</FloatingPointModel>
+    </ClCompile>
     <ClCompile Include="source\Memory\String.cpp" />
     <ClCompile Include="source\Objects\SuperSectors.cpp" />
     <ClCompile Include="source\Render\CustomShaders.cpp" />
-    <ClCompile Include="source\Timer\Timer.cpp" />
+    <ClCompile Include="source\Timer\Timer.cpp">
+      <FloatingPointModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Fast</FloatingPointModel>
+    </ClCompile>
     <ClCompile Include="source\zip\unzip.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="res\resource.h" />
     <ClInclude Include="source\Hook\Bugfixes.h" />
+    <ClInclude Include="source\RenderWare\RenderWare.h" />
     <ClInclude Include="source\Script\Checksum.h" />
     <ClInclude Include="source\Collision.h" />
     <ClInclude Include="source\Commands.h" />

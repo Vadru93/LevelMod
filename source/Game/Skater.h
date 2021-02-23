@@ -551,6 +551,32 @@ public:
         pSetFlag(0x004A2580)(flag, value);
     }
 
+    const Vertex const GetNextFramePos() const
+    {
+        return (position + (velocity * framelength));
+    }
+
+    bool UberFrigFix()
+    {
+        Vertex pos = GetNextFramePos();
+        startcol = pos;
+        endcol = pos;
+
+        // Very minor adjustment to move origin away from vert walls
+        *(Vertex*)&endcol += *(Vertex*)&matrix[Y] * 0.001f;
+
+        startcol[Y] += 8.0f;
+        endcol[Y] -= 4800;
+
+        bool safe = CollisionCheck();
+        if (safe)
+        {
+            oldpos = position;
+            debug_print("You got saved by new UberFrig\n");
+        }
+        return safe;
+    }
+
     __inline void SetTrigger(DWORD node_name, DWORD trigger_script)
     {
         unk5[0x0C] = true;

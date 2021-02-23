@@ -5,6 +5,7 @@
 #include "Script\Checksum.h"
 #include "Objects\Mesh.h"
 #include "Script\Node.h"
+#include "RenderWare\RenderWare.h"
 
 
 //Collision stuff 00501CE0
@@ -17,29 +18,34 @@ extern bool updatingObjects;
 //#pragma pack(1)
 EXTERN struct SuperSector
 {
-    DWORD FFFFFFFF;
-    WORD* pUnk1;//prbably something about collision?
+    DWORD FFFFFFFF;//Always -1 maybe morph target index?
+    RpTriangle* triangles;
     D3DXVECTOR3* vertices;
     D3DXVECTOR3* normals;
-    float* uv_offset;//Looks like axis for CollisionTree?
-    DWORD* pUnk3;
+    float* uv_offset;
+    float* uv_offset2;
     DWORD* color_offset;
     Mesh* mesh;
-    DWORD* pUnk6[6];//Points to itself, probably child but since the tree is made this way it is like this
+    /* Atomics in this sectors */
+        /* The pointers are frigged so they look like they are pointing to
+           Atomics when they are pointing to here */
+    DWORD* pUnk[6];//Here should be pointer to atomic data, but since bsp is made in a bad way it only points to itself
     D3DXVECTOR3 bboxMax;
     D3DXVECTOR3 bboxMin;
-    DWORD* pUnk7;//Always NULL?
+    void* pUnk1;//Always NULL?
     CSector* sector;
-    DWORD* pUnk9;//Always NULL?
-    WORD padding;
+    void* pipeline;//Always NULL?
+    WORD padding;//Should be matbaseindex, but I think not used?
     WORD numVertices;
     WORD numIndices;
-    WORD unk1;//maybe flags?
-    DWORD* pUnk10;//maybe this is the leaf??
+    WORD padding2;//maybe flags?
+
+    //Th3 extension
+    DWORD* pUnk10;
     DWORD* pUnk11;//Always NULL?
     DWORD flag;//always 6?
     BYTE state;//MeshState
-    BYTE padding2[19];
+    BYTE padding3[19];
     /*DWORD* pUnk12;//Always NULL?
     WORD* pCollisionFlags;//the flags for skatable, trigger etc
     DWORD* pUnk13;//bunch of 0xFF and random data

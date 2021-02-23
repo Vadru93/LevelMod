@@ -21,9 +21,9 @@ typedef bool(__thiscall* const pCollisionCheck)(Skater* pThis, Collision::Flags 
 EXTERN bool Skater::CollisionCheck(Collision::Flags flag, bool ignore)
 {
     if (ignore)
-        return pCollisionCheck(0x0049FC80)(this, flag, Collision::Flags::Ignore, Collision::Flags::Ignore);
+        return pCollisionCheck(0x0049FC80)(this, flag, Collision::Flags::None, Collision::Flags::None);
     else
-        return pCollisionCheck(0x0049FC80)(this, Collision::Flags::Ignore, flag, Collision::Flags::Ignore);
+        return pCollisionCheck(0x0049FC80)(this, Collision::Flags::None, flag, Collision::Flags::None);
 }
 
 bool GetZAngle(CStruct* pParams, CScript* pScript)

@@ -284,6 +284,9 @@
     <ClInclude Include="source\Timer\Timer.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
+    <ClInclude Include="source\RenderWare\RenderWare.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\d3d8.def">

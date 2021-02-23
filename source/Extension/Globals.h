@@ -247,7 +247,7 @@ void Checksum_naked();
 //Gets executed when game opens a level file
 //This is used to know when you can add script functions
 //And used to ncomp node stuff and other level related stuff
-void Fopen_naked();
+void Fopen_naked() noexcept;
 //Gets executed at begining of frame
 //This is used in thug1src to tell engine that we began the frame in transfer
 //Currently not used, not sure if we need this?
