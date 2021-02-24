@@ -70,26 +70,45 @@ namespace NewTimer
     void ResetTime()
     {
         debug_print("ResetTime\n");
+
+        //First reset framelength
         *(float*)0x00850FD0 = (float)(1000.0 / Gfx::target_fps);
         framelength = 1000000 / Gfx::target_fps;
+
+        //old time is used to reset script timers
         DWORD old_time = GetTime();
+
+        //Reset timer
         timeBeginPeriod(1);
         reset_time = timeGetTime();
         timeEndPeriod(1);
 
+        //Now we need to reset physics, script timers and KeyState timers
+
+        //Sanity check, get latest skater pointer and check if we are initialized(to prevent crashing)
         Game::skater = Skater::UpdateSkater();
         if (Game::skater && !init && init2)
         {
+            //Reset specifically used KeyState timers
             KeyState::ResetTimers();
-            DWORD longest = CScript::GetLongestWaitPeriod();
 
-            if (reset_time > longest)
+            //Now reseting script timers
+            //This is probably not needed(so far didn't find any script running while time is reset)
+            //However if it will happen it's good to have this here, else a script might get stuck in endless loop
+
+            //First get the longest wait period of currently running scripts
+            DWORD longest_wait = CScript::GetLongestWaitPeriod();
+
+            //if our timer is above longest wait period we can safely increase our timer by this time
+            if (reset_time > longest_wait)
             {
-                reset_time -= longest;
-                CScript::ResetScriptTimers(NewTimer::GetTime(), old_time);// reset_time, old_time);
+                reset_time -= longest_wait;
+                CScript::ResetScriptTimers(longest_wait, old_time);
             }
+            else//This will be worst case scenario that will probably never happen
+                CScript::ResetScriptTimers();
 
-            
+            //Lastly reset Physics(also probably not needed, but do it anyway just in case)
             Game::skater->ResetPhysics();
         }
     }

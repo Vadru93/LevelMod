@@ -293,9 +293,24 @@ struct EXTERN CScript
         {
             if (p_scr->paused == 2)
             {
-                MessageBox(0, 0, 0, 0);
+                debug_print("Reseting timer on Script %s\n", FindChecksumName(scriptChecksum));
                 DWORD elapsed = old_time - *(DWORD*)&p_scr->startTime;
                 p_scr->startTime = (time_now - elapsed);
+            }
+            p_scr = GetNextScript(p_scr);
+        }
+    }
+
+    static void ResetScriptTimers()
+    {
+        CScript* p_scr = GetNextScript();
+
+        while (p_scr)
+        {
+            if (p_scr->paused == 2)
+            {
+                debug_print("Reseting timer on Script %s\n", FindChecksumName(scriptChecksum));
+                p_scr->startTime = 0;
             }
             p_scr = GetNextScript(p_scr);
         }
