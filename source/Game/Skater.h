@@ -547,13 +547,23 @@ public:
 
     void SetFlag(void* flag, bool value)
     {
-        typedef void(__thiscall* const pSetFlag)(void* flag, bool value);
-        pSetFlag(0x004A2580)(flag, value);
+        typedef void(__thiscall* const pSetFlag)(Skater* pThis, void* flag, bool value);
+        pSetFlag(0x004A2580)(this, flag, value);
     }
 
     const Vertex const GetNextFramePos() const
     {
         return (position + (velocity * framelength));
+    }
+
+    void ResetNewPhysics();
+
+    void ResetPhysics()
+    {
+        debug_print("ResetPhysics\n");
+        ResetNewPhysics();
+        typedef void(__thiscall* const pResetPhysics)(Skater* pThis);
+        pResetPhysics(0x004AD380)(this);
     }
 
     bool UberFrigFix()
@@ -914,21 +924,25 @@ public:
     {
         static const DWORD ptr = 0x005D06C0;
         VALIDATE_PTR((void*)ptr);
-        if (ptr == 0)
+        if (*(DWORD*)ptr == 0)
             return NULL;
         DWORD pSkater = *(DWORD*)ptr + 0x580;
         VALIDATE_PTR((void*)pSkater);
         if (pSkater == 0)
             return NULL;
+        if (*(DWORD*)pSkater == 0 || *(DWORD*)pSkater == 0xFFFFFFFF)
+            return NULL;
         pSkater = *(DWORD*)pSkater + 0x4;
         VALIDATE_PTR((void*)pSkater);
-        if (pSkater == 0)
+        if (pSkater == 0 || *(DWORD*)pSkater == 0xFFFFFFFF)
             return NULL;
         pSkater = *(DWORD*)pSkater + 0x2C;
         VALIDATE_PTR((void*)pSkater);
-        if (pSkater == 0 || pSkater == 43)
+        if (pSkater == 0 || pSkater == 43 || pSkater == 0x2C || *(DWORD*)pSkater == 0 || *(DWORD*)pSkater == 0xFFFFFFFF)
             return NULL;
         pSkater = *(DWORD*)pSkater + 0x48;
+        if (pSkater == 0)
+            return NULL;
         pSkater = *(DWORD*)pSkater;
         if (pSkater == 0)
             return NULL;

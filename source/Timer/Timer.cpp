@@ -2,6 +2,9 @@
 #include "Timer.h"
 #include <Mmsystem.h>
 
+extern bool init;
+extern bool init2;
+
 namespace NewTimer
 {
     DWORD reset_time = 0;
@@ -64,11 +67,16 @@ namespace NewTimer
     }
     void ResetTime()
     {
+        debug_print("ResetTime\n");
         *(float*)0x00850FD0 = (float)(1000.0 / Gfx::target_fps);
         framelength = 1000000 / Gfx::target_fps;
         timeBeginPeriod(1);
         reset_time = timeGetTime();
         timeEndPeriod(1);
+
+        Game::skater = Skater::UpdateSkater();
+        if (Game::skater && !init && init2)
+            Game::skater->ResetPhysics();
     }
 
     void UpdateTimer()

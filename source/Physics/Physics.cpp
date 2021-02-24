@@ -2007,6 +2007,46 @@ __declspec(noalias) void MaybeAcid()
     Slerp::OnGrind = false;
 }
 
+void Skater::ResetNewPhysics()
+{
+    Slerp::transfer = false;
+    Slerp::bDisallowTransfer = false;
+    Slerp::landing = false;
+    Slerp::m_began_frame_in_transfer = false;
+    Slerp::slerping = false;
+    Slerp::start = Matrix();
+    Slerp::end = Matrix();
+    Slerp::old = Matrix();
+    Slerp::duration = 0.0f;
+    Slerp::radians = 0.0f;
+    Slerp::timer = 0.0f;
+    Slerp::axis = D3DXVECTOR3(0, 0, 0);
+    Slerp::vel = Vertex(0, 0, 0);
+    Slerp::facing = Vertex(0, 0, 0);
+    Slerp::height = 0.0f;
+    Slerp::goal = Vertex(0, 0, 0);
+    //
+    Slerp::last = Vertex(0, 0, 0);
+    Slerp::lerp = 0.0f;
+    Slerp::inAcid = false;
+    Slerp::vert = false;
+    Slerp::addedvel = false;
+    Slerp::landed = false;
+    Slerp::OnGround = false;
+    Slerp::OnGrind = false;
+    Slerp::done = false;
+    Slerp::trying = false;
+    Slerp::value = 0.0f;
+    Slerp::wallplant = false;
+    Slerp::m_last_wallplant_time_stamp;
+    Slerp::realVelocity = Vertex(0, 0, 0);
+    Slerp::type = ACID;
+    Slerp::targetNormal = Vertex(0, 0, 0);
+    Slerp::target_normal = D3DXVECTOR4(0, 0, 0, 0);
+
+    Slerp::speed = 0.0f;
+}
+
 bool Skater::CheckForWallpant()
 {
     if (!(LevelModSettings::AllowNewTricks & LevelModSettings::ALLOW_WALLPLANT))
