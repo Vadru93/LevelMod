@@ -21,6 +21,8 @@ namespace NewTimer
     DWORD min_frame_ticks = 0;
     double hybrid_limit = 16.0;
     DWORD time = 0;
+    unsigned long long time_now;
+
 
     void CalculateFPSTimers()
     {
@@ -70,13 +72,26 @@ namespace NewTimer
         debug_print("ResetTime\n");
         *(float*)0x00850FD0 = (float)(1000.0 / Gfx::target_fps);
         framelength = 1000000 / Gfx::target_fps;
+        DWORD old_time = GetTime();
         timeBeginPeriod(1);
         reset_time = timeGetTime();
         timeEndPeriod(1);
 
         Game::skater = Skater::UpdateSkater();
         if (Game::skater && !init && init2)
+        {
+            KeyState::ResetTimers();
+            DWORD longest = CScript::GetLongestWaitPeriod();
+
+            if (reset_time > longest)
+            {
+                reset_time -= longest;
+                CScript::ResetScriptTimers(NewTimer::GetTime(), old_time);// reset_time, old_time);
+            }
+
+            
             Game::skater->ResetPhysics();
+        }
     }
 
     void UpdateTimer()
@@ -86,16 +101,20 @@ namespace NewTimer
         timeEndPeriod(1);*/
     }
 
-    DWORD __cdecl GetTime()
+    unsigned long long GetFrameTime()
+    {
+        return time_now;
+    }
+
+    unsigned long long __stdcall GetTime()
     {
         //timer_old_start = timer_time.LowPart;
         timeBeginPeriod(1);
-        DWORD _time = timeGetTime() - reset_time;
+        unsigned long long time_now = timeGetTime() - reset_time;
         timeEndPeriod(1);
-        _asm xor edx, edx;
-        return _time;
+        return time_now;
 
-
+        /*
         QueryPerformanceCounter(&timer_time);
         timer_time.QuadPart -= *(LONGLONG*)0x00850fb0;
 
@@ -113,7 +132,7 @@ namespace NewTimer
         else
             _asm xor edx, edx
 
-            return truncated;
+            return truncated;*/
     }
 
     LARGE_INTEGER TimerStart_Hybrid()

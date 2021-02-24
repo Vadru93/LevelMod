@@ -793,6 +793,9 @@ char* QScript::FindReference(DWORD checksum)
 
 void QBScript::AddScripts()
 {
+#ifdef _DEBUG
+    FILE* fd = fopen("Script functions.txt", "wb");
+#endif
     char* dir = GetScriptDir();
     FILE* f = fopen(dir, "rb+");
 
@@ -825,8 +828,22 @@ void QBScript::AddScripts()
         pFile++;
         while (pFile < (oldData + size) && (*pFile == 0x0D || *pFile == 0x0A))
             pFile++;
+
+#ifdef _DEBUG
+        if (fd)
+        {
+            for (DWORD i = 0; i < scripts.size(); i++)
+            {
+                fprintf(fd, "Script %X File %s\n", scripts[i], dir);
+            }
+        }
+#endif
     }
     delete[] oldData;
+
+#ifdef _DEBUG
+    fclose(fd);
+#endif
 }
 
 char* QBScript::GetQBKeyName(int checksum)
@@ -1066,6 +1083,13 @@ void QBScript::OpenScript(char* path, bool level)
             MessageBox(0,"default", def, 0);*/
             pFile++;
             break;
+#ifdef _DEBUG
+        case 0x23:
+            pFile += 2;
+            scripts.push_back(*(DWORD*)pFile);
+            pFile += 4;
+            break;
+#endif
 
         case 0x2F:
         case 0x37:

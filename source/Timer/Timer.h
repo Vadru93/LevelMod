@@ -23,7 +23,8 @@ namespace NewTimer
     void ResetTime();
     bool ResetTimeScript(CStruct* pStruct, CScript* pScript);
 
-    DWORD __cdecl GetTime();
+    unsigned long long __stdcall GetTime();
+    unsigned long long GetFrameTime();
 
     LARGE_INTEGER TimerStart_Hybrid();
     LARGE_INTEGER TimerStart();

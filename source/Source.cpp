@@ -3032,7 +3032,7 @@ void HookedFopen(char* p)
                 temp_level[strlen(p) - 3 - (pos + 1)] = 0x00;
                 Game::level_checksum = Checksum(temp_level);
                 /*typedef void(__cdecl* pResetTimers)();
-                pResetTimers(0x00409870)();*/
+                pNewTimers(0x00409870)();*/
                 QueryPerformanceCounter((LARGE_INTEGER*)0x00850FB0);
                 NewTimer::ResetTime();
                 //MessageBox(0, temp_level, Level, 0);
@@ -5350,7 +5350,7 @@ void OnRelease()
 void OnLost()
 {
     QueryPerformanceCounter(&startTime);
-    NewTimer::ResetTime();
+   // NewTimer::ResetTime();
     debug_print("OnLost\n");
     if (m_font)
     {
@@ -5362,7 +5362,7 @@ void OnLost()
 void OnReset()
 {
     QueryPerformanceCounter(&startTime);
-    NewTimer::ResetTime();
+    //NewTimer::ResetTime();
     debug_print("OnReset\n");
     if (m_font)
     {
@@ -6586,7 +6586,8 @@ __declspec(noalias) void DrawFrame()
 
             m_pIDirect3DDevice8->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
             for (DWORD i = 0; i < pointList.size(); i++)
-            m_pIDirect3DDevice8->DrawPrimitiveUP(D3DPT_LINELIST, (pointList[i].numNodes - 1) / 2, &pointList[i].v[0], sizeof(pointList[i].v[0]));*/
+            m_pIDirect3DDevice8->DrawPrimitiveUP(D3DPT_LINELIST, (pointList[i].
+            - 1) / 2, &pointList[i].v[0], sizeof(pointList[i].v[0]));*/
 
 
             //}

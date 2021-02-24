@@ -146,6 +146,9 @@ namespace QScript
         char* fileName;
         std::map<DWORD, char*> qbTable;
         std::map<DWORD, char*> levelTable;
+#ifdef _DEBUG
+        std::vector<DWORD> scripts;
+#endif
 
         void CreateQBTable(BYTE* table, bool level = false);
 
@@ -231,15 +234,26 @@ struct EXTERN CScript
     BYTE* address;//address of where script - parser/executer is in script
     CStruct* params;//params sent when called the script
     void* extras;//extra stuff
-    BYTE unk[0x370];//not looked into
+    BYTE unk[0x35C];//not looked into
+    unsigned long long startTime;
+    unsigned long long waitPeriod;
+    BYTE unk2[0x4];//not looked into
     //linked list
+    //37c
     CScript* next;
+    //380
     CScript* prev;
+    //384
     int nodeIndex;//-1 if no node
+    //388
     bool spawned;
     BYTE padding[3];
+    //38C
     Node* node;
+    //390
     DWORD scriptChecksum;//The name of the script
+    //394
+    DWORD paused;
 
     CScript()
     {
@@ -257,7 +271,35 @@ struct EXTERN CScript
             return (CScript*)*(DWORD*)0x008E1DFC;
     }
 
+    static DWORD GetLongestWaitPeriod()
+    {
+        DWORD longest = 0;
+        CScript* p_scr = GetNextScript();
 
+        while (p_scr)
+        {
+            if (p_scr->paused == 2 && p_scr->waitPeriod > longest)
+                longest = p_scr->waitPeriod;
+            p_scr = GetNextScript(p_scr);
+        }
+        return longest;
+    }
+
+    static void ResetScriptTimers(DWORD time_now, DWORD old_time)
+    {
+        CScript* p_scr = GetNextScript();
+
+        while (p_scr)
+        {
+            if (p_scr->paused == 2)
+            {
+                MessageBox(0, 0, 0, 0);
+                DWORD elapsed = old_time - *(DWORD*)&p_scr->startTime;
+                p_scr->startTime = (time_now - elapsed);
+            }
+            p_scr = GetNextScript(p_scr);
+        }
+    }
 
     static DWORD GetNumCScripts()
     {

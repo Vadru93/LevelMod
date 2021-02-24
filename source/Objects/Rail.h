@@ -19,6 +19,10 @@ class RailNode
 {
     friend class RailManager;
 
+    RailNode()
+    {
+    }
+
     enum class Flags : WORD
     {
         DEFAULT_LINE = 1,
@@ -333,10 +337,10 @@ public:
         if(first_node)
             *first_node = NULL;
         if (mp_nodes)
-            freex(mp_nodes);
+            delete mp_nodes;
         mp_nodes = NULL;
         if (temp_nodes)
-            freex(temp_nodes);
+            delete temp_nodes;
         temp_nodes = NULL;
 
         if(PointyObjects.size())
@@ -498,9 +502,9 @@ public:
             }
         }
         if (mp_nodes)
-            freex(mp_nodes);
+            delete mp_nodes;
         if (temp_nodes)
-            freex(temp_nodes);
+            delete temp_nodes;
 
         if(Game::skater)
             Game::skater->Restore();
@@ -510,11 +514,11 @@ public:
 
         if (numRailNodes)
         {
-            temp_nodes = (RailNode*)mallocx(sizeof(RailNode) * (numRailNodes+1));
+            temp_nodes = new RailNode [numRailNodes + 1];//(RailNode*)mallocx(sizeof(RailNode) * (numRailNodes+1));
             if (!temp_nodes)
                 MessageBox(0, 0, 0, 0);
             EndOfRail = (DWORD)&temp_nodes[numRailNodes];
-            temp_links = (RailLinks*)mallocx(sizeof(RailLinks) * numRailNodes+1);
+            temp_links = new RailLinks[numRailNodes + 1]; //(RailLinks*)mallocx(sizeof(RailLinks) * numRailNodes+1);
             if (!temp_links)
                 MessageBox(0, 0, 0, 0);
 
@@ -973,7 +977,7 @@ public:
         if (numRailNodes)
         {
             EndOfRail = (DWORD)&temp_nodes[current_node];
-            RailNode** pp_railnodes = (RailNode**)mallocx(numNodes * sizeof(RailNode*));
+            RailNode** pp_railnodes = new RailNode * [numNodes]; //mallocx(numNodes * sizeof(RailNode*));
             for (int i = 0; i < numNodes; i++)
             {
                 pp_railnodes[i] = NULL;
@@ -1024,12 +1028,12 @@ public:
                 //p_node = p_node->pNext;
             }
 
-            freex(pp_railnodes);
-            freex(temp_links);
+            delete pp_railnodes;
+            delete temp_links;
 
             pointy_rails.clear();
             PointyObjects.clear();
-            mp_nodes = (RailNode*)mallocx((current_node + pointy_rails.size())* sizeof(RailNode));
+            mp_nodes = new RailNode[current_node + pointy_rails.size()];// (RailNode*)mallocx((current_node + pointy_rails.size()) * sizeof(RailNode));
             DWORD temp_counter = 0;
 
             vector<RailNode*> alreadyAdded;
@@ -1214,7 +1218,7 @@ public:
             }
 
             pointy_rails.clear();
-            freex(temp_nodes);
+            delete temp_nodes;
             temp_nodes = NULL;
             //ExecuteQBScript("LoadTerrain");
         }

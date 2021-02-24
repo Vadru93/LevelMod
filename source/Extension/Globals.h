@@ -32,7 +32,7 @@
 
 #define p_slomo *(float*)0x005B4E68
 
-extern DWORD NewTimer::GetTime();
+extern unsigned long long __stdcall NewTimer::GetTime();
 
 //--------Spine and Acid--------
 enum TransferType

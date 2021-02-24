@@ -176,6 +176,11 @@ public:
         return p_num_keys;
     }
 
+    static void ResetTimers()
+    {
+        ZeroMemory((void*)0x0085B4D0, 8 * 0x10);
+    }
+
     WORD XINPUT_UpdateCamera_Hook(BYTE gamestate, BYTE* game_config);
 
     static bool IsPressed(KeyCode key)
