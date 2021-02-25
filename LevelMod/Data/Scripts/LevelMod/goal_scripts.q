@@ -1,4 +1,3 @@
-
 GOAL_BRONZE = 0
 GOAL_SILVER = 1
 GOAL_GOLD = 2
@@ -52,7 +51,65 @@ STAT_POINT2 = 1
 STAT_POINT3 = 2
 STAT_POINT4 = 3
 STAT_POINT5 = 4
-DefaultGoalParams = { Goal_Start_Script = NullScript Goal_Start_End_Script = NullScript Goal_Complete_Start_Script = NullScript NetPlayScript = NullScript CareerPlayScript = NullScript CameraStart = "Cam_Goals" CameraTape = "Cam_Goal_04" CameraTrickspotVert = "Cam_Goal_05vert" CameraTrickspotVertComplete = "Cam_Goal_05vert" CameraTrickspotStreet = "Cam_Goal_05street" CameraTrickspotStreetComplete = "Cam_Goal_05street" CameraScripted1 = "Cam_Goal_06" CameraScripted1Complete = "Cam_Goal_Complete_06" CameraScripted2 = "Cam_Goal_07" CameraScripted2Complete = "Cam_Goal_Complete_07" CameraScripted3 = "Cam_Goal_07" CameraScripted3Complete = "Cam_Goals" CameraLevelEnd = "Cam_Goals" Goal_HighScore_Text = "Get a HIGH SCORE: XXXX Points" Goal_ProScore_Text = "Get a PRO SCORE: YYYY Points" Goal_SickScore_Text = "Get a SICK SCORE: ZZZ Points" Goal_SKATE_Text = "Collect S-K-A-T-E" Goal_Tape_Text = "Get the Secret Tape" Goal_TrickspotStreet_Text = "Street Trick X at Location Y" Goal_TrickspotVert_Text = "Vert Trick X at Location Y" Goal_Scripted1_Text = "Scripted Goal 1" Goal_Scripted2_Text = "Scripted Goal 2" Goal_Scripted3_Text = "Scripted Goal 3" Goal_Trickspot_Start_Script = NullScript Goal_TrickspotVert_Complete_Start_Script = NullScript Goal_TrickspotStreet_Complete_Start_Script = NullScript Goal_Scripted1_Start_Script = NullScript Goal_Scripted1_End_Script = NullScript Goal_Scripted1_Complete_Start_Script = NullScript Goal_Scripted1_Complete_End_Script = NullScript Goal_Scripted2_Start_Script = NullScript Goal_Scripted2_End_Script = NullScript Goal_Scripted2_Complete_Start_Script = NullScript Goal_Scripted2_Complete_End_Script = NullScript Goal_Scripted3_Start_Script = NullScript Goal_Scripted3_End_Script = NullScript Goal_Scripted3_Complete_Start_Script = NullScript Goal_Scripted3_Complete_End_Script = NullScript Goal_End_Script = NullScript Goal_Complete_End_Script = NullScript }
+
+DefaultGoalParams = { 
+  Goal_Start_Script = NullScript 
+  Goal_Start_End_Script = NullScript
+  Goal_Complete_Start_Script = NullScript
+  NetPlayScript = NullScript
+  CareerPlayScript = NullScript
+  
+  CameraStart = "Cam_Goals"
+  CameraTape = "Cam_Goal_04"
+  CameraTrickspotVert = "Cam_Goal_05vert"
+  CameraTrickspotVertComplete = "Cam_Goal_05vert"
+  CameraTrickspotStreet = "Cam_Goal_05street"
+  CameraTrickspotStreetComplete = "Cam_Goal_05street"
+  CameraScripted1 = "Cam_Goal_06"
+  CameraScripted1Complete = "Cam_Goal_Complete_06"
+  CameraScripted2 = "Cam_Goal_07"
+  CameraScripted2Complete = "Cam_Goal_Complete_07"
+  CameraScripted3 = "Cam_Goal_07"
+  CameraScripted3Complete = "Cam_Goals"
+  CameraLevelEnd = "Cam_Goals"
+  
+  Goal_HighScore_Text = "Get a HIGH SCORE: XXX Points"
+  Goal_ProScore_Text = "Get a PRO SCORE: YYY Points"
+  Goal_SickScore_Text = "Get a SICK SCORE: ZZZ Points"
+  Goal_SKATE_Text = "Collect S-K-A-T-E"
+  Goal_Tape_Text = "Get the Secret Tape"
+  Goal_TrickspotStreet_Text = "Street Trick X at Location Y"
+  Goal_TrickspotVert_Text = "Vert Trick X at Location Y"
+  Goal_Scripted1_Text = "Scripted Goal 1"
+  Goal_Scripted2_Text = "Scripted Goal 2"
+  Goal_Scripted3_Text = "Scripted Goal 3"
+  
+  Goal_Trickspot_Start_Script = NullScript
+  Goal_TrickspotVert_Complete_Start_Script = NullScript
+  Goal_TrickspotStreet_Complete_Start_Script = NullScript
+  
+  Goal_Scripted1_Start_Script = NullScript
+  Goal_Scripted1_End_Script = NullScript
+  Goal_Scripted1_Complete_Start_Script = NullScript
+  Goal_Scripted1_Complete_End_Script = NullScript
+  
+  Goal_Scripted2_Start_Script = NullScript
+  Goal_Scripted2_End_Script = NullScript
+  Goal_Scripted2_Complete_Start_Script = NullScript
+  Goal_Scripted2_Complete_End_Script = NullScript
+  
+  Goal_Scripted3_Start_Script = NullScript
+  Goal_Scripted3_End_Script = NullScript
+  Goal_Scripted3_Complete_Start_Script = NullScript
+  Goal_Scripted3_Complete_End_Script = NullScript
+  
+  Goal_End_Script = NullScript
+  Goal_Complete_End_Script = NullScript
+}
+
+//move this part to framework i guess? all before UnSetWaitForGoalFlags
+script NullScript
+endscript
 
 script WaitForControllerPressedX
   ResetKeyState
@@ -115,6 +172,14 @@ script WaitForPressAndReleaseX
   Debounce X time = 0.3
 endscript
 
+script WaitForSkippable
+  wait 1 second
+endscript
+
+script DebounceForSkippable
+  Debounce X time = 1
+endscript
+
 script UnSetWaitForGoalFlags
   UnSetFlag flag = WAIT_FOR_HIGHSCORE
   UnSetFlag flag = WAIT_FOR_PROSCORE
@@ -131,14 +196,7 @@ script GameStart DefaultGoalParams
   if IsCareerMode
     PauseSkaters
     MoveSkaterZ dist = -2000
-    UnSetFlag flag = WAIT_FOR_HIGHSCORE
-    UnSetFlag flag = WAIT_FOR_PROSCORE
-    UnSetFlag flag = WAIT_FOR_SICKSCORE
-    UnSetFlag flag = WAIT_FOR_SKATE
-    UnSetFlag flag = WAIT_FOR_TAPE
-    UnSetFlag flag = WAIT_FOR_SCRIPTED1
-    UnSetFlag flag = WAIT_FOR_SCRIPTED2
-    UnSetFlag flag = WAIT_FOR_SCRIPTED3
+    UnSetWaitForGoalFlags
     Kill prefix = "TRG_Goal_Letter"
     Kill prefix = "TRG_Goal_Secret_T"
     Kill prefix = "TRG_Stat"
@@ -345,61 +403,95 @@ script GameStart DefaultGoalParams
   endif
 endscript
 
-script NullScript
+FoundryScoreParams = { 
+  Goal_HighScore_Score = 10000
+  Goal_ProScore_Score = 30000
+  Goal_SickScore_Score = 60000
+  Goal_HighScore_Text = "Get a HIGH SCORE:| 10,000 Points" 
+  Goal_ProScore_Text = "Get a PRO SCORE:| 30,000 Points" 
+  Goal_SickScore_Text = "Get a SICK SCORE:| 60,000 Points"
+}
+
+CanadaScoreParams = {
+  Goal_HighScore_Score = 35000
+  Goal_ProScore_Score = 70000
+  Goal_SickScore_Score = 120000
+  Goal_HighScore_Text = "Get a HIGH SCORE:| 35,000 Points" 
+  Goal_ProScore_Text = "Get a PRO SCORE:| 70,000 Points"
+  Goal_SickScore_Text = "Get a SICK SCORE:| 120,000 Points" 
+}
+
+SuburbiaScoreParams = { 
+  Goal_HighScore_Score = 35000
+  Goal_ProScore_Score = 70000
+  Goal_SickScore_Score = 120000
+  Goal_HighScore_Text = "Get a HIGH SCORE:| 55,000 Points" 
+  Goal_ProScore_Text = "Get a PRO SCORE:| 110,000 Points" 
+  Goal_SickScore_Text = "Get a SICK SCORE:| 200,000 Points" 
+}
+
+AirportScoreParams = {
+  Goal_HighScore_Score = 75000
+  Goal_ProScore_Score = 150000
+  Goal_SickScore_Score = 300000
+  Goal_HighScore_Text = "Get a HIGH SCORE:| 75,000 Points" 
+  Goal_ProScore_Text = "Get a PRO SCORE:| 150,000 Points" 
+  Goal_SickScore_Text = "Get a SICK SCORE:| 300,000 Points" 
+}
+
+LosAngelesScoreParams = { 
+  Goal_HighScore_Score = 10000
+  Goal_ProScore_Score = 19000
+  Goal_SickScore_Score = 400000
+  Goal_HighScore_Text = "Get a HIGH SCORE:| 100,000 Points" 
+  Goal_ProScore_Text = "Get a PRO SCORE:| 190,000 Points" 
+  Goal_SickScore_Text = "Get a SICK SCORE:| 400,000 Points" 
+}
+
+ShipScoreParams = { 
+  Goal_HighScore_Score = 150000
+  Goal_ProScore_Score = 225000
+  Goal_SickScore_Score = 500000
+  Goal_HighScore_Text = "Get a HIGH SCORE:| 150,000 Points" 
+  Goal_ProScore_Text = "Get a PRO SCORE:| 225,000 Points" 
+  Goal_SickScore_Text = "Get a SICK SCORE:| 500,000 Points" 
+}
+
+script SetupCareerGoals
+  SetScoreGoal Score = <Goal_HighScore_Score> GoalScript = Got_HighScore goal = GOAL_HIGHSCORE
+  SetScoreGoal Score = <Goal_ProScore_Score> GoalScript = Got_ProScore goal = GOAL_PROSCORE
+  SetScoreGoal Score = <Goal_SickScore_Score> GoalScript = Got_SickScore goal = GOAL_SICKSCORE
+  GameStart <...>
 endscript
-FoundryScoreParams = { Goal_HighScore_Text = "Get a HIGH SCORE:| 10,000 Points" Goal_ProScore_Text = "Get a PRO SCORE:| 30,000 Points" Goal_SickScore_Text = "Get a SICK SCORE:| 60,000 Points" }
-CanadaScoreParams = { Goal_HighScore_Text = "Get a HIGH SCORE:| 35,000 Points" Goal_ProScore_Text = "Get a PRO SCORE:| 70,000 Points" Goal_SickScore_Text = "Get a SICK SCORE:| 120,000 Points" }
-SuburbiaScoreParams = { Goal_HighScore_Text = "Get a HIGH SCORE:| 55,000 Points" Goal_ProScore_Text = "Get a PRO SCORE:| 110,000 Points" Goal_SickScore_Text = "Get a SICK SCORE:| 200,000 Points" }
-AirportScoreParams = { Goal_HighScore_Text = "Get a HIGH SCORE:| 75,000 Points" Goal_ProScore_Text = "Get a PRO SCORE:| 150,000 Points" Goal_SickScore_Text = "Get a SICK SCORE:| 300,000 Points" }
-LosAngelesScoreParams = { Goal_HighScore_Text = "Get a HIGH SCORE:| 100,000 Points" Goal_ProScore_Text = "Get a PRO SCORE:| 190,000 Points" Goal_SickScore_Text = "Get a SICK SCORE:| 400,000 Points" }
-ShipScoreParams = { Goal_HighScore_Text = "Get a HIGH SCORE:| 150,000 Points" Goal_ProScore_Text = "Get a PRO SCORE:| 225,000 Points" Goal_SickScore_Text = "Get a SICK SCORE:| 500,000 Points" }
 
 script StartRunScript
   ClearScoreGoals
   if CareerLevelIs LevelNum_Foundry
-    SetScoreGoal Score = 10000 GoalScript = Got_HighScore goal = GOAL_HIGHSCORE
-    SetScoreGoal Score = 30000 GoalScript = Got_ProScore goal = GOAL_PROSCORE
-    SetScoreGoal Score = 60000 GoalScript = Got_SickScore goal = GOAL_SICKSCORE
-    GameStart FoundryGoalParams FoundryScoreParams
+    SetupCareerGoals FoundryGoalParams FoundryScoreParams
   endif
   if CareerLevelIs LevelNum_Canada
-    SetScoreGoal Score = 35000 GoalScript = Got_HighScore goal = GOAL_HIGHSCORE
-    SetScoreGoal Score = 70000 GoalScript = Got_ProScore goal = GOAL_PROSCORE
-    SetScoreGoal Score = 120000 GoalScript = Got_SickScore goal = GOAL_SICKSCORE
-    GameStart CanadaGoalParams CanadaScoreParams
+  SetupCareerGoals CanadaGoalParams CanadaScoreParams
+  endif
+  if CareerLevelIs LevelNum_Rio
+    CompIntroSequence RioCompParams
   endif
   if CareerLevelIs LevelNum_Suburbia
-    SetScoreGoal Score = 55000 GoalScript = Got_HighScore goal = GOAL_HIGHSCORE
-    SetScoreGoal Score = 110000 GoalScript = Got_ProScore goal = GOAL_PROSCORE
-    SetScoreGoal Score = 200000 GoalScript = Got_SickScore goal = GOAL_SICKSCORE
-    GameStart SuburbiaGoalParams SuburbiaScoreParams
+    SetupCareerGoals SuburbiaGoalParams SuburbiaScoreParams
   endif
   if CareerLevelIs LevelNum_SkaterIsland
     CompIntroSequence SICompParams
   endif
   if CareerLevelIs LevelNum_Airport
-    SetScoreGoal Score = 75000 GoalScript = Got_HighScore goal = GOAL_HIGHSCORE
-    SetScoreGoal Score = 150000 GoalScript = Got_ProScore goal = GOAL_PROSCORE
-    SetScoreGoal Score = 300000 GoalScript = Got_SickScore goal = GOAL_SICKSCORE
-    GameStart AirportGoalParams AirportScoreParams
-  endif
-  if CareerLevelIs LevelNum_Rio
-    CompIntroSequence RioCompParams
+    SetupCareerGoals AirportGoalParams AirportScoreParams
   endif
   if CareerLevelIs LevelNum_LA
-    SetScoreGoal Score = 100000 GoalScript = Got_HighScore goal = GOAL_HIGHSCORE
-    SetScoreGoal Score = 190000 GoalScript = Got_ProScore goal = GOAL_PROSCORE
-    SetScoreGoal Score = 400000 GoalScript = Got_SickScore goal = GOAL_SICKSCORE
-    GameStart LosAngelesGoalParams LosAngelesScoreParams
+    SetupCareerGoals LosAngelesGoalParams LosAngelesScoreParams
   endif
   if CareerLevelIs LevelNum_Tokyo
     CompIntroSequence TokCompParams
   endif
   if CareerLevelIs LevelNum_Ship
-    SetScoreGoal Score = 150000 GoalScript = Got_HighScore goal = GOAL_HIGHSCORE
-    SetScoreGoal Score = 225000 GoalScript = Got_ProScore goal = GOAL_PROSCORE
-    SetScoreGoal Score = 500000 GoalScript = Got_SickScore goal = GOAL_SICKSCORE
-    GameStart ShipGoalParams ShipScoreParams
+    SetupCareerGoals ShipGoalParams ShipScoreParams
   endif
   if GotParam From_menu
     SwitchToMenu menu = end_run_menu
@@ -645,6 +737,33 @@ script CreateDeckIcon
   endif
 endscript
 
+
+CareerStatPoints = [
+  { STAT_SET_A flag = GOAL_STAT_POINT1 name = TRG_Stat_Point_A01 }
+  { STAT_SET_A flag = GOAL_STAT_POINT2 name = TRG_Stat_Point_A02 }
+  { STAT_SET_A flag = GOAL_STAT_POINT3 name = TRG_Stat_Point_A03 }
+  { STAT_SET_A flag = GOAL_STAT_POINT4 name = TRG_Stat_Point_A04 }
+  { STAT_SET_A flag = GOAL_STAT_POINT5 name = TRG_Stat_Point_A05 }
+
+  { STAT_SET_B flag = GOAL_STAT_POINT1 name = TRG_Stat_Point_B01 }
+  { STAT_SET_B flag = GOAL_STAT_POINT2 name = TRG_Stat_Point_B02 }
+  { STAT_SET_B flag = GOAL_STAT_POINT3 name = TRG_Stat_Point_B03 }
+  { STAT_SET_B flag = GOAL_STAT_POINT4 name = TRG_Stat_Point_B04 }
+  { STAT_SET_B flag = GOAL_STAT_POINT5 name = TRG_Stat_Point_B05 }
+
+  { STAT_SET_C flag = GOAL_STAT_POINT1 name = TRG_Stat_Point_C01 }
+  { STAT_SET_C flag = GOAL_STAT_POINT2 name = TRG_Stat_Point_C02 }
+  { STAT_SET_C flag = GOAL_STAT_POINT3 name = TRG_Stat_Point_C03 }
+  { STAT_SET_C flag = GOAL_STAT_POINT4 name = TRG_Stat_Point_C04 }
+  { STAT_SET_C flag = GOAL_STAT_POINT5 name = TRG_Stat_Point_C05 }
+
+  { STAT_SET_D flag = GOAL_STAT_POINT1 name = TRG_Stat_Point_D01 }
+  { STAT_SET_D flag = GOAL_STAT_POINT2 name = TRG_Stat_Point_D02 }
+  { STAT_SET_D flag = GOAL_STAT_POINT3 name = TRG_Stat_Point_D03 }
+  { STAT_SET_D flag = GOAL_STAT_POINT4 name = TRG_Stat_Point_D04 }
+  { STAT_SET_D flag = GOAL_STAT_POINT5 name = TRG_Stat_Point_D05 }
+]
+
 script KillTrickPoints
   if InMultiplayerGame
   else
@@ -654,113 +773,48 @@ script KillTrickPoints
   endif
 endscript
 
-script CreateTrickPoints
-endscript
-
-script CreateTrickPoints2
-  if InMultiplayerGame
-  else
-    if IsCareerMode
-      if GetFlag flag = STAT_SET_A
-        if GetFlag flag = GOAL_STAT_POINT1
-        else
-          Create name = TRG_Stat_Point_A01
-        endif
-        if GetFlag flag = GOAL_STAT_POINT2
-        else
-          Create name = TRG_Stat_Point_A02
-        endif
-        if GetFlag flag = GOAL_STAT_POINT3
-        else
-          Create name = TRG_Stat_Point_A03
-        endif
-        if GetFlag flag = GOAL_STAT_POINT4
-        else
-          Create name = TRG_Stat_Point_A04
-        endif
-        if GetFlag flag = GOAL_STAT_POINT5
-        else
-          Create name = TRG_Stat_Point_A05
-        endif
-      endif
-      if GetFlag flag = STAT_SET_B
-        if GetFlag flag = GOAL_STAT_POINT1
-        else
-          Create name = TRG_Stat_Point_B01
-        endif
-        if GetFlag flag = GOAL_STAT_POINT2
-        else
-          Create name = TRG_Stat_Point_B02
-        endif
-        if GetFlag flag = GOAL_STAT_POINT3
-        else
-          Create name = TRG_Stat_Point_B03
-        endif
-        if GetFlag flag = GOAL_STAT_POINT4
-        else
-          Create name = TRG_Stat_Point_B04
-        endif
-        if GetFlag flag = GOAL_STAT_POINT5
-        else
-          Create name = TRG_Stat_Point_B05
-        endif
-      endif
-      if GetFlag flag = STAT_SET_C
-        if GetFlag flag = GOAL_STAT_POINT1
-        else
-          Create name = TRG_Stat_Point_C01
-        endif
-        if GetFlag flag = GOAL_STAT_POINT2
-        else
-          Create name = TRG_Stat_Point_C02
-        endif
-        if GetFlag flag = GOAL_STAT_POINT3
-        else
-          Create name = TRG_Stat_Point_C03
-        endif
-        if GetFlag flag = GOAL_STAT_POINT4
-        else
-          Create name = TRG_Stat_Point_C04
-        endif
-        if GetFlag flag = GOAL_STAT_POINT5
-        else
-          Create name = TRG_Stat_Point_C05
-        endif
-      endif
-      if GetFlag flag = STAT_SET_D
-        if GetFlag flag = GOAL_STAT_POINT1
-        else
-          Create name = TRG_Stat_Point_D01
-        endif
-        if GetFlag flag = GOAL_STAT_POINT2
-        else
-          Create name = TRG_Stat_Point_D02
-        endif
-        if GetFlag flag = GOAL_STAT_POINT3
-        else
-          Create name = TRG_Stat_Point_D03
-        endif
-        if GetFlag flag = GOAL_STAT_POINT4
-        else
-          Create name = TRG_Stat_Point_D04
-        endif
-        if GetFlag flag = GOAL_STAT_POINT5
-        else
-          Create name = TRG_Stat_Point_D05
-        endif
-      endif
+script MaybeSpawnStatPoint
+  if GotParam <set>
+    if GetFlag flag = <flag>
+    else
+      Create name = <name>
     endif
   endif
 endscript
 
-script Goal_SKATE_Letter_S
+script CreateTrickPoints
+endscript
+
+script CreateTrickPoints2
+  printf "CreateTrickPoints2"
+  if InMultiplayerGame
+  else
+    if IsCareerMode
+      if GetFlag flag = STAT_SET_A
+        ForeachIn CareerStatPoints do = MaybeSpawnStatPoint params = { set = STAT_SET_A <...> }
+      endif
+      if GetFlag flag = STAT_SET_B
+        ForeachIn CareerStatPoints do = MaybeSpawnStatPoint params = { set = STAT_SET_B <...> }
+      endif
+      if GetFlag flag = STAT_SET_C
+        ForeachIn CareerStatPoints do = MaybeSpawnStatPoint params = { set = STAT_SET_C <...> }
+      endif
+      if GetFlag flag = STAT_SET_D
+        ForeachIn CareerStatPoints do = MaybeSpawnStatPoint params = { set = STAT_SET_D <...> }
+      endif     
+    endif
+  endif
+endscript
+
+
+script Goal_SKATE_Letter
   if IsCareerMode
   else
     Die
   endif
   Obj_RotY speed = 200
   Obj_SetInnerRadius 8
-  Obj_SetException ex = SkaterInRadius scr = Got_SKATE_Letter_S
+  Obj_SetException ex = SkaterInRadius scr = <scr>
   begin
     Obj_MoveToRelPos (0, 2, 0) time = 0.1
     Obj_WaitMove
@@ -779,6 +833,11 @@ script Goal_SKATE_Letter_S
     Obj_MoveToRelPos (0, -1, 0) time = 0.1
     Obj_WaitMove
   repeat
+endscript
+
+
+script Goal_SKATE_Letter_S
+  Goal_SKATE_Letter scr = Got_SKATE_Letter_S
 endscript
 
 script Got_SKATE_Letter_S
@@ -790,31 +849,7 @@ script Got_SKATE_Letter_S
 endscript
 
 script Goal_SKATE_Letter_K
-  if IsCareerMode
-  else
-    Die
-  endif
-  Obj_RotY speed = 200
-  Obj_SetInnerRadius 8
-  Obj_SetException ex = SkaterInRadius scr = Got_SKATE_Letter_K
-  begin
-    Obj_MoveToRelPos (0, 2, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, 6, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, 2, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, 1, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, -2, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, -6, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, -2, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, -1, 0) time = 0.1
-    Obj_WaitMove
-  repeat
+  Goal_SKATE_Letter scr = Got_SKATE_Letter_K
 endscript
 
 script Got_SKATE_Letter_K
@@ -826,31 +861,7 @@ script Got_SKATE_Letter_K
 endscript
 
 script Goal_SKATE_Letter_A
-  if IsCareerMode
-  else
-    Die
-  endif
-  Obj_RotY speed = 200
-  Obj_SetInnerRadius 8
-  Obj_SetException ex = SkaterInRadius scr = Got_SKATE_Letter_A
-  begin
-    Obj_MoveToRelPos (0, 2, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, 6, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, 2, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, 1, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, -2, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, -6, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, -2, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, -1, 0) time = 0.1
-    Obj_WaitMove
-  repeat
+  Goal_SKATE_Letter scr = Got_SKATE_Letter_A
 endscript
 
 script Got_SKATE_Letter_A
@@ -862,31 +873,7 @@ script Got_SKATE_Letter_A
 endscript
 
 script Goal_SKATE_Letter_T
-  if IsCareerMode
-  else
-    Die
-  endif
-  Obj_RotY speed = 200
-  Obj_SetInnerRadius 8
-  Obj_SetException ex = SkaterInRadius scr = Got_SKATE_Letter_T
-  begin
-    Obj_MoveToRelPos (0, 2, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, 6, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, 2, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, 1, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, -2, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, -6, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, -2, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, -1, 0) time = 0.1
-    Obj_WaitMove
-  repeat
+  Goal_SKATE_Letter scr = Got_SKATE_Letter_T
 endscript
 
 script Got_SKATE_Letter_T
@@ -898,31 +885,7 @@ script Got_SKATE_Letter_T
 endscript
 
 script Goal_SKATE_Letter_E
-  if IsCareerMode
-  else
-    Die
-  endif
-  Obj_RotY speed = 200
-  Obj_SetInnerRadius 8
-  Obj_SetException ex = SkaterInRadius scr = Got_SKATE_Letter_E
-  begin
-    Obj_MoveToRelPos (0, 2, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, 6, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, 2, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, 1, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, -2, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, -6, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, -2, 0) time = 0.1
-    Obj_WaitMove
-    Obj_MoveToRelPos (0, -1, 0) time = 0.1
-    Obj_WaitMove
-  repeat
+  Goal_SKATE_Letter scr = Got_SKATE_Letter_E
 endscript
 
 script Got_SKATE_Letter_E
@@ -932,6 +895,8 @@ script Got_SKATE_Letter_E
   SetFlag flag = GOAL_LETTER_E
   GOAL_SKATE_Check
 endscript
+
+
 
 script Goal_STAT_POINT
   if IsCareerMode
@@ -1615,6 +1580,9 @@ script MidGameCheckGoals
   endif
 endscript
 
+//basically if got all goals, do nothing?
+//can remove probably
+
 script MidGameCheckAllGoals
   if GetGoal goal = GOAL_SCRIPTED3
     if GetGoal goal = GOAL_SCRIPTED2
@@ -1642,6 +1610,8 @@ script MidGameCheckAllGoals
     endif
   endif
 endscript
+
+
 panel_message_goal = { font = "title.fnt" just = (0, 0) dims = (320, 112) colors = [ { (128, 128, 128) alpha = 70 } ] key_points = [ { pos = (320, 200) alpha = 0 scale = 0.3 time = 0 }
     { pos = (320, 205) alpha = 20 scale = 1.05 time = 0.1 }
     { pos = (320, 209) alpha = 50 scale = 0.95 time = 0.2 }
@@ -2099,6 +2069,8 @@ SideListSelected = { font = "large.fnt" just = (0, 0) dims = (200, 112) colors =
     { scale = 1 time = 0.3 }
     { time = 6000 } ] }
 
+
+//unused?
 script SetPacer
   wait 2 seconds
   SetFlag flag = PACER
@@ -2363,6 +2335,7 @@ script EndGame DefaultGoalParams
     endif
   endif
 endscript
+
 TrickspotLocLeft = { font = "large.fnt" just = (0, 0) dims = (600, 112) colors = [ { (100, 100, 100) alpha = 128 } ] key_points = [ { pos = (20, 224) alpha = 0 scale = 1.2 time = 0 }
     { time = 5 } ] }
 TrickspotLocTop = { font = "large.fnt" just = (0, 0) dims = (600, 112) colors = [ { (100, 100, 100) alpha = 128 } ] key_points = [ { pos = (320, 20) alpha = 0 scale = 1.2 time = 0 }
@@ -2625,7 +2598,32 @@ CHEAT_ON_14 = 198
 CHEAT_ON_15 = 199
 SKATER_UNLOCKED_DOOMGUY = 200
 SECRET_UNLOCKED_01 = 201
-SecretScripts = [ THPS3_secret_1 THPS3_secret_2 THPS3_secret_3 THPS3_secret_4 THPS3_secret_5 THPS3_secret_6 THPS3_secret_7 THPS3_secret_8 THPS3_secret_9 THPS3_secret_10 THPS3_secret_11 THPS3_secret_12 THPS3_secret_13 THPS3_secret_14 THPS3_secret_15 THPS3_secret_16 THPS3_secret_17 THPS3_secret_18 THPS3_secret_19 THPS3_secret_20 THPS3_secret_21 THPS3_secret_22 ]
+
+
+SecretScripts = [ 
+  THPS3_secret_1,
+  THPS3_secret_2,
+  THPS3_secret_3, 
+  THPS3_secret_4,
+  THPS3_secret_5, 
+  THPS3_secret_6, 
+  THPS3_secret_7, 
+  THPS3_secret_8, 
+  THPS3_secret_9, 
+  THPS3_secret_10, 
+  THPS3_secret_11, 
+  THPS3_secret_12, 
+  THPS3_secret_13, 
+  THPS3_secret_14, 
+  THPS3_secret_15, 
+  THPS3_secret_16, 
+  THPS3_secret_17, 
+  THPS3_secret_18, 
+  THPS3_secret_19, 
+  THPS3_secret_20, 
+  THPS3_secret_21, 
+  THPS3_secret_22 
+]
 
 script THPS3_secretScript_1
   LaunchLocalMessage id = LegealStuff "Darth Maul ® 2001 Lucasfilm Ltd and TM or ® as indicated. |All rights reserved. Used under authorization.|Courtesy of LucasArts Entertainment Company LLC" panel_message_legalmumbojumbo
@@ -2738,6 +2736,7 @@ script THPS3_secret_Everything
   WaitForControllerPressedX
   LaunchLocalMessage id = BottomInfo " " panel_message_XtoContinue
 endscript
+
 panel_message_legalmumbojumbo = { font = "small.fnt" just = (0, 0) dims = (600, 112) colors = [ { (128, 128, 128) alpha = 128 } ] key_points = [ { pos = (330, 360) alpha = 0 scale = 0.2 time = 0 }
     { pos = (330, 360) alpha = 0 scale = 0.2 time = 0.5 }
     { pos = (330, 360) alpha = 128 scale = 0.81 time = 0.7 }
@@ -2860,6 +2859,7 @@ script PlayCredits
   SetGlobalFlag flag = SHOW_CREDITS
 endscript
 
+//unused?
 script MovieSpawn
   SpawnScript SpawnedMovie
 endscript
@@ -3342,13 +3342,7 @@ script ClearEndMessagesSlowly
   wait 0.01 second
 endscript
 
-script WaitForSkippable
-  wait 1 second
-endscript
 
-script DebounceForSkippable
-  Debounce X time = 1
-endscript
 
 script THPS3_secret_1
   SetGlobalFlag flag = SECRET_UNLOCK_01
