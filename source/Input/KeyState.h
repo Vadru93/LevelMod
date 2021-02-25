@@ -308,4 +308,5 @@ public:
 
 };
 
+bool ResetKeyStateScript(CStruct* pStruct, CScript* pScript);
 #endif

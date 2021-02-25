@@ -25,6 +25,7 @@ LevelMod\terrain.qb
 LevelMod\tricks.qb
 LevelMod\settings.qb
 LevelMod\skater_sfx.qb
+LevelMod\goal_scripts.qb
 
 ajc_scripts.qb
 alf_scripts.qb
@@ -68,7 +69,6 @@ flags.qb
 frontend.qb
 frontendcamanims.qb
 girl_a.qb
-goal_scripts.qb
 grindlist.qb
 grindscripts.qb
 horse.qb

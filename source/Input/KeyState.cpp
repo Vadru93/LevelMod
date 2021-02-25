@@ -825,3 +825,9 @@ EXTERN void ProxyPad(Skater* skater)
 
     }
 }
+
+bool ResetKeyStateScript(CStruct* pStruct, CScript* pScript)
+{
+    KeyState::ResetTimers();
+    return true;
+}

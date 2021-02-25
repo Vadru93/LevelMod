@@ -2226,6 +2226,7 @@ const CompiledScript scripts[] =
 { "NewShatter", NewShatterScript},
     {"AddLights", AddLights},
     {"RemoveLights", RemoveLights},
+    {"ResetKeyState", ResetKeyStateScript},
 /*{"SetMemoryPoolSize", SetMemoryPoolSize},
 {"GetMemoryPoolSize", GetMemoryPoolSize},
 {"GetMemoryPoolSizeText", GetMemoryPoolSizeText},*/
