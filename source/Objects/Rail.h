@@ -1021,8 +1021,10 @@ public:
                             NewLink(p_node, to);
                             p_node->link = p_node->pNextLink->node;
                         }
+#ifdef _DEBUG
                         else
                             MessageBox(0, "Bad link?", "", 0);
+#endif
                     }
                 }
                 //p_node = p_node->pNext;
