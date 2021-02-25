@@ -73,7 +73,7 @@ namespace NewTimer
 
         //First reset framelength
         *(float*)0x00850FD0 = (float)(1000.0 / Gfx::target_fps);
-        framelength = 1000000 / Gfx::target_fps;
+        framelength = 1000000.0 / Gfx::target_fps;
 
         //old time is used to reset script timers
         DWORD old_time = GetTime();

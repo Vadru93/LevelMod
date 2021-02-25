@@ -4342,7 +4342,10 @@ __declspec(naked) void FixUberFrig()
     static DWORD caller = 0x0045D330;
     _asm pushad;
     _asm pushfd;
-    safe = Game::skater->UberFrigFix();
+    if(Game::skater)
+        safe = Game::skater->UberFrigFix();
+    else
+        safe = false;
     _asm popfd;
     _asm popad;
     if (!safe)
