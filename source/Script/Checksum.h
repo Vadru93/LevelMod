@@ -264,6 +264,8 @@ namespace Checksums
         X = COMPILE_CRC32("x"),
         Circle = COMPILE_CRC32("circle"),
 
+            SpineTransfer = COMPILE_CRC32("spinetransfer"),
+
         Oil = COMPILE_CRC32("oil"),
 
             Physics_vert_hang_Stat = COMPILE_CRC32("physics_vert_hang_stat"),

@@ -16,6 +16,258 @@ KeyMap* __restrict keyMap = NULL;
 BYTE* __restrict keyState = NULL;
 
 
+
+const char* vk_names[] =
+{
+    "Unassigned",
+    "Left Mouse",//0x1
+    "Right Mouse",//0x2
+    "Cancel"//0x3
+    "Middle Mouse",//0x4
+    "Scroll Up",//0x5
+    "Scroll Down",//0x6
+    "UNDEFINED",//0x7
+    "Backspace",//0x8
+    "Unknown",
+    "Tab",//0x9
+    "Unassigned",//0xA
+    "Unassigned",//0xB
+    "Clear",//0xC
+    "Enter",//0xD
+    "Undefined",//0xE
+    "Undefined",//0xF
+    "Shift",//0x10
+    "Control",//0x11
+    "Alt",//0x12
+    "Pause",//0x13
+    "CapsLock",//0x14
+    "IME Kana",//0x15
+    "IME On",//0x16
+    "IME Junja",//0x17
+    "IME Final",//0x18
+    "IME Hanja"//0x19
+    "IME Off",//0x1A
+    "Unknown",
+    "Escape",//0x1B
+    "IME Convert",//0x1C
+    "IME Nonconvert",//0x1D
+    "IME Accept",//0x1E
+    "IME ChangeMode",//0x1F
+    "Space",//0x20
+    "PageUp",//0x21
+    "PageDown",//0x22
+    "End",//0x23
+    "Home",//0x24
+        "Left",//0x25
+        "Up",//0x26
+        "Right",//0x27
+        "Down",//0x28
+        "Select",//0x29
+        "Print",//0x2A
+        "Execute",//0x2B
+        "PrintScreen",//0x2C
+        "Insert",//0x2D
+        "Delete",//0x2E
+        "Help",//0x2F
+        "0",//0x30
+        "1",//0x31
+        "2",//0x32
+        "3",//0x33
+        "4",//0x34
+        "5",//0x35
+        "6",//0x36
+        "7",//0x37
+        "8",//0x38
+        "9",//0x39
+        "Undefined",//0x3A
+        "Undefined",//0x3B
+    "Undefined",//0x3C
+    "Undefined",//0x3D
+    "Undefined",//0x3E
+    "Undefined",//0x3F
+    "Undefined",//0x40
+        "A",//0x41
+        "B",//0x42
+        "C",//0x43
+        "D",//0x44
+        "E",//0x45
+        "F",//0x46
+        "G",//0x47
+        "H",//0x48
+        "I",//0x49
+        "J",//0x4A
+        "K",//0x4B
+        "L",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "U",
+        "V",
+        "W",
+        "X",
+        "Y",
+        "Z",//0x5A
+        "LeftWindowsKey",//0x5B
+        "RightWindowsKey",
+        "ApplicationsKey",
+        "Reserved"
+        "Sleep",
+        "Unknown",
+        "NumPad0",
+        "NumPad1",
+        "NumPad2",
+        "NumPad3",
+        "NumPad4",
+        "NumPad5",
+        "NumPad6",
+        "NumPad7",
+        "NumPad8",
+        "NumPad9",
+        "Multiply",
+        "Add",
+        "Seperator",
+        "Subtract",
+        "Decimal",
+        "Divide",
+        "F1",
+        "F2",
+        "F3",
+        "F4",
+        "F5",
+        "F6",
+        "F7",
+        "F8",
+        "F9",
+        "F10",
+        "F11",
+        "F12",
+        "F13",
+        "F14",
+        "F15",
+        "F16",
+        "F17",
+        "F18",
+        "F19",
+        "F20",
+        "F21",
+        "F22",
+        "F23",
+        "F24",
+        "Unassigned",
+        "Unassigned",
+            "Unassigned",
+            "Unassigned",
+            "Unassigned",
+            "Unassigned",
+            "Unassigned",
+            "Unassigned",
+        "Numlock",
+        "ScrollLock",
+        "Unknown",
+            "Unknown",
+            "Unknown",
+            "Unknown",
+            "Unknown",
+            "Unassigned",
+            "Unassigned",
+            "Unassigned",
+            "Unassigned",
+            "Unassigned",
+            "Unassigned",
+            "Unassigned",
+            "Unassigned",
+        "LeftShift",
+        "RightShift",
+        "LeftControl",
+        "RightContol",
+        "LeftMenu",
+        "RightMenu",
+        "BrowserBack",
+        "BrowserForward",
+        "BrowserRefresh",
+        "BrowserStop",
+        "BrowserSearch",
+        "BrowserFavorites",
+        "BrowserHome",
+        "VolumeMute",
+        "VolumeDown",
+        "VolumeUp",
+        "NextTrack",
+        "PreviousTrack",
+        "StopMedia",
+        "PlayPause",
+        "LaunchMail",
+        "SelectMedia",
+        "LaunchApp1",
+        "LaunchApp2",
+        "OEM1",
+        "OEMPlus",
+        "OEMComma",
+        "OEMMinus",
+        "OEMPeriod",
+        "OEM2",
+        "OEM3",
+        "OEM4",
+        "OEM5",
+        "OEM6",
+        "OEM7",
+        "OEM8",
+        "OEM102",
+        "Process",
+        "Packet",
+        "Attn",
+        "CrSel",
+        "ExSel",
+        "EraseEOF",
+        "Play",
+        "Zoom",
+        "PA1",
+        "OEMClear",
+            "Unknown",
+};
+
+
+const char* MappedKeyNames[] =
+{
+    "Pause",
+    "CameraToggle",
+    "SpineTransfer",
+    "CameraLock",
+    "Grind",
+    "Grab",
+    "Ollie",
+    "Flip",
+    "SpinLeft",
+    "SpinRight",
+    "Nollie",
+    "Revert",
+    "Right",
+    "Left",
+    "Up",
+    "Down",
+    "Undefined"
+};
+
+KeyMap::MappedKey KeyMap::GetKeyType()
+{
+    for (BYTE i = 0; i < (BYTE)MappedKey::Undefined; i++)
+    {
+        if (this == &keyMap[i])
+            return (MappedKey)i;
+    }
+    return MappedKey::Undefined;
+}
+
+const char* KeyMap::GetName(KeyMap::MappedKey key)
+{
+    return MappedKeyNames[(BYTE)key];
+}
+
 void  KeyMap::UpdateKeyMap()
 {
     DWORD pKeyboardControl = *(DWORD*)0x008510B8;
@@ -56,7 +308,7 @@ __declspec(noalias) bool __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYT
     //KeyMap key = keyMap[(BYTE)KeyMap::MappedKey::Grind];
     //buffer[key.DIK_KeyCode] = buffer[DIK_Y];
 
-    if (XINPUT::Player1 && XINPUT::Player1->IsConnected())
+    if (LevelModSettings::bHookedControls && XINPUT::Player1 && XINPUT::Player1->IsConnected())
     {
         //Move the global pointer to stack to make sure compiler optimize well
         KeyMap* __restrict const map = keyMap;
@@ -220,12 +472,40 @@ __declspec(noalias) bool __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYT
 
     }
 
+    if (LevelModSettings::pEditKeyMap)
+    {
+        /*if (KeyState::GetNumKeyPress())
+            MessageBox(0, "NUM", 0, 0);*/
+
+        ZeroMemory(data, size);
+    }
+
     return suceeded;
+}
+
+bool KeyState::FindMappedKey(VirtualKeyCode code, KeyMap::MappedKey* already_mapped)
+{
+    DWORD din_code = MapVirtualKeyA((DWORD)code, MAPVK_VK_TO_VSC);
+
+    for (BYTE i = 0; i < (BYTE)KeyMap::MappedKey::Undefined; i++)
+    {
+        if (keyMap[i].mapped && keyMap[i].DIK_KeyCode == din_code)
+        {
+            *already_mapped = (KeyMap::MappedKey)i;
+            return true;
+        }
+    }
+    return false;
+}
+
+const char* KeyState::GetVKName(VirtualKeyCode code)
+{
+    return vk_names[(BYTE)code & 206];
 }
 
 WORD KeyState::XINPUT_UpdateCamera_Hook(BYTE gamestate, BYTE* game_config)
 {
-    if (XINPUT::Player1 && XINPUT::Player1->IsConnected())
+    if (LevelModSettings::bHookedControls && XINPUT::Player1 && XINPUT::Player1->IsConnected())
     {
         BYTE* gamepad = *(BYTE**)(game_config + 0x18);
 
@@ -568,6 +848,18 @@ BYTE UpdateKeyState2(DWORD button, BYTE pressed)
     return pressed;
 }
 
+void KeyState::ClearAllKeys()
+{
+    debug_print("ClearAllKeys\n");
+    //Store current at old
+    memcpy(*(void**)0x005D0304, *(void**)0x005D0308, 254);
+    //ZeroMemory Keyboard State
+    ZeroMemory(*(void**)0x005D0308, 254);
+    /*if (Game::skater)
+        ZeroMemory((void*)Game::skater->GetKeyState(0), sizeof(KeyState) * 0x0B);*/
+    debug_print("ClearKeys DOne\n");
+}
+
 void __cdecl UpdateKeyState_naked(DWORD press, void* pUnk)
 {
     static bool bUpdate;
@@ -830,4 +1122,141 @@ bool ResetKeyStateScript(CStruct* pStruct, CScript* pScript)
 {
     KeyState::ResetTimers();
     return true;
+}
+
+const char tst[] = "N";
+
+bool GetTextFromKeyMapScript(CStruct* pStruct, CScript* pScript)
+{
+    auto header = pStruct->GetHeader();
+    if (header)
+    {
+        const char* key_name = NULL;
+        switch (header->Data)
+        {
+        case Checksums::Up:
+            key_name = vk_names[(BYTE)KeyMap::GetVKeyCode(KeyMap::MappedKey::Up)];
+            break;
+        case Checksums::Down:
+            key_name = vk_names[(BYTE)KeyMap::GetVKeyCode(KeyMap::MappedKey::Down)];
+            break;
+        case Checksums::Left:
+            key_name = vk_names[(BYTE)KeyMap::GetVKeyCode(KeyMap::MappedKey::Left)];
+            break;
+        case Checksums::Right:
+            key_name = vk_names[(BYTE)KeyMap::GetVKeyCode(KeyMap::MappedKey::Right)];
+            break;
+        case Checksums::Triangle:
+            key_name = vk_names[(BYTE)KeyMap::GetVKeyCode(KeyMap::MappedKey::Grind)];
+            break;
+        case Checksums::Square:
+            key_name = vk_names[(BYTE)KeyMap::GetVKeyCode(KeyMap::MappedKey::Flip)];
+            break;
+        case Checksums::Circle:
+            key_name = vk_names[(BYTE)KeyMap::GetVKeyCode(KeyMap::MappedKey::Grab)];
+            break;
+        case Checksums::X:
+            key_name = vk_names[(BYTE)KeyMap::GetVKeyCode(KeyMap::MappedKey::Ollie)];
+            break;
+        case Checksums::R2:
+            key_name = vk_names[(BYTE)KeyMap::GetVKeyCode(KeyMap::MappedKey::Revert)];
+            break;
+        case Checksums::L2:
+            key_name = vk_names[(BYTE)KeyMap::GetVKeyCode(KeyMap::MappedKey::Nollie)];
+            break;
+        case Checksums::L1:
+            key_name = vk_names[(BYTE)KeyMap::GetVKeyCode(KeyMap::MappedKey::SpinLeft)];
+            break;
+        case Checksums::R1:
+            key_name = vk_names[(BYTE)KeyMap::GetVKeyCode(KeyMap::MappedKey::SpinRight)];
+            break;
+        case Checksums::SpineTransfer:
+            key_name = vk_names[(BYTE)KeyMap::GetVKeyCode(KeyMap::MappedKey::Unused)];
+            break;
+            
+        }
+
+        if (key_name)
+        {
+            CStructHeader* pParam = pScript->params->AllocateCStruct();
+            if (!pParam)
+            {
+                debug_print(__FUNCTION__ "couldn't Allocate CStruct...\n");
+                return false;
+            }
+
+            if (pScript->params->head)
+            {
+                pScript->params->tail->NextHeader = pParam;
+                pScript->params->tail = pParam;
+            }
+            else
+            {
+                pScript->params->head = pParam;
+                pScript->params->tail = pParam;
+            }
+            pParam->Type = QBKeyHeader::QBKeyType::STRING;
+            pParam->QBkey = Checksum("text");
+
+            pParam->pStr = (char*)mallocx(strlen(key_name) + 1);
+            memcpy(pParam->pStr, key_name, strlen(key_name) + 1);
+
+            pParam->NextHeader = NULL;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool EditKeyMapScript(CStruct* pStruct, CScript* pScript)
+{
+    auto header = pStruct->GetHeader();
+    if (header)
+    {
+        debug_print("EditKeyMap Key: %s\n", FindChecksumName(header->Data));
+        switch (header->Data)
+        {
+        case Checksums::Up:
+            LevelModSettings::pEditKeyMap = &keyMap[(BYTE)KeyMap::MappedKey::Up];
+            break;
+        case Checksums::Down:
+            LevelModSettings::pEditKeyMap = &keyMap[(BYTE)KeyMap::MappedKey::Down];
+            break;
+        case Checksums::Left:
+            LevelModSettings::pEditKeyMap = &keyMap[(BYTE)KeyMap::MappedKey::Left];
+            break;
+        case Checksums::Right:
+            LevelModSettings::pEditKeyMap = &keyMap[(BYTE)KeyMap::MappedKey::Right];
+            break;
+        case Checksums::Triangle:
+            LevelModSettings::pEditKeyMap = &keyMap[(BYTE)KeyMap::MappedKey::Grind];
+            break;
+        case Checksums::Square:
+            LevelModSettings::pEditKeyMap = &keyMap[(BYTE)KeyMap::MappedKey::Flip];
+            break;
+        case Checksums::Circle:
+            LevelModSettings::pEditKeyMap = &keyMap[(BYTE)KeyMap::MappedKey::Grab];
+            break;
+        case Checksums::X:
+            LevelModSettings::pEditKeyMap = &keyMap[(BYTE)KeyMap::MappedKey::Ollie];
+            break;
+        case Checksums::R2:
+            LevelModSettings::pEditKeyMap = &keyMap[(BYTE)KeyMap::MappedKey::Revert];
+            break;
+        case Checksums::L2:
+            LevelModSettings::pEditKeyMap = &keyMap[(BYTE)KeyMap::MappedKey::Nollie];
+            break;
+        case Checksums::L1:
+            LevelModSettings::pEditKeyMap = &keyMap[(BYTE)KeyMap::MappedKey::SpinLeft];
+            break;
+        case Checksums::R1:
+            LevelModSettings::pEditKeyMap = &keyMap[(BYTE)KeyMap::MappedKey::SpinRight];
+            break;
+        case Checksums::SpineTransfer:
+            LevelModSettings::pEditKeyMap = &keyMap[(BYTE)KeyMap::MappedKey::Unused];
+            break;
+        }
+        return true;
+    }
+    return false;
 }

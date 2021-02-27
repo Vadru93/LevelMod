@@ -89,6 +89,7 @@ namespace NewTimer
         Game::skater = Skater::UpdateSkater();
         if (Game::skater && !init && init2)
         {
+            KeyMap::UpdateKeyMap();
             //Reset specifically used KeyState timers
             KeyState::ResetTimers();
 

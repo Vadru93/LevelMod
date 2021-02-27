@@ -2187,6 +2187,8 @@ const CompiledScript scripts[] =
     { "Not", NotScript },
     { "IsNot", NotScript },
     { "NotTrue", NotScript},
+    { "EditKeyMap", EditKeyMapScript },
+    { "GetTextFromKeyMap", GetTextFromKeyMapScript },
     { "FileExists", FileExistsScript },
     { "AddParam", AddParamScript },
     { "SubToGlobal", SubToGlobal },
@@ -3075,6 +3077,7 @@ void LoadCustomShaderThread()
     //First update skater pointer
     Game::skater = Skater::UpdateSkater();
     while(!Game::skater) Skater::UpdateSkater();
+    KeyMap::UpdateKeyMap();
 
     //Then check if we are host and if we are, send the HostOptions to clients
     Network::NetHandler* net_handler = Network::NetHandler::Instance();
@@ -4438,6 +4441,9 @@ void InitLevelMod()
     VirtualProtect((LPVOID)0x00458B68, 4, PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((LPVOID)0x0058E100, 4, PAGE_EXECUTE_READWRITE, &old);
     NewTimer::CalculateFPSTimers();
+
+    VirtualProtect((LPVOID)0x00474450, 4, PAGE_EXECUTE_READWRITE, &old);
+    *(DWORD*)0x00474450 = 0x900004C2;
 
     //Change the RailNode size
     BYTE optimize_grind[] = { 0xB8, 0x2C, 0x01, 0x00, 0x00, 0x89, 0x86, 0xB8, 0x84, 0x00, 0x00, 0xEB, 0x14, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0xD9 };
@@ -5931,21 +5937,77 @@ bool bToggleWindowed = false;
 
 SHORT __stdcall proxy_GetAsyncKeyState(int key)
 {
-    if (KeyState::GetKeyboardState(VirtualKeyCode::ALT) && KeyState::GetKeyboardState(VirtualKeyCode::ENTER) && !KeyState::GetOldKeyboardState(VirtualKeyCode::ENTER))//alt + enter
+    //pEditKeyMap will point to a keymap if we are in edit control mode
+    if (LevelModSettings::pEditKeyMap)
     {
-        if (!Gfx::bOldWindowed)
+        //If press ESC stop edit
+        if (KeyState::GetKeyboardState(VirtualKeyCode::ESC))
+            LevelModSettings::pEditKeyMap = NULL;
+        //If press BACK unassign key
+        else if (KeyState::GetKeyboardState(VirtualKeyCode::BACK))
         {
-            //Unpress the enter KeyboardState
-            KeyState::Unpress(VirtualKeyCode::ENTER);
-            bToggleWindowed = true;
+            LevelModSettings::pEditKeyMap->mapped = 0;
+            LevelModSettings::pEditKeyMap->DIK_KeyCode = 0;
+            LevelModSettings::pEditKeyMap = NULL;
+            ExecuteQBScript("UpdateKeyMapTextCallback");
         }
         else
-            QScript::CallCFunction(Checksum("LaunchPanelMessage"), (void*)"Please launch game in Fullscreen mode");
+        {
+            for (DWORD i = 3; i < 207; i++)
+            {
+                //Don't assign ENTER key, since it's reserved for chat
+                if (i == (DWORD)VirtualKeyCode::ENTER)
+                    continue;
+
+                KeyMap::MappedKey already_mapped = KeyMap::MappedKey::Undefined;
+                if (KeyState::GetKeyboardState((VirtualKeyCode)i) && !KeyState::GetOldKeyboardState((VirtualKeyCode)i) && !KeyState::FindMappedKey((VirtualKeyCode)i, &already_mapped))
+                {
+                    __assume(LevelModSettings::pEditKeyMap != NULL);
+                    if (LevelModSettings::pEditKeyMap->GetKeyType() == KeyMap::MappedKey::Unused)
+                    {
+                        //New SpineButton
+                        LevelModSettings::SpineButton3 = (VirtualKeyCode)i;
+                    }
+                    //Enable mapping for this key
+                    LevelModSettings::pEditKeyMap->mapped = 1;
+                    //Map the VirtualKeyCode to DirectInput KeyCode
+                    LevelModSettings::pEditKeyMap->DIK_KeyCode = (WORD)MapVirtualKeyA(i, MAPVK_VK_TO_VSC);
+                    //Stop editing so we only assign first keypress
+                    LevelModSettings::pEditKeyMap = NULL;
+                    ExecuteQBScript("UpdateKeyMapTextCallback");
+                    break;
+                }
+                else if (already_mapped != KeyMap::MappedKey::Undefined)
+                {
+                    char msg[50];
+                    sprintf(msg, "%s is already mapped to %s", KeyState::GetVKName((VirtualKeyCode)i), KeyMap::GetName(already_mapped));
+                    QScript::CallCFunction(Checksum("LaunchPanelMessage"), (void*)msg);
+                }
+            }
+        }
+
+        //Clear all key presses so game don't go back in menu if press ESC etc
+        KeyState::ClearAllKeys();
     }
     else
-        bToggleWindowed = false;
+    {
+        if (KeyState::GetKeyboardState(VirtualKeyCode::ALT) && KeyState::GetKeyboardState(VirtualKeyCode::ENTER) && !KeyState::GetOldKeyboardState(VirtualKeyCode::ENTER))//alt + enter
+        {
+            if (!Gfx::bOldWindowed)
+            {
+                //Unpress the enter KeyboardState
+                KeyState::Unpress(VirtualKeyCode::ENTER);
+                bToggleWindowed = true;
+            }
+            else
+                QScript::CallCFunction(Checksum("LaunchPanelMessage"), (void*)"Please launch game in Fullscreen mode");
+        }
+        else
+            bToggleWindowed = false;
 
-    return GetAsyncKeyState(key);
+        return GetAsyncKeyState(key);
+    }
+    return 0;
 }
 
 typedef BOOL(__stdcall* const pGetMessage)(LPMSG lpMsg,
@@ -6067,6 +6129,7 @@ void MaybeFixStutter()
 {
     if (Gfx::fps_fix)
     {
+        HookFunction(0x0040CA2B, proxy_Dinput_GetDeviceState);
         BYTE timer[] = { 0xE8, 0x98, 0xF4, 0xF7, 0x79, 0xB9, 0x0E, 0x00, 0x00, 0x00, 0x39, 0xC8, 0x73, 0x27, 0x29, 0xC1, 0x51, 0xE8, 0xD7, 0x29, 0x8C, 0x75, 0xA1, 0x00, 0x00, 0x00, 0x00, 0x85, 0xC0, 0x75, 0x16, 0xE8, 0x00, 0x00, 0x00, 0x00, 0xEB, 0x0F };
 
         switch (Gfx::fps_fix)
@@ -6150,8 +6213,11 @@ bool GetMaximumIndexScript(CStruct* pStruct, CScript* pScript)
     const CArray* pArray;
     pStruct->GetArray("array", &pArray);
 
-    CStructHeader* param = pScript->params->AddParam("Max", QBKeyHeader::QBKeyType::INT);
-    param->Data = (pArray->GetNumItems() - 1);
+    if (pArray)
+    {
+        CStructHeader* param = pScript->params->AddParam("Max", QBKeyHeader::QBKeyType::INT);
+        param->Data = (pArray->GetNumItems() - 1);
+    }
     return true;
 }
 

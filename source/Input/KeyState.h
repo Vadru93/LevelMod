@@ -110,14 +110,18 @@ struct KeyMap
         Right,
         Left,
         Up,
-        Down
+        Down,
+        Undefined
     };
+
+
+    static const char* GetName(KeyMap::MappedKey key);
 
     static VirtualKeyCode GetVKeyCode(MappedKey key);
 
     static void  UpdateKeyMap();
 
-
+    MappedKey GetKeyType();
 };
 
 enum CameraMovement
@@ -154,11 +158,6 @@ private:
     DWORD checksum;
 
 
-    static KeyCode GetKeyPress(DWORD idx)
-    {
-        return p_key_state(idx);
-    }
-
     static void Unpress(DWORD idx)
     {
         p_key_state(idx) = KeyCode::UNDEFINED;
@@ -166,6 +165,12 @@ private:
 
 
 public:
+
+    static KeyCode GetKeyPress(DWORD idx)
+    {
+        return p_key_state(idx);
+    }
+
     enum
     {
         NONE = -1, UP = 0, DOWN = 1, LEFT = 2, RIGHT = 3, SPINLEFT = 4, NOLLIE = 5, SPINRIGHT = 6, REVERT = 7, GRAB = 8, FLIP = 9, GRIND = 10, OLLIE = 11
@@ -178,8 +183,17 @@ public:
 
     static void ResetTimers()
     {
+        /*DWORD time_now = NewTimer::GetTime();
+        unsigned long long* p_keypress_timers = (unsigned long long*)0x0085B4D0;
+        for (DWORD i = 0; i < 8; i++)
+        {
+            *p_keypress_timers = time_now;
+            p_keypress_timers++;
+        }*/
         ZeroMemory((void*)0x0085B4D0, 8 * 0x10);
     }
+
+    static void ClearAllKeys();
 
     WORD XINPUT_UpdateCamera_Hook(BYTE gamestate, BYTE* game_config);
 
@@ -257,6 +271,9 @@ public:
 
     }
 
+    static bool FindMappedKey(VirtualKeyCode code, KeyMap::MappedKey* already_mapped);
+    static const char* GetVKName(VirtualKeyCode code);
+
     DWORD GetChecksum()
     {
         return checksum;
@@ -309,4 +326,6 @@ public:
 };
 
 bool ResetKeyStateScript(CStruct* pStruct, CScript* pScript);
+bool EditKeyMapScript(CStruct* pStruct, CScript* pScript);
+bool GetTextFromKeyMapScript(CStruct* pStruct, CScript* pScript);
 #endif

@@ -293,7 +293,7 @@ struct EXTERN CScript
         {
             if (p_scr->paused == 2)
             {
-                debug_print("Reseting timer on Script %s\n", FindChecksumName(scriptChecksum));
+                debug_print("Reseting timer on Script %s\n", FindChecksumName(p_scr->scriptChecksum));
                 DWORD elapsed = old_time - *(DWORD*)&p_scr->startTime;
                 p_scr->startTime = (time_now - elapsed);
             }
@@ -309,7 +309,7 @@ struct EXTERN CScript
         {
             if (p_scr->paused == 2)
             {
-                debug_print("Reseting timer on Script %s\n", FindChecksumName(scriptChecksum));
+                debug_print("Reseting timer on Script %s\n", FindChecksumName(p_scr->scriptChecksum));
                 p_scr->startTime = 0;
             }
             p_scr = GetNextScript(p_scr);

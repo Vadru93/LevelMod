@@ -33,6 +33,7 @@ namespace LevelModSettings
     extern VirtualKeyCode SpineButton3;
     extern bool bInvertedY;
     extern bool bInvertedX;
+    extern KeyMap* __restrict pEditKeyMap;
 
 #ifdef _DEBUG
     extern bool bLogging;

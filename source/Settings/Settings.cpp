@@ -51,6 +51,8 @@ VirtualKeyCode LevelModSettings::SpineButton3 = VirtualKeyCode::Undefined;
 bool LevelModSettings::bInvertedY = false;
 bool LevelModSettings::bInvertedX = false;
 
+KeyMap* __restrict LevelModSettings::pEditKeyMap = NULL;
+
 #ifdef _DEBUG
 bool LevelModSettings::bLogging = false;
 #endif
