@@ -63,6 +63,7 @@ ID3DXLine* line = NULL;
 DWORD numLineVertices = 0;
 D3DCOLOR lineColor = 0;
 D3DXMATRIX lineWorld;
+DWORD MenuSelectCallback = 0;
 
 vector<SuperSector*> EnvironmentObjects;
 extern vector<SuperSector*> PointyObjects;
@@ -2195,6 +2196,7 @@ const CompiledScript scripts[] =
     { "Not", NotScript },
     { "IsNot", NotScript },
     { "NotTrue", NotScript},
+    { "SetMenuSelectCallback", ScriptSetMenuSelectCallback },
     { "KeyMapScript", KeyMapScript },
     { "EditKeyMap", EditKeyMapScript },
     { "GetTextFromKeyMap", GetTextFromKeyMapScript },
@@ -4416,6 +4418,46 @@ __declspec(naked) void CalibrateScore()
     _asm jmp[pCalculateScorePot]
 }
 
+void CallMenuSelectCallback(DWORD id)
+{
+    CStruct params;
+    CStructHeader param(QBKeyHeader::LOCAL, Checksums::id, id);
+    params.Set(&param);
+    ExecuteQBScript(MenuSelectCallback, &params);
+}
+
+DWORD last_select_id = 0;
+
+__declspec(naked) void OnMenuSelect()
+{
+    static DWORD id;
+    static DWORD jmpBack_menu = 0x004CDFA0;
+    _asm mov id, ebx;
+    _asm mov[esi + 0x000001A4], ebx
+    if (MenuSelectCallback && last_select_id != id)
+    {
+        last_select_id = id;
+        _asm pushad;
+        CallMenuSelectCallback(id);
+        _asm popad;
+    }
+    _asm jmp [jmpBack_menu];
+}
+
+bool ScriptSetMenuSelectCallback(CStruct* pStruct, CScript* pScript)
+{
+    auto header = pStruct->GetHeader();
+    if (header)
+    {
+        last_select_id = 0;
+        if (header->Data == Checksum("NULL"))
+            MenuSelectCallback = 0;
+        else
+            MenuSelectCallback = header->Data;
+        return true;
+    }
+    return false;
+}
 
 void InitLevelMod()
 {
@@ -4484,6 +4526,8 @@ void InitLevelMod()
     HookFunction(0x004AB27D, 0x0049F3B1);
     HookFunction(0x004AB29B, 0x0049F3B1);
     //MessageBox(0, 0, 0, 0);
+
+    HookFunction(0x004CDF9B, OnMenuSelect, 0xE9);
 
     //Remove dublicate NodeArray loading
     BYTE nop_func[] = { 0x90, 0x90, 0x90, 0x90, 0x90 };

@@ -12,7 +12,7 @@ gapname_charset min_chars = 0 max_chars = 16
 title_string = "Profile name:" eventhandlers = 
 [ { type = ContentsChangedEventHandler target = 
 "EditKeyMapControlAccept" params = 
-{ field_id = display_name keyboard_id = lm_edit_keymap_keyboard_control  } } 
+{ field_id = display_name keyboard_id = lm_edit_keymap_keyboard_control  } }
 ] default_to_accept hide_on_close parent = contain1 }
 
 LM_HostOption_MenuItem = { Type = textmenuelement text = "Foo" target = "LM_ToggleHostOption" }
@@ -32,7 +32,7 @@ LM_HostOptions = [
 ]
 
  
-//maybe move to shader.q, when enough code for shaders??
+//maybe move to shader.q, when enough code for shaders??s
 
 BlendModes = [
 	//Oringial th4+ blendmodes, in order 0-15
@@ -214,6 +214,7 @@ SCRIPT sFixGoBack
     MoveMenu id = game_options_on_off_menu y = 0
     EnableBackEvent
 	FixGoBack
+	SetMenuSelectCallback NULL
 ENDSCRIPT
 
 SCRIPT EditControls_OnShow
@@ -365,20 +366,41 @@ load_keymap_menu = {
 	] 
 }
 
+
 //Control->Edit->Save menu struct
 save_keymap_menu = { 
 	LM_Menu_Shared_Vertical
 	id = save_keymap_menu
-	eventhandler = { Type = showeventhandler target = "KeyMap_loadsave_OnShow" }
+	eventhandler = { Type = showeventhandler target = "KeyMap_loadsave_OnShow" params = { SelectCallback = SaveKeyMapOnSelect } }
 	children = [
-	{ Type = textmenuelement auto_id text = "Save Controls" static dont_gray drawer = title }
-	{ Type = textmenuelement auto_id text = "Save To Game" target = "sKeyMapScript" params = { SaveGame Save } }
-	{ Type = textmenuelement auto_id text = "Save To Settings" target = "sKeyMapScript" params = { SaveSettings Save } }
+	{ Type = textmenuelement auto_id text = "Save Controls"    static dont_gray drawer = title }
+	{ Type = textmenuelement id = edit_info_id text = ""       static }
+	{ Type = textmenuelement id = save_game_id text = "Save To Game"     target = "sKeyMapScript" params = { SaveGame Save } }
+    { Type = textmenuelement id =save_settings_id text = "Save To Settings"  target = "sKeyMapScript" params = { SaveSettings Save }  }
 	{ LM_Menu_Shared_Back Params = { id = save_keymap_menu } } 
 	] 
 }
 
+script SaveKeyMapOnSelect
+    if ChecksumEquals a = <id> b = save_settings_id
+	    SetMenuElementText "This will get loaded when game loads" id = edit_info_id
+	else
+		if ChecksumEquals a = <id> b = save_game_id
+			SetMenuElementText "This will get loaded if you remove controls.ini" id = edit_info_id
+		else
+		    SetMenuElementText "" id = edit_info_id
+	    endif
+	endif
+endscript
+
+script KeyMapMenuSetInfoText
+    SetMenuElementText <...> id = edit_info_id
+endscript
+
 script KeyMap_loadsave_OnShow
+    if GotParam SelectCallback
+        SetMenuSelectCallback <SelectCallback>
+	endif
     EnableBackEvent
 	FixGoBack
 endscript
@@ -820,6 +842,7 @@ SCRIPT UpdateMenuText
 	IF GotParam RestoreBack
 	    RestoreGoBack
 	ENDIF
+	SetMenuSelectCallback NULL
 ENDSCRIPT
 
 

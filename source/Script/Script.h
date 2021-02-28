@@ -198,6 +198,12 @@ __declspec(noalias) void inline ExecuteQBScript(const char* __restrict pScriptNa
 {
     return ExecuteScript(0x00428240)(pScriptName, pParams, pScript, assert);
 }
+typedef void(__cdecl* const ExecuteScript_Stub)(DWORD checksum, const CStruct* __restrict pParams, const CScript* __restrict pScript, bool assert);
+__declspec(noalias) void inline ExecuteQBScript(DWORD checksum, const CStruct* __restrict pParams = NULL, const CScript* __restrict pScript = NULL, bool assert = false)
+{
+    return ExecuteScript_Stub(0x00428180)(checksum, pParams, pScript, assert);
+}
+
 
 //Add a QBkeyHeader to game array, this can be a value/function that you can acces/call in qb script.
 typedef QBKeyHeader* (__cdecl* const RegisterQBKeyHeaderFunc)(const int QBKey, const int HeaderID);
