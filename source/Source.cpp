@@ -2196,6 +2196,7 @@ const CompiledScript scripts[] =
     { "Not", NotScript },
     { "IsNot", NotScript },
     { "NotTrue", NotScript},
+    { "GetParamFromArray", GetParamFromArrayScript },
     { "SetMenuSelectCallback", ScriptSetMenuSelectCallback },
     { "KeyMapScript", KeyMapScript },
     { "EditKeyMap", EditKeyMapScript },

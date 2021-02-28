@@ -241,3 +241,69 @@ EXTERN bool CArray::AddString(char* String)
     }
     return false;
 }
+
+bool GetParamFromArrayScript(CStruct* pStruct, CScript* pScript)
+{
+    auto header = pStruct->GetHeader();
+    if (header)
+    {
+        CStructHeader* param_name;
+        if (pStruct->GetStruct(Checksums::param, &param_name))
+        {
+        CStructHeader* masks = NULL;
+        if (pStruct->GetStruct(Checksum("mask"), &masks) && masks->pStruct)
+        {
+            QBKeyHeader* temp = GetQBKeyHeader(header->Data);
+            if (!temp || !temp->pArray || temp->type != QBKeyHeader::ARRAY)
+                return false;
+            CArray* pArray = temp->pArray;
+
+            for (DWORD i = 0; i < pArray->GetNumItems(); i++)
+            {
+                CStruct* element = pArray->GetStructure(i);
+                CStructHeader* mask = *masks->pStruct;
+                bool match = true;
+                while (mask)
+                {
+                    CStructHeader* value;
+                    if (element->GetStruct(mask->QBkey, &value) && value->Data == mask->Data)
+                        mask = mask->NextHeader;
+                    else
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match)
+                {
+                    CStructHeader* out_param;
+                    if(element->GetStruct(param_name->Data, &out_param))
+                    {
+                        CStructHeader* pParam = pScript->params->AllocateCStruct();
+                        if (!pParam)
+                        {
+                            debug_print(__FUNCTION__ "couldn't Allocate CStruct...\n");
+                            return false;
+                        }
+
+                        if (pScript->params->head)
+                        {
+                            pScript->params->tail->NextHeader = pParam;
+                            pScript->params->tail = pParam;
+                        }
+                        else
+                        {
+                            pScript->params->head = pParam;
+                            pScript->params->tail = pParam;
+                        }
+                        memcpy(pParam, out_param, sizeof(CStructHeader));
+                        pParam->NextHeader = NULL;
+                        return true;
+                    }
+                }
+            }
+        }
+        }
+    }
+    return false;
+}

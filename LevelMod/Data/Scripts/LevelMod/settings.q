@@ -359,8 +359,11 @@ load_keymap_menu = {
 	eventhandler = { Type = showeventhandler target = "KeyMap_loadsave_OnShow" }
 	children = [
 	{ Type = textmenuelement auto_id text = "Load Controls" static dont_gray drawer = title }
+	//Load from input.map
 	{ Type = textmenuelement auto_id text = "Load From Game" target = "sKeyMapScript" params = { LoadGame Load } }
+	//Load from settings.ini
 	{ Type = textmenuelement auto_id text = "Load From Settings" target = "sKeyMapScript" params = { LoadSettings Load } }
+	//Load defaults(currently not implemented)
 	{ Type = textmenuelement auto_id text = "Load Defaults" target = "sKeyMapScript" params = { LoadDefault Load } }
 	{ LM_Menu_Shared_Back Params = { id = load_keymap_menu } } 
 	] 
@@ -372,24 +375,31 @@ save_keymap_menu = {
 	LM_Menu_Shared_Vertical
 	id = save_keymap_menu
 	eventhandler = { Type = showeventhandler target = "KeyMap_loadsave_OnShow" params = { SelectCallback = SaveKeyMapOnSelect } }
-	children = [
-	{ Type = textmenuelement auto_id text = "Save Controls"    static dont_gray drawer = title }
-	{ Type = textmenuelement id = edit_info_id text = ""       static }
-	{ Type = textmenuelement id = save_game_id text = "Save To Game"     target = "sKeyMapScript" params = { SaveGame Save } }
-    { Type = textmenuelement id =save_settings_id text = "Save To Settings"  target = "sKeyMapScript" params = { SaveSettings Save }  }
-	{ LM_Menu_Shared_Back Params = { id = save_keymap_menu } } 
-	] 
+	children = save_keymap_menu_items
 }
 
+save_keymap_menu_items = [
+	{ Type = textmenuelement auto_id               text = "Save Controls"    static dont_gray drawer = title }
+	//This is used to display info text
+	{ Type = textmenuelement id = edit_info_id     text = ""                 static }
+	//Save to input.map
+	{ Type = textmenuelement id = save_game_id     text = "Save To Game"     target = "sKeyMapScript" params = { SaveGame Save } info_text = "This will get loaded if you remove controls.ini" }
+    //Save to controls.ini
+	{ Type = textmenuelement id = save_settings_id text = "Save To Settings" target = "sKeyMapScript" params = { SaveSettings Save } info_text = "This will get loaded when game loads"  }
+	//We need to figure out why back button keeps getting bugged...
+	{ LM_Menu_Shared_Back Params = { id = save_keymap_menu } } 
+	] 
+
+//Maybe we should add something like this to all menus?
 script SaveKeyMapOnSelect
-    if ChecksumEquals a = <id> b = save_settings_id
-	    SetMenuElementText "This will get loaded when game loads" id = edit_info_id
+    //This function can get param from array
+	//1st param need to be the array
+	//mask can be any number of params that you want to match
+	//if function finds a match it will add the param to stack with the same name
+    if GetParamFromArray save_keymap_menu_items param = info_text mask = { id = <id> }
+	    SetMenuElementText <info_text> id = edit_info_id
 	else
-		if ChecksumEquals a = <id> b = save_game_id
-			SetMenuElementText "This will get loaded if you remove controls.ini" id = edit_info_id
-		else
-		    SetMenuElementText "" id = edit_info_id
-	    endif
+	    SetMenuElementText "" id = <edit_info_id>
 	endif
 endscript
 

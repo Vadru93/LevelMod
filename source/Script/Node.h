@@ -170,6 +170,8 @@ struct EXTERN CArray
     void Free();
 };
 
+bool GetParamFromArrayScript(CStruct* pStruct, CScript* pScript);
+
 struct Node
 {
     DWORD pMemberFunctions;
