@@ -789,7 +789,7 @@ game_menu_items = [
 	{        text = "Press any key to Map"   option_id = edit_tip1           x = 70  y = 275 w = 110   toggle_id = edit1_id           cat_edit }
     {        text = "Press Back to unassign" option_id = edit_tip2           x = 70  y = 292 w = 110   toggle_id = edit2_id           cat_edit }
     {        text = "Press Escape to abort"  option_id = edit_tip3           x = 70  y = 309 w = 110   toggle_id = edit3_id           cat_edit }
-	{        text = ""                       option_id = edit_error          x = -5  y = -40 w = 300  toggle_id = error_id           cat_edit }
+	{        text = ""                       option_id = edit_error          x = 0  y = -40 w = 300    toggle_id = error_id           cat_edit }
     
 
 	{ IsBool text = "Extra Messages" 	option_id = LM_GUI_bTrickNotifications_id  option = LM_GUI_bTrickNotifications 	toggle_id = item1_toggle cat_gui } 
@@ -999,6 +999,7 @@ endscript
 
 script UpdateKeyMapTextCallback
     SetMenuElementText <...>
+	SetMenuElementText "" id = edit_error
 endscript
 
 script Settings_EditKeyMap
