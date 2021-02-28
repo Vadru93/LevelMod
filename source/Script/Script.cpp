@@ -626,7 +626,7 @@ void QScript::CallCFunction(DWORD checksum, void* param, QBKeyHeader::QBKeyType 
         CScript script;
         CStruct params;
         CStructHeader header(type, 0, param);
-        params.AddParam(&header);
+        params.Set(&header);
         pFunctionHeader->pFunction(&params, &script);
     }
 }

@@ -198,6 +198,7 @@ Levelmod_menu_root = {
 }
 
 SCRIPT sFixGoBack
+    EnableBackEvent
 	FixGoBack
 ENDSCRIPT
 
@@ -730,6 +731,7 @@ ENDSCRIPT
 
 //intented to loop through list items and update item text based on selected option
 SCRIPT UpdateMenuText
+    EnableBackEvent
 	ForEachIn <children> do = LM_ToggleOption params = { TextOnly <...> }
 	printf "menu text init done"
 	IF GotParam RestoreBack
@@ -997,15 +999,9 @@ script Settings_UpdateKeyMapText
 	printf "Update done"
 endscript
 
-script UpdateKeyMapTextCallback
-    SetMenuElementText <...>
-	SetMenuElementText "" id = edit_error
-endscript
-
 script Settings_EditKeyMap
-    printf "EDIT"
     EditKeyMap <KeyMap>
-	printf "EDIT DONE"
+    DisableBackEvent
 endscript
 
 //Updates menu item text based on boolean setting

@@ -301,10 +301,10 @@ void KeyMap::Set(VirtualKeyCode code, bool mapped)
 
     CStruct params;
     CStructHeader param(QBKeyHeader::STRING, 0, (char*)KeyState::GetVKName(code));
+    CStructHeader param2;
+    param.NextHeader = &param2;
 
     KeyMap::MappedKey key = this->GetKeyType();
-    CStructHeader param2;
-
     switch ((DWORD)key)
     {
     case (DWORD)KeyMap::MappedKey::Up:
@@ -359,11 +359,12 @@ void KeyMap::Set(VirtualKeyCode code, bool mapped)
         break;
 
     }
-    params.AddParam(&param);
-    params.tail = &param2;
-    param.NextHeader = &param2;
-    CScript script;
-    ExecuteQBScript("UpdateKeyMapTextCallback", &params, &script);
+
+    params.Set(&param);
+    //Set KeyMap text
+    QScript::CallCFunction(Checksum("SetMenuElementText"), &params);
+    //Reset error text
+    SetErrorText("");
 }
 
 bool held_pause = false;

@@ -681,13 +681,13 @@ struct EXTERN CStruct
     CStruct(QBKeyHeader::QBKeyType type, void* value)
     {
         CStructHeader param(type, 0, value);
-        AddParam(&param);
+        Set(&param);
     }
 
     CStruct(const char* text)
     {
         CStructHeader param(QBKeyHeader::QBKeyType::STRING, 0, (void*)text);
-        AddParam(&param);
+        Set(&param);
     }
 
     DWORD GetName()
@@ -1115,7 +1115,7 @@ struct EXTERN CStruct
 
     //My Functions
 
-    void AddParam(CStructHeader* pParam)
+    void Set(CStructHeader* pParam)
     {
         head = pParam;
         auto temp = pParam->NextHeader;

@@ -1553,7 +1553,7 @@ __declspec(noalias) bool TestForAcid(CStruct* pParams, CScript* pScript)
             skater->SetState(Skater::AIR);
 
             CStructHeader param(QBKeyHeader::INT, 500);
-            pStruct.AddParam(&param);
+            pStruct.Set(&param);
             skater->CallMemberFunction(Checksum("SetSpeed"), &pStruct, &pScript);
             pStruct.head = NULL;
             pStruct.tail = NULL;

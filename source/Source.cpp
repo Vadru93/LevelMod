@@ -4317,7 +4317,7 @@ void CheatDetected()
 {
     CStruct params;
     CStructHeader param(QBKeyHeader::STRING, Checksums::text, stat_cheat_message);
-    params.AddParam(&param);
+    params.Set(&param);
     ExecuteQBScript("LaunchGrafCounter", &params);
 }
 
@@ -5933,6 +5933,13 @@ void DrawEye()
     Gfx::pDevice->SetRenderTarget(0, old_target);
 }
 
+void EnableBackEvent()
+{
+    Sleep(300);
+    ExecuteQBScript("EnableBackEvent");
+    
+}
+
 bool bToggleWindowed = false;
 
 SHORT __stdcall proxy_GetAsyncKeyState(int key)
@@ -5942,7 +5949,14 @@ SHORT __stdcall proxy_GetAsyncKeyState(int key)
     {
         //If press ESC stop edit
         if (KeyState::GetKeyboardState(VirtualKeyCode::ESC))
+        {
+            //Reset error text
+            KeyMap::SetErrorText("");
+            //stop editing
             LevelModSettings::pEditKeyMap = NULL;
+            //Enable back event after 300 ms
+            CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)EnableBackEvent, 0, 0/*CREATE_SUSPENDED*/, NULL);
+        }
         //If press BACK unassign key
         else if (KeyState::GetKeyboardState(VirtualKeyCode::BACK))
         {
@@ -5953,17 +5967,18 @@ SHORT __stdcall proxy_GetAsyncKeyState(int key)
         }
         else
         {
-            for (DWORD i = 3; i < 207; i++)
+            //Check all keys between Cancel and Max(3 and 207)
+            for (VirtualKeyCode key = VirtualKeyCode::CANCEL; key != VirtualKeyCode::MAX; (*(DWORD*)&key)++)
             {
                 //Don't assign ENTER key, since it's reserved for chat
-                if (i == (DWORD)VirtualKeyCode::ENTER)
+                if (key == VirtualKeyCode::ENTER)
                     continue;
 
                 KeyMap::MappedKey already_mapped = KeyMap::MappedKey::Undefined;
-                if (KeyState::GetKeyboardState((VirtualKeyCode)i) && !KeyState::GetOldKeyboardState((VirtualKeyCode)i) && !KeyState::FindMappedKey((VirtualKeyCode)i, &already_mapped))
+                if (KeyState::GetKeyboardState(key) && !KeyState::GetOldKeyboardState(key) && !KeyState::FindMappedKey(key, &already_mapped))
                 {
                     //Set map and update text
-                    LevelModSettings::pEditKeyMap->Set((VirtualKeyCode)i);
+                    LevelModSettings::pEditKeyMap->Set(key);
                     //Stop editing so we only assign first keypress
                     LevelModSettings::pEditKeyMap = NULL;
                     break;
@@ -5971,13 +5986,8 @@ SHORT __stdcall proxy_GetAsyncKeyState(int key)
                 else if (already_mapped != KeyMap::MappedKey::Undefined)
                 {
                     char msg[50];
-                    sprintf(msg, "%s is already mapped to %s", KeyState::GetVKName((VirtualKeyCode)i), KeyMap::GetName(already_mapped));
-                    CStruct params;
-                    CStructHeader param(QBKeyHeader::STRING, 0, (void*)msg);
-                    CStructHeader param2(QBKeyHeader::LOCAL, Checksums::id, Checksum("edit_error"));
-                    param.NextHeader = &param2;
-                    params.AddParam(&param);
-                    QScript::CallCFunction(Checksum("SetMenuElementText"), &params);
+                    sprintf(msg, "%s is already mapped to %s", KeyState::GetVKName(key), KeyMap::GetName(already_mapped));
+                    KeyMap::SetErrorText(msg);
                 }
             }
         }
@@ -6460,7 +6470,7 @@ __declspec(noalias) void DrawFrame()
                     sprintf(&tags[6], "%u %X", tagCount, *(DWORD*)(0x0040033C + ((tagCount - 1) * 4)));
                     CStruct params;
                     CStructHeader param(QBKeyHeader::STRING, Checksums::text, tags);
-                    params.AddParam(&param);
+                    params.Set(&param);
                     ExecuteQBScript("LaunchGrafCounter", &params);
                 }
                 else

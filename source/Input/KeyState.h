@@ -64,6 +64,7 @@ enum class VirtualKeyCode : BYTE
     INSERT,
     DEL,
     HELP,
+    MAX = 207
 };
 
 struct KeyMap
@@ -129,6 +130,16 @@ struct KeyMap
     static void  UpdateKeyMap();
 
     MappedKey GetKeyType();
+
+    static void SetErrorText(const char* text)
+    {
+        CStruct params;
+        CStructHeader param = CStructHeader(QBKeyHeader::STRING, 0, (void*)text);
+        CStructHeader param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("edit_error"));
+        param.NextHeader = &param2;
+        params.Set(&param);
+        QScript::CallCFunction(Checksum("SetMenuElementText"), &params);
+    }
 };
 
 enum CameraMovement
