@@ -181,12 +181,21 @@ LM_Menu_Shared_Bool = {
 	target = "LM_ToggleOption"
 }
 
+script new_go_back
+    if GotParam from
+       SwitchOffMenu id = <From>
+	   SwitchToMenu DoNotMakeRoot menu = <To>
+	else
+	    go_back id = <id>
+    endif
+endscript
+
 //shared option for a back menu item
 LM_Menu_Shared_Back = {
 	Type = textmenuelement 
 	auto_id 
 	text = "Back"
-	target = "go_back"	
+	target = "new_go_back"	
 }
 
 
@@ -370,7 +379,7 @@ load_keymap_menu_items = [
 	{ Type = textmenuelement id = load_settings_id text = "Load From Settings" target = "sKeyMapScript" params = { LoadSettings Load } load_info_text = "Load File: Controls.ini" }
 	//Load defaults(currently not implemented)
 	{ Type = textmenuelement id = load_default_id  text = "Load Defaults"      target = "sKeyMapScript" params = { LoadDefault Load } load_info_text = "Load Default Controls" }
-	{ LM_Menu_Shared_Back Params = { id = load_keymap_menu } } 
+	{ LM_Menu_Shared_Back Params = { from = load_keymap_menu to = newSettingsMenu } } 
 	] 
 
 
@@ -392,7 +401,7 @@ save_keymap_menu_items = [
     //Save to controls.ini
 	{ Type = textmenuelement id = save_settings_id text = "Save To Settings" target = "sKeyMapScript" params = { SaveSettings Save } save_info_text = "Save File: Controls.ini" save_info_text2 = "This will get loaded when game loads"  }
 	//We need to figure out why back button keeps getting bugged...
-	{ LM_Menu_Shared_Back Params = { id = save_keymap_menu } } 
+	{ LM_Menu_Shared_Back Params = { from = save_keymap_menu to = newSettingsMenu } } 
 	] 
 
 //Maybe we should add something like this to all menus?
