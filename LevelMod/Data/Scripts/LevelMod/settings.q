@@ -356,50 +356,66 @@ levelmod_menu_wall_items = [
 load_keymap_menu = { 
 	LM_Menu_Shared_Vertical
 	id = load_keymap_menu
-	eventhandler = { Type = showeventhandler target = "KeyMap_loadsave_OnShow" }
-	children = [
-	{ Type = textmenuelement auto_id text = "Load Controls" static dont_gray drawer = title }
+	eventhandler = { Type = showeventhandler target = "KeyMapMenu_OnShow" params = { SelectCallback = Load_KeyMapMenu_OnSelect } }
+	children = load_keymap_menu_items
+}
+
+load_keymap_menu_items = [
+	{ Type = textmenuelement auto_id               text = "Load Controls"    static dont_gray drawer = title }
+	//This is used to display info text
+	{ Type = textmenuelement id = load_info_text   text = ""                 static }
 	//Load from input.map
-	{ Type = textmenuelement auto_id text = "Load From Game" target = "sKeyMapScript" params = { LoadGame Load } }
+	{ Type = textmenuelement id = load_game_id     text = "Load From Game"     target = "sKeyMapScript" params = { LoadGame Load } load_info_text = "Load File: Data\input.map" }
 	//Load from settings.ini
-	{ Type = textmenuelement auto_id text = "Load From Settings" target = "sKeyMapScript" params = { LoadSettings Load } }
+	{ Type = textmenuelement id = load_settings_id text = "Load From Settings" target = "sKeyMapScript" params = { LoadSettings Load } load_info_text = "Load File: Controls.ini" }
 	//Load defaults(currently not implemented)
-	{ Type = textmenuelement auto_id text = "Load Defaults" target = "sKeyMapScript" params = { LoadDefault Load } }
+	{ Type = textmenuelement id = load_default_id  text = "Load Defaults"      target = "sKeyMapScript" params = { LoadDefault Load } load_info_text = "Load Default Controls" }
 	{ LM_Menu_Shared_Back Params = { id = load_keymap_menu } } 
 	] 
-}
 
 
 //Control->Edit->Save menu struct
 save_keymap_menu = { 
 	LM_Menu_Shared_Vertical
 	id = save_keymap_menu
-	eventhandler = { Type = showeventhandler target = "KeyMap_loadsave_OnShow" params = { SelectCallback = SaveKeyMapOnSelect } }
+	eventhandler = { Type = showeventhandler target = "KeyMapMenu_OnShow" params = { SelectCallback = Save_KeyMapMenu_OnSelect } }
 	children = save_keymap_menu_items
 }
 
 save_keymap_menu_items = [
 	{ Type = textmenuelement auto_id               text = "Save Controls"    static dont_gray drawer = title }
 	//This is used to display info text
-	{ Type = textmenuelement id = edit_info_id     text = ""                 static }
+	{ Type = textmenuelement id = save_info_text   text = ""                 static }
+	{ Type = textmenuelement id = save_info_text2  text = ""                 static }
 	//Save to input.map
-	{ Type = textmenuelement id = save_game_id     text = "Save To Game"     target = "sKeyMapScript" params = { SaveGame Save } info_text = "This will get loaded if you remove controls.ini" }
+	{ Type = textmenuelement id = save_game_id     text = "Save To Game"     target = "sKeyMapScript" params = { SaveGame Save } save_info_text = "Save File: Data\input.map" save_info_text2 = "This will get loaded if you remove controls.ini" }
     //Save to controls.ini
-	{ Type = textmenuelement id = save_settings_id text = "Save To Settings" target = "sKeyMapScript" params = { SaveSettings Save } info_text = "This will get loaded when game loads"  }
+	{ Type = textmenuelement id = save_settings_id text = "Save To Settings" target = "sKeyMapScript" params = { SaveSettings Save } save_info_text = "Save File: Controls.ini" save_info_text2 = "This will get loaded when game loads"  }
 	//We need to figure out why back button keeps getting bugged...
 	{ LM_Menu_Shared_Back Params = { id = save_keymap_menu } } 
 	] 
 
 //Maybe we should add something like this to all menus?
-script SaveKeyMapOnSelect
+script Save_KeyMapMenu_OnSelect
     //This function can get param from array
 	//1st param need to be the array
 	//mask can be any number of params that you want to match
-	//if function finds a match it will add the param to stack with the same name
-    if GetParamFromArray save_keymap_menu_items param = info_text mask = { id = <id> }
-	    SetMenuElementText <info_text> id = edit_info_id
+	//params can be any number of params you want to get
+	//if function finds a match it will add the params to stack with the same name
+    if GetParamFromArray save_keymap_menu_items params = { save_info_text save_info_text2 } mask = { id = <id> }
+	    SetMenuElementText <save_info_text> id = save_info_text
+		SetMenuElementText <save_info_text2> id = save_info_text2
 	else
-	    SetMenuElementText "" id = <edit_info_id>
+	    SetMenuElementText "" id = save_info_text
+		SetMenuElementText "" id = save_info_text2
+	endif
+endscript
+
+script Load_KeyMapMenu_OnSelect
+    if GetParamFromArray load_keymap_menu_items params = { load_info_text } mask = { id = <id> }
+	    SetMenuElementText <load_info_text> id = load_info_text
+	else
+	    SetMenuElementText "" id = load_info_text
 	endif
 endscript
 
@@ -407,7 +423,7 @@ script KeyMapMenuSetInfoText
     SetMenuElementText <...> id = edit_info_id
 endscript
 
-script KeyMap_loadsave_OnShow
+script KeyMapMenu_OnShow
     if GotParam SelectCallback
         SetMenuSelectCallback <SelectCallback>
 	endif
