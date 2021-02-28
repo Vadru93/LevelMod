@@ -1395,14 +1395,15 @@ bool SaveKeyMap()
         BYTE* pFile = new BYTE[size];
         fseek(f, 0, SEEK_SET);
         fread(pFile, size, 1, f);
-        fseek(f, 0, SEEK_SET);
+        fseek(f, 0x7C, SEEK_SET);
         BYTE* pData = pFile;
 
         pFile += 0x7C;
         KeyMap* new_map = (KeyMap*)pFile;
         for (DWORD i = 0; i != (DWORD)KeyMap::MappedKey::Undefined; i++)
         {
-            new_map[i] = keyMap[i];
+            new_map[i].mapped = keyMap[i].mapped;
+            new_map[i].DIK_KeyCode = keyMap[i].DIK_KeyCode;
         }
         fwrite(pFile, size, 1, f);
         delete pData;
