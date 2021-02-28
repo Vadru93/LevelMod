@@ -3,6 +3,18 @@
 //These options will override the original option
 //If no connection is found the client will use the Value parameter
 
+lm_edit_keymap_keyboard_control = { 
+type = keyboardcontrol 
+id = lm_edit_keymap_keyboard_control 
+x = 160.0 y = 115.0 w = 320.0 h = 336.0 
+just_center_x just_center_y num_columns = 13 
+gapname_charset min_chars = 0 max_chars = 16 
+title_string = "Profile name:" eventhandlers = 
+[ { type = ContentsChangedEventHandler target = 
+"EditKeyMapControlAccept" params = 
+{ field_id = display_name keyboard_id = lm_edit_keymap_keyboard_control  } } 
+] default_to_accept hide_on_close parent = contain1 }
+
 LM_HostOption_MenuItem = { Type = textmenuelement text = "Foo" target = "LM_ToggleHostOption" }
 
 LM_HostOptions = [
@@ -484,6 +496,12 @@ SCRIPT Settings_UpdateLevelFog
 	ENDIF
 ENDSCRIPT
 
+SCRIPT DestroyMessageAndGoBack
+    Wait 1.0 seconds
+    SwitchOffMenu id = simple_menu
+    SwitchToMenu DoNotMakeRoot <...>
+ENDSCRIPT
+
 SCRIPT sKeyMapScript
     if GotParam Load
 	    DisplayMessage MessageScript = Message_LoadingData PauseLength = MemCardMessageShortPause
@@ -492,6 +510,8 @@ SCRIPT sKeyMapScript
 		else
 		    DisplayMessage MessageScript = Message_LoadFailed
 		endif
+		SpawnScript DestroyMessageAndGoBack params = { menu = load_keymap_menu }
+	    
 	endif
     if GotParam Save
         DisplayMessage MessageScript = Message_SavingData PauseLength = MemCardMessageShortPause
@@ -500,7 +520,10 @@ SCRIPT sKeyMapScript
 		else
 		    DisplayMessage MessageScript = Message_SaveFailed
 		endif
+		SpawnScript DestroyMessageAndGoBack params = { menu = save_keymap_menu }
     endif
+	
+
 ENDSCRIPT
 
 

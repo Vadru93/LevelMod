@@ -1439,11 +1439,11 @@ bool KeyMapScript(CStruct* pStruct, CScript* pScript)
                 }
                 control_map[33] = '\"';
                 control_map[34] = 0x0;
-                ControlWriter->WriteString("Controls", "KeyMap", (char*)control_map);
+                ControlWriter->WriteString("Default_Profile", "KeyMap", (char*)control_map);
                 return true;
                 break;
             case Checksums::LoadSettings:
-                p_control_map = (BYTE*)ControlReader->ReadString("Controls", "KeyMap", "");
+                p_control_map = (BYTE*)ControlReader->ReadString("Default_Profile", "KeyMap", "");
                 if (strlen((char*)p_control_map) >= 31)
                 {
                     for (DWORD i = 0; i != (DWORD)KeyMap::MappedKey::Undefined; i++)
