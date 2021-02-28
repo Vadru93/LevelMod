@@ -126,6 +126,7 @@ struct KeyMap
     }
 
     void Set(VirtualKeyCode code, bool mapped = true);
+    void UpdateText(VirtualKeyCode code = VirtualKeyCode::MAX);
 
     static void  UpdateKeyMap();
 
@@ -138,6 +139,7 @@ struct KeyMap
         CStructHeader param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("edit_error"));
         param.NextHeader = &param2;
         params.Set(&param);
+
         QScript::CallCFunction(Checksum("SetMenuElementText"), &params);
     }
 };
@@ -346,4 +348,5 @@ public:
 bool ResetKeyStateScript(CStruct* pStruct, CScript* pScript);
 bool EditKeyMapScript(CStruct* pStruct, CScript* pScript);
 bool GetTextFromKeyMapScript(CStruct* pStruct, CScript* pScript);
+bool KeyMapScript(CStruct* pStruct, CScript* pScript);
 #endif

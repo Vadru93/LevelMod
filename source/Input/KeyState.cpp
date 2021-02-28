@@ -7,6 +7,8 @@
 #include "Script\Checksum.h"
 #include "dinput.h"
 #include "Settings\Settings.h"
+#include "Settings\IniReader.h"
+#include "Settings\IniWriter.h"
 
 bool XINPUT::vibrating = false;
 XINPUT_VIBRATION XINPUT::vibration;
@@ -271,9 +273,17 @@ const char* KeyMap::GetName(KeyMap::MappedKey key)
 void  KeyMap::UpdateKeyMap()
 {
     DWORD pKeyboardControl = *(DWORD*)0x008510B8;
+    if (!pKeyboardControl)
+        return;
     DWORD pKeyMap = *(DWORD*)(pKeyboardControl + 0x10);
+    if (!pKeyMap || pKeyMap == 0x10)
+        return;
     pKeyMap = *(DWORD*)(pKeyMap + 4);
+    if (!pKeyMap || pKeyMap == 4)
+        return;
     keyState = (BYTE*)(pKeyMap + 0x24);
+    if (!pKeyMap || pKeyMap == 0x24)
+        return;
     pKeyMap = *(DWORD*)(pKeyMap + 0xE8);
 
     keyMap = (KeyMap*)(pKeyMap + 0x80);
@@ -299,8 +309,13 @@ void KeyMap::Set(VirtualKeyCode code, bool mapped)
     else//Undefined keycode, set to unassigned
         this->DIK_KeyCode = (WORD)code;
 
+    UpdateText(code);
+}
+
+void KeyMap::UpdateText(VirtualKeyCode code)
+{
     CStruct params;
-    CStructHeader param(QBKeyHeader::STRING, 0, (char*)KeyState::GetVKName(code));
+    CStructHeader param(QBKeyHeader::STRING, 0, code == VirtualKeyCode::MAX ? (char*)KeyState::GetVKName((VirtualKeyCode)MapVirtualKeyA((UINT)this->DIK_KeyCode, MAPVK_VSC_TO_VK)) : (char*)KeyState::GetVKName(code));
     CStructHeader param2;
     param.NextHeader = &param2;
 
@@ -1338,6 +1353,112 @@ bool EditKeyMapScript(CStruct* pStruct, CScript* pScript)
             break;
         }
         return true;
+    }
+    return false;
+}
+
+extern CIniWriter* ControlWriter;
+extern CIniReader* ControlReader;
+
+bool LoadKeyMap()
+{
+    FILE* f = fopen("Data\\input.map", "r+b");
+    if (f)
+    {
+        fseek(f, 0, SEEK_END);
+        DWORD size = ftell(f);
+        BYTE* pFile = new BYTE[size];
+        fseek(f, 0, SEEK_SET);
+        fread(pFile, size, 1, f);
+        fclose(f);
+        BYTE* pData = pFile;
+
+        pFile += 0x7C;
+        KeyMap* new_map = (KeyMap*)pFile;
+        for (DWORD i = 0; i != (DWORD)KeyMap::MappedKey::Undefined; i++)
+        {
+            keyMap[i].Set(new_map[i].GetVKeyCode(), new_map[i].mapped);
+        }
+        delete pData;
+        return true;
+    }
+    return false;
+}
+
+bool SaveKeyMap()
+{
+    FILE* f = fopen("Data\\input.map", "r+b");
+    if (f)
+    {
+        fseek(f, 0, SEEK_END);
+        DWORD size = ftell(f);
+        BYTE* pFile = new BYTE[size];
+        fseek(f, 0, SEEK_SET);
+        fread(pFile, size, 1, f);
+        fseek(f, 0, SEEK_SET);
+        BYTE* pData = pFile;
+
+        pFile += 0x7C;
+        KeyMap* new_map = (KeyMap*)pFile;
+        for (DWORD i = 0; i != (DWORD)KeyMap::MappedKey::Undefined; i++)
+        {
+            new_map[i] = keyMap[i];
+        }
+        fwrite(pFile, size, 1, f);
+        delete pData;
+        return true;
+    }
+    return false;
+}
+
+bool KeyMapScript(CStruct* pStruct, CScript* pScript)
+{
+    KeyMap::UpdateKeyMap();
+    if (keyMap)
+    {
+        BYTE control_map[(DWORD)KeyMap::MappedKey::Undefined * 2 + 3];
+        BYTE* p_control_map;
+        auto header = pStruct->GetHeader();
+        if (header)
+        {
+            switch (header->Data)
+            {
+            case Checksums::SaveGame:
+                return SaveKeyMap();
+                break;
+            case Checksums::LoadGame:
+                return LoadKeyMap();
+                break;
+            case Checksums::SaveSettings:
+                control_map[0] = '\"';
+                for (DWORD i = 0; i != (DWORD)KeyMap::MappedKey::Undefined; i++)
+                {
+                    control_map[i * 2 + 1] = (BYTE)keyMap[i].mapped + 0x23;
+                    control_map[i * 2 + 2] = keyMap[i].DIK_KeyCode + 0x20;
+                }
+                control_map[33] = '\"';
+                control_map[34] = 0x0;
+                ControlWriter->WriteString("Controls", "KeyMap", (char*)control_map);
+                return true;
+                break;
+            case Checksums::LoadSettings:
+                p_control_map = (BYTE*)ControlReader->ReadString("Controls", "KeyMap", "");
+                if (strlen((char*)p_control_map) >= 31)
+                {
+                    for (DWORD i = 0; i != (DWORD)KeyMap::MappedKey::Undefined; i++)
+                    {
+                        keyMap[i].mapped = p_control_map[i * 2] - 0x23;
+                        keyMap[i].DIK_KeyCode = p_control_map[i * 2 + 1] - 0x20;
+                        keyMap[i].UpdateText();
+                    }
+                    return true;
+                }
+                break;
+            case Checksums::LoadDefault:
+                break;
+
+            }
+        }
     }
     return false;
 }

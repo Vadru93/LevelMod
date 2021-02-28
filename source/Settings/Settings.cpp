@@ -20,6 +20,9 @@ extern bool bAddedOptions, bDebugMode, bHooked;
 extern CIniWriter* OptionWriter;
 extern CIniReader* OptionReader;
 
+extern CIniWriter* ControlWriter;
+extern CIniReader* ControlReader;
+
 extern BYTE oldCustomPrint[6];
 extern BYTE oldPrint[6];
 

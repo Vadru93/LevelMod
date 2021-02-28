@@ -198,8 +198,16 @@ Levelmod_menu_root = {
 }
 
 SCRIPT sFixGoBack
+    MoveMenu id = game_options_names_menu y = 0
+    MoveMenu id = game_options_on_off_menu y = 0
     EnableBackEvent
 	FixGoBack
+ENDSCRIPT
+
+SCRIPT EditControls_OnShow
+    sFixGoBack
+	MoveMenu id = game_options_names_menu y = 64
+    MoveMenu id = game_options_on_off_menu y = 64
 ENDSCRIPT
 
 levelmod_menu_root_children = [
@@ -228,7 +236,7 @@ levelmod_menu_root_children = [
 	
 	//Edit Controls
 	{ Type = textmenuelement auto_id text = "Edit Controls" link = newSettingsMenu     
-	target = "populate_game_options" params = { mask = cat_edit items = game_menu_items title = "Edit Controls" OnShow = sFixGoBack } }
+	target = "populate_game_options" params = { mask = cat_edit items = game_menu_items title = "Edit Controls" OnShow = EditControls_OnShow } }
 ]
 
 
@@ -331,6 +339,37 @@ levelmod_menu_wall_items = [
 	{ LM_Menu_Shared_Back Params = { id = LevelMod_menu_wall } } 
 ]
 
+//Control->Edit->Load menu struct
+load_keymap_menu = { 
+	LM_Menu_Shared_Vertical
+	id = load_keymap_menu
+	eventhandler = { Type = showeventhandler target = "KeyMap_loadsave_OnShow" }
+	children = [
+	{ Type = textmenuelement auto_id text = "Load Controls" static dont_gray drawer = title }
+	{ Type = textmenuelement auto_id text = "Load From Game" target = "sKeyMapScript" params = { LoadGame Load } }
+	{ Type = textmenuelement auto_id text = "Load From Settings" target = "sKeyMapScript" params = { LoadSettings Load } }
+	{ Type = textmenuelement auto_id text = "Load Defaults" target = "sKeyMapScript" params = { LoadDefault Load } }
+	{ LM_Menu_Shared_Back Params = { id = load_keymap_menu } } 
+	] 
+}
+
+//Control->Edit->Save menu struct
+save_keymap_menu = { 
+	LM_Menu_Shared_Vertical
+	id = save_keymap_menu
+	eventhandler = { Type = showeventhandler target = "KeyMap_loadsave_OnShow" }
+	children = [
+	{ Type = textmenuelement auto_id text = "Save Controls" static dont_gray drawer = title }
+	{ Type = textmenuelement auto_id text = "Save To Game" target = "sKeyMapScript" params = { SaveGame Save } }
+	{ Type = textmenuelement auto_id text = "Save To Settings" target = "sKeyMapScript" params = { SaveSettings Save } }
+	{ LM_Menu_Shared_Back Params = { id = save_keymap_menu } } 
+	] 
+}
+
+script KeyMap_loadsave_OnShow
+    EnableBackEvent
+	FixGoBack
+endscript
 
 levelmod_HostOptions_root = {
 	LM_Menu_Shared_Vertical 
@@ -351,6 +390,8 @@ Settings_CreateOptionsMenu //items = game_menu_items
 	//CreateAndAttachMenu { LevelMod_menu_GameOptions }
 	CreateAndAttachMenu { LevelMod_menu_Air }
 	CreateAndAttachMenu { LevelMod_menu_Wall }
+	CreateAndAttachMenu { load_keymap_menu }
+	CreateAndAttachMenu { save_keymap_menu }
 	CreateAndAttachMenu { levelmod_menu_LevelOptions }
 	
 	CreateAndAttachMenu { levelmod_HostOptions_root }
@@ -441,6 +482,25 @@ SCRIPT Settings_UpdateLevelFog
 			PrepareLevelFog <...>
 		ENDIF
 	ENDIF
+ENDSCRIPT
+
+SCRIPT sKeyMapScript
+    if GotParam Load
+	    DisplayMessage MessageScript = Message_LoadingData PauseLength = MemCardMessageShortPause
+		if KeyMapScript <...>
+		    DisplayMessage MessageScript = Message_LoadSuccessful
+		else
+		    DisplayMessage MessageScript = Message_LoadFailed
+		endif
+	endif
+    if GotParam Save
+        DisplayMessage MessageScript = Message_SavingData PauseLength = MemCardMessageShortPause
+		if KeyMapScript <...>
+		    DisplayMessage MessageScript = Message_SaveSuccessful
+		else
+		    DisplayMessage MessageScript = Message_SaveFailed
+		endif
+    endif
 ENDSCRIPT
 
 
@@ -774,6 +834,8 @@ game_menu_items = [
 	//This freezes for some reason...
 	//{        text = "Edit Controls" option_id = levelmod_menu_edit_id       link = newSettingsMenu              toggle_id = item8_toggle cat_control   target = "populate_game_options" params = { mask = cat_edit items = game_menu_items title = "Edit Controls" } }
 	
+	{        text = "Load"                   option_id = load_id             link = load_keymap_menu   toggle_id = toggle_load_id     cat_edit }
+	{        text = "Save"                   option_id = save_id             link = save_keymap_menu   toggle_id = toggle_save_id     cat_edit }
 	//Editable keys
 	{ IsMap  text = "Up (¡)"                 option_id = up_id               KeyMap = Up               toggle_id = up_text_id         cat_edit }
 	{ IsMap  text = "Down (¥)"               option_id = down_id             KeyMap = Down             toggle_id = down_text_id       cat_edit }
@@ -788,10 +850,10 @@ game_menu_items = [
 	{ IsMap  text = "Revert"                 option_id = revert_id           KeyMap = R2               toggle_id = revert_text_id     cat_edit }
 	{ IsMap  text = "Nollie (ª2)"            option_id = nollie_id           KeyMap = L2               toggle_id = nollie_text_id     cat_edit }
 	{ IsMap  text = "Spine Transfer"         option_id = SpineTransfer_id    KeyMap = SpineTransfer    toggle_id = spine_text_id      cat_edit }
-	{        text = "Press any key to Map"   option_id = edit_tip1           x = 70  y = 275 w = 110   toggle_id = edit1_id           cat_edit }
-    {        text = "Press Back to unassign" option_id = edit_tip2           x = 70  y = 292 w = 110   toggle_id = edit2_id           cat_edit }
-    {        text = "Press Escape to abort"  option_id = edit_tip3           x = 70  y = 309 w = 110   toggle_id = edit3_id           cat_edit }
-	{        text = ""                       option_id = edit_error          x = 0  y = -40 w = 300    toggle_id = error_id           cat_edit }
+	{        text = "Press any key to Map"   option_id = edit_tip1           x = 0  y = -64 w = 300   toggle_id = edit1_id           cat_edit }
+    {        text = "Press Back to unassign" option_id = edit_tip2           x = 0  y = -48 w = 300   toggle_id = edit2_id           cat_edit }
+    {        text = "Press Escape to abort"  option_id = edit_tip3           x = 0  y = -32 w = 300   toggle_id = edit3_id           cat_edit }
+	{        text = ""                       option_id = edit_error          x = 0  y = -16 w = 300    toggle_id = error_id           cat_edit }
     
 
 	{ IsBool text = "Extra Messages" 	option_id = LM_GUI_bTrickNotifications_id  option = LM_GUI_bTrickNotifications 	toggle_id = item1_toggle cat_gui } 
@@ -817,7 +879,7 @@ script Settings_CreateOptionsMenu
 		type = verticalmenu 
 		Id = newSettingsMenu
 		parent = contain1 
-		x = 170.0 y = 90.0 w = 300.0
+		x = 170.0 y = 40.0 w = 300.0
 		just_center_x just_center_y blue_top 
 		//eventhandler = { type = showeventhandler target = "populate_game_options" params = { mask = <cat> items = <items> } }
 		children = [ 

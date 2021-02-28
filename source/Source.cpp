@@ -87,7 +87,10 @@ bool bAddedOptions = false;
 
 CIniWriter* OptionWriter = NULL;// ini("LevelMod.ini");
 CIniReader* OptionReader = NULL;
+CIniWriter* ControlWriter = NULL;// ini("controls.ini");
+CIniReader* ControlReader = NULL;
 char IniPath[MAX_PATH + 1] = "";
+char IniPath2[MAX_PATH + 1] = "";
 
 const DWORD line_fvf = D3DFVF_XYZRHW | D3DFVF_DIFFUSE;
 
@@ -1215,6 +1218,11 @@ void ReadFirstOptions()
     OptionWriter = new CIniWriter(IniPath);
     OptionReader = new CIniReader(IniPath);
 
+    sprintf(IniPath2, "%s\\Controls.ini", temp);
+    //MessageBox(0, IniPath, IniPath, 0);
+    ControlWriter = new CIniWriter(IniPath2);
+    ControlReader = new CIniReader(IniPath2);
+
 
     //debug_print("Reading from ini file %s, default %d ", "LM_GFX_eBuffering", Gfx::numBackBuffers);
     DWORD new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_eBuffering", Gfx::numBackBuffers);
@@ -2187,6 +2195,7 @@ const CompiledScript scripts[] =
     { "Not", NotScript },
     { "IsNot", NotScript },
     { "NotTrue", NotScript},
+    { "KeyMapScript", KeyMapScript },
     { "EditKeyMap", EditKeyMapScript },
     { "GetTextFromKeyMap", GetTextFromKeyMapScript },
     { "FileExists", FileExistsScript },
@@ -5214,6 +5223,12 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
         }
         else
             debug_print("Couldn't find HostOptions\n");
+
+
+        CStruct params;
+        CStructHeader param(QBKeyHeader::LOCAL, 0, Checksums::LoadSettings);
+        params.Set(&param);
+        KeyMapScript(&params, NULL);
     }
 
     /*int id = -255;

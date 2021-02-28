@@ -275,6 +275,12 @@ namespace Checksums
 
             id = COMPILE_CRC32("id"),
 
+            SaveGame = COMPILE_CRC32("savegame"),
+            SaveSettings = COMPILE_CRC32("savesettings"),
+            LoadGame = COMPILE_CRC32("loadgame"),
+            LoadSettings = COMPILE_CRC32("loadsettings"),
+            LoadDefault = COMPILE_CRC32("loaddefault"),
+
 
 
         //Trick_KFBackflip = 0xF7B4E0CB
