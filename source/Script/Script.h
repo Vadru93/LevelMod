@@ -185,6 +185,7 @@ namespace QScript
     };
 
     extern void CallCFunction(DWORD checksum, void* param, QBKeyHeader::QBKeyType type = QBKeyHeader::QBKeyType::STRING);
+    extern void CallCFunction(DWORD checksum, CStruct* pParams);
 
     extern QBScript* Scripts;
     extern const char* QBTypes[19];
@@ -1117,7 +1118,17 @@ struct EXTERN CStruct
     void AddParam(CStructHeader* pParam)
     {
         head = pParam;
-        tail = pParam;
+        auto temp = pParam->NextHeader;
+        if (temp)
+        {
+            while (temp->NextHeader)
+            {
+                temp = temp->NextHeader;
+            }
+            tail = temp;
+        }
+        else
+            tail = pParam;
     }
 
     void FreeHeader();

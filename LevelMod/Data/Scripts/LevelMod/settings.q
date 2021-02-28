@@ -773,19 +773,23 @@ game_menu_items = [
 	//{        text = "Edit Controls" option_id = levelmod_menu_edit_id       link = newSettingsMenu              toggle_id = item8_toggle cat_control   target = "populate_game_options" params = { mask = cat_edit items = game_menu_items title = "Edit Controls" } }
 	
 	//Editable keys
-	{ IsMap  text = "Up"                 option_id = up_id               KeyMap = Up               toggle_id = up_text_id         cat_edit }
-	{ IsMap  text = "Down"               option_id = down_id             KeyMap = Down             toggle_id = down_text_id       cat_edit }
-	{ IsMap  text = "Left"               option_id = left_id             KeyMap = Left             toggle_id = left_text_id       cat_edit }
-	{ IsMap  text = "Right"              option_id = right_id            KeyMap = Right            toggle_id = right_text_id      cat_edit }
-	{ IsMap  text = "Ollie"              option_id = ollie_id            KeyMap = X                toggle_id = ollie_text_id      cat_edit }
-	{ IsMap  text = "Grind"              option_id = grind_id            KeyMap = Triangle         toggle_id = grind_text_id      cat_edit }
-	{ IsMap  text = "Flip"               option_id = flip_id             KeyMap = Square           toggle_id = flip_text_id       cat_edit }
-	{ IsMap  text = "Grab"               option_id = grab_id             KeyMap = Circle           toggle_id = grab_text_id       cat_edit }
-	{ IsMap  text = "Spin Left"          option_id = spinleft_id         KeyMap = L1               toggle_id = spinleft_text_id   cat_edit }
-	{ IsMap  text = "Spin Right"         option_id = spinright_id        KeyMap = R1               toggle_id = spinright_text_id  cat_edit }
-	{ IsMap  text = "Revert"             option_id = revert_id           KeyMap = R2               toggle_id = revert_text_id     cat_edit }
-	{ IsMap  text = "Nollie"             option_id = nollie_id           KeyMap = L2               toggle_id = nollie_text_id     cat_edit }
-	{ IsMap  text = "Spine Transfer"     option_id = SpineTransfer_id    KeyMap = SpineTransfer    toggle_id = spine_text_id      cat_edit }
+	{ IsMap  text = "Up (¡)"                 option_id = up_id               KeyMap = Up               toggle_id = up_text_id         cat_edit }
+	{ IsMap  text = "Down (¥)"               option_id = down_id             KeyMap = Down             toggle_id = down_text_id       cat_edit }
+	{ IsMap  text = "Left (§)"               option_id = left_id             KeyMap = Left             toggle_id = left_text_id       cat_edit }
+	{ IsMap  text = "Right (£)"              option_id = right_id            KeyMap = Right            toggle_id = right_text_id      cat_edit }
+	{ IsMap  text = "Ollie (¬)"              option_id = ollie_id            KeyMap = X                toggle_id = ollie_text_id      cat_edit }
+	{ IsMap  text = "Grind (ª)"              option_id = grind_id            KeyMap = Triangle         toggle_id = grind_text_id      cat_edit }
+	{ IsMap  text = "Flip (©)"               option_id = flip_id             KeyMap = Square           toggle_id = flip_text_id       cat_edit }
+	{ IsMap  text = "Grab («)"               option_id = grab_id             KeyMap = Circle           toggle_id = grab_text_id       cat_edit }
+	{ IsMap  text = "Spin Left (ª1)"         option_id = spinleft_id         KeyMap = L1               toggle_id = spinleft_text_id   cat_edit }
+	{ IsMap  text = "Spin Right"             option_id = spinright_id        KeyMap = R1               toggle_id = spinright_text_id  cat_edit }
+	{ IsMap  text = "Revert"                 option_id = revert_id           KeyMap = R2               toggle_id = revert_text_id     cat_edit }
+	{ IsMap  text = "Nollie (ª2)"            option_id = nollie_id           KeyMap = L2               toggle_id = nollie_text_id     cat_edit }
+	{ IsMap  text = "Spine Transfer"         option_id = SpineTransfer_id    KeyMap = SpineTransfer    toggle_id = spine_text_id      cat_edit }
+	{        text = "Press any key to Map"   option_id = edit_tip1           x = 70  y = 275 w = 110   toggle_id = edit1_id           cat_edit }
+    {        text = "Press Back to unassign" option_id = edit_tip2           x = 70  y = 292 w = 110   toggle_id = edit2_id           cat_edit }
+    {        text = "Press Escape to abort"  option_id = edit_tip3           x = 70  y = 309 w = 110   toggle_id = edit3_id           cat_edit }
+	{        text = ""                       option_id = edit_error          x = -5  y = -40 w = 300  toggle_id = error_id           cat_edit }
     
 
 	{ IsBool text = "Extra Messages" 	option_id = LM_GUI_bTrickNotifications_id  option = LM_GUI_bTrickNotifications 	toggle_id = item1_toggle cat_gui } 
@@ -957,6 +961,14 @@ script Settings_AddLine params = {}
 					    if GotParam IsMap
 						    printf "Add KeyInput"
 					        AddKeyInput <...>
+						else
+							    AddLine { 
+				                    parent = game_options_names_menu 
+				                    Type = textmenuelement 
+				                    id = <option_id>
+				                    text = <text>
+				                    static dont_gray drawer = main_warning x = <x> y = <y> w = <w> lock_layout lock_width
+			                    }
 					    endif
 				    endif
 			    endif

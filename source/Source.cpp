@@ -5972,7 +5972,12 @@ SHORT __stdcall proxy_GetAsyncKeyState(int key)
                 {
                     char msg[50];
                     sprintf(msg, "%s is already mapped to %s", KeyState::GetVKName((VirtualKeyCode)i), KeyMap::GetName(already_mapped));
-                    QScript::CallCFunction(Checksum("LaunchPanelMessage"), (void*)msg);
+                    CStruct params;
+                    CStructHeader param(QBKeyHeader::STRING, 0, (void*)msg);
+                    CStructHeader param2(QBKeyHeader::LOCAL, Checksums::id, Checksum("edit_error"));
+                    param.NextHeader = &param2;
+                    params.AddParam(&param);
+                    QScript::CallCFunction(Checksum("SetMenuElementText"), &params);
                 }
             }
         }

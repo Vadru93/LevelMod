@@ -631,6 +631,16 @@ void QScript::CallCFunction(DWORD checksum, void* param, QBKeyHeader::QBKeyType 
     }
 }
 
+void QScript::CallCFunction(DWORD checksum, CStruct* pParams)
+{
+    auto pFunctionHeader = GetQBKeyHeader(checksum);
+    if (pFunctionHeader)
+    {
+        CScript script;
+        pFunctionHeader->pFunction(pParams, &script);
+    }
+}
+
 
 char* QScript::FindReference(char* file_name, DWORD checksum, bool levelmod)
 {
