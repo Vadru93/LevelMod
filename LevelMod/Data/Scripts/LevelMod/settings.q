@@ -986,32 +986,7 @@ script Settings_UpdateKeyMapText
 endscript
 
 script UpdateKeyMapTextCallback
-    GetTextFromKeyMap SpineTransfer
-    SetMenuElementText <text> id = spine_text_id
-	GetTextFromKeyMap Up
-    SetMenuElementText <text> id = up_text_id
-	GetTextFromKeyMap Down
-    SetMenuElementText <text> id = down_text_id
-	GetTextFromKeyMap Left
-    SetMenuElementText <text> id = left_text_id
-	GetTextFromKeyMap Right
-    SetMenuElementText <text> id = right_text_id
-	GetTextFromKeyMap L1
-    SetMenuElementText <text> id = spinleft_text_id
-	GetTextFromKeyMap L2
-    SetMenuElementText <text> id = spinright_text_id
-	GetTextFromKeyMap R2
-    SetMenuElementText <text> id = revert_text_id
-	GetTextFromKeyMap L2
-    SetMenuElementText <text> id = nollie_text_id
-	GetTextFromKeyMap Triangle
-    SetMenuElementText <text> id = grind_text_id
-	GetTextFromKeyMap Square
-    SetMenuElementText <text> id = flip_text_id
-	GetTextFromKeyMap Circle
-    SetMenuElementText <text> id = grab_text_id
-	GetTextFromKeyMap X
-    SetMenuElementText <text> id = ollie_text_id
+    SetMenuElementText <...>
 endscript
 
 script Settings_EditKeyMap

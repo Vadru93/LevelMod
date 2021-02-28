@@ -436,7 +436,10 @@ struct CStructHeader
 
     CStructHeader(QBKeyHeader::QBKeyType Type, DWORD checksum, DWORD data)
     {
+        this->Type = Type;
+        this->QBkey = checksum;
         this->Data = data;
+        NextHeader = NULL;
     }
 
 

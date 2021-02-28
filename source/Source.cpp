@@ -5946,10 +5946,10 @@ SHORT __stdcall proxy_GetAsyncKeyState(int key)
         //If press BACK unassign key
         else if (KeyState::GetKeyboardState(VirtualKeyCode::BACK))
         {
-            LevelModSettings::pEditKeyMap->mapped = 0;
-            LevelModSettings::pEditKeyMap->DIK_KeyCode = 0;
+            //Set map and update text
+            LevelModSettings::pEditKeyMap->Set(VirtualKeyCode::Undefined, false);
+            //Stop editing so we only assign first keypress
             LevelModSettings::pEditKeyMap = NULL;
-            ExecuteQBScript("UpdateKeyMapTextCallback");
         }
         else
         {
@@ -5962,19 +5962,10 @@ SHORT __stdcall proxy_GetAsyncKeyState(int key)
                 KeyMap::MappedKey already_mapped = KeyMap::MappedKey::Undefined;
                 if (KeyState::GetKeyboardState((VirtualKeyCode)i) && !KeyState::GetOldKeyboardState((VirtualKeyCode)i) && !KeyState::FindMappedKey((VirtualKeyCode)i, &already_mapped))
                 {
-                    __assume(LevelModSettings::pEditKeyMap != NULL);
-                    if (LevelModSettings::pEditKeyMap->GetKeyType() == KeyMap::MappedKey::Unused)
-                    {
-                        //New SpineButton
-                        LevelModSettings::SpineButton3 = (VirtualKeyCode)i;
-                    }
-                    //Enable mapping for this key
-                    LevelModSettings::pEditKeyMap->mapped = 1;
-                    //Map the VirtualKeyCode to DirectInput KeyCode
-                    LevelModSettings::pEditKeyMap->DIK_KeyCode = (WORD)MapVirtualKeyA(i, MAPVK_VK_TO_VSC);
+                    //Set map and update text
+                    LevelModSettings::pEditKeyMap->Set((VirtualKeyCode)i);
                     //Stop editing so we only assign first keypress
                     LevelModSettings::pEditKeyMap = NULL;
-                    ExecuteQBScript("UpdateKeyMapTextCallback");
                     break;
                 }
                 else if (already_mapped != KeyMap::MappedKey::Undefined)

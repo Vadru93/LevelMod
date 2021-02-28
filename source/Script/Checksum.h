@@ -273,6 +273,8 @@ namespace Checksums
 
             ForceUpdate = COMPILE_CRC32("forceupdate"),
 
+            id = COMPILE_CRC32("id"),
+
 
 
         //Trick_KFBackflip = 0xF7B4E0CB

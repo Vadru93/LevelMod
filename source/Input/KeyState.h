@@ -119,6 +119,13 @@ struct KeyMap
 
     static VirtualKeyCode GetVKeyCode(MappedKey key);
 
+    VirtualKeyCode GetVKeyCode()
+    {
+        return (VirtualKeyCode)MapVirtualKeyA(DIK_KeyCode, MAPVK_VSC_TO_VK);
+    }
+
+    void Set(VirtualKeyCode code, bool mapped = true);
+
     static void  UpdateKeyMap();
 
     MappedKey GetKeyType();

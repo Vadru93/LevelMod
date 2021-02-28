@@ -289,6 +289,83 @@ VirtualKeyCode KeyMap::GetVKeyCode(MappedKey key)
     return (VirtualKeyCode)MapVirtualKeyA((UINT)keyMap[(BYTE)key].DIK_KeyCode, MAPVK_VSC_TO_VK);
 }
 
+void KeyMap::Set(VirtualKeyCode code, bool mapped)
+{
+    //Enable mapping for this key?
+    this->mapped = mapped;
+    //Map the VirtualKeyCode to DirectInput KeyCode
+    if (code != VirtualKeyCode::Undefined)
+        this->DIK_KeyCode = (WORD)MapVirtualKeyA((UINT)code, MAPVK_VK_TO_VSC);
+    else//Undefined keycode, set to unassigned
+        this->DIK_KeyCode = (WORD)code;
+
+    CStruct params;
+    CStructHeader param(QBKeyHeader::STRING, 0, (char*)KeyState::GetVKName(code));
+
+    KeyMap::MappedKey key = this->GetKeyType();
+    CStructHeader param2;
+
+    switch ((DWORD)key)
+    {
+    case (DWORD)KeyMap::MappedKey::Up:
+        //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::Up);
+        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("up_text_id"));
+        break;
+    case (BYTE)KeyMap::MappedKey::Down:
+        //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::Down);
+        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("down_text_id"));
+        break;
+    case (BYTE)KeyMap::MappedKey::Left:
+        //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::Left);
+        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("left_text_id"));
+        break;
+    case (BYTE)KeyMap::MappedKey::Right:
+        //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::Right);
+        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("right_text_id"));
+        break;
+    case (BYTE)KeyMap::MappedKey::Flip:
+        //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::Square);
+        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("flip_text_id"));
+        break;
+    case (BYTE)KeyMap::MappedKey::Grab:
+        //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::Circle);
+        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("grab_text_id"));
+        break;
+    case (BYTE)KeyMap::MappedKey::Grind:
+        //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::Triangle);
+        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("grind_text_id"));
+        break;
+    case (BYTE)KeyMap::MappedKey::SpinLeft:
+        //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::L1);
+        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("spinleft_text_id"));
+        break;
+    case (BYTE)KeyMap::MappedKey::SpinRight:
+        //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::R1);
+        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("spinright_text_id"));
+        break;
+    case (BYTE)KeyMap::MappedKey::Nollie:
+        //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::L2);
+        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("nollie_text_id"));
+        break;
+    case (BYTE)KeyMap::MappedKey::Revert:
+        //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::R2);
+        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("revert_text_id"));
+        break;
+    case (BYTE)KeyMap::MappedKey::Unused:
+        //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::SpineTransfer);
+        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("spine_text_id"));
+        //New SpineButton
+        LevelModSettings::SpineButton3 = code;
+        break;
+
+    }
+    params.AddParam(&param);
+    params.tail = &param2;
+    param.NextHeader = &param2;
+    CScript script;
+    ExecuteQBScript("UpdateKeyMapTextCallback", &params, &script);
+}
+
 bool held_pause = false;
 bool held_select = false;
 
@@ -500,7 +577,7 @@ bool KeyState::FindMappedKey(VirtualKeyCode code, KeyMap::MappedKey* already_map
 
 const char* KeyState::GetVKName(VirtualKeyCode code)
 {
-    return vk_names[(BYTE)code & 206];
+    return vk_names[(BYTE)code];
 }
 
 WORD KeyState::XINPUT_UpdateCamera_Hook(BYTE gamestate, BYTE* game_config)
@@ -1178,13 +1255,19 @@ bool GetTextFromKeyMapScript(CStruct* pStruct, CScript* pScript)
 
         if (key_name)
         {
-            CStructHeader* pParam = pScript->params->AllocateCStruct();
+            CStructHeader* pParam = pScript->GetParam(crc32f("text"));
             if (!pParam)
             {
-                debug_print(__FUNCTION__ "couldn't Allocate CStruct...\n");
-                return false;
+                pParam = pScript->params->AllocateCStruct();
+                if (!pParam)
+                {
+                    debug_print(__FUNCTION__ "couldn't Allocate CStruct...\n");
+                    return false;
+                }
+                pParam->Type = QBKeyHeader::STRING;
+                pParam->QBkey = crc32f("text");
+                pParam->pStr = (char*)mallocx(strlen("Undefined Key") + 1);
             }
-
             if (pScript->params->head)
             {
                 pScript->params->tail->NextHeader = pParam;
@@ -1195,12 +1278,9 @@ bool GetTextFromKeyMapScript(CStruct* pStruct, CScript* pScript)
                 pScript->params->head = pParam;
                 pScript->params->tail = pParam;
             }
-            pParam->Type = QBKeyHeader::QBKeyType::STRING;
-            pParam->QBkey = Checksum("text");
 
-            pParam->pStr = (char*)mallocx(strlen(key_name) + 1);
+            //pParam->pStr = (char*)mallocx(strlen(key_name) + 1);
             memcpy(pParam->pStr, key_name, strlen(key_name) + 1);
-
             pParam->NextHeader = NULL;
             return true;
         }
