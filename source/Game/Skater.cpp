@@ -4,6 +4,10 @@
 #include "Physics\Physics.h"
 
 Vertex scol, ecol;
+CStruct* last_trigger_node = NULL;
+DWORD last_trigger_type = 0;
+DWORD last_trigger_checksum = 0;
+DWORD new_trigger_frame = 0;
 
 bool Modulating()
 {
@@ -482,7 +486,7 @@ void Skater::Store()
     /*skpos = position;
     skopos = oldpos;
     skvel = velocity;*/
-    memcpy(old_feeler, &scripts, 0x60*2);
+    memcpy(old_feeler, &m_feeler, 0x60*2);
     //memcpy(old_feeler2, &scripts+0x60, 0x60);
     /*oldCollNormal = normal;
     oldHitPoint = hitpoint;
@@ -497,7 +501,7 @@ void Skater::Restore()
     /*position = skpos;
     oldpos = skopos;
     skvel = velocity;^*/
-    memcpy(&scripts, old_feeler, 0x60*2);
+    memcpy(&m_feeler, old_feeler, 0x60*2);
     //memcpy(&scripts + 0x60, old_feeler2, 0x60);
     /*normal = oldCollNormal;
     hitpoint = oldHitPoint;
@@ -505,6 +509,34 @@ void Skater::Restore()
     height = oldHeight;
     scol = *(Vertex*)&startcol;
     ecol = *(Vertex*)&endcol;*/
+}
+
+void Skater::CheckEventTrigger(Node::TriggerType type, Collision::CollData& col)
+{
+    if (col.collided)
+    {
+        DWORD checksum = col.checksum;
+        if (m_current_trigger_type != type || checksum != last_trigger_checksum || Gfx::frameCounter > new_trigger_frame)
+        {
+            CArray* node_array = Node::GetNodeArray();
+            DWORD node_index = Node::GetNodeIndex(checksum);
+            CStruct* node = node_array->GetStructure(node_index);
+
+            if (!SkateMod::ShouldBeAbsentNode(node))
+            {
+                DWORD trigger_script;
+                if (node->GetChecksum(Checksums::TriggerScript, &trigger_script))
+                {
+                    last_trigger_node = NULL;
+                    last_trigger_checksum = checksum;
+                    new_trigger_frame = Gfx::frameCounter + 10;
+                    m_current_trigger_type = type;
+                    m_trigger_script = trigger_script;
+                    SpawnAndRunScript(trigger_script, node_index, true, true);
+                }
+            }
+        }
+    }
 }
 
 void Skater::ResetLerpingMatrix()

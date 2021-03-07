@@ -185,6 +185,7 @@ struct Node
 
     enum TriggerType
     {
+        TRIGGER_NONE = 0,
         TRIGGER_SKATE_OFF_EDGE = 1,
         TRIGGER_JUMP_OFF,
         TRIGGER_LAND_ON,

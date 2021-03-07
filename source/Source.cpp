@@ -221,6 +221,19 @@ __inline void HookFunction(DWORD addr, void (Skater::* function)(), BYTE byteCod
     //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
 }
 
+__inline void HookFunction(DWORD addr, void (Skater::* function)(Node::TriggerType, Collision::CollData &), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+
 __inline void HookFunction(DWORD addr, void (Skater::* function)(DWORD type), BYTE byteCode = 0, DWORD nopCount = 0)
 {
     DWORD old;
@@ -4547,8 +4560,8 @@ void InitLevelMod()
     //InjectHook(0x0043A6D6, nop_func, 5);
     //InjectHook(0x00419D07, nop_func, 5);
 
-    InjectHook(0x0049D15D, nop_func, 5);
-    InjectHook(0x0049D180, nop_func, 5);
+    //InjectHook(0x0049D15D, nop_func, 5);
+    //InjectHook(0x0049D180, nop_func, 5);
 
     
     //Fix UberFrig
@@ -4856,7 +4869,22 @@ void InitLevelMod()
     memcpy((void*)0x0042FA9D, codeCaveRenderHook2, sizeof(codeCaveRenderHook2));
 
     //Fixing bug that produces duplicate TriggerScripts
-    HookFunction(0x00499B48, TriggerScript, 0xE9);
+    //HookFunction(0x00499B48, TriggerScript, 0xE9);
+    HookFunction(0x0049F051, &Skater::CheckEventTrigger);
+    HookFunction(0x0049F2BB, &Skater::CheckEventTrigger);
+    HookFunction(0x0049F2E3, &Skater::CheckEventTrigger);
+    HookFunction(0x0049FAE1, &Skater::CheckEventTrigger);
+    HookFunction(0x004A060E, &Skater::CheckEventTrigger);
+    HookFunction(0x004A0D31, &Skater::CheckEventTrigger);
+    HookFunction(0x004A1896, &Skater::CheckEventTrigger);
+    HookFunction(0x004A300F, &Skater::CheckEventTrigger);
+    HookFunction(0x004A3518, &Skater::CheckEventTrigger);
+    HookFunction(0x004A416E, &Skater::CheckEventTrigger);
+    HookFunction(0x004A4186, &Skater::CheckEventTrigger);
+    HookFunction(0x004A4222, &Skater::CheckEventTrigger);
+    HookFunction(0x004A4256, &Skater::CheckEventTrigger);
+    HookFunction(0x004A60E2, &Skater::CheckEventTrigger);
+    HookFunction(0x004A77BA, &Skater::CheckEventTrigger);
 
     for (DWORD i = 0; i < sizeof(optimized_grind) / sizeof(OptimizedGrind); i++)
     {

@@ -41,12 +41,21 @@ namespace Collision
     struct CollData
     {
         void* cache;
+        //4
         Vertex normal;
+        //10
         DWORD padding;
+        //14
         float unk;
+        //18
         Vertex point;
+        //24
         int index;//Or terrain?
-        Vertex* vertices[3];
+        //28
+        //Vertex* vertices[3];
+        BYTE unk1[0x20];
+        bool collided;
+        DWORD checksum;
 
         Collision::Flags ignore_1;
         Collision::Flags ignore_0;

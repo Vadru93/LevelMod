@@ -8,6 +8,7 @@
 #include "Gfx\Camera.h"
 #include "RenderWare\RenderWare.h"
 #include "Game\Task.h"
+#include "Script\Node.h"
 
 bool GetZAngle(CStruct* pParams, CScript* pScript);
 bool GetZAngle(CStruct* pParams, CScript* pScript);
@@ -71,11 +72,10 @@ struct SkaterProfileContainer
     }
 };
 struct RailNode;
-static D3DXVECTOR3 oldCollNormal;
-static D3DXVECTOR3 oldHitPoint;
-static DWORD oldCollFlag;
-static float oldHeight;
-static DWORD previus_state;
+extern DWORD last_trigger_type;
+extern DWORD last_trigger_checksum;
+extern DWORD new_trigger_frame;
+extern CStruct* last_trigger_node;
 //#pragma pack(1)
 //Skater: contains information about camera, position, collision etc
 struct Timer
@@ -413,7 +413,7 @@ private://0575a190
     //84A8
     BYTE unknown2[0x18];
     //84C0
-    DWORD current_trigger_type;
+    DWORD m_current_trigger_type;
     //84C4
     bool m_restarted_this_frame;
     BYTE unknown34[0x0B];
@@ -430,7 +430,7 @@ private://0575a190
     //8678
     float endcolW;//1.0f
     //867C
-    void* scripts;
+    Collision::CollData* m_feeler;
     //8680
     DWORD flag;//0 1 idk?
     //8684
@@ -451,9 +451,9 @@ public:
     DWORD checksumName;
 private:
     //86CC
-    DWORD nodeIndex;
+    DWORD m_node_index;
     //86D0
-    DWORD triggerScript;
+    DWORD m_trigger_script;
     //86D4
     BYTE unk7[0x78];
     //874C
@@ -549,11 +549,13 @@ public:
         return safe;
     }
 
+    void CheckEventTrigger(Node::TriggerType type, Collision::CollData& col);
+
     __inline void SetTrigger(DWORD node_name, DWORD trigger_script)
     {
         unk5[0x0C] = true;
         checksumName = node_name;
-        triggerScript = trigger_script;
+        m_trigger_script = trigger_script;
         m_last_rail_node_name = node_name;
     }
 
@@ -604,8 +606,15 @@ public:
 
     void TripTrigger(DWORD type, DWORD trigger_script, DWORD node_index, CStruct* pNode)
     {
-        current_trigger_type = type;
-        SpawnAndRunScript(trigger_script, node_index, pNode->ContainsFlag(Checksums::NetEnabled), pNode->ContainsFlag(Checksums::Permanent));
+        if (m_current_trigger_type != type || pNode != last_trigger_node || Gfx::frameCounter > new_trigger_frame)
+        {
+            last_trigger_node = pNode;
+            last_trigger_checksum = 0;
+            new_trigger_frame = Gfx::frameCounter + 10;
+            m_current_trigger_type = type;
+            m_trigger_script = trigger_script;
+            SpawnAndRunScript(trigger_script, node_index, pNode->ContainsFlag(Checksums::NetEnabled), pNode->ContainsFlag(Checksums::Permanent));
+        }
     }
 
 
@@ -968,10 +977,10 @@ public:
         p_set_terrain(0x0049BA80)(this, terrain);
     }
 
-    typedef void(__thiscall* const pTriggerScript)(Skater* pThis, DWORD triggerType, void**);
+    typedef void(__thiscall* const pTriggerScript)(Skater* pThis, DWORD triggerType, Collision::CollData**);
     void TriggerScript(DWORD triggerType)
     {
-        pTriggerScript(0x0049D070)(this, triggerType, &scripts);
+        pTriggerScript(0x0049D070)(this, triggerType, &m_feeler);
     }
 
 
