@@ -3865,9 +3865,6 @@ void AddFunctions()
     if (header)
     {
         QScript::ShatterScript = header->pFunction;
-        char msm[25];
-        sprintf(msm, "%p", header->pFunction);
-        MessageBox(0, msm, msm, 0);
         header->pFunction = NewShatterScript;
     }
 
