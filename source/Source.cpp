@@ -4458,9 +4458,15 @@ bool ScriptSetMenuSelectCallback(CStruct* pStruct, CScript* pScript)
     {
         last_select_id = 0;
         if (header->Data == Checksum("NULL"))
+        {
+            debug_print("Setting menu select callback to NULL\n");
             MenuSelectCallback = 0;
+        }
         else
+        {
             MenuSelectCallback = header->Data;
+            debug_print("Setting menu select callback to %s\n", FindChecksumName(MenuSelectCallback));
+        }
         return true;
     }
     return false;
@@ -5022,6 +5028,7 @@ static char version_string[150] = "";
 
 bool Initialize(CStruct* pStruct, CScript* pScript)
 {
+    MenuSelectCallback = 0;
     if (init)//00425e10
     {
 

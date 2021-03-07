@@ -223,7 +223,11 @@ SCRIPT sFixGoBack
     MoveMenu id = game_options_on_off_menu y = 0
     EnableBackEvent
 	FixGoBack
-	SetMenuSelectCallback NULL
+	if GotParam SelectCallback
+	   SetMenuSelectCallback <SelectCallback>
+	else
+	    SetMenuSelectCallback NULL
+	endif
 ENDSCRIPT
 
 SCRIPT EditControls_OnShow
@@ -238,7 +242,7 @@ levelmod_menu_root_children = [
 
 	//game options that affect gameplay
 	{ Type = textmenuelement auto_id text = "Game Options" link = newSettingsMenu  
-	target = "populate_game_options" params = { mask = cat_game items = game_menu_items title = "Game Options" OnShow = sFixGoBack } }
+	target = "populate_game_options" params = { mask = cat_game items = game_menu_items title = "Game Options" OnShow = sFixGoBack params = { SelectCallback = LevelModSettingsMenu_OnSelect } }  }
 	
 	//GUI options, like Show HUD, show GrafCounter, etc
 	{ Type = textmenuelement auto_id text = "GUI Options" link = newSettingsMenu  
@@ -246,7 +250,7 @@ levelmod_menu_root_children = [
 	
 	//hardware graphics options (AA, filtering, 
 	{ Type = textmenuelement auto_id text = "Graphics Options" link = newSettingsMenu  
-	target = "populate_game_options" params = { mask = cat_gfx items = game_menu_items title = "Graphics Options" OnShow = sFixGoBack } }
+	target = "populate_game_options" params = { mask = cat_gfx items = game_menu_items title = "Graphics Options" OnShow = sFixGoBack  params = { SelectCallback = LevelModSettingsMenu_OnSelect } } }
 	
 	
 	//Options that affect certain parts of th level
@@ -254,7 +258,7 @@ levelmod_menu_root_children = [
 		
 	//Control options, like spine transfer, acid drop, etc
 	{ Type = textmenuelement auto_id text = "Control Options" link = newSettingsMenu  
-	target = "populate_game_options" params = { mask = cat_control items = game_menu_items title = "Control Options" OnShow = sFixGoBack } }
+	target = "populate_game_options" params = { mask = cat_control items = game_menu_items title = "Control Options" OnShow = sFixGoBack  params = { SelectCallback = LevelModSettingsMenu_OnSelect } } }
 	
 	//Edit Controls
 	{ Type = textmenuelement auto_id text = "Edit Controls" link = newSettingsMenu     
@@ -896,22 +900,25 @@ back_menu_item = {
 }
 
 game_menu_items = [
-	{ IsBool text = "251x Patch" 		option_id = LM_GameOption_b251Patch_id	    option = LM_GameOption_b251Patch 		toggle_id = item1_toggle cat_game }
-	{ IsBool text = "No BW Manual"		option_id = LM_GameOption_bFixBWManual_id	option = LM_GameOption_bFixBWManual 	toggle_id = item2_toggle cat_game }
-	{ IsBool text = "Unlimited Tags" 	option_id = LM_GameOption_bUnLimitTags_id	option = LM_GameOption_bUnLimitTags 	toggle_id = item3_toggle cat_game }
-	{ IsBool text = "Tele Stance Fix" 	option_id = LM_BugFix_bTeleFix_id	        option = LM_BugFix_bTeleFix 			toggle_id = item4_toggle cat_game }
-	{ IsBool text = "Ped Props"			option_id = LM_Gameplay_bPedProps_id	    option = LM_Gameplay_bPedProps 			toggle_id = item5_toggle cat_game }
+    { static text = ""                  option_id = info_text                                                               toggle_id = info         cat_game cat_gfx cat_control }
+	{ static text = ""                  option_id = info_text2                                                              toggle_id = info2        cat_gfx }
+	
+	{ IsBool text = "251x Patch" 		option_id = LM_GameOption_b251Patch_id	    option = LM_GameOption_b251Patch 		toggle_id = item1_toggle cat_game info_text = "Allow more than 251 multiplier" }
+	{ IsBool text = "No BW Manual"		option_id = LM_GameOption_bFixBWManual_id	option = LM_GameOption_bFixBWManual 	toggle_id = item2_toggle cat_game info_text = "Fix backward manuals" }
+	{ IsBool text = "Unlimited Tags" 	option_id = LM_GameOption_bUnLimitTags_id	option = LM_GameOption_bUnLimitTags 	toggle_id = item3_toggle cat_game info_text = "Allow more than 32 tags in 1 combo" }
+	{ IsBool text = "Tele Stance Fix" 	option_id = LM_BugFix_bTeleFix_id	        option = LM_BugFix_bTeleFix 			toggle_id = item4_toggle cat_game info_text = "Fix stance after teleport" }
+	{ IsBool text = "Ped Props"			option_id = LM_Gameplay_bPedProps_id	    option = LM_Gameplay_bPedProps 			toggle_id = item5_toggle cat_game info_text = "Ped props messages" }
 	
 	//since debug is now a separate dll, don't need this right?
 	//{ IsBool text = "Debug Console" 	option_id = item6	option = LM_DebugOption_bDebugMode 		toggle_id = item6_toggle cat_game }
 
-	{ 		 text = "Air"			option_id = levelmod_menu_air_id        link = levelmod_menu_air            toggle_id = item1_toggle cat_control }	
-	{ 		 text = "Wall"			option_id = levelmod_menu_wall_id       link = levelmod_menu_wall           toggle_id = item2_toggle cat_control }	
-	{ IsBool text = "Reverts" 		option_id = LM_Control_bRevert_id	    option = LM_Control_bRevert 		toggle_id = item3_toggle cat_control }
-	{ IsBool text = "Extra tricks"	option_id = LM_Control_bExtraTricks_id	option = LM_Control_bExtraTricks 	toggle_id = item4_toggle cat_control }
-	{ IsBool text = "XInput" 		option_id = LM_Control_bXinput_id	    option = LM_Control_bXinput 		toggle_id = item5_toggle cat_control }
-	{ IsBool text = "Invert Cam X"  option_id = LM_Control_bInvertedX_id	option = LM_Control_bInvertedX 		toggle_id = item6_toggle cat_control }
-	{ IsBool text = "Invert Cam Y"  option_id = LM_Control_bInvertedY_id	option = LM_Control_bInvertedY 		toggle_id = item7_toggle cat_control }
+	{ 		 text = "Air"			option_id = levelmod_menu_air_id        link = levelmod_menu_air            toggle_id = item1_toggle cat_control info_text = "Air Options Menu" }	
+	{ 		 text = "Wall"			option_id = levelmod_menu_wall_id       link = levelmod_menu_wall           toggle_id = item2_toggle cat_control info_text = "Wall Options Menu" }	
+	{ IsBool text = "Reverts" 		option_id = LM_Control_bRevert_id	    option = LM_Control_bRevert 		toggle_id = item3_toggle cat_control info_text = "Allow Reverts" }
+	{ IsBool text = "Extra tricks"	option_id = LM_Control_bExtraTricks_id	option = LM_Control_bExtraTricks 	toggle_id = item4_toggle cat_control info_text = "Allow Extra Tricks" }
+	{ IsBool text = "XInput" 		option_id = LM_Control_bXinput_id	    option = LM_Control_bXinput 		toggle_id = item5_toggle cat_control info_text = "XINPUT controller support" }
+	{ IsBool text = "Invert Cam X"  option_id = LM_Control_bInvertedX_id	option = LM_Control_bInvertedX 		toggle_id = item6_toggle cat_control info_text = "Invert camera Left/Right" }
+	{ IsBool text = "Invert Cam Y"  option_id = LM_Control_bInvertedY_id	option = LM_Control_bInvertedY 		toggle_id = item7_toggle cat_control info_text = "Invert camera Up/Down" }
 	//This freezes for some reason...
 	//{        text = "Edit Controls" option_id = levelmod_menu_edit_id       link = newSettingsMenu              toggle_id = item8_toggle cat_control   target = "populate_game_options" params = { mask = cat_edit items = game_menu_items title = "Edit Controls" } }
 	
@@ -934,7 +941,7 @@ game_menu_items = [
 	{        text = "Press any key to Map"   option_id = edit_tip1           x = 0  y = -64 w = 300   toggle_id = edit1_id           cat_edit }
     {        text = "Press Back to unassign" option_id = edit_tip2           x = 0  y = -48 w = 300   toggle_id = edit2_id           cat_edit }
     {        text = "Press Escape to abort"  option_id = edit_tip3           x = 0  y = -32 w = 300   toggle_id = edit3_id           cat_edit }
-	{        text = ""                       option_id = edit_error          x = 0  y = -16 w = 300    toggle_id = error_id           cat_edit }
+	{        text = ""                       option_id = edit_error          x = 0  y = -16 w = 300   toggle_id = error_id           cat_edit }
     
 
 	{ IsBool text = "Extra Messages" 	option_id = LM_GUI_bTrickNotifications_id  option = LM_GUI_bTrickNotifications 	toggle_id = item1_toggle cat_gui } 
@@ -943,13 +950,13 @@ game_menu_items = [
 	{ IsBool text = "New Net Menu" 		option_id = LM_GUI_bNewMenu_id             option = LM_GUI_bNewMenu 			toggle_id = item4_toggle cat_gui } 
 	{ IsBool text = "GrafCounter" 		option_id = LM_GUI_bShowGrafCounter_id     option = LM_GUI_bShowGrafCounter 	toggle_id = item5_toggle cat_gui } 
 	
-	{ IsEnum text = "Buffering" 		option_id = LM_GFX_eBuffering_id  option = LM_GFX_eBuffering 	toggle_id = item1_toggle cat_gfx TextValues = [ "Off" "Double" "Triple" ] Do = sLaunchGFXCommand } 
-	{ IsEnum text = "MSAA Level" 		option_id = LM_GFX_eAntiAlias_id  option = LM_GFX_eAntiAlias 	toggle_id = item2_toggle cat_gfx TextValues = [ "Off" "auto" "2x" "4x" "8x" ] Do = sLaunchGFXCommand } 
-	{ IsBool text = "Windowed"		    option_id = LM_GFX_bWindowed_id   option = LM_GFX_bWindowed     toggle_id = item3_toggle cat_gfx Do = sLaunchGFXCommand params = { command = ToggleWindowed } }
-	{ IsBool text = "Texture Filtering" option_id = LM_GFX_bFiltering_id  option = LM_GFX_bFiltering 	toggle_id = item5_toggle cat_gfx } 
-	{ IsBool text = "Enable VSync" 	    option_id = LM_GFX_bVSync_id      option = LM_GFX_bVSync        toggle_id = item6_toggle cat_gfx Do = sLaunchGFXCommand } 
-	{ IsInt  text = "FPS Lock:"	        option_id = LM_GFX_TargetFPS_id   option = LM_GFX_TargetFPS     toggle_id = item7_toggle cat_gfx min = 60 max = 300  Do = sLaunchGFXCommand params = { command = TargetFPS } }
-	{ IsEnum text = "Stutter Fix" 	    option_id = LM_GFX_eFixStutter_id option = LM_GFX_eFixStutter   toggle_id = item8_toggle cat_gfx TextValues = [ "Off" "Exact" "Hybrid" "Sleep" ] Do = sLaunchGFXCommand params = { command = FixStutter } } 
+	{ IsEnum text = "Buffering" 		option_id = LM_GFX_eBuffering_id  option = LM_GFX_eBuffering 	toggle_id = item1_toggle cat_gfx TextValues = [ "Off" "Double" "Triple" ] Do = sLaunchGFXCommand info_text = "Double/Tripple buffering" info_text2 = "May increase input lag" } 
+	{ IsEnum text = "MSAA Level" 		option_id = LM_GFX_eAntiAlias_id  option = LM_GFX_eAntiAlias 	toggle_id = item2_toggle cat_gfx TextValues = [ "Off" "auto" "2x" "4x" "8x" ] Do = sLaunchGFXCommand info_text = "Anti Aliasing" info_text2 = "Disable to improve performance" } 
+	{ IsBool text = "Windowed"		    option_id = LM_GFX_bWindowed_id   option = LM_GFX_bWindowed     toggle_id = item3_toggle cat_gfx Do = sLaunchGFXCommand params = { command = ToggleWindowed } info_text = "Launch game in windowed mode" info_text2 = "Toggle by pressing ALT + ENTER" }
+	{ IsBool text = "Texture Filtering" option_id = LM_GFX_bFiltering_id  option = LM_GFX_bFiltering 	toggle_id = item5_toggle cat_gfx info_text = "Generate Texture mipmaps" info_text2 = "May produce slight graphic bugs"} 
+	{ IsBool text = "Enable VSync" 	    option_id = LM_GFX_bVSync_id      option = LM_GFX_bVSync        toggle_id = item6_toggle cat_gfx Do = sLaunchGFXCommand info_text = "Sync rendering to monitor refresh rate" info_text2 = "Enable if you see tearing" } 
+	{ IsInt  text = "FPS Lock:"	        option_id = LM_GFX_TargetFPS_id   option = LM_GFX_TargetFPS     toggle_id = item7_toggle cat_gfx min = 60 max = 300  Do = sLaunchGFXCommand params = { command = TargetFPS } info_text = "Set the target fps" info_text2 = "" }
+	{ IsEnum text = "Stutter Fix" 	    option_id = LM_GFX_eFixStutter_id option = LM_GFX_eFixStutter   toggle_id = item8_toggle cat_gfx TextValues = [ "Off" "Exact" "Hybrid" "Sleep" ] Do = sLaunchGFXCommand params = { command = FixStutter } info_text = "Improve framerate consistency" info_text2 = "Exact is usually best option" } 
 ]
 
 
@@ -991,7 +998,7 @@ script Settings_CreateOptionsMenu
 	}
 endscript
 
-script populate_game_options
+script populate_game_options params = { }
 	DepopulateMenu id = game_options_names_menu
 	DepopulateMenu id = game_options_on_off_menu
 
@@ -1000,8 +1007,18 @@ script populate_game_options
 	ForeachIn <items> do = Settings_AddLine params = { <...> }
 	Settings_AddLine back_menu_item target = "go_back" Params = { id = game_options_names_menu } 
 	IF GotParam OnShow
-		Goto <OnShow>
+		Goto <OnShow> params = <params>
 	ENDIF
+endscript
+
+script LevelModSettingsMenu_OnSelect
+    if GetParamFromArray game_menu_items params = { info_text info_text2 } mask = { option_id = <id> }
+	    SetMenuElementText <info_text> id = info_text
+		SetMenuElementText <info_text2> id = info_text2
+	else
+	    SetMenuElementText "" id = info_text
+		SetMenuElementText "" id = info_text2
+	endif
 endscript
 
 script AddEnum
@@ -1106,7 +1123,16 @@ script Settings_AddLine params = {}
 					    if GotParam IsMap
 						    printf "Add KeyInput"
 					        AddKeyInput <...>
-						else
+						else 
+						    if GotParam static
+							    AddLine { 
+								parent = game_options_names_menu 
+								Type = textmenuelement 
+								id = <option_id> 
+								text = <text> 
+								static 
+								}
+							else
 							    AddLine { 
 				                    parent = game_options_names_menu 
 				                    Type = textmenuelement 
@@ -1114,6 +1140,7 @@ script Settings_AddLine params = {}
 				                    text = <text>
 				                    static dont_gray drawer = main_warning x = <x> y = <y> w = <w> lock_layout lock_width
 			                    }
+							endif
 					    endif
 				    endif
 			    endif
