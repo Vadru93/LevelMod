@@ -759,6 +759,9 @@ bool EnterObserveMode(CStruct* pParams, CScript* pScript)
         time_pressed_x = Game::skater->GetKeyState(KeyState::OLLIE)->GetPressedTime();
     }
     return observing;
+
+    //old code
+    /*
     if (pObserve)
     {
         delete pObserve;
@@ -768,7 +771,7 @@ bool EnterObserveMode(CStruct* pParams, CScript* pScript)
     pObserve->Enter();
     debug_print("Entered ObserveMode, Observing player: %s\n", pObserve->name);
     return pObserve->current != NULL;
-    return true;
+    return true;*/
 }
 
 bool ObserveNext(CStruct* pParams, CScript* pScript)
@@ -777,17 +780,18 @@ bool ObserveNext(CStruct* pParams, CScript* pScript)
     {
         Network::NetHandler* net_manager = Network::NetHandler::Instance();
         if (net_manager)
-        {
             net_manager->ObserveNextPlayer();
-        }
     }
     return observing;
+
+    //old code
+    /*
     if (pObserve)
     {
         pObserve->Next();
         return true;
     }
-    return true;
+    return true;*/
 }
 
 bool LeaveObserveMode(CStruct* pParams, CScript* pScript)
@@ -802,6 +806,9 @@ bool LeaveObserveMode(CStruct* pParams, CScript* pScript)
         }
     }
     return !observing;
+
+    //old code
+    /*
     if (pObserve)
     {
         DWORD camMode = pObserve->GetCamModeAddress();// Skater::GetCamModeAddress();
@@ -810,5 +817,5 @@ bool LeaveObserveMode(CStruct* pParams, CScript* pScript)
         delete pObserve;
         pObserve = NULL;
     }
-    return true;
+    return true;*/
 }

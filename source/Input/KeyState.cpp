@@ -394,15 +394,12 @@ __declspec(noalias) bool __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYT
     typedef bool(__stdcall* pDinput_GetDeviceState)(DWORD size, LPBYTE data);
     bool suceeded = pDinput_GetDeviceState(0x0040C770)(size, data);
 
-    //MessageBox(0, 0, 0, 0);
-
-    BYTE* buffer = data;
-
-    //KeyMap key = keyMap[(BYTE)KeyMap::MappedKey::Grind];
-    //buffer[key.DIK_KeyCode] = buffer[DIK_Y];
-
-    if (LevelModSettings::bHookedControls && XINPUT::Player1 && XINPUT::Player1->IsConnected())
+    //XINPUT enabled and connnected?
+    if (LevelModSettings::bHookedControls && XINPUT::Player1 && XINPUT::Player1->IsConnected()) [[unlikely]]
     {
+
+        BYTE* buffer = data;
+
         //Move the global pointer to stack to make sure compiler optimize well
         KeyMap* __restrict const map = keyMap;
         //Move the controller1 state to stack for cache optimization
@@ -565,7 +562,7 @@ __declspec(noalias) bool __stdcall proxy_Dinput_GetDeviceState(DWORD size, LPBYT
 
     }
 
-    if (LevelModSettings::pEditKeyMap)
+    if (LevelModSettings::pEditKeyMap) [[unlikely]]
     {
         /*if (KeyState::GetNumKeyPress())
             MessageBox(0, "NUM", 0, 0);*/

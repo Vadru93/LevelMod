@@ -694,6 +694,9 @@ void DestroySuperSectors()
 
     if (!Gfx::loadingShaders)
         Gfx::UnloadShaders();
+
+    if (observing)
+        LeaveObserveMode(NULL, NULL);
 }
 void CreateSuperSectors()
 {
@@ -5412,6 +5415,9 @@ void OnRelease()
         if(logFile)
            fclose(logFile);
 
+        if (observing)
+            LeaveObserveMode(NULL, NULL);
+
         /*for (DWORD i = 0; i < 6; i++)
         {
             wheel_texture[i]->Release();
@@ -6196,9 +6202,9 @@ bool RestoreGoBackScript(CStruct* pStruct, CScript* pScript)
 
 void MaybeFixStutter()
 {
+    HookFunction(0x0040CA2B, proxy_Dinput_GetDeviceState);
     if (Gfx::fps_fix)
     {
-        HookFunction(0x0040CA2B, proxy_Dinput_GetDeviceState);
         BYTE timer[] = { 0xE8, 0x98, 0xF4, 0xF7, 0x79, 0xB9, 0x0E, 0x00, 0x00, 0x00, 0x39, 0xC8, 0x73, 0x27, 0x29, 0xC1, 0x51, 0xE8, 0xD7, 0x29, 0x8C, 0x75, 0xA1, 0x00, 0x00, 0x00, 0x00, 0x85, 0xC0, 0x75, 0x16, 0xE8, 0x00, 0x00, 0x00, 0x00, 0xEB, 0x0F };
 
         switch (Gfx::fps_fix)
@@ -6461,12 +6467,21 @@ __declspec(noalias) void DrawFrame()
             {
                 if (observing) [[unlikely]]
                 {
-                     KeyState* ollie = Game::skater->GetKeyState(KeyState::OLLIE);
+                    //Get ollie keymap
+                    VirtualKeyCode ollie = KeyMap::GetVKeyCode(KeyMap::MappedKey::Ollie);
+                    //check if pressed this frame but not last
+                    if (KeyState::GetKeyboardState(ollie) && !KeyState::GetOldKeyboardState(ollie))
+                    {
+                        Network::NetHandler* net_manager = Network::NetHandler::Instance();
+                        if (net_manager)
+                            net_manager->ObserveNextPlayer();
+                    }
+                     /*KeyState* ollie = Game::skater->GetKeyState(KeyState::OLLIE);
                      if (ollie->IsPressed() && ollie->GetPressedTime() != time_pressed_x)
                      {
                          ObserveNext(NULL, NULL);
                          time_pressed_x = ollie->GetPressedTime();
-                     }
+                     }*/
                      //pObserve->Update();
                 }
 
