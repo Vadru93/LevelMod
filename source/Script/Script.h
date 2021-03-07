@@ -35,6 +35,7 @@ namespace QScript
 {
     extern bool(*GotParam)(CStruct*, CScript*);
     extern bool(*ResetClock)(CStruct*, CScript*);
+    extern bool (*ShatterScript)(CStruct*, CScript*);
     auto constexpr ASSERT = 1;
     enum ScriptToken
     {

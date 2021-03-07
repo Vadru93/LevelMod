@@ -5,6 +5,9 @@
 #include "Input\KeyState.h"
 #include "Script\Script.h"
 #include "Collision.h"
+#include "Gfx\Camera.h"
+#include "RenderWare\RenderWare.h"
+#include "Game\Task.h"
 
 bool GetZAngle(CStruct* pParams, CScript* pScript);
 bool GetZAngle(CStruct* pParams, CScript* pScript);
@@ -22,55 +25,6 @@ struct Settings
     bool IsTrue(const char* name)
     {
         return pIsTrue(0x004342E0)(this, name);
-    }
-};
-
-struct Camera
-{
-    Matrix		    matrix;							// orientation matrix
-    Vector		    pos;						    // camera position
-    Matrix		    mat;						    // maybe old matrix?
-
-    //Not sure these exists in th3??
-    float			h_fov;							// horizontal field of view angle (degrees)
-    float			adj_h_fov;						// screen adjusted horizontal field of view angle (degrees)
-
-    float			near_clip;						// near clip plane
-    float			far_clip;						// far clip plane
-};
-
-struct CameraContainer
-{
-    DWORD unk;//probably refcount?
-    Camera* pCamera;
-};
-
-struct Viewport
-{
-    Vector rect;
-    CameraContainer* pCameraContainer;
-};
-
-struct ViewportManager
-{
-    static ViewportManager* Instance()
-    {
-        return *(ViewportManager**)0x008e1e78;
-    }
-
-    DWORD GetNumActiveCams()
-    {
-        return *(DWORD*)(0x0058d970 + *(int*)((int)this + 0xbc) * 4);
-    }
-
-    Viewport* GetViewport(DWORD index)
-    {
-        return *(Viewport**)((int)this + index * 4 + 0x6c);
-    }
-
-    Camera* GetCamera(DWORD index)
-    {
-        return GetViewport(index)->pCameraContainer->pCamera;
     }
 };
 
@@ -199,15 +153,15 @@ struct SfxManager
     {
         out_vol.lvol = 0;
         out_vol.rvol = 0;
-        ViewportManager* viewport_manager = ViewportManager::Instance();
+        Gfx::ViewportManager* viewport_manager = Gfx::ViewportManager::Instance();
         DWORD numCams = viewport_manager->GetNumActiveCams();
         //debug_print("NumCams %d\n", numCams);
         float closest_dist = dropoffDist;
-        Camera* camera = NULL;
+        Gfx::Camera* camera = NULL;
 
         for (DWORD i = 0; i < numCams; i++)
         {
-            Camera* temp_camera = viewport_manager->GetCamera(i);
+            Gfx::Camera* temp_camera = viewport_manager->GetCamera(i);
             if (temp_camera)
             {
                 Vertex pos = *(D3DXVECTOR3*)&temp_camera->pos;
@@ -536,7 +490,9 @@ public:
     RailNode* mp_rail_node;
 private:
     //883c
-    BYTE un[0xA2c];
+    SkaterCam* cam;
+    //8840
+    BYTE un[0xA28];
     //9268
     void* trickFont;//not sure?
     //926c
@@ -544,6 +500,12 @@ private:
 public:
     //92F8
     DWORD m_last_rail_node_name;
+
+
+    SkaterCam* GetSkaterCam() const
+    {
+        return cam;
+    }
 
     void SetFlag(void* flag, bool value)
     {

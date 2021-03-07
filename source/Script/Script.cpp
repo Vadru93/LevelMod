@@ -85,6 +85,7 @@ const char* QScript::QBTypes[] = {
 };
 bool(*QScript::GotParam)(CStruct*, CScript*) = NULL;
 bool(*QScript::ResetClock)(CStruct*, CScript*) = NULL;
+bool (*QScript::ShatterScript)(CStruct*, CScript*) = NULL;
 QScript::QBScript* QScript::Scripts=NULL;
 std::vector<QScript::CompressedNode> QScript::compNodes;
 std::vector<DWORD> QScript::qbKeys;

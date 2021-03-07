@@ -601,3 +601,69 @@ struct RpAtomicContainer
     RpAtomic* atomic;
     DWORD checksum;
 };
+
+class BaseClass
+{
+public:
+    void* operator new(size_t size)
+    {
+        typedef void*(__cdecl* const pNew)(size_t size);
+        return pNew(0x00410460)(size);
+    }
+};
+
+class SkaterCam : BaseClass
+{
+    BYTE unk[0x48];
+    //Skater to follow
+    Skater* skater;
+    BYTE unk2[0x12C];
+public:
+
+    void SetSkater(Skater* follow)
+    {
+        skater = follow;
+    }
+
+    SkaterCam(int unk, RpWorld* world)
+    {
+        typedef SkaterCam* (__thiscall* const pSkaterCam)(SkaterCam* pThis, int unk, RpWorld* world);
+        pSkaterCam(0x004B7FF0)(this, unk, world);
+    }
+
+    void AttachCamera(Gfx::Camera* camera)
+    {
+        typedef void(__thiscall* const pAttachCamera)(SkaterCam* pThis, Gfx::Camera*);
+        pAttachCamera(0x004B8200)(this, camera);
+    }
+
+    void SetMode(DWORD mode, float unk)
+    {
+        typedef void(__thiscall* const pSetMode)(SkaterCam* pThis, DWORD mode, float unk);
+        pSetMode(0x004B82B0)(this, mode, unk);
+    }
+};
+
+class RwViewer
+{
+    BYTE unk[0x6C];
+    Gfx::Camera* camera[8];//Not sure how many`?
+    BYTE unk2[0x18];
+    RpWorld* world;
+
+public:
+    Gfx::Camera* GetCamera(int index)
+    {
+        return camera[index];
+    }
+
+    RpWorld* GetCurrentWorld()
+    {
+        return world;
+    }
+
+    static RwViewer* Instance()
+    {
+        return *(RwViewer**)0x008E1E78;
+    }
+};

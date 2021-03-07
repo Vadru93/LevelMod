@@ -2,7 +2,7 @@
 #ifndef NET_H
 #define NET_H
 #include "Game\Skater.h"
-
+#include "RenderWare\RenderWare.h"
 
 
 
@@ -172,17 +172,20 @@ namespace Network
     };
     struct Player;
 
-    struct PlayerInfo
+    struct PlayerInfoList
     {
         DWORD* ptr;
         DWORD temp1;
         DWORD temp2;
-        PlayerInfo()
+
+        PlayerInfoList()
         {
             ptr = (DWORD*)0x0058DB60;
             temp1 = 0;
             temp2 = 0;
         }
+
+
     };
 
     struct Connection
@@ -229,12 +232,22 @@ namespace Network
         }
     };
 
-    struct Player
+    struct PlayerInfo
     {
         DWORD** memberFunctions;
         BYTE unk1[0x10];
         Skater* skater;
         Connection* conn;
+
+        BYTE unk[0x000000D0];
+        DWORD flags;
+        DWORD unk2;
+        SkaterCam* cam;
+
+        bool IsObserving()
+        {
+            return flags & 0x100;
+        }
 
         void* GetConnHandler()
         {
@@ -287,6 +300,8 @@ namespace Network
         }
     };
 
+    static SkaterCam* old_camera = NULL;
+
     struct Manager
     {
         BYTE unk[0x28];
@@ -310,8 +325,9 @@ namespace Network
         }
     };
 
-    struct NetHandler
+    class NetHandler//AKA GameNet::Manager
     {
+    public:
         static NetHandler* GetNetHandler(bool create = false)//Increase VP Count
         {
             typedef NetHandler* (__cdecl* const pGetNetHandler)(bool create);
@@ -349,33 +365,101 @@ namespace Network
         ~NetHandler()
         {
             typedef void(__cdecl* const pRelease)();
-            pRelease(0x00471CB0)();
+            pRelease(0x00471CB0)();     
         }
 
         void SendMessageToClients(unsigned char msg_id, DWORD len, void* data, int prio = NORMAL_PRIO, int queue = QUEUE_DEFAULT, int flag1 = 0, int flag2 = 0, bool include_observers = false)
         {
             App* net_app = GetNetApp();
-            PlayerInfo PlayerInfoList = PlayerInfo();
+            PlayerInfoList player_list = PlayerInfoList();
 
-            for (Player* player = FirstPlayerInfo(&PlayerInfoList, include_observers); player; player = NextPlayerInfo(&PlayerInfoList, include_observers))
+            for (PlayerInfo* player = FirstPlayerInfo(&player_list, include_observers); player; player = NextPlayerInfo(&player_list, include_observers))
             {
                 net_app->EnqueueMessage(player->GetConnHandler(), msg_id, len, data, prio, queue, flag1, flag2);
             }
         }
 
-    private:
-        App* app;
-
-        Player* FirstPlayerInfo(PlayerInfo* PlayerInfoList, bool include_observers = false)
+        void EnterObserverMode()
         {
-            typedef Player* (__thiscall* const pFirstPlayerInfo)(NetHandler* pThis, PlayerInfo* PlayerInfoList, bool include_observers);
-            return pFirstPlayerInfo(0x004769D0)(this, PlayerInfoList, include_observers);
+            typedef  void(__thiscall* const pEnterObserverMode)(NetHandler* pThis);
+            pEnterObserverMode(0x004764A0)(this);
         }
 
-        Player* NextPlayerInfo(PlayerInfo* PlayerInfoList, bool include_observers = false)
+        void LeaveObserverMode()
         {
-            typedef Player* (__thiscall* const pNextPlayerInfo)(NetHandler* pThis, PlayerInfo* PlayerInfoList, bool include_observers);
-            return pNextPlayerInfo(0x00476A30)(this, PlayerInfoList, include_observers);
+            SkaterCam* skater_cam = Game::skater->GetSkaterCam();
+            skater_cam->SetSkater(Game::skater);
+            currently_observing = NULL;
+        }
+
+        void ObserveNextPlayer()
+        {
+            SkaterCam* skater_cam = Game::skater->GetSkaterCam();
+
+            //Get pointer to RwViewer
+            /*RwViewer* viewer = RwViewer::Instance();
+            //Get viewer camera[0]
+            Gfx::Camera* cam = viewer->GetCamera(0);
+
+            //Create a new camera attached to the RpWorld
+            SkaterCam* skater_cam = new SkaterCam(0, viewer->GetCurrentWorld());
+
+            //Attach Gfx::Camera to skater camera
+            skater_cam->AttachCamera(cam);*/
+            //Set camera mode to default
+
+            if (!currently_observing)
+            {
+                //Set currently observing to local player, else we will start observing our self
+                currently_observing = GetLocalPlayer();
+                //Set default cam mode
+                skater_cam->SetMode(2, 0.0f);
+            }
+
+            //Get next player to observe
+            PlayerInfo* observe_player = GetNextPlayerToObserve();
+            if (observe_player)
+            {
+                //Set currently observing
+                currently_observing = observe_player;
+                //Set skater camera should follow
+                skater_cam->SetSkater(currently_observing->skater);
+            }
+
+        }
+
+        PlayerInfo* GetNextPlayerToObserve()
+        {
+            typedef PlayerInfo*(__thiscall* const pGetNextPlayerToObserve)(NetHandler* pThis);
+            return pGetNextPlayerToObserve(0x00476380)(this);
+            /*currently_observing = observing;
+            if (observing == GetLocalPlayer())
+                observing = pGetNextPlayerToObserve(0x00476380)(this);
+            return observing;*/
+        }
+
+        PlayerInfo* GetLocalPlayer()
+        {
+            typedef  PlayerInfo*(__thiscall* const pGetLocalPlayer)(NetHandler* pThis);
+            return pGetLocalPlayer(0x00476AC0)(this);
+        }
+    private:
+        App* app;
+        BYTE unk[0x000001A4];
+        DWORD flags;
+        BYTE unk2[0x34];
+        PlayerInfo* currently_observing;
+
+        PlayerInfo* FirstPlayerInfo(PlayerInfoList* player_list, bool include_observers = false)
+        {
+            typedef PlayerInfo* (__thiscall* const pFirstPlayerInfo)(NetHandler* pThis, PlayerInfoList* player_list, bool include_observers);
+            return pFirstPlayerInfo(0x004769D0)(this, player_list, include_observers);
+        }
+
+        PlayerInfo* NextPlayerInfo(PlayerInfoList* player_list, bool include_observers = false)
+        {
+            typedef PlayerInfo* (__thiscall* const pNextPlayerInfo)(NetHandler* pThis, PlayerInfoList* player_list, bool include_observers);
+            return pNextPlayerInfo(0x00476A30)(this, player_list, include_observers);
         }
 
     };
@@ -395,7 +479,7 @@ namespace Network
         App* app;//NetApp
         Connection* conn;//The senders Connection info
         int flags;//HANDLE_FORIEGEN etc
-        void* client;
+        NetHandler* manager;
         DWORD retAddr;//Actually not part of NetMessage, but added for debug and maybe some future usage
 
         void* GetConnHandler()

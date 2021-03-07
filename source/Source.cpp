@@ -3860,10 +3860,16 @@ void AddFunctions()
             MessageBox(0, "couldn't add script", scripts[i].name, 0);
     }
 
-    header = GetQBKeyHeader(Checksums::Shatter);
     QScript::GotParam = GetQBKeyHeader(Checksum("GotParam"))->pFunction;
+    header = GetQBKeyHeader(Checksums::Shatter);
     if (header)
+    {
+        QScript::ShatterScript = header->pFunction;
+        char msm[25];
+        sprintf(msm, "%p", header->pFunction);
+        MessageBox(0, msm, msm, 0);
         header->pFunction = NewShatterScript;
+    }
 
     header = GetQBKeyHeader(Checksum("ResetClock"));
     if (header)
@@ -6456,6 +6462,18 @@ __declspec(noalias) void DrawFrame()
             //Skater * skater = Skater::Instance();
             if (Game::skater) [[likely]]
             {
+                if (observing) [[unlikely]]
+                {
+                     KeyState* ollie = Game::skater->GetKeyState(KeyState::OLLIE);
+                     if (ollie->IsPressed() && ollie->GetPressedTime() != time_pressed_x)
+                     {
+                         ObserveNext(NULL, NULL);
+                         time_pressed_x = ollie->GetPressedTime();
+                     }
+                     //pObserve->Update();
+                }
+
+
                 Gfx::frameCounter++;
                 Gfx::uv_anim_timer += Game::skater->GetFrameLength();
                 if (LevelModSettings::bHookedControls && XINPUT::Player1->IsConnected())
@@ -6471,6 +6489,7 @@ __declspec(noalias) void DrawFrame()
                     }
 
                 }
+
 
             //RenderShadows();
             //ProxyPad(skater);
@@ -6501,23 +6520,6 @@ __declspec(noalias) void DrawFrame()
                DrawEye();*/
 
     //}
-    if (pObserve && pObserve->observing) [[unlikely]]
-    {
-        Skater * skater = Skater::Instance();
-        if (skater)
-        {
-            KeyState* ollie = skater->GetKeyState(KeyState::OLLIE);
-            if (ollie->IsPressed() && ollie->GetPressedTime() != pObserve->timeNext)
-                pObserve->Next(ollie->GetPressedTime());
-            pObserve->Update();
-        }
-        else
-        {
-            pObserve->Leave();
-            delete pObserve;
-            pObserve = NULL;
-        }
-    }
         if (LevelModSettings::bGrafCounter && Modulating()) [[unlikely]]
         {
             //TestForAcid();

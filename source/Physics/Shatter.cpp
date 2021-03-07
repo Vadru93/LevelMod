@@ -111,7 +111,10 @@ bool NewShatterScript(CStruct* pStruct, CScript* pScript)
             ShatterSuperSector(sector);
         }
         else
+        {
             debug_print("Couldn't find sector %s\n", FindChecksumName(name));
+            return QScript::ShatterScript(pStruct, pScript);
+        }
     }
     else
         debug_print("Need name param " __FUNCTION__);

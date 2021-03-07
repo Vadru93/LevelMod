@@ -4,6 +4,7 @@
 #include "Observe.h"
 
 EXTERN ObserveMode* pObserve = NULL;
+DWORD time_pressed_x = 0;
 
 void ObserveMode::Enter()
 {
@@ -747,10 +748,17 @@ void ObserveMode::InterpolateCamera()
     *(float*)((DWORD)matrix + 56) = xn + yn + zn;*/
 }
 
-
-
+bool observing = false;
 bool EnterObserveMode(CStruct* pParams, CScript* pScript)
 {
+    Network::NetHandler* net_manager = Network::NetHandler::Instance();
+    if (net_manager)
+    {
+        net_manager->ObserveNextPlayer();
+        observing = true;
+        time_pressed_x = Game::skater->GetKeyState(KeyState::OLLIE)->GetPressedTime();
+    }
+    return observing;
     if (pObserve)
     {
         delete pObserve;
@@ -765,6 +773,15 @@ bool EnterObserveMode(CStruct* pParams, CScript* pScript)
 
 bool ObserveNext(CStruct* pParams, CScript* pScript)
 {
+    if (observing)
+    {
+        Network::NetHandler* net_manager = Network::NetHandler::Instance();
+        if (net_manager)
+        {
+            net_manager->ObserveNextPlayer();
+        }
+    }
+    return observing;
     if (pObserve)
     {
         pObserve->Next();
@@ -775,6 +792,16 @@ bool ObserveNext(CStruct* pParams, CScript* pScript)
 
 bool LeaveObserveMode(CStruct* pParams, CScript* pScript)
 {
+    if (observing)
+    {
+        Network::NetHandler* net_manager = Network::NetHandler::Instance();
+        if (net_manager)
+        {
+            net_manager->LeaveObserverMode();
+            observing = false;
+        }
+    }
+    return !observing;
     if (pObserve)
     {
         DWORD camMode = pObserve->GetCamModeAddress();// Skater::GetCamModeAddress();

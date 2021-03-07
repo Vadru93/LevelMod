@@ -4,6 +4,9 @@
 #include "Skater.h"
 
 
+extern bool observing;
+extern DWORD time_pressed_x;
+
 struct ObserveMode
 {
     //PlayerInfo: 0x008E2498; + 0x13C;
