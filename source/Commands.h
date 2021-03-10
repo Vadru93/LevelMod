@@ -164,6 +164,7 @@ void CommandConsole(const char* message);
 void CommandTell(const char* message);
 void CommandAdd(const char* message);
 void CommandToggleLogging(const char* message);
+void CommandCall(const char* message);
 
 struct Commands
 {
@@ -178,6 +179,7 @@ Commands commands[] = {
     { crc32f("ban"), &CommandBan, "ban" },
     { crc32f("getinfo"), &CommandGetInfo, "getinfo" },
     { crc32f("console"), &CommandConsole, "console" },
+    { crc32f("call"), &CommandCall, "call" },
 #ifdef    _DEBUG
     { crc32f("log"), &CommandToggleLogging, "log" },
 #endif
@@ -510,28 +512,60 @@ void CommandToggleLogging(const char* message)
     LevelModSettings::bLogging = !LevelModSettings::bLogging;
     if (LevelModSettings::bLogging)
     {
-        auto header = GetQBKeyHeader(Checksum("LaunchPanelMessage"));
-        CStruct pStruct;
-        CScript pScript;
-        CStructHeader param(QBKeyHeader::STRING, 0, (void*)"Logging enabled");
-        pStruct.AddParam(&param);
-        header->pFunction(&pStruct, &pScript);
+        QScript::PanelMessage("Logging enabled");
         logFile = fopen("LM_Log.txt", "w");
     }
     else if (logFile)
     {
-        auto header = GetQBKeyHeader(Checksum("LaunchPanelMessage"));
-        CStruct pStruct;
-        CScript pScript;
-        CStructHeader param(QBKeyHeader::STRING, 0, (void*)"Logging disabled");
-        pStruct.AddParam(&param);
-        header->pFunction(&pStruct, &pScript);
+        QScript::PanelMessage("Logging disabled");
         fclose(logFile);
         logFile = NULL;
     }
 #endif
 }
 
+void CommandCall(const char* message)
+{
+    message += 5;
+    char script_name[48];
+    DWORD j = 0;
+    while (message[j] != 0x20 && message[j] != 0x0)
+    {
+        script_name[j] = message[j];
+        j++;
+        if (j > 48)
+        {
+            j = 0;
+            break;
+        }
+    }
+    if (j)
+    {
+        script_name[j] = 0x00;
+        DWORD checksum = Checksum(script_name);
+        QBKeyHeader* header = GetQBKeyHeader(checksum);
+        if (header)
+        {
+            if (header->type == QBKeyHeader::SCRIPTED_FUNCTION)
+            {
+                QScript::PanelMessage("Launching script %s", script_name);
+                ExecuteQBScript(checksum);
+            }
+            else if (header->type == QBKeyHeader::COMPILED_FUNCTION)
+            {
+                QScript::PanelMessage("Launching CFunction %s", script_name);
+                CScript script;
+                header->pFunction(NULL, &script);
+            }
+            else if (header->type == QBKeyHeader::GLOBAL)
+                QScript::PanelMessage("Cannot call Member Function without Object", script_name);
+            else
+                QScript::PanelMessage("QBKey is wrong type [%s]", QScript::QBTypes[header->type]);
+        }
+        else
+            QScript::PanelMessage("Couldn't find qbkey %s(%X)", script_name, checksum);
+    }
+}
 
 void CommandAdd(const char* message)
 {

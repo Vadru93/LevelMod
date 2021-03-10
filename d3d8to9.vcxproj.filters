@@ -293,6 +293,9 @@
     <ClInclude Include="source\Game\Task.h">
       <Filter>LevelMod\Header</Filter>
     </ClInclude>
+    <ClInclude Include="source\Game\FrontEnd.h">
+      <Filter>LevelMod\Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\d3d8.def">

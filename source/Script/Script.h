@@ -29,6 +29,20 @@ void UpdateScriptConstants();
 
 
 //inline unsigned long Checksum(const char* string);//THPS3 Function for CRC32
+struct Node;
+
+    //calls a QB scripted function, remember to pass a CStruct.
+typedef void(__cdecl* const ExecuteScript)(const char* __restrict name, const CStruct* __restrict pParams, const Node* __restrict pObject, bool assert);
+__declspec(noalias) void inline ExecuteQBScript(const char* __restrict pScriptName, const CStruct* __restrict pParams = NULL, const Node* __restrict pObject = NULL, bool assert = false)
+{
+    return ExecuteScript(0x00428240)(pScriptName, pParams, pObject, assert);
+}
+typedef void(__cdecl* const ExecuteScript_Stub)(DWORD checksum, const CStruct* __restrict pParams, const Node* __restrict pObject, bool assert);
+__declspec(noalias) void inline ExecuteQBScript(DWORD checksum, const CStruct* __restrict pParams = NULL, const Node* __restrict pObject = NULL, bool assert = false)
+{
+    return ExecuteScript_Stub(0x00428180)(checksum, pParams, pObject, assert);
+}
+
 
 //--------Script Stuff--------
 namespace QScript
@@ -36,6 +50,7 @@ namespace QScript
     extern bool(*GotParam)(CStruct*, CScript*);
     extern bool(*ResetClock)(CStruct*, CScript*);
     extern bool (*ShatterScript)(CStruct*, CScript*);
+    extern bool (*LaunchPanelMessage)(CStruct*, CScript*);
     auto constexpr ASSERT = 1;
     enum ScriptToken
     {
@@ -81,6 +96,17 @@ namespace QScript
 
     };
 
+    struct SpawnedScript
+    {
+        CScript* script;
+        DWORD checksum;//not sure?
+        DWORD callback;
+        CStruct* params;
+        bool  paused;
+    };
+
+    void ClearScript(DWORD index);
+
     char* GetScriptDir(bool second = false);
 
     struct CompressedNode
@@ -104,6 +130,8 @@ namespace QScript
     char* FindReference(char* file_name, DWORD checksumm, bool levelmod);
     //I'm not sure about the AbsentInNetGames, but the function calling this function did AbsentInNetGames = !NetEnabled, could be something else...
     void SpawnScript(DWORD checksum, CStruct* params = NULL, DWORD node = 0xFFFFFFFF, DWORD callback = 0, CStruct* callback_params = NULL, bool AbsentInNetGames = false, bool NetEnabled = true, bool Permanent = true);
+
+    void PanelMessage(const char* msg, ...);
 
     struct QBFile
     {
@@ -186,25 +214,15 @@ namespace QScript
     };
 
     extern void CallCFunction(DWORD checksum, void* param, QBKeyHeader::QBKeyType type = QBKeyHeader::QBKeyType::STRING);
-    extern void CallCFunction(DWORD checksum, CStruct* pParams);
+    extern void CallCFunction(DWORD checksum, CStruct* pParams = NULL);
 
     extern QBScript* Scripts;
     extern const char* QBTypes[19];
+
+    void UpdateSpawnedScripts();
+
 };
 //--------Script Stuff--------
-
-//calls a QB scripted function, remember to pass a CStruct.
-typedef void(__cdecl* const ExecuteScript)(const char* __restrict name, const CStruct* __restrict pParams, const CScript* __restrict pScript, bool assert);
-__declspec(noalias) void inline ExecuteQBScript(const char* __restrict pScriptName, const CStruct* __restrict pParams = NULL, const CScript* __restrict pScript = NULL, bool assert = false)
-{
-    return ExecuteScript(0x00428240)(pScriptName, pParams, pScript, assert);
-}
-typedef void(__cdecl* const ExecuteScript_Stub)(DWORD checksum, const CStruct* __restrict pParams, const CScript* __restrict pScript, bool assert);
-__declspec(noalias) void inline ExecuteQBScript(DWORD checksum, const CStruct* __restrict pParams = NULL, const CScript* __restrict pScript = NULL, bool assert = false)
-{
-    return ExecuteScript_Stub(0x00428180)(checksum, pParams, pScript, assert);
-}
-
 
 //Add a QBkeyHeader to game array, this can be a value/function that you can acces/call in qb script.
 typedef QBKeyHeader* (__cdecl* const RegisterQBKeyHeaderFunc)(const int QBKey, const int HeaderID);
@@ -235,13 +253,17 @@ struct CompiledScript
 };
 struct Node;
 
+struct CScript;
+
+
+
 //pack(1) to make sure alignment is correct when try to acess game data
 //#pragma pack(1)
 struct EXTERN CScript
 {
     BYTE* address;//address of where script - parser/executer is in script
     CStruct* params;//params sent when called the script
-    void* extras;//extra stuff
+    void* extra;//extra stuff
     BYTE unk[0x35C];//not looked into
     unsigned long long startTime;
     unsigned long long waitPeriod;
@@ -268,8 +290,96 @@ struct EXTERN CScript
         ZeroMemory(this, sizeof(CScript));
     }
 
+
+    
+
     bool GotParam(DWORD name);
     CStructHeader* GetParam(DWORD name);
+
+    //Used to not make stuff crash when calling a CFunction
+    void SetScript_Hook(DWORD checksum, CStruct* params, Node* object);
+
+    void SetScript(DWORD checksum, CStruct* params, Node* object);
+
+    void ClearScript()
+    {
+        typedef void(__thiscall* const pClearScript)(CScript* pThis);
+        pClearScript(0x00427650)(this);
+    }
+
+    void SkipToken()
+    {
+        char opcode = *address;
+
+        switch (opcode)
+        {
+        case QScript::ScriptToken::If2:
+        case QScript::ScriptToken::Else2:
+        case QScript::ScriptToken::EndSwitch2:
+            address += 3;
+            break;
+
+        case QScript::ScriptToken::String:
+        case QScript::ScriptToken::LocalString:
+            address += *(DWORD*)address + 4;
+            break;
+
+        case QScript::ScriptToken::Int:
+        case QScript::ScriptToken::Float:
+        case QScript::ScriptToken::Jump:
+        case QScript::ScriptToken::NewLineNumber:
+        case QScript::ScriptToken::QBKey:
+            address += 5;
+            break;
+
+            //Known key values
+        case QScript::ScriptToken::NewLine:
+        case QScript::ScriptToken::Struct:
+        case QScript::ScriptToken::EndStruct:
+        case QScript::ScriptToken::Array:
+        case QScript::ScriptToken::EndArray:
+        case QScript::ScriptToken::Equals:
+        case QScript::ScriptToken::Property:
+        case QScript::ScriptToken::Comma:
+        case QScript::ScriptToken::Parenthesis:
+        case QScript::ScriptToken::EndParenthesis:
+        case QScript::ScriptToken::Begin:
+        case QScript::ScriptToken::Repeat:
+        case QScript::ScriptToken::Break:
+        case QScript::ScriptToken::Script:
+        case QScript::ScriptToken::If:
+        case QScript::ScriptToken::Else:
+        case QScript::ScriptToken::ElseIf:
+        case QScript::ScriptToken::EndIf:
+        case QScript::ScriptToken::Global:
+        case QScript::ScriptToken::RandomRange:
+        case QScript::ScriptToken::Not:
+            address++;
+            break;
+
+        case QScript::ScriptToken::Pair:
+            address += 9;
+            break;
+
+        case QScript::ScriptToken::Vector:
+            address += 13;
+            break;
+
+        case QScript::ScriptToken::Random:
+        case QScript::ScriptToken::RandomPermute:
+        case QScript::ScriptToken::RandomNoRepeat:
+            address += *(DWORD*)address * 4 + 5;
+            break;
+
+        default:
+            //Should add all the unhandled opcodes to prevent crashing and other issues
+            debug_print("%X @ %p\n", opcode, address);
+            MessageBox(0, "Unhandled opcode...", __FUNCTION__, 0);
+            break;
+        }
+    }
+
+    void AdvanceToEnd();
 
     static CScript* GetNextScript(CScript* pScript = NULL)
     {
@@ -291,6 +401,12 @@ struct EXTERN CScript
             p_scr = GetNextScript(p_scr);
         }
         return longest;
+    }
+
+    DWORD Update()
+    {
+        typedef DWORD(__thiscall* const pUpdate)(CScript* pThis);
+        return pUpdate(0x00427940)(this);
     }
 
     static void ResetScriptTimers(DWORD time_now, DWORD old_time)
@@ -433,6 +549,7 @@ struct CStructHeader
         //if Type is function this is the address of the function
     };
 
+    
     //Unnamed int
     CStructHeader(QBKeyHeader::QBKeyType Type, int value, CStructHeader* next = NULL)
     {
@@ -440,6 +557,20 @@ struct CStructHeader
         this->QBkey = 0;
         this->value.i = value;
         NextHeader = next;
+    }
+
+    void operator delete(void* ptr)
+    {
+        ((CStructHeader*)ptr)->Type = QBKeyHeader::UNDEFINED;
+        ((CStructHeader*)ptr)->Data = 0;
+        ((CStructHeader*)ptr)->NextHeader = *(CStructHeader**)0x008E1E04;
+        *(void**)0x008E1E04 = ptr;
+    }
+
+    void ClearComponent()
+    {
+        typedef void(__cdecl* const pClearComponent)(CStructHeader* pThis);
+        pClearComponent(0x00428920)(this);
     }
 
     CStructHeader(QBKeyHeader::QBKeyType Type, DWORD checksum, DWORD data)
@@ -676,6 +807,41 @@ struct EXTERN CStruct
         tail = NULL;
     }
 
+    
+    void* operator new(size_t size)
+    {
+        CStruct* topHeap = *(CStruct**)0x008E1E30;
+        *(CStruct**)0x008E1E30 = (CStruct*)topHeap->tail;
+        *(DWORD*)0x008E1E34 = *(DWORD*)0x008E1E34 + 1;
+        /*DWORD topHeap = *(DWORD*)(*(DWORD*)0x008E1E30 + 4);
+        *(DWORD*)0x008E1E30 = topHeap;
+        *(DWORD*)0x008E1E34 = *(DWORD*)0x008E1E34 + 1;*/
+        return (void*)topHeap;
+    }
+
+    void operator delete(void* ptr)
+    {
+        /*DWORD topHeap = *(DWORD*)(*(DWORD*)0x008E1E30 + 4);
+        *(DWORD*)(*(DWORD*)ptr + 4) = topHeap;
+        *(void**)0x008E1E30 = ptr;*/
+
+        CStruct* topHeap = *(CStruct**)0x008E1E30;
+        ((CStruct*)ptr)->tail = topHeap->tail;
+        *(void**)0x008E1E30 = ptr;
+        *(DWORD*)0x008E1E34 = *(DWORD*)0x008E1E34 - 1;
+    }
+
+    void AddComponent(CStructHeader* param)
+    {
+        typedef void(__thiscall* const pAddComponent)(CStruct* pThis, CStructHeader* param);
+        pAddComponent(0x004292B0)(this, param);
+    }
+
+    BYTE* AddComponentsUntilEndOfLine(BYTE* address, void* unk = NULL)
+    {
+        typedef BYTE* (__thiscall* const pAddConentsUntilEndOfLine)(CStruct* pThis, BYTE* address, void* unk);
+        return pAddConentsUntilEndOfLine(0x00429500)(this, address, unk);
+    }
 
     CStruct(QBKeyHeader::QBKeyType type, int value)
     {
@@ -731,8 +897,8 @@ struct EXTERN CStruct
         debug_print("%s couldn't find param type %s in script %s\n", func, QScript::QBTypes[type], file);
         return NULL;
 }
-#define CREATE_1(x) GetHeader_debug(__FUNCTION__, FindChecksumName(pScript->scriptChecksum), x)
-#define CREATE_0() GetHeader_debug(__FUNCTION__, FindChecksumName(pScript->scriptChecksum))
+#define CREATE_1(x) GetHeader_debug(__FUNCTION__, pScript ? FindChecksumName(pScript->scriptChecksum) : "No Script", x)
+#define CREATE_0() GetHeader_debug(__FUNCTION__, pScript ? FindChecksumName(pScript->scriptChecksum) : "No Script")
 #define FUNC_CHOOSER(_f1, _f2, _f3, ...) _f3
 #define FUNC_RECOMPOSER(argsWithParentheses) FUNC_CHOOSER argsWithParentheses
 #define CHOOSE_FROM_ARG_COUNT(...) FUNC_RECOMPOSER((__VA_ARGS__, CREATE_2, CREATE_1, ))
@@ -778,7 +944,7 @@ struct EXTERN CStruct
         return mallocx(0x00428B90)();
     }
     typedef CStructHeader* (__cdecl* const freex)(CStructHeader* param);
-    inline CStructHeader* DellocateCStruct(CStructHeader* param)
+    static inline CStructHeader* DellocateCStruct(CStructHeader* param)
     {
         return freex(0x004260E0)(param);
     }

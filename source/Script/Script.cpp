@@ -77,15 +77,16 @@ const char* QScript::QBTypes[] = {
      "Local Struct",//Used in struct / array, Structure Pointer in Thps4
      "Array",
      "Local Variable/Function",//Used in struct / array, Name in Thps4
-     "Unknown",
-     "Unknown",
-     "Unknown",
-     "Unknown",
-     "Unknown"
+     "Unknown1",//Just a safeguard, don't think there are any more types?
+     "Unknown2",
+     "Unknown3",
+     "Unknown4",
+     "Unknown5"
 };
 bool(*QScript::GotParam)(CStruct*, CScript*) = NULL;
 bool(*QScript::ResetClock)(CStruct*, CScript*) = NULL;
 bool (*QScript::ShatterScript)(CStruct*, CScript*) = NULL;
+bool (*QScript::LaunchPanelMessage)(CStruct*, CScript*) = NULL;
 QScript::QBScript* QScript::Scripts=NULL;
 std::vector<QScript::CompressedNode> QScript::compNodes;
 std::vector<DWORD> QScript::qbKeys;
@@ -101,11 +102,270 @@ char levelPath[MAX_PATH];
 
 QBFile levelQB;
 
+void QScript::PanelMessage(const char* msg, ...)
+{
+    char panel_msg[200];
+    va_list myargs;
+    va_start(myargs, msg);
+    vsprintf(panel_msg, msg, myargs);
+    va_end(myargs);
+
+    CScript script;
+    CStruct params;
+    CStructHeader header(QBKeyHeader::STRING, 0, panel_msg);
+    params.Set(&header);
+    LaunchPanelMessage(&params, &script);
+}
 
 void QScript::SpawnScript(DWORD checksum, CStruct* params, DWORD node, DWORD callback, CStruct* callback_params, bool AbsentInNetGames, bool NetEnabled, bool Permanent)
 {
     typedef DWORD(__cdecl* const pSpawnScript)(DWORD checksum, CStruct* params, DWORD callback, CStruct* callback_params, DWORD node, bool AbsentInNetGames, bool NetEnabled, bool Permanent);
     pSpawnScript(0x00428510)(checksum, params, callback, callback_params, node, AbsentInNetGames, NetEnabled, Permanent);
+}
+
+void QScript::UpdateSpawnedScripts()
+{
+    *(bool*)0x008E1DF4 = true;
+    DWORD numSpawnedScripts = *(DWORD*)0x008E1E1C;
+    SpawnedScript* pScript = (SpawnedScript*)0x008918F8;
+
+    for (int i = 0; i < numSpawnedScripts; i++, pScript++)
+    {
+        if (pScript->script && !pScript->paused)
+        {
+            while (true)
+            {
+                DWORD ret_val = pScript->script->Update();
+                if (ret_val == 0)
+                {
+                    if (pScript->callback)
+                    {
+                        ExecuteQBScript(pScript->callback, pScript->params, pScript->script->node);
+                    }
+
+                    ClearScript(i);
+                    break;
+                }
+                else if (ret_val == 2)
+                    break;
+            }
+        }
+    }
+    *(bool*)0x008E1DF4 = false;
+
+    if (*(bool*)0x008E1DF5)
+    {
+        *(bool*)0x008E1DF5 = false;
+        for (DWORD i = 0; i < numSpawnedScripts; i++)
+        {
+            ClearScript(i);
+        }
+    }
+}
+
+void CScript::SetScript(DWORD checksum, CStruct* _params, Node* object)
+{
+    //Clear current script
+    ClearScript();
+
+    //We need to get the information to decide if we jump to script, call CFunction or print debug info
+    auto header = GetQBKeyHeader(checksum);
+    if (header)
+    {
+        //It's a script, let's jump to it
+        if (header->type == QBKeyHeader::SCRIPTED_FUNCTION)
+        {
+            //Don't think this extra allocation is needed, can save few cpu cycles and memory usuage by each script call/jump
+            /*CStruct* temp_params;
+            if (_params)
+            {
+                temp_params = new CStruct();
+                for (auto param = _params->head; param; param = param->NextHeader)
+                {
+                    temp_params->AddComponent(param);
+                }
+            }*/
+
+            //Set the address of the script
+            address = (BYTE*)header->pStr + 6;// + 6 = 0x23 0x16 0x?? 0x?? 0x?? 0x?? Skip function name
+            //New CStruct that will contain the params
+            this->params = new CStruct();
+            //Add default params, if there are any
+            address = this->params->AddComponentsUntilEndOfLine(this->address);
+            //Not sure what this is used for
+            extra = new CStruct();
+            //Assign the object
+            node = object;
+            //the checksum of the new script
+            scriptChecksum = checksum;
+
+            if (_params)
+            {
+                //Add the params to the scripts
+                for (auto param = _params->head; param; param = param->NextHeader)
+                {
+                    this->params->AddComponent(param);
+                }
+
+                /*CStructHeader* next;
+                for (auto param = temp_params->head; param; param = next)
+                {
+                    next = param->NextHeader;
+                    param->ClearComponent();
+                    delete param;
+                }
+
+                delete temp_params;*/
+            }
+
+        }
+        //It's a CFunction, let's call it
+        else if (header->type == QBKeyHeader::COMPILED_FUNCTION)
+        {
+            //Assign the object incase the function want it
+            this->node = object;
+            header->pFunction(_params , this);
+        }
+        else
+            debug_print("\nWarning: QBKey %s is not callable.\nType is %s\n", FindChecksumName(checksum), QScript::QBTypes[header->type]);
+    }
+    else
+        debug_print("\nWarning: Script %s not found.\n", FindChecksumName(checksum));
+
+    //Just keeping it here to find pointer to original function
+    /*typedef DWORD(__thiscall* const pSetScript)(CScript* pThis, DWORD checksum, CStruct* params, Node* object);
+return pSetScript(0x04274A0)(this, checksum, params, object);*/
+
+}
+
+void CScript::AdvanceToEnd()
+{
+    char opcode = *address;
+
+    while (opcode != QScript::ScriptToken::EndScript)
+    {
+        address++;
+        switch (opcode)
+        {
+        case QScript::ScriptToken::If2:
+        case QScript::ScriptToken::Else2:
+        case QScript::ScriptToken::EndSwitch2:
+            address += 2;
+            break;
+
+        case QScript::ScriptToken::String:
+        case QScript::ScriptToken::LocalString:
+            address += *(DWORD*)address + 4;
+            break;
+
+        case QScript::ScriptToken::Int:
+        case QScript::ScriptToken::Float:
+        case QScript::ScriptToken::Jump:
+        case QScript::ScriptToken::NewLineNumber:
+        case QScript::ScriptToken::QBKey:
+            address += 4;
+            break;
+
+            //Known key values
+        case QScript::ScriptToken::NewLine:
+        case QScript::ScriptToken::Struct:
+        case QScript::ScriptToken::EndStruct:
+        case QScript::ScriptToken::Array:
+        case QScript::ScriptToken::EndArray:
+        case QScript::ScriptToken::Equals:
+        case QScript::ScriptToken::Property:
+        case QScript::ScriptToken::Comma:
+        case QScript::ScriptToken::Parenthesis:
+        case QScript::ScriptToken::EndParenthesis:
+        case QScript::ScriptToken::Begin:
+        case QScript::ScriptToken::Repeat:
+        case QScript::ScriptToken::Break:
+        case QScript::ScriptToken::Script:
+        case QScript::ScriptToken::If:
+        case QScript::ScriptToken::Else:
+        case QScript::ScriptToken::ElseIf:
+        case QScript::ScriptToken::EndIf:
+        case QScript::ScriptToken::Global:
+        case QScript::ScriptToken::RandomRange:
+        case QScript::ScriptToken::Not:
+            break;
+
+        case QScript::ScriptToken::Pair:
+            address += 8;
+            break;
+
+        case QScript::ScriptToken::Vector:
+            address += 12;
+            break;
+
+        case QScript::ScriptToken::Random:
+        case QScript::ScriptToken::RandomPermute:
+        case QScript::ScriptToken::RandomNoRepeat:
+            address += *(DWORD*)address * 4 + 4;
+            break;
+
+        default:
+            //Should add all the unhandled opcodes to prevent crashing and other issues
+            debug_print("%X @ %p\n", opcode, address);
+            MessageBox(0, "Unhandled opcode...", __FUNCTION__, 0);
+            break;
+        }
+        opcode = *address;
+    }
+}
+
+void CScript::SetScript_Hook(DWORD checksum, CStruct* _params, Node* object)
+{
+    QBKeyHeader* header = GetQBKeyHeader(checksum);
+    if (header)
+    {
+        if (header->type == QBKeyHeader::SCRIPTED_FUNCTION || header->type == QBKeyHeader::GLOBAL)
+        {
+            SetScript(checksum, _params, object);
+            return;
+        }
+        else if (header->type == QBKeyHeader::COMPILED_FUNCTION)
+        {
+            auto param = params->head;
+            for (; param; param = param->NextHeader)
+            {
+                MessageBox(0, FindChecksumName(param->Data, false), FindChecksumName(param->QBkey, false), 0);
+                if (param->Type == QBKeyHeader::LOCAL_STRUCT)
+                {
+                    auto param2 = ((CStruct*)param->pStruct)->head;
+                    for (; param2; param2 = param2->NextHeader)
+                    {
+                        MessageBox(0, FindChecksumName(param2->Data, false), FindChecksumName(param2->QBkey, false), 0);
+                    }
+                }
+            }
+            for (param = _params->head; param; param = param->NextHeader)
+            {
+                MessageBox(0, FindChecksumName(param->Data, false), FindChecksumName(param->QBkey, false), 0);
+                if (param->Type == QBKeyHeader::LOCAL_STRUCT)
+                {
+                    auto param2 = ((CStruct*)param->pStruct)->head;
+                    for (; param2; param2 = param2->NextHeader)
+                    {
+                        MessageBox(0, FindChecksumName(param2->Data, false), FindChecksumName(param2->QBkey, false), 0);
+                    }
+                }
+            }
+            //header->pFunction(param ? (CStruct*)param->pStruct : NULL, this);
+            AdvanceToEnd();
+        }
+        else
+            debug_print("GoTo: Invalid type %s\n", QScript::QBTypes[header->type]);
+    }
+    else
+        debug_print("GoTo: Couldn't find QBKey %s\n", FindChecksumName(checksum));
+    return;
+}
+
+void QScript::ClearScript(DWORD index)
+{
+    typedef void(__cdecl* const pClearScript)(DWORD index);
+    pClearScript(0x004282A0)(index);
 }
 
 void CStruct::AddCompressedNode(DWORD checksum, QBKeyInfoContainer* container)

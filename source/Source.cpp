@@ -30,6 +30,7 @@
 #include "Render\shadow.h"
 #include "dinput.h"
 #include "Objects\rail.h"
+#include "Game\FrontEnd.h"
 /*0
 004F9B9E < -non semi
     8
@@ -167,6 +168,45 @@ void InjectHook(DWORD addr, BYTE* hook, DWORD size)
     DWORD old;
     VirtualProtect((void*)addr, size, PAGE_EXECUTE_READWRITE, &old);
     memcpy((void*)addr, hook, size);
+}
+__inline void HookFunction(DWORD addr, void(CScript::* function)(DWORD checksum, CStruct* params, Node* object), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    addr += 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+__inline void HookFunction(DWORD addr, void(FrontEnd::* function)(), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    addr += 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+__inline void HookFunction(DWORD addr, void(FrontEnd::* function)(DWORD checksum, CStruct* params), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    addr += 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
 }
 __inline void HookFunction(DWORD addr, WORD(KeyState::* function)(BYTE gamestate, BYTE* key_data), BYTE byteCode = 0, DWORD nopCount = 0)
 {
@@ -3884,6 +3924,8 @@ void AddFunctions()
         header->pFunction = NewShatterScript;
     }
 
+    QScript::LaunchPanelMessage = GetQBKeyHeader(Checksum("LaunchPanelMessage"))->pFunction;
+
     header = GetQBKeyHeader(Checksum("ResetClock"));
     if (header)
     {
@@ -4500,6 +4542,31 @@ void InitLevelMod()
     //HookFunction(0x004C04F0, TimerElapsed);
     HookFunction(0x004F9463, UpdateFrameLength);
 
+    //Fix script being able to call CFunctions
+    HookFunction(0x004CFCDE, &FrontEnd::SetScriptToRun_Hook);
+    HookFunction(0x004180DC, &CScript::SetScript);
+    HookFunction(0x0041816C, &CScript::SetScript);
+    HookFunction(0x004273FE, &CScript::SetScript);
+    HookFunction(0x00427455, &CScript::SetScript);
+    HookFunction(0x00427784, &CScript::SetScript);
+    HookFunction(0x0048F697, &CScript::SetScript);
+    HookFunction(0x0048F6EB, &CScript::SetScript);
+    HookFunction(0x0048F740, &CScript::SetScript);
+    HookFunction(0x0048F7B9, &CScript::SetScript);
+    HookFunction(0x0049A6DC, &CScript::SetScript);
+    HookFunction(0x0049A735, &CScript::SetScript);
+    HookFunction(0x0049A7BF, &CScript::SetScript);
+    /*HookFunction(0x0049AAD9, &CScript::SetScript);
+    HookFunction(0x0049AE1E, &CScript::SetScript);
+    HookFunction(0x0049B6BF, &CScript::SetScript);*/
+    HookFunction(0x0049B96E, &CScript::SetScript);
+    HookFunction(0x004A70DD, &CScript::SetScript);
+    HookFunction(0x004ACFAC, &CScript::SetScript);
+    HookFunction(0x004B2C0A, &CScript::SetScript);
+    HookFunction(0x004C27AF, &CScript::SetScript);
+    //HookFunction(0x004CFC76, &FrontEnd::UpdateScript_Hook);
+    HookFunction(0x0041801F, &CScript::SetScript);
+
     //For camera controll
     HookFunction(0x00498F39, &KeyState::XINPUT_UpdateCamera_Hook);
 
@@ -4557,6 +4624,7 @@ void InitLevelMod()
 
     //Remove dublicate NodeArray loading
     BYTE nop_func[] = { 0x90, 0x90, 0x90, 0x90, 0x90 };
+    //InjectHook(0x0044A3E7, nop_func, 5);
     //InjectHook(0x0043A6D6, nop_func, 5);
     //InjectHook(0x00419D07, nop_func, 5);
 
@@ -5381,7 +5449,7 @@ DWORD GetTagCount()
 }
 
 extern QBKeyHeader triggers[];
-EXTERN QBKeyHeader* GetQBKeyHeader(unsigned long QBKey)
+EXTERN __declspec(noalias) QBKeyHeader* GetQBKeyHeader(unsigned long QBKey)
 {
     int ShortedQBKey = QBKey & 0x0000FFFF;//last 16 bit of QBKey, old code - last 12 bits of QBKey
     int* LoadAddress = (int*)(ShortedQBKey + ShortedQBKey * 4);//get index
@@ -6494,7 +6562,6 @@ __declspec(noalias) void DrawFrame()
         }*/
 
     }
-
         if (GameState::GotSuperSectors) [[likely]]
         {
             //Skater * skater = Skater::Instance();

@@ -607,8 +607,15 @@ class BaseClass
 public:
     void* operator new(size_t size)
     {
-        typedef void*(__cdecl* const pNew)(size_t size);
-        return pNew(0x00410460)(size);
+        typedef void*(__cdecl* const pMalloc)(size_t size);
+        void* data = pMalloc(*(DWORD*)0x0058D204)(size);//pNew(0x00410460)(size);
+        ZeroMemory(data, size);
+    }
+
+    void operator delete(void* ptr)
+    {
+        typedef void* (__cdecl* const pFree)();
+        pFree(*(DWORD*)0x0058D1F4)();
     }
 };
 

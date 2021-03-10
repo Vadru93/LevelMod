@@ -54,7 +54,7 @@ namespace Network
 
     int Handle_Test(NetMessage* msg)
     {
-        debug_print("Host sent testmsg %s\nApp %p Conn %p %X %X\n%X %X\n", msg->msg, msg->app, msg->conn, msg->id, msg->flags, msg->client, msg->retAddr);
+        debug_print("Host sent testmsg %s\nApp %p Conn %p %X %X\n%X %X\n", msg->msg, msg->app, msg->conn, msg->id, msg->flags, msg->manager, msg->retAddr);
         return HANDLER_CONTINUE;
     }
 

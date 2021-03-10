@@ -185,6 +185,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="res\resource.h" />
+    <ClInclude Include="source\Game\FrontEnd.h" />
     <ClInclude Include="source\Game\Task.h" />
     <ClInclude Include="source\Gfx\Camera.h" />
     <ClInclude Include="source\Hook\Bugfixes.h" />
