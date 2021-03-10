@@ -15,7 +15,8 @@ namespace NewTimer
     LARGE_INTEGER elapsedTime;
     LARGE_INTEGER old_start;
     DWORD timer_lock = 0x10;
-    double framelength = 1000000.0 / Gfx::target_fps;
+    double target = 1000000.0 / Gfx::target_fps;
+    double framelength = target;
     DWORD frameticks = 0;
     DWORD max_frame_ticks = 0;
     DWORD min_frame_ticks = 0;
@@ -47,7 +48,8 @@ namespace NewTimer
         Gfx::sleep_low = (1000000.0 / Gfx::target_fps) - Gfx::sleep_low_diff;
 
         *(float*)0x00850FD0 = (float)(1000.0 / Gfx::target_fps);
-        framelength = 1000000.0 / Gfx::target_fps;
+        double target = 1000000.0 / Gfx::target_fps;
+        double framelength = target;
     }
 
     void Initialize()
@@ -73,7 +75,8 @@ namespace NewTimer
 
         //First reset framelength
         *(float*)0x00850FD0 = (float)(1000.0 / Gfx::target_fps);
-        framelength = 1000000.0 / Gfx::target_fps;
+        target = 1000000.0 / Gfx::target_fps;
+        framelength = target;
 
         //old time is used to reset script timers
         DWORD old_time = GetTime();
@@ -163,7 +166,10 @@ namespace NewTimer
         QueryPerformanceCounter(&startTime);
         old_start.QuadPart = startTime.QuadPart - old_start.QuadPart;
         double ms = (double((old_start.LowPart)) * fFreq);
-        framelength = ms;
+        if(ms<FPS(25))
+            framelength = ms;
+        else
+            framelength = target;
         if (ms < 32000.0 && isActive)
         {
             if (ms >= Gfx::hybrid_high) // ~59.88
