@@ -25,14 +25,16 @@ namespace NewTimer
     double hybrid_limit = 16.0;
     DWORD time = 0;
     unsigned long long time_now;
+    DWORD hybrid_loop_time = 0;
+    DWORD ticks_hybrid;
 
 
     void CalculateFPSTimers()
     {
         DWORD frameticks2 = (DWORD)(16666.666666666 / (1000.0 / (double)freq.QuadPart));
         frameticks = (DWORD)((1000000.0 / Gfx::target_fps) / fFreq);
-        max_frame_ticks = frameticks + 1000;
-        min_frame_ticks = frameticks - 1000;
+        max_frame_ticks = frameticks + 2000;
+        min_frame_ticks = frameticks - 2000;
         //Add some headroom for hardware delay and rounding errors, probably should add this to ini for platform specific stored value
         frameticks -= 750;
         DWORD frameticks3 = (DWORD)(0.0166666666 / (1.0 / (double)freq.QuadPart));
@@ -59,6 +61,7 @@ namespace NewTimer
         QueryPerformanceCounter(&startTime);
         QueryPerformanceFrequency(&freq);
         fFreq = 1000000.0 / (double)freq.QuadPart;
+        ticks_hybrid = freq.QuadPart / 75;
 
         if (!p_bWindowed)
             timer_lock = 0x0D;
@@ -79,6 +82,7 @@ namespace NewTimer
         *(float*)0x00850FD0 = (float)(1000.0 / Gfx::target_fps);
         target = 1000000.0 / Gfx::target_fps;
         framelength = target;
+        hybrid_loop_time = 0;
 
         //old time is used to reset script timers
         DWORD old_time = GetTime();
@@ -180,6 +184,25 @@ namespace NewTimer
                 {
                     if (hybrid_limit)
                         hybrid_limit--;
+                }
+                else if (hybrid_loop_time)
+                {
+                    if (ms > Gfx::exact_high && frameticks > min_frame_ticks)//59,97 fps
+                    {
+                        /*DWORD diff = (DWORD)((ms - (1000000 / Gfx::target_fps))* 0.005);
+                        diff += 4;
+                        diff & 20;
+                        debug_print("Dec %u\n", diff);*/
+                        if (frameticks > 2)
+                            frameticks -= 1;
+                    }
+                    else if (ms < Gfx::exact_low && frameticks < max_frame_ticks)//60,24 fps
+                    {
+                        debug_print("Inc\n");
+                        frameticks += 2;
+                    }
+                    if (hybrid_loop_time > ticks_hybrid)
+                        hybrid_limit++;
                 }
             }
         }
@@ -329,6 +352,11 @@ namespace NewTimer
 
         LARGE_INTEGER targetTime;
         targetTime.QuadPart = startTime.QuadPart + frameticks;
+        if (endTime.QuadPart < targetTime.QuadPart)
+        {
+            QueryPerformanceCounter(&endTime);
+            hybrid_loop_time = targetTime.QuadPart - endTime.QuadPart;
+        }
         while (endTime.QuadPart < targetTime.QuadPart)
         {
             QueryPerformanceCounter(&endTime);
