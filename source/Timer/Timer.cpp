@@ -5,6 +5,8 @@
 extern bool init;
 extern bool init2;
 
+#define FPS(x) 1000000.0 / x
+
 namespace NewTimer
 {
     DWORD reset_time = 0;
@@ -166,18 +168,23 @@ namespace NewTimer
         QueryPerformanceCounter(&startTime);
         old_start.QuadPart = startTime.QuadPart - old_start.QuadPart;
         double ms = (double((old_start.LowPart)) * fFreq);
-        if(ms<FPS(25))
-            framelength = ms;
-        else
-            framelength = target;
-        if (ms < 32000.0 && isActive)
+
+        //Only update framelength if above 25 fps
+        if (ms < FPS(25))
         {
-            if (ms >= Gfx::hybrid_high) // ~59.88
+            framelength = ms;
+            //Only update fps lock if window is active
+            if (isActive)
             {
-                if (hybrid_limit)
-                    hybrid_limit--;
+                if (ms >= Gfx::hybrid_high) // ~59.88
+                {
+                    if (hybrid_limit)
+                        hybrid_limit--;
+                }
             }
         }
+        else
+            framelength = target;
         return startTime;
     }
 
@@ -190,24 +197,32 @@ namespace NewTimer
         QueryPerformanceCounter(&startTime);
         old_start.QuadPart = startTime.QuadPart - old_start.QuadPart;
         double ms = (double((old_start.LowPart)) * fFreq);
-        framelength = ms;
-        if (ms < 32000.0 && isActive)
+        
+        //Only update framelength if above 25 fps
+        if (ms < FPS(25))
         {
-            if (ms > Gfx::exact_high && frameticks > min_frame_ticks)//59,97 fps
+            framelength = ms;
+            //Only update FPS lock if window is active
+            if (isActive)
             {
-                /*DWORD diff = (DWORD)((ms - (1000000 / Gfx::target_fps))* 0.005);
-                diff += 4;
-                diff & 20;
-                debug_print("Dec %u\n", diff);*/
-                if(frameticks > 2)
-                   frameticks -= 1;
-            }
-            else if (ms < Gfx::exact_low && frameticks < max_frame_ticks)//60,24 fps
-            {
-                debug_print("Inc\n");
-                frameticks+=2;
+                if (ms > Gfx::exact_high && frameticks > min_frame_ticks)//59,97 fps
+                {
+                    /*DWORD diff = (DWORD)((ms - (1000000 / Gfx::target_fps))* 0.005);
+                    diff += 4;
+                    diff & 20;
+                    debug_print("Dec %u\n", diff);*/
+                    if (frameticks > 2)
+                        frameticks -= 1;
+                }
+                else if (ms < Gfx::exact_low && frameticks < max_frame_ticks)//60,24 fps
+                {
+                    debug_print("Inc\n");
+                    frameticks += 2;
+                }
             }
         }
+        else
+            framelength = target;
         return startTime;
     }
 
@@ -219,38 +234,46 @@ namespace NewTimer
         QueryPerformanceCounter(&startTime);
         old_start.QuadPart = startTime.QuadPart - old_start.QuadPart;
         double ms = (double((old_start.LowPart)) * fFreq);
-        framelength = ms;
-        if (ms < 32000.0 && isActive)
+        
+        //Only update framelength if above 25 fps
+        if (ms < FPS(25))
         {
-            //debug_print("2nd %f ", ms);
+            framelength = ms;
+            //Only update FPS lock if window is active
+            if (isActive)
+            {
+                //debug_print("2nd %f ", ms);
 
-            //We need to cap FPS around 60 because else some physics and scripts will not work correctly
-            //Also this is the most fair in a game heavily dependant on speed etc
-            //Maybe in the future can change this so can have more FPS
-            //Vsync is always on when we are using the new timer
-            //So on a screen with 60hz this will not matter too much because we will get perfect 60 FPS
-            //However on my screen with 144hz it's pretty hard to get consistent 60 FPS
-            //Currently worst case scenario is 59.9-65 and it's usually around 63-64
-            //For some reason it's more consistent in window mode than in fullscreen mode
-            if (ms >= Gfx::sleep_high) // ~61.01 FPS
-            {
-                BYTE target_ms = p_target_ms;
-                if (target_ms > 1)
+                //We need to cap FPS around 60 because else some physics and scripts will not work correctly
+                //Also this is the most fair in a game heavily dependant on speed etc
+                //Maybe in the future can change this so can have more FPS
+                //Vsync is always on when we are using the new timer
+                //So on a screen with 60hz this will not matter too much because we will get perfect 60 FPS
+                //However on my screen with 144hz it's pretty hard to get consistent 60 FPS
+                //Currently worst case scenario is 59.9-65 and it's usually around 63-64
+                //For some reason it's more consistent in window mode than in fullscreen mode
+                if (ms >= Gfx::sleep_high) // ~61.01 FPS
                 {
-                    target_ms--;
-                    p_target_ms = target_ms;
+                    BYTE target_ms = p_target_ms;
+                    if (target_ms > 1)
+                    {
+                        target_ms--;
+                        p_target_ms = target_ms;
+                    }
                 }
-            }
-            else if (ms < Gfx::sleep_low) // ~65.02 FPS
-            {
-                BYTE target_ms = p_target_ms;
-                if (target_ms < timer_lock)
+                else if (ms < Gfx::sleep_low) // ~65.02 FPS
                 {
-                    target_ms++;
-                    p_target_ms = target_ms;
+                    BYTE target_ms = p_target_ms;
+                    if (target_ms < timer_lock)
+                    {
+                        target_ms++;
+                        p_target_ms = target_ms;
+                    }
                 }
             }
         }
+        else
+            framelength = target;
         return startTime;
     }
 
