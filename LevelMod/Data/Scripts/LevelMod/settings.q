@@ -666,7 +666,7 @@ ENDSCRIPT
 SCRIPT LM_SetOption_Do
 	LM_SetOption <...>
 	IF GotParam Do
-	    GoTo <Do> params = <params>
+	    GoTo <Do> params = <do_params>
 	ENDIF
 ENDSCRIPT
 
@@ -952,11 +952,11 @@ game_menu_items = [
 	//GFX Options
 	{ IsEnum text = "Buffering" 		option_id = LM_GFX_eBuffering_id  option = LM_GFX_eBuffering 	toggle_id = item1_toggle cat_gfx TextValues = [ "Off" "Double" "Triple" ] Do = LaunchGFXCommand info_text = "Double/Tripple buffering" info_text2 = "May increase input lag" } 
 	{ IsEnum text = "MSAA Level" 		option_id = LM_GFX_eAntiAlias_id  option = LM_GFX_eAntiAlias 	toggle_id = item2_toggle cat_gfx TextValues = [ "Off" "auto" "2x" "4x" "8x" ] Do = LaunchGFXCommand info_text = "Anti Aliasing" info_text2 = "Disable to improve performance" } 
-	{ IsBool text = "Windowed"		    option_id = LM_GFX_bWindowed_id   option = LM_GFX_bWindowed     toggle_id = item3_toggle cat_gfx Do = LaunchGFXCommand params = { command = ToggleWindowed } info_text = "Launch game in windowed mode" info_text2 = "Toggle by pressing ALT + ENTER" }
+	{ IsBool text = "Windowed"		    option_id = LM_GFX_bWindowed_id   option = LM_GFX_bWindowed     toggle_id = item3_toggle cat_gfx Do = LaunchGFXCommand do_params = { command = ToggleWindowed } info_text = "Launch game in windowed mode" info_text2 = "Toggle by pressing ALT + ENTER" }
 	{ IsBool text = "Texture Filtering" option_id = LM_GFX_bFiltering_id  option = LM_GFX_bFiltering 	toggle_id = item5_toggle cat_gfx info_text = "Generate Texture mipmaps" info_text2 = "May produce slight graphic bugs"} 
 	{ IsBool text = "Enable VSync" 	    option_id = LM_GFX_bVSync_id      option = LM_GFX_bVSync        toggle_id = item6_toggle cat_gfx Do = LaunchGFXCommand info_text = "Sync rendering to monitor refresh rate" info_text2 = "Enable if you see tearing" } 
-	{ IsInt  text = "FPS Lock:"	        option_id = LM_GFX_TargetFPS_id   option = LM_GFX_TargetFPS     toggle_id = item7_toggle cat_gfx min = 60 max = 300  Do = LaunchGFXCommand params = { command = TargetFPS } info_text = "Set the target fps" info_text2 = "Only works if Stutter fix is enabled" }
-	{ IsEnum text = "Stutter Fix" 	    option_id = LM_GFX_eFixStutter_id option = LM_GFX_eFixStutter   toggle_id = item8_toggle cat_gfx TextValues = [ "Off" "Exact" "Hybrid" "Sleep" ] Do = LaunchGFXCommand params = { command = FixStutter } info_text = "Improve framerate consistency" info_text2 = "Exact is usually best option" } 
+	{ IsInt  text = "FPS Lock:"	        option_id = LM_GFX_TargetFPS_id   option = LM_GFX_TargetFPS     toggle_id = item7_toggle cat_gfx min = 60 max = 300  Do = LaunchGFXCommand do_params = { command = TargetFPS } info_text = "Set the target fps" info_text2 = "Only works if Stutter fix is enabled" }
+	{ IsEnum text = "Stutter Fix" 	    option_id = LM_GFX_eFixStutter_id option = LM_GFX_eFixStutter   toggle_id = item8_toggle cat_gfx TextValues = [ "Off" "Exact" "Hybrid" "Sleep" ] Do = LaunchGFXCommand do_params = { command = FixStutter } info_text = "Improve framerate consistency" info_text2 = "Exact is usually best option" } 
 ]
 
 
@@ -1030,7 +1030,7 @@ script AddEnum
 		id = <option_id> 
 		text = <text> 
 		lower = 0 upper = <max> delta = 1 start = <OptionValue> wrap = 1 right_side_w = 100
-		eventhandlers = [ {Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextFromValue = <TextValues> TextOnly } }{ Type = ContentsChangedEventHandler target = "LM_SetOption_Do" params = { Do = <Do> params = <params> name = <option> id = <option_id> TextFromValue = <TextValues> } } ]
+		eventhandlers = [ {Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextFromValue = <TextValues> TextOnly } }{ Type = ContentsChangedEventHandler target = "LM_SetOption_Do" params = { Do = <Do> do_params = <do_params> name = <option> id = <option_id> TextFromValue = <TextValues> } } ]
 	}
 	//if GotParam toggle_id
 				//GetOptionText option = <option> text = <TextValues>
@@ -1072,14 +1072,14 @@ script AddInt
 		id = <option_id> 
 		text = <text> 
 		lower = <min> upper = <max> delta = 1 start = <OptionValue> wrap = 1 right_side_w = 100
-		eventhandlers = [ {Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextOnly } }{ Type = ContentsChangedEventHandler target = "LM_SetOption_Do" params = { Do = <Do> params = <params> name = <option> id = <option_id>  } } ]
+		eventhandlers = [ {Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextOnly } }{ Type = ContentsChangedEventHandler target = "LM_SetOption_Do" params = { Do = <Do> do_params = <do_params> name = <option> id = <option_id>  } } ]
 	}
 endscript
 
 //to avoid multiple nested IFs
 //should rewrite this func in switch-case-ish logic
 //like if isEnum call enum func, if IsBool call bool func etc.
-script Settings_AddLine params = {}
+script Settings_AddLine
 	if GotParam <mask>
 	    		
 		if GotParam toggle_id
