@@ -4556,9 +4556,9 @@ void InitLevelMod()
     HookFunction(0x0049A6DC, &CScript::SetScript);
     HookFunction(0x0049A735, &CScript::SetScript);
     HookFunction(0x0049A7BF, &CScript::SetScript);
-    /*HookFunction(0x0049AAD9, &CScript::SetScript);
+    HookFunction(0x0049AAD9, &CScript::SetScript);
     HookFunction(0x0049AE1E, &CScript::SetScript);
-    HookFunction(0x0049B6BF, &CScript::SetScript);*/
+    HookFunction(0x0049B6BF, &CScript::SetScript);
     HookFunction(0x0049B96E, &CScript::SetScript);
     HookFunction(0x004A70DD, &CScript::SetScript);
     HookFunction(0x004ACFAC, &CScript::SetScript);
@@ -5449,7 +5449,7 @@ DWORD GetTagCount()
 }
 
 extern QBKeyHeader triggers[];
-EXTERN __declspec(noalias) QBKeyHeader* GetQBKeyHeader(unsigned long QBKey)
+EXTERN __declspec(noalias) QBKeyHeader* Resolve(unsigned long QBKey)
 {
     int ShortedQBKey = QBKey & 0x0000FFFF;//last 16 bit of QBKey, old code - last 12 bits of QBKey
     int* LoadAddress = (int*)(ShortedQBKey + ShortedQBKey * 4);//get index
@@ -5458,12 +5458,74 @@ EXTERN __declspec(noalias) QBKeyHeader* GetQBKeyHeader(unsigned long QBKey)
     while (header->QBKeyCheck)//loop until end of table or corect header is found
     {
         if (((header->QBKeyCheck << 0x0C) | ShortedQBKey) == QBKey)
+        {
+            return header;
+            /*if (header->type != QBKeyHeader::LOCAL)
+                return header;//found header lets return it
+            else//Header is LOCAL type, keep scanning
+            {
+                header++;
+                while (header->type == QBKeyHeader::LOCAL)
+                {
+                    if (((header->QBKeyCheck << 0x0C) | ShortedQBKey) != QBKey)//Mismatching QBKey, stop scanning and return NULL
+                        return NULL;
+                    header++;
+                }
+
+                if (((header->QBKeyCheck << 0x0C) | ShortedQBKey) == QBKey)//Still a match and not LOCAL, let's return it
+                    return header;
+                else
+                    return NULL;//Mismatching QBKey return NULL
+            }*/
+
+        }
+        header++;
+    }
+
+    return NULL;
+    /*typedef QBKeyHeader* (__cdecl* const GetQBKeyHeaderFunc)(const unsigned long QBKey);
+    return ((GetQBKeyHeaderFunc)(0x00426340))(QBKey);//didn't find header lets let game search through sub qbTables*/
+}
+
+__declspec(noalias)QBKeyHeader* Resolve_Game(unsigned long QBKey)
+{
+    typedef QBKeyHeader* (__cdecl* pResolve)(unsigned long QBKey);
+    return pResolve(0x00426340)(QBKey);
+}
+
+__declspec(noalias)QBKeyHeader* GetQBKeyHeader_NotWorking(unsigned long QBKey)
+{
+    int ShortedQBKey = QBKey & 0x0000FFFF;//last 16 bit of QBKey, old code - last 12 bits of QBKey
+    QBKeyHeader* header = (QBKeyHeader*)((DWORD)&triggers + ShortedQBKey * 0x14);//get index
+    if ((*(BYTE*)((DWORD)&triggers + 8 + ShortedQBKey * 5) & 2) == 0)
+        return NULL;
+
+    while (header->QBKeyCheck)//loop until end of table or corect header is found
+    {
+        if (((header->QBKeyCheck << 0x0C) | ShortedQBKey) == QBKey)
             return header;//found header lets return it
         header++;
     }
 
-    typedef QBKeyHeader* (__cdecl* const GetQBKeyHeaderFunc)(const unsigned long QBKey);
-    return ((GetQBKeyHeaderFunc)(0x00426340))(QBKey);//didn't find header lets let game search through sub qbTables
+    return NULL;
+}
+
+EXTERN __declspec(noalias)QBKeyHeader* GetQBKeyHeader(unsigned long QBKey)
+{
+    QBKeyHeader* header = Resolve_Game(QBKey);
+
+    for(DWORD i=0; i<15; i++)
+    {
+        if (!header)
+            return NULL;
+        if (header->type != QBKeyHeader::LOCAL)
+            return header;
+        header = Resolve_Game(header->GetInt());
+
+    }
+    return NULL;
+
+    //return Resolve(QBKey);
 }
 
 __restrict LPDIRECT3DDEVICE9 Gfx::pDevice = NULL;
@@ -6348,42 +6410,39 @@ void MaybeFixStutter()
 bool LaunchGFXCommand(CStruct* pStruct, CScript* pScript)
 {
     LevelModSettings::Option* option;
+    DWORD command = Checksums::Reset;
 
-    for (auto header = pStruct->head; header != NULL; header = header->NextHeader)
+    auto header = pStruct->GetHeader();
+    if (header)
+        command = header->Data;
+    switch (command)
     {
-        if (header->Type == QBKeyHeader::LOCAL)
+    case (DWORD)Checksums::Reset:
+        Gfx::command = Gfx::Command::Reset;
+        break;
+    case Checksums::FixStutter:
+        Gfx::command = Gfx::Command::FixStutter;
+        break;
+    case (DWORD)Checksums::TargetFPS:
+        option = GetOption(crc32f("LM_GFX_TargetFPS"));
+        if (option)
         {
-            switch (header->Data)
-            {
-            case Checksums::Reset:
-                Gfx::command = Gfx::Command::Reset;
-                    break;
-            case Checksums::FixStutter:
-                Gfx::command = Gfx::Command::FixStutter;
-                break;
-            case Checksums::TargetFPS:
-                option = GetOption(crc32f("LM_GFX_TargetFPS"));
-                if (option)
-                {
-                    Gfx::target_fps = option->value;
-                }
-                NewTimer::CalculateFPSTimers();
-                break;
-            case Checksums::ToggleWindowed:
-                if (!Gfx::bOldWindowed)
-                {
-                    if (IsOptionOn("LM_GFX_bWindowed") == (*(BYTE*)0x00851094 & 1))
-                        Gfx::command = Gfx::Command::ToggleWindowed;
-                }
-                else
-                    QScript::CallCFunction(Checksum("LaunchPanelMessage"), (void*)"Please launch game in Fullscreen mode");
-                break;
-            }
-
-            return true;
+            Gfx::target_fps = option->value;
         }
+        NewTimer::CalculateFPSTimers();
+        break;
+    case (DWORD)Checksums::ToggleWindowed:
+        if (!Gfx::bOldWindowed)
+        {
+            if (IsOptionOn("LM_GFX_bWindowed") == (*(BYTE*)0x00851094 & 1))
+                Gfx::command = Gfx::Command::ToggleWindowed;
+        }
+        else
+            QScript::CallCFunction(Checksum("LaunchPanelMessage"), (void*)"Please launch game in Fullscreen mode");
+        break;
     }
-    return false;
+
+    return true;
 }
 
 bool GetMaximumIndexScript(CStruct* pStruct, CScript* pScript)

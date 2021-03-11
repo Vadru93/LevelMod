@@ -165,6 +165,17 @@ void QScript::UpdateSpawnedScripts()
 
 void CScript::SetScript(DWORD checksum, CStruct* _params, Node* object)
 {
+    //Copy params to temp location
+    CStruct* temp_params = NULL;
+    if (_params)
+    {
+        temp_params = new CStruct();
+        for (auto param = _params->head; param; param = param->NextHeader)
+        {
+            temp_params->AddComponent(param);
+        }
+    }
+
     //Clear current script
     ClearScript();
 
@@ -175,47 +186,24 @@ void CScript::SetScript(DWORD checksum, CStruct* _params, Node* object)
         //It's a script, let's jump to it
         if (header->type == QBKeyHeader::SCRIPTED_FUNCTION)
         {
-            //Don't think this extra allocation is needed, can save few cpu cycles and memory usuage by each script call/jump
-            /*CStruct* temp_params;
-            if (_params)
-            {
-                temp_params = new CStruct();
-                for (auto param = _params->head; param; param = param->NextHeader)
-                {
-                    temp_params->AddComponent(param);
-                }
-            }*/
-
             //Set the address of the script
             address = (BYTE*)header->pStr + 6;// + 6 = 0x23 0x16 0x?? 0x?? 0x?? 0x?? Skip function name
             //New CStruct that will contain the params
             this->params = new CStruct();
-            //Add default params, if there are any
-            address = this->params->AddComponentsUntilEndOfLine(this->address);
             //Not sure what this is used for
             extra = new CStruct();
+            //Add default params, if there are any
+            address = this->params->AddComponentsUntilEndOfLine(this->address);
             //Assign the object
             node = object;
             //the checksum of the new script
             scriptChecksum = checksum;
 
-            if (_params)
+            if (temp_params)
             {
                 //Add the params to the scripts
-                for (auto param = _params->head; param; param = param->NextHeader)
-                {
+                for (auto param = temp_params->head; param; param = param->NextHeader)
                     this->params->AddComponent(param);
-                }
-
-                /*CStructHeader* next;
-                for (auto param = temp_params->head; param; param = next)
-                {
-                    next = param->NextHeader;
-                    param->ClearComponent();
-                    delete param;
-                }
-
-                delete temp_params;*/
             }
 
         }
@@ -224,7 +212,7 @@ void CScript::SetScript(DWORD checksum, CStruct* _params, Node* object)
         {
             //Assign the object incase the function want it
             this->node = object;
-            header->pFunction(_params , this);
+            header->pFunction(temp_params , this);
         }
         else
             debug_print("\nWarning: QBKey %s is not callable.\nType is %s\n", FindChecksumName(checksum), QScript::QBTypes[header->type]);
@@ -232,6 +220,19 @@ void CScript::SetScript(DWORD checksum, CStruct* _params, Node* object)
     else
         debug_print("\nWarning: Script %s not found.\n", FindChecksumName(checksum));
 
+    //Clear temp params
+    if (temp_params)
+    {
+        CStructHeader* next;
+        for (auto param = temp_params->head; param; param = next)
+        {
+            next = param->NextHeader;
+            param->ClearComponent();
+            delete param;
+        }
+
+        delete temp_params;
+    }
     //Just keeping it here to find pointer to original function
     /*typedef DWORD(__thiscall* const pSetScript)(CScript* pThis, DWORD checksum, CStruct* params, Node* object);
 return pSetScript(0x04274A0)(this, checksum, params, object);*/

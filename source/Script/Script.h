@@ -562,7 +562,7 @@ struct CStructHeader
     void operator delete(void* ptr)
     {
         ((CStructHeader*)ptr)->Type = QBKeyHeader::UNDEFINED;
-        ((CStructHeader*)ptr)->Data = 0;
+        ((CStructHeader*)ptr)->QBkey = 0;
         ((CStructHeader*)ptr)->NextHeader = *(CStructHeader**)0x008E1E04;
         *(void**)0x008E1E04 = ptr;
     }
@@ -837,10 +837,10 @@ struct EXTERN CStruct
         pAddComponent(0x004292B0)(this, param);
     }
 
-    BYTE* AddComponentsUntilEndOfLine(BYTE* address, void* unk = NULL)
+    BYTE* AddComponentsUntilEndOfLine(BYTE* address, void* params = NULL)
     {
-        typedef BYTE* (__thiscall* const pAddConentsUntilEndOfLine)(CStruct* pThis, BYTE* address, void* unk);
-        return pAddConentsUntilEndOfLine(0x00429500)(this, address, unk);
+        typedef BYTE* (__thiscall* const pAddConentsUntilEndOfLine)(CStruct* pThis, BYTE* address, void* params);
+        return pAddConentsUntilEndOfLine(0x00429500)(this, address, params);
     }
 
     CStruct(QBKeyHeader::QBKeyType type, int value)

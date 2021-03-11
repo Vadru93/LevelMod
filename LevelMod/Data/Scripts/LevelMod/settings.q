@@ -12,7 +12,7 @@ gapname_charset min_chars = 0 max_chars = 16
 title_string = "Profile name:" eventhandlers = 
 [ { type = ContentsChangedEventHandler target = 
 "EditKeyMapControlAccept" params = 
-{ field_id = display_name keyboard_id = lm_edit_keymap_keyboard_control  } }
+{ field_id = display_name keyboard_id = lm_edit_keymap_keyboard_control  } } 
 ] default_to_accept hide_on_close parent = contain1 }
 
 LM_HostOption_MenuItem = { Type = textmenuelement text = "Foo" target = "LM_ToggleHostOption" }
@@ -659,21 +659,15 @@ SCRIPT OptionsOnStartGame
    ENDIF
 ENDSCRIPT
 
-SCRIPT sLaunchGFXCommand command = Reset
-	LaunchGFXCommand <command> params = <params>
-ENDSCRIPT
-
-SCRIPT sAddOption max = 2
-	AddOption Name = <Name> Value = <Value> max = <max>
-ENDSCRIPT
-
 SCRIPT AddOptions
-	ForEachIn LevelModOptions do = sAddOption params =  <...>
+	ForEachIn LevelModOptions do = AddOption params =  <...>
 ENDSCRIPT
 
 SCRIPT LM_SetOption_Do
 	LM_SetOption <...>
-	GoTo <Do> params = <params>
+	IF GotParam Do
+	    GoTo <Do> params = <params>
+	ENDIF
 ENDSCRIPT
 
 SCRIPT LM_SetOption_Slider
@@ -900,9 +894,11 @@ back_menu_item = {
 }
 
 game_menu_items = [
+    //Generic info text
     { static text = ""                  option_id = info_text                                                               toggle_id = info         cat_game cat_gfx cat_control }
 	{ static text = ""                  option_id = info_text2                                                              toggle_id = info2        cat_gfx }
 	
+	//Game Options
 	{ IsBool text = "251x Patch" 		option_id = LM_GameOption_b251Patch_id	    option = LM_GameOption_b251Patch 		toggle_id = item1_toggle cat_game info_text = "Allow more than 251 multiplier" }
 	{ IsBool text = "No BW Manual"		option_id = LM_GameOption_bFixBWManual_id	option = LM_GameOption_bFixBWManual 	toggle_id = item2_toggle cat_game info_text = "Fix backward manuals" }
 	{ IsBool text = "Unlimited Tags" 	option_id = LM_GameOption_bUnLimitTags_id	option = LM_GameOption_bUnLimitTags 	toggle_id = item3_toggle cat_game info_text = "Allow more than 32 tags in 1 combo" }
@@ -912,6 +908,7 @@ game_menu_items = [
 	//since debug is now a separate dll, don't need this right?
 	//{ IsBool text = "Debug Console" 	option_id = item6	option = LM_DebugOption_bDebugMode 		toggle_id = item6_toggle cat_game }
 
+    //Control Options
 	{ 		 text = "Air"			option_id = levelmod_menu_air_id        link = levelmod_menu_air            toggle_id = item1_toggle cat_control info_text = "Air Options Menu" }	
 	{ 		 text = "Wall"			option_id = levelmod_menu_wall_id       link = levelmod_menu_wall           toggle_id = item2_toggle cat_control info_text = "Wall Options Menu" }	
 	{ IsBool text = "Reverts" 		option_id = LM_Control_bRevert_id	    option = LM_Control_bRevert 		toggle_id = item3_toggle cat_control info_text = "Allow Reverts" }
@@ -922,6 +919,7 @@ game_menu_items = [
 	//This freezes for some reason...
 	//{        text = "Edit Controls" option_id = levelmod_menu_edit_id       link = newSettingsMenu              toggle_id = item8_toggle cat_control   target = "populate_game_options" params = { mask = cat_edit items = game_menu_items title = "Edit Controls" } }
 	
+	//Edit Controls
 	{        text = "Load"                   option_id = load_id             link = load_keymap_menu   toggle_id = toggle_load_id     cat_edit }
 	{        text = "Save"                   option_id = save_id             link = save_keymap_menu   toggle_id = toggle_save_id     cat_edit }
 	//Editable keys
@@ -944,19 +942,21 @@ game_menu_items = [
 	{        text = ""                       option_id = edit_error          x = 0  y = -16 w = 300   toggle_id = error_id           cat_edit }
     
 
+    //GUI Options
 	{ IsBool text = "Extra Messages" 	option_id = LM_GUI_bTrickNotifications_id  option = LM_GUI_bTrickNotifications 	toggle_id = item1_toggle cat_gui } 
 	{ IsBool text = "Show HUD" 			option_id = LM_GUI_bShowHud_id             option = LM_GUI_bShowHud 			toggle_id = item2_toggle cat_gui Do = UpdateShowHUD } 
 	{ IsBool text = "Player names" 		option_id = LM_GUI_bNetName_id             option = LM_GUI_bNetName 			toggle_id = item3_toggle cat_gui Do = UpdateNetName } 
 	{ IsBool text = "New Net Menu" 		option_id = LM_GUI_bNewMenu_id             option = LM_GUI_bNewMenu 			toggle_id = item4_toggle cat_gui } 
 	{ IsBool text = "GrafCounter" 		option_id = LM_GUI_bShowGrafCounter_id     option = LM_GUI_bShowGrafCounter 	toggle_id = item5_toggle cat_gui } 
 	
-	{ IsEnum text = "Buffering" 		option_id = LM_GFX_eBuffering_id  option = LM_GFX_eBuffering 	toggle_id = item1_toggle cat_gfx TextValues = [ "Off" "Double" "Triple" ] Do = sLaunchGFXCommand info_text = "Double/Tripple buffering" info_text2 = "May increase input lag" } 
-	{ IsEnum text = "MSAA Level" 		option_id = LM_GFX_eAntiAlias_id  option = LM_GFX_eAntiAlias 	toggle_id = item2_toggle cat_gfx TextValues = [ "Off" "auto" "2x" "4x" "8x" ] Do = sLaunchGFXCommand info_text = "Anti Aliasing" info_text2 = "Disable to improve performance" } 
-	{ IsBool text = "Windowed"		    option_id = LM_GFX_bWindowed_id   option = LM_GFX_bWindowed     toggle_id = item3_toggle cat_gfx Do = sLaunchGFXCommand params = { command = ToggleWindowed } info_text = "Launch game in windowed mode" info_text2 = "Toggle by pressing ALT + ENTER" }
+	//GFX Options
+	{ IsEnum text = "Buffering" 		option_id = LM_GFX_eBuffering_id  option = LM_GFX_eBuffering 	toggle_id = item1_toggle cat_gfx TextValues = [ "Off" "Double" "Triple" ] Do = LaunchGFXCommand info_text = "Double/Tripple buffering" info_text2 = "May increase input lag" } 
+	{ IsEnum text = "MSAA Level" 		option_id = LM_GFX_eAntiAlias_id  option = LM_GFX_eAntiAlias 	toggle_id = item2_toggle cat_gfx TextValues = [ "Off" "auto" "2x" "4x" "8x" ] Do = LaunchGFXCommand info_text = "Anti Aliasing" info_text2 = "Disable to improve performance" } 
+	{ IsBool text = "Windowed"		    option_id = LM_GFX_bWindowed_id   option = LM_GFX_bWindowed     toggle_id = item3_toggle cat_gfx Do = LaunchGFXCommand params = { command = ToggleWindowed } info_text = "Launch game in windowed mode" info_text2 = "Toggle by pressing ALT + ENTER" }
 	{ IsBool text = "Texture Filtering" option_id = LM_GFX_bFiltering_id  option = LM_GFX_bFiltering 	toggle_id = item5_toggle cat_gfx info_text = "Generate Texture mipmaps" info_text2 = "May produce slight graphic bugs"} 
-	{ IsBool text = "Enable VSync" 	    option_id = LM_GFX_bVSync_id      option = LM_GFX_bVSync        toggle_id = item6_toggle cat_gfx Do = sLaunchGFXCommand info_text = "Sync rendering to monitor refresh rate" info_text2 = "Enable if you see tearing" } 
-	{ IsInt  text = "FPS Lock:"	        option_id = LM_GFX_TargetFPS_id   option = LM_GFX_TargetFPS     toggle_id = item7_toggle cat_gfx min = 60 max = 300  Do = sLaunchGFXCommand params = { command = TargetFPS } info_text = "Set the target fps" info_text2 = "" }
-	{ IsEnum text = "Stutter Fix" 	    option_id = LM_GFX_eFixStutter_id option = LM_GFX_eFixStutter   toggle_id = item8_toggle cat_gfx TextValues = [ "Off" "Exact" "Hybrid" "Sleep" ] Do = sLaunchGFXCommand params = { command = FixStutter } info_text = "Improve framerate consistency" info_text2 = "Exact is usually best option" } 
+	{ IsBool text = "Enable VSync" 	    option_id = LM_GFX_bVSync_id      option = LM_GFX_bVSync        toggle_id = item6_toggle cat_gfx Do = LaunchGFXCommand info_text = "Sync rendering to monitor refresh rate" info_text2 = "Enable if you see tearing" } 
+	{ IsInt  text = "FPS Lock:"	        option_id = LM_GFX_TargetFPS_id   option = LM_GFX_TargetFPS     toggle_id = item7_toggle cat_gfx min = 60 max = 300  Do = LaunchGFXCommand params = { command = TargetFPS } info_text = "Set the target fps" info_text2 = "Only works if Stutter fix is enabled" }
+	{ IsEnum text = "Stutter Fix" 	    option_id = LM_GFX_eFixStutter_id option = LM_GFX_eFixStutter   toggle_id = item8_toggle cat_gfx TextValues = [ "Off" "Exact" "Hybrid" "Sleep" ] Do = LaunchGFXCommand params = { command = FixStutter } info_text = "Improve framerate consistency" info_text2 = "Exact is usually best option" } 
 ]
 
 
@@ -1153,7 +1153,7 @@ script Settings_AddLine params = {}
 	endif
 endscript
 
-script Settings_ToggleOption params = { }
+script Settings_ToggleOption
 	ToggleOption <option>
 	Settings_UpdateBoolText <...>
 	if GotParam do
