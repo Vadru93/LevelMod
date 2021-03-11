@@ -5,7 +5,9 @@
 extern bool init;
 extern bool init2;
 
-#define FPS(x) 1000000.0 / x
+#define FPS(x) (1000000.0 / x)
+#define FPS_LOWRES(x) (1000.0 / x)
+#define FPS_SCALE(x) (60.0 / x)
 
 namespace NewTimer
 {
@@ -42,17 +44,17 @@ namespace NewTimer
 
         //Special anim speed and maybe more gui speed stuff? 
         //is 0.058 on original 60 fps lock
-        *(float*)0x00458B68 = (float)((60.0 / Gfx::target_fps) * 0.058);//Stack value
-        *(float*)0x0058E100 = (float)((60.0 / Gfx::target_fps) * 0.058);//Memory value
+        //*(float*)0x00458B68 = (float)((FPS_SCALE(Gfx::target_fps)) * 0.058);//Stack value
+        //*(float*)0x0058E100 = (float)((FPS_SCALE(Gfx::target_fps)) * 0.058);//Memory value
 
-        Gfx::exact_high = (1000000.0 / Gfx::target_fps) + Gfx::exact_high_diff;
-        Gfx::exact_low = (1000000.0 / Gfx::target_fps) - Gfx::exact_low_diff;
-        Gfx::hybrid_high = (1000000.0 / Gfx::target_fps) + Gfx::hybrid_high_diff;
-        Gfx::sleep_high = (1000000.0 / Gfx::target_fps) - Gfx::sleep_high_diff;
-        Gfx::sleep_low = (1000000.0 / Gfx::target_fps) - Gfx::sleep_low_diff;
+        Gfx::exact_high  = FPS(Gfx::target_fps) + Gfx::exact_high_diff;
+        Gfx::exact_low   = FPS(Gfx::target_fps) - Gfx::exact_low_diff;
+        Gfx::hybrid_high = FPS(Gfx::target_fps) + Gfx::hybrid_high_diff;
+        Gfx::sleep_high  = FPS(Gfx::target_fps) - Gfx::sleep_high_diff;
+        Gfx::sleep_low   = FPS(Gfx::target_fps) - Gfx::sleep_low_diff;
 
-        *(float*)0x00850FD0 = (float)(1000.0 / Gfx::target_fps);
-        double target = 1000000.0 / Gfx::target_fps;
+        *(float*)0x00850FD0 = (float)FPS_LOWRES(Gfx::target_fps);
+        double target = FPS(Gfx::target_fps);
         double framelength = target;
     }
 
@@ -60,7 +62,7 @@ namespace NewTimer
     {
         QueryPerformanceCounter(&startTime);
         QueryPerformanceFrequency(&freq);
-        fFreq = 1000000.0 / (double)freq.QuadPart;
+        fFreq = FPS((double)freq.QuadPart);
         ticks_hybrid = freq.QuadPart / 75;
 
         if (!p_bWindowed)
@@ -79,8 +81,8 @@ namespace NewTimer
         debug_print("ResetTime\n");
 
         //First reset framelength
-        *(float*)0x00850FD0 = (float)(1000.0 / Gfx::target_fps);
-        target = 1000000.0 / Gfx::target_fps;
+        *(float*)0x00850FD0 = (float)FPS_LOWRES(Gfx::target_fps);
+        target = FPS(Gfx::target_fps);
         framelength = target;
         hybrid_loop_time = 0;
 
@@ -177,7 +179,7 @@ namespace NewTimer
         if (ms < FPS(25))
         {
             framelength = ms;
-            //Only update fps lock if window is active
+            //Only update FPS lock if window is active
             if (isActive)
             {
                 if (ms >= Gfx::hybrid_high) // ~59.88
@@ -185,7 +187,7 @@ namespace NewTimer
                     if (hybrid_limit)
                         hybrid_limit--;
                 }
-                else if (hybrid_loop_time)
+                else
                 {
                     if (ms > Gfx::exact_high && frameticks > min_frame_ticks)//59,97 fps
                     {
@@ -340,7 +342,7 @@ namespace NewTimer
         elapsedTime.QuadPart = (endTime.QuadPart - startTime.QuadPart);
         double ms = ((double)(elapsedTime.LowPart) * fFreq);
 
-        if (hybrid_limit > 3.0)
+        if (hybrid_limit > 2.0)
         {
             ms *= 0.001;
             DWORD truncated = (DWORD)(((hybrid_limit - ms) * 0.5));

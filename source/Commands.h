@@ -32,7 +32,7 @@ void CommandBan(const char* message)
 void CommandShowCommands(const char* message);
 void CommandGetInfo(const char* message)
 {
-
+#ifdef DEBUG
     extern QBKeyHeader triggers[MAX_TRIGGERS];
     DWORD numQBKeyHeaders = 0, numInts = 0, numUndef = 0, undefSize = 0, intSize = 0,
         totalSize = 0, floatSize = 0, numFloats = 0, numArrays = 0, arraySize = 0,
@@ -151,12 +151,16 @@ void CommandGetInfo(const char* message)
     char test[128] = "Test Msg";
     SendMessageToClients(MSG_ID_LM_TEST, strlen(test) + 1, &test);
 
-
+#else
+QScript::PanelMessage("GetInfo command is only usable in debug mode");
+#endif
 }
 
 bool GetInfoScript(CStruct* pStruct, CScript* pScript)
 {
+#ifdef DEBUG
     CommandGetInfo(NULL);
+#endif
     return true;
 }
 
@@ -620,7 +624,7 @@ void CommandAdd(const char* message)
             AddDump("STRUCT{\nPosition = VECTOR[%f; %f; %f]\nAngles = VECTOR[0.0; 0.0; 0.0]\nName = TRG_CONTROL_ZONE%d\nClass = GenericNode\nType = ZONE\nCreatedAtStart zone_multiplier = 1\n}\n \r\n", vertex.x, vertex.y + 50, vertex.z * -1, ZoneCount);
             ZoneCount++;
             break;
-        case Checksums::Crown:
+        case (DWORD)Checksums::Crown:
             CrownCount++;
             AddDump("STRUCT{\nPosition = VECTOR[%f; %f; %f]\nAngles = VECTOR[0.0; 0.0; 0.0]\nName = TRG_NewCrown%d\nClass = GenericNode\nType = Crown\nCreatedAtStart }", vertex.x, vertex.y, vertex.z * -1, CrownCount);
             break;
