@@ -232,8 +232,8 @@ struct RwTexture
 
     DWORD             refCount; /* Reference count, surprisingly enough */
 
-    //Th3 Extension
-    DWORD uAddress;
+    //Useless Th3 Extension
+    DWORD uAddress;//why is this 8 bytes when in original RW Engine it's 4???
     DWORD vAddress;
     //LevelMod Extension
     ShaderObject2 shader;
