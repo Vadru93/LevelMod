@@ -4406,7 +4406,7 @@ DWORD GetTerrain(SuperSector* sector, DWORD index)
 __declspec(naked) void UpdateFrameLength()
 {
     //p_slomo is float that is set by slomo cheat, normally this is 1.0
-    p_framedelta = (float)(NewTimer::framelength  * 0.000001) * p_slomo;
+    p_framedelta = (float)(NewTimer::framelength * 0.000001/*0028406688*/ * 0.9761) * p_slomo;
     _asm ret;
 }
 
@@ -4540,7 +4540,8 @@ void InitLevelMod()
 
     DWORD old;
     //HookFunction(0x004C04F0, TimerElapsed);
-    HookFunction(0x004F9463, UpdateFrameLength);
+    if(Gfx::fps_fix)
+        HookFunction(0x004F9463, UpdateFrameLength);
 
     //Fix script being able to call CFunctions
     HookFunction(0x004CFCDE, &FrontEnd::SetScriptToRun_Hook);
@@ -4693,11 +4694,14 @@ void InitLevelMod()
     HookFunction(0x004B088C, &Skater::maybe_trip_rail_trigger);
     HookFunction(0x00489C7F, &RailNode::ProbablyOnSameRailAs);
 
-    //Improve accuracy and performance of franelength math
-    VirtualProtect((LPVOID)0x00409B90, 7, PAGE_EXECUTE_READWRITE, &old);
-    *(WORD*)0x00409B90 = 0x05D9;
-    *(DWORD*)0x00409B92 = 0x00850FD8;
-    *(BYTE*)0x00409B96 = 0xC3;
+    if (Gfx::fps_fix)
+    {
+        //Improve accuracy and performance of franelength math
+        VirtualProtect((LPVOID)0x00409B90, 7, PAGE_EXECUTE_READWRITE, &old);
+        *(WORD*)0x00409B90 = 0x05D9;
+        *(DWORD*)0x00409B92 = 0x00850FD8;
+        *(BYTE*)0x00409B96 = 0xC3;
+    }
 
     //Fix Score above 60 fps
     VirtualProtect((LPVOID)0x00435992, 2, PAGE_EXECUTE_READWRITE, &old);
@@ -6469,7 +6473,7 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
             //Make sure we toggle only 1 per 2 sec
             DWORD time = NewTimer::GetTime();
             if (time < lastTime + 2000)
-                return false;
+                return hres;
             lastTime = time;
 
             //Unpress enter key, should already be unpressed but better safe than sorry...
@@ -6572,11 +6576,14 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
     return hres;
 }
 
+LARGE_INTEGER tTime, old_time;
+
 __declspec(noalias) void DrawFrame()
 {
     //MessageBox(0, 0, 0, 0);
     if (!m_font) [[unlikely]]
     {
+        //CreateConsole();
         GameState::GotSuperSectors = false;
         XINPUT::Player1 = new CXBOXController();
         //MessageBox(0,"init font","",0);
@@ -6621,11 +6628,15 @@ __declspec(noalias) void DrawFrame()
         }*/
 
     }
+
         if (GameState::GotSuperSectors) [[likely]]
         {
             //Skater * skater = Skater::Instance();
             if (Game::skater) [[likely]]
             {
+                    /*old_time = tTime;
+    QueryPerformanceCounter(&tTime);
+    printf("CPU ticks %u Physics framelength %f\n", (DWORD)(tTime.QuadPart - old_time.QuadPart), Game::skater->GetFrameLength());*/
                 if (observing) [[unlikely]]
                 {
                     //Get ollie keymap
