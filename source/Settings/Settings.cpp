@@ -1032,6 +1032,7 @@ bool AddOption(CStruct* pStruct, CScript* pScript)
                 if (pStruct->GetStruct(Checksums::Value, &DEFAULT))
                 {
                     debug_print("Adding option %s default %d\n", name->pStr, DEFAULT->value.i);
+                    pMax = NULL;
                     pStruct->GetStruct(crc32f("max"), &pMax);
                     AddOption(name->pStr, DEFAULT->value.i);
                 }
