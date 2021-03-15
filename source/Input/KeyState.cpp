@@ -255,7 +255,7 @@ const char* MappedKeyNames[] =
     "Undefined"
 };
 
-KeyMap::MappedKey KeyMap::GetKeyType()
+KeyMap::MappedKey KeyMap::GetKeyType() const
 {
     for (BYTE i = 0; i < (BYTE)MappedKey::Undefined; i++)
     {
@@ -577,14 +577,29 @@ bool KeyState::FindMappedKey(VirtualKeyCode code, KeyMap::MappedKey* already_map
 {
     DWORD din_code = MapVirtualKeyA((DWORD)code, MAPVK_VK_TO_VSC);
 
+    BYTE edit_map = (BYTE)LevelModSettings::pEditKeyMap->GetKeyType();
     for (BYTE i = 0; i < (BYTE)KeyMap::MappedKey::Undefined; i++)
     {
-        if (keyMap[i].mapped && keyMap[i].DIK_KeyCode == din_code)
+        //Allow spine transfer to be same as revert, nollie, spinleft and spinright
+        if (i == (BYTE)KeyMap::MappedKey::Unused && edit_map < (BYTE)KeyMap::MappedKey::Right && edit_map >(BYTE)KeyMap::MappedKey::Flip)
+            continue;
+        else if (i < (BYTE)KeyMap::MappedKey::Right && i >(BYTE)KeyMap::MappedKey::Flip && edit_map == (BYTE)KeyMap::MappedKey::Unused)
+            continue;
+
+        //Allow spinleft and spinright to be same as revert and nollie
+        else if ((i == (BYTE)KeyMap::MappedKey::SpinLeft || i == (BYTE)KeyMap::MappedKey::SpinRight) && (edit_map == (BYTE)KeyMap::MappedKey::Nollie || edit_map == (BYTE)KeyMap::MappedKey::Revert))
+            continue;
+        else if ((i == (BYTE)KeyMap::MappedKey::Revert || i == (BYTE)KeyMap::MappedKey::Nollie) && (edit_map == (BYTE)KeyMap::MappedKey::SpinLeft || edit_map == (BYTE)KeyMap::MappedKey::SpinRight))
+            continue;
+
+        //Don't allow any other keys to be mapped to the same button
+        else if (keyMap[i].mapped && keyMap[i].DIK_KeyCode == din_code)
         {
             *already_mapped = (KeyMap::MappedKey)i;
             return true;
         }
     }
+
     return false;
 }
 

@@ -130,7 +130,7 @@ struct KeyMap
 
     static void  UpdateKeyMap();
 
-    MappedKey GetKeyType();
+    MappedKey GetKeyType() const;
 
     static void SetErrorText(const char* text)
     {
