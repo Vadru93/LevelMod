@@ -4405,8 +4405,8 @@ DWORD GetTerrain(SuperSector* sector, DWORD index)
 
 __declspec(naked) void UpdateFrameLength()
 {
-    //p_slomo is float that is set by slomo cheat, normally this is 1.0
-    p_framedelta = (float)(NewTimer::framelength * 0.000001/*0028406688*/ * 0.9761) * p_slomo;
+    //p_slomo is float that is set by slomo cheat, normally this is 1.0  //0.971593312 0.971639342 0.9761
+    p_framedelta = (float)(NewTimer::framelength /** 0.000001/*0028406688*/ * Gfx::frame_modifier) * p_slomo;
     _asm ret;
 }
 

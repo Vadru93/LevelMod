@@ -14,6 +14,7 @@
 
 
 int ClampValue(int value, int min, int max, int outMin, int outMax);
+double Map(double value, double min, double max, double outMin, double outMax);
 
 inline	float	ClampMax(float v, float max)
 {

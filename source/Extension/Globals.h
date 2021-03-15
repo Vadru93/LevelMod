@@ -106,6 +106,7 @@ namespace Gfx
     extern double sleep_low_diff;
     extern double sleep_low;
     extern double target_fps;
+    extern double frame_modifier;
     extern DWORD num_threads;
     extern bool bOldWindowed;
 };

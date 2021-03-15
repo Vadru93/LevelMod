@@ -56,6 +56,26 @@ namespace NewTimer
         *(float*)0x00850FD0 = (float)FPS_LOWRES(Gfx::target_fps);
         double target = FPS(Gfx::target_fps);
         double framelength = target;
+
+        if (Gfx::target_fps == 60.0)
+            Gfx::frame_modifier = 0.97248;
+        else if (Gfx::target_fps == 120.0)
+            Gfx::frame_modifier = 0.973;
+        else if (Gfx::target_fps == 144.0)
+            Gfx::frame_modifier = 0.97612;
+        else if (Gfx::target_fps == 300.0)
+            Gfx::frame_modifier = 0.9774592502;
+        else
+        {
+            if (Gfx::target_fps < 120.0)
+                Gfx::frame_modifier = Map(Gfx::target_fps, 60.0, 120.0, 0.97248, 0.971593312);
+            else if(Gfx::target_fps < 144.0)
+                Gfx::frame_modifier = Map(Gfx::target_fps, 120.0, 144.0, 0.971593312, 0.97612);
+            else
+                Gfx::frame_modifier = Map(Gfx::target_fps, 144.0, 300.0, 0.97612, 0.9774592502);
+        }
+
+        Gfx::frame_modifier *= 0.000001;
     }
 
     void Initialize()
