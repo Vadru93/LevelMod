@@ -59,6 +59,7 @@
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <ExceptionHandling>Async</ExceptionHandling>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -85,7 +86,8 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <FloatingPointModel>Precise</FloatingPointModel>
-      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExceptionHandling>false</ExceptionHandling>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
@@ -107,6 +109,7 @@
   <ItemGroup>
     <ClCompile Include="source\Collision.cpp" />
     <ClCompile Include="source\Hook\Bugfixes.cpp" />
+    <ClCompile Include="source\RenderWare\RenderWare.cpp" />
     <ClCompile Include="source\Script\Checksum.cpp" />
     <ClCompile Include="source\Input\CXBOXController.cpp" />
     <ClCompile Include="source\d3d8to9\d3d8to9.cpp">

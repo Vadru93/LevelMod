@@ -29,7 +29,9 @@ struct Model
     Vertex pos;//The origin
     BYTE unk3[0x18];//current position etc??
     DWORD nodeIndex;
-    BYTE unk4[0x314];
+    BYTE unk4[0xF8];
+    BYTE flags;
+    BYTE unk5[0x21B];
     D3DXMATRIX rotation;
 
     DWORD GetNodeIndex()
@@ -37,6 +39,15 @@ struct Model
         return nodeIndex;
     }
 
+    void RenderCallback()
+    {
+
+    }
+
+    void PostRenderCallback()
+    {
+
+    }
 };
 
 void Obj_MoveToNode(Model* mdl, CStruct* pStruct);

@@ -159,6 +159,56 @@ struct RwLinkList
     RwLLLink link;
 };
 
+enum RwCameraType
+{
+    RW_CAMERA_NULL = 0,
+    RW_CAMERA_PERSPECTIVE = 1,
+    RW_CAMERA_ORTHOGRAPHIC = 2,
+    FORCE_INT = 0xFFFFFFFF
+};
+
+struct RwPlane
+{
+    Vertex normal;
+    float length;
+};
+struct RwObjectFrame
+{
+    RwObject     object;
+    RwLLLink  lFrame;
+    void* callback;
+};
+
+struct RwCameraFrustum
+{
+    RwPlane       plane;
+    unsigned char x, y, z;
+    unsigned char unknown1;
+};
+struct RwRaster;
+struct RwCamera
+{
+    RwObjectFrame        object;
+    RwCameraType         type;
+    void*  preCallback;
+    void* postCallback;
+    Matrix               matrix;
+    RwRaster* bufferColor;
+    RwRaster* bufferDepth;
+    float                screen[2];
+    float                screenInverse[2];
+    float                screenOffset[2];
+    float                nearplane;
+    float                farplane;
+    float                fog;
+    float                unknown1;
+    float                unknown2;
+    RwCameraFrustum      frustum4D[6];
+    RwBBox               viewBBox;
+    Vertex               frustum3D[8];
+};
+
+
 struct RwRaster
 {
     RwRaster* parent; /* Top level raster if a sub raster */
@@ -510,6 +560,14 @@ struct RpWorld
     {
         return *(RpWorld**)0x008E1E78;
     }
+
+
+    static void RenderClumps(RpWorld* world, void* render_callback, void* rw_camera)
+    {
+
+    }
+
+    void RenderVisibleClumps(void* rw_camera);
 };
 #endif /* (!defined(DOXYGEN)) */
 
@@ -520,8 +578,10 @@ struct RwSphere
 };
 
 typedef struct RpClump;
+typedef struct RpAtomic;
 
 typedef RpClump* (*RpClumpCallBack) (RpClump* clump, void* data);
+struct Model;
 
 struct RpClump
 {
@@ -532,7 +592,8 @@ struct RpClump
 
     /* Lists of lights and cameras */
     RwLinkList          lightList;
-    RwLinkList          cameraList;
+    Model* model;
+    DWORD unk;
 
     /* The clump in a world */
     RwLLLink            inWorldLink;
@@ -541,8 +602,10 @@ struct RpClump
     RpClumpCallBack     callback;
     
     //Th3 extension
-    DWORD unk[2];
+    DWORD unk1[2];
     RpWorld* world;
+
+    void Render(void* rwCamera);
 };
 
 typedef struct RwObjectHasFrame RwObjectHasFrame;
@@ -594,6 +657,12 @@ struct RpAtomic
 
     /* The Atomic object pipeline for this Atomic */
     void* pipeline;//Always NULL, ie default pipeline
+
+    void Render(void* rwCamera)
+    {
+        typedef void(__cdecl* const pRender_visible_atomics)(RpAtomic* atomic, void* rwCamera);
+        pRender_visible_atomics(0x004F9E10)(this, rwCamera);
+    }
 };
 
 struct RpAtomicContainer
@@ -621,11 +690,20 @@ public:
 
 class SkaterCam : BaseClass
 {
-    BYTE unk[0x48];
+    BYTE unk[0x44];
+    BYTE** rwCamera;
     //Skater to follow
     Skater* skater;
     BYTE unk2[0x12C];
+
 public:
+
+    RwCamera* GetCamera()
+    {
+        if (!rwCamera || !*rwCamera)
+            return NULL;
+        return (RwCamera*)(*rwCamera + 0x10);
+    }
 
     void SetSkater(Skater* follow)
     {
@@ -673,4 +751,23 @@ public:
     {
         return *(RwViewer**)0x008E1E78;
     }
+
 };
+
+/*
+namespace NxPlugin
+{
+    void* GetWorldPluginData(RpWorld* world)
+    {
+        
+    }
+
+    DWORD GetWorldSectorOperationId(RpWorldSector* sector)
+    {
+        return 0;
+    }
+    DWORD SetWorldSectorOperationId(RpWorldSector* sector, DWORD op_id)
+    {
+        return 0;
+    }
+};*/

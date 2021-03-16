@@ -8,14 +8,15 @@ extern Skater* __restrict Game::skater;
 
 struct ShadowMap
 {
-    Model* model;
+    RpClump* clump;
     D3DXMATRIX lightView;
     D3DXMATRIX lightProj;
+    RwCamera camera;
     IDirect3DTexture9* shadow;
 
-    ShadowMap(Model* mdl)
+    ShadowMap(RpClump* mdl)
     {
-        model = mdl;
+        clump = mdl;
         if (D3DXCreateTexture(Gfx::pDevice, 256, 256, 1, D3DUSAGE_RENDERTARGET, D3DFMT_D24S8, D3DPOOL_MANAGED, &shadow) != D3D_OK)
             MessageBox(0, "Failed to create shadow", "", 0);
     }
@@ -28,7 +29,7 @@ struct ShadowMap
 
         D3DXVECTOR3 camPos = *(D3DXVECTOR3*)&inverse._41;
 
-        Vertex position = model->pos;
+        Vertex position = clump->model->pos;
         Vertex lightDir = Vertex(position - Gfx::sun_position);
         lightDir.Normalize();
 
@@ -56,7 +57,7 @@ struct ShadowMap
             shadow->GetSurfaceLevel(0, &renderTarget);
             Gfx::pDevice->SetRenderTarget(0, renderTarget);
             Gfx::pDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL, 0, 1.0f, 0);
-            //model->Render();
+            clump->Render(&camera);
 
             //Release target to decrease vp count
             renderTarget->Release();
@@ -154,9 +155,7 @@ void RenderShadows()
 
         Gfx::pDevice->SetVertexShaderConstantF(4, (float*)&final, 4);
 
-        //set_blend_mode(vBLEND_MODE_MODULATE_COLOR);
-
-        //model->Ren- ();
+        //RenderWorldWithShadow
     }
 
     Gfx::pDevice->SetVertexShader(NULL);

@@ -480,10 +480,19 @@ void __stdcall RenderShatterObjects()
             Gfx::pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, old_alpha2);
         }
     }
+
+    /*RwViewer* viewer = RwViewer::Instance();
+    RpWorld* world = viewer->GetCurrentWorld();
+    if (world && Game::skater && Node::GetNodeArray())
+    {
+        SkaterCam* cam = Game::skater->GetSkaterCam();
+        if (cam)
+            world->RenderVisibleClumps(cam);
+    }*/
     rendering = false;
 }
 
-void UnloadShatterObjects()
+void UnloadShatterObjects()//004F9C09
 {
     while (rendering)
         Sleep(10);

@@ -747,10 +747,10 @@ public:
     static bool StickToRail(const Vertex& pos1, const Vertex& pos2, Vertex* p_point, RailNode** pp_rail_node, const RailNode* p_ignore_node, float min_dot, int side)
     {
 
-/*#ifdef _DEBUG
+#ifdef _DEBUG
         LARGE_INTEGER start;
         QueryPerformanceCounter(&start);
-#endif*/
+#endif
         // Go through all the rail segments, and find the shortest distance to line
         // and there is your rail
 
@@ -807,6 +807,7 @@ public:
         {*/
             //CRailNode* pRailNode = mp_first_node;
             //	while (pRailNode)
+#pragma omp parallel for
             for (int check_node = 0; check_node < current_node; check_node++)
             {
                 RailNode* const __restrict pRailNode = &mp_nodes[check_node];
@@ -955,19 +956,19 @@ public:
             }
             else*/
             {
-                if(Game::skater->mp_rail_node)
+                /*if(Game::skater->mp_rail_node)
                     debug_print("StickToRail old %s\n", FindChecksumName(Game::skater->mp_rail_node->GetNode()));
-                debug_print("StickToRail new %s\n", FindChecksumName(p_closest_rail->GetNode()));
+                debug_print("StickToRail new %s\n", FindChecksumName(p_closest_rail->GetNode()));*/
                 *p_point = closest_point;
                 *pp_rail_node = p_closest_rail;
             }
         }
-/*#ifdef _DEBUG
+#ifdef _DEBUG
         LARGE_INTEGER end;
         QueryPerformanceCounter(&end);
         end.QuadPart -= start.QuadPart;
         debug_print("Ms %f\n", (double)end.LowPart * NewTimer::fFreq);
-#endif*/
+#endif
         return p_closest_rail != NULL;
     }
 
@@ -1352,6 +1353,7 @@ public:
         //	CRailNode *pRailNode = mp_first_node;
         //	while (pRailNode)
         //	{
+#pragma omp parallel for
         for (int node = 0; node < current_node; node++)
         {
             RailNode* pRailNode = &mp_nodes[node];

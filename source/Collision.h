@@ -1,5 +1,14 @@
 #ifndef COLLISION_H
 #define COLLISION_H
+
+
+struct BBox
+{
+    Vertex max;
+    Vertex min;
+};
+
+
 namespace Collision
 {
 
@@ -54,10 +63,13 @@ namespace Collision
         //28
         //Vertex* vertices[3];
         BYTE unk1[0x20];
+        //38
         bool collided;
+        //3C
         DWORD checksum;
-
+        //40
         Collision::Flags ignore_1;
+        //41
         Collision::Flags ignore_0;
 
         DWORD unk_flags;//00 01 00 00

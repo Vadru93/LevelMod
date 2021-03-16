@@ -350,6 +350,11 @@ struct Node
         return GetNodeArray()->GetCStruct(index);
     }
 
+    static CStruct* GetNodeByIndex(DWORD index)
+    {
+        return GetNodeArray()->GetStructure(index);
+    }
+
     static CStructHeader* GetNodeStructAndIndex(DWORD checksum, DWORD& out_index)
     {
         out_index = GetNodeIndex(checksum);

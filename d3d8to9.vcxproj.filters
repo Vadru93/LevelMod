@@ -156,6 +156,9 @@
     <ClCompile Include="source\Timer\Timer.cpp">
       <Filter>LevelMod\Source</Filter>
     </ClCompile>
+    <ClCompile Include="source\RenderWare\RenderWare.cpp">
+      <Filter>LevelMod\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="res\resource.h">

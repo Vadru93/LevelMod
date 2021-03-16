@@ -10,7 +10,7 @@
 
 //Collision stuff 00501CE0
 struct MovingObject;
-struct Model;
+struct z;
 extern void RemoveMovingObject(SuperSector* sector);
 extern bool updatingObjects;
 //00491820
@@ -52,7 +52,7 @@ EXTERN struct SuperSector
     DWORD* pUnk14;//bunch of 00
     BYTE unknown2;//Used when collision checking
     BYTE padding2[2];*/
-    DWORD* pUnknown;
+    DWORD pUnknown;
     DWORD* pUnk16;//bunch of floats, maybe something about collision?
     DWORD name;//crc32
     DWORD* pUnk17;//similar to pUnk16
@@ -177,6 +177,124 @@ EXTERN struct SuperSector
         CScript pScript;
         pSetMeshState(0x00418DD0)(Node::GetNodeIndex(name), state, &pScript);
     }
+};
+
+namespace Collision
+{
+    extern ::SuperSector* pCollCache[1024];
+    extern DWORD coll_cache_idx;
+    extern DWORD operationId;
+
+    class Manager;
+    class Sector
+    {
+
+    private:
+        ::BBox			    BBox;
+        DWORD			    numSectors;
+        ::RpWorldSector**   super_sectors;
+
+        friend Manager;
+    };
+
+    class Manager
+    {
+        ::BBox			    world_bbox;
+        float				sector_width;
+        float 				sector_depth;
+        int 				num_sectors_x;
+        int 				num_sectors_z;
+        //The world collision is divided up in a 20*20 2d bbox
+        //In 95% of cases we will only need to collide with 1 SuperSector
+        //And in the worst case scenario we will only need to intersect with about 100 SuperSectors
+        Sector		        sectors[20][20];
+
+
+        ::SuperSector** GetIntersectingCollSectors(Line& line)
+        {
+            int numCollidingSectors = 0;
+            Line test_line;
+            Vertex dir = *(Vertex*)&line.end - *(Vertex*)&line.start;
+            dir.Normalize();
+            dir.Scale(0.5f);
+
+            test_line.start[X] = line.start[X] - dir.x;
+            test_line.start[Y] = line.start[Y] - dir.y;
+            test_line.start[Z] = line.start[Z] - dir.z;
+            test_line.end[X] = line.end[X] + dir.x;
+            test_line.end[Y] = line.end[Y] + dir.y;
+            test_line.end[Z] = line.end[Z] + dir.z;
+
+
+            float x_offset = test_line.start[X] - world_bbox.min[X];
+            float z_offset = test_line.start[Z] - world_bbox.min[Z];
+            int start_x_box = (int)(x_offset / sector_width);
+            int start_z_box = (int)(z_offset / sector_depth);
+
+            start_x_box < 0 ? start_x_box = 0 : start_x_box >= num_sectors_x ? start_x_box = 0 : start_x_box = start_x_box;
+            start_z_box < 0 ? start_z_box = 0 : start_z_box >= num_sectors_z ? start_z_box = 0 : start_z_box = start_z_box;
+
+            x_offset = test_line.end[X] - world_bbox.min[X];
+            z_offset = test_line.end[Z] - world_bbox.min[Z];
+            int end_x_box = (int)(x_offset / sector_width);
+            int end_z_box = (int)(z_offset / sector_depth);
+
+            end_x_box < 0 ? end_x_box = 0 : end_x_box >= num_sectors_x ? end_x_box = 0 : end_x_box = end_x_box;
+            end_z_box < 0 ? end_z_box = 0 : end_z_box >= num_sectors_z ? end_z_box = 0 : end_z_box = end_z_box;
+
+            //Optimization if in same Sector
+            if (start_x_box == end_x_box && start_z_box == end_z_box)
+            {
+                Sector* sector = &sectors[start_x_box][start_z_box];
+
+                for(coll_cache_idx = 0; coll_cache_idx < sector->numSectors; coll_cache_idx++)
+                {
+                    ::RpWorldSector* world_sector = sector->super_sectors[coll_cache_idx];
+
+                    //Skip if kill flag is set
+                    if (world_sector->flag & 6)
+                        continue;
+                    pCollCache[coll_cache_idx] = sector->super_sectors[coll_cache_idx];
+                }
+                return pCollCache;
+            }
+            
+            //New operation ID
+            operationId++;
+
+            //Set CollCache Index to zero
+            coll_cache_idx = 0;
+
+            //Now get Sectors inside the line bbox start - end
+            for (int i = start_x_box; i <= end_x_box; i++)
+            {
+                for (int j = start_z_box; j <= end_z_box; j++)
+                {
+                    for (DWORD k = 0; k < sectors[i][j].numSectors; k++)
+                    {
+                        ::SuperSector* cs = sectors[i][j].super_sectors[k];
+
+                        //OperationId is used so we only add each SuperSector once
+                        if (cs->pUnknown != operationId)
+                        {
+                            //Skip if kill flag is set
+                            if (cs->flag & 6)
+                                continue;
+
+                            if (coll_cache_idx < 1023)
+                            {
+                                pCollCache[coll_cache_idx++] = cs;
+                                cs->pUnknown = operationId;
+                            }
+                        }
+
+                    }
+                }
+            }
+
+            return pCollCache;
+        }
+    };
 };
 //#pragma pop(pack)
 //bool second = true;

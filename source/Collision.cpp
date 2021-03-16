@@ -3,6 +3,9 @@
 
 namespace Collision
 {
+    static ::SuperSector* pCollCache[1024];
+    static DWORD coll_cache_idx = 0;
+    static DWORD operationId = 0;
     bool TriangleIntersectingSphere(D3DXVECTOR3 A, D3DXVECTOR3 B, D3DXVECTOR3 C, D3DXVECTOR3 P, float R)
     {
         A = A - P;
