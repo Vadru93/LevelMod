@@ -196,7 +196,7 @@ namespace NewTimer
         double ms = (double((old_start.LowPart)) * fFreq);
 
         //Only update framelength if above 25 fps
-        if (ms < FPS(25))
+        if (ms < FPS(20))
         {
             framelength = ms;
             //Only update FPS lock if window is active
@@ -244,7 +244,7 @@ namespace NewTimer
         double ms = (double((old_start.LowPart)) * fFreq);
         
         //Only update framelength if above 25 fps
-        if (ms < FPS(25))
+        if (ms < FPS(20))
         {
             framelength = ms;
             //Only update FPS lock if window is active
@@ -281,7 +281,7 @@ namespace NewTimer
         double ms = (double((old_start.LowPart)) * fFreq);
         
         //Only update framelength if above 25 fps
-        if (ms < FPS(25))
+        if (ms < FPS(20))
         {
             framelength = ms;
             //Only update FPS lock if window is active

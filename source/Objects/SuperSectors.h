@@ -204,9 +204,10 @@ namespace Collision
         float 				sector_depth;
         int 				num_sectors_x;
         int 				num_sectors_z;
-        //The world collision is divided up in a 20*20 2d bbox
-        //In 95% of cases we will only need to collide with 1 SuperSector
-        //And in the worst case scenario we will only need to intersect with about 100 SuperSectors
+        //The world collision is divided up in 20*20 2d bboxes
+        //Each bbox will contain around 1-50 SuperSectors
+        //In 95% of cases we will only need to collide with 1 2d bbox
+        //And in the worst case scenario we will need to collide with 3 2d bboxes, which takes up to twice as long
         Sector		        sectors[20][20];
 
 
