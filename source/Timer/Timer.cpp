@@ -209,7 +209,7 @@ namespace NewTimer
                 }
                 else
                 {
-                    if (ms > Gfx::exact_high && frameticks > min_frame_ticks)//59,97 fps
+                    if (ms > Gfx::hybrid_high && frameticks > min_frame_ticks)//59,97 fps
                     {
                         /*DWORD diff = (DWORD)((ms - (1000000 / Gfx::target_fps))* 0.005);
                         diff += 4;
@@ -218,7 +218,7 @@ namespace NewTimer
                         if (frameticks > 2)
                             frameticks -= 1;
                     }
-                    else if (ms < Gfx::exact_low && frameticks < max_frame_ticks)//60,24 fps
+                    else if (ms < Gfx::hybrid_low && frameticks < max_frame_ticks)//60,24 fps
                     {
                         debug_print("Inc\n");
                         frameticks += 2;

@@ -1,11 +1,25 @@
 #ifndef COLLISION_H
 #define COLLISION_H
 
+struct RwLine
+{
+    Vertex start;
+    Vertex end;
+};
+
+namespace Collision
+{
+    struct Line;
+};
+typedef struct SuperSector;
 
 struct BBox
 {
     Vertex max;
     Vertex min;
+
+    bool Within(RwLine& line);
+    bool Intersect(BBox& bbox);
 };
 
 
@@ -45,11 +59,15 @@ namespace Collision
         Vector point;
     };
 
+    typedef struct CollCache;
+
+    extern CollCache* spine_cache;
+
     struct SuperSector;
 
     struct CollData
     {
-        void* cache;
+        CollCache* cache;
         //4
         Vertex normal;
         //10
@@ -84,28 +102,97 @@ namespace Collision
 
         BYTE safe_guard[200];
         //BYTE unk3[200];
+
+        CollData(Collision::Flags ignore0 = Collision::Flags::Skatable, Collision::Flags ignore1 = Collision::Flags::Hollow)
+        {
+            cache = NULL;
+            ignore_1 = ignore1;
+            ignore_0 = ignore0;
+        }
+
+        CollData(CollCache* _cache, Collision::Flags ignore0 = Collision::Flags::Skatable, Collision::Flags ignore1 = Collision::Flags::Hollow)
+        {
+            cache = _cache;
+            ignore_1 = ignore1;
+            ignore_0 = ignore0;
+        }
     };
+
+    struct Branch
+    {
+        WORD axis;
+        BYTE leftType;
+        BYTE rightType;
+        WORD leftIndex;
+        WORD rightIndex;
+        float max;
+        float min;
+    };
+
+    struct Leaf
+    {
+        WORD numFaces;
+        WORD idx;
+    };
+    extern WORD pInterFaces[1024];
+    extern DWORD numInterFaces;
+
+    class CollisionPLG
+    {
+        DWORD flags;//Always 1?
+        void* tree;//points to numLeafs
+        DWORD numFaces;
+        WORD* faces;
+        DWORD numLeafs;
+        Branch* branches;
+        Leaf* leafs;
+        DWORD unk;//Always NULL?
+
+        void AddLeaf(Leaf& leaf)
+        {
+            debug_print("Adding Leaf %d faces\n", leaf.numFaces);
+            DWORD last = leaf.numFaces + leaf.idx;
+            for (DWORD idx = leaf.idx; idx < last; idx++)
+            {
+                pInterFaces[numInterFaces++] = faces[idx];
+            }
+        }
+
+
+        bool CollideWithLine(Leaf& leaf, Vertex& start, Vertex& dir, ::SuperSector* sector, CollData& data);
+        bool TraverseBranch(Branch* branch, RwLine& line, Vertex& dir, ::SuperSector* sector, CollData& data);
+
+    public:
+        bool ColldeWithLine(RwLine & line, Vertex & dir, ::SuperSector* sector, CollData & data)
+        {
+            numInterFaces = 0;
+            if (!branches)
+            {
+                if (leafs)
+                    return CollideWithLine(leafs[0], *(Vertex*)&line.start, dir, sector, data);
+            }
+
+            return TraverseBranch(&branches[0], line, dir, sector, data);
+        }
+    };
+
+    typedef class CollCache;
+    bool FindNearestCollision(RwLine& line, CollData& data);
 
     struct CFeeler : public Line
     {
         CollData cld;
 
-        CFeeler()
+        CFeeler() : cld(Collision::Flags::None, Collision::Flags::Hollow)
         {
-            cld.ignore_1 = Collision::Flags::Hollow;
-            cld.ignore_0 = Collision::Flags::None;
-
             cld.surface.normal.Set();
             cld.surface.point.Set();
         }
 
-        CFeeler(D3DXVECTOR3& const _start, D3DXVECTOR3& const _end, Collision::Flags ignore_1 = Collision::Flags::Hollow, Collision::Flags ignore_0 = Collision::Flags::None)
+        CFeeler(D3DXVECTOR3& const _start, D3DXVECTOR3& const _end, Collision::Flags ignore_1 = Collision::Flags::Hollow, Collision::Flags ignore_0 = Collision::Flags::None) : cld(ignore_0, ignore_1)
         {
             start.Set(_start.x, _start.y, _start.z);
             end.Set(_end.x, _end.y, _end.z);
-
-            cld.ignore_1 = ignore_1;
-            cld.ignore_0 = ignore_0;
 
             cld.surface.normal.Set();
             cld.surface.point.Set();

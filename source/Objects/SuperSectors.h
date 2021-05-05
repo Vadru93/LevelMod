@@ -10,7 +10,12 @@
 
 //Collision stuff 00501CE0
 struct MovingObject;
-struct z;
+namespace Collision
+{
+    struct CollisionPLG;
+    struct Leaf;
+    struct CollData;
+};
 extern void RemoveMovingObject(SuperSector* sector);
 extern bool updatingObjects;
 //00491820
@@ -19,33 +24,59 @@ extern bool updatingObjects;
 EXTERN struct SuperSector
 {
     DWORD FFFFFFFF;//Always -1 maybe morph target index?
+    //4
     RpTriangle* triangles;
+    //8
     D3DXVECTOR3* vertices;
+    //14
     D3DXVECTOR3* normals;
+    //20
     float* uv_offset;
+    //24
     float* uv_offset2;
+    //28
     DWORD* color_offset;
+    //2C
     Mesh* mesh;
+    //30
     /* Atomics in this sectors */
         /* The pointers are frigged so they look like they are pointing to
            Atomics when they are pointing to here */
     DWORD* pUnk[6];//Here should be pointer to atomic data, but since bsp is made in a bad way it only points to itself
+    //48
     D3DXVECTOR3 bboxMax;
+    //4C
     D3DXVECTOR3 bboxMin;
+    //50
     void* pUnk1;//Always NULL?
+    //54
     CSector* sector;
+    //58
     void* pipeline;//Always NULL?
-    WORD padding;//Should be matbaseindex, but I think not used?
+    //5C
+    WORD flags;//Should be matbaseindex, but now it's flag
+    //5E
     WORD numVertices;
+    //60
     WORD numIndices;
+    //62
     WORD padding2;//maybe flags?
 
     //Th3 extension
-    DWORD* pUnk10;
+    //64
+    Collision::CollisionPLG* pCollisionPLG;//Collision BBTree
+    //68
     DWORD* pUnk11;//Always NULL?
-    DWORD flag;//always 6?
-    BYTE state;//MeshState
-    BYTE padding3[19];
+    //6C
+    DWORD unk_flag;//always 6?
+    //70
+    BYTE state;
+    BYTE padding3[3];
+    Collision::Flags* pCollisionFlags;
+    DWORD null1;
+    DWORD null2;
+    BYTE operationId;
+    BYTE padding4[3];
     /*DWORD* pUnk12;//Always NULL?
     WORD* pCollisionFlags;//the flags for skatable, trigger etc
     DWORD* pUnk13;//bunch of 0xFF and random data
@@ -65,6 +96,13 @@ EXTERN struct SuperSector
         BYTE b;
         BYTE a;
     };
+
+    //bool CollideWithLine(Collision::Leaf& leaf, Vertex& start, Vertex& dir, SuperSector* sector, Collision::CollData& data);
+
+    Collision::CollisionPLG* GetCollisionPlugin()
+    {
+        return pCollisionPLG;
+    }
 
     Color* GetColors()
     {
@@ -181,16 +219,55 @@ EXTERN struct SuperSector
 
 namespace Collision
 {
-    extern ::SuperSector* pCollCache[1024];
-    extern DWORD coll_cache_idx;
+
+    extern CollCache defaultCollCache;
     extern DWORD operationId;
+
+    extern BBox cache_bbox;
+    class CollCache
+    {
+        BBox bbox;
+        DWORD idx;
+        ::SuperSector* sectors[1024];
+
+        friend class Manager;
+    public:
+        CollCache()
+        {
+            bbox.max = Vertex(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+            bbox.min = Vertex(FLT_MAX, FLT_MAX, FLT_MAX);
+            ZeroMemory(&idx, sizeof(CollCache)-sizeof(BBox));
+        }
+
+        void Update(RwLine& line);
+
+        CollCache* GetCache(RwLine & line)
+        {
+            if (!bbox.Within(line))
+            {
+                if (!defaultCollCache.bbox.Within(line))
+                    Update(line);
+                else
+                    return &defaultCollCache;
+            }
+            return this;
+        }
+
+        ::SuperSector** GetSuperSectors()
+        {
+            sectors[idx] = NULL;
+            return sectors;
+        }
+
+        CollCache(RwLine& line);
+    };
 
     class Manager;
     class Sector
     {
 
     private:
-        ::BBox			    BBox;
+        BBox bbox;
         DWORD			    numSectors;
         ::RpWorldSector**   super_sectors;
 
@@ -210,12 +287,34 @@ namespace Collision
         //And in the worst case scenario we will need to collide with 3 2d bboxes, which takes up to twice as long
         Sector		        sectors[20][20];
 
-
-        ::SuperSector** GetIntersectingCollSectors(Line& line)
+    public:
+        __declspec(noalias) CollCache* GetIntersectingWorldSectors(RwLine& line, CollData & data, bool update_cache = false)
         {
-            int numCollidingSectors = 0;
-            Line test_line;
-            Vertex dir = *(Vertex*)&line.end - *(Vertex*)&line.start;
+            if (data.cache)
+            {
+                if (update_cache)
+                {
+                    if (!data.cache->bbox.Within(line))
+                    {
+                        if (!defaultCollCache.bbox.Within(line))
+                            UpdateCache(line, data.cache);
+                        else
+                            return &defaultCollCache;
+                    }
+                }
+                return data.cache;
+            }
+
+            if (!defaultCollCache.bbox.Within(line))
+                UpdateCache(line, &defaultCollCache);
+            return &defaultCollCache;
+        }
+        /*::SuperSector** GetIntersectingWorldSectors(RwLine& line)
+        {
+            Collision::cache_bbox.max = Vertex(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+            Collision::cache_bbox.min = Vertex(FLT_MAX, FLT_MAX, FLT_MAX);
+            RwLine test_line;
+            Vertex dir = line.end - line.start;
             dir.Normalize();
             dir.Scale(0.5f);
 
@@ -232,16 +331,16 @@ namespace Collision
             int start_x_box = (int)(x_offset / sector_width);
             int start_z_box = (int)(z_offset / sector_depth);
 
-            start_x_box < 0 ? start_x_box = 0 : start_x_box >= num_sectors_x ? start_x_box = 0 : start_x_box = start_x_box;
-            start_z_box < 0 ? start_z_box = 0 : start_z_box >= num_sectors_z ? start_z_box = 0 : start_z_box = start_z_box;
+            start_x_box < 0 ? start_x_box = 0 : start_x_box >= num_sectors_x ? start_x_box = num_sectors_x-1 : start_x_box = start_x_box;
+            start_z_box < 0 ? start_z_box = 0 : start_z_box >= num_sectors_z ? start_z_box = num_sectors_z-1 : start_z_box = start_z_box;
 
             x_offset = test_line.end[X] - world_bbox.min[X];
             z_offset = test_line.end[Z] - world_bbox.min[Z];
             int end_x_box = (int)(x_offset / sector_width);
             int end_z_box = (int)(z_offset / sector_depth);
 
-            end_x_box < 0 ? end_x_box = 0 : end_x_box >= num_sectors_x ? end_x_box = 0 : end_x_box = end_x_box;
-            end_z_box < 0 ? end_z_box = 0 : end_z_box >= num_sectors_z ? end_z_box = 0 : end_z_box = end_z_box;
+            end_x_box < 0 ? end_x_box = 0 : end_x_box >= num_sectors_x ? end_x_box = num_sectors_x-1 : end_x_box = end_x_box;
+            end_z_box < 0 ? end_z_box = 0 : end_z_box >= num_sectors_z ? end_z_box = num_sectors_z-1 : end_z_box = end_z_box;
 
             //Optimization if in same Sector
             if (start_x_box == end_x_box && start_z_box == end_z_box)
@@ -253,13 +352,34 @@ namespace Collision
                     ::RpWorldSector* world_sector = sector->super_sectors[coll_cache_idx];
 
                     //Skip if kill flag is set
-                    if (world_sector->flag & 6)
+                    if (!world_sector->unk_flag & 6 || world_sector->state & 6)
                         continue;
-                    pCollCache[coll_cache_idx] = sector->super_sectors[coll_cache_idx];
+                    if (Collision::cache_bbox.max.x < sector->bbox.max.x) Collision::cache_bbox.max.x = sector->bbox.max.x;
+                    if (Collision::cache_bbox.max.y < sector->bbox.max.y) Collision::cache_bbox.max.y = sector->bbox.max.y;
+                    if (Collision::cache_bbox.max.z < sector->bbox.max.z) Collision::cache_bbox.max.z = sector->bbox.max.z;
+                    if (Collision::cache_bbox.min.x > sector->bbox.min.x) Collision::cache_bbox.min.x = sector->bbox.min.x;
+                    if (Collision::cache_bbox.min.y > sector->bbox.min.y) Collision::cache_bbox.min.y = sector->bbox.min.y;
+                    if (Collision::cache_bbox.min.z > sector->bbox.min.z) Collision::cache_bbox.min.z = sector->bbox.min.z;
+                    pCollCache[coll_cache_idx] = world_sector;
                 }
+                coll_cache_idx++;
+                pCollCache[coll_cache_idx] = NULL;
                 return pCollCache;
             }
-            
+
+            if (start_x_box > end_x_box)
+            {
+                float temp = start_x_box;
+                start_x_box = end_x_box;
+                end_x_box = temp;
+            }
+            if (start_z_box > end_z_box)
+            {
+                float temp = start_z_box;
+                start_z_box = end_z_box;
+                end_z_box = temp;
+            }
+
             //New operation ID
             operationId++;
 
@@ -279,12 +399,18 @@ namespace Collision
                         if (cs->pUnknown != operationId)
                         {
                             //Skip if kill flag is set
-                            if (cs->flag & 6)
+                            if (!cs->unk_flag & 6 || cs->state & 6)
                                 continue;
 
                             if (coll_cache_idx < 1023)
                             {
-                                pCollCache[coll_cache_idx++] = cs;
+                                if (Collision::cache_bbox.max.x < sectors[i][j].bbox.max.x) Collision::cache_bbox.max.x = sectors[i][j].bbox.max.x;
+                                if (Collision::cache_bbox.max.y < sectors[i][j].bbox.max.y) Collision::cache_bbox.max.y = sectors[i][j].bbox.max.y;
+                                if (Collision::cache_bbox.max.z < sectors[i][j].bbox.max.z) Collision::cache_bbox.max.z = sectors[i][j].bbox.max.z;
+                                if (Collision::cache_bbox.min.x > sectors[i][j].bbox.min.x) Collision::cache_bbox.min.x = sectors[i][j].bbox.min.x;
+                                if (Collision::cache_bbox.min.y > sectors[i][j].bbox.min.y) Collision::cache_bbox.min.y = sectors[i][j].bbox.min.y;
+                                if (Collision::cache_bbox.min.z > sectors[i][j].bbox.min.z) Collision::cache_bbox.min.z = sectors[i][j].bbox.min.z;
+                                pCollCache[coll_cache_idx++] = cs; 
                                 cs->pUnknown = operationId;
                             }
                         }
@@ -292,8 +418,130 @@ namespace Collision
                     }
                 }
             }
-
+            pCollCache[coll_cache_idx] = NULL;
             return pCollCache;
+        }*/
+
+        __declspec(noalias) void UpdateCache(RwLine& line, CollCache* const __restrict cache)
+        {
+            //Set impossible BBOX
+            cache->bbox.max = Vertex(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+            cache->bbox.min = Vertex(FLT_MAX, FLT_MAX, FLT_MAX);
+
+            //Set CollCache Index to zero
+            cache->idx = 0;
+
+            Line test_line;
+            Vertex dir = *(Vertex*)&line.end - *(Vertex*)&line.start;
+            dir.Normalize();
+            dir.Scale(0.5f);
+
+            test_line.start[X] = line.start[X] - dir.x;
+            test_line.start[Y] = line.start[Y] - dir.y;
+            test_line.start[Z] = line.start[Z] - dir.z;
+            test_line.end[X] = line.end[X] + dir.x;
+            test_line.end[Y] = line.end[Y] + dir.y;
+            test_line.end[Z] = line.end[Z] + dir.z;
+
+
+            float x_offset = test_line.start[X] - world_bbox.min[X];
+            float z_offset = test_line.start[Z] - world_bbox.min[Z];
+            int start_x_box = (int)(x_offset / sector_width);
+            int start_z_box = (int)(z_offset / sector_depth);
+
+            start_x_box < 0 ? start_x_box = 0 : start_x_box >= num_sectors_x ? start_x_box = num_sectors_x - 1 : start_x_box = start_x_box;
+            start_z_box < 0 ? start_z_box = 0 : start_z_box >= num_sectors_z ? start_z_box = num_sectors_z - 1 : start_z_box = start_z_box;
+
+            x_offset = test_line.end[X] - world_bbox.min[X];
+            z_offset = test_line.end[Z] - world_bbox.min[Z];
+            int end_x_box = (int)(x_offset / sector_width);
+            int end_z_box = (int)(z_offset / sector_depth);
+
+            end_x_box < 0 ? end_x_box = 0 : end_x_box >= num_sectors_x ? end_x_box = num_sectors_x - 1 : end_x_box = end_x_box;
+            end_z_box < 0 ? end_z_box = 0 : end_z_box >= num_sectors_z ? end_z_box = num_sectors_z - 1 : end_z_box = end_z_box;
+
+            //Optimization if in same Sector, will return up to 30% faster
+            if (start_x_box == end_x_box && start_z_box == end_z_box)
+            {
+                //Optimize array access
+                const Sector* sector = &sectors[start_x_box][start_z_box];
+
+                for (int i = 0; i < sector->numSectors; i++)
+                {
+                    ::RpWorldSector* world_sector = sector->super_sectors[i];
+
+                    //Skip if kill flag is set
+                    if (!world_sector->unk_flag & 6 || world_sector->state & 6)
+                        continue;
+
+                    if (cache->bbox.max.x < sector->bbox.max.x) cache->bbox.max.x = sector->bbox.max.x;
+                    if (cache->bbox.max.y < sector->bbox.max.y) cache->bbox.max.y = sector->bbox.max.y;
+                    if (cache->bbox.max.z < sector->bbox.max.z) cache->bbox.max.z = sector->bbox.max.z;
+                    if (cache->bbox.min.x > sector->bbox.min.x) cache->bbox.min.x = sector->bbox.min.x;
+                    if (cache->bbox.min.y > sector->bbox.min.y) cache->bbox.min.y = sector->bbox.min.y;
+                    if (cache->bbox.min.z > sector->bbox.min.z) cache->bbox.min.z = sector->bbox.min.z;
+                    cache->sectors[cache->idx++] = world_sector;
+                }
+                cache->sectors[cache->idx] = NULL;
+                return;
+            }
+
+            //Optimize Array access order
+            if (start_x_box > end_x_box)
+            {
+                float temp = start_x_box;
+                start_x_box = end_x_box;
+                end_x_box = temp;
+            }
+            if (start_z_box > end_z_box)
+            {
+                float temp = start_z_box;
+                start_z_box = end_z_box;
+                end_z_box = temp;
+            }
+
+            //New operation ID
+            operationId++;
+
+            //Now get Sectors inside the line bbox start - end
+            for (int i = start_x_box; i <= end_x_box; i++)
+            {
+                for (int j = start_z_box; j <= end_z_box; j++)
+                {
+                    //Optimize array access
+                    Collision::Sector & sector = sectors[i][j];
+
+                    if (cache->bbox.max.x < sector.bbox.max.x) cache->bbox.max.x = sector.bbox.max.x;
+                    if (cache->bbox.max.y < sector.bbox.max.y) cache->bbox.max.y = sector.bbox.max.y;
+                    if (cache->bbox.max.z < sector.bbox.max.z) cache->bbox.max.z = sector.bbox.max.z;
+                    if (cache->bbox.min.x > sector.bbox.min.x) cache->bbox.min.x = sector.bbox.min.x;
+                    if (cache->bbox.min.y > sector.bbox.min.y) cache->bbox.min.y = sector.bbox.min.y;
+                    if (cache->bbox.min.z > sector.bbox.min.z) cache->bbox.min.z = sector.bbox.min.z;
+
+
+                    for (DWORD k = 0; k < sector.numSectors; k++)
+                    {
+                        ::SuperSector* cs = sector.super_sectors[k];
+
+                        //OperationId is used so we only add each SuperSector once
+                        if (cs->pUnknown != operationId)
+                        {
+                            //Skip if kill flag is set
+                            if (!cs->unk_flag & 6 || cs->state & 6)
+                                continue;
+
+                            if (cache->idx < 1023)
+                            {
+                                cache->sectors[cache->idx++] = cs;
+                                cs->pUnknown = operationId;
+                            }
+                        }
+
+                    }
+                }
+            }
+            cache->sectors[cache->idx] = NULL;
+            return;
         }
     };
 };

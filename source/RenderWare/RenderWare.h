@@ -207,8 +207,13 @@ struct RwCamera
     RwBBox               viewBBox;
     Vertex               frustum3D[8];
 };
-
-
+/*
+struct RwLine
+{
+    Vertex start;
+    Vertex end;
+};
+*/
 struct RwRaster
 {
     RwRaster* parent; /* Top level raster if a sub raster */
@@ -514,6 +519,7 @@ typedef RpWorldSector* (*RpWorldSectorCallBackRender) (RpWorldSector*
  * Use the RpWorld API functions to access.
  */
 typedef struct RpWorld RpWorld;
+typedef struct NxPlugin;
 
 
 #if (!defined(DOXYGEN))
@@ -559,6 +565,11 @@ struct RpWorld
     RpWorld* Instance()
     {
         return *(RpWorld**)0x008E1E78;
+    }
+
+    NxPlugin* GetWorldPluginData()
+    {
+        return (NxPlugin*)((DWORD)this + 0x84);
     }
 
 
@@ -754,12 +765,21 @@ public:
 
 };
 
-/*
-namespace NxPlugin
+namespace Collision
 {
-    void* GetWorldPluginData(RpWorld* world)
+    typedef struct Manager;
+};
+
+
+class NxPlugin
+{
+    //Maybe bbox?
+    BYTE unk[0x14];
+    Collision::Manager* manager;
+public:
+    Collision::Manager* GetManager()
     {
-        
+        return manager;
     }
 
     DWORD GetWorldSectorOperationId(RpWorldSector* sector)
@@ -770,4 +790,4 @@ namespace NxPlugin
     {
         return 0;
     }
-};*/
+};

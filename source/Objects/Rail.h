@@ -967,7 +967,7 @@ public:
         LARGE_INTEGER end;
         QueryPerformanceCounter(&end);
         end.QuadPart -= start.QuadPart;
-        debug_print("Ms %f\n", (double)end.LowPart * NewTimer::fFreq);
+        //debug_print("Ms %f\n", (double)end.LowPart * NewTimer::fFreq);
 #endif
         return p_closest_rail != NULL;
     }

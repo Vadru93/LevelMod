@@ -7,6 +7,7 @@
 #include "Script\Node.h"
 #include "Script\Script.h"
 #include "Settings\Settings.h"
+#include "Objects\SuperSectors.h"
 
 DWORD GetElapsedTime(DWORD currentTime, DWORD lastTime)
 {
@@ -1963,6 +1964,17 @@ __declspec(noalias) void MaybeAcid()
             (LevelModSettings::SpineButton2 == KeyState::NONE || skater->GetKeyState(LevelModSettings::SpineButton2)->IsPressed()) ) 
         ))
     {
+        /*RwLine line;
+        line.start = *skater->GetPosition();
+        line.end = line.start;
+        line.end.y -= 4500.0f;
+        Collision::CollData data(Collision::spine_cache->GetCache(line));
+
+        if (Collision::FindNearestCollision(line, data))
+        {
+            skater->SetPosition(data.point);
+            MessageBox(0, "Collided", FindChecksumName(data.checksum, false), 0);
+        }*/
         debug_print("trying acid\n");
 
         /*if (skater->maybe_acid_drop(false, *skater->GetPosition(), *skater->GetOldPosition(), *skater->GetVelocity(), acid_drop_data))
@@ -2164,7 +2176,7 @@ bool Skater::CheckForWallpant()
     LARGE_INTEGER end;
     QueryPerformanceCounter(&end);
     end.QuadPart -= start.QuadPart;
-    debug_print("Ms %f\n", (double)end.LowPart * NewTimer::fFreq);
+    //debug_print("Ms %f\n", (double)end.LowPart * NewTimer::fFreq);
 #endif
 
     /**(Vertex*)&GetMatrix()[Z] = *velocity;

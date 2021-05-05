@@ -750,9 +750,11 @@ void DestroySuperSectors()
 
     if (observing)
         LeaveObserveMode(NULL, NULL);
+    delete Collision::spine_cache;
 }
 void CreateSuperSectors()
 {
+    Collision::spine_cache = new Collision::CollCache;
     debug_print("Going to create MovingObjects\n");
     GameState::GotSuperSectors = true;
     KeyMap::UpdateKeyMap();
