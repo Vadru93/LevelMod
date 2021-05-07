@@ -1973,7 +1973,7 @@ __declspec(noalias) void MaybeAcid()
         if (Collision::FindNearestCollision(line, data))
         {
             skater->SetPosition(data.point);
-            MessageBox(0, "Collided", FindChecksumName(data.checksum, false), 0);
+            //MessageBox(0, "Collided", FindChecksumName(data.checksum, false), 0);
         }*/
         debug_print("trying acid\n");
 

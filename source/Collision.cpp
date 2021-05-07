@@ -99,10 +99,58 @@ namespace Collision
 
     bool CollisionPLG::TraverseBranch(Branch* branch, RwLine& line, Vertex& dir, ::SuperSector* sector, CollData& data)
     {
+        //axis is optimized for easy access of x, y and z
+        //x + 0 bytes = x
+        //x + 4 bytes = y
+        //x + 8 bytes = z
         WORD axis = branch->axis;
-        debug_print("Axis %d branchmax % f branchmin % f linemax % f linemin % f\n", axis, branch->max, branch->min, *(float*)((BYTE*)(&line.start.x) + axis), *(float*)((BYTE*)(&line.end.x) + axis));
+        debug_print("Axis %d branchmax % f branchmin % f linemax % f linemin % f\n", axis, branch->max, branch->min, axis_aligned_start, axis_aligned_end);
 
-        //float mid = (branch->max - branch->min) * 0.5f + branch->min;
+        //align the line start and end point with the branch
+        float axis_aligned_start = *(float*)((BYTE*)(&line.start.x) + axis);
+        float axis_aligned_end = *(float*)((BYTE*)(&line.end.x) + axis);
+
+        //compare to mid, go left or right?
+        //optimization suggestion: change BSP collision tree to store middle point directly instead of storing min and max
+        //this will use 4 less bytes per node and use few less instructions per node call
+        //this should improve collision detection speed since the less bytes will lead to less cache misses
+        //and the removed instructions will obviusly be faster code, how much? who knows...
+        float mid = (branch->max - branch->min) * 0.5f + branch->min;
+
+        if (axis_aligned_start < mid && axis_aligned_end < mid)
+        {
+            debug_print("Going Left\n");
+            if (branch->leftType == 2)
+                return TraverseBranch(&branches[branch->leftIndex], line, dir, sector, data);
+            else
+                return CollideWithLine(leafs[branch->leftIndex], *(Vertex*)&line.start, dir, sector, data);
+        }
+        else if (axis_aligned_start >= mid && axis_aligned_end >= mid)
+        {
+            debug_print("Going Righ\n");
+            if (branch->rightType == 2)
+                return TraverseBranch(&branches[branch->rightIndex], line, dir, sector, data);
+            else
+                return CollideWithLine(leafs[branch->rightIndex], *(Vertex*)&line.start, dir, sector, data);
+        }
+        else
+        {
+            //How often are we going both ways?
+            //Maybe can optimize the tree creation in LevelEditor to make it happen less often
+            debug_print("Going Both\n");
+            bool bCollided_left, bCollided_right;
+            if (branch->leftType == 2)
+                bCollided_left = TraverseBranch(&branches[branch->leftIndex], line, dir, sector, data);
+            else
+                bCollided_left = CollideWithLine(leafs[branch->leftIndex], *(Vertex*)&line.start, dir, sector, data);
+
+            if (branch->rightType == 2)
+                bCollided_right = TraverseBranch(&branches[branch->rightIndex], line, dir, sector, data);
+            else
+                bCollided_right = CollideWithLine(leafs[branch->rightIndex], *(Vertex*)&line.start, dir, sector, data);
+            return bCollided_left || bCollided_right;
+        }
+        /*
         float start_min = *(float*)((BYTE*)(&line.start.x) + axis) - branch->min;
         float end_min = *(float*)((BYTE*)(&line.end.x) + axis) - branch->min;
         if ((*(int*)&start_min < 0) && (*(int*)&end_min < 0))
@@ -138,7 +186,7 @@ namespace Collision
                 else
                     return CollideWithLine(leafs[branch->rightIndex], *(Vertex*)&line.start, dir, sector, data);
             }
-        }
+        }*/
         return false;
     }
 
