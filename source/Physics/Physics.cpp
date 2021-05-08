@@ -155,7 +155,7 @@ inline bool is_vert_for_transfers(const Vertex* normal)
     return fabsf(normal->y) < 0.707f;
 }
 
-__declspec(noalias) bool look_for_transfer_target(const D3DXVECTOR3& search_dir, const Vertex& start_normal, bool& hip_transfer, Vertex& target, Vertex& target_normal)
+__declspec(noalias) bool look_for_transfer_target(const D3DXVECTOR3& search_dir, const Vertex& start_normal, bool& hip_transfer, Vertex& target, Vertex& target_normal, Collision::CollData & data)
 {
     // take a bunch of steps forward until we find one		
     // This is not very good, as we have to do 80 collision checks....
@@ -168,7 +168,6 @@ __declspec(noalias) bool look_for_transfer_target(const D3DXVECTOR3& search_dir,
 
     Skater* __restrict const skater = Skater::Instance();
 
-
     for (float step = 10.0f; step < 650.0f; step += 5.0f)
     {
         // First find a VERT point a bit in front of us
@@ -177,24 +176,25 @@ __declspec(noalias) bool look_for_transfer_target(const D3DXVECTOR3& search_dir,
         // (and low to high, proving you can jump up from the low point to the high point first)
         /*Vertex vel = *GetVelocity();
         Vertex vel_normal = ::GetNormal(&vel);*/
-        Vertex start = Vertex(*(Vertex*)skater->GetPosition() + search_dir * step);		// start at current height
+        RwLine line;
+        line.start = Vertex(*(Vertex*)skater->GetPosition() + search_dir * step);		// start at current height
         //printf("Start %f %f, pos %f %f\n", start.x, start.z, skater->GetPosition()->x, skater->GetPosition()->z);
         //start.y += 100.0f;m
-        Vertex end = start;
-        end.y -= 4500.0f;									// long way below
-        skater->SetRay(*(D3DXVECTOR3*)&start, *(D3DXVECTOR3*)&end);
-        if (skater->CollisionCheck(Collision::Flags::Vert) && is_vert_for_transfers((Vertex*)skater->GetCollisionNormal()))
+        line.end = line.start;
+        line.end.y -= 4500.0f;									// long way below
+        //skater->SetRay(*(D3DXVECTOR3*)&start, *(D3DXVECTOR3*)&end);
+        if (Collision::FindNearestCollision(line, data) && is_vert_for_transfers(&data.normal))//skater->CollisionCheck(Collision::Flags::Vert) && is_vert_for_transfers((Vertex*)skater->GetCollisionNormal()))
         {
             debug_print("Found Vert\n");
-            Vertex horizontal_normal = *(Vertex*)skater->GetCollisionNormal();
+            Vertex horizontal_normal = data.normal;// *(Vertex*)skater->GetCollisionNormal();
             horizontal_normal.y = 0.0f;
             horizontal_normal.Normalize();
             float dot = D3DXVec3Dot((D3DXVECTOR3*)&start_normal, (D3DXVECTOR3*)&horizontal_normal);
             if (dot <= 0.95f)//same as in thug1src
             {
-                target = *(Vertex*)skater->GetHitPoint();
-                target_normal = *(Vertex*)skater->GetCollisionNormal();
-                //debug_print("Target %f %f %f normal %f %f %f\n", target.x, target.y, target.z, target_normal.x, target_normal.y, target_normal.z);
+                target = data.point;// *(Vertex*)skater->GetHitPoint();
+                target_normal = data.normal;// *(Vertex*)skater->GetCollisionNormal();
+                debug_print("Target %f %f %f normal %f %f %f\n", target.x, target.y, target.z, target_normal.x, target_normal.y, target_normal.z);
 
                 hip_transfer = dot > -0.866f;//same as in thug1src
                 if (hip_transfer)
@@ -213,8 +213,8 @@ __declspec(noalias) bool look_for_transfer_target(const D3DXVECTOR3& search_dir,
             }
             else
             {
-                target = *(Vertex*)skater->GetHitPoint();
-                target_normal = *(Vertex*)skater->GetCollisionNormal();
+                target = data.point;// *(Vertex*)skater->GetHitPoint();
+                target_normal = data.normal;// *(Vertex*)skater->GetCollisionNormal();
                 debug_print("FAlSE Target dot %f\n%f %f %f normal %f %f %f\n", dot, target.x, target.y, target.z, target_normal.x, target_normal.y, target_normal.z);
 
             }
@@ -369,51 +369,89 @@ bool Skater::CheckForSpine()
     // feeler.SetIgnore(0, mFD_VERT);
 
     Vertex	wall_pos;
-    SetRay(start, end);
-    if (CollisionCheck(Collision::Flags::Vert))
+    if (GetCollFlags() & (DWORD)Collision::Flags::Vert)
     {
-        debug_print("found target -\n");
-
-        //MessageBox(0, "found wall", "", 0);
         wall_pos = *(Vertex*)GetHitPoint();
 
         Vertex start_normal = *(Vertex*)&this->normal;
         start_normal.y = 0.0f;
         start_normal.Normalize();
 
-        target_found = look_for_transfer_target(wall_out, start_normal, hip_transfer, target, target_normal);
+        //bound the cache to the maximum target distance, looking at all possible directions
+        RwLine line;
+        line.start = *GetPosition();
+        //forward
+        line.end = line.start + (wall_out * 650.0f);
+        //sideways
+        Vertex left_along_vert(-start_normal.z, 0.0f, start_normal.x);
+        //left
+        Vertex left = line.start + ((-left_along_vert + wall_out) * 650.0f);
+        //right
+        Vertex right = line.start + ((left_along_vert + wall_out) * 650.0f);
+
+        //make the line as small as possible but big enough to fit all possible directions
+        if (line.start.x > line.end.x)
+        {
+            if (line.end.x > left.x)
+                line.end.x = left.x;
+            if (line.end.x > right.x)
+                line.end.x = right.x;
+        }
+        else
+        {
+            if (line.end.x < left.x)
+                line.end.x = left.x;
+            if (line.end.x < right.x)
+                line.end.x = right.x;
+        }
+        if (line.start.z > line.end.z)
+        {
+            if (line.end.z > left.z)
+                line.end.z = left.z;
+            if (line.end.z > right.z)
+                line.end.z = right.z;
+        }
+        else
+        {
+            if (line.end.z < left.z)
+                line.end.z = left.z;
+            if (line.end.z < right.z)
+                line.end.z = right.z;
+        }
+
+        //a point very far down...
+        line.end.y -= 4500.0f;
+
+        //Get and update the cache containing the SuperSectors that are potentially intersecting with the line
+        Collision::CollData data = Collision::CollData(Collision::spine_cache->GetCache(line, true), Collision::Flags::Vert);
+
+        target_found = look_for_transfer_target(wall_out, start_normal, hip_transfer, target, target_normal, data);
 
         if (!target_found)
         {
-            Vertex left_along_vert(-start_normal.z, 0.0f, start_normal.x);
-
             // no target was found in the forward direction, perhaps we should look slightly left or right; look in the horizontal direction which is
             // halfway between the previous search direction and the plane of the vert
             if (!GetKeyState(KeyState::LEFT)->IsPressed() && GetKeyState(KeyState::RIGHT)->IsPressed())
             {
                 Vertex search_dir = Vertex(-left_along_vert + wall_out);
                 search_dir.Normalize();
-                target_found = look_for_transfer_target(search_dir, start_normal, hip_transfer, target, target_normal);
+                target_found = look_for_transfer_target(search_dir, start_normal, hip_transfer, target, target_normal, data);
             }
             else if (!GetKeyState(KeyState::RIGHT)->IsPressed() && GetKeyState(KeyState::LEFT)->IsPressed())
             {
                 Vertex search_dir = Vertex(left_along_vert + wall_out);
                 search_dir.Normalize();
-                target_found = look_for_transfer_target(search_dir, start_normal, hip_transfer, target, target_normal);
+                target_found = look_for_transfer_target(search_dir, start_normal, hip_transfer, target, target_normal, data);
             }
         }
     }
-    else
+    //old code
+    /*else
     {
-        debug_print("Retrying\n");
-        D3DXVECTOR3 start = (*GetPosition() - wall_out * 0.5f);
-        D3DXVECTOR3 end = (*GetPosition() - wall_out * 0.5f);
-        end.y -= 4500.0f;
-
         SetRay(start, end);
         if (CollisionCheck(Collision::Flags::Vert))
         {
-            debug_print("found target +\n");
+            debug_print("found target -\n");
 
             //MessageBox(0, "found wall", "", 0);
             wall_pos = *(Vertex*)GetHitPoint();
@@ -447,14 +485,14 @@ bool Skater::CheckForSpine()
         else
         {
             debug_print("Retrying\n");
-            D3DXVECTOR3 start = (*GetPosition());
-            D3DXVECTOR3 end = (*GetPosition());
+            D3DXVECTOR3 start = (*GetPosition() - wall_out * 0.5f);
+            D3DXVECTOR3 end = (*GetPosition() - wall_out * 0.5f);
             end.y -= 4500.0f;
 
             SetRay(start, end);
             if (CollisionCheck(Collision::Flags::Vert))
             {
-                debug_print("found target\n");
+                debug_print("found target +\n");
 
                 //MessageBox(0, "found wall", "", 0);
                 wall_pos = *(Vertex*)GetHitPoint();
@@ -485,8 +523,50 @@ bool Skater::CheckForSpine()
                     }
                 }
             }
+            else
+            {
+                debug_print("Retrying\n");
+                D3DXVECTOR3 start = (*GetPosition());
+                D3DXVECTOR3 end = (*GetPosition());
+                end.y -= 4500.0f;
+
+                SetRay(start, end);
+                if (CollisionCheck(Collision::Flags::Vert))
+                {
+                    debug_print("found target\n");
+
+                    //MessageBox(0, "found wall", "", 0);
+                    wall_pos = *(Vertex*)GetHitPoint();
+
+                    Vertex start_normal = *(Vertex*)&this->normal;
+                    start_normal.y = 0.0f;
+                    start_normal.Normalize();
+
+                    target_found = look_for_transfer_target(wall_out, start_normal, hip_transfer, target, target_normal);
+
+                    if (!target_found)
+                    {
+                        Vertex left_along_vert(-start_normal.z, 0.0f, start_normal.x);
+
+                        // no target was found in the forward direction, perhaps we should look slightly left or right; look in the horizontal direction which is
+                        // halfway between the previous search direction and the plane of the vert
+                        if (!GetKeyState(KeyState::LEFT)->IsPressed() && GetKeyState(KeyState::RIGHT)->IsPressed())
+                        {
+                            Vertex search_dir = Vertex(-left_along_vert + wall_out);
+                            search_dir.Normalize();
+                            target_found = look_for_transfer_target(search_dir, start_normal, hip_transfer, target, target_normal);
+                        }
+                        else if (!GetKeyState(KeyState::RIGHT)->IsPressed() && GetKeyState(KeyState::LEFT)->IsPressed())
+                        {
+                            Vertex search_dir = Vertex(left_along_vert + wall_out);
+                            search_dir.Normalize();
+                            target_found = look_for_transfer_target(search_dir, start_normal, hip_transfer, target, target_normal);
+                        }
+                    }
+                }
+            }
         }
-    }
+    }*/
     /*else
       AddRay(*(D3DXVECTOR3*)&start, *(D3DXVECTOR3*)&end, D3DXCOLOR(0.0f, 255.0f, 0.0f, 255.0f));*/
 
@@ -1973,6 +2053,9 @@ __declspec(noalias) void MaybeAcid()
         if (Collision::FindNearestCollision(line, data))
         {
             skater->SetPosition(data.point);
+            char tst[256];
+            sprintf(tst, "%f %f %f %f %f %f", data.normal.x, data.normal.y, data.normal.z, skater->GetCollisionNormal()->x, skater->GetCollisionNormal()->y, skater->GetCollisionNormal()->z);
+            MessageBox(0, tst, tst, 0);
             //MessageBox(0, "Collided", FindChecksumName(data.checksum, false), 0);
         }*/
         debug_print("trying acid\n");

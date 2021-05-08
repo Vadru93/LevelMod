@@ -163,7 +163,7 @@ namespace Collision
         bool TraverseBranch(Branch* branch, RwLine& line, Vertex& dir, ::SuperSector* sector, CollData& data);
 
     public:
-        bool ColldeWithLine(RwLine & line, Vertex & dir, ::SuperSector* sector, CollData & data)
+        bool CollideWithLine(RwLine & line, Vertex & dir, ::SuperSector* sector, CollData & data)
         {
             numInterFaces = 0;
             if (!branches)
@@ -178,6 +178,7 @@ namespace Collision
 
     typedef class CollCache;
     bool FindNearestCollision(RwLine& line, CollData& data);
+    bool FindFirstCollision(RwLine& line, CollData& data);
 
     struct CFeeler : public Line
     {

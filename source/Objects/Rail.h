@@ -515,12 +515,10 @@ public:
         if (numRailNodes)
         {
             temp_nodes = new RailNode [numRailNodes + 1];//(RailNode*)mallocx(sizeof(RailNode) * (numRailNodes+1));
-            if (!temp_nodes)
-                MessageBox(0, 0, 0, 0);
+            assert(temp_nodes, "Failed to allocate RailNode buffer");
             EndOfRail = (DWORD)&temp_nodes[numRailNodes];
             temp_links = new RailLinks[numRailNodes + 1]; //(RailLinks*)mallocx(sizeof(RailLinks) * numRailNodes+1);
-            if (!temp_links)
-                MessageBox(0, 0, 0, 0);
+            assert(temp_links, "Failed to allocate RailLink buffer");
 
             first_node = first;
             /*if (*first)
@@ -1101,8 +1099,7 @@ public:
                 }
                 
             }
-            if (temp_counter != current_node)
-                MessageBox(0, "NOT GOOD", "", 0);
+            assert(temp_counter == current_node, "Stack is trashed");
 
             for (DWORD i = 0; i < temp_counter; i++)
             {
@@ -1734,11 +1731,7 @@ public:
 
     void AddRailNode(DWORD index, CStruct* pNodeStruct)
     {
-        if (current_node == MAX_RAIL_NODES)
-        {
-            MessageBox(0, "Now it's fuckedup...", "RailNodes....", 0);
-            return;
-        }
+        assert(current_node < MAX_RAIL_NODES, "Too many RailNodes.. ");
 
         if (!SkateMod::ShouldBeAbsentNode(pNodeStruct))
         {
@@ -1798,18 +1791,12 @@ public:
             if (pNodeStruct->GetArray("links", &links))
             {
                 int numLinks = links->GetNumItems();
-                if (numLinks > MAX_RAIL_LINKS)
-                {
-                    MessageBox(0, "TOO MANY LINKS", "", 0);
-                    numLinks = MAX_RAIL_LINKS;
-                }
+                assert(numLinks <= MAX_RAIL_LINKS, "TOO MANY LINKS");
                 for (auto i = 0; i < numLinks; i++)
                 {
                     signed short link = (*links)[i];
-                    if (link >= numNodes || link < 0)
-                        MessageBox(0, "BAD LINNK", "", 0);
-                    else
-                        pLinkNode->m_link[i] = link;
+                    assert(link < numNodes || link >= 0, "BAD LINK");
+                    pLinkNode->m_link[i] = link;
                 }
             }
 

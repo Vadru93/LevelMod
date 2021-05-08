@@ -30,13 +30,13 @@ namespace Collision
     CollCache* spine_cache;
 #define EPSILON 0.000001f
 
-    void CollCache::Update(RwLine& line)
+    void CollCache::Update(RwLine& line, bool definite_mask)
     {
         RpWorld* world = RwViewer::Instance()->GetCurrentWorld();
         NxPlugin* plg = world->GetWorldPluginData();
         Collision::Manager* cld_manager = plg->GetManager();
 
-        cld_manager->UpdateCache(line, this);
+        cld_manager->UpdateCache(line, this, definite_mask);
     }
 
     CollCache::CollCache(RwLine& line)
@@ -104,11 +104,11 @@ namespace Collision
         //x + 4 bytes = y
         //x + 8 bytes = z
         WORD axis = branch->axis;
-        debug_print("Axis %d branchmax % f branchmin % f linemax % f linemin % f\n", axis, branch->max, branch->min, axis_aligned_start, axis_aligned_end);
-
         //align the line start and end point with the branch
         float axis_aligned_start = *(float*)((BYTE*)(&line.start.x) + axis);
         float axis_aligned_end = *(float*)((BYTE*)(&line.end.x) + axis);
+
+        //debug_print("Axis %d branchmax % f branchmin % f linemax % f linemin % f\n", axis, branch->max, branch->min, axis_aligned_start, axis_aligned_end);
 
         //compare to mid, go left or right?
         //optimization suggestion: change BSP collision tree to store middle point directly instead of storing min and max
@@ -119,7 +119,7 @@ namespace Collision
 
         if (axis_aligned_start < mid && axis_aligned_end < mid)
         {
-            debug_print("Going Left\n");
+            //debug_print("Going Left\n");
             if (branch->leftType == 2)
                 return TraverseBranch(&branches[branch->leftIndex], line, dir, sector, data);
             else
@@ -127,7 +127,7 @@ namespace Collision
         }
         else if (axis_aligned_start >= mid && axis_aligned_end >= mid)
         {
-            debug_print("Going Righ\n");
+            //debug_print("Going Righ\n");
             if (branch->rightType == 2)
                 return TraverseBranch(&branches[branch->rightIndex], line, dir, sector, data);
             else
@@ -137,7 +137,7 @@ namespace Collision
         {
             //How often are we going both ways?
             //Maybe can optimize the tree creation in LevelEditor to make it happen less often
-            debug_print("Going Both\n");
+            //debug_print("Going Both\n");
             bool bCollided_left, bCollided_right;
             if (branch->leftType == 2)
                 bCollided_left = TraverseBranch(&branches[branch->leftIndex], line, dir, sector, data);
@@ -210,9 +210,10 @@ namespace Collision
                     {
                         data.collided = true;
                         data.checksum = sector->name;
-                        Vertex tmp1 = v1 - v0;
-                        Vertex tmp2 = v2 - v0;
-                        data.normal = CrossProduct(&tmp1, &tmp2);
+                        Vertex edge1 = v0 - v1;
+                        Vertex edge2 = v1 - v2;
+                        data.normal = CrossProduct(&edge1, &edge2);
+                        data.normal.Normalize();
                         data.point = dir;
                         data.point.Scale(distance);
                         data.point += start;
@@ -223,6 +224,71 @@ namespace Collision
             }
         }
         return data.collided;
+    }
+
+    bool FindFirstCollision(RwLine& line, CollData& data)
+    {
+        data.collided = false;
+        data.unk = FLT_MAX;
+        Vertex rayDir = line.end - line.start;
+
+
+        BBox line_bbox;
+        line_bbox.max.x = line.end.x > line.start.x ? line.end.x : line.start.x;
+        line_bbox.max.x += 0.5f;
+        line_bbox.max.y = line.end.y > line.start.y ? line.end.y : line.start.y;
+        line_bbox.max.y += 0.5f;
+        line_bbox.max.z = line.end.z > line.start.z ? line.end.z : line.start.z;
+        line_bbox.max.z += 0.5f;
+
+        line_bbox.min.x = line.end.x < line.start.x ? line.end.x : line.start.x;
+        line_bbox.min.x -= 0.5f;
+        line_bbox.min.y = line.end.y < line.start.y ? line.end.y : line.start.y;
+        line_bbox.min.y -= 0.5f;
+        line_bbox.min.z = line.end.z < line.start.z ? line.end.z : line.start.z;
+        line_bbox.min.z -= 0.5f;
+
+        RwLine extended_line;
+        Vertex dir = line.end - line.start;
+        dir.Normalize();
+        dir.Scale(0.5f);
+
+        extended_line.start[X] = line.start[X] - dir.x;
+        extended_line.start[Y] = line.start[Y] - dir.y;
+        extended_line.start[Z] = line.start[Z] - dir.z;
+        extended_line.end[X] = line.end[X] + dir.x;
+        extended_line.end[Y] = line.end[Y] + dir.y;
+        extended_line.end[Z] = line.end[Z] + dir.z;
+
+
+        RpWorld* world = RwViewer::Instance()->GetCurrentWorld();
+        NxPlugin* plg = world->GetWorldPluginData();
+        Collision::Manager* cld_manager = plg->GetManager();
+
+        CollCache* cache = cld_manager->GetIntersectingWorldSectors(line, data);
+
+        for (::SuperSector** sectors = cache->GetSuperSectors(); ::SuperSector * sector = *sectors; sectors++)
+        {
+            if (sector == NULL)
+                return data.collided;
+
+            //is the line intersecting the sector bbox?
+            if (line_bbox.Intersect((*(BBox*)&sector->bboxMax)))
+            {
+                //Does the sector have collision plugin and is it not killed?
+                if (sector->pCollisionPLG && sector->state != 6)
+                {
+                    //is the line intersecting any of the sector triangles?
+                    if (sector->GetCollisionPlugin()->CollideWithLine(extended_line, rayDir, sector, data))
+                    {
+                        debug_print("Colliding with sector %s\n", FindChecksumName(sector->name));
+                        return true;
+                    }
+                }
+
+            }
+        }
+        return false;
     }
 
     bool FindNearestCollision(RwLine& line, CollData& data)
@@ -278,7 +344,7 @@ namespace Collision
                 if (sector->pCollisionPLG && sector->state != 6)
                 {
                     //is the line intersecting any of the sector triangles?
-                    if (sector->GetCollisionPlugin()->ColldeWithLine(extended_line, rayDir, sector, data))
+                    if (sector->GetCollisionPlugin()->CollideWithLine(extended_line, rayDir, sector, data))
                     {
                         debug_print("Colliding with sector %s\n", FindChecksumName(sector->name));
                     }

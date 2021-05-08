@@ -3162,6 +3162,12 @@ void LoadCustomShaderThread()
 
     //Then update shaders
     Gfx::LoadCustomShaders(ShaderFile);
+
+    //this currently crashes, need to look into why...
+    /*RpWorld* world = RwViewer::Instance()->GetCurrentWorld();
+    NxPlugin* plg = world->GetWorldPluginData();
+    Collision::Manager* cld_manager = plg->GetManager();
+    cld_manager->SortWorldSectors();*/
 }
 
 bool OnPostLevelLoad(CStruct* pStruct, CScript* pScript)

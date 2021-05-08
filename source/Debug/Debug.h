@@ -15,6 +15,11 @@
 
 void Tracer(LPCSTR format, ...);
 void DebugPrint(const char* file, DWORD line, const char* date, const char* string, ...);
+#ifdef _DEBUG
+#define assert(x, text) if(!(x)) { MessageBox(0, "Assertion in file: " __FILE__  "\nFunction: " __FUNCTION__ "\n" text, "Critical ERROR", 0); ExitProcess(0); }
+#else
+#define assert(x, text)
+#endif
 
 
 // ****************************************************************************

@@ -104,6 +104,11 @@ EXTERN struct SuperSector
         return pCollisionPLG;
     }
 
+    BBox* GetBBox()
+    {
+        return (BBox*)&bboxMax;
+    }
+
     Color* GetColors()
     {
         return (Color*)color_offset;
@@ -239,14 +244,14 @@ namespace Collision
             ZeroMemory(&idx, sizeof(CollCache)-sizeof(BBox));
         }
 
-        void Update(RwLine& line);
+        void Update(RwLine& line, bool definite_mask = false);
 
-        CollCache* GetCache(RwLine & line)
+        CollCache* GetCache(RwLine & line, bool definite_mask = false)
         {
             if (!bbox.Within(line))
             {
                 if (!defaultCollCache.bbox.Within(line))
-                    Update(line);
+                    Update(line, definite_mask);
                 else
                     return &defaultCollCache;
             }
@@ -271,6 +276,25 @@ namespace Collision
         DWORD			    numSectors;
         ::RpWorldSector**   super_sectors;
 
+        void Sort()
+        {
+            for (DWORD i = 0; i < numSectors - 1; i++)
+            {
+                DWORD max = i;
+                for (DWORD j = i + 1; j < numSectors; j++)
+                {
+                    if (super_sectors[max]->bboxMax.y < super_sectors[j]->bboxMax.y)
+                        max = j;
+                }
+                if (max != i)
+                {
+                    ::RpWorldSector* temp = super_sectors[i];
+                    super_sectors[i] = super_sectors[max];
+                    super_sectors[max] = temp;
+                }
+            }
+        }
+
         friend Manager;
     };
 
@@ -288,6 +312,18 @@ namespace Collision
         Sector		        sectors[20][20];
 
     public:
+
+        void SortWorldSectors()
+        {
+            for (DWORD x = 0; x < num_sectors_x; x++)
+            {
+                for (DWORD z = 0; z < num_sectors_z; z++)
+                {
+                    Sector& sector = sectors[x][z];
+                    sector.Sort();
+                }
+            }
+        }
         __declspec(noalias) CollCache* GetIntersectingWorldSectors(RwLine& line, CollData & data, bool update_cache = false)
         {
             if (data.cache)
@@ -422,7 +458,7 @@ namespace Collision
             return pCollCache;
         }*/
 
-        __declspec(noalias) void UpdateCache(RwLine& line, CollCache* const __restrict cache)
+        __declspec(noalias) void UpdateCache(RwLine& line, CollCache* const __restrict cache, bool definite_mask = false)
         {
             //Set impossible BBOX
             cache->bbox.max = Vertex(-FLT_MAX, -FLT_MAX, -FLT_MAX);
@@ -443,6 +479,20 @@ namespace Collision
             test_line.end[Y] = line.end[Y] + dir.y;
             test_line.end[Z] = line.end[Z] + dir.z;
 
+            BBox line_bbox;
+            line_bbox.max.x = line.end.x > line.start.x ? line.end.x : line.start.x;
+            line_bbox.max.x += 0.5f;
+            line_bbox.max.y = line.end.y > line.start.y ? line.end.y : line.start.y;
+            line_bbox.max.y += 0.5f;
+            line_bbox.max.z = line.end.z > line.start.z ? line.end.z : line.start.z;
+            line_bbox.max.z += 0.5f;
+
+            line_bbox.min.x = line.end.x < line.start.x ? line.end.x : line.start.x;
+            line_bbox.min.x -= 0.5f;
+            line_bbox.min.y = line.end.y < line.start.y ? line.end.y : line.start.y;
+            line_bbox.min.y -= 0.5f;
+            line_bbox.min.z = line.end.z < line.start.z ? line.end.z : line.start.z;
+            line_bbox.min.z -= 0.5f;
 
             float x_offset = test_line.start[X] - world_bbox.min[X];
             float z_offset = test_line.start[Z] - world_bbox.min[Z];
@@ -470,8 +520,16 @@ namespace Collision
                 {
                     ::RpWorldSector* world_sector = sector->super_sectors[i];
 
-                    //Skip if kill flag is set
+                    //Skip if kill or non collide flag is set
                     if (!world_sector->unk_flag & 6 || world_sector->state & 6)
+                        continue;
+
+                    //since we are casting several rays when scanning for spine transfer targets
+                    //we should try to raycast as few SuperSectors as possible
+                    //so instead of raycasting all SuperSectors in the divided sector
+                    //we mask out SuperSectors that are not intersecting with our line
+                    //this should speedup the scanning drastically
+                    if (definite_mask && !line_bbox.Intersect(*world_sector->GetBBox()))
                         continue;
 
                     if (cache->bbox.max.x < sector->bbox.max.x) cache->bbox.max.x = sector->bbox.max.x;
@@ -526,15 +584,21 @@ namespace Collision
                         //OperationId is used so we only add each SuperSector once
                         if (cs->pUnknown != operationId)
                         {
-                            //Skip if kill flag is set
+                            //Skip if kill or non collide flag is set
                             if (!cs->unk_flag & 6 || cs->state & 6)
                                 continue;
 
-                            if (cache->idx < 1023)
-                            {
-                                cache->sectors[cache->idx++] = cs;
-                                cs->pUnknown = operationId;
-                            }
+                            //since we are casting several rays when scanning for spine transfer targets
+                            //we should try to raycast as few SuperSectors as possible
+                            //so instead of raycasting all SuperSectors in the divided sector
+                            //we mask out SuperSectors that are not intersecting with our line
+                            //this should speedup the scanning drastically
+                            if (definite_mask && !line_bbox.Intersect(*cs->GetBBox()))
+                                continue;
+
+                            assert(cache->idx < 1023, "Too many SuperSectors in cache...");
+                            cache->sectors[cache->idx++] = cs;
+                            cs->pUnknown = operationId;
                         }
 
                     }
@@ -645,8 +709,7 @@ struct MovingObject
         sector = _sector;
         this->link = Node::GetNodeStruct(checksum);
         pScript = _pScript;
-        if (!this->link)
-            MessageBox(0, "", "", 0);
+        assert(this->link, "No link in MovingObject...");
         CStructHeader* _position;
         if (!this->link->GetStruct(Checksums::Position, &_position))
             pos = D3DXVECTOR3(0, 0, 0);
