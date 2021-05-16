@@ -528,6 +528,94 @@ public:
         pResetPhysics(0x004AD380)(this);
     }
 
+    Collision::CFeeler & GetFeeler()
+    {
+        return *(Collision::CFeeler*)&m_feeler;
+    }
+
+    void GetCollisionFlags()
+    {
+        typedef void(__thiscall* const pGetCollisionFlags)(Skater* pThis);
+        pGetCollisionFlags(0x0049FBB0)(this);
+    }
+
+    void UberFrig(bool force_update)
+    {
+        if (force_update || position != oldpos)
+        {
+            RwLine line;
+            line.start = position;
+            line.end = line.start;
+            line.start += *(Vertex*)&matrix[Y] * 0.001f;
+            line.start.y += 8.0f;
+            line.end.y -= 4800.0f;
+            Collision::CollData cld;
+
+            //New collision check is generally 100% faster
+            //and in worst case scenarios it's 50% slower(probably because of wrong math somewhere)
+            //it also uses cache alot more often and efficiently which can improve speed by up to 500% in rare occations!
+            //if I can get parallelism to work it should get even faster
+            /*printf("Which is better?\n");
+            NewTimer::ProfileStart();
+            for (int i = 0; i < 10000; i++)
+            {
+                CollisionCheck();
+            }
+
+            NewTimer::ProfileEnd();
+            startcol = line.start;
+            endcol = line.end;
+            NewTimer::ProfileStart();
+            for (int i = 0; i < 10000; i++)
+            {
+                Collision::FindNearestCollision(line, cld);
+            }
+            NewTimer::ProfileEnd();
+            printf("-------------------\n");*/
+            
+            if (Collision::FindNearestCollision(line, cld))
+            {
+                normal = cld.normal;
+                hitpoint = cld.point;
+                collFlags = (DWORD)cld.collFlags;
+                height = position.y - hitpoint.y;
+                if (height < 0.001f)
+                {
+                    position.y = hitpoint.y + 0.001f;
+                    height = 0.0f;
+                }
+            }
+            /*else
+            {
+                startcol = line.start;
+                endcol = line.end;
+                if (CollisionCheck())
+                {
+                    if (height < 0.001f)
+                    {
+                        position.y = hitpoint.y + 0.001f;
+                        height = 0.0f;
+                    }
+                }
+                else
+                {
+                    //printf("bounce...\n");
+                    if (!UberFrigFix())
+                    {
+                        if (m_state != RAIL)
+                        {
+                            position = oldpos;
+                            velocity = -velocity;
+                            if (m_state == WALL)
+                                SetState(AIR);
+                        }
+                        height = 0.0f;
+                    }
+                }
+            }*/
+        }
+    }
+
     bool UberFrigFix()
     {
         Vertex pos = GetNextFramePos();
@@ -935,22 +1023,23 @@ public:
     }
 
     //used for spine transfer, don't call this
-    EXTERN void Store();
+    void Store();
 
     //used for spine transfer, don't call this
-    EXTERN void Restore();
+    void Restore();
 
     //used for spine transfer, don't call this
-    EXTERN void Slerping();
+    void Slerping();
 
     //used for spine transfer, don't call this
-    EXTERN void MultiplyMatrix(const D3DXMATRIX& delta);
+    void MultiplyMatrix(const D3DXMATRIX& delta);
 
     //used for spine transfer, don't call this
-    EXTERN bool CheckForSpine();
+    bool CheckForSpine();
+    //bool NewSpineTransferCode(Vertex& wall_out, Vertex& start_normal, bool& hip_transfer, Vertex& target, Vertex& target_normal);
 
     //used for spine transfer, don't call this
-    EXTERN void ResetLerpingMatrix();
+    void ResetLerpingMatrix();
 
     float GetAirGravity();
 

@@ -2,19 +2,29 @@
 #include "Collision.h"
 #include "Objects\SuperSectors.h"
 
-bool BBox::Within(RwLine& line)
+bool BBox::Within_2D(const RwLine& line)
 {
-        return ((line.start[X] >= min[X]) && (line.start[Y] >= min[Y]) && (line.start[Z] >= min[Z]) &&
-            (line.start[X] <= max[X]) && (line.start[Y] <= max[Y]) && (line.start[Z] <= max[Z]) &&
-            (line.end[X] >= min[X]) && (line.end[Y] >= min[Y]) && (line.end[Z] >= min[Z]) &&
-                (line.end[X] <= max[X]) && (line.end[Y] <= max[Y]) && (line.end[Z] <= max[Z]));
+        return ((line.start[X] > min[X]) && /*(line.start[Y] > min[Y]) &&*/ (line.start[Z] > min[Z]) &&
+            (line.start[X] < max[X]) && /*(line.start[Y] < max[Y]) &&*/ (line.start[Z] < max[Z]) &&
+            (line.end[X] > min[X]) && /*(line.end[Y] > min[Y]) &&*/ (line.end[Z] > min[Z]) &&
+                (line.end[X] < max[X]) && /*(line.end[Y] < max[Y]) &&*/ (line.end[Z] < max[Z]));
 }
 
-bool BBox::Intersect(BBox& bbox)
+bool BBox::Intersect(const BBox& bbox)
 {
-    return !((min[X] > bbox.max[X]) || (bbox.min[X] > max[X]) ||
+    if (((min[X] > bbox.max[X]) || (bbox.min[X] > max[X]) ||
         (min[Z] > bbox.max[Z]) || (bbox.min[Z] > max[Z]) ||
-        (min[Y] > bbox.max[Y]) || (bbox.min[Y] > max[Y]));
+        (min[Y] > bbox.max[Y]) || (bbox.min[Y] > max[Y])))
+        return false;
+    return true;
+}
+
+bool BBox::Intersect_2D(const BBox& bbox)
+{
+    if (((min[X] > bbox.max[X]) || (bbox.min[X] > max[X]) ||
+        (min[Z] > bbox.max[Z]) || (bbox.min[Z] > max[Z])))
+        return false;
+    return true;
 }
 
 namespace Collision
@@ -52,7 +62,7 @@ namespace Collision
         D3DXVECTOR3 E2 = C - A;
         D3DXVec3Cross(&N, &E1, &E2);
         float det = -D3DXVec3Dot(&dir, &N);
-        float invdet = 1.0 / det;
+        float invdet = 1.0f / det;
         D3DXVECTOR3 AO = start - A;
         D3DXVECTOR3 DAO;
         D3DXVec3Cross(&DAO, &AO, &dir);
@@ -63,7 +73,7 @@ namespace Collision
     }
 
 
-    __declspec (noalias) bool TriangleIntersection(const D3DXVECTOR3* v1, const D3DXVECTOR3* v2, const D3DXVECTOR3* v3, const D3DXVECTOR3* rayPos, const D3DXVECTOR3* rayDir, float & out_distance)
+    bool TriangleIntersection(const D3DXVECTOR3* v1, const D3DXVECTOR3* v2, const D3DXVECTOR3* v3, const D3DXVECTOR3* rayPos, const D3DXVECTOR3* rayDir, float & out_distance)
     {
         D3DXVECTOR3 edge1, edge2, tvec, pvec, qvec;
         float det, inv_det;
@@ -97,7 +107,7 @@ namespace Collision
         return true;
     }
 
-    bool CollisionPLG::TraverseBranch(Branch* branch, RwLine& line, Vertex& dir, ::SuperSector* sector, CollData& data)
+    __inline __declspec (noalias) bool CollisionPLG::TraverseBranch(const Branch* const __restrict branch, const RwLine& line, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const
     {
         //axis is optimized for easy access of x, y and z
         //x + 0 bytes = x
@@ -113,8 +123,9 @@ namespace Collision
         //compare to mid, go left or right?
         //optimization suggestion: change BSP collision tree to store middle point directly instead of storing min and max
         //this will use 4 less bytes per node and use few less instructions per node call
-        //this should improve collision detection speed since the less bytes will lead to less cache misses
+        //this should improve collision detection speed since less bytes will lead to less cache misses
         //and the removed instructions will obviusly be faster code, how much? who knows...
+        //RW 3.4 and later has this optimization
         float mid = (branch->max - branch->min) * 0.5f + branch->min;
 
         if (axis_aligned_start < mid && axis_aligned_end < mid)
@@ -150,12 +161,16 @@ namespace Collision
                 bCollided_right = CollideWithLine(leafs[branch->rightIndex], *(Vertex*)&line.start, dir, sector, data);
             return bCollided_left || bCollided_right;
         }
-        /*
-        float start_min = *(float*)((BYTE*)(&line.start.x) + axis) - branch->min;
+
+
+        //don't remember if this was some wild idea I had or if it's actually how RW does it??
+        //either way it seems to be a bad implementation, keeping it here just in case...
+        
+        /*float start_min = *(float*)((BYTE*)(&line.start.x) + axis) - branch->min;
         float end_min = *(float*)((BYTE*)(&line.end.x) + axis) - branch->min;
         if ((*(int*)&start_min < 0) && (*(int*)&end_min < 0))
         {
-            debug_print("Going Left\n");
+            //debug_print("Going Left\n");
             if (branch->leftType == 2)
                 return TraverseBranch(&branches[branch->leftIndex], line, dir, sector, data);
             else
@@ -167,20 +182,22 @@ namespace Collision
             float end_max = *(float*)((BYTE*)(&line.end.x) + axis) - branch->max;
             if (*(int*)&start_max < 0 || *(int*)&end_max < 0)
             {
-                debug_print("Going Both\n");
+                //debug_print("Going Both\n");
+                bool bCollided_left, bCollided_right;
                 if (branch->leftType == 2)
-                    return TraverseBranch(&branches[branch->leftIndex], line, dir, sector, data);
+                    bCollided_left = TraverseBranch(&branches[branch->leftIndex], line, dir, sector, data);
                 else
-                    return CollideWithLine(leafs[branch->leftIndex], *(Vertex*)&line.start, dir, sector, data);
+                    bCollided_left = CollideWithLine(leafs[branch->leftIndex], *(Vertex*)&line.start, dir, sector, data);
 
                 if (branch->rightType == 2)
-                    TraverseBranch(&branches[branch->rightIndex], line, dir, sector, data);
+                    bCollided_right = TraverseBranch(&branches[branch->rightIndex], line, dir, sector, data);
                 else
-                    return CollideWithLine(leafs[branch->rightIndex], *(Vertex*)&line.start, dir, sector, data);
+                    bCollided_right = CollideWithLine(leafs[branch->rightIndex], *(Vertex*)&line.start, dir, sector, data);
+                return bCollided_left || bCollided_right;
             }
             else
             {
-                debug_print("Going Righ\n");
+                //debug_print("Going Righ\n");
                 if (branch->rightType == 2)
                     return TraverseBranch(&branches[branch->rightIndex], line, dir, sector, data);
                 else
@@ -190,35 +207,37 @@ namespace Collision
         return false;
     }
 
-    bool CollisionPLG::CollideWithLine(Leaf& leaf, Vertex& start, Vertex& dir, ::SuperSector* sector, CollData& data)
+    __inline __declspec (noalias) bool CollisionPLG::CollideWithLine(const Leaf& leaf, const Vertex& start, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const
     {
         DWORD last = leaf.numFaces + leaf.idx;
         for (DWORD idx = leaf.idx; idx < last; idx++)
         {
-            if (!((WORD)sector->pCollisionFlags[faces[idx]] & (WORD)data.ignore_1) && !(~(WORD)sector->pCollisionFlags[faces[idx]] & (WORD)data.ignore_0))
+            DWORD collFlags = (WORD)sector->pCollisionFlags[faces[idx]];
+            if (!(collFlags & (WORD)data.ignore_1) && !(~collFlags & (WORD)data.ignore_0))
             {
                 RpTriangle& face = sector->triangles[faces[idx]];
                 Vertex v0 = sector->vertices[face.a];
                 Vertex v1 = sector->vertices[face.b];
                 Vertex v2 = sector->vertices[face.c];
 
-                float distance, u, v;
-                Vertex normal;
+                float distance;/* , u, v;
+                Vertex normal;*/
                 if (TriangleIntersection(&v0, &v1, &v2, &start, &dir, distance))//if (intersect_triangle(*(D3DXVECTOR3*)&line.start, rayDir, v0, v1, v2, distance, u, v, normal))
                 {
                     if (data.unk > distance)
                     {
+
+                        data.unk = distance;
                         data.collided = true;
                         data.checksum = sector->name;
-                        Vertex edge1 = v0 - v1;
-                        Vertex edge2 = v1 - v2;
-                        data.normal = CrossProduct(&edge1, &edge2);
-                        data.normal.Normalize();
-                        data.point = dir;
-                        data.point.Scale(distance);
-                        data.point += start;
-                        data.unk = distance;
+                        //data.p_sector = sector;
                         data.index = faces[idx];
+                        data.terrain = face.matIndex;
+                        data.collFlags = (Collision::Flags)collFlags;
+                        data.v0 = v0;
+                        data.v1 = v1;
+                        data.v2 = v2;
+
                     }
                 }
             }
@@ -226,10 +245,11 @@ namespace Collision
         return data.collided;
     }
 
-    bool FindFirstCollision(RwLine& line, CollData& data)
+    __declspec (noalias) bool FindFirstCollision(const RwLine& line, CollData& data, bool update_cache)
     {
-        data.collided = false;
         data.unk = FLT_MAX;
+        data.collided = false;
+
         Vertex rayDir = line.end - line.start;
 
 
@@ -265,9 +285,9 @@ namespace Collision
         NxPlugin* plg = world->GetWorldPluginData();
         Collision::Manager* cld_manager = plg->GetManager();
 
-        CollCache* cache = cld_manager->GetIntersectingWorldSectors(line, data);
+        CollCache* cache = cld_manager->GetIntersectingWorldSectors(line, data, update_cache);
 
-        for (::SuperSector** sectors = cache->GetSuperSectors(); ::SuperSector * sector = *sectors; sectors++)
+        for (const ::SuperSector* const* __restrict sectors = cache->GetSuperSectors(); const ::SuperSector* const __restrict sector = *sectors; sectors++)
         {
             if (sector == NULL)
                 return data.collided;
@@ -275,82 +295,101 @@ namespace Collision
             //is the line intersecting the sector bbox?
             if (line_bbox.Intersect((*(BBox*)&sector->bboxMax)))
             {
-                //Does the sector have collision plugin and is it not killed?
-                if (sector->pCollisionPLG && sector->state != 6)
+                //Is the sector killed since last cache update?
+                if (sector->state != 6)
                 {
                     //is the line intersecting any of the sector triangles?
                     if (sector->GetCollisionPlugin()->CollideWithLine(extended_line, rayDir, sector, data))
                     {
-                        debug_print("Colliding with sector %s\n", FindChecksumName(sector->name));
+                        Vertex edge1 = data.v0 - data.v1;
+                        Vertex edge2 = data.v1 - data.v2;
+                        data.normal = CrossProduct(&edge1, &edge2);
+                        data.normal.Normalize();
+                        data.point = rayDir;
+                        data.point.Scale(data.unk);
+                        data.point += line.start;
+                        //debug_print("Colliding with sector %s\n", FindChecksumName(sector->name));
                         return true;
+                    }
+                }
+            }
+        }
+        //did not collide with any sectors
+        return false;
+    }
+
+    __declspec (noalias) bool FindNearestCollision(const RwLine& line, CollData& data, bool update_cache)
+    {
+        data.unk = FLT_MAX;
+        data.collided = false;
+
+        Vertex rayDir = line.end - line.start;
+
+
+        BBox line_bbox;
+        line_bbox.max.x = line.end.x > line.start.x ? line.end.x : line.start.x;
+        line_bbox.max.x += 0.5f;
+        line_bbox.max.y = line.end.y > line.start.y ? line.end.y : line.start.y;
+        line_bbox.max.y += 0.5f;
+        line_bbox.max.z = line.end.z > line.start.z ? line.end.z : line.start.z;
+        line_bbox.max.z += 0.5f;
+
+        line_bbox.min.x = line.end.x < line.start.x ? line.end.x : line.start.x;
+        line_bbox.min.x -= 0.5f;
+        line_bbox.min.y = line.end.y < line.start.y ? line.end.y : line.start.y;
+        line_bbox.min.y -= 0.5f;
+        line_bbox.min.z = line.end.z < line.start.z ? line.end.z : line.start.z;
+        line_bbox.min.z -= 0.5f;
+
+        RwLine extended_line;
+        Vertex dir = line.end - line.start;
+        dir.Normalize();
+        dir.Scale(0.5f);
+
+        extended_line.start[X] = line.start[X] - dir.x;
+        extended_line.start[Y] = line.start[Y] - dir.y;
+        extended_line.start[Z] = line.start[Z] - dir.z;
+        extended_line.end[X] = line.end[X] + dir.x;
+        extended_line.end[Y] = line.end[Y] + dir.y;
+        extended_line.end[Z] = line.end[Z] + dir.z;
+
+
+        RpWorld* world = RwViewer::Instance()->GetCurrentWorld();
+        NxPlugin* plg = world->GetWorldPluginData();
+        Collision::Manager* cld_manager = plg->GetManager();
+
+        CollCache* cache = cld_manager->GetIntersectingWorldSectors(line, data, update_cache);
+//#pragma omp parallel for throwing a compiler error for some reason...
+        for(/*int i=0; i<cache->GetNumSuperSectors(); i++)//*/::SuperSector** sectors = cache->GetSuperSectors(); ::SuperSector* sector = *sectors;  sectors++)
+        {
+            //::SuperSector* __restrict sector = cache->GetSuperSector(i);
+            if (sector == NULL)
+                return data.collided;
+
+            //is the line intersecting the sector bbox?
+            if (line_bbox.Intersect((*(BBox*)&sector->bboxMax)))
+            {
+                //Is the sector killed since last cache update?
+                if (sector->state != 6)
+                {
+                    //is the line intersecting any of the sector triangles?
+                    if (sector->GetCollisionPlugin()->CollideWithLine(extended_line, rayDir, sector, data))
+                    {
+                        //debug_print("Colliding with sector %s\n", FindChecksumName(sector->name));
                     }
                 }
 
             }
         }
-        return false;
-    }
-
-    bool FindNearestCollision(RwLine& line, CollData& data)
-    {
-        data.collided = false;
-        data.unk = FLT_MAX;
-        Vertex rayDir = line.end - line.start;
-
-
-        BBox line_bbox;
-        line_bbox.max.x = line.end.x > line.start.x ? line.end.x : line.start.x;
-        line_bbox.max.x += 0.5f;
-        line_bbox.max.y = line.end.y > line.start.y ? line.end.y : line.start.y;
-        line_bbox.max.y += 0.5f;
-        line_bbox.max.z = line.end.z > line.start.z ? line.end.z : line.start.z;
-        line_bbox.max.z += 0.5f;
-
-        line_bbox.min.x = line.end.x < line.start.x ? line.end.x : line.start.x;
-        line_bbox.min.x -= 0.5f;
-        line_bbox.min.y = line.end.y < line.start.y ? line.end.y : line.start.y;
-        line_bbox.min.y -= 0.5f;
-        line_bbox.min.z = line.end.z < line.start.z ? line.end.z : line.start.z;
-        line_bbox.min.z -= 0.5f;
-
-        RwLine extended_line;
-        Vertex dir = line.end - line.start;
-        dir.Normalize();
-        dir.Scale(0.5f);
-
-        extended_line.start[X] = line.start[X] - dir.x;
-        extended_line.start[Y] = line.start[Y] - dir.y;
-        extended_line.start[Z] = line.start[Z] - dir.z;
-        extended_line.end[X] = line.end[X] + dir.x;
-        extended_line.end[Y] = line.end[Y] + dir.y;
-        extended_line.end[Z] = line.end[Z] + dir.z;
-
-
-        RpWorld* world = RwViewer::Instance()->GetCurrentWorld();
-        NxPlugin* plg = world->GetWorldPluginData();
-        Collision::Manager* cld_manager = plg->GetManager();
-
-        CollCache* cache = cld_manager->GetIntersectingWorldSectors(line, data);
-
-        for(::SuperSector** sectors = cache->GetSuperSectors(); ::SuperSector* sector = *sectors;  sectors++)
+        if (data.collided)
         {
-            if (sector == NULL)
-                return data.collided;
-
-            //is the line intersecting the sector bbox?
-            if (line_bbox.Intersect((*(BBox*)&sector->bboxMax)))
-            {
-                //Does the sector have collision plugin and is it not killed?
-                if (sector->pCollisionPLG && sector->state != 6)
-                {
-                    //is the line intersecting any of the sector triangles?
-                    if (sector->GetCollisionPlugin()->CollideWithLine(extended_line, rayDir, sector, data))
-                    {
-                        debug_print("Colliding with sector %s\n", FindChecksumName(sector->name));
-                    }
-                }
-
-            }
+            Vertex edge1 = data.v0 - data.v1;
+            Vertex edge2 = data.v1 - data.v2;
+            data.normal = CrossProduct(&edge1, &edge2);
+            data.normal.Normalize();
+            data.point = rayDir;
+            data.point.Scale(data.unk);
+            data.point += line.start;
         }
         return data.collided;
     }

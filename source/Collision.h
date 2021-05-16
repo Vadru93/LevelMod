@@ -18,8 +18,9 @@ struct BBox
     Vertex max;
     Vertex min;
 
-    bool Within(RwLine& line);
-    bool Intersect(BBox& bbox);
+    bool Within_2D(const RwLine& line);
+    bool Intersect_2D(const BBox& bbox);
+    bool Intersect(const BBox& bbox);
 };
 
 
@@ -93,14 +94,19 @@ namespace Collision
         DWORD unk_flags;//00 01 00 00
         DWORD terrain;//Maybe?
         void* pRandomFunclocation;
-        SuperSector* p_sector;
+        const ::SuperSector* __restrict p_sector;
         void* node_data;//Not sure?
-        DWORD unk2[4];
+        Collision::Flags collFlags;
+        WORD padd;
+        DWORD unk2[3];
         float unk3[2];
 
         Surface surface;
+        Vertex v0;
+        Vertex v1;
+        Vertex v2;
 
-        BYTE safe_guard[200];
+        BYTE safe_guard[20];
         //BYTE unk3[200];
 
         CollData(Collision::Flags ignore0 = Collision::Flags::Skatable, Collision::Flags ignore1 = Collision::Flags::Hollow)
@@ -140,15 +146,15 @@ namespace Collision
     class CollisionPLG
     {
         DWORD flags;//Always 1?
-        void* tree;//points to numLeafs
+        void* __restrict tree;//points to numLeafs
         DWORD numFaces;
-        WORD* faces;
+        WORD* __restrict faces;
         DWORD numLeafs;
-        Branch* branches;
-        Leaf* leafs;
+        Branch* __restrict branches;
+        Leaf* __restrict leafs;
         DWORD unk;//Always NULL?
 
-        void AddLeaf(Leaf& leaf)
+        /*__inline __declspec (noalias) void AddLeaf(const Leaf& leaf)
         {
             debug_print("Adding Leaf %d faces\n", leaf.numFaces);
             DWORD last = leaf.numFaces + leaf.idx;
@@ -156,29 +162,29 @@ namespace Collision
             {
                 pInterFaces[numInterFaces++] = faces[idx];
             }
-        }
+        }*/
 
 
-        bool CollideWithLine(Leaf& leaf, Vertex& start, Vertex& dir, ::SuperSector* sector, CollData& data);
-        bool TraverseBranch(Branch* branch, RwLine& line, Vertex& dir, ::SuperSector* sector, CollData& data);
+        __inline __declspec (noalias) bool CollideWithLine(const Leaf& leaf, const Vertex& start, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const;
+        __inline __declspec (noalias) bool TraverseBranch(const Branch* const __restrict branch, const RwLine& line, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const;
 
     public:
-        bool CollideWithLine(RwLine & line, Vertex & dir, ::SuperSector* sector, CollData & data)
+        __declspec (noalias) bool CollideWithLine(const RwLine& line, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const
         {
             numInterFaces = 0;
-            if (!branches)
-            {
-                if (leafs)
-                    return CollideWithLine(leafs[0], *(Vertex*)&line.start, dir, sector, data);
-            }
 
-            return TraverseBranch(&branches[0], line, dir, sector, data);
+            if (branches)
+                return TraverseBranch(&branches[0], line, dir, sector, data);
+            else if (leafs)
+                return CollideWithLine(leafs[0], line.start, dir, sector, data);
+
+            return false;
         }
     };
 
     typedef class CollCache;
-    bool FindNearestCollision(RwLine& line, CollData& data);
-    bool FindFirstCollision(RwLine& line, CollData& data);
+    __declspec (noalias) bool FindNearestCollision(const RwLine& line, CollData& data, bool update_cache = false);
+    __declspec (noalias) bool FindFirstCollision(const RwLine& line, CollData& data, bool update_cache = false);
 
     struct CFeeler : public Line
     {
@@ -220,12 +226,13 @@ namespace Collision
 
         bool GetCollision()
         {
-            typedef bool(__thiscall* const pGetCollision)(CFeeler* pThis);
-            return pGetCollision(0x00496EA0)(this);
+            return FindFirstCollision(*(RwLine*)&start, cld);
+            /*typedef bool(__thiscall* const pGetCollision)(CFeeler* pThis);
+            return pGetCollision(0x00496EA0)(this);*/
         }
     };
 
-    bool TriangleIntersectingSphere(D3DXVECTOR3 A, D3DXVECTOR3 B, D3DXVECTOR3 C, D3DXVECTOR3 P, float R);
+    __inline __declspec (noalias) bool TriangleIntersectingSphere(D3DXVECTOR3 A, D3DXVECTOR3 B, D3DXVECTOR3 C, D3DXVECTOR3 P, float R);
     bool TriangleInsideSphere(D3DXVECTOR3 A, D3DXVECTOR3 B, D3DXVECTOR3 C, D3DXVECTOR3 P, float R);
 };
 #endif

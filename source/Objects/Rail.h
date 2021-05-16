@@ -199,19 +199,20 @@ public:
     }
     int	Side(const Vertex& vel) const
     {
-        Vertex Start = *(D3DXVECTOR3*)&vPos;
-        Vertex End = *(D3DXVECTOR3*)&pNextLink->vPos;
+        RwLine line;
+        line.start = *(D3DXVECTOR3*)&vPos;
+        line.end = *(D3DXVECTOR3*)&pNextLink->vPos;
         //Game::skater->Store();
 
 
         // Find a point "Mid", which is 1/4 of the way along the rail   
         // and lowered six inches
-        Vertex Mid = (Start + End) / 2.0f;			// Half way along
-        Mid = Start + ((Mid - Start) / 2.0f);		    // quarter of the way along	
+        Vertex Mid = (line.start + line.end) / 2.0f;			// Half way along
+        Mid = line.start + ((Mid - line.start) / 2.0f);		    // quarter of the way along	
         Mid[Y] -= 6.0f;									// lowered a bit
 
     // Find a vector "Side" which is horizontal, perpendicular to the rail, and 4 inches long	
-        Vertex Side = End - Start;	   			// vector along the rail
+        Vertex Side = line.end - line.start;	   			// vector along the rail
         Side[Y] = 0.0f;								// horizontal
         Side.Normalize(4.0f);						// this is half the width of the thickest rail.  Was 4.0, changed for Tokyo mega funbox
         float temp = Side[X];			 				// make perpendicular to rail
@@ -256,7 +257,7 @@ public:
         }
 
         // flip is we are going the opposite direction on the rail
-        const D3DXVECTOR3 temp3 = (End - Start);
+        const D3DXVECTOR3 temp3 = (line.end - line.start);
         if (side && (D3DXVec3Dot(&vel, &temp3) < 0.0f))
         {
             side = -side;

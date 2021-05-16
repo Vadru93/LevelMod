@@ -99,7 +99,7 @@ EXTERN struct SuperSector
 
     //bool CollideWithLine(Collision::Leaf& leaf, Vertex& start, Vertex& dir, SuperSector* sector, Collision::CollData& data);
 
-    Collision::CollisionPLG* GetCollisionPlugin()
+    Collision::CollisionPLG* const __restrict GetCollisionPlugin() const
     {
         return pCollisionPLG;
     }
@@ -244,18 +244,33 @@ namespace Collision
             ZeroMemory(&idx, sizeof(CollCache)-sizeof(BBox));
         }
 
+        void Clear()
+        {
+            CollCache();
+        }
+
         void Update(RwLine& line, bool definite_mask = false);
 
         CollCache* GetCache(RwLine & line, bool definite_mask = false)
         {
-            if (!bbox.Within(line))
+            if (!bbox.Within_2D(line))
             {
-                if (!defaultCollCache.bbox.Within(line))
+                if (!defaultCollCache.bbox.Within_2D(line))
                     Update(line, definite_mask);
                 else
                     return &defaultCollCache;
             }
             return this;
+        }
+
+        ::SuperSector* __restrict GetSuperSector(DWORD index) const
+        {
+            return sectors[index];
+        }
+
+        const DWORD GetNumSuperSectors() const
+        {
+            return idx+1;
         }
 
         ::SuperSector** GetSuperSectors()
@@ -324,15 +339,15 @@ namespace Collision
                 }
             }
         }
-        __declspec(noalias) CollCache* GetIntersectingWorldSectors(RwLine& line, CollData & data, bool update_cache = false)
+        __declspec(noalias) CollCache* GetIntersectingWorldSectors(const RwLine& line, CollData & data, bool update_cache = false) const
         {
             if (data.cache)
             {
                 if (update_cache)
                 {
-                    if (!data.cache->bbox.Within(line))
+                    if (!data.cache->bbox.Within_2D(line))
                     {
-                        if (!defaultCollCache.bbox.Within(line))
+                        if (!defaultCollCache.bbox.Within_2D(line))
                             UpdateCache(line, data.cache);
                         else
                             return &defaultCollCache;
@@ -341,7 +356,7 @@ namespace Collision
                 return data.cache;
             }
 
-            if (!defaultCollCache.bbox.Within(line))
+            if (!defaultCollCache.bbox.Within_2D(line))
                 UpdateCache(line, &defaultCollCache);
             return &defaultCollCache;
         }
@@ -458,8 +473,9 @@ namespace Collision
             return pCollCache;
         }*/
 
-        __declspec(noalias) void UpdateCache(RwLine& line, CollCache* const __restrict cache, bool definite_mask = false)
+        __declspec(noalias) void UpdateCache(const RwLine& line, CollCache* const __restrict cache, bool definite_mask = false) const
         {
+            printf("Updating cache\n");
             //Set impossible BBOX
             cache->bbox.max = Vertex(-FLT_MAX, -FLT_MAX, -FLT_MAX);
             cache->bbox.min = Vertex(FLT_MAX, FLT_MAX, FLT_MAX);
@@ -498,14 +514,18 @@ namespace Collision
             float z_offset = test_line.start[Z] - world_bbox.min[Z];
             int start_x_box = (int)(x_offset / sector_width);
             int start_z_box = (int)(z_offset / sector_depth);
+            /*cache->bbox.min.x = world_bbox.min.x + (float)start_x_box * sector_width;
+            cache->bbox.min.z = world_bbox.min.z + (float)start_z_box * sector_width;*/
 
             start_x_box < 0 ? start_x_box = 0 : start_x_box >= num_sectors_x ? start_x_box = num_sectors_x - 1 : start_x_box = start_x_box;
             start_z_box < 0 ? start_z_box = 0 : start_z_box >= num_sectors_z ? start_z_box = num_sectors_z - 1 : start_z_box = start_z_box;
 
             x_offset = test_line.end[X] - world_bbox.min[X];
             z_offset = test_line.end[Z] - world_bbox.min[Z];
-            int end_x_box = (int)(x_offset / sector_width);
-            int end_z_box = (int)(z_offset / sector_depth);
+            int end_x_box = (int)((x_offset / sector_width) /*+ 0.5f*/);
+            int end_z_box = (int)((z_offset / sector_depth) /*+ 0.5f*/);
+            /*cache->bbox.max.x = world_bbox.min.x + (float)end_x_box * sector_width;
+            cache->bbox.max.z = world_bbox.min.z + (float)end_z_box * sector_width;*/
 
             end_x_box < 0 ? end_x_box = 0 : end_x_box >= num_sectors_x ? end_x_box = num_sectors_x - 1 : end_x_box = end_x_box;
             end_z_box < 0 ? end_z_box = 0 : end_z_box >= num_sectors_z ? end_z_box = num_sectors_z - 1 : end_z_box = end_z_box;
@@ -513,6 +533,7 @@ namespace Collision
             //Optimization if in same Sector, will return up to 30% faster
             if (start_x_box == end_x_box && start_z_box == end_z_box)
             {
+                //MessageBox(0, 0, 0, 0);
                 //Optimize array access
                 const Sector* sector = &sectors[start_x_box][start_z_box];
 
@@ -521,7 +542,7 @@ namespace Collision
                     ::RpWorldSector* world_sector = sector->super_sectors[i];
 
                     //Skip if kill or non collide flag is set
-                    if (!world_sector->unk_flag & 6 || world_sector->state & 6)
+                    if (!world_sector->pCollisionPLG || world_sector->pCollisionPLG == INVALID_PTR || !(world_sector->unk_flag & 6) || world_sector->state & 6)
                         continue;
 
                     //since we are casting several rays when scanning for spine transfer targets
@@ -529,7 +550,7 @@ namespace Collision
                     //so instead of raycasting all SuperSectors in the divided sector
                     //we mask out SuperSectors that are not intersecting with our line
                     //this should speedup the scanning drastically
-                    if (definite_mask && !line_bbox.Intersect(*world_sector->GetBBox()))
+                    if (definite_mask && !line_bbox.Intersect_2D(*world_sector->GetBBox()))
                         continue;
 
                     if (cache->bbox.max.x < sector->bbox.max.x) cache->bbox.max.x = sector->bbox.max.x;
@@ -547,16 +568,25 @@ namespace Collision
             //Optimize Array access order
             if (start_x_box > end_x_box)
             {
-                float temp = start_x_box;
+                int temp = start_x_box;
                 start_x_box = end_x_box;
                 end_x_box = temp;
+                /*temp = cache->bbox.min.x;
+                cache->bbox.min.x = cache->bbox.max.x;
+                cache->bbox.max.x = temp;*/
             }
             if (start_z_box > end_z_box)
             {
-                float temp = start_z_box;
+                int temp = start_z_box;
                 start_z_box = end_z_box;
                 end_z_box = temp;
+                /*temp = cache->bbox.min.z;
+                cache->bbox.min.z = cache->bbox.max.z;
+                cache->bbox.max.z = temp;*/
             }
+
+            /*cache->bbox.min.x = world_bbox.min.x + (float)start_x_box * sector_width;
+            cache->bbox.min.z = world_bbox.min.z + (float)start_z_box * sector_width;*/
 
             //New operation ID
             operationId++;
@@ -567,7 +597,7 @@ namespace Collision
                 for (int j = start_z_box; j <= end_z_box; j++)
                 {
                     //Optimize array access
-                    Collision::Sector & sector = sectors[i][j];
+                    const Collision::Sector & sector = sectors[i][j];
 
                     if (cache->bbox.max.x < sector.bbox.max.x) cache->bbox.max.x = sector.bbox.max.x;
                     if (cache->bbox.max.y < sector.bbox.max.y) cache->bbox.max.y = sector.bbox.max.y;
@@ -585,7 +615,7 @@ namespace Collision
                         if (cs->pUnknown != operationId)
                         {
                             //Skip if kill or non collide flag is set
-                            if (!cs->unk_flag & 6 || cs->state & 6)
+                            if (!cs->pCollisionPLG || cs->pCollisionPLG == INVALID_PTR || !(cs->unk_flag & 6) || cs->state & 6)
                                 continue;
 
                             //since we are casting several rays when scanning for spine transfer targets
@@ -593,7 +623,7 @@ namespace Collision
                             //so instead of raycasting all SuperSectors in the divided sector
                             //we mask out SuperSectors that are not intersecting with our line
                             //this should speedup the scanning drastically
-                            if (definite_mask && !line_bbox.Intersect(*cs->GetBBox()))
+                            if (definite_mask && !line_bbox.Intersect_2D(*cs->GetBBox()))
                                 continue;
 
                             assert(cache->idx < 1023, "Too many SuperSectors in cache...");

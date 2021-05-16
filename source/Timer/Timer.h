@@ -22,6 +22,8 @@ namespace NewTimer
     void Initialize();
     void ResetTime();
     bool ResetTimeScript(CStruct* pStruct, CScript* pScript);
+    void ProfileStart();
+    void ProfileEnd();
 
     unsigned long long __stdcall GetTime();
     unsigned long long GetFrameTime();

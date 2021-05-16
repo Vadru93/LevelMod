@@ -4,6 +4,7 @@
 #define NO_DEFINES
 #include "d3d9.h"
 #include "Objects\SuperSectors.h"
+#include "Collision.h"
 
 
 //#define p_stride 0x24//*(DWORD*)0x0090B8A8
@@ -63,6 +64,11 @@ struct ShatterData
     float bounce;
     float bounceAmp;
 
+    D3DXVECTOR3* old_pos;
+    bool* collided;
+    Collision::CollData data;
+    Collision::CollCache cache;
+
     ~ShatterData()
     {
         debug_print("Deleting ShatterObject %s\n", FindChecksumName(sector->name));
@@ -70,6 +76,8 @@ struct ShatterData
         delete[]pos;
         delete[]vel;
         delete[]matrices;
+        delete[]old_pos;
+        delete[]collided;
         //delete[]tris;
         ZeroMemory(this, sizeof(ShatterData));
     }
@@ -108,18 +116,20 @@ struct ShatterData
 
         for (int i = 0; i < numTris; ++i)
         {
-            // To move the shatter pieces:
-            // 1) subtract position from each vertex
-            // 2) rotate
-            // 3) update position with velocity
-            // 4) add new position to each vertex
+            if (!collided[i])
+            {
+                // To move the shatter pieces:
+                // 1) subtract position from each vertex
+                // 2) rotate
+                // 3) update position with velocity
+                // 4) add new position to each vertex
 
-            // The matrix holds 3 vectors at once.
-            /*D3DXVECTOR3* p_v0 = (D3DXVECTOR3*)(((BYTE*)base_p_v0) + ((stride * 3) * shatteredTris[i]));
-            D3DXVECTOR3* p_v1 = (D3DXVECTOR3*)(((BYTE*)base_p_v1) + ((stride * 3) * shatteredTris[i]));
-            D3DXVECTOR3* p_v2 = (D3DXVECTOR3*)(((BYTE*)base_p_v2) + ((stride * 3) * shatteredTris[i]));
-            if (true)
-            {*/
+                // The matrix holds 3 vectors at once.
+                /*D3DXVECTOR3* p_v0 = (D3DXVECTOR3*)(((BYTE*)base_p_v0) + ((stride * 3) * shatteredTris[i]));
+                D3DXVECTOR3* p_v1 = (D3DXVECTOR3*)(((BYTE*)base_p_v1) + ((stride * 3) * shatteredTris[i]));
+                D3DXVECTOR3* p_v2 = (D3DXVECTOR3*)(((BYTE*)base_p_v2) + ((stride * 3) * shatteredTris[i]));
+                if (true)
+                {*/
                 Matrix m;
                 m[X].Set(p_v0->x - pos[i][X], p_v0->y - pos[i][Y], p_v0->z - pos[i][Z]);
                 m[Y].Set(p_v1->x - pos[i][X], p_v1->y - pos[i][Y], p_v1->z - pos[i][Z]);
@@ -130,15 +140,24 @@ struct ShatterData
                 m[Z].Rotate(matrices[i]);
 
                 // Update the position and velocity of the shatter piece, dealing with bouncing if necessary.
-                UpdateParameters(i, framelength);
+                if (!UpdateParameters(i, framelength))
+                {
+                    *p_v0 = *(D3DXVECTOR3*)&m[X] + pos[i];
+                    *p_v1 = *(D3DXVECTOR3*)&m[Y] + pos[i];
+                    *p_v2 = *(D3DXVECTOR3*)&m[Z] + pos[i];
+                }
+                else
+                {
+                    *(D3DXVECTOR3*)&m[X] += pos[i];
+                    *(D3DXVECTOR3*)&m[Y] += pos[i];
+                    *(D3DXVECTOR3*)&m[Z] += pos[i];
 
-                *(D3DXVECTOR3*)&m[X] += pos[i];
-                *(D3DXVECTOR3*)&m[Y] += pos[i];
-                *(D3DXVECTOR3*)&m[Z] += pos[i];
-
-                p_v0->x = m[X][X]; p_v0->y = m[X][Y]; p_v0->z = m[X][Z];
-                p_v1->x = m[Y][X]; p_v1->y = m[Y][Y]; p_v1->z = m[Y][Z];
-                p_v2->x = m[Z][X]; p_v2->y = m[Z][Y]; p_v2->z = m[Z][Z];
+                    Vertex temp0, temp1, temp2;
+                    p_v0->x = m[X][X]; p_v0->y = m[X][Y]; p_v0->z = m[X][Z];
+                    p_v1->x = m[Y][X]; p_v1->y = m[Y][Y]; p_v1->z = m[Y][Z];
+                    p_v2->x = m[Z][X]; p_v2->y = m[Z][Y]; p_v2->z = m[Z][Z];
+                }
+            }
 
                 p_v0 = (D3DXVECTOR3*)(((BYTE*)p_v0) + (stride * 3));
                 p_v1 = (D3DXVECTOR3*)(((BYTE*)p_v1) + (stride * 3));
@@ -199,6 +218,21 @@ struct ShatterData
         life = shatterLifetime * Gfx::shatter_life_factor;
         bounce = shatterBounce;
         bounceAmp = shatterBounceAmplitude;
+
+        BBox bbox = *sector->GetBBox();
+        RwLine line;
+        line.start = bbox.min;
+        line.end = bbox.max;
+        line.end.y -= 4500.f;
+        line.start.x -= 50.0f;
+        line.start.z -= 50.0f;
+        line.end.x += 50.0f;
+        line.end.z += 50.0f;
+
+        cache.Update(line);
+        data = Collision::CollData(&cache);
+
+
         debug_print("Allocated memory\n");
     }
 
@@ -207,6 +241,9 @@ struct ShatterData
         pos = new D3DXVECTOR3[numTris];
         vel = new D3DXVECTOR3[numTris];
         matrices = new Matrix[numTris];
+        old_pos = new D3DXVECTOR3[numTris];
+        collided = new bool[numTris];
+        ZeroMemory(collided, numTris);
 
         if (pos && vel && matrices)
             debug_print("Memory alllocated successfully\n");
@@ -214,8 +251,10 @@ struct ShatterData
             debug_print("Memory did not allocate...\n");
     }
 
-    void UpdateParameters(int index, float timestep)
+    bool UpdateParameters(int index, float timestep)
     {
+        old_pos[index] = pos[index];
+
         pos[index] += vel[index] * timestep;
 
         if ((pos[index][Y] < bounce) && (vel[index][Y] < 0.0f))
@@ -232,6 +271,21 @@ struct ShatterData
         }
 
         vel[index][Y] -= gravity * timestep;
+
+        if (old_pos[index] != pos[index])
+        {
+            RwLine line;
+            line.start = old_pos[index];
+            line.end = pos[index];
+
+            if (Collision::FindNearestCollision(line, data) && data.normal.y > 0.1f)
+            {
+                collided[index] = true;
+                pos[index] = data.point;
+                return false;
+            }
+        }
+        return true;
     }
 };
 

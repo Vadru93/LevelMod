@@ -78,6 +78,24 @@ namespace NewTimer
         Gfx::frame_modifier *= 0.000001;
     }
 
+    LARGE_INTEGER profile_start;
+    void ProfileStart()
+    {
+//#ifdef _DEBUG
+        QueryPerformanceCounter(&profile_start);
+//#endif
+    }
+
+    void ProfileEnd()
+    {
+//#ifdef _DEBUG
+        LARGE_INTEGER end;
+        QueryPerformanceCounter(&end);
+        end.QuadPart -= profile_start.QuadPart;
+        printf("Ms %f\n", (double)end.LowPart * NewTimer::fFreq);
+//#endif
+    }
+
     void Initialize()
     {
         QueryPerformanceCounter(&startTime);

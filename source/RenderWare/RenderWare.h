@@ -2,6 +2,7 @@
 #include "Extension\Defines.h"
 #include "d3d8to9\d3d8to9.hpp"
 #define RWFORCEENUMSIZEINT ((DWORD)((~((DWORD)0))>>1))
+#define INVALID_PTR (void*)0xFFFFFFFF
 
 struct RwObject
 {

@@ -702,7 +702,7 @@ void AddVibration(CStruct* pStruct, CScript* pScript)
         {
             debug_print("GotParam Percent %d\n", pPercent->value.i);
             double vibrationLevel = 65535.0;
-            vibrationLevel *= (((double)pPercent->value.i / 100.0));
+            vibrationLevel *= (((double)pPercent->value.i / 50.0));
 
             *motor = (WORD)(vibrationLevel + 0.5);
             debug_print("Setting vibration to %f(%d) on motor %d\n", vibrationLevel, *motor, rightMotor);
@@ -714,7 +714,7 @@ void AddVibration(CStruct* pStruct, CScript* pScript)
         }
 
         //The duration is a value between 0-1
-        //The game multiply that value by 1000 to get the number of frames
+        //The game multiply that value by 1000
         //If duration is not found it should vibrate until off is called
         XINPUT::vibrationFrames = 0xFFFFFFFF;
 

@@ -328,7 +328,7 @@ EXTERN void Skater::SetTracking(bool value)
 }
 
 
-EXTERN void Skater::MultiplyMatrix(const D3DXMATRIX& delta)
+void Skater::MultiplyMatrix(const D3DXMATRIX& delta)
 {
     matrix *= delta;
     old = matrix;

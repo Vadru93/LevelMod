@@ -182,6 +182,19 @@ __inline void HookFunction(DWORD addr, void(CScript::* function)(DWORD checksum,
     //
     //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
 }
+__inline void HookFunction(DWORD addr, void(Skater::* function)(bool force_update), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    addr += 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
 __inline void HookFunction(DWORD addr, void(FrontEnd::* function)(), BYTE byteCode = 0, DWORD nopCount = 0)
 {
     DWORD old;
@@ -733,6 +746,8 @@ bool CreatePair(CStruct* pStruct, CScript* pScript)
 
 void DestroySuperSectors()
 {
+    if(LevelModSettings::bHookedControls && XINPUT::Player1->IsConnected())
+        XINPUT::Player1->Vibrate(0, 0);
     EnvironmentObjects.clear();
     PointyObjects.clear();
     String::RemoveLevelStrings();
@@ -751,6 +766,7 @@ void DestroySuperSectors()
     if (observing)
         LeaveObserveMode(NULL, NULL);
     delete Collision::spine_cache;
+    Collision::defaultCollCache.Clear();
 }
 void CreateSuperSectors()
 {
@@ -1316,7 +1332,7 @@ void ReadFirstOptions()
     //NewTimer::CalculateFPSTimers();
 
     //debug_print("value %d\n", Gfx::fps_fix);
-    //CreateConsole();
+    CreateConsole();
 
     //debug_print("Reading from ini file %s, default %d ", "LM_DebugOption_bDebugMode", debug);
     new_value = OptionReader->ReadInt("Script_Settings", "LM_DebugOption_bDebugMode", debug);
@@ -4635,6 +4651,9 @@ void InitLevelMod()
     
     //Fix UberFrig
     HookFunction(0x004A76D3, FixUberFrig, 0xE9);
+    /*HookFunction(0x004994E5, &Skater::UberFrig);
+    HookFunction(0x004996C6, &Skater::UberFrig);
+    HookFunction(0x004A8B6F, &Skater::UberFrig);*/
 
     //Optimize Vertex equal function
     //Before it was loading each float to FPU
@@ -6667,7 +6686,7 @@ __declspec(noalias) void DrawFrame()
                     if (XINPUT::vibrationFrames)
                     {
                         XINPUT::Player1->Vibrate(XINPUT::vibration.wLeftMotorSpeed, XINPUT::vibration.wRightMotorSpeed);
-                        XINPUT::vibrationFrames -= Game::skater->GetFrameLength();
+                        XINPUT::vibrationFrames-=100;
                     }
                     else
                     {
