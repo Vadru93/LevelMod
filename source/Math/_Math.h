@@ -499,6 +499,15 @@ inline	Vertex	Lerp(const Vertex& v1, const Vertex& v2, const float val)
 
 Vertex CrossProduct(const Vertex* vec1, Vertex* vec2);
 
+inline Vertex CalculateNormal(const D3DXVECTOR3* const __restrict v0, const D3DXVECTOR3* const __restrict v1, const D3DXVECTOR3* const __restrict v2)
+{
+    Vertex edge1 = *v0 - *v1;
+    Vertex edge2 = *v1 - *v2;
+    Vertex normal = CrossProduct(&edge1, &edge2);
+    normal.Normalize();
+    return normal;
+}
+
 struct Matrix : D3DXMATRIX
 {
 

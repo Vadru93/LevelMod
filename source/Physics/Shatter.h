@@ -6,6 +6,18 @@
 #include "Objects\SuperSectors.h"
 #include "Collision.h"
 
+struct RenderableVertex : Vertex
+{
+    Vertex n;
+    BYTE color[4];
+    float uv[2];
+
+    RenderableVertex(float _x, float _y, float _z) : Vertex(_x, _y, _z)
+    {
+
+    }
+};
+
 
 //#define p_stride 0x24//*(DWORD*)0x0090B8A8
 
@@ -69,6 +81,8 @@ struct ShatterData
     Collision::CollData data;
     Collision::CollCache cache;
 
+    std::vector<RenderableVertex> shattered_pieces;
+
     ~ShatterData()
     {
         debug_print("Deleting ShatterObject %s\n", FindChecksumName(sector->name));
@@ -99,6 +113,8 @@ struct ShatterData
             Gfx::pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, split->baseIndex, 0, split->numVertices, 0, split->numIndices);*/
             //debug_print("Going to Draw\n");
             Gfx::pDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, numTris, verts, split->stride);
+            /*if(shattered_pieces.size())
+                Gfx::pDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, shattered_pieces.size() / 3, &shattered_pieces.front(), split->stride);*/
             //debug_print("Finished rendering, sucessfully :)\n");
         }
     }
@@ -114,6 +130,8 @@ struct ShatterData
         D3DXVECTOR3* p_v1 = (D3DXVECTOR3*)(p_vert_data + stride);
         D3DXVECTOR3* p_v2 = (D3DXVECTOR3*)(p_vert_data + (2 * stride));
 
+//for some reason this breaks the code...
+//#pragma omp parallel for
         for (int i = 0; i < numTris; ++i)
         {
             if (!collided[i])
@@ -140,11 +158,90 @@ struct ShatterData
                 m[Z].Rotate(matrices[i]);
 
                 // Update the position and velocity of the shatter piece, dealing with bouncing if necessary.
-                if (!UpdateParameters(i, framelength))
+                if (!UpdateParameters(i, framelength, p_v0, p_v1, p_v2))
                 {
-                    *p_v0 = *(D3DXVECTOR3*)&m[X] + pos[i];
-                    *p_v1 = *(D3DXVECTOR3*)&m[Y] + pos[i];
-                    *p_v2 = *(D3DXVECTOR3*)&m[Z] + pos[i];
+                    *p_v0 = *(D3DXVECTOR3*)&m[X];// +pos[i];
+                    *p_v1 = *(D3DXVECTOR3*)&m[Y];// +pos[i];
+                    *p_v2 = *(D3DXVECTOR3*)&m[Z];// +pos[i];
+                    Vertex normal = CalculateNormal(p_v0, p_v1, p_v2);
+                    printf("normal %f %f %f data %f %f %f\n", normal.x, normal.y, normal.z, data.normal.x, data.normal.y, data.normal.z);
+                    float angle = fabsf(data.normal.y - normal.y);
+                    if (angle > 0.15f && i % 5 == 0)
+                    {
+                        RenderableVertex v00 = RenderableVertex(p_v0->x, p_v0->y, p_v0->z);
+                        RenderableVertex v01(p_v1->x, p_v1->y, p_v1->z);
+                        RenderableVertex v02(p_v2->x, p_v2->y, p_v2->z);
+                        RenderableVertex v0(p_v0->x + ((p_v1->x - p_v0->x) * 0.5f), p_v0->y + ((p_v1->y - p_v0->y) * 0.5f), p_v0->z + ((p_v1->z - p_v0->z) * 0.5f));
+                        RenderableVertex v1(p_v1->x + ((p_v2->x - p_v1->x) * 0.5f), p_v1->y + ((p_v2->y - p_v1->y) * 0.5f), p_v1->z + ((p_v2->z - p_v1->z) * 0.5f));
+                        RenderableVertex v2(p_v2->x + ((p_v0->x - p_v2->x) * 0.5f), p_v2->y + ((p_v0->y - p_v2->y) * 0.5f), p_v2->z + ((p_v0->z - p_v2->z) * 0.5f));
+
+                        DWORD uv_offset = 12;
+                        //Need to learn how to check if have normals...
+                        if (sector->color_offset)
+                        {
+                            uv_offset += 4;
+                            DWORD color_offset = 12;
+                            BYTE* p_v0col = (BYTE*)(p_v0 + color_offset);
+                            BYTE* p_v1col = (BYTE*)(p_v1 + color_offset);
+                            BYTE* p_v2col = (BYTE*)(p_v2 + color_offset);
+
+                            for (int i = 0; i < 4; ++i)
+                            {
+                                v0.color[i] = p_v0col[i] + (((int)p_v1col[i] - (int)p_v0col[i]) / 2);
+                                v1.color[i] = p_v1col[i] + (((int)p_v2col[i] - (int)p_v1col[i]) / 2);
+                                v2.color[i] = p_v2col[i] + (((int)p_v0col[i] - (int)p_v2col[i]) / 2);
+                            }
+                        }
+
+                        // Deal with uv0 (not always present).
+                        if (sector->uv_offset)
+                        {
+                            float* p_v0uv = (float*)(p_v0 + uv_offset);
+                            float* p_v1uv = (float*)(p_v1 + uv_offset);
+                            float* p_v2uv = (float*)(p_v2 + uv_offset);
+
+                            for (int i = 0; i < 2; ++i)
+                            {
+                                v0.uv[i] = p_v0uv[i] + ((p_v1uv[i] - p_v0uv[i]) * 0.5f);
+                                v1.uv[i] = p_v1uv[i] + ((p_v2uv[i] - p_v1uv[i]) * 0.5f);
+                                v2.uv[i] = p_v2uv[i] + ((p_v0uv[i] - p_v2uv[i]) * 0.5f);
+                            }
+                        }
+
+                        // Push the four new tris onto the stack.
+                        v00 += pos[i];
+                        v01 += pos[i];
+                        v02 += pos[i];
+                        v0 += pos[i];
+                        v1 += pos[i];
+                        v2 += pos[i];
+
+                        shattered_pieces.push_back(v00);
+                        shattered_pieces.push_back(v0);
+                        shattered_pieces.push_back(v2);
+
+                        shattered_pieces.push_back(v0);
+                        shattered_pieces.push_back(v01);
+                        shattered_pieces.push_back(v1);
+
+                        shattered_pieces.push_back(v0);
+                        shattered_pieces.push_back(v1);
+                        shattered_pieces.push_back(v2);
+
+                        shattered_pieces.push_back(v2);
+                        shattered_pieces.push_back(v1);
+                        shattered_pieces.push_back(v02);
+
+                        *p_v0 = Vertex(0, 0, 0);
+                        *p_v1 = Vertex(0, 0, 0);
+                        *p_v2 = Vertex(0, 0, 0);
+                    }
+                    else
+                    {
+                        *p_v0 += pos[i];
+                        *p_v1 += pos[i];
+                        *p_v2 += pos[i];
+                    }
                 }
                 else
                 {
@@ -251,7 +348,7 @@ struct ShatterData
             debug_print("Memory did not allocate...\n");
     }
 
-    bool UpdateParameters(int index, float timestep)
+    bool UpdateParameters(int index, float timestep, const D3DXVECTOR3* const __restrict v0, const D3DXVECTOR3* const __restrict v1, const D3DXVECTOR3* const __restrict v2)
     {
         old_pos[index] = pos[index];
 
@@ -280,6 +377,56 @@ struct ShatterData
 
             if (Collision::FindNearestCollision(line, data) && data.normal.y > 0.1f)
             {
+                /*matrices[index].Ident();
+                matrices[index].Rotate(data.normal, 90.0f);*/
+                collided[index] = true;
+                pos[index] = data.point;
+                return false;
+            }
+            Vertex old_start = line.start;
+            line.start.x += v0->x;
+            line.start.y += v0->y;
+            line.start.z += v0->z;
+            Vertex old_end = line.end;
+            line.end.x += v0->x;
+            line.end.y += v0->y;
+            line.end.z += v0->z;
+            if (Collision::FindNearestCollision(line, data) && data.normal.y > 0.1f)
+            {
+                /*matrices[index].Ident();
+                matrices[index].Rotate(data.normal, 90.0f);*/
+                collided[index] = true;
+                pos[index] = data.point;
+                return false;
+            }
+            line.start = old_start;
+            line.start.x += v1->x;
+            line.start.y += v1->y;
+            line.start.z += v1->z;
+            line.end = old_end;
+            line.end.x += v1->x;
+            line.end.y += v1->y;
+            line.end.z += v1->z;
+            if (Collision::FindNearestCollision(line, data) && data.normal.y > 0.1f)
+            {
+                /*matrices[index].Ident();
+                matrices[index].Rotate(data.normal, 90.0f);*/
+                collided[index] = true;
+                pos[index] = data.point;
+                return false;
+            }
+            line.start = old_start;
+            line.start.x += v2->x;
+            line.start.y += v2->y;
+            line.start.z += v2->z;
+            line.end = old_end;
+            line.end.x += v2->x;
+            line.end.y += v2->y;
+            line.end.z += v2->z;
+            if (Collision::FindNearestCollision(line, data) && data.normal.y > 0.1f)
+            {
+                /*matrices[index].Ident();
+                matrices[index].Rotate(data.normal, 90.0f);*/
                 collided[index] = true;
                 pos[index] = data.point;
                 return false;

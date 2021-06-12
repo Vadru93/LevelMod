@@ -166,6 +166,7 @@ namespace Collision
 
 
         __inline __declspec (noalias) bool CollideWithLine(const Leaf& leaf, const Vertex& start, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const;
+        __inline __declspec (noalias) bool CollideWithLine(const Vertex& start, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const;
         __inline __declspec (noalias) bool TraverseBranch(const Branch* const __restrict branch, const RwLine& line, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const;
 
     public:
@@ -175,8 +176,8 @@ namespace Collision
 
             if (branches)
                 return TraverseBranch(&branches[0], line, dir, sector, data);
-            else if (leafs)
-                return CollideWithLine(leafs[0], line.start, dir, sector, data);
+            else
+                CollideWithLine(line.start, dir, sector, data);
 
             return false;
         }

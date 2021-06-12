@@ -746,6 +746,11 @@ bool CreatePair(CStruct* pStruct, CScript* pScript)
 
 void DestroySuperSectors()
 {
+    RpWorld* world = RwViewer::Instance()->GetCurrentWorld();
+    NxPlugin* plg = world->GetWorldPluginData();
+    Collision::Manager* cld_manager = plg->GetManager();
+    cld_manager->RestoreWorldSectorFlags();
+
     if(LevelModSettings::bHookedControls && XINPUT::Player1->IsConnected())
         XINPUT::Player1->Vibrate(0, 0);
     EnvironmentObjects.clear();
@@ -771,6 +776,7 @@ void DestroySuperSectors()
 void CreateSuperSectors()
 {
     Collision::spine_cache = new Collision::CollCache;
+    Collision::spine_cache->SetRequirement(Collision::Flags::Vert);
     debug_print("Going to create MovingObjects\n");
     GameState::GotSuperSectors = true;
     KeyMap::UpdateKeyMap();
@@ -3179,11 +3185,13 @@ void LoadCustomShaderThread()
     //Then update shaders
     Gfx::LoadCustomShaders(ShaderFile);
 
+    Sleep(3000);
     //this currently crashes, need to look into why...
-    /*RpWorld* world = RwViewer::Instance()->GetCurrentWorld();
+    RpWorld* world = RwViewer::Instance()->GetCurrentWorld();
     NxPlugin* plg = world->GetWorldPluginData();
     Collision::Manager* cld_manager = plg->GetManager();
-    cld_manager->SortWorldSectors();*/
+    cld_manager->UpdateWorldSectorFlags();
+    //cld_manager->SortWorldSectors();
 }
 
 bool OnPostLevelLoad(CStruct* pStruct, CScript* pScript)

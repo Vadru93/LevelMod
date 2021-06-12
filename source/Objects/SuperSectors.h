@@ -23,7 +23,23 @@ extern bool updatingObjects;
 //#pragma pack(1)
 EXTERN struct SuperSector
 {
-    DWORD FFFFFFFF;//Always -1 maybe morph target index?
+    //determine if the object has any trigger polys, wallride polys, vert polys, shadow polys or is completly non collideable
+    enum Flags : WORD
+    {
+        Default = 0xFFFF,
+        NoCollision = 0,
+        Wallride = 0x0004,
+        Vert = 0x0008,
+        Hollow = 0x0010,
+        Trigger = 0x0040,
+        Skatable = 0x0080,
+        Collideable = 0x008C,//maybe use 0xBF??
+    };
+    union
+    {
+        WORD req_flags;;
+        int FFFFFFFF;//Always -1 maybe morph target index?
+    };
     //4
     RpTriangle* triangles;
     //8
@@ -96,6 +112,16 @@ EXTERN struct SuperSector
         BYTE b;
         BYTE a;
     };
+
+    bool IsCollideable()
+    {
+        for (auto i = 0; i < numIndices; i++)
+        {
+            if(!((WORD)pCollisionFlags[i] & (WORD)Collision::Flags::Hollow))
+                return true;
+        }
+        return false;
+    }
 
     //bool CollideWithLine(Collision::Leaf& leaf, Vertex& start, Vertex& dir, SuperSector* sector, Collision::CollData& data);
 
@@ -232,6 +258,7 @@ namespace Collision
     class CollCache
     {
         BBox bbox;
+        DWORD req_flags;
         DWORD idx;
         ::SuperSector* sectors[1024];
 
@@ -239,14 +266,27 @@ namespace Collision
     public:
         CollCache()
         {
+            //impossible bbox
             bbox.max = Vertex(-FLT_MAX, -FLT_MAX, -FLT_MAX);
             bbox.min = Vertex(FLT_MAX, FLT_MAX, FLT_MAX);
-            ZeroMemory(&idx, sizeof(CollCache)-sizeof(BBox));
+
+            //set default requirements to all collideable flags
+            req_flags = ::SuperSector::Flags::Collideable;
+            
+            //zero everything else
+            ZeroMemory(&idx, sizeof(CollCache)-sizeof(BBox)-4);
         }
 
         void Clear()
         {
             CollCache();
+        }
+
+        //Set the CollCache requirement flag
+        //all sectors that does not meet this requirement is ignored
+        void SetRequirement(Collision::Flags req)
+        {
+            req_flags = (WORD)req;
         }
 
         void Update(RwLine& line, bool definite_mask = false);
@@ -327,6 +367,62 @@ namespace Collision
         Sector		        sectors[20][20];
 
     public:
+
+        //We need to restore the new custom flags to default value, else we will have a crash when unloading the level
+        void RestoreWorldSectorFlags()
+        {
+            for (DWORD x = 0; x < num_sectors_x; x++)
+            {
+                for (DWORD z = 0; z < num_sectors_z; z++)
+                {
+                    Sector& sector = sectors[x][z];
+
+                    for (DWORD i = 0; i < sector.numSectors; i++)
+                    {
+                        sector.super_sectors[i]->req_flags = ::SuperSector::Flags::Default;
+                    }
+                }
+            }
+        }
+
+        //Updates the world sector flags so we can ignore certain sectors and optimize our collision detection
+        //it's only called once every time you change level
+        void UpdateWorldSectorFlags()
+        {
+            //This method will loop throught he same sectors multiply times and is very inefficient
+            //it's not so important since it's only called once every level change
+            //however should find a better way to loop through all sectors...
+            for (DWORD x = 0; x < num_sectors_x; x++)
+            {
+                for (DWORD z = 0; z < num_sectors_z; z++)
+                {
+                    Sector& sector = sectors[x][z];
+
+                    for (DWORD i = 0; i < sector.numSectors; i++)
+                    {
+                        ::SuperSector* s = sector.super_sectors[i]; 
+                        printf("%p %X\n", s, s->req_flags);
+
+                        //Does the sector have collision plugin and is it collideable?
+                        if (!s->pCollisionPLG || s->pCollisionPLG == INVALID_PTR || !(s->unk_flag & 6))
+                        {
+                            s->req_flags = ::SuperSector::Flags::NoCollision;
+                            continue;
+                        }
+
+                        //Add all polies flags to the sector flag
+                        for (DWORD j = 0; j < s->numIndices; j++)
+                        {
+                            s->req_flags |= (WORD)s->pCollisionFlags[j];
+                        }
+
+                        //If trigger flag is not set and all polies are flagged as hollow the sector has no collision
+                        if (!(s->req_flags & ::SuperSector::Flags::Trigger) && !s->IsCollideable())
+                            s->req_flags = ::SuperSector::Flags::NoCollision;
+                    }
+                }
+            }
+        }
 
         void SortWorldSectors()
         {
@@ -541,8 +637,8 @@ namespace Collision
                 {
                     ::RpWorldSector* world_sector = sector->super_sectors[i];
 
-                    //Skip if kill or non collide flag is set
-                    if (!world_sector->pCollisionPLG || world_sector->pCollisionPLG == INVALID_PTR || !(world_sector->unk_flag & 6) || world_sector->state & 6)
+                    //skip if non collide flag is set, or requirement is not met
+                    if (!(world_sector->req_flags & cache->req_flags))
                         continue;
 
                     //since we are casting several rays when scanning for spine transfer targets
@@ -614,8 +710,8 @@ namespace Collision
                         //OperationId is used so we only add each SuperSector once
                         if (cs->pUnknown != operationId)
                         {
-                            //Skip if kill or non collide flag is set
-                            if (!cs->pCollisionPLG || cs->pCollisionPLG == INVALID_PTR || !(cs->unk_flag & 6) || cs->state & 6)
+                            //skip if non collide flag is set, or requirement is not met
+                            if (!(cs->req_flags & cache->req_flags))
                                 continue;
 
                             //since we are casting several rays when scanning for spine transfer targets

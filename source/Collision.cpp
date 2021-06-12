@@ -207,6 +207,45 @@ namespace Collision
         return false;
     }
 
+    __inline __declspec (noalias) bool CollisionPLG::CollideWithLine(const Vertex& start, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const
+    {
+#pragma omp parallel for
+        for (auto idx = 0; idx < numFaces; idx++)
+        {
+            DWORD collFlags = (WORD)sector->pCollisionFlags[idx];
+            if (!(collFlags & (WORD)data.ignore_1) && !(~collFlags & (WORD)data.ignore_0))
+            {
+                RpTriangle& face = sector->triangles[idx];
+                Vertex v0 = sector->vertices[face.a];
+                Vertex v1 = sector->vertices[face.b];
+                Vertex v2 = sector->vertices[face.c];
+
+                float distance;/* , u, v;
+                Vertex normal;*/
+                if (TriangleIntersection(&v0, &v1, &v2, &start, &dir, distance))//if (intersect_triangle(*(D3DXVECTOR3*)&line.start, rayDir, v0, v1, v2, distance, u, v, normal))
+                {
+                    if (data.unk > distance)
+                    {
+
+                        data.unk = distance;
+                        data.collided = true;
+                        data.checksum = sector->name;
+                        //data.p_sector = sector;
+                        data.index = faces[idx];
+                        data.terrain = face.matIndex;
+                        data.collFlags = (Collision::Flags)collFlags;
+                        data.v0 = v0;
+                        data.v1 = v1;
+                        data.v2 = v2;
+
+                    }
+                }
+            }
+        }
+
+        return data.collided;
+    }
+
     __inline __declspec (noalias) bool CollisionPLG::CollideWithLine(const Leaf& leaf, const Vertex& start, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const
     {
         DWORD last = leaf.numFaces + leaf.idx;
