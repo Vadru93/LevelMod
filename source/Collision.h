@@ -42,6 +42,9 @@ namespace Collision
         Skatable = 0x0080,
     };
 
+
+    Flags& operator+(const Flags& f1, const Flags& f2);
+
     struct Line
     {
         Vector start;
@@ -227,9 +230,9 @@ namespace Collision
 
         bool GetCollision()
         {
-            return FindFirstCollision(*(RwLine*)&start, cld);
-            /*typedef bool(__thiscall* const pGetCollision)(CFeeler* pThis);
-            return pGetCollision(0x00496EA0)(this);*/
+            //return FindFirstCollision(*(RwLine*)&start, cld);
+            typedef bool(__thiscall* const pGetCollision)(CFeeler* pThis);
+            return pGetCollision(0x00496EA0)(this);
         }
     };
 

@@ -40,6 +40,12 @@ namespace Collision
     CollCache* spine_cache;
 #define EPSILON 0.000001f
 
+    Flags& operator+(const Flags& f1, const Flags& f2)
+    {
+        WORD result = (WORD)f1 | (WORD)f2;
+        return *(Flags*)&result;
+    }
+
     void CollCache::Update(RwLine& line, bool definite_mask)
     {
         RpWorld* world = RwViewer::Instance()->GetCurrentWorld();

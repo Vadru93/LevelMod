@@ -417,7 +417,7 @@ namespace Collision
                         }
 
                         //If trigger flag is not set and all polies are flagged as hollow the sector has no collision
-                        if (!(s->req_flags & ::SuperSector::Flags::Trigger) && !s->IsCollideable())
+                        if (!(s->req_flags & ::SuperSector::Flags::Trigger) && !(s->req_flags & ::SuperSector::Flags::Collideable))
                             s->req_flags = ::SuperSector::Flags::NoCollision;
                     }
                 }

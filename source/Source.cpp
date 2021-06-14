@@ -746,41 +746,63 @@ bool CreatePair(CStruct* pStruct, CScript* pScript)
 
 void DestroySuperSectors()
 {
+    debug_print("Restore the custom sector flags\n");
     RpWorld* world = RwViewer::Instance()->GetCurrentWorld();
     NxPlugin* plg = world->GetWorldPluginData();
     Collision::Manager* cld_manager = plg->GetManager();
     cld_manager->RestoreWorldSectorFlags();
 
+    debug_print("Restore vibration\n");
     if(LevelModSettings::bHookedControls && XINPUT::Player1->IsConnected())
         XINPUT::Player1->Vibrate(0, 0);
+
+    debug_print("Clear the custom geometry\n");
     EnvironmentObjects.clear();
     PointyObjects.clear();
+
+    debug_print("Clear the static level string heap\n");
     String::RemoveLevelStrings();
+    
+    debug_print("Clear the level QB table\n");
     QScript::Scripts->ClearLevelTable();
-    debug_print("Going to remove MovingObjects\n");
+
     GameState::GotSuperSectors = false;
+
+    debug_print("Remove ShatterObjects\n");
     extern void UnloadShatterObjects();
     UnloadShatterObjects();
     *(bool*)0x00400020 = false;
+
+    debug_print("Going to remove MovingObjects\n");
     if (movingObjects.size())
         movingObjects.clear();
 
+    debug_print("Remove Shaders\n");
     if (!Gfx::loadingShaders)
         Gfx::UnloadShaders();
 
     if (observing)
         LeaveObserveMode(NULL, NULL);
+
+    debug_print("Clearing Spine CollCache\n");
     delete Collision::spine_cache;
+
+    debug_print("Clearing Default CollCache\n");
     Collision::defaultCollCache.Clear();
 }
 void CreateSuperSectors()
 {
+    debug_print("Creating Spine CollCache\n");
     Collision::spine_cache = new Collision::CollCache;
-    Collision::spine_cache->SetRequirement(Collision::Flags::Vert);
+    Collision::spine_cache->SetRequirement(Collision::Flags::Vert + Collision::Flags::Skatable);
+
     debug_print("Going to create MovingObjects\n");
     GameState::GotSuperSectors = true;
+
+    debug_print("Updating KeyMap\n");
     KeyMap::UpdateKeyMap();
     *(bool*)0x00400020 = true;
+
     //Game::skater = Skater::UpdateSkater();
 }
 FILE* logFile = NULL;
@@ -3185,7 +3207,7 @@ void LoadCustomShaderThread()
     //Then update shaders
     Gfx::LoadCustomShaders(ShaderFile);
 
-    Sleep(3000);
+    Sleep(500);
     //this currently crashes, need to look into why...
     RpWorld* world = RwViewer::Instance()->GetCurrentWorld();
     NxPlugin* plg = world->GetWorldPluginData();
@@ -4153,9 +4175,14 @@ void OilRigGrindPatch()
        pVel->z = Game::skater->GetMatrix().m[Z][Z];
    }
    else
-   //If we have speed greater than 100, rotate the velocity so we don't grind backwards on steep rails
-   if(Game::level_checksum == Checksums::Oil && (( (pVel->x * pVel->x) + (pVel->z * pVel->z) ) > 100.0f ))
-       pVel->RotateToPlane(Vertex(0, 1.0f, 0));
+       //If we have speed greater than 100, rotate the velocity so we don't grind backwards on steep rails
+       if (Game::level_checksum == Checksums::Oil && (((pVel->x * pVel->x) + (pVel->z * pVel->z)) > 100.0f))
+       {
+           const RailNode* pStart = Game::skater->mp_rail_node;
+           const RailNode* pEnd = pStart->GetNextLink();
+           if(pEnd && RailManager::GetPos(pEnd).y - RailManager::GetPos(pStart).y > 50.0f)
+               pVel->RotateToPlane(Vertex(0, 1.0f, 0));
+       }
 }
 
 __declspec (naked) void HookEmptyRailNodeData()
