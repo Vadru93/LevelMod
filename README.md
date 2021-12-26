@@ -10,14 +10,14 @@ LevelMod features:
 - some optimizations to game engine
 - mod settings menu with multiple features to toggle
 - trick system overhaul to add features from later games (extra tricks, wallplant/wallieplant, etc).
-- intergrated patches like 251x or 32 tag counter limit.
+- integrated patches like 251x or 32 tag counter limit.
 - graphics enhancement(extra blendmodes, shaders, mipmaps, AA, etc)
 
 [_Complete list of features_](https://github.com/Vadru93/LevelMod/wiki/Settings-and-Features)
 
 ### How to install
 **Important!** *The mod requires original game to be installed on your computer. You cannot play the mod without original files. You also need the [1.01 patch](#links)*
-1. Make sure you have the latest LevelMod Full release installed from [Chapter-3.net thread](#links)
+1. Make sure you have the latest LevelMod Full release and lost levels installed from [Chapter-3.net thread](#links)
 2. Look for Levelmod.flt file and remove it if found
 3. Download [latest release from repo](#links)
 4. Extract to your game folder and replace all the files if asked. However, for the first install it shouldn't require to replace any existing files
