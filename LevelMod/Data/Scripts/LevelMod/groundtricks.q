@@ -7,8 +7,8 @@ Dpad = [ Up Down Left Right Upright UpLeft DownRight DownLeft ]
 TRIGGER_MANUAL_BRANCHFLIP = { InOrder Square Square 200 }
 EXTRA_BRANCHFLIP = { Trigger = TRIGGER_MANUAL_BRANCHFLIP Scr = ManualLink }
 
-//changed taunts to dpad, cause original layout doesn't make any sense anyway. 
-GroundTricks = [ 
+//changed taunts to dpad, cause original layout doesn't make any sense anyway.
+GroundTricks = [
 	{ Trigger = { Press R2 20 } Scr = ToggleSwitchRegular }
 	{ Trigger = { Press L2 20 } Scr = ToggleNollieRegular }
 	{ Trigger = { TapOnceRelease Up X 300 } Scr = NoComply Params = { Name = 'No Comply' Score = 100 } }
@@ -17,10 +17,10 @@ GroundTricks = [
 	{ Trigger = { HoldTwoAndPress R1 L1 Down 500 } Scr = Taunt Params = { Anim = Taunt2 PanelMessage = "No way" } }
 	//{ Trigger = { HoldTwoAndPress R1 L1 Triangle 500 } Scr = Props }
 	{ Trigger = { HoldTwoAndPress R1 L1 Right 500 } Scr = Taunt Params = { Anim = Taunt3 PanelMessage = "Come get some" } }
-	//{ Trigger = { HoldTwoAndPress R1 L1 Circle 500 } Scr = Taunt Params = { Anim = Taunt2 PanelMessage = "No way" } } 
+	//{ Trigger = { HoldTwoAndPress R1 L1 Circle 500 } Scr = Taunt Params = { Anim = Taunt2 PanelMessage = "No way" } }
 ]
 
-SpecialManualTricks = [ 
+SpecialManualTricks = [
 	{ Trigger = { TripleInOrder Up Right Triangle 400 } Duration = 700 TrickSlot = SpMan_U_R_Triangle }
 	{ Trigger = { TripleInOrder Up Down Triangle 400 } Duration = 700 TrickSlot = SpMan_U_D_Triangle }
 	{ Trigger = { TripleInOrder Up Left Triangle 400 } Duration = 700 TrickSlot = SpMan_U_L_Triangle }
@@ -32,22 +32,22 @@ SpecialManualTricks = [
 	{ Trigger = { TripleInOrder Down Left Triangle 400 } Duration = 700 TrickSlot = SpMan_D_L_Triangle }
 	{ Trigger = { TripleInOrder Left Up Triangle 400 } Duration = 700 TrickSlot = SpMan_L_U_Triangle }
 	{ Trigger = { TripleInOrder Left Right Triangle 400 } Duration = 700 TrickSlot = SpMan_L_R_Triangle }
-	{ Trigger = { TripleInOrder Left Down Triangle 400 } Duration = 700 TrickSlot = SpMan_L_D_Triangle } 
+	{ Trigger = { TripleInOrder Left Down Triangle 400 } Duration = 700 TrickSlot = SpMan_L_D_Triangle }
 ]
 
-ManualTricks = [ 
+ManualTricks = [
 	{ Trigger = { InOrder Up Down 400 } Duration = 700 Trick_Manual }
-	{ Trigger = { InOrder Down Up 400 } Duration = 700 Trick_NoseManual } 
+	{ Trigger = { InOrder Down Up 400 } Duration = 700 Trick_NoseManual }
 ]
 
-GroundManualTricks = [ 
+GroundManualTricks = [
 	{ Trigger = { InOrder Up Down 220 } Trick_Manual }
-	{ Trigger = { InOrder Down Up 220 } Trick_NoseManual } 
+	{ Trigger = { InOrder Down Up 220 } Trick_NoseManual }
 ]
 
-Reverts = [ 
+Reverts = [
 	{ Trigger = { Press R2 200 } TrickSlot = ExtraSlot1 }
-	{ Trigger = { Press L2 200 } TrickSlot = ExtraSlot2 } 
+	{ Trigger = { Press L2 200 } TrickSlot = ExtraSlot2 }
 ]
 
 Jumptricks0 = [ { Trigger = { TapOnceRelease Up X 300 } Scr = NoComply Params = { Name = 'No Comply' Score = 100 } } ]
@@ -55,24 +55,24 @@ Jumptricks = [ { Trigger = { TapTwiceRelease Up X 500 } TrickSlot = JumpSlot } ]
 
 //changed to proper anims, originally all 3 are boneless
 Trick_Boneless = { Scr = Boneless Params = { Name = 'Boneless' Score = 250 } }
-Trick_Fastplant = { Scr = Fastplant Params = { Name = 'Fastplant' Score = 250 } }
-Trick_Beanplant = { Scr = Beanplant Params = { Name = 'Beanplant' Score = 250 } }
+Trick_Fastplant = { Scr = Boneless Params = { Name = 'Fastplant' Score = 250 Anim = Fastplant } }
+Trick_Beanplant = { Scr = Boneless Params = { Name = 'Beanplant' Score = 250 Anim = Beanplant } }
 
 SCR_MANUAL = { Scr = Manual }
 
 
 //special manual tricks
-TrickDef_Sproing = { 
-	Name = 'Sproing' 
-	Score = 1500 
-	InitAnim = Sproing 
-	FromAirAnim = Sproing 
-	BalanceAnim = Manual_Range 
-	OffMeterTop = ManualBail 
-	OffMeterBottom = ManualLand 
-	ExtraTricks = ManualBranches 
-	IsSpecial 
-	SproingFlip 
+TrickDef_Sproing = {
+	Name = 'Sproing'
+	Score = 1500
+	InitAnim = Sproing
+	FromAirAnim = Sproing
+	BalanceAnim = Manual_Range
+	OffMeterTop = ManualBail
+	OffMeterBottom = ManualLand
+	ExtraTricks = ManualBranches
+	IsSpecial
+	SproingFlip
 }
 
 Trick_Sproing = { SCR_MANUAL Params = TrickDef_Sproing }
@@ -107,30 +107,30 @@ Trick_WorkForFoodManual = { SCR_MANUAL Params = { Name = 'Can Ya Spare a Dime?' 
 
 
 TrickDef_Manual = {
-	Name = 'Manual' 
-	Score = 100 
-	InitAnim = Manual 
-	FromAirAnim = ManualFromAir 
-	BalanceAnim = Manual_Range 
-	OffMeterTop = ManualBail 
-	OffMeterBottom = ManualLand 
+	Name = 'Manual'
+	Score = 100
+	InitAnim = Manual
+	FromAirAnim = ManualFromAir
+	BalanceAnim = Manual_Range
+	OffMeterTop = ManualBail
+	OffMeterBottom = ManualLand
 	Manual_Branchlinks
 }
 
 Trick_Manual = { SCR_MANUAL Params = TrickDef_Manual }
 
-TrickDef_NoseManual = { 
-	Name = 'Nose Manual' 
-	Score = 100 
-	InitAnim = Nosemanual 
-	FromAirAnim = NoseManualFromAir 
-	BalanceAnim = NoseManual_Range 
-	Nollie 
-	OffMeterTop = ManualLand 
-	OffMeterBottom = NoseManualBail 
+TrickDef_NoseManual = {
+	Name = 'Nose Manual'
+	Score = 100
+	InitAnim = Nosemanual
+	FromAirAnim = NoseManualFromAir
+	BalanceAnim = NoseManual_Range
+	Nollie
+	OffMeterTop = ManualLand
+	OffMeterBottom = NoseManualBail
 	NoseManual_Branchlinks
-} 
-	
+}
+
 Trick_NoseManual = { SCR_MANUAL Params = TrickDef_NoseManual }
 
 NoseManualBranches = [ { Trigger = { Press R2 200 } Trick_Gturn } ]
@@ -140,88 +140,88 @@ ManualBranches = [ { Trigger = { Press R2 200 } Trick_Gturn2 } ]
 //ManualBranches2 = [ { Trigger = { Press R2 200 } Trick_Gturn3 } ]
 //NoseManualBranches2 = [ { Trigger = { Press R2 200 } Trick_Gturn4 } ]
 
-TrickDef_NosePivot = { 
-	Name = 'Nose Pivot' 
-	Score = 250 
-	Anim = GTurn 
-	BalanceAnim = Manual 
-	FlipAfter 
-	BalanceAnim = Manual_Range 
-	Trickslack = 0 
-	PlayCessSound 
-	Extrapercent = 100 
-	TimeAdd = 2 
-	SpeedMult = 1.2 
-	OffMeterTop = ManualBail 
+TrickDef_NosePivot = {
+	Name = 'Nose Pivot'
+	Score = 250
+	Anim = GTurn
+	BalanceAnim = Manual
+	FlipAfter
+	BalanceAnim = Manual_Range
+	Trickslack = 0
+	PlayCessSound
+	Extrapercent = 100
+	TimeAdd = 2
+	SpeedMult = 1.2
+	OffMeterTop = ManualBail
 	OffMeterBottom = ManualLand
 	Manual_Branchlinks
-} 
+}
 
 Trick_Gturn = { Trigger = { Press R2 200 } Scr = ManualLink Params = TrickDef_NosePivot }
 
-TrickDef_Pivot = { 
-	Name = 'Pivot' 
-	Score = 250 
-	Anim = GTurn2 
-	BalanceAnim = Manual 
-	FlipAfter 
-	BalanceAnim = NoseManual_Range 
-	Trickslack = 0 
-	PlayCessSound 
-	Extrapercent = 100 
+TrickDef_Pivot = {
+	Name = 'Pivot'
+	Score = 250
+	Anim = GTurn2
+	BalanceAnim = Manual
+	FlipAfter
+	BalanceAnim = NoseManual_Range
+	Trickslack = 0
+	PlayCessSound
+	Extrapercent = 100
 	Nollie
-	TimeAdd = 2 
-	SpeedMult = 1.2 
-	OffMeterTop = ManualLand 
-	OffMeterBottom = NoseManualBail 
+	TimeAdd = 2
+	SpeedMult = 1.2
+	OffMeterTop = ManualLand
+	OffMeterBottom = NoseManualBail
 	NoseManual_Branchlinks
-} 
+}
 
 Trick_Gturn2 = { Trigger = { Press R2 200 } Scr = ManualLink Params = TrickDef_Pivot }
 
 Manual_Branchlinks = {
-	ExtraTricks = ManualBranches 
-	NewExtraTricks = ManualBranches 
-	NewExtraTricks2 = NewFlatlandBranches 
+	ExtraTricks = ManualBranches
+	NewExtraTricks = ManualBranches
+	NewExtraTricks2 = NewFlatlandBranches
 }
 
 NoseManual_Branchlinks = {
-	ExtraTricks = NoseManualBranches 
-	NewExtraTricks = NoseManualBranches 
-	NewExtraTricks2 = NewFlatlandBranches 
+	ExtraTricks = NoseManualBranches
+	NewExtraTricks = NoseManualBranches
+	NewExtraTricks2 = NewFlatlandBranches
 }
 
-TrickDef_AntiCasper = { 
-	Name = 'Anti Casper' 
-	Score = 1350 
-	InitAnim = AntiCasper_Init 
-	FromAirAnim = AntiCasper_Init 
-	BalanceAnim = AntiCasper_Range 
-	OutAnim = AntiCasper_out 
-	OffMeterTop = ManualLand 
-	OffMeterBottom = NoseManualBail 
-	Friction = 0.5 
-	BoardRotate 
-	Nollie 
-	ExtraTricks = FlatlandBranches 
-	NewExtraTricks = NewFlatlandBranches 
+TrickDef_AntiCasper = {
+	Name = 'Anti Casper'
+	Score = 1350
+	InitAnim = AntiCasper_Init
+	FromAirAnim = AntiCasper_Init
+	BalanceAnim = AntiCasper_Range
+	OutAnim = AntiCasper_out
+	OffMeterTop = ManualLand
+	OffMeterBottom = NoseManualBail
+	Friction = 0.5
+	BoardRotate
+	Nollie
+	ExtraTricks = FlatlandBranches
+	NewExtraTricks = NewFlatlandBranches
 }
 
 Trick_AntiCasper = { SCR_MANUAL Params = { TrickDef_AntiCasper IsSpecial } }
 
 
 
-TrickDef_Casper = { 
-	Name = 'Casper' 
-	Score = 1250 
-	InitAnim = Casper_Init 
-	FromAirAnim = Casper_Init 
-	BalanceAnim = Casper_Range 
-	OutAnim = Casper_out 
-	OffMeterTop = ManualBail 
-	OffMeterBottom = ManualLand 
-	Friction = 0.5 
-	BoardRotate 
+TrickDef_Casper = {
+	Name = 'Casper'
+	Score = 1250
+	InitAnim = Casper_Init
+	FromAirAnim = Casper_Init
+	BalanceAnim = Casper_Range
+	OutAnim = Casper_out
+	OffMeterTop = ManualBail
+	OffMeterBottom = ManualLand
+	Friction = 0.5
+	BoardRotate
 	Casper_Branchlinks
 }
 
@@ -230,39 +230,39 @@ Trick_Casper = { SCR_MANUAL Params = { TrickDef_Casper IsSpecial } }
 CasperBranches = [ { Trigger = { AirTrickLogic Left Square 500 } Scr = ManualLink Params = { TrickDef_CasperFlip IsExtra } } ]
 NewCasperBranches = [ { EXTRA_BRANCHFLIP Params = { TrickDef_CasperFlip IsExtra } } ]
 
-TrickDef_CasperFlip = { 
-	Name = 'Casper Flip' 
-	Score = 500 
-	Extrapercent = 100 
-	Anim = CasperFlip 
-	BalanceAnim = Casper_Range 
-	OutAnim = Casper_out 
-	Trickslack = 0 
-	BoardRotate  
+TrickDef_CasperFlip = {
+	Name = 'Casper Flip'
+	Score = 500
+	Extrapercent = 100
+	Anim = CasperFlip
+	BalanceAnim = Casper_Range
+	OutAnim = Casper_out
+	Trickslack = 0
+	BoardRotate
 	Parent = 'Casper'
 	Casper_Branchlinks
 }
 
 Casper_Branchlinks = {
-	ExtraTricks = FlatlandBranches 
-	ExtraTricks2 = CasperBranches 
-	NewExtraTricks = NewFlatlandBranches 
-	NewExtraTricks2 = NewCasperBranches 
+	ExtraTricks = FlatlandBranches
+	ExtraTricks2 = CasperBranches
+	NewExtraTricks = NewFlatlandBranches
+	NewExtraTricks2 = NewCasperBranches
 }
 
 
 
-TrickDef_Handstand = { 
-	Name = 'HandStand' 
-	Score = 1250 
-	InitAnim = HandstandHandFlip_Init 
-	FromAirAnim = HandstandHandFlip_Init 
-	BalanceAnim = HandstandHandFlip_Range 
-	OutAnim = HandstandHandFlip_out 
-	OffMeterTop = NoseManualBail 
-	OffMeterBottom = ManualBail 
-	Friction = 0.5 
-	WaitOnOlliePercent = 10 
+TrickDef_Handstand = {
+	Name = 'HandStand'
+	Score = 1250
+	InitAnim = HandstandHandFlip_Init
+	FromAirAnim = HandstandHandFlip_Init
+	BalanceAnim = HandstandHandFlip_Range
+	OutAnim = HandstandHandFlip_out
+	OffMeterTop = NoseManualBail
+	OffMeterBottom = ManualBail
+	Friction = 0.5
+	WaitOnOlliePercent = 10
 	Handstand_Branchlinks
 }
 
@@ -271,21 +271,21 @@ Trick_Handstand = { SCR_MANUAL Params = { TrickDef_Handstand IsSpecial } }
 HandstandBranches = [ { Trigger = { AirTrickLogic Left Square 500 } Scr = ManualLink Params = { TrickDef_Handflip IsExtra } } ]
 NewHandstandBranches = [ { EXTRA_BRANCHFLIP Params = { TrickDef_Handflip IsExtra } } ]
 
-TrickDef_Handflip = { 
-	Name = 'Handflip' 
-	Score = 500 
-	Anim = HStandFliptoHStand 
-	BalanceAnim = HandstandHandFlip_Range 
+TrickDef_Handflip = {
+	Name = 'Handflip'
+	Score = 500
+	Anim = HStandFliptoHStand
+	BalanceAnim = HandstandHandFlip_Range
 	OutAnim = HandstandHandFlip_out
-	Trickslack = 0 
+	Trickslack = 0
 	Parent = 'HandStand'
 	Handstand_Branchlinks
 }
 
-Handstand_Branchlinks = {	
-	ExtraTricks = FlatlandBranches 
-	ExtraTricks2 = HandstandBranches 
-	NewExtraTricks = NewFlatlandBranches 
+Handstand_Branchlinks = {
+	ExtraTricks = FlatlandBranches
+	ExtraTricks2 = HandstandBranches
+	NewExtraTricks = NewFlatlandBranches
 	NewExtraTricks2 = NewHandstandBranches
 }
 
@@ -293,15 +293,15 @@ Handstand_Branchlinks = {
 
 
 TrickDef_ToRail = {
-	Name = 'To Rail' 
-	Score = 500 
-	InitAnim = Primo_Init 
-	FromAirAnim = Primo_Init 
-	BalanceAnim = Primo_Range 
-	OutAnim = Primo_out 
-	OffMeterTop = NoseManualBail 
-	OffMeterBottom = ManualBail 
-	Friction = 1.0 
+	Name = 'To Rail'
+	Score = 500
+	InitAnim = Primo_Init
+	FromAirAnim = Primo_Init
+	BalanceAnim = Primo_Range
+	OutAnim = Primo_out
+	OffMeterTop = NoseManualBail
+	OffMeterBottom = ManualBail
+	Friction = 1.0
 	ToRail_Branchlinks
 }
 
@@ -310,43 +310,43 @@ Trick_ToRail = { SCR_MANUAL Params = { TrickDef_ToRail IsSpecial } }
 ToRail_Branches = [ { Trigger = { AirTrickLogic Left Square 500 } Scr = ManualLink Params = { TrickDef_RailFlip IsExtra } } ]
 NewToRail_Branches = [ { EXTRA_BRANCHFLIP Params = { TrickDef_RailFlip IsExtra } } ]
 
-TrickDef_RailFlip = { 
-	Name = 'Rail Flip' 
-	Score = 500 
-	Anim = RailFlip 
-	BalanceAnim = Primo_Range 
-	Trickslack = 0 
+TrickDef_RailFlip = {
+	Name = 'Rail Flip'
+	Score = 500
+	Anim = RailFlip
+	BalanceAnim = Primo_Range
+	Trickslack = 0
 	Parent = 'To Rail'
 	ToRail_Branchlinks
 }
 
 ToRail_Branchlinks = {
-	ExtraTricks = FlatlandBranches 
-	ExtraTricks2 = ToRail_Branches 
-	NewExtraTricks = NewFlatlandBranches 
+	ExtraTricks = FlatlandBranches
+	ExtraTricks2 = ToRail_Branches
+	NewExtraTricks = NewFlatlandBranches
 	NewExtraTricks2 = NewToRail_Branches
 }
 
 
-TrickDef_Truckstand = { 
-	Name = 'Truckstand' 
-	Score = 1300 
-	InitAnim = Truckstand_Init 
-	FromAirAnim = Truckstand_Init 
-	BalanceAnim = Truckstand_Range 
-	OutAnim = Truckstand_Out 
-	OffMeterTop = NoseManualBail 
-	OffMeterBottom = ManualBail 
-	Friction = 1 
+TrickDef_Truckstand = {
+	Name = 'Truckstand'
+	Score = 1300
+	InitAnim = Truckstand_Init
+	FromAirAnim = Truckstand_Init
+	BalanceAnim = Truckstand_Range
+	OutAnim = Truckstand_Out
+	OffMeterTop = NoseManualBail
+	OffMeterBottom = ManualBail
+	Friction = 1
 	Truckstand_BranchLinks
 }
 
 Trick_Truckstand = { SCR_MANUAL Params = { TrickDef_Truckstand IsSpecial } }
 
-TruckstandBranches = [ 
+TruckstandBranches = [
 	{ Trigger = { AirTrickLogic Left Square 500 } Scr = ManualLink Params = TrickDef_TruckstandFlip }
 	{ Trigger = { TripleInOrder Right Right Triangle 500 } Scr = ManualLink Params = { Name = 'Truck Spin' Score = 1000 Anim = Truckstand_Init BalanceAnim = Truckstand_Range OutAnim = Truckstand_Out ExtraTricks = FlatlandBranches NewExtraTricks = NewFlatlandBranches ExtraTricks2 = TruckstandBranches Trickslack = 0 IsExtra } }
-	{ Trigger = { HoldTwoAndPress R2 L2 Triangle 500 } Scr = ManualLink Params = { Name = 'Pogo to Hair Flip' RodneyOnly Score = 1500 Anim = Sweet BalanceAnim = Truckstand_Range OutAnim = Truckstand_Out ExtraTricks = FlatlandBranches NewExtraTricks = NewFlatlandBranches ExtraTricks2 = TruckstandBranches Trickslack = 0 IsExtra } } 
+	{ Trigger = { HoldTwoAndPress R2 L2 Triangle 500 } Scr = ManualLink Params = { Name = 'Pogo to Hair Flip' RodneyOnly Score = 1500 Anim = Sweet BalanceAnim = Truckstand_Range OutAnim = Truckstand_Out ExtraTricks = FlatlandBranches NewExtraTricks = NewFlatlandBranches ExtraTricks2 = TruckstandBranches Trickslack = 0 IsExtra } }
 ]
 
 NewTruckstandBranches = [
@@ -354,37 +354,37 @@ NewTruckstandBranches = [
 ]
 
 TrickDef_TruckstandFlip = {
-	Name = 'Truckstand Flip' 
-	Score = 500 
-	Anim = Truckstand_Flip 
-	BalanceAnim = Truckstand_Range 
-	OutAnim = Truckstand_Out 
-	ExtraTricks = FlatlandBranches 
-	NewExtraTricks = NewFlatlandBranches 
-	ExtraTricks2 = TruckstandBranches 
-	Trickslack = 0 
+	Name = 'Truckstand Flip'
+	Score = 500
+	Anim = Truckstand_Flip
+	BalanceAnim = Truckstand_Range
+	OutAnim = Truckstand_Out
+	ExtraTricks = FlatlandBranches
+	NewExtraTricks = NewFlatlandBranches
+	ExtraTricks2 = TruckstandBranches
+	Trickslack = 0
 	Parent = 'Truckstand'
 	Truckstand_BranchLinks
 }
 
 Truckstand_BranchLinks = {
-	ExtraTricks = FlatlandBranches 
+	ExtraTricks = FlatlandBranches
 	ExtraTricks2 = TruckstandBranches
-	NewExtraTricks = NewFlatlandBranches 	
+	NewExtraTricks = NewFlatlandBranches
 	NewExtraTricks2 = NewTruckstandBranches
 }
 
 //original struct
-FlatlandBranches = [ 
+FlatlandBranches = [
 	{ Trigger = { TripleInOrder Left Right Triangle 500 } Trick_AntiCasper }
 	{ Trigger = { TripleInOrder Right Left Triangle 500 } Trick_Casper }
 	{ Trigger = { TripleInOrder Left Left Triangle 500 } Trick_ToRail }
 	{ Trigger = { TripleInOrder Right Right Triangle 500 } Trick_Truckstand }
-	{ Trigger = { TripleInOrder Right Right Circle 500 } Trick_Handstand } 
+	{ Trigger = { TripleInOrder Right Right Circle 500 } Trick_Handstand }
 ]
 
 //new struct
-NewFlatlandBranches = [ 
+NewFlatlandBranches = [
 	{ Trigger = { InOrder Square Circle 300 } Trick_AntiCasper }
 	{ Trigger = { InOrder Square Triangle 300 } Trick_Casper }
 	{ Trigger = { InOrder Circle Circle 300 } Trick_Handstand }
@@ -408,17 +408,17 @@ SCRIPT Manual BlendPeriod = 0.3
 	ClearLipCombos
 	ClearExceptions
 	KillExtraTricks
-	
+
 	SetException Ex = GroundGone Scr = GroundGone Params = { NoBoneless }
 	SetException Ex = MadeOtherSkaterBail Scr = MadeOtherSkaterBail_Called CallInsteadOfGoto
-	
+
 	IF GotParam Nollie
 		SetException Ex = Ollied Scr = NollieNoDisplay Params = { <...> }
 		NollieOn
 	ELSE
 		SetException Ex = Ollied Scr = Ollie Params = { <...> }
 	ENDIF
-	
+
 	SetException Ex = FlailHitWall Scr = FlailHitWall
 	SetException Ex = FlailLeft Scr = FlailLeft
 	SetException Ex = FlailRight Scr = FlailRight
@@ -428,9 +428,9 @@ SCRIPT Manual BlendPeriod = 0.3
 	SetException Ex = CarBail Scr = CarBail
 	SetException Ex = SkaterCollideBail Scr = SkaterCollideBail
 	OnExceptionRun ManualOut
-	
+
 	SetQueueTricks NoTricks
-	
+
 	IF GotParam IsSpecial
 		SetManualTricks NoTricks
 	ELSE
@@ -440,14 +440,14 @@ SCRIPT Manual BlendPeriod = 0.3
 			SetManualTricks NoTricks Special = SpecialManualTricks
 		ENDIF
 	ENDIF
-	
+
 	StartBalanceTrick
 	Vibrate Actuator = 1 Percent = 25
-	
+
 	IF GotParam Friction
 		SetRollingFriction <Friction>
 	ENDIF
-	
+
 	IF GotParam IsSpecial
 		IF GotParam Nollie
 			DoBalanceTrick ButtonA = Up ButtonB = Down Type = Nosemanual Tweak = 5
@@ -461,13 +461,13 @@ SCRIPT Manual BlendPeriod = 0.3
 			DoBalanceTrick ButtonA = Up ButtonB = Down Type = Manual Tweak = 1
 		ENDIF
 	ENDIF
-	
+
 	IF GotParam FromAir
 		PlayAnim Anim = <FromAirAnim> BlendPeriod = 0.0
 	ELSE
 		PlayAnim Anim = <InitAnim> BlendPeriod = 0.3
 	ENDIF
-	
+
 	IF Obj_FlagSet FLAG_SKATER_MANUALCHEESE
 		IF AirTimeLessThan 1 second
 			AdjustBalance TimeAdd = 2 SpeedMult = 1.2
@@ -480,11 +480,11 @@ SCRIPT Manual BlendPeriod = 0.3
 	ELSE
 		Obj_SetFlag FLAG_SKATER_MANUALCHEESE
 	ENDIF
-	
+
 	IF SpeedGreaterThan 300
 		Obj_ClearFlag FLAG_SKATER_MANUALCHEESE
 	ENDIF
-	
+
 	WaitAnim 50 Percent
 	IF GotParam IsSpecial
 	ELSE
@@ -493,7 +493,7 @@ SCRIPT Manual BlendPeriod = 0.3
 			DoNextManualTrick
 		ENDIF
 	ENDIF
-	
+
 	IF GotParam IsSpecial
 		LaunchSpecialMessage
 	ELSE
@@ -501,30 +501,30 @@ SCRIPT Manual BlendPeriod = 0.3
 			LaunchExtraMessage
 		ENDIF
 	ENDIF
-	
+
 	GroundTricks_AddExtraManualTricks ignore = <Name> <...>
-	
+
 	IF AnimEquals WorkForFood_Init
 		SpawnSkaterScript Ollie_Signage
 	ENDIF
-	
+
 	WaitAnimFinished
-	
+
 	SetTrickName <Name>
 	SetTrickScore <Score>
 	Display Blockspin
-	
+
 	IF GotParam SproingFlip
 		BlendPeriodOut 0
 		FlipAfter
 	ENDIF
-	
+
 	IF GotParam BalanceIdle
 		PlayAnim Anim = <BalanceIdle> cycle BlendPeriod = <BlendPeriod>
 	ELSE
 		PlayAnim Anim = <BalanceAnim> wobble
 	ENDIF
-	
+
 	IF AnimEquals VisitingHome_Idle
 		SwitchOnAtomic special_item
 		SwitchOffAtomic skin
@@ -537,14 +537,14 @@ SCRIPT Manual BlendPeriod = 0.3
 			Wait 0.5 second
 		REPEAT
 	ENDIF
-	
+
 	IF GotParam Sparks
 		BEGIN
 			ClawSparks
 			Wait 0.5 frames
 		REPEAT
 	ENDIF
-	
+
 	IF AnimEquals LazyAss_Idle
 		BEGIN
 			IF frameis 20
@@ -553,7 +553,7 @@ SCRIPT Manual BlendPeriod = 0.3
 			Wait 1 Frame
 		REPEAT
 	ENDIF
-	
+
 	IF AnimEquals MaulNinjaManual_Idle
 		BEGIN
 			IF Flipped
@@ -575,19 +575,19 @@ SCRIPT SpecialManualSFX
 ENDSCRIPT
 
 claw_sparks_partice_params = {
-	Name = "Grass_1.png" 
-	start_col = -16711681 
-	end_col = -2013265665 
-	blend_mode = 68 
-	num = 10 
-	emit_w = 2.0 
-	emit_h = 2.1 
-	angle = -50 
-	size = 1.0 
-	growth = 3 
-	time = 0.25 
-	speed = 150 
-	grav = 0 
+	Name = "Grass_1.png"
+	start_col = -16711681
+	end_col = -2013265665
+	blend_mode = 68
+	num = 10
+	emit_w = 2.0
+	emit_h = 2.1
+	angle = -50
+	size = 1.0
+	growth = 3
+	time = 0.25
+	speed = 150
+	grav = 0
 	life = 0.25
 }
 
@@ -675,18 +675,18 @@ SCRIPT ManualLink grindslack = 25 Trickslack = 10 displaypercent = 50 Extraperce
 			LaunchExtraMessage
 		ENDIF
 	ENDIF
-	
+
 	WaitAnim <displaypercent>
-	
+
 	IF GotParam NoDisplay
 	ELSE
 		Display
 	ENDIF
-	
+
 	WaitAnim <Extrapercent> Percent
 
 	GroundTricks_AddExtraManualTricks ignore = <Parent> <...>
-	
+
 	WaitAnim <grindslack> frames fromend
 	Bailoff
 	WaitAnim <Trickslack> frames fromend
@@ -708,7 +708,7 @@ ENDSCRIPT
 
 //the logic is that we store 2 sets of extra tricks: original and new
 //first we assign old tricks
-SCRIPT GroundTricks_AddExtraManualTricks 
+SCRIPT GroundTricks_AddExtraManualTricks
 	IF GotParam ExtraTricks
 		IF GotParam ExtraTricks2
 			SetExtraTricks <ExtraTricks2> <ExtraTricks> ignore = <ignore>
@@ -720,7 +720,7 @@ SCRIPT GroundTricks_AddExtraManualTricks
 	//if new tricks are allowed, we assign new extensions
 	//if new ones are missing, then old tricks are in effect
 	//should we have a separate option here? now uses extra tricks toggle
-	
+
 	IF IsOptionOn LM_Control_bExtraTricks
 		IF GotParam NewExtraTricks
 			IF GotParam NewExtraTricks2
@@ -850,7 +850,7 @@ SCRIPT ToggleNollieRegular
 	SetException Ex = SkaterCollideBail Scr = SkaterCollideBail
 	SetQueueTricks GroundTricks
 	DoNextTrick
-	
+
 	IF InNollie
 		NollieOff
 		IF Crouched
@@ -866,15 +866,15 @@ SCRIPT ToggleNollieRegular
 			PlayAnim Anim = SkatingToNollie BlendPeriod = 0.1
 		ENDIF
 	ENDIF
-	
+
 	WaitAnimWhilstChecking AndManuals
-	
+
 	//fixed original bug where it wouldn't go back to regular
 	IF InNollie
 		Goto OnGroundNollieAI
 	ELSE
 		Goto OnGroundAI
-	ELSE		
+	ENDIF
 ENDSCRIPT
 
 SCRIPT Nollie
@@ -884,7 +884,7 @@ SCRIPT Nollie
 	ENDIF
 	ClearTrickQueue
 	ClearEventBuffer Buttons = Dpad OlderThan = TRICK_PRELOAD_TIME
-	Jump 
+	Jump
 	InAirExceptions
 	Vibrate Actuator = 1 Percent = 50 Duration = 0.05
 	NollieOn
@@ -915,7 +915,7 @@ SCRIPT NollieNoDisplay
 	SetTrickName 'Nollie'
 	SetTrickScore 100
 	Display Deferred
-	Jump 
+	Jump
 	InAirExceptions
 	Vibrate Actuator = 1 Percent = 80 Duration = 0.05
 	NollieOn
@@ -991,42 +991,6 @@ SCRIPT NoComply
 	ENDIF
 	Bailoff
 	PlayAnim Anim = NoComply BlendPeriod = 0.2
-	WaitAnimWhilstChecking
-	Goto Airborne
-ENDSCRIPT
-
-SCRIPT Beanplant Anim = Beanplant Height = BonelessHeight
-	ClearTrickQueue
-	ClearEventBuffer Buttons = Dpad OlderThan = TRICK_PRELOAD_TIME
-	Jump <Height>
-	InAirExceptions
-	Vibrate Actuator = 1 Percent = 80 Duration = 0.1
-	PlaySound boneless09 pitch = 85
-	IF GotParam Name
-		SetTrickName <Name>
-		SetTrickScore <Score>
-		Display
-	ENDIF
-	PlayAnim Anim = <Anim> BlendPeriod = 0.2
-	Bailoff
-	WaitAnimWhilstChecking
-	Goto Airborne
-ENDSCRIPT
-
-SCRIPT Fastplant Anim = Fastplant Height = BonelessHeight
-	ClearTrickQueue
-	ClearEventBuffer Buttons = Dpad OlderThan = TRICK_PRELOAD_TIME
-	Jump <Height>
-	InAirExceptions
-	Vibrate Actuator = 1 Percent = 80 Duration = 0.1
-	PlaySound boneless09 pitch = 85
-	IF GotParam Name
-		SetTrickName <Name>
-		SetTrickScore <Score>
-		Display
-	ENDIF
-	PlayAnim Anim = <Anim> BlendPeriod = 0.2
-	Bailoff
 	WaitAnimWhilstChecking
 	Goto Airborne
 ENDSCRIPT
