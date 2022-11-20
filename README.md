@@ -17,7 +17,7 @@ LevelMod features:
 
 ### How to install
 **Important!** *The mod requires original game to be installed on your computer. You cannot play the mod without original files. You also need the [1.01 patch](#links)*
-1. Make sure you have the latest LevelMod Full release and lost levels installed from [Chapter-3.net thread](#links)
+1. Make sure you have the latest LevelMod Full release and lost levels installed from [Chapter-3.net thread](#links).
 2. Look for Levelmod.flt file and remove it if found
 3. Download [latest release from repo](#links)
 4. Extract to your game folder and replace all the files if asked. However, for the first install it shouldn't require to replace any existing files
@@ -45,6 +45,7 @@ Additional code used to be loaded in LevelMod.flt by integrated MSS plugin syste
 * [Latest LevelMod release](https://github.com/Vadru93/LevelMod/releases/latest)
 * [LevelMod wiki](https://github.com/Vadru93/LevelMod/wiki)
 * [Original LevelMod thread at Chapter-3.net](http://chapter-3.net/thps3/v2/showthread.php?tid=3141)
+* [Lost levels for THUG1 and THUG2](http://chapter-3.net/thps3/v2/showthread.php?tid=4269&pid=73448)
 * [Visual Studio Redist x86 2019](https://aka.ms/vs/16/release/vc_redist.x86.exe)
 * [Official 1.01 patch](https://community.pcgamingwiki.com/files/file/339-tony-hawks-pro-skater-3-patch/)
 * [THPS3 Widescreen patch by thirteenAG](https://github.com/ThirteenAG/WidescreenFixesPack/releases/tag/thps3)
