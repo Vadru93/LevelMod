@@ -367,7 +367,7 @@ public:
 
         CArray* node_array = Node::GetNodeArray();
         numNodes = node_array->GetNumItems();
-        for (int i = 0; i < numNodes; i++)
+        for (DWORD i = 0; i < numNodes; i++)
         {
             CStruct* pStruct = node_array->GetStructure(i);
 
@@ -717,7 +717,7 @@ public:
                         (!(bb_min.z > pRailNode->vBBMax.z)) &&
                         (!(bb_max.z < pRailNode->vBBMin.z)) &&
                         (!(bb_min.y > pRailNode->vBBMax.y)) &&
-                        (!(bb_max.y) < pRailNode->vBBMin.y))
+                        (!(bb_max.y < pRailNode->vBBMin.y)))
                     {
                         // calculate the distance from the movement to the rail point 
                         D3DXVECTOR3 offset = *(D3DXVECTOR3*)&pRailNode->vPos - pos1;
@@ -921,7 +921,7 @@ public:
                             (!(bb_min.z > pRailNode->vBBMax.z)) &&
                             (!(bb_max.z < pRailNode->vBBMin.z)) &&
                             (!(bb_min.y > pRailNode->vBBMax.y)) &&
-                            (!(bb_max.y) < pRailNode->vBBMin.y))
+                            (!(bb_max.y < pRailNode->vBBMin.y)))
                         {
                             // calculate the distance from the movement to the rail point
                             D3DXVECTOR3 offset = *(D3DXVECTOR3*)&pRailNode->vPos - pos1;
@@ -978,13 +978,13 @@ public:
         {
             EndOfRail = (DWORD)&temp_nodes[current_node];
             RailNode** pp_railnodes = new RailNode * [numNodes]; //mallocx(numNodes * sizeof(RailNode*));
-            for (int i = 0; i < numNodes; i++)
+            for (DWORD i = 0; i < numNodes; i++)
             {
                 pp_railnodes[i] = NULL;
             }
 
             RailNode* p_node;// = *first_node;
-            int last = current_node - 1;
+            DWORD last = current_node - 1;
             *first_node = &temp_nodes[0];
             /*char test_msg[50];
             sprintf(test_msg, "%X\n", &Game::skater->mp_rail_node);
@@ -992,7 +992,7 @@ public:
             MessageBox(0, 0, 0, 0);*/
             EndOfRail = (DWORD)&temp_nodes[current_node];
 
-            for (int node = 0; node < current_node; node++)
+            for (DWORD node = 0; node < current_node; node++)
             {
                 p_node = &temp_nodes[node];
                 /*if (node != last)
@@ -1004,11 +1004,11 @@ public:
             }
 
             //p_node = *first_node;
-            for (int node = 0; node < current_node; node++)
+            for (DWORD node = 0; node < current_node; node++)
             {
                 p_node = &temp_nodes[node];
 
-                for (int i = 0; i < MAX_RAIL_LINKS; i++)
+                for (DWORD i = 0; i < MAX_RAIL_LINKS; i++)
                 {
                     signed short link = temp_links[node].m_link[i];
                     if (temp_links[node].m_link[i] != -1)
@@ -1289,7 +1289,7 @@ public:
 
         //	CRailNode *pRailNode = mp_first_node;
         //	while (pRailNode)
-        for (int check_node = 0; check_node < current_node; check_node++)
+        for (DWORD check_node = 0; check_node < current_node; check_node++)
         {
             RailNode* __restrict pRailNode = temp_nodes ? &temp_nodes[check_node] : &mp_nodes[check_node];
 
@@ -1375,7 +1375,7 @@ public:
                 bb_max[Z] += 16.0f;
 
 
-                int check_node = node + 1;
+                DWORD check_node = node + 1;
                 //			CRailNode *pCheckNode = pRailNode->m_pNext;
                 while (check_node < current_node && pRailNode->IsActive())
                 {

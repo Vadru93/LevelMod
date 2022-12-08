@@ -42,7 +42,8 @@ D3DXVECTOR4 Slerp::target_normal = D3DXVECTOR4(0, 0, 0, 0);
 
 float Slerp::speed = 0.0f;
 
-EXTERN bool GameState::GotSuperSectors = false;
+bool GameState::GotSuperSectors = false;
+bool GameState::loading_completed = false;
 Skater* __restrict Game::skater = NULL;
 bool(*Game::PlaySound)(CStruct*, CScript*) = NULL;
 DWORD Game::level_checksum = 0;

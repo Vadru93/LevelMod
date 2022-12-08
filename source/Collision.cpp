@@ -38,6 +38,7 @@ namespace Collision
     DWORD numInterFaces;
     BBox cache_bbox;
     CollCache* spine_cache;
+    CollCache* trigger_cache;
 #define EPSILON 0.000001f
 
     Flags& operator+(const Flags& f1, const Flags& f2)

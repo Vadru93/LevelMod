@@ -195,6 +195,21 @@ __inline void HookFunction(DWORD addr, void(Skater::* function)(bool force_updat
     //
     //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
 }
+
+__inline void HookFunction(DWORD addr, bool(Skater::* function)(Collision::Flags ignore0, Collision::Flags flags, Collision::Flags ignore1), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    addr += 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+
 __inline void HookFunction(DWORD addr, void(FrontEnd::* function)(), BYTE byteCode = 0, DWORD nopCount = 0)
 {
     DWORD old;
@@ -767,6 +782,7 @@ void DestroySuperSectors()
     QScript::Scripts->ClearLevelTable();
 
     GameState::GotSuperSectors = false;
+    GameState::loading_completed = false;
 
     debug_print("Remove ShatterObjects\n");
     extern void UnloadShatterObjects();
@@ -787,6 +803,9 @@ void DestroySuperSectors()
     debug_print("Clearing Spine CollCache\n");
     delete Collision::spine_cache;
 
+    debug_print("Clearing Trigger CollCache\n");
+    delete Collision::trigger_cache;
+
     debug_print("Clearing Default CollCache\n");
     Collision::defaultCollCache.Clear();
 }
@@ -795,6 +814,10 @@ void CreateSuperSectors()
     debug_print("Creating Spine CollCache\n");
     Collision::spine_cache = new Collision::CollCache;
     Collision::spine_cache->SetRequirement(Collision::Flags::Vert + Collision::Flags::Skatable);
+
+    debug_print("Creating Trigger CollCache\n");
+    Collision::trigger_cache = new Collision::CollCache;
+    Collision::trigger_cache->SetRequirement(Collision::Flags::Trigger + Collision::Flags::Hollow);
 
     debug_print("Going to create MovingObjects\n");
     GameState::GotSuperSectors = true;
@@ -1360,7 +1383,6 @@ void ReadFirstOptions()
     //NewTimer::CalculateFPSTimers();
 
     //debug_print("value %d\n", Gfx::fps_fix);
-    CreateConsole();
 
     //debug_print("Reading from ini file %s, default %d ", "LM_DebugOption_bDebugMode", debug);
     new_value = OptionReader->ReadInt("Script_Settings", "LM_DebugOption_bDebugMode", debug);
@@ -3188,7 +3210,14 @@ void LoadCustomShaderThread()
 {
     //We have started a new game
 
-    //First update skater pointer
+    //First update the custom world sector flags
+    RpWorld* world = RwViewer::Instance()->GetCurrentWorld();
+    NxPlugin* plg = world->GetWorldPluginData();
+    Collision::Manager* cld_manager = plg->GetManager();
+    cld_manager->UpdateWorldSectorFlags();
+    GameState::loading_completed = true;
+
+    //Then update skater pointer
     Game::skater = Skater::UpdateSkater();
     while(!Game::skater) Skater::UpdateSkater();
     KeyMap::UpdateKeyMap();
@@ -3207,12 +3236,8 @@ void LoadCustomShaderThread()
     //Then update shaders
     Gfx::LoadCustomShaders(ShaderFile);
 
-    Sleep(500);
+    //Sleep(500);
     //this currently crashes, need to look into why...
-    RpWorld* world = RwViewer::Instance()->GetCurrentWorld();
-    NxPlugin* plg = world->GetWorldPluginData();
-    Collision::Manager* cld_manager = plg->GetManager();
-    cld_manager->UpdateWorldSectorFlags();
     //cld_manager->SortWorldSectors();
 }
 
@@ -3944,6 +3969,7 @@ bool DisplayLoadingScreen(CStruct* pStruct, CScript* pScript)
 
 
 
+
 const DWORD numFunctions = sizeof(scripts) / sizeof(CompiledScript);
 
 void AddFunctions()
@@ -4016,6 +4042,12 @@ void AddFunctions()
 #endif
 }
 
+#ifdef _DEBUG  //disable debug
+#undef _DEBUG
+#pragma optimize( "g", on )
+#define _DD
+#endif
+
 bool __stdcall proxy_FixGoBack(BYTE unk1, BYTE unk2, BYTE unk3, BYTE unk4)
 {
     static void* oldECX;
@@ -4030,6 +4062,10 @@ bool __stdcall proxy_FixGoBack(BYTE unk1, BYTE unk2, BYTE unk3, BYTE unk4)
     _asm mov ecx, oldECX;
     return true;
 }
+#ifdef _DD
+#define _DEBUG
+#pragma optimize( "", off )
+#endif
 
 float __cdecl proxy_SnapToGroundClamp(float a1)
 {
@@ -4439,9 +4475,9 @@ __declspec(naked) void CheckForPointRail_Hook()
 
 void CheatDetected()
 {
-    CStruct params;
     CStructHeader param(QBKeyHeader::STRING, Checksums::text, stat_cheat_message);
-    params.Set(&param);
+    CStruct params(&param);
+    
     ExecuteQBScript("LaunchGrafCounter", &params);
 }
 
@@ -4533,9 +4569,9 @@ __declspec(naked) void CalibrateScore()
 
 void CallMenuSelectCallback(DWORD id)
 {
-    CStruct params;
     CStructHeader param(QBKeyHeader::LOCAL, Checksums::id, id);
-    params.Set(&param);
+    CStruct params(&param);
+    
     ExecuteQBScript(MenuSelectCallback, &params);
 }
 
@@ -4689,6 +4725,33 @@ void InitLevelMod()
     /*HookFunction(0x004994E5, &Skater::UberFrig);
     HookFunction(0x004996C6, &Skater::UberFrig);
     HookFunction(0x004A8B6F, &Skater::UberFrig);*/
+    //HookFunction(0x004A8B76, &HandleTriggers);
+    /*HookFunction(0x00400321, &Skater::CollisionCheck_Hook);
+    HookFunction(0x0049EE9D, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A02DD, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A05A2, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A0846, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A0AF3, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A0FF6, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A10FA, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A13BE, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A14E9, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A1752, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A1884, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A195D, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A2946, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A2BD6, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A2E60, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A3646, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A3EE7, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A4092, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A5A3C, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A6642, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A6C1C, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A6CD6, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A72AC, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004AFB58, &Skater::CollisionCheck_Hook);*/
+
 
     //Optimize Vertex equal function
     //Before it was loading each float to FPU
@@ -5332,6 +5395,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
 
         LevelModSettings::SpineButton3 = KeyMap::GetVKeyCode(KeyMap::MappedKey::Unused);
 
+
         /*if (!bDebugMode)
         {
             
@@ -5437,9 +5501,8 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
             debug_print("Couldn't find HostOptions\n");
 
 
-        CStruct params;
         CStructHeader param(QBKeyHeader::LOCAL, 0, Checksums::LoadSettings);
-        params.Set(&param);
+        CStruct params(&param);
         KeyMapScript(&params, NULL);
     }
 
@@ -6260,7 +6323,7 @@ SHORT __stdcall proxy_GetAsyncKeyState(int key)
         else
         {
             //Check all keys between Cancel and Max(3 and 207)
-            for (VirtualKeyCode key = VirtualKeyCode::CANCEL; key != VirtualKeyCode::MAX; (*(DWORD*)&key)++)
+            for (VirtualKeyCode key = VirtualKeyCode::CANCEL; key != VirtualKeyCode::MAX; key++)
             {
                 //Don't assign ENTER key, since it's reserved for chat
                 if (key == VirtualKeyCode::ENTER)
@@ -6770,9 +6833,8 @@ __declspec(noalias) void DrawFrame()
                 {
                     oldTagCount = tagCount;
                     sprintf(&tags[6], "%u %X", tagCount, *(DWORD*)(0x0040033C + ((tagCount - 1) * 4)));
-                    CStruct params;
                     CStructHeader param(QBKeyHeader::STRING, Checksums::text, tags);
-                    params.Set(&param);
+                    CStruct params(&param);
                     ExecuteQBScript("LaunchGrafCounter", &params);
                 }
                 else

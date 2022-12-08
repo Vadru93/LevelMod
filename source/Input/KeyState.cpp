@@ -299,6 +299,17 @@ VirtualKeyCode KeyMap::GetVKeyCode(MappedKey key)
     return (VirtualKeyCode)MapVirtualKeyA((UINT)keyMap[(BYTE)key].DIK_KeyCode, MAPVK_VSC_TO_VK);
 }
 
+VirtualKeyCode& operator++(VirtualKeyCode& c) {
+    c = static_cast<VirtualKeyCode>(static_cast<BYTE>(c) + 1);
+    return c;
+}
+
+VirtualKeyCode& operator++(VirtualKeyCode& c, int) {
+    VirtualKeyCode result = c;
+    ++c;
+    return result;
+}
+
 void KeyMap::Set(VirtualKeyCode code, bool mapped)
 {
     //Enable mapping for this key?
@@ -314,70 +325,71 @@ void KeyMap::Set(VirtualKeyCode code, bool mapped)
 
 void KeyMap::UpdateText(VirtualKeyCode code)
 {
-    CStruct params;
-    CStructHeader param(QBKeyHeader::STRING, 0, code == VirtualKeyCode::MAX ? (char*)KeyState::GetVKName((VirtualKeyCode)MapVirtualKeyA((UINT)this->DIK_KeyCode, MAPVK_VSC_TO_VK)) : (char*)KeyState::GetVKName(code));
-    CStructHeader param2;
-    param.NextHeader = &param2;
+    const char* text = code == VirtualKeyCode::MAX ? 
+        KeyState::GetVKName((VirtualKeyCode)MapVirtualKeyA((UINT)this->DIK_KeyCode, MAPVK_VSC_TO_VK)) : 
+        KeyState::GetVKName(code);
+    DWORD id = 0;
 
     KeyMap::MappedKey key = this->GetKeyType();
     switch (key)
     {
     case KeyMap::MappedKey::Up:
         //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::Up);
-        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("up_text_id"));
+        id = Checksums::up_text_id;
         break;
     case KeyMap::MappedKey::Down:
         //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::Down);
-        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("down_text_id"));
+        id = Checksums::down_text_id;
         break;
     case KeyMap::MappedKey::Left:
         //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::Left);
-        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("left_text_id"));
+        id = Checksums::left_text_id;
         break;
     case KeyMap::MappedKey::Right:
         //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::Right);
-        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("right_text_id"));
+        id = Checksums::right_text_id;
         break;
     case KeyMap::MappedKey::Flip:
         //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::Square);
-        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("flip_text_id"));
+        id = Checksums::flip_text_id;
         break;
     case KeyMap::MappedKey::Grab:
         //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::Circle);
-        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("grab_text_id"));
+        id = Checksums::grab_text_id;
         break;
     case KeyMap::MappedKey::Grind:
         //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::Triangle);
-        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("grind_text_id"));
+        id = Checksums::grind_text_id;
         break;
     case KeyMap::MappedKey::SpinLeft:
         //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::L1);
-        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("spinleft_text_id"));
+        id = Checksums::spinleft_text_id;
         break;
     case KeyMap::MappedKey::SpinRight:
         //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::R1);
-        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("spinright_text_id"));
+        id = Checksums::spinright_text_id;
         break;
     case KeyMap::MappedKey::Nollie:
         //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::L2);
-        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("nollie_text_id"));
+        id = Checksums::nollie_text_id;
         break;
     case KeyMap::MappedKey::Revert:
         //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::R2);
-        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("revert_text_id"));
+        id = Checksums::revert_text_id;
         break;
     case KeyMap::MappedKey::Unused:
         //param = CStructHeader(QBKeyHeader::LOCAL, Checksum("KeyMap"), Checksums::SpineTransfer);
-        param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("spine_text_id"));
+        id = Checksums::spine_text_id;
+
         //New SpineButton
-        LevelModSettings::SpineButton3 = code;
+        if(LevelModSettings::pEditKeyMap)
+           LevelModSettings::SpineButton3 = code;
         break;
 
     }
 
-    params.Set(&param);
     //Set KeyMap text
-    QScript::CallCFunction(Checksum("SetMenuElementText"), &params);
+    QScript::SetMenuElementText(id, text);
     //Reset error text
     SetErrorText("");
 }

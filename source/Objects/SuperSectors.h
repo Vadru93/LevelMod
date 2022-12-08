@@ -371,9 +371,9 @@ namespace Collision
         //We need to restore the new custom flags to default value, else we will have a crash when unloading the level
         void RestoreWorldSectorFlags()
         {
-            for (DWORD x = 0; x < num_sectors_x; x++)
+            for (int x = 0; x < num_sectors_x; x++)
             {
-                for (DWORD z = 0; z < num_sectors_z; z++)
+                for (int z = 0; z < num_sectors_z; z++)
                 {
                     Sector& sector = sectors[x][z];
 
@@ -392,16 +392,16 @@ namespace Collision
             //This method will loop throught he same sectors multiply times and is very inefficient
             //it's not so important since it's only called once every level change
             //however should find a better way to loop through all sectors...
-            for (DWORD x = 0; x < num_sectors_x; x++)
+            for (int x = 0; x < num_sectors_x; x++)
             {
-                for (DWORD z = 0; z < num_sectors_z; z++)
+                for (int z = 0; z < num_sectors_z; z++)
                 {
                     Sector& sector = sectors[x][z];
 
                     for (DWORD i = 0; i < sector.numSectors; i++)
                     {
                         ::SuperSector* s = sector.super_sectors[i]; 
-                        printf("%p %X\n", s, s->req_flags);
+                        debug_print("%p %X\n", s, s->req_flags);
 
                         //Does the sector have collision plugin and is it collideable?
                         if (!s->pCollisionPLG || s->pCollisionPLG == INVALID_PTR || !(s->unk_flag & 6))
@@ -411,7 +411,7 @@ namespace Collision
                         }
 
                         //Add all polies flags to the sector flag
-                        for (DWORD j = 0; j < s->numIndices; j++)
+                        for (int j = 0; j < s->numIndices; j++)
                         {
                             s->req_flags |= (WORD)s->pCollisionFlags[j];
                         }
@@ -426,9 +426,9 @@ namespace Collision
 
         void SortWorldSectors()
         {
-            for (DWORD x = 0; x < num_sectors_x; x++)
+            for (int x = 0; x < num_sectors_x; x++)
             {
-                for (DWORD z = 0; z < num_sectors_z; z++)
+                for (int z = 0; z < num_sectors_z; z++)
                 {
                     Sector& sector = sectors[x][z];
                     sector.Sort();
@@ -571,7 +571,9 @@ namespace Collision
 
         __declspec(noalias) void UpdateCache(const RwLine& line, CollCache* const __restrict cache, bool definite_mask = false) const
         {
-            printf("Updating cache\n");
+            D3DXVECTOR3* p = Game::skater->GetPosition();
+            debug_print("%p\n", p);
+            debug_print("Updating cache\n");
             //Set impossible BBOX
             cache->bbox.max = Vertex(-FLT_MAX, -FLT_MAX, -FLT_MAX);
             cache->bbox.min = Vertex(FLT_MAX, FLT_MAX, FLT_MAX);
@@ -633,7 +635,7 @@ namespace Collision
                 //Optimize array access
                 const Sector* sector = &sectors[start_x_box][start_z_box];
 
-                for (int i = 0; i < sector->numSectors; i++)
+                for (DWORD i = 0; i < sector->numSectors; i++)
                 {
                     ::RpWorldSector* world_sector = sector->super_sectors[i];
 

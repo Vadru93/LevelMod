@@ -281,6 +281,22 @@ namespace Checksums
             LoadSettings = COMPILE_CRC32("loadsettings"),
             LoadDefault = COMPILE_CRC32("loaddefault"),
 
+            SetMenuElementText = COMPILE_CRC32("setmenuelementtext"),
+            edit_error = COMPILE_CRC32("edit_error"),
+
+            up_text_id = COMPILE_CRC32("up_text_id"),
+            down_text_id = COMPILE_CRC32("down_text_id"),
+            left_text_id = COMPILE_CRC32("left_text_id"),
+            right_text_id = COMPILE_CRC32("right_text_id"),
+            flip_text_id = COMPILE_CRC32("flip_text_id"),
+            grab_text_id = COMPILE_CRC32("grab_text_id"),
+            grind_text_id = COMPILE_CRC32("grind_text_id"),
+            spinleft_text_id = COMPILE_CRC32("spinleft_text_id"),
+            spinright_text_id = COMPILE_CRC32("spinright_text_id"),
+            nollie_text_id = COMPILE_CRC32("nollie_text_id"),
+            revert_text_id = COMPILE_CRC32("revert_text_id"),
+            spine_text_id = COMPILE_CRC32("spine_text_id"),
+
 
 
         //Trick_KFBackflip = 0xF7B4E0CB

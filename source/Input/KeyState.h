@@ -67,6 +67,10 @@ enum class VirtualKeyCode : BYTE
     MAX = 207
 };
 
+
+VirtualKeyCode& operator++(VirtualKeyCode& c);
+VirtualKeyCode& operator++(VirtualKeyCode& c, int);
+
 struct KeyMap
 {
     bool mapped;
@@ -134,13 +138,7 @@ struct KeyMap
 
     static void SetErrorText(const char* text)
     {
-        CStruct params;
-        CStructHeader param = CStructHeader(QBKeyHeader::STRING, 0, (void*)text);
-        CStructHeader param2 = CStructHeader(QBKeyHeader::LOCAL, Checksums::id, Checksum("edit_error"));
-        param.NextHeader = &param2;
-        params.Set(&param);
-
-        QScript::CallCFunction(Checksum("SetMenuElementText"), &params);
+        QScript::SetMenuElementText(Checksums::edit_error, text);
     }
 };
 
@@ -234,7 +232,7 @@ public:
         return p_KeyboardState(code) & 0x80;
     }
 
-    static void SetKeyboardState(VirtualKeyCode code, DWORD value)
+    static void SetKeyboardState(VirtualKeyCode code, BYTE value)
     {
         p_KeyboardState(code) = value;
     }

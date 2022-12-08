@@ -353,7 +353,11 @@ private://0575a190
     //40C
     float mTallyAngles;
     //410
-    BYTE unknown1[0x165];
+    BYTE unknown[0x144];
+    //554
+    D3DXVECTOR3 old_trigger_pos;
+    //560
+    BYTE unknown1[0x15];
     //575
     bool bRail_Backwards;
     //576
@@ -365,19 +369,19 @@ private://0575a190
     DWORD m_land_time;
     DWORD m_land_time2;
     //590
-    BYTE unknown0[0xC0];
+    BYTE unknown2[0xC0];
     //650
     bool blockspin;
     //651
-    BYTE unknown4[0x7CCF];
+    BYTE unknown10[0x7CCF];
     //8320
     bool inVert;
     //8321
-    BYTE unknown6[0xF];
+    BYTE unknown3[0xF];
     //8330
     bool tracking;
     //8331
-    BYTE unknown7[0x1F];
+    BYTE unknown11[0x1F];
     //8350
     bool canbreakvert;
     //8351
@@ -391,11 +395,11 @@ private://0575a190
     //8388
     DWORD m_stop_sliding_time;
     DWORD m_stop_sliding_time2;
-    BYTE unknown10[0x10];
+    BYTE unknown6[0x10];
     //83A0
     bool autoturn;
     //83A1
-    BYTE unknown[0x57];//1 more
+    BYTE unknown7[0x57];//1 more
     //83F8
     D3DXMATRIX  lerp;//1 more
     //8438
@@ -411,7 +415,7 @@ private://0575a190
     //84A4
     DWORD m_state_change_timestamp2;
     //84A8
-    BYTE unknown2[0x18];
+    BYTE unknown13[0x18];
     //84C0
     DWORD m_current_trigger_type;
     //84C4
@@ -420,7 +424,7 @@ private://0575a190
     //84D0
     KeyState keystates[12];
     //8620
-    BYTE unknown3[0x3C];
+    BYTE unknown12[0x3C];
     //865C
     D3DXVECTOR3 startcol;
     //8668
@@ -455,11 +459,16 @@ private:
     //86D0
     DWORD m_trigger_script;
     //86D4
-    BYTE unk7[0x78];
+    BYTE unk6[0x6C];
+    //8740
+    bool skatable;//not sure
+    bool vert;
+    bool trigger;
+    BYTE unk7[9];
     //874C
     Vertex m_pre_lip_pos;
     //8758
-    BYTE unk6[0x78];
+    BYTE unk8[0x78];
     //87D0
     float height;//relative to ground
     //87D4
@@ -539,6 +548,8 @@ public:
         pGetCollisionFlags(0x0049FBB0)(this);
     }
 
+    void HandleTriggers();
+
     void UberFrig(bool force_update)
     {
         if (force_update || position != oldpos)
@@ -585,7 +596,7 @@ public:
                     height = 0.0f;
                 }
             }
-            /*else
+            else
             {
                 startcol = line.start;
                 endcol = line.end;
@@ -612,7 +623,7 @@ public:
                         height = 0.0f;
                     }
                 }
-            }*/
+            }
         }
     }
 
@@ -1112,6 +1123,8 @@ public:
 
     EXTERN bool CollisionCheck(Collision::Flags flag, bool ignore = false);
 
+    bool CollisionCheck_Hook(Collision::Flags ignore0, Collision::Flags flags, Collision::Flags ignore1);
+
     D3DXVECTOR3* GetNormal()
     {
         return &*(D3DXVECTOR3*)&currentnormal;
@@ -1152,6 +1165,9 @@ public:
         return &velocity;
     }
 };
+
+
+void HandleTriggers();
 
 //is in graf game?
 bool Modulating();

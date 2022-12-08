@@ -66,6 +66,7 @@ namespace Collision
     typedef struct CollCache;
 
     extern CollCache* spine_cache;
+    extern CollCache* trigger_cache;
 
     struct SuperSector;
 
@@ -78,7 +79,7 @@ namespace Collision
         DWORD padding;
         //14
         float unk;
-        //18
+        //18<g
         Vertex point;
         //24
         int index;//Or terrain?
@@ -176,13 +177,22 @@ namespace Collision
         __declspec (noalias) bool CollideWithLine(const RwLine& line, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const
         {
             numInterFaces = 0;
+            bool collided = false;
 
             if (branches)
-                return TraverseBranch(&branches[0], line, dir, sector, data);
+            {
+                debug_print("Branches\n");
+                collided = TraverseBranch(&branches[0], line, dir, sector, data);
+            }
             else
-                CollideWithLine(line.start, dir, sector, data);
+            {
+                debug_print("No branches\n");
+                collided = CollideWithLine(line.start, dir, sector, data);
+            }
 
-            return false;
+            if (collided)
+                debug_print("collided with supersector %s\n", FindChecksumName(data.checksum, false));
+            return collided;
         }
     };
 

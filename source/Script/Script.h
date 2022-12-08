@@ -133,6 +133,8 @@ namespace QScript
 
     void PanelMessage(const char* msg, ...);
 
+    void SetMenuElementText(DWORD id, const char* text);
+
     struct QBFile
     {
         DWORD checksum;
@@ -590,6 +592,14 @@ struct CStructHeader
         NextHeader = NULL;
     }
 
+    CStructHeader(QBKeyHeader::QBKeyType Type, const char* text, CStructHeader* next = NULL)
+    {
+        this->Type = Type;
+        this->QBkey = 0;
+        this->pData = (void*)text;
+        NextHeader = next;
+    }
+
     inline float GetFloat()
     {
         return value.f;
@@ -819,6 +829,17 @@ struct EXTERN CStruct
         return (void*)topHeap;
     }
 
+    CStruct(CStructHeader* param)
+    {
+        Set(param);
+    }
+
+    CStruct(CStructHeader param, CStructHeader & param2)
+    {
+        param.NextHeader = &param2;
+        Set(&param);
+    }
+
     void operator delete(void* ptr)
     {
         /*DWORD topHeap = *(DWORD*)(*(DWORD*)0x008E1E30 + 4);
@@ -859,7 +880,7 @@ struct EXTERN CStruct
 
     CStruct(const char* text)
     {
-        CStructHeader param(QBKeyHeader::QBKeyType::STRING, 0, (void*)text);
+        CStructHeader param(QBKeyHeader::QBKeyType::STRING, text);
         Set(&param);
     }
 

@@ -111,10 +111,19 @@ void QScript::PanelMessage(const char* msg, ...)
     va_end(myargs);
 
     CScript script;
-    CStruct params;
-    CStructHeader header(QBKeyHeader::STRING, 0, panel_msg);
-    params.Set(&header);
+    CStructHeader header(QBKeyHeader::STRING, panel_msg);
+    CStruct params(&header);
+
     LaunchPanelMessage(&params, &script);
+}
+
+void QScript::SetMenuElementText(DWORD id, const char* text)
+{
+    CStructHeader param_id(QBKeyHeader::LOCAL, Checksums::id, id);
+    CStructHeader parent(QBKeyHeader::STRING, text, &param_id);
+    CStruct params(&parent);
+
+    QScript::CallCFunction(Checksums::SetMenuElementText, &params);
 }
 
 void QScript::SpawnScript(DWORD checksum, CStruct* params, DWORD node, DWORD callback, CStruct* callback_params, bool AbsentInNetGames, bool NetEnabled, bool Permanent)

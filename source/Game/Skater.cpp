@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "Skater.h"
 #include "Physics\Physics.h"
+#include "Objects\SuperSectors.h"
 
 Vertex scol, ecol;
 CStruct* last_trigger_node = NULL;
@@ -28,6 +29,36 @@ EXTERN bool Skater::CollisionCheck(Collision::Flags flag, bool ignore)
         return pCollisionCheck(0x0049FC80)(this, flag, Collision::Flags::None, Collision::Flags::None);
     else
         return pCollisionCheck(0x0049FC80)(this, Collision::Flags::None, flag, Collision::Flags::None);
+}
+
+bool Skater::CollisionCheck_Hook(Collision::Flags ignore0, Collision::Flags flags, Collision::Flags ignore1)
+{
+
+    if (Game::skater)
+    {
+        RwLine line;
+        line.start = startcol;
+
+        line.end = endcol;
+
+        WORD ignore = (WORD)ignore0;
+        if (ignore)
+        {
+            *(WORD*)&ignore1 |= ignore;
+        }
+        ignore0 = flags;
+        Collision::CollData cld(ignore0, ignore1);
+        bool collided = Collision::FindNearestCollision(line, cld, true);
+        if (collided)
+        {
+            normal = cld.normal;
+            hitpoint = cld.point;
+            this->collFlags = (DWORD)cld.collFlags;
+            //this->checksumName = cld.checksum;
+        }
+        return collided;
+    }
+    return false;
 }
 
 bool GetZAngle(CStruct* pParams, CScript* pScript)
@@ -547,4 +578,31 @@ void Skater::ResetLerpingMatrix()
     lastdisplaynormal = *(Vector*)&GetMatrix()[Y];
     normallerp = 0.0f;
     //old = matrix;
+}
+
+void HandleTriggers()
+{
+    Game::skater->HandleTriggers();
+}
+
+void Skater::HandleTriggers()
+{
+    if (GameState::loading_completed && position != old_trigger_pos)
+    {
+        RwLine line;
+        line.start = old_trigger_pos;
+        old_trigger_pos = position;
+        line.end = position;
+        Collision::CollData cld(Collision::trigger_cache->GetCache(line), Collision::Flags::Hollow + Collision::Flags::Trigger, Collision::Flags::None);
+
+        if (Collision::FindNearestCollision(line, cld, true))
+        {
+            normal = cld.normal;
+            hitpoint = cld.point;
+            collFlags = (DWORD)cld.collFlags;
+            skatable = false;
+            trigger = true;
+            //MessageBox(0, 0, 0, 0);
+        }
+    }
 }

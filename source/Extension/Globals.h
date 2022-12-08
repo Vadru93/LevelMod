@@ -132,7 +132,8 @@ namespace XINPUT
 //--------Game States--------
 namespace GameState
 {
-    EXTERN extern bool GotSuperSectors;
+    extern bool GotSuperSectors;
+    extern bool loading_completed;
 
     bool IsActive();
 };
