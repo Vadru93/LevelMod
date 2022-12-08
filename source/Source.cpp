@@ -3597,14 +3597,14 @@ __declspec(naked) void AddMessageHook(void)
         je skip;
         mov message, eax;
         mov eax, old;
-        pushad;
-        pushfd;
+        //pushad;
+        //pushfd;
     }
     GotMessage(++message);
     _asm
     {
-        popfd;
-        popad;
+        //popfd;
+        //popad;
     skip:
         push retAddr;
         ret;
@@ -4505,12 +4505,12 @@ __declspec(naked) void FixUberFrig()
     static DWORD jmpBack_uber2 = 0x004A770B;
     static DWORD caller = 0x0045D330;
     _asm pushad;
-    _asm pushfd;
+    //_asm pushfd;
     if(Game::skater)
         safe = Game::skater->UberFrigFix();
     else
         safe = false;
-    _asm popfd;
+    //_asm popfd;
     _asm popad;
     if (!safe)
     {

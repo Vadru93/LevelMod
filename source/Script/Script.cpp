@@ -138,7 +138,7 @@ void QScript::UpdateSpawnedScripts()
     DWORD numSpawnedScripts = *(DWORD*)0x008E1E1C;
     SpawnedScript* pScript = (SpawnedScript*)0x008918F8;
 
-    for (int i = 0; i < numSpawnedScripts; i++, pScript++)
+    for (DWORD i = 0; i < numSpawnedScripts; i++, pScript++)
     {
         if (pScript->script && !pScript->paused)
         {
@@ -705,7 +705,7 @@ CStructHeader* CScript::GetParam(DWORD name)
             debug_print("Parsing array...\n");
             CArray* pArray = header->pArray;
 
-            for (int i = 0; i < pArray->GetNumItems(); i++)
+            for (DWORD i = 0; i < pArray->GetNumItems(); i++)
             {
                 if (pArray->Type == 0xA || pArray->Type == 0xB)
                 {
@@ -774,7 +774,7 @@ bool CScript::GotParam(DWORD name)
             debug_print("Parsing array...\n");
             CArray* pArray = header->pArray;
 
-            for (int i = 0; i < pArray->GetNumItems(); i++)
+            for (DWORD i = 0; i < pArray->GetNumItems(); i++)
             {
                 if (pArray->Type == 0xA || pArray->Type == 0xB)
                 {

@@ -503,12 +503,10 @@ __declspec(naked) void Render_Naked()
 {
     static DWORD pCall = 0x004F9C80;
     static DWORD pJmp = 0x004F9C0E;
-    _asm pushad;
-    _asm pushfd;
+   // _asm pushad;
     if (p_render_scene)
         RenderShatterObjects();
-    _asm popfd;
-    _asm popad;
+   // _asm popad;
     _asm call[pCall];
     _asm jmp[pJmp];
 }
