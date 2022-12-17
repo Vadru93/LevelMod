@@ -78,6 +78,22 @@ namespace QScript
 
     };
 
+<<<<<<< Updated upstream:source/Script.h
+=======
+    struct SpawnedScript
+    {
+        CScript* script;
+        DWORD checksum;//not sure?
+        DWORD callback;
+        CStruct* params;
+        bool  paused;
+    };
+
+    float GetPhysicsFloat(DWORD name);
+
+    void ClearScript(DWORD index);
+
+>>>>>>> Stashed changes:source/Script/Script.h
     char* GetScriptDir(bool second = false);
 
     struct CompressedNode

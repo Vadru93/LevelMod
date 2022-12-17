@@ -1712,7 +1712,11 @@ __inline void Skater::MaybeSkateOffRail(bool last_segment, Vertex& extra_dist, R
     // sign is which way we are going along the rail
     float sign = Sgn(D3DXVec3Dot(&dir, GetVelocity()));
 
+<<<<<<< Updated upstream:source/Rail.h
     m_rail_time = GetCurrentTime();
+=======
+    m_rail_time = NewTimer::GetFrameTime();
+>>>>>>> Stashed changes:source/Objects/Rail.h
 
     ((Vertex*)GetVelocity())->RotateToNormal(dir);
     random = 0;
@@ -2044,6 +2048,10 @@ void Skater::SkateOffRail()
                 set_terrain(mp_rail_node->GetTerrain());
 
                 really_off = false;
+<<<<<<< Updated upstream:source/Rail.h
+=======
+                m_rail_time = NewTimer::GetFrameTime();
+>>>>>>> Stashed changes:source/Objects/Rail.h
             }
             else
             {

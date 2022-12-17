@@ -102,6 +102,7 @@ struct ShatterData
         D3DXVECTOR3* p_v0 = (D3DXVECTOR3*)(p_vert_data);
         D3DXVECTOR3* p_v1 = (D3DXVECTOR3*)(p_vert_data + stride);
         D3DXVECTOR3* p_v2 = (D3DXVECTOR3*)(p_vert_data + (2 * stride));
+<<<<<<< Updated upstream:source/Shatter.h
 
         for (int i = 0; i < numTris; ++i)
         {
@@ -135,8 +136,141 @@ struct ShatterData
             p_v0 = (D3DXVECTOR3*)(((BYTE*)p_v0) + (stride * 3));
             p_v1 = (D3DXVECTOR3*)(((BYTE*)p_v1) + (stride * 3));
             p_v2 = (D3DXVECTOR3*)(((BYTE*)p_v2) + (stride * 3));
-        }
+=======
+        //NewTimer::ProfileStart();
+//for some reason this breaks the code...
+//#pragma omp parallel for
+        for (int i = 0; i < numTris; ++i)
+        {
+            if (!collided[i])
+            {
+                // To move the shatter pieces:
+                // 1) subtract position from each vertex
+                // 2) rotate
+                // 3) update position with velocity
+                // 4) add new position to each vertex
 
+                // The matrix holds 3 vectors at once.
+                /*D3DXVECTOR3* p_v0 = (D3DXVECTOR3*)(((BYTE*)base_p_v0) + ((stride * 3) * shatteredTris[i]));
+                D3DXVECTOR3* p_v1 = (D3DXVECTOR3*)(((BYTE*)base_p_v1) + ((stride * 3) * shatteredTris[i]));
+                D3DXVECTOR3* p_v2 = (D3DXVECTOR3*)(((BYTE*)base_p_v2) + ((stride * 3) * shatteredTris[i]));
+                if (true)
+                {*/
+                Matrix m;
+                m[X].Set(p_v0->x - pos[i][X], p_v0->y - pos[i][Y], p_v0->z - pos[i][Z]);
+                m[Y].Set(p_v1->x - pos[i][X], p_v1->y - pos[i][Y], p_v1->z - pos[i][Z]);
+                m[Z].Set(p_v2->x - pos[i][X], p_v2->y - pos[i][Y], p_v2->z - pos[i][Z]);
+
+                m[X].Rotate(matrices[i]);
+                m[Y].Rotate(matrices[i]);
+                m[Z].Rotate(matrices[i]);
+
+                // Update the position and velocity of the shatter piece, dealing with bouncing if necessary.
+                if (!UpdateParameters(i, framelength, p_v0, p_v1, p_v2))
+                {
+                    *p_v0 = *(D3DXVECTOR3*)&m[X];// +pos[i];
+                    *p_v1 = *(D3DXVECTOR3*)&m[Y];// +pos[i];
+                    *p_v2 = *(D3DXVECTOR3*)&m[Z];// +pos[i];
+                    Vertex normal = CalculateNormal(p_v0, p_v1, p_v2);
+                    debug_print("normal %f %f %f data %f %f %f\n", normal.x, normal.y, normal.z, data.normal.x, data.normal.y, data.normal.z);
+                    float angle = fabsf(data.normal.y - normal.y);
+                    if (angle > 0.15f && i % 5 == 0)
+                    {
+                        RenderableVertex v00 = RenderableVertex(p_v0->x, p_v0->y, p_v0->z);
+                        RenderableVertex v01(p_v1->x, p_v1->y, p_v1->z);
+                        RenderableVertex v02(p_v2->x, p_v2->y, p_v2->z);
+                        RenderableVertex v0(p_v0->x + ((p_v1->x - p_v0->x) * 0.5f), p_v0->y + ((p_v1->y - p_v0->y) * 0.5f), p_v0->z + ((p_v1->z - p_v0->z) * 0.5f));
+                        RenderableVertex v1(p_v1->x + ((p_v2->x - p_v1->x) * 0.5f), p_v1->y + ((p_v2->y - p_v1->y) * 0.5f), p_v1->z + ((p_v2->z - p_v1->z) * 0.5f));
+                        RenderableVertex v2(p_v2->x + ((p_v0->x - p_v2->x) * 0.5f), p_v2->y + ((p_v0->y - p_v2->y) * 0.5f), p_v2->z + ((p_v0->z - p_v2->z) * 0.5f));
+
+                        DWORD uv_offset = 12;
+                        //Need to learn how to check if have normals...
+                        if (sector->color_offset)
+                        {
+                            uv_offset += 4;
+                            DWORD color_offset = 12;
+                            BYTE* p_v0col = (BYTE*)(p_v0 + color_offset);
+                            BYTE* p_v1col = (BYTE*)(p_v1 + color_offset);
+                            BYTE* p_v2col = (BYTE*)(p_v2 + color_offset);
+
+                            for (int i = 0; i < 4; ++i)
+                            {
+                                v0.color[i] = p_v0col[i] + (((int)p_v1col[i] - (int)p_v0col[i]) / 2);
+                                v1.color[i] = p_v1col[i] + (((int)p_v2col[i] - (int)p_v1col[i]) / 2);
+                                v2.color[i] = p_v2col[i] + (((int)p_v0col[i] - (int)p_v2col[i]) / 2);
+                            }
+                        }
+
+                        // Deal with uv0 (not always present).
+                        if (sector->uv_offset)
+                        {
+                            float* p_v0uv = (float*)(p_v0 + uv_offset);
+                            float* p_v1uv = (float*)(p_v1 + uv_offset);
+                            float* p_v2uv = (float*)(p_v2 + uv_offset);
+
+                            for (int i = 0; i < 2; ++i)
+                            {
+                                v0.uv[i] = p_v0uv[i] + ((p_v1uv[i] - p_v0uv[i]) * 0.5f);
+                                v1.uv[i] = p_v1uv[i] + ((p_v2uv[i] - p_v1uv[i]) * 0.5f);
+                                v2.uv[i] = p_v2uv[i] + ((p_v0uv[i] - p_v2uv[i]) * 0.5f);
+                            }
+                        }
+
+                        // Push the four new tris onto the stack.
+                        v00 += pos[i];
+                        v01 += pos[i];
+                        v02 += pos[i];
+                        v0 += pos[i];
+                        v1 += pos[i];
+                        v2 += pos[i];
+
+                        shattered_pieces.push_back(v00);
+                        shattered_pieces.push_back(v0);
+                        shattered_pieces.push_back(v2);
+
+                        shattered_pieces.push_back(v0);
+                        shattered_pieces.push_back(v01);
+                        shattered_pieces.push_back(v1);
+
+                        shattered_pieces.push_back(v0);
+                        shattered_pieces.push_back(v1);
+                        shattered_pieces.push_back(v2);
+
+                        shattered_pieces.push_back(v2);
+                        shattered_pieces.push_back(v1);
+                        shattered_pieces.push_back(v02);
+
+                        *p_v0 = Vertex(0, 0, 0);
+                        *p_v1 = Vertex(0, 0, 0);
+                        *p_v2 = Vertex(0, 0, 0);
+                    }
+                    else
+                    {
+                        *p_v0 += pos[i];
+                        *p_v1 += pos[i];
+                        *p_v2 += pos[i];
+                    }
+                }
+                else
+                {
+                    *(D3DXVECTOR3*)&m[X] += pos[i];
+                    *(D3DXVECTOR3*)&m[Y] += pos[i];
+                    *(D3DXVECTOR3*)&m[Z] += pos[i];
+
+                    Vertex temp0, temp1, temp2;
+                    p_v0->x = m[X][X]; p_v0->y = m[X][Y]; p_v0->z = m[X][Z];
+                    p_v1->x = m[Y][X]; p_v1->y = m[Y][Y]; p_v1->z = m[Y][Z];
+                    p_v2->x = m[Z][X]; p_v2->y = m[Z][Y]; p_v2->z = m[Z][Z];
+                }
+            }
+
+                p_v0 = (D3DXVECTOR3*)(((BYTE*)p_v0) + (stride * 3));
+                p_v1 = (D3DXVECTOR3*)(((BYTE*)p_v1) + (stride * 3));
+                p_v2 = (D3DXVECTOR3*)(((BYTE*)p_v2) + (stride * 3));
+            //}
+>>>>>>> Stashed changes:source/Physics/Shatter.h
+        }
+        //NewTimer::ProfileEnd();
         // Also process normals if they exist.
         /*if (sector->normals)
         {
@@ -256,10 +390,14 @@ bool NewShatterScript(CStruct* pStruct, CScript* pScript);
 /*                                                                */
 /*                                                                */
 /******************************************************************/
-bool subdivide_tri_stack(BYTE** p_write, SuperSector* sector, float targetShatterArea, int& numTris)
+bool subdivide_tri_stack(BYTE** p_write, SuperSector* sector, float targetShatterArea, int& numTris, int valid_tris)
 {
 
+<<<<<<< Updated upstream:source/Shatter.h
     static float dividers[4] = { 0.5f, 0.6f, 0.2f, 0.33f };
+=======
+    static float dividers[3] = { 0.5f, 0.75f, 0.45f };
+>>>>>>> Stashed changes:source/Physics/Shatter.h
     float divider = dividers[rand() % 3];
     // Three temporary buffers.
     static BYTE v0[256];
@@ -386,6 +524,9 @@ bool subdivide_tri_stack(BYTE** p_write, SuperSector* sector, float targetShatte
         memcpy(*p_write, v2, block_size);
         *p_write += block_size;
         numTris++;
+        if (numTris > valid_tris)
+            return false;
+
     }
     return true;
 }

@@ -485,12 +485,14 @@ private://0575a190
     //86A0
     BYTE unk4[0x14];
     //86B4
-    DWORD collFlags;
+    WORD collFlags;
+    WORD alin;
     //86B8
-    BYTE unk5[0x10];
+    BYTE unk5[0xC];
     //bool trigger;//Maybe?
-    //86C8
 public:
+    DWORD unk_now;
+    //86C8
     DWORD checksumName;
 private:
     //86CC
@@ -544,10 +546,201 @@ private:
 
     void SetFlag(void* flag, bool value)
     {
+<<<<<<< Updated upstream:source/Skater.h
         typedef void(__thiscall* const pSetFlag)(void* flag, bool value);
         pSetFlag(0x004A2580)(flag, value);
     }
 
+=======
+        typedef void(__thiscall* const pSetFlag)(Skater* pThis, void* flag, bool value);
+        pSetFlag(0x004A2580)(this, flag, value);
+    }
+
+    const Vertex const GetNextFramePos() const
+    {
+        return (position + (velocity * framelength));
+    }
+
+    void SkaterCollided()
+    {
+        float z_angle = normal.y;
+        WORD collFlag = collFlags;
+
+        if (this->checksumName && this->unk_now)
+            m_trigger_script = 0;
+
+        trigger = false;
+        if ((collFlag & 8) == 0)
+        {
+            vert = false;
+
+            if ((collFlag & 1) == 0)
+            {
+                if ((collFlags & 2) != 0)
+                {
+                    skatable = false;
+                    return;
+                }
+
+                if ((collFlag & 4) != 0)
+                {
+                    skatable = false;
+                    trigger = true;
+                    return;
+                }
+
+                float skatable_angle = QScript::GetPhysicsFloat(Checksums::Wall_Non_Skatable_Angle);
+                float a = sinf(skatable_angle * 3.141593f * 0.005555556f);
+                
+                if (a > z_angle)
+                {
+                    skatable = false;
+                    return;
+                }
+            }
+        }
+        else
+            vert = true;
+
+        skatable = true;
+    }
+
+    void ResetNewPhysics();
+
+    void ResetPhysics()
+    {
+        debug_print("ResetPhysics\n");
+        ResetNewPhysics();
+        typedef void(__thiscall* const pResetPhysics)(Skater* pThis);
+        //pResetPhysics(0x004AD380)(this);
+    }
+
+    Collision::CFeeler & GetFeeler()
+    {
+        return *(Collision::CFeeler*)&m_feeler;
+    }
+
+    void GetCollisionFlags()
+    {
+        typedef void(__thiscall* const pGetCollisionFlags)(Skater* pThis);
+        pGetCollisionFlags(0x0049FBB0)(this);
+    }
+
+    void HandleTriggers();
+
+    void UberFrig(bool force_update)
+    {
+        if (force_update || position != oldpos)
+        {
+            RwLine line;
+            line.start = position;
+            line.end = line.start;
+            line.start += *(Vertex*)&matrix[Y] * 0.001f;
+            line.start.y += 8.0f;
+            line.end.y -= 4800.0f;
+            Collision::CollData cld;
+
+            //New collision check is generally 100% faster
+            //and in worst case scenarios it's 50% slower(probably because of wrong math somewhere)
+            //it also uses cache alot more often and efficiently which can improve speed by up to 500% in rare occations!
+            //if I can get parallelism to work it should get even faster
+            /*printf("Which is better?\n");
+            NewTimer::ProfileStart();
+            for (int i = 0; i < 10000; i++)
+            {
+                CollisionCheck();
+            }
+
+            NewTimer::ProfileEnd();
+            startcol = line.start;
+            endcol = line.end;
+            NewTimer::ProfileStart();
+            for (int i = 0; i < 10000; i++)
+            {
+                Collision::FindNearestCollision(line, cld);
+            }
+            NewTimer::ProfileEnd();
+            printf("-------------------\n");*/
+            
+            //Seems to be fine to just look for first contact instead of nearest?
+            flag = 0;
+            checksumName = 0;
+
+            if (Collision::FindFirstCollision(line, cld))
+            {
+                normal = cld.normal;
+                hitpoint = cld.point;
+                collFlags = (DWORD)cld.collFlags;
+                unk = cld.unk;
+                flag = cld.collided;
+                checksumName = cld.checksum;
+                unk_now = cld.checksum;
+                
+                height = position.y - hitpoint.y;
+                
+                if (height < 0.001f)
+                {
+                    position.y = hitpoint.y + 0.001f;
+                    height = 0.0f;
+                }
+
+                SkaterCollided();
+            }
+            else
+            {
+                startcol = line.start;
+                endcol = line.end;
+                if (CollisionCheck())
+                {
+                    if (height < 0.001f)
+                    {
+                        position.y = hitpoint.y + 0.001f;
+                        height = 0.0f;
+                    }
+                }
+                else
+                {
+                    //printf("bounce...\n");
+                    if (!UberFrigFix())
+                    {
+                        if (m_state != RAIL)
+                        {
+                            position = oldpos;
+                            velocity = -velocity;
+                            if (m_state == WALL)
+                                SetState(AIR);
+                        }
+                        height = 0.0f;
+                    }
+                }
+            }
+        }
+    }
+
+    bool UberFrigFix()
+    {
+        Vertex pos = GetNextFramePos();
+        startcol = pos;
+        endcol = pos;
+
+        // Very minor adjustment to move origin away from vert walls
+        *(Vertex*)&endcol += *(Vertex*)&matrix[Y] * 0.001f;
+
+        startcol[Y] += 8.0f;
+        endcol[Y] -= 4800;
+
+        bool safe = CollisionCheck();
+        if (safe)
+        {
+            oldpos = position;
+            debug_print("You got saved by new UberFrig\n");
+        }
+        return safe;
+    }
+
+    void CheckEventTrigger(Node::TriggerType type, Collision::CollData& col);
+
+>>>>>>> Stashed changes:source/Game/Skater.h
     __inline void SetTrigger(DWORD node_name, DWORD trigger_script)
     {
         unk5[0x0C] = true;

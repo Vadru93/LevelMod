@@ -263,6 +263,37 @@ namespace Checksums
             Physics_vert_hang_Stat = COMPILE_CRC32("physics_vert_hang_stat"),
             Skater_Max_Max_Speed_Stat = COMPILE_CRC32("skater_max_max_speed_stat"),
 
+<<<<<<< Updated upstream:source/Checksum.h
+=======
+            ForceUpdate = COMPILE_CRC32("forceupdate"),
+
+            id = COMPILE_CRC32("id"),
+
+            SaveGame = COMPILE_CRC32("savegame"),
+            SaveSettings = COMPILE_CRC32("savesettings"),
+            LoadGame = COMPILE_CRC32("loadgame"),
+            LoadSettings = COMPILE_CRC32("loadsettings"),
+            LoadDefault = COMPILE_CRC32("loaddefault"),
+
+            SetMenuElementText = COMPILE_CRC32("setmenuelementtext"),
+            edit_error = COMPILE_CRC32("edit_error"),
+
+            up_text_id = COMPILE_CRC32("up_text_id"),
+            down_text_id = COMPILE_CRC32("down_text_id"),
+            left_text_id = COMPILE_CRC32("left_text_id"),
+            right_text_id = COMPILE_CRC32("right_text_id"),
+            flip_text_id = COMPILE_CRC32("flip_text_id"),
+            grab_text_id = COMPILE_CRC32("grab_text_id"),
+            grind_text_id = COMPILE_CRC32("grind_text_id"),
+            spinleft_text_id = COMPILE_CRC32("spinleft_text_id"),
+            spinright_text_id = COMPILE_CRC32("spinright_text_id"),
+            nollie_text_id = COMPILE_CRC32("nollie_text_id"),
+            revert_text_id = COMPILE_CRC32("revert_text_id"),
+            spine_text_id = COMPILE_CRC32("spine_text_id"),
+
+            Wall_Non_Skatable_Angle = COMPILE_CRC32("wall_non_skatable_angle"),
+
+>>>>>>> Stashed changes:source/Script/Checksum.h
 
 
         //Trick_KFBackflip = 0xF7B4E0CB

@@ -32,6 +32,7 @@ enum enum_vertex
 
 #define _T(x) x
 extern bool bAddedOptions, bDebugMode, bHooked;
+#ifdef _DEBUG
 //where p = pointer to data
 #define VALIDATE_PTR(p) \
 { \
@@ -53,6 +54,11 @@ if (bDebugMode && InvalidReadPtr(p, s)) \
   _T("CFUNC ") __FUNCTION__ _T("\r\n")); return NULL; \
 } \
 }
+#else
+#pragma warning( disable : 4390)
+#define VALIDATE_PTR(p)
+#define VALIDATE_DATA(p, s)
+#endif
 
 void _printf(const char* str, ...);
 #endif

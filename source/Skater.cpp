@@ -23,7 +23,44 @@ EXTERN bool Skater::CollisionCheck(Collision::Flags flag, bool ignore)
     if (ignore)
         return pCollisionCheck(0x0049FC80)(this, flag, Collision::Flags::Ignore, Collision::Flags::Ignore);
     else
+<<<<<<< Updated upstream:source/Skater.cpp
         return pCollisionCheck(0x0049FC80)(this, Collision::Flags::Ignore, flag, Collision::Flags::Ignore);
+=======
+        return pCollisionCheck(0x0049FC80)(this, Collision::Flags::None, flag, Collision::Flags::None);
+}
+
+bool Skater::CollisionCheck_Hook(Collision::Flags ignore0, Collision::Flags flags, Collision::Flags ignore1)
+{
+
+    if (Game::skater)
+    {
+        RwLine line;
+        line.start = startcol;
+
+        line.end = endcol;
+
+        WORD ignore = (WORD)ignore0;
+        if (ignore)
+        {
+            *(WORD*)&ignore1 |= ignore;
+        }
+        ignore0 = flags;
+        Collision::CollData cld(ignore0, ignore1);
+        bool collided = Collision::FindNearestCollision(line, cld, true);
+        if (collided)
+        {
+            normal = cld.normal;
+            hitpoint = cld.point;
+            this->collFlags = (DWORD)cld.collFlags;
+            this->checksumName = cld.checksum;
+            unk = cld.unk;
+            flag = collided;
+            SkaterCollided();
+        }
+        return collided;
+    }
+    return false;
+>>>>>>> Stashed changes:source/Game/Skater.cpp
 }
 
 bool GetZAngle(CStruct* pParams, CScript* pScript)
@@ -507,6 +544,37 @@ void Skater::Restore()
     ecol = *(Vertex*)&endcol;*/
 }
 
+<<<<<<< Updated upstream:source/Skater.cpp
+=======
+void Skater::CheckEventTrigger(Node::TriggerType type, Collision::CollData& col)
+{
+    if (col.trigger)
+    {
+        DWORD checksum = col.checksum;
+        if (m_current_trigger_type != type || checksum != last_trigger_checksum || Gfx::frameCounter > new_trigger_frame)
+        {
+            CArray* node_array = Node::GetNodeArray();
+            DWORD node_index = Node::GetNodeIndex(checksum);
+            CStruct* node = node_array->GetStructure(node_index);
+
+            if (!SkateMod::ShouldBeAbsentNode(node))
+            {
+                DWORD trigger_script;
+                if (node->GetChecksum(Checksums::TriggerScript, &trigger_script))
+                {
+                    last_trigger_node = NULL;
+                    last_trigger_checksum = checksum;
+                    new_trigger_frame = Gfx::frameCounter + 25;
+                    m_current_trigger_type = type;
+                    m_trigger_script = trigger_script;
+                    SpawnAndRunScript(trigger_script, node_index, true, true);
+                }
+            }
+        }
+    }
+}
+
+>>>>>>> Stashed changes:source/Game/Skater.cpp
 void Skater::ResetLerpingMatrix()
 {
     old = matrix;
@@ -515,4 +583,37 @@ void Skater::ResetLerpingMatrix()
     lastdisplaynormal = *(Vector*)&GetMatrix()[Y];
     normallerp = 0.0f;
     //old = matrix;
+<<<<<<< Updated upstream:source/Skater.cpp
+=======
+}
+
+void HandleTriggers()
+{
+    Game::skater->HandleTriggers();
+}
+
+void Skater::HandleTriggers()
+{
+    if (GameState::loading_completed && position != old_trigger_pos)
+    {
+        RwLine line;
+        line.start = old_trigger_pos;
+        old_trigger_pos = position;
+        line.end = position;
+        Collision::CollData cld(Collision::trigger_cache->GetCache(line), Collision::Flags::Hollow + Collision::Flags::Trigger, Collision::Flags::None);
+
+        if (Collision::FindNearestCollision(line, cld, true))
+        {
+            normal = cld.normal;
+            hitpoint = cld.point;
+            this->collFlags = (DWORD)cld.collFlags;
+            this->checksumName = cld.checksum;
+            unk = cld.unk;
+            flag = cld.collided;
+            SkaterCollided();
+
+            //MessageBox(0, 0, 0, 0);
+        }
+    }
+>>>>>>> Stashed changes:source/Game/Skater.cpp
 }

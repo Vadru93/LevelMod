@@ -657,6 +657,21 @@ bool CreatePair(CStruct* pStruct, CScript* pScript)
 
 void DestroySuperSectors()
 {
+<<<<<<< Updated upstream
+=======
+    debug_print("Restore the custom sector flags\n");
+    RpWorld* world = RwViewer::Instance()->GetCurrentWorld();
+    NxPlugin* plg = world->GetWorldPluginData();
+    Collision::Manager* cld_manager = plg->GetManager();
+    if(cld_manager)
+        cld_manager->RestoreWorldSectorFlags();
+
+    debug_print("Restore vibration\n");
+    if(LevelModSettings::bHookedControls && XINPUT::Player1->IsConnected())
+        XINPUT::Player1->Vibrate(0, 0);
+
+    debug_print("Clear the custom geometry\n");
+>>>>>>> Stashed changes
     EnvironmentObjects.clear();
     PointyObjects.clear();
     String::RemoveLevelStrings();
@@ -1218,9 +1233,22 @@ void ReadFirstOptions()
     //_printf("Reading from ini file %s, default %d ", "LM_GFX_bFixStutter", Gfx::fps_fix);
     new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_bFixStutter", Gfx::fps_fix);
     if (new_value < 2)
+<<<<<<< Updated upstream
         Gfx::fps_fix = new_value;
     //_printf("value %d\n", Gfx::fps_fix);
     //CreateConsole();
+=======
+        Gfx::bVSync = new_value;
+
+    new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_TargetFPS", (int)Gfx::target_fps);
+    if (new_value <= 300 && new_value >= 60)
+        Gfx::target_fps = (double)new_value;
+
+    //CreateConsole();
+    //NewTimer::CalculateFPSTimers();
+
+    //debug_print("value %d\n", Gfx::fps_fix);
+>>>>>>> Stashed changes
 
     //_printf("Reading from ini file %s, default %d ", "LM_DebugOption_bDebugMode", debug);
     new_value = OptionReader->ReadInt("Script_Settings", "LM_DebugOption_bDebugMode", debug);
@@ -3153,19 +3181,19 @@ __declspec(naked) void Checksum_naked()
 
     _asm mov ecx, [esp + 4];
     _asm mov checksum_name, ecx;
-    __asm { mov pESP, esp };
+    _asm { mov pESP, esp };
 
 
 
 
     _asm call[jmpBack];
     _asm mov chc, eax
-    _asm pushad;
-    _asm pushfd;
+ //   _asm pushad;
+ //   _asm pushfd;
     retAddr = pESP[0];
     AddChecksum(chc, checksum_name, retAddr);
-    _asm popfd;
-    _asm popad;
+ //   _asm popfd;
+ //   _asm popad;
     _asm mov eax, chc
     _asm ret;
 }
@@ -3954,6 +3982,15 @@ DWORD optimized2[] = { 0x0040100F, 0x00401D40, 0x00402478, 0x0041117C, 0x0041158
 0x00441913, 0x00441AAE, 0x00441AB8, 0x004422FF, 0x00442375, 0x004423D9, 0x004423E5, 0x00442E2A, 0x00442EB7, 0x00443405,
 0x004434A7, 0x00443545, 0x00443D9F, 0x00443E8F, 0x00443F7F, 0x004449A9, 0x004C5E9E, 0x0047FAA0, 0x0047759E, 0x00474A98};
 
+DWORD optimized_qphysics[] = { 0x0040100F, 0x00401D40, 0x00402478, 0x0041117C, 0x00411589, 0x00413A31, 0x00413A3D, 0x00413AEF,
+0x00413AFB, 0x004155B2, 0x004194EC, 0x0041963B, 0x0041A6CA, 0x0041AC5A, 0x004201CD, 0x004251F9, 0x00425250, 0x0042527D,
+0x0042528B, 0x004263CA, 0x0042641A, 0x0042646A, 0x004264BA, 0x0042651F, 0x0042657A, 0x004265DA, 0x004273F2, 0x00428254,
+0x004286D8, 0x00429776, 0x00429856, 0x00429936, 0x00429A26, 0x00429B16, 0x00429C26, 0x00429CF6, 0x00429DD6, 0x00429E52,
+0x00429F16, 0x00429FCA, 0x0042B0DF, 0x0042B2E5, 0x0042BF87, 0x0042BFBF, 0x0042C6A6, 0x0042C6B2, 0x0043299E, 0x004329B1,
+0x00433BF7, 0x004355F4, 0x0043763D, 0x00438F6C, 0x0043D6D3, 0x0042A05A, 0x004508ED, 0x004508F9, 0x00504F7F, 0x004BA6F2,
+0x00441913, 0x00441AAE, 0x00441AB8, 0x004422FF, 0x00442375, 0x004423D9, 0x004423E5, 0x00442E2A, 0x00442EB7, 0x00443405,
+0x004434A7, 0x00443545, 0x00443D9F, 0x00443E8F, 0x00443F7F, 0x004449A9, 0x004C5E9E, 0x0047FAA0, 0x0047759E, 0x00474A98 };
+
 struct OptimizedArrayCRC
 {
     DWORD string;
@@ -4206,6 +4243,17 @@ skip_label:
 }
 
 bool force_rail_check = false;
+<<<<<<< Updated upstream
+=======
+bool force_rail_check2 = false;
+
+DWORD ForceRailCheck()
+{
+    force_rail_check2 = true;
+    return NewTimer::GetFrameTime();
+}
+
+>>>>>>> Stashed changes
 void Skater::PointRail(const Vertex& rail_pos)
 {
     // for a single node rail, we apply in a single frame all the effects of enteringand exiting the rail state;
@@ -4306,7 +4354,11 @@ void Skater::PointRail(const Vertex& rail_pos)
 
     // (Mick) Set m_rail_time, otherwise there is a single frame where it is invalid
     // and this allows us to immediately re-rail and hence do the "insta-bail", since the triangle button will be held down   
+<<<<<<< Updated upstream
     m_rail_time = GetTime();
+=======
+    m_rail_time = NewTimer::GetFrameTime();
+>>>>>>> Stashed changes
     //_asm mov m_rail_time2, edx;
 
     /////////////////////////////////////////////////////
@@ -4360,7 +4412,11 @@ bool Skater::will_take_rail()
 {
 
 
+<<<<<<< Updated upstream
     return (!force_rail_check || (GetElapsedTime(GetTime(), *(LARGE_INTEGER*)&m_rail_time) > 500))
+=======
+    return (!force_rail_check || (GetElapsedTime(NewTimer::GetFrameTime(), m_rail_time) > 200))
+>>>>>>> Stashed changes
             && (m_state != RAIL 									// not already on a rail
                 && (!tracking || *GetVelocity()[Y] > 0.0f));		// must be not vert, or going up 
 }
@@ -4447,6 +4503,13 @@ void InitLevelMod()
 
     HookFunction(0x004A8B1A, &Skater::got_rail_hook);
     HookFunction(0x004A656D, &CheckForPointRail_Hook, 0xE9);
+<<<<<<< Updated upstream
+=======
+    
+    //Fix multiple rerail bugs
+    /*VirtualProtect((LPVOID)0x004A54D5, 4, PAGE_EXECUTE_READWRITE, &old);
+    HookFunction(0x004A54D5, &ForceRailCheck);*/
+>>>>>>> Stashed changes
     //Cheat detection
     BYTE CheatDetection[]{ 0x8B, 0x44, 0x24, 0x04, 0x56, 0x8B, 0xF1, 0x81, 0xBC, 0x86, 0xD0, 0x83, 0x00, 0x00, 0x00, 0x00, 0x80, 0xBF, 0x75, 0x11, 0x6A, 0x01, 0x68, 0x78, 0x4C, 0x5C, 0x00, 0xE8, 0xEF, 0x6F, 0xF8, 0xFF, 0x83, 0xC4, 0x08, 0xEB, 0x2A, 0xD9, 0x84, 0x86, 0xD0, 0x83, 0x00, 0x00, 0xD8, 0x15, 0xFC, 0xF3, 0x49, 0x00, 0xDF, 0xE0, 0x66, 0xA9, 0x00, 0x41, 0x75, 0x15, 0x90, 0x90, 0x90, 0x90, 0x90, 0xEB, 0x0E, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x00, 0x00, 0x20, 0x41, 0xD9, 0x5C, 0x24, 0x08, 0x8B, 0xCE, 0x6A, 0xEC, 0xE8, 0x03, 0x5F, 0x01, 0x00, 0x84, 0xC0, 0x74, 0x08, 0xD9, 0x05, 0x3C, 0xF4, 0x49, 0x00, 0xEB, 0x04, 0xD9, 0x44, 0x24, 0x08, 0x8B, 0xB6, 0x68, 0x92, 0x00, 0x00, 0x85, 0xF6, 0x74, 0x0D, 0x8A, 0x46, 0x50, 0x84, 0xC0, 0x74, 0x06, 0xD8, 0x05, 0x38, 0xF4, 0x49, 0x00, 0x5E, 0xC2, 0x04, 0x00 , 0x00 , 0x00 , 0x40 , 0x40 , 0x00, 0x00 , 0x70 , 0x41 };
     InjectHook(0x0049F3B1, CheatDetection, sizeof(CheatDetection));
@@ -4470,8 +4533,54 @@ void InitLevelMod()
     InjectHook(0x0043A6D6, nop_func, 5);
     //InjectHook(0x00419D07, nop_func, 5);
 
+<<<<<<< Updated upstream
     InjectHook(0x0049D15D, nop_func, 5);
     InjectHook(0x0049D180, nop_func, 5);
+=======
+    //InjectHook(0x0049D15D, nop_func, 5);
+    //InjectHook(0x0049D180, nop_func, 5);
+
+    
+    //Fix UberFrig
+    HookFunction(0x004A76D3, FixUberFrig, 0xE9);
+    HookFunction(0x004994E5, &Skater::UberFrig);
+    HookFunction(0x004996C6, &Skater::UberFrig);
+    //HookFunction(0x004A8B6F, &Skater::UberFrig);
+    //HookFunction(0x004A8B76, &HandleTriggers);
+    /*HookFunction(0x00400321, &Skater::CollisionCheck_Hook);
+    HookFunction(0x0049EE9D, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A02DD, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A05A2, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A0846, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A0AF3, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A0FF6, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A10FA, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A13BE, &Skater::CollisionCheck_Hook);*/
+    /*HookFunction(0x004A14E9, &Skater::CollisionCheck_Hook);
+    //HookFunction(0x004A1752, &Skater::CollisionCheck_Hook);
+    //HookFunction(0x004A1884, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A195D, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A2946, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A2BD6, &Skater::CollisionCheck_Hook);
+    //HookFunction(0x004A2E60, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A3646, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A3EE7, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A4092, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A5A3C, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A6642, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A6C1C, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A6CD6, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A72AC, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004AFB58, &Skater::CollisionCheck_Hook);*/
+
+
+    //Optimize Vertex equal function
+    //Before it was loading each float to FPU
+    //Now it simply does cpu memory check
+    BYTE OptimizedVertexFunc[] = { 0x8B, 0x54, 0x24, 0x04, 0x8B, 0x02, 0x3B, 0x01, 0x75, 0x20, 0x8B, 0x42, 0x04, 0x3B, 0x41, 0x04, 0x75, 0x18, 0x8B, 0x42, 0x08, 0x3B, 0x41, 0x08, 0x75, 0x10, 0x8B, 0x41, 0x0C, 0x3B, 0x41, 0x0C, 0x75, 0x08, 0xB8, 0x01, 0x00, 0x00, 0x00, 0xC2, 0x04, 0x00, 0x31, 0xC0, 0xC2, 0x04, 0x00 };
+    VirtualProtect((LPVOID)0x0049EA70, sizeof(OptimizedVertexFunc), PAGE_EXECUTE_READWRITE, &old);
+    memcpy((void*)0x0049EA70, OptimizedVertexFunc, sizeof(OptimizedVertexFunc));
+>>>>>>> Stashed changes
 
     //Add RailNode to list
     BYTE AddRailFix[] = { 0x50, 0x51, 0x52, 0x56, 0x57, 0xE8, 0x00, 0x00, 0x00, 0x00, 0x5A, 0x59, 0x58, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90};
@@ -4769,7 +4878,26 @@ void InitLevelMod()
     memcpy((void*)0x0042FA9D, codeCaveRenderHook2, sizeof(codeCaveRenderHook2));
 
     //Fixing bug that produces duplicate TriggerScripts
+<<<<<<< Updated upstream
     HookFunction(0x00499B48, TriggerScript, 0xE9);
+=======
+    //HookFunction(0x00499B48, TriggerScript, 0xE9);
+    /*HookFunction(0x0049F051, &Skater::CheckEventTrigger);
+    HookFunction(0x0049F2BB, &Skater::CheckEventTrigger);
+    HookFunction(0x0049F2E3, &Skater::CheckEventTrigger);
+    HookFunction(0x0049FAE1, &Skater::CheckEventTrigger);
+    HookFunction(0x004A060E, &Skater::CheckEventTrigger);
+    HookFunction(0x004A0D31, &Skater::CheckEventTrigger);
+    HookFunction(0x004A1896, &Skater::CheckEventTrigger);
+    HookFunction(0x004A300F, &Skater::CheckEventTrigger);
+    HookFunction(0x004A3518, &Skater::CheckEventTrigger);
+    HookFunction(0x004A416E, &Skater::CheckEventTrigger);
+    HookFunction(0x004A4186, &Skater::CheckEventTrigger);
+    HookFunction(0x004A4222, &Skater::CheckEventTrigger);
+    HookFunction(0x004A4256, &Skater::CheckEventTrigger);
+    HookFunction(0x004A60E2, &Skater::CheckEventTrigger);
+    HookFunction(0x004A77BA, &Skater::CheckEventTrigger);*/
+>>>>>>> Stashed changes
 
     for (DWORD i = 0; i < sizeof(optimized_grind) / sizeof(OptimizedGrind); i++)
     {
@@ -4862,6 +4990,9 @@ void InitLevelMod()
     /*if(!QScript::Scripts)
         QScript::Scripts = new QScript::QBScript();*/
 
+    HookFunction(0x0049FCA3, &Skater::SkaterCollided);
+    HookFunction(0x004AFB67, &Skater::SkaterCollided);
+
     //If debugmode is enabled we want to hook checksum generating function
     if (bDebugMode)
         HookFunction(0x004265F1, Checksum_naked, 0xE9);
@@ -4875,6 +5006,11 @@ void InitLevelMod()
             VirtualProtect((LPVOID)addr, 4, PAGE_EXECUTE_READWRITE, &old);
             *(DWORD*)addr = 0x004110E0 - addr - 4;
         }
+
+        /*for (DWORD i = 0; i < sizeof(optimized_qphysics) / 4; i++)
+        {
+
+        }*/
     }
 
     /*VirtualProtect((LPVOID)0x004265D9, 3 + 4 * 4, PAGE_EXECUTE_READWRITE, &old);
@@ -6077,7 +6213,11 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
         {
 
             //Make sure we toggle only 1 per 2 sec
+<<<<<<< Updated upstream
             DWORD time = GetCurrentTime();
+=======
+            DWORD time = NewTimer::GetFrameTime();
+>>>>>>> Stashed changes
             if (time < lastTime + 2000)
                 return false;
             lastTime = time;

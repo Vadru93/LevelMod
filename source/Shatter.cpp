@@ -131,7 +131,7 @@ void ShatterSuperSector(SuperSector* super_sector)
     float targetShatterArea[5];
     targetShatterArea[0] = shatterAreaTest;
     targetShatterArea[1] = shatterAreaTest;
-    targetShatterArea[2] = shatterAreaTest *= 0.9;
+    targetShatterArea[2] = shatterAreaTest *= 0.9f;
     targetShatterArea[3] = shatterAreaTest *= 1.1f;
     targetShatterArea[4] = shatterAreaTest *= 0.75f;
 
@@ -244,7 +244,7 @@ void ShatterSuperSector(SuperSector* super_sector)
                             while (area_squared > targetShatterArea[0])
                             {
                                 num_extra_tris *= 4;
-                                area_squared *= (1.0f / 16.0f);
+                                area_squared *= 0.25f;// (1.0f / 16.0f);
                             }
 
                             // This original tri will not be added...
@@ -264,7 +264,7 @@ void ShatterSuperSector(SuperSector* super_sector)
                 _printf("Worst case scenario %d tris\n", valid_tris);
 
                 // Create a tracking structure for this mesh.
-                ShatterData* p_shatter = new ShatterData(super_sector, &super_sector->mesh->splits[m], valid_tris * 4);
+                ShatterData* p_shatter = new ShatterData(super_sector, &super_sector->mesh->splits[m], valid_tris + 1);
                 //p_shatter->numTris = valid_tris;
                 BYTE* p_write_vertex = p_shatter->verts;
                 DWORD details_index = 0;
@@ -282,7 +282,11 @@ void ShatterSuperSector(SuperSector* super_sector)
                 {
                     numTris = subdivide_tri_stack(&p_write_vertex, super_sector, targetShatterArea[0]);//  targetShatterArea[rand() % 5]);
                 }*/
+<<<<<<< Updated upstream:source/Shatter.cpp
                 while (subdivide_tri_stack(&p_write_vertex, super_sector, targetShatterArea[rand() % 5], p_shatter->numTris));//  );
+=======
+                while (subdivide_tri_stack(&p_write_vertex, super_sector, targetShatterArea[4/*rand() % 5*/], p_shatter->numTris, valid_tris));//  );
+>>>>>>> Stashed changes:source/Physics/Shatter.cpp
 
                 _printf("Going to allocate %d tris\n", p_shatter->numTris);
                 p_shatter->Allocate();
