@@ -195,7 +195,6 @@ namespace Collision
                     bCollided_left = TraverseBranch(&branches[branch->leftIndex], line, dir, sector, data);
                 else
                     bCollided_left = CollideWithLine(leafs[branch->leftIndex], *(Vertex*)&line.start, dir, sector, data);
-
                 if (branch->rightType == 2)
                     bCollided_right = TraverseBranch(&branches[branch->rightIndex], line, dir, sector, data);
                 else
@@ -298,7 +297,6 @@ namespace Collision
                     bCollided_left = TraverseBranch(&branches[branch->leftIndex], line, dir, sector, data);
                 else
                     bCollided_left = CollideWithLine(leafs[branch->leftIndex], *(Vertex*)&line.start, dir, sector, data);
-
                 if (branch->rightType == 2)
                     bCollided_right = TraverseBranch(&branches[branch->rightIndex], line, dir, sector, data);
                 else
@@ -319,7 +317,7 @@ namespace Collision
 
     __inline __declspec (noalias) bool CollisionPLG::CollideWithLine(const Vertex& start, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const
     {
-//#pragma omp parallel for never faster??
+        //#pragma omp parallel for never faster??
         for (auto idx = 0; idx < numFaces; idx++)
         {
             DWORD collFlags = (WORD)sector->pCollisionFlags[idx];
@@ -391,7 +389,7 @@ namespace Collision
                     data.v1 = v1;
                     data.v2 = v2;
 
-                        return true;
+                    return true;
                 }
             }
         }
@@ -456,21 +454,21 @@ namespace Collision
                 Vertex normal;*/
                 if (TriangleIntersection(&v0, &v1, &v2, &start, &dir, distance))//if (intersect_triangle(*(D3DXVECTOR3*)&line.start, rayDir, v0, v1, v2, distance, u, v, normal))
                 {
-                        data.collided = true;
-                        data.unk = distance;
+                    data.collided = true;
+                    data.unk = distance;
 
-                        data.collFlags = (Collision::Flags)collFlags;
-                        data.trigger = collFlags >> 6 & 1;
+                    data.collFlags = (Collision::Flags)collFlags;
+                    data.trigger = collFlags >> 6 & 1;
 
-                        data.checksum = sector->name;
-                        //data.p_sector = sector;
-                        data.index = faces[idx];
-                        //data.terrain = face.matIndex;
-                        data.v0 = v0;
-                        data.v1 = v1;
-                        data.v2 = v2;
+                    data.checksum = sector->name;
+                    //data.p_sector = sector;
+                    data.index = faces[idx];
+                    //data.terrain = face.matIndex;
+                    data.v0 = v0;
+                    data.v1 = v1;
+                    data.v2 = v2;
 
-                        return true;
+                    return true;
                 }
             }
         }

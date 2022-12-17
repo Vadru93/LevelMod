@@ -1,11 +1,14 @@
+# Acrchives
+*.zip
+
+# qscripted backup files
 *.bkp.q
 
 # Build results
-[Bb]in/
+old/
+intermediate/
 [Oo]bj/
 [Bb]uild/
-[Dd]ebug/
-[Rr]elease/
 .vs/
 
 # Visual Studio cache files
@@ -34,7 +37,6 @@ ipch/
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
 
 # Fortran module files
 *.mod

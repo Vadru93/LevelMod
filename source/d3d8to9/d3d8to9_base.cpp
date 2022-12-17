@@ -8,7 +8,7 @@
 
  //#include "..\pch.h"
 #include "d3d8to9.hpp"
-#include "..\CustomShaders.h"
+#include "..\Render\CustomShaders.h"
 
 D3DPRESENT_PARAMETERS current_params;
 
@@ -229,8 +229,13 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
     }
 
     Gfx::hFocusWindow = hFocusWindow;
-    if(!pPresentationParameters->Windowed && IsOptionOn("LM_GFX_bWindowed"))
-        Gfx::command = Gfx::Command::ToggleWindowed;
+    if (!pPresentationParameters->Windowed)
+    {
+        if (IsOptionOn("LM_GFX_bWindowed"))
+            Gfx::command = Gfx::Command::ToggleWindowed;
+    }
+    else
+        Gfx::bOldWindowed = true;
 
     *ppReturnedDeviceInterface = nullptr;
 
@@ -239,10 +244,14 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
 
     IDirect3DDevice9* DeviceInterface = nullptr;
 
-    if (Gfx::fps_fix)
+    if (Gfx::bVSync)
     {
         PresentParams.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-        PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+        //PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+    }
+    else
+    {
+        PresentParams.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
     }
     PresentParams.BackBufferCount = Gfx::numBackBuffers;// d3dpp.BackBufferCount;
     PresentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
@@ -263,7 +272,7 @@ HRESULT STDMETHODCALLTYPE Direct3D8::CreateDevice(UINT Adapter, D3DDEVTYPE Devic
         QualityLevels = 0;
 
         // Check AntiAliasing quality
-        for (int x = Gfx::AntiAliasing == 1 ? 16 : min(16, Gfx::AntiAliasing); x > 0; x--)
+        for (int x = Gfx::AntiAliasing == 1 ? 16 : min(16, Gfx::AntiAliasing); x > 1; x--)
         {
             if (SUCCEEDED(ProxyInterface->CheckDeviceMultiSampleType(Adapter,
                 DeviceType, (d3dpp.BackBufferFormat) ? d3dpp.BackBufferFormat : D3DFMT_A8R8G8B8, d3dpp.Windowed,

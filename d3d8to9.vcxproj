@@ -12,20 +12,20 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7EE21ADA-3B02-4CD6-A891-C2257A54B061}</ProjectGuid>
-    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -35,17 +35,20 @@
   </ImportGroup>
   <PropertyGroup>
     <TargetName>d3d8</TargetName>
-    <OutDir>bin\$(Configuration)\</OutDir>
+    <OutDir>LevelMod\</OutDir>
     <IntDir>intermediate\$(Configuration)\</IntDir>
     <IncludePath>$(IncludePath);$(DXSDK_DIR)\Include;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.18362.0\um\xinput.h;$(WindowsSdkDir)include;C:\Users\Vadru\Documents\Chilkat\include;C:\Users\Vidar\Documents\GitHub\LevelMod\source</IncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.18362.0\um\x86\xinput.lib;C:\Users\Vadru\Documents\Chilkat\libs;$(DXSDK_DIR)\Lib\x86;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetExt>d.dll</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_ALLOW_RTCc_IN_STL;WIN32_LEAN_AND_MEAN;_WINSOCK_DEPRECATED_NO_WARNINGS;_DEBUG;EXPORTING;_CRT_SECURE_NO_WARNINGS;D3D_DEBUG_INFO;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ALLOW_RTCc_IN_STL;WIN32_LEAN_AND_MEAN;_WINSOCK_DEPRECATED_NO_WARNINGS;_DEBUG;EXPORTING;_CRT_SECURE_NO_WARNINGS;D3D_DEBUG_INFO;__DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SmallerTypeCheck>true</SmallerTypeCheck>
       <ControlFlowGuard>false</ControlFlowGuard>
       <FloatingPointExceptions>true</FloatingPointExceptions>
@@ -54,13 +57,23 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <OpenMPSupport>true</OpenMPSupport>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <ModuleDefinitionFile>res\d3d8.def</ModuleDefinitionFile>
-      <AdditionalDependencies>d3d9.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <LinkTimeCodeGeneration>PGOptimization</LinkTimeCodeGeneration>
+      <AdditionalDependencies>winmm.lib;d3d9.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName)d.pdb</ProgramDatabaseFile>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(TargetDir)d3d8d.dll" "C:\Program Files (x86)\Activision\Thps3\d3d8d.dll"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -78,28 +91,39 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <ExceptionHandling>false</ExceptionHandling>
+      <OpenMPSupport>true</OpenMPSupport>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointExceptions>false</FloatingPointExceptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>res\d3d8.def</ModuleDefinitionFile>
-      <AdditionalDependencies>d3d9.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;d3d9.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
       <IgnoreAllDefaultLibraries>
       </IgnoreAllDefaultLibraries>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <Profile>true</Profile>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
+    <PostBuildEvent>
+      <Command>copy /Y "$(TargetDir)d3d8.dll" "C:\Program Files (x86)\Activision\Thps3\d3d8.dll"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="source\Bugfixes.cpp" />
-    <ClCompile Include="source\Checksum.cpp" />
-    <ClCompile Include="source\CXBOXController.cpp" />
+    <ClCompile Include="source\Collision.cpp" />
+    <ClCompile Include="source\Hook\Bugfixes.cpp" />
+    <ClCompile Include="source\RenderWare\RenderWare.cpp" />
+    <ClCompile Include="source\Script\Checksum.cpp" />
+    <ClCompile Include="source\Input\CXBOXController.cpp" />
     <ClCompile Include="source\d3d8to9\d3d8to9.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -136,77 +160,94 @@
     <ClCompile Include="source\d3d8to9\lookup_table.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="source\debug.cpp" />
-    <ClCompile Include="source\Defines.cpp" />
-    <ClCompile Include="source\Extension.cpp" />
-    <ClCompile Include="source\GameMode.cpp" />
-    <ClCompile Include="source\Globals.cpp" />
-    <ClCompile Include="source\IniReader.cpp" />
-    <ClCompile Include="source\IniWriter.cpp" />
-    <ClCompile Include="source\KeyState.cpp" />
-    <ClCompile Include="source\math.cpp" />
-    <ClCompile Include="source\Memory.cpp" />
-    <ClCompile Include="source\Mesh.cpp" />
-    <ClCompile Include="source\Model.cpp" />
-    <ClCompile Include="source\Net.cpp" />
-    <ClCompile Include="source\Node.cpp" />
-    <ClCompile Include="source\Observe.cpp" />
+    <ClCompile Include="source\Debug\debug.cpp" />
+    <ClCompile Include="source\Extension\Defines.cpp" />
+    <ClCompile Include="source\Extension\Extension.cpp" />
+    <ClCompile Include="source\Game\GameMode.cpp" />
+    <ClCompile Include="source\Extension\Globals.cpp" />
+    <ClCompile Include="source\Settings\IniReader.cpp" />
+    <ClCompile Include="source\Settings\IniWriter.cpp" />
+    <ClCompile Include="source\Input\KeyState.cpp" />
+    <ClCompile Include="source\Math\math.cpp" />
+    <ClCompile Include="source\Memory\Memory.cpp" />
+    <ClCompile Include="source\Objects\Mesh.cpp" />
+    <ClCompile Include="source\Objects\Model.cpp" />
+    <ClCompile Include="source\Net\Net.cpp" />
+    <ClCompile Include="source\Script\Node.cpp" />
+    <ClCompile Include="source\Game\Observe.cpp" />
     <ClCompile Include="source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Precise</FloatingPointModel>
+      <FloatingPointExceptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</FloatingPointExceptions>
     </ClCompile>
-    <ClCompile Include="source\Physics.cpp" />
-    <ClCompile Include="source\Script.cpp" />
-    <ClCompile Include="source\Settings.cpp" />
-    <ClCompile Include="source\Shatter.cpp" />
-    <ClCompile Include="source\Skater.cpp" />
-    <ClCompile Include="source\Source.cpp" />
-    <ClCompile Include="source\String.cpp" />
-    <ClCompile Include="source\SuperSectors.cpp" />
-    <ClCompile Include="source\CustomShaders.cpp" />
+    <ClCompile Include="source\Physics\Physics.cpp">
+      <FloatingPointModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Fast</FloatingPointModel>
+    </ClCompile>
+    <ClCompile Include="source\Script\Script.cpp" />
+    <ClCompile Include="source\Settings\Settings.cpp" />
+    <ClCompile Include="source\Physics\Shatter.cpp">
+      <FloatingPointModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Fast</FloatingPointModel>
+    </ClCompile>
+    <ClCompile Include="source\Game\Skater.cpp" />
+    <ClCompile Include="source\Source.cpp">
+      <FloatingPointModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Fast</FloatingPointModel>
+    </ClCompile>
+    <ClCompile Include="source\Memory\String.cpp" />
+    <ClCompile Include="source\Objects\SuperSectors.cpp" />
+    <ClCompile Include="source\Render\CustomShaders.cpp" />
+    <ClCompile Include="source\Timer\Timer.cpp">
+      <FloatingPointModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Fast</FloatingPointModel>
+    </ClCompile>
     <ClCompile Include="source\zip\unzip.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="res\resource.h" />
-    <ClInclude Include="source\Bugfixes.h" />
-    <ClInclude Include="source\Checksum.h" />
+    <ClInclude Include="source\Game\FrontEnd.h" />
+    <ClInclude Include="source\Game\Task.h" />
+    <ClInclude Include="source\Gfx\Camera.h" />
+    <ClInclude Include="source\Hook\Bugfixes.h" />
+    <ClInclude Include="source\RenderWare\RenderWare.h" />
+    <ClInclude Include="source\Script\Checksum.h" />
     <ClInclude Include="source\Collision.h" />
     <ClInclude Include="source\Commands.h" />
-    <ClInclude Include="source\CustomShaders.h" />
-    <ClInclude Include="source\CXBOXController.h" />
+    <ClInclude Include="source\Render\CustomShaders.h" />
+    <ClInclude Include="source\Input\CXBOXController.h" />
     <ClInclude Include="source\d3d8to9\d3d8to9.hpp" />
     <ClInclude Include="source\d3d8to9\d3d8types.hpp" />
     <ClInclude Include="source\d3d8to9\d3dx9.hpp" />
     <ClInclude Include="source\d3d8to9\lookup_table.hpp" />
-    <ClInclude Include="source\Debug.h" />
-    <ClInclude Include="source\Defines.h" />
-    <ClInclude Include="source\Extension.h" />
-    <ClInclude Include="source\framework.h" />
-    <ClInclude Include="source\GameMode.h" />
-    <ClInclude Include="source\Globals.h" />
-    <ClInclude Include="source\HTTPRequest.h" />
-    <ClInclude Include="source\IniReader.h" />
-    <ClInclude Include="source\IniWriter.h" />
-    <ClInclude Include="source\KeyState.h" />
-    <ClInclude Include="source\Memory.h" />
-    <ClInclude Include="source\Mesh.h" />
-    <ClInclude Include="source\Model.h" />
-    <ClInclude Include="source\Net.h" />
-    <ClInclude Include="source\Node.h" />
-    <ClInclude Include="source\Observe.h" />
+    <ClInclude Include="source\Debug\Debug.h" />
+    <ClInclude Include="source\Extension\Defines.h" />
+    <ClInclude Include="source\Extension\Extension.h" />
+    <ClInclude Include="source\Extension\framework.h" />
+    <ClInclude Include="source\Game\GameMode.h" />
+    <ClInclude Include="source\Extension\Globals.h" />
+    <ClInclude Include="source\Net\HTTPRequest.h" />
+    <ClInclude Include="source\Settings\IniReader.h" />
+    <ClInclude Include="source\Settings\IniWriter.h" />
+    <ClInclude Include="source\Input\KeyState.h" />
+    <ClInclude Include="source\Memory\Memory.h" />
+    <ClInclude Include="source\Objects\Mesh.h" />
+    <ClInclude Include="source\Objects\Model.h" />
+    <ClInclude Include="source\Net\Net.h" />
+    <ClInclude Include="source\Script\Node.h" />
+    <ClInclude Include="Source\Game\Observe.h" />
     <ClInclude Include="source\pch.h" />
-    <ClInclude Include="source\Physics.h" />
-    <ClInclude Include="source\QBKey.h" />
-    <ClInclude Include="source\Rail.h" />
-    <ClInclude Include="source\Script.h" />
-    <ClInclude Include="source\Settings.h" />
-    <ClInclude Include="source\shadow.h" />
-    <ClInclude Include="source\Shatter.h" />
-    <ClInclude Include="source\SkateModule.h" />
-    <ClInclude Include="source\Skater.h" />
-    <ClInclude Include="source\String.h" />
-    <ClInclude Include="source\SuperSectors.h" />
+    <ClInclude Include="source\Physics\Physics.h" />
+    <ClInclude Include="source\Script\QBKey.h" />
+    <ClInclude Include="source\Objects\Rail.h" />
+    <ClInclude Include="source\Script\Script.h" />
+    <ClInclude Include="source\Settings\Settings.h" />
+    <ClInclude Include="source\Render\shadow.h" />
+    <ClInclude Include="source\Physics\Shatter.h" />
+    <ClInclude Include="source\Game\SkateModule.h" />
+    <ClInclude Include="source\Game\Skater.h" />
+    <ClInclude Include="source\Memory\String.h" />
+    <ClInclude Include="source\Objects\SuperSectors.h" />
+    <ClInclude Include="source\Timer\Timer.h" />
     <ClInclude Include="source\zip\unzip.h" />
-    <ClInclude Include="source\_Math.h" />
+    <ClInclude Include="source\Math\_Math.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\d3d8.def" />

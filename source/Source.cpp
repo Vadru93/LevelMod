@@ -3,7 +3,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "pch.h"
 #include "Commands.h"
-#include "Extension.h"
+#include "Extension\Extension.h"
 #include "zip\unzip.h"
 #include <conio.h>
 #include <stdio.h>
@@ -15,21 +15,22 @@
 #include "Shellapi.h"
 #include <sstream>
 #include "d3d9.h"
-#include "IniReader.h"
-#include "IniWriter.h"
-#include "Bugfixes.h"
-#include "String.h"
+#include "Settings\IniReader.h"
+#include "Settings\IniWriter.h"
+#include "Hook\Bugfixes.h"
+#include "Memory\String.h"
 #undef ONLY_SHADER
-#include "CustomShaders.h"
-#include "ObjParser.h"
+#include "Render\CustomShaders.h"
+#include "Objects\ObjParser.h"
 #include <string.h>
 #include <memory.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include "shadow.h"
+#include "Render\shadow.h"
 #include "dinput.h"
-#include "rail.h"
+#include "Objects\rail.h"
+#include "Game\FrontEnd.h"
 /*0
 004F9B9E < -non semi
     8
@@ -63,6 +64,7 @@ ID3DXLine* line = NULL;
 DWORD numLineVertices = 0;
 D3DCOLOR lineColor = 0;
 D3DXMATRIX lineWorld;
+DWORD MenuSelectCallback = 0;
 
 vector<SuperSector*> EnvironmentObjects;
 extern vector<SuperSector*> PointyObjects;
@@ -75,6 +77,7 @@ LPDIRECT3DTEXTURE9 wheel_texture[12];
 BYTE eye_state = 0;
 DWORD actual_timer = 0;
 DWORD last_state;
+DWORD reset_time = 0;
 bool rotating = false;
 
 void SetTagLimit(DWORD limit);
@@ -86,7 +89,10 @@ bool bAddedOptions = false;
 
 CIniWriter* OptionWriter = NULL;// ini("LevelMod.ini");
 CIniReader* OptionReader = NULL;
+CIniWriter* ControlWriter = NULL;// ini("controls.ini");
+CIniReader* ControlReader = NULL;
 char IniPath[MAX_PATH + 1] = "";
+char IniPath2[MAX_PATH + 1] = "";
 
 const DWORD line_fvf = D3DFVF_XYZRHW | D3DFVF_DIFFUSE;
 
@@ -149,6 +155,8 @@ FILE* debugFile = NULL;
 //Used for custom ObserveMode
 extern ObserveMode* pObserve;
 
+void MaybeFixStutter();
+
 //Used for graf tag counter
 char tags[256] = "Tags: 0";
 char stat_cheat_message[] = "Stat cheat detected...";
@@ -160,6 +168,86 @@ void InjectHook(DWORD addr, BYTE* hook, DWORD size)
     DWORD old;
     VirtualProtect((void*)addr, size, PAGE_EXECUTE_READWRITE, &old);
     memcpy((void*)addr, hook, size);
+}
+__inline void HookFunction(DWORD addr, void(CScript::* function)(DWORD checksum, CStruct* params, Node* object), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    addr += 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+__inline void HookFunction(DWORD addr, void(Skater::* function)(bool force_update), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    addr += 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+
+__inline void HookFunction(DWORD addr, bool(Skater::* function)(Collision::Flags ignore0, Collision::Flags flags, Collision::Flags ignore1), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    addr += 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+
+__inline void HookFunction(DWORD addr, void(FrontEnd::* function)(), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    addr += 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+__inline void HookFunction(DWORD addr, void(FrontEnd::* function)(DWORD checksum, CStruct* params), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    addr += 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+__inline void HookFunction(DWORD addr, WORD(KeyState::* function)(BYTE gamestate, BYTE* key_data), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    addr += 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
 }
 
 __inline void HookFunction(DWORD addr, void(SfxManager::* function)(float* lvol, float* rvol, Vector* soundSource, float dropoffDist), BYTE byteCode = 0, DWORD nopCount=0)
@@ -189,6 +277,19 @@ __inline void HookFunction(DWORD addr, bool (RailNode::* function )(int SearchNo
 }
 
 __inline void HookFunction(DWORD addr, void (Skater::* function)(), BYTE byteCode = 0, DWORD nopCount = 0)
+{
+    DWORD old;
+    VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
+    if (byteCode)
+        *(DWORD*)(addr - 1) = byteCode;
+    *(DWORD*)addr = (PtrToUlong((void*&)function) - addr) - 4;
+    for (DWORD i = 0; i < nopCount; i++)
+        *(BYTE*)addr++ = 0x90;
+    //
+    //VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, old, &old);
+}
+
+__inline void HookFunction(DWORD addr, void (Skater::* function)(Node::TriggerType, Collision::CollData &), BYTE byteCode = 0, DWORD nopCount = 0)
 {
     DWORD old;
     VirtualProtect((void*)addr, (byteCode ? 5 : 4) + nopCount, PAGE_EXECUTE_READWRITE, &old);
@@ -333,7 +434,7 @@ struct Hook
             MessageBox(0, "no d3d8 found", "", 0);
         DWORD ptr = *(DWORD*)0x00970E48;
         DWORD_PTR* vTable = (DWORD*)*(DWORD*)(ptr);
-        _printf("vTable %X\n", vTable);
+        debug_print("vTable %X\n", vTable);
         //DWORD_PTR* vTable = GetD3D8VTable(addr, 0x0001A4F4);//0x128000);
         if (vTable == NULL)
         {
@@ -342,7 +443,7 @@ struct Hook
         }
 
         addr = (DWORD)vTable[vTableIndex];
-        _printf("addr %X", addr);
+        debug_print("addr %X", addr);
         /*BYTE jmp[6] = { 0xe9,			//jmp
         0x00, 0x00, 0x00, 0x00,		//address
         0xc3 };						//retn
@@ -441,9 +542,12 @@ struct D3D_PARAMS
 
 void NotGood(DWORD checksum, CScript* pScript)
 {
-    _printf("Called a function that doesn't exsits..\nName %s(%X) in function %s(%X) location %p\n", FindChecksumName(checksum), checksum, FindChecksumName(pScript->scriptChecksum), pScript->scriptChecksum, pScript->address);
-    MessageBox(0, "This means your Scripts are trashed or old", "Called a function that don't exists", 0);
+    char err_code[128];
+    debug_print("Called a function that doesn't exsits..\nName %s(%X) in function %s(%X) location %p\n", FindChecksumName(checksum), checksum, FindChecksumName(pScript->scriptChecksum), pScript->scriptChecksum, pScript->address);
+    sprintf(err_code, "This means your Scripts are trashed or old\nFunction to Call: %s\nCalled From: %s", FindChecksumName(checksum, false), FindChecksumName(pScript->scriptChecksum, false));
+    MessageBox(0, err_code, "Called a function that don't exists", 0);
 }
+
 
 __declspec(naked)  void __cdecl NotGood_naked()
 {
@@ -556,7 +660,7 @@ bool WallplantScript(CStruct* pParams, CScript* pScript)
         pAngle = *(DWORD*)pAngle + 0x40;
         VALIDATE_DATA((float*)pAngle, sizeof(float));
         (*(float*)pAngle) *= -1.0f;//float angle = *(float*)pAngle*(180.0f / 3.14159f);
-        _printf("speedx %f speedz %f anglez %f\n", speed.x, speed.z, *(float*)pAngle);*/
+        debug_print("speedx %f speedz %f anglez %f\n", speed.x, speed.z, *(float*)pAngle);*/
 
         void* first = (void*)*(DWORD*)(*(DWORD*)0x008E2498 + 0x13C);
         void* last = (void*)*(DWORD*)(*(DWORD*)0x008E2498 + 0x140);
@@ -568,7 +672,7 @@ bool WallplantScript(CStruct* pParams, CScript* pScript)
         {
             pos = (Vertex*)(*(DWORD*)((DWORD)current + 20) + 0x18);
             speed = *((Vertex*)(*(DWORD*)((DWORD)current + 20) + 0x18 + 16));
-            _printf("pos %f oldPos %f", pos->x, speed.x);
+            debug_print("pos %f oldPos %f", pos->x, speed.x);
 
             /*speed.x -= pos->x;
             speed.z -= pos->z;*/
@@ -619,10 +723,10 @@ bool WallplantScript(CStruct* pParams, CScript* pScript)
         pPos += 8;
         //float oldf = *(float*)pPos;
         //*((float*)pPos) = (cameraAngle / 0.5f / 3.14159f) - 1.0f;
-        //_printf("new %f camAngle%f old %f ", *((float*)pPos), cameraAngle, oldf);
+        //debug_print("new %f camAngle%f old %f ", *((float*)pPos), cameraAngle, oldf);
         //*((float*)pPos) *= -1.0f;*/
         *((float*)pPos) = oldAngle2;
-        //_printf("newnew %f posX %f speedX %f\n", *((float*)pPos), pos->x, speed.x);
+        //debug_print("newnew %f posX %f speedX %f\n", *((float*)pPos), pos->x, speed.x);
     }
     DEBUGEND()
         return true;
@@ -657,8 +761,6 @@ bool CreatePair(CStruct* pStruct, CScript* pScript)
 
 void DestroySuperSectors()
 {
-<<<<<<< Updated upstream
-=======
     debug_print("Restore the custom sector flags\n");
     RpWorld* world = RwViewer::Instance()->GetCurrentWorld();
     NxPlugin* plg = world->GetWorldPluginData();
@@ -671,31 +773,63 @@ void DestroySuperSectors()
         XINPUT::Player1->Vibrate(0, 0);
 
     debug_print("Clear the custom geometry\n");
->>>>>>> Stashed changes
     EnvironmentObjects.clear();
     PointyObjects.clear();
+
+    debug_print("Clear the static level string heap\n");
     String::RemoveLevelStrings();
+    
+    debug_print("Clear the level QB table\n");
     QScript::Scripts->ClearLevelTable();
-    _printf("Going to remove MovingObjects\n");
+
     GameState::GotSuperSectors = false;
+    GameState::loading_completed = false;
+
+    debug_print("Remove ShatterObjects\n");
     extern void UnloadShatterObjects();
     UnloadShatterObjects();
     *(bool*)0x00400020 = false;
+
+    debug_print("Going to remove MovingObjects\n");
     if (movingObjects.size())
         movingObjects.clear();
 
+    debug_print("Remove Shaders\n");
     if (!Gfx::loadingShaders)
         Gfx::UnloadShaders();
+
+    if (observing)
+        LeaveObserveMode(NULL, NULL);
+
+    debug_print("Clearing Spine CollCache\n");
+    delete Collision::spine_cache;
+
+    debug_print("Clearing Trigger CollCache\n");
+    delete Collision::trigger_cache;
+
+    debug_print("Clearing Default CollCache\n");
+    Collision::defaultCollCache.Clear();
 }
 void CreateSuperSectors()
 {
-    _printf("Going to create MovingObjects\n");
+    debug_print("Creating Spine CollCache\n");
+    Collision::spine_cache = new Collision::CollCache;
+    Collision::spine_cache->SetRequirement(Collision::Flags::Vert + Collision::Flags::Skatable);
+
+    debug_print("Creating Trigger CollCache\n");
+    Collision::trigger_cache = new Collision::CollCache;
+    Collision::trigger_cache->SetRequirement(Collision::Flags::Trigger + Collision::Flags::Hollow);
+
+    debug_print("Going to create MovingObjects\n");
     GameState::GotSuperSectors = true;
+
+    debug_print("Updating KeyMap\n");
     KeyMap::UpdateKeyMap();
     *(bool*)0x00400020 = true;
+
     //Game::skater = Skater::UpdateSkater();
 }
-FILE* logFile;
+FILE* logFile = NULL;
 void __cdecl add_log(const char* string, ...)
 {
     if (string == (const char*)0x005B6120) [[unlikely]]
@@ -746,8 +880,8 @@ void __cdecl add_log(const char* string, ...)
             p++;
         }
     }
-    _printf(buf);
-    _printf("\n");
+    debug_print(buf);
+    debug_print("\n");
     return;
 }
 
@@ -901,7 +1035,7 @@ struct Message
 
 void SendMessage(Message* msg)
 {
-    _printf("sending msg!!\n");
+    debug_print("sending msg!!\n");
 
     DWORD timeSpent = 0;
     while (timeSpent <= TIME_TIMED)
@@ -911,7 +1045,7 @@ void SendMessage(Message* msg)
         timeSpent += TIME_STEP;
         Sleep(TIME_STEP);
     }
-    _printf("disconnecting client: %d.%d.%d.%d!!\n", ((BYTE*)&msg->ip)[0], ((BYTE*)&msg->ip)[1], ((BYTE*)&msg->ip)[2], ((BYTE*)&msg->ip)[3]);
+    debug_print("disconnecting client: %d.%d.%d.%d!!\n", ((BYTE*)&msg->ip)[0], ((BYTE*)&msg->ip)[1], ((BYTE*)&msg->ip)[2], ((BYTE*)&msg->ip)[3]);
 
     closesocket(msg->socket);
 }
@@ -925,7 +1059,7 @@ struct StructScript
 
 DWORD GetServerAddress()
 {
-    _printf("getting server address!!\n");
+    debug_print("getting server address!!\n");
 
     /*DWORD addr=0x05D0968;
     addr = *(DWORD*)addr+0xB8;
@@ -956,12 +1090,12 @@ void StartedGraf(StructScript* pStructScript)
         SOCKET serverSocket = socket(AF_INET, SOCK_STREAM, 0);
         if (serverSocket == -1)//error couldn't create valid socket
         {
-            _printf("socket failure\n");
+            debug_print("socket failure\n");
             if (!IsHosting(pStructScript->pStruct, pStructScript->pScript))//not hosting, so limit graf for now
             {
                 if (oldLimit != 32)
                 {
-                    _printf("temporarly limiting graf\n");//MessageBox(0,"limiting graf","",0);
+                    debug_print("temporarly limiting graf\n");//MessageBox(0,"limiting graf","",0);
 
                     CStruct pStruct;//= new CStruct;
                     CStructHeader head;
@@ -989,7 +1123,7 @@ void StartedGraf(StructScript* pStructScript)
         server.sin_port = htons( 6500 );*/
         if (IsHosting(pStructScript->pStruct, pStructScript->pScript))//host trying to send info that graf is unlimited
         {
-            _printf("hosting!!\n");
+            debug_print("hosting!!\n");
 
             SOCKADDR_IN sin;
             sin.sin_family = AF_INET;
@@ -997,11 +1131,11 @@ void StartedGraf(StructScript* pStructScript)
             sin.sin_addr.s_addr = INADDR_ANY;
             if (bind(serverSocket, (LPSOCKADDR)&sin, sizeof(sin)) < 0)
             {
-                _printf("bind error: ");
+                debug_print("bind error: ");
 
                 char error[256];
                 sprintf(error, "%d\n", WSAGetLastError());
-                _printf(error);
+                debug_print(error);
 
                 closesocket(serverSocket);
                 WSACleanup();
@@ -1010,23 +1144,23 @@ void StartedGraf(StructScript* pStructScript)
 
             if (listen(serverSocket, 8) < 0)
             {
-                _printf("listen error: ");
+                debug_print("listen error: ");
 
                 char error[256];
                 sprintf(error, "%d\n", WSAGetLastError());
-                _printf(error);
+                debug_print(error);
 
                 closesocket(serverSocket);
                 WSACleanup();
                 return;
             }
-            _printf("opening connection!!\n");
+            debug_print("opening connection!!\n");
 
             FD_SET fdSet;
             //shutdown(serverSocket, SD_RECEIVE);
             if (oldLimit == 32)
             {
-                _printf("setting taglimit to 200");
+                debug_print("setting taglimit to 200");
 
                 CStruct pStruct;//= new CStruct;
                 CStructHeader head;
@@ -1044,7 +1178,7 @@ void StartedGraf(StructScript* pStructScript)
             timer.tv_usec = 0;
             for (DWORD i = 0; i < 8; i++)//while(timeSpent<=TIME_TIMED)
             {
-                _printf("checking for connections %u/8\n", i + 1);
+                debug_print("checking for connections %u/8\n", i + 1);
 
                 FD_ZERO(&fdSet);
                 FD_SET(serverSocket, &fdSet);
@@ -1052,19 +1186,19 @@ void StartedGraf(StructScript* pStructScript)
                 {
                     char error[256];
                     sprintf(error, "%d\n", WSAGetLastError());
-                    _printf("SelectError: ");
-                    _printf(error);
+                    debug_print("SelectError: ");
+                    debug_print(error);
 
                 }
                 if (FD_ISSET(serverSocket, &fdSet))
                 {
-                    _printf("trying to accept connection\n");
+                    debug_print("trying to accept connection\n");
 
                     sockaddr_in clientInfo;
                     SOCKET connectionSocket = ::accept(serverSocket, (sockaddr*)&clientInfo, NULL);
                     if (connectionSocket != INVALID_SOCKET)
                     {
-                        _printf("connected to client: %d.%d.%d.%d!!\n", ((BYTE*)&clientInfo.sin_addr)[0], ((BYTE*)&clientInfo.sin_addr)[1], ((BYTE*)&clientInfo.sin_addr)[2], ((BYTE*)&clientInfo.sin_addr)[3]);
+                        debug_print("connected to client: %d.%d.%d.%d!!\n", ((BYTE*)&clientInfo.sin_addr)[0], ((BYTE*)&clientInfo.sin_addr)[1], ((BYTE*)&clientInfo.sin_addr)[2], ((BYTE*)&clientInfo.sin_addr)[3]);
                         Message msg(connectionSocket, (const char*)&LevelModSettings::bUnlimitedGraf, 1, clientInfo.sin_addr);
                         HANDLE hRequestThread = ::CreateThread(NULL, 4, (LPTHREAD_START_ROUTINE)SendMessage, (LPVOID)&msg, 0/*CREATE_SUSPENDED*/, NULL);
                     }
@@ -1072,8 +1206,8 @@ void StartedGraf(StructScript* pStructScript)
                     {
                         char error[256];
                         sprintf(error, "%d\n", WSAGetLastError());
-                        _printf("Error: ");
-                        _printf(error);
+                        debug_print("Error: ");
+                        debug_print(error);
 
                     }
                 }
@@ -1084,13 +1218,13 @@ void StartedGraf(StructScript* pStructScript)
         }
         else//client trying to get info from host, if no info received graf will remain limited
         {
-            _printf("client!!\n");
+            debug_print("client!!\n");
 
             //shutdown(serverSocket, SD_SEND);
             //MessageBox(0,"your client","",0);
             sockaddr_in server;
             DWORD address = GetServerAddress();
-            _printf("server address: %d.%d.%d.%d\n", ((BYTE*)&address)[0], ((BYTE*)&address)[1], ((BYTE*)&address)[2], ((BYTE*)&address)[3]);
+            debug_print("server address: %d.%d.%d.%d\n", ((BYTE*)&address)[0], ((BYTE*)&address)[1], ((BYTE*)&address)[2], ((BYTE*)&address)[3]);
 
             server.sin_addr.s_addr = address;
             server.sin_family = AF_INET;
@@ -1100,18 +1234,18 @@ void StartedGraf(StructScript* pStructScript)
             for (DWORD i = 0; i < 2; i++)
             {
                 int err = 0;
-                _printf("trying to connect\n");
+                debug_print("trying to connect\n");
 
                 if (err = connect(serverSocket, (sockaddr*)&server, sizeof(sockaddr)) >= 0)
                 {
-                    _printf("connected!!\n");
+                    debug_print("connected!!\n");
 
                     timeSpent = 0;
                     while (timeSpent <= TIME_TIMED)
                     {
                         if (recv(serverSocket, (char*)&unlimitedGraf, 1, 0) >= 0)
                         {
-                            _printf("recieved!!\n");
+                            debug_print("recieved!!\n");
 
                             //shutdown(serverSocket, SD_RECEIVE);
                             break;
@@ -1125,8 +1259,8 @@ void StartedGraf(StructScript* pStructScript)
                 {
                     char error[256];
                     sprintf(error, "%d\n", WSAGetLastError());
-                    _printf("Error: ");
-                    _printf(error);
+                    debug_print("Error: ");
+                    debug_print(error);
 
                 }
                 /*timeSpent+=TIME_STEP;
@@ -1134,7 +1268,7 @@ void StartedGraf(StructScript* pStructScript)
             }
             if (unlimitedGraf)
             {
-                _printf("unlimiting graf!!\n");
+                debug_print("unlimiting graf!!\n");
 
                 if (oldLimit == 32)
                 {
@@ -1150,7 +1284,7 @@ void StartedGraf(StructScript* pStructScript)
             }
             else if (oldLimit != 32)
             {
-                _printf("limiting graf!!\n");
+                debug_print("limiting graf!!\n");
 
                 //MessageBox(0,"limiting graf","",0);
                 CStruct pStruct;//= new CStruct;
@@ -1165,17 +1299,17 @@ void StartedGraf(StructScript* pStructScript)
             }
             else
             {
-                _printf("graf already limited!!\n");
+                debug_print("graf already limited!!\n");
             }
         }
-        _printf("closing connection!!\n");
+        debug_print("closing connection!!\n");
 
         closesocket(serverSocket);
         WSACleanup();
     }
     else if (oldLimit != 32)//couldn't initialize game function pointer, so will need to limit graf....
     {
-        _printf("NO PTR TO OnServer!!\n");
+        debug_print("NO PTR TO OnServer!!\n");
         CStruct pStruct;//= new CStruct;
         CStructHeader head;
         pStruct.head = &head;//new CStructHeader;
@@ -1211,54 +1345,104 @@ void ReadFirstOptions()
     OptionWriter = new CIniWriter(IniPath);
     OptionReader = new CIniReader(IniPath);
 
+    sprintf(IniPath2, "%s\\Controls.ini", temp);
+    //MessageBox(0, IniPath, IniPath, 0);
+    ControlWriter = new CIniWriter(IniPath2);
+    ControlReader = new CIniReader(IniPath2);
 
-    //_printf("Reading from ini file %s, default %d ", "LM_GFX_eBuffering", Gfx::numBackBuffers);
+
+    //debug_print("Reading from ini file %s, default %d ", "LM_GFX_eBuffering", Gfx::numBackBuffers);
     DWORD new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_eBuffering", Gfx::numBackBuffers);
     if (new_value < 3)
         Gfx::numBackBuffers = new_value;
-    //_printf("value %d\n", Gfx::numBackBuffers);
+    //debug_print("value %d\n", Gfx::numBackBuffers);
 
-    //_printf("Reading from ini file %s, default %d ", "LM_GFX_eAntiAlias", Gfx::AntiAliasing);
+    //debug_print("Reading from ini file %s, default %d ", "LM_GFX_eAntiAlias", Gfx::AntiAliasing);
     new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_eAntiAlias", Gfx::AntiAliasing);
     if (new_value < 5)
         Gfx::AntiAliasing = new_value;
-    //_printf("value %d\n", Gfx::AntiAliasing);
+    //debug_print("value %d\n", Gfx::AntiAliasing);
 
-    //_printf("Reading from ini file %s, default %d ", "LM_GFX_bFiltering", Gfx::filtering);
+    //debug_print("Reading from ini file %s, default %d ", "LM_GFX_bFiltering", Gfx::filtering);
     new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_bFiltering", Gfx::filtering);
     if (new_value < 2)
         Gfx::filtering= new_value;
-    //_printf("value %d\n", Gfx::filtering);
+    //debug_print("value %d\n", Gfx::filtering);
 
-    //_printf("Reading from ini file %s, default %d ", "LM_GFX_bFixStutter", Gfx::fps_fix);
-    new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_bFixStutter", Gfx::fps_fix);
-    if (new_value < 2)
-<<<<<<< Updated upstream
+    //debug_print("Reading from ini file %s, default %d ", "LM_GFX_bFixStutter", Gfx::fps_fix);
+    new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_eFixStutter", Gfx::fps_fix);
+    if (new_value < 4)
         Gfx::fps_fix = new_value;
-    //_printf("value %d\n", Gfx::fps_fix);
-    //CreateConsole();
-=======
+
+    new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_bVSync", Gfx::bVSync);
+    if (new_value < 2)
         Gfx::bVSync = new_value;
 
     new_value = OptionReader->ReadInt("Script_Settings", "LM_GFX_TargetFPS", (int)Gfx::target_fps);
     if (new_value <= 300 && new_value >= 60)
         Gfx::target_fps = (double)new_value;
-
-    //CreateConsole();
     //NewTimer::CalculateFPSTimers();
 
     //debug_print("value %d\n", Gfx::fps_fix);
->>>>>>> Stashed changes
 
-    //_printf("Reading from ini file %s, default %d ", "LM_DebugOption_bDebugMode", debug);
+    //debug_print("Reading from ini file %s, default %d ", "LM_DebugOption_bDebugMode", debug);
     new_value = OptionReader->ReadInt("Script_Settings", "LM_DebugOption_bDebugMode", debug);
     if (new_value < 2)
        debug = new_value;
-    //_printf("value %d\n", debug);
+#ifdef _DEBUG
+    debug = true;
+#endif
+    //debug_print("value %d\n", debug);
     if (debug)
     {
+        DWORD retry = 0;
+        HANDLE h = NULL;
+        while (!h && retry < 50000)
+        {
+            h = OpenMutexA(0x1f0001, 0, "thps3_debug");
+            retry++;
+        }
+        if (!h)
+        {
+            char temp[MAX_PATH] = "";
+            GetCurrentDirectory(MAX_PATH, temp);
+            sprintf(IniPath, "%s\\Skate3_debug.exe", temp);
+            PROCESS_INFORMATION ProcessInfo; //This is what we get as an [out] parameter
+
+            STARTUPINFO StartupInfo; //This is an [in] parameter-
+            ZeroMemory(&StartupInfo, sizeof(StartupInfo));
+            StartupInfo.cb = sizeof StartupInfo; //Only compulsory field
+            bool bCreated = false;
+
+            if (!CreateProcess("skate3_debug.exe", LPSTR("skate3_debug.exe -windowed"),
+                NULL, NULL, FALSE, 0, NULL,
+                NULL, &StartupInfo, &ProcessInfo))
+            {
+                if (CreateProcess(IniPath, NULL,
+                    NULL, NULL, FALSE, 0, NULL,
+                    NULL, &StartupInfo, &ProcessInfo))
+                {
+                    bCreated = true;
+                }
+            }
+            else
+            {
+                bCreated = true;
+            }
+
+            if (bCreated)
+            {
+                CloseHandle(ProcessInfo.hThread);
+                CloseHandle(ProcessInfo.hProcess);
+                ExitProcess(0);
+            }
+        }
+        else
+            CloseHandle(h);
+
+        
         CreateConsole();
-        _printf("Welcome to DebugMode\n");
+        debug_print("Welcome to DebugMode\n");
     }
 }
 
@@ -1674,11 +1858,9 @@ bool AddParamScript(CStruct* pStruct, CScript* pScript)
 
 bool NotScript(CStruct* pStruct, CScript* pScript)
 {
-    CStructHeader* header = pStruct->head;
-    while (header)
+    auto header = pStruct->GetHeader();
+    if (header)
     {
-        if (header->Type == QBKeyHeader::LOCAL)
-        {
             QBKeyHeader* Header = GetQBKeyHeader(header->Data);
             if (Header && Header->type == QBKeyHeader::COMPILED_FUNCTION)
             {
@@ -1692,10 +1874,8 @@ bool NotScript(CStruct* pStruct, CScript* pScript)
                 pStruct->tail=NULL;*/
                 return !Header->CallScript(&params, pScript);
             }
-            break;
+
         }
-        header = header->NextHeader;
-    }
     return true;
 }
 
@@ -1803,7 +1983,7 @@ void ExecuteQBThread()
 
 EXTERN bool QBKeyHeader::SetFloat(DWORD checksum, float value)
 {
-    _printf("Seting Name %s\n", FindChecksumName(checksum));
+    debug_print("Seting Name %s\n", FindChecksumName(checksum));
     if (this->type == QBKeyHeader::STRUCT || this->type == QBKeyHeader::LOCAL_STRUCT)
     {
         CStructHeader* pStruct = *(CStructHeader**)this->pStruct;
@@ -1818,7 +1998,7 @@ EXTERN bool QBKeyHeader::SetFloat(DWORD checksum, float value)
             else
                 if (pStruct->QBkey == checksum)
                 {
-                    _printf("FloatVal %s(%f)\n", FindChecksumName(pStruct->QBkey), value);
+                    debug_print("FloatVal %s(%f)\n", FindChecksumName(pStruct->QBkey), value);
                     pStruct->value.f = value;
                     return true;
                 }
@@ -1832,7 +2012,7 @@ EXTERN bool QBKeyHeader::SetFloat(DWORD checksum, float value)
 
 bool ChangeParamToUnnamedScript(CStruct* pStruct, CScript* pScript)
 {
-    _printf("UnnamedScript ");
+    debug_print("UnnamedScript ");
     CStructHeader* pFunc = NULL;
     if (pStruct->GetStruct(Checksums::FUNCTION, &pFunc))
     {
@@ -1850,8 +2030,8 @@ bool ChangeParamToUnnamedScript(CStruct* pStruct, CScript* pScript)
                 pStructParam->AddParam(0, QBKeyHeader::STRING, pParam->pStr);
                 /*pStruct.head = &header;
                 pStruct.tail = &header;*/
-                _printf(pFunc->pStr);
-                _printf("\n");
+                debug_print(pFunc->pStr);
+                debug_print("\n");
                 memcpy(funcName, pFunc->pStr, strlen(pFunc->pStr) + 1);
                 funcParam = pStructParam;
                 CreateThread(0, 0, (LPTHREAD_START_ROUTINE)ExecuteQBThread, 0, 0, 0);
@@ -1860,7 +2040,7 @@ bool ChangeParamToUnnamedScript(CStruct* pStruct, CScript* pScript)
             }
         }
     }
-    _printf("couldn't find function\n");
+    debug_print("couldn't find function\n");
     return false;
 }
 
@@ -1886,7 +2066,7 @@ bool CallWithNoNameScript(CStruct* pStruct, CScript* pScript)
             return true;
         }
 
-        _printf("Invalid call to %s\nNeed param String|Int\n", __FUNCTION__);
+        debug_print("Invalid call to %s\nNeed param String|Int\n", __FUNCTION__);
         return false;
     }
     else
@@ -1913,29 +2093,29 @@ bool MoveObjectScript(CStruct* pStruct, CScript* pScript)
     /*DEBUGSTART()
     {*/
     int name = 0;
-    _printf("Maybe Move pScript %p CalledFrom %p\n", pScript, pScript->address);
+    debug_print("Maybe Move pScript %p CalledFrom %p\n", pScript, pScript->address);
     if (pStruct->GetScript("Name", &name))
     {
         SuperSector* sector = SuperSector::GetSuperSector(name);
         if (sector)
         {
-            _printf("Got Name %X\n", name);
+            debug_print("Got Name %X\n", name);
             CStructHeader* param = NULL;
 
             if (pStruct->GetStruct(Checksums::Type, &param))
             {
-                _printf("Got Type: ");
+                debug_print("Got Type: ");
                 switch (param->value.i)
                 {
                 case Checksums::ANGULAR_VELOCITY:
-                    _printf("ANGULAR_VELOCITY\n");
+                    debug_print("ANGULAR_VELOCITY\n");
                     if (pStruct->GetStruct(Checksums::ORIENT, &param))
                     {
                         for (DWORD i = 0; i < movingObjects.size(); i++)
                         {
                             if (movingObjects[i].sector == sector)
                             {
-                                _printf("ORIENT\n");
+                                debug_print("ORIENT\n");
                                 D3DXVECTOR3 angle = *param->pVec * D3DX_PI / 2048.0f;
                                 //angle.y += D3DX_PI;
                                 movingObjects[i].goalAngle = angle;
@@ -1960,7 +2140,7 @@ bool MoveObjectScript(CStruct* pStruct, CScript* pScript)
                             {
                                 if (movingObjects[i].sector == sector)
                                 {
-                                    _printf("updating sector\n");
+                                    debug_print("updating sector\n");
                                     D3DXVECTOR3 angle = *param->pVec * D3DX_PI / 2048.0f;
                                     //angle += D3DX_PI;
                                     movingObjects[i].acceleration = angle;
@@ -1979,13 +2159,13 @@ bool MoveObjectScript(CStruct* pStruct, CScript* pScript)
                             }
                             return true;
                         }
-                    _printf("Need to pass param 'ANGULAR_VELOCITY'\n");
+                    debug_print("Need to pass param 'ANGULAR_VELOCITY'\n");
                     return false;
                 case Checksums::MOVE_TO_POS:
-                    _printf("MOVE_TO_POS\n");
+                    debug_print("MOVE_TO_POS\n");
                     if (pStruct->GetStruct(Checksums::Relpos, &param))
                     {
-                        _printf("Going to mov Object -> Relpos %f %f %f pScript %p\n", param->pVec->x, param->pVec->y, param->pVec->z, pScript);
+                        debug_print("Going to mov Object -> Relpos %f %f %f pScript %p\n", param->pVec->x, param->pVec->y, param->pVec->z, pScript);
 
 
                         for (DWORD i = 0; i < movingObjects.size(); i++)
@@ -2006,21 +2186,21 @@ bool MoveObjectScript(CStruct* pStruct, CScript* pScript)
                         }*/
                         return true;
                     }
-                    _printf("Need to pass param 'Relpos'\n");
+                    debug_print("Need to pass param 'Relpos'\n");
                     return false;
                 default:
-                    _printf("Defaulting to FOLLOW_PATH_LINKED\n");
+                    debug_print("Defaulting to FOLLOW_PATH_LINKED\n");
                     for (DWORD i = 0; i < movingObjects.size(); i++)
                     {
                         if (movingObjects[i].sector == sector)
                             return false;
                     }
-                    _printf("Going to mov Object -> FollowPathLinked pScript %p\n", pScript);
+                    debug_print("Going to mov Object -> FollowPathLinked pScript %p\n", pScript);
 
                     CArray* links = pScript->node->GetNodeStruct()->GetArray(Checksums::Links);
                     if (links)
                     {
-                        _printf("Links %p", links);
+                        debug_print("Links %p", links);
                         D3DXVECTOR3 position = (sector->bboxMax + sector->bboxMin) / 2.0f;
                         CStructHeader* pos = NULL;
                         CStructHeader* link = NULL;
@@ -2043,13 +2223,13 @@ bool MoveObjectScript(CStruct* pStruct, CScript* pScript)
                                 }
                                 return true;
                             }
-                            _printf("couldn't find node->position\n");
+                            debug_print("couldn't find node->position\n");
                             return false;
                         }
-                        _printf("couldn't find link in NodeArray\n");
+                        debug_print("couldn't find link in NodeArray\n");
                         return false;
                     }
-                    _printf("Couldn't find node->links\n");
+                    debug_print("Couldn't find node->links\n");
                     return false;
                 }
             }
@@ -2069,28 +2249,28 @@ bool MoveObjectScript(CStruct* pStruct, CScript* pScript)
                     fclose(f);
 
                  }*/
-                _printf("No Type, defaulting to FOLLOW_PATH_LINKED\n");
+                debug_print("No Type, defaulting to FOLLOW_PATH_LINKED\n");
                 for (DWORD i = 0; i < movingObjects.size(); i++)
                 {
-                    _printf("What's going on?[%d][%d] sector %p\n", i, movingObjects.size(), movingObjects[i].sector);
+                    debug_print("What's going on?[%d][%d] sector %p\n", i, movingObjects.size(), movingObjects[i].sector);
                     if (movingObjects[i].sector == sector)
                     {
-                        _printf("returning false..\n");
+                        debug_print("returning false..\n");
                         return false;
                     }
                 }
-                _printf("Going to mov Object %X -> FollowPathLinked Node %X \n", name, pScript->node->name);
+                debug_print("Going to mov Object %X -> FollowPathLinked Node %X \n", name, pScript->node->name);
 
                 CArray* links = pScript->node->GetNodeStruct()->GetArray(Checksums::Links);
                 if (links)
                 {
-                    _printf("Links %p\n", links);
+                    debug_print("Links %p\n", links);
                     D3DXVECTOR3 position = (sector->bboxMax + sector->bboxMin) / 2.0f;
                     CStructHeader* pos = NULL;
                     CStructHeader* link = Node::GetNodeStructByIndex((*links)[0]);
                     if (link->GetStruct(Checksums::Position, &pos))
                     {
-                        _printf("position %f %f %f pos %f %f %f\n", position.x, position.y, position.z, pos->pVec->x, pos->pVec->y, pos->pVec->z);
+                        debug_print("position %f %f %f pos %f %f %f\n", position.x, position.y, position.z, pos->pVec->x, pos->pVec->y, pos->pVec->z);
                         //position += *pos->pVec;
                         movingObjects.push_back(MovingObject(sector, position, *pos->pVec, pScript, link));
                         MovingObject& obj = movingObjects.back();
@@ -2102,14 +2282,14 @@ bool MoveObjectScript(CStruct* pStruct, CScript* pScript)
                         }
                         return true;
                     }
-                    _printf("couldn't find node->position\n");
+                    debug_print("couldn't find node->position\n");
                     return false;
                 }
-                _printf("Couldn't find node->links\n");
+                debug_print("Couldn't find node->links\n");
             }
         }
         else
-            _printf("Couldn't find SuperSector(0x%X)", name);
+            debug_print("Couldn't find SuperSector(0x%X)", name);
     }
     /*}
     DEBUGEND()*/
@@ -2141,13 +2321,18 @@ const CompiledScript scripts[] =
     { "Not", NotScript },
     { "IsNot", NotScript },
     { "NotTrue", NotScript},
+    { "GetParamFromArray", GetParamFromArrayScript },
+    { "SetMenuSelectCallback", ScriptSetMenuSelectCallback },
+    { "KeyMapScript", KeyMapScript },
+    { "EditKeyMap", EditKeyMapScript },
+    { "GetTextFromKeyMap", GetTextFromKeyMapScript },
     { "FileExists", FileExistsScript },
     { "AddParam", AddParamScript },
     { "SubToGlobal", SubToGlobal },
     { "AddToGlobal", AddToGlobal },
     { "FreezeCamera", FreezeCamera },
     { "UnfreezeCamera", UnfreezeCamera },
-    { "GrafStarted", GrafStarted },
+    //{ "GrafStarted", GrafStarted },
     { "ChangeValues", ChangeValues },
     { "CreatePair", CreatePair },
     { "GetSliderValue", GetSliderValue },
@@ -2170,6 +2355,7 @@ const CompiledScript scripts[] =
 {"ToggleHostOption", ToggleHostOption},
     {"LM_GotParam", LM_GotParamScript },
     {"GetParam", GetParamScript},
+    {"MessageBox", MessageBoxScript},
     {"SetOption", SetOption},
     {"GetOptionText", GetOptionText},
     {"LM_PrintInfo", GetInfoScript },
@@ -2179,6 +2365,7 @@ const CompiledScript scripts[] =
 { "NewShatter", NewShatterScript},
     {"AddLights", AddLights},
     {"RemoveLights", RemoveLights},
+    {"ResetKeyState", ResetKeyStateScript},
 /*{"SetMemoryPoolSize", SetMemoryPoolSize},
 {"GetMemoryPoolSize", GetMemoryPoolSize},
 {"GetMemoryPoolSizeText", GetMemoryPoolSizeText},*/
@@ -2464,7 +2651,7 @@ bool DownloadAndInstall(std::string& path, float build, SOCKADDR* service)
         GetCurrentDirectory(MAX_PATH, installPath);
         char final[MAX_PATH * 2 + 100];
         sprintf(final, "%s/LevelMod-Installer.exe", installPath);
-        _printf("%s", final);
+        debug_print("%s", final);
         STARTUPINFO si;
         PROCESS_INFORMATION pi;
 
@@ -2809,11 +2996,11 @@ void TestForAcid()
             float absnorm = fabsf(skater->GetCollisionNormal()->y);
             if (absnorm > 0.48f && absnorm < 0.98f)
             {
-                //_printf("norm %f %f vel %f %f", vel_normal.x, vel_normal.z, velocity.x, velocity.z);
+                //debug_print("norm %f %f vel %f %f", vel_normal.x, vel_normal.z, velocity.x, velocity.z);
                 float test = ((vel_normal.x - skater->GetCollisionNormal()->x) + (vel_normal.z - skater->GetCollisionNormal()->z));
                 if (fabsf(test) < 0.82f)
                 {
-                    _printf("above\n");
+                    debug_print("above\n");
                     skater->CallMemberFunction(Checksum("DoNextTrick"));
                     skater->FlagException("AcidDrop");
                     break;
@@ -2836,7 +3023,7 @@ void AddCompressedNodes()
     FILE* f = fopen(qbPath, "r+b");
     if (f)
     {
-        _printf("Opened: %s\n", qbPath);
+        debug_print("Opened: %s\n", qbPath);
         fseek(f, 0, SEEK_END);
         DWORD size = ftell(f);
 
@@ -2866,7 +3053,7 @@ void AddCompressedNodes()
                 /*sprintf(msg, "P %X", opcode);
                 MessageBox(0, msg, msg, 0);*/
                 DWORD name = *(DWORD*)pFile;
-                _printf("Name %X\n", name);
+                debug_print("Name %X\n", name);
                 pFile += 4;
 
 
@@ -2886,7 +3073,7 @@ void AddCompressedNodes()
                 CStructHeader* header = comp->first;
                 comp->last = header;
 
-                _printf("chc %X comp %X\n", name, comp);
+                debug_print("chc %X comp %X\n", name, comp);
                 while (*pFile != 0 && *pFile != 1)
                 {
                     pFile++;
@@ -2932,7 +3119,7 @@ void AddCompressedNodes()
                             header->NextHeader = &compressedStructs.back();
                             /*pMap = pMap->NextHeader;
                             *(CStructHeader**)0x008E1E04 = pMap;
-                            _printf("pMap %X\n", pMap);*/
+                            debug_print("pMap %X\n", pMap);*/
                             header = header->NextHeader;
                         }
                         else
@@ -2984,12 +3171,16 @@ void HookedFopen(char* p)
                 memcpy(temp_level, &p[pos + 1], strlen(p) - 3 - (pos + 1));
                 temp_level[strlen(p) - 3 - (pos + 1)] = 0x00;
                 Game::level_checksum = Checksum(temp_level);
+                /*typedef void(__cdecl* pResetTimers)();
+                pNewTimers(0x00409870)();*/
+                QueryPerformanceCounter((LARGE_INTEGER*)0x00850FB0);
+                NewTimer::ResetTime();
                 //MessageBox(0, temp_level, Level, 0);
 
 
                 if (bDebugMode)
                 {
-                    _printf("Fopen: %s\n", p);
+                    debug_print("Fopen: %s\n", p);
                     memcpy(qbPath, p, strlen(p) + 1);
                     qbPath[strlen(qbPath) - 1] = 0x0;
 
@@ -3020,9 +3211,17 @@ void LoadCustomShaderThread()
 {
     //We have started a new game
 
-    //First update skater pointer
+    //First update the custom world sector flags
+    RpWorld* world = RwViewer::Instance()->GetCurrentWorld();
+    NxPlugin* plg = world->GetWorldPluginData();
+    Collision::Manager* cld_manager = plg->GetManager();
+    cld_manager->UpdateWorldSectorFlags();
+    GameState::loading_completed = true;
+
+    //Then update skater pointer
     Game::skater = Skater::UpdateSkater();
     while(!Game::skater) Skater::UpdateSkater();
+    KeyMap::UpdateKeyMap();
 
     //Then check if we are host and if we are, send the HostOptions to clients
     Network::NetHandler* net_handler = Network::NetHandler::Instance();
@@ -3037,11 +3236,15 @@ void LoadCustomShaderThread()
 
     //Then update shaders
     Gfx::LoadCustomShaders(ShaderFile);
+
+    //Sleep(500);
+    //this currently crashes, need to look into why...
+    //cld_manager->SortWorldSectors();
 }
 
 bool OnPostLevelLoad(CStruct* pStruct, CScript* pScript)
 {
-    _printf("OnPostLevelLoad...\n");
+    debug_print("OnPostLevelLoad...\n");
     oldSkater = Game::skater;
 
     CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)LoadCustomShaderThread, NULL, NULL, NULL);
@@ -3056,16 +3259,16 @@ bool ChangeLocalScript(CStruct* pStruct, CScript* pScript)
         CStructHeader* param = pScript->GetParam(header->QBkey);
         if (param)
         {
-            _printf("param %s value %d header %s value %d\n", FindChecksumName(param->QBkey), param->value.i, FindChecksumName(header->QBkey), header->value.i);
-            _printf("param_type %s header_type %s\n", QScript::QBTypes[param->Type], QScript::QBTypes[header->Type]);
+            debug_print("param %s value %d header %s value %d\n", FindChecksumName(param->QBkey), param->value.i, FindChecksumName(header->QBkey), header->value.i);
+            debug_print("param_type %s header_type %s\n", QScript::QBTypes[param->Type], QScript::QBTypes[header->Type]);
             param->Data = header->Data;
             return true;
         }
         else
-            _printf(__FUNCTION__ "Couldn't find %s in script %s\n", FindChecksumName(header->QBkey), FindChecksumName(pScript->scriptChecksum));
+            debug_print(__FUNCTION__ "Couldn't find %s in script %s\n", FindChecksumName(header->QBkey), FindChecksumName(pScript->scriptChecksum));
     }
 
-    _printf("No param passed to Local_Param? in script %s\n", FindChecksumName(pScript->scriptChecksum));
+    debug_print("No param passed to Local_Param? in script %s\n", FindChecksumName(pScript->scriptChecksum));
     return false;
 }
 
@@ -3091,12 +3294,9 @@ bool RemoveLights(CStruct* pStruct, CScript* pScript)
 
 bool AddLights(CStruct* pStruct, CScript* pScript)
 {
-    CStructHeader* header = pStruct->head;
-
-    while (header)
+    auto header = pStruct->GetHeader(QBKeyHeader::ARRAY);
+    if (header)
     {
-        if (header->Type = QBKeyHeader::QBKeyType::ARRAY)
-        {
             for (DWORD i = 0; i < header->pArray->GetNumItems(); i++)
             {
                 D3DXVECTOR3 position = D3DXVECTOR3(1000.0f, 8000.0f, 1000.0f);
@@ -3119,8 +3319,6 @@ bool AddLights(CStruct* pStruct, CScript* pScript)
             }
             return true;
         }
-        header = header->NextHeader;
-    }
     return false;
 }
 
@@ -3143,7 +3341,7 @@ void AddChecksum(int key, char* name, void* retAddr)
             fprintf(debugFile, "AddingKey %s %X, CalledFrom %p\r\n", name, key, retAddr);
             printf("AddingKey %s %X, CalledFrom %p\r\n", name, key, retAddr);
             fclose(debugFile);*/
-            //_printf("AddChecksum %s 0x%X\n", name, key);
+            //debug_print("AddChecksum %s 0x%X\n", name, key);
             QScript::Scripts->qbTable.insert(std::pair<DWORD, char*>(key, String::AddString(name)));
             QScript::qbKeys.push_back(key);
         }
@@ -3181,27 +3379,29 @@ __declspec(naked) void Checksum_naked()
 
     _asm mov ecx, [esp + 4];
     _asm mov checksum_name, ecx;
-    _asm { mov pESP, esp };
+    __asm { mov pESP, esp };
 
 
 
 
     _asm call[jmpBack];
     _asm mov chc, eax
- //   _asm pushad;
- //   _asm pushfd;
+    //_asm pushad;
+    //_asm pushfd;
     retAddr = pESP[0];
     AddChecksum(chc, checksum_name, retAddr);
- //   _asm popfd;
- //   _asm popad;
+    //_asm popfd;
+    //_asm popad;
     _asm mov eax, chc
     _asm ret;
 }
 
-__declspec(naked) void Fopen_naked()
+static DWORD fopemn;// = *(DWORD*)0x0058D0B0;
+static DWORD jmpBack;// = fopen + 5;
+__declspec(naked) void Fopen_naked() noexcept
 {
-    static DWORD fopen = *(DWORD*)0x0058D0B0;
-    static const DWORD jmpBack = fopen + 5;
+    fopemn = *(DWORD*)0x0058D0B0;
+    jmpBack = fopemn + 5;
     _asm mov fopen_path, esp;
     _asm pushad;
     _asm pushfd;
@@ -3219,7 +3419,7 @@ __declspec(naked) void Fopen_naked()
 
 FILE* __cdecl _fopen(const char* p, const char* b)
 {
-    _printf("Fopen: %s\n");
+    debug_print("Fopen: %s\n");
     if (p[strlen(p) - 1] == 'b' && p[strlen(p) - 2] == 'q' && p[strlen(p) - 3] == '.' && game)
     {
 
@@ -3232,14 +3432,6 @@ FILE* __cdecl _fopen(const char* p, const char* b)
 
     return fopen(p, b);
 }
-
-
-struct BBox
-{
-    Vertex max;
-    Vertex min;
-};
-
 struct CollisionObject;
 
 struct UnkStruct
@@ -3285,7 +3477,7 @@ FILE* Dump;
 
 void AddDump(const char* dump, ...)
 {
-    _printf("Dumping %s", dump);
+    debug_print("Dumping %s", dump);
     Dump = fopen("dump.txt", "w+t");
     fseek(Dump, 0, SEEK_END);
     va_list va_alist;
@@ -3406,14 +3598,14 @@ __declspec(naked) void AddMessageHook(void)
         je skip;
         mov message, eax;
         mov eax, old;
-        pushad;
-        pushfd;
+        //pushad;
+        //pushfd;
     }
     GotMessage(++message);
     _asm
     {
-        popfd;
-        popad;
+        //popfd;
+        //popad;
     skip:
         push retAddr;
         ret;
@@ -3598,7 +3790,7 @@ void GetMotd()
 
 void FixMessage()
 {
-    printf("Fixing Messages\n");
+    debug_print("Fixing Messages\n");
 
 
 
@@ -3638,7 +3830,7 @@ void FixMessage()
             header->pStr[i] = motd[i];
         }
     }*/
-    printf("FixMessage DONE\n");
+    debug_print("FixMessage DONE\n");
     init2 = true;
 }
 
@@ -3778,6 +3970,7 @@ bool DisplayLoadingScreen(CStruct* pStruct, CScript* pScript)
 
 
 
+
 const DWORD numFunctions = sizeof(scripts) / sizeof(CompiledScript);
 
 void AddFunctions()
@@ -3796,10 +3989,65 @@ void AddFunctions()
             MessageBox(0, "couldn't add script", scripts[i].name, 0);
     }
 
+    QScript::GotParam = GetQBKeyHeader(Checksum("GotParam"))->pFunction;
     header = GetQBKeyHeader(Checksums::Shatter);
     if (header)
+    {
+        QScript::ShatterScript = header->pFunction;
         header->pFunction = NewShatterScript;
+    }
+
+    QScript::LaunchPanelMessage = GetQBKeyHeader(Checksum("LaunchPanelMessage"))->pFunction;
+
+    header = GetQBKeyHeader(Checksum("ResetClock"));
+    if (header)
+    {
+        QScript::ResetClock = header->pFunction;
+        header->pFunction = NewTimer::ResetTimeScript;
+    }
+
+#ifdef _DEBUG && 0
+    FILE* f = fopen("func_info.txt", "w");
+    fprintf(f, "# Functions\n| Name | Params | Returns | Example | Description |\n");
+    fprintf(f, "| :- | :- | :- | :- | :- |\n");
+
+    CompiledScript* pEnd = (CompiledScript*)0x005B83D8;
+    for(auto pScript = (CompiledScript*)0x005B7510; pScript != pEnd; pScript++)
+    {
+        fprintf(f, "| %s | ? | ? | ? | ? |\n", pScript->name);
+    }
+
+    fprintf(f, "# Member Functions\n| Name | Params | Returns | Example | Description |\n");
+    fprintf(f, "| :- | :- | :- | :- | :- |\n");
+    
+    for (char** name = (char**)pEnd; name != (char**)0x005B8868; name += 1)
+    {
+        fprintf(f, "| %s | ? | ? | ? | ? |\n", *name);
+    }
+
+    fprintf(f, "# More Info\n| Name | Checksum | Address | References |\n");
+    fprintf(f, "| :- | :- | :- | :- |\n");
+
+    for (auto pScript = (CompiledScript*)0x005B7510; pScript != pEnd; pScript++)
+    {
+        DWORD checksum = Checksum(pScript->name);
+        fprintf(f, "| %s | 0x%X | 0x%p | %s |\n", pScript->name, checksum, pScript->pFunction, QScript::FindReference(checksum));
+    }
+    for (char** name = (char**)pEnd; name != (char**)0x005B8868; name += 1)
+    {
+        DWORD checksum = Checksum(*name);
+        fprintf(f, "| %s | 0x%X | ? | %s |\n", *name, checksum, QScript::FindReference(checksum));
+    }
+
+    fclose(f);
+#endif
 }
+
+#ifdef _DEBUG  //disable debug
+#undef _DEBUG
+#pragma optimize( "g", on )
+#define _DD
+#endif
 
 bool __stdcall proxy_FixGoBack(BYTE unk1, BYTE unk2, BYTE unk3, BYTE unk4)
 {
@@ -3815,6 +4063,10 @@ bool __stdcall proxy_FixGoBack(BYTE unk1, BYTE unk2, BYTE unk3, BYTE unk4)
     _asm mov ecx, oldECX;
     return true;
 }
+#ifdef _DD
+#define _DEBUG
+#pragma optimize( "", off )
+#endif
 
 float __cdecl proxy_SnapToGroundClamp(float a1)
 {
@@ -3858,121 +4110,12 @@ struct OptimizedGrind
     }
 };
 
-
-//To optimize CRC we put the checksum in eax instead of calling Checksum("string")
-//string here means pointer in memory where string is pushed to stack
-//eax means pointer to where function is called and should be replaced with eax
-//esp means where stack is changed, since we remove the push string we need to decrease add esp with 4
-struct OptimizedCRC
-{
-    DWORD string;
-    DWORD eax;
-    DWORD esp;
-
-    void Optimize()
-    {
-        DWORD old;
-        VirtualProtect((LPVOID)string, 5 + 5 + 3 + eax + esp, PAGE_EXECUTE_READWRITE, &old);
-
-        DWORD ptr = string;
-        char error[256];
-        sprintf(error, "%X %d", string, esp);
-        ptr++;
-        char* c = *(char**)ptr;
-
-        *(BYTE*)string = 0x90;
-        string++;
-        ptr += 4;
-
-        //If trying to access esp we need to decrease by 4
-        if (*(BYTE*)ptr == 0xC7 || *(BYTE*)ptr == 0xC6)
-            *(BYTE*)(ptr + 3) -= 4;
-        else if (*(BYTE*)ptr == 0x88 || *(BYTE*)ptr == 0x89)
-            *(BYTE*)(ptr + 3) -= 4;
-        ptr += eax;
-        if (*(BYTE*)ptr != 0xE8)
-            MessageBox(0, "Wrong eax", "", 0);
-        *(BYTE*)ptr = 0xB8;
-        ptr++;
-        _printf("Optimizing checksum access: %s\n", c);
-        *(DWORD*)ptr = crc32f(c);
-
-        //Replace push string with nop
-        *(DWORD*)string = 0x90909090;
-        ptr += 4;
-
-        //If trying to access esp we need to decrease by 4
-        if (*(BYTE*)ptr == 0x8B && (*(BYTE*)(ptr+1) != 0x8F && *(BYTE*)(ptr+1) != 0x8E && *(BYTE*)(ptr+1) != 0x0E && *(BYTE*)(ptr+1) != 0x4E))
-        {
-            *(BYTE*)(ptr + 3) -= 4;
-            if (*(BYTE*)(ptr + 3) == 0)
-                *(BYTE*)(ptr + 3) = 0x90;
-        }
-        ptr += esp;
-        if (*(BYTE*)ptr != 0x83)
-        {
-            MessageBox(0, "Wrong esp", error, 0);
-        }
-
-        //If add esp, 4 replace it with nop
-        if (*(BYTE*)(ptr + 2) == 4)
-        {
-            *(BYTE*)ptr = 0x90;
-            ptr++;
-            *(BYTE*)ptr = 0x90;
-            ptr++;
-            *(BYTE*)ptr = 0x90;
-        }
-        //Else reduce by 4
-        else
-        {
-            *(BYTE*)(ptr + 2) -= 4;
-        }
-    }
-};
-
 OptimizedGrind optimized_grind[] = { {0x00489CCB, 3}, {0x004A507C, 2}, {0x004A5316, 2}, {0x004A5384, 2}, {0x004A5395, 2},
     {0x004A53F5, 2}, {0x004A538E, 2}, {0x004A537B, 2}, {0x004A5071, 2}, {0x004A4EC1, 2}, {0x004A4ECC, 2 }, {0x004A530B, 2}, 
     {0x004A50D3, 2},  {0x004A5059, 2}, {0x004A4F23, 2}, {0x004A4CA1, 2},  {0x004A5AFF, 3}, {0x004A6566,2}, {0x004A633E, 2}, 
     {0x004A6341, 2}, {0x004A6306, 2}, {0x004A62CE, 2}, {0x004A6278, 2}, {0x004A626F, 2}, {0x004A6735, 2},  {0x004A657E, 2},
     {0x004A5985, 2},  {0x004A596D, 2}, {0x004A542C, 2},  };
 
-OptimizedCRC optimized[] = { {0x00401B3F, 5, 9},  {0x00401E0C, 4, 9}, {0x004021DA, 4, 9}, {0x00404C50, 8, 0}, {0x00404C71, 0, 0},  
-    {0x00404C89, 0, 0},  {0x00404CA1, 0, 0}, {0x00405240, 16, 0}, {0x00405640, 8, 0}, {0x0041525F, 0, 0}, {0x0041527A, 0, 0},
-    {0x00405660, 0, 0}, {0x00405678, 0, 0},  {0x0040BBA7, 0, 4},  {0x0040BBBD, 0, 4},  {0x0040BBD3, 0, 4},  {0x0040BBE9,0, 4},
- {0x0040BBFF, 0, 4},  {0x00413C97, 0, 0},  {0x00413FB4, 0, 0},  {0x00413FD6, 0, 0},  {0x0041417E, 0, 0},   {0x0041419D, 0, 0},
- {0x004141E7, 0, 0},  {0x00414206, 0, 0},  {0x004143BD, 0, 0},  {0x004146A4,8, 0 },  {0x004151A8, 0, 0},   {0x00415295, 0, 0},
- {0x004152B2, 0, 0},  {0x004152D0, 0, 0},  {0x004152EC, 0, 0},  {0x00415374, 0, 0},  {0x00415397, 0, 0},   {0x004153BA, 0, 0}, 
-{0x004153E0, 0, 0}, {0x0041545B, 0, 0}, {0x00415476, 0, 0}, {0x00415491, 0, 0}, {0x004154A9, 0, 4}, {0x00416291, 8, 0},
-{0x004162DA, 0, 0}, {0x0041631B, 0, 0}, {0x004163A4, 0, 0}, {0x00416823, 8, 0}, {0x00416A52, 0, 9}, {0x00416A89, 0, 9},
-{0x00416AC0, 0, 9}, {0x00416AF3, 0, 9}, {0x00416B45, 0, 9}, {0x00416B75, 0, 9}, {0x00416BA5, 0, 9}, {0x00416C11, 0, 9},
-{0x00416C58, 0, 9}, {0x00416C7D, 0, 9}, {0x00416CA9, 0, 0}, {0x0041AA22, 0, 0}, {0x0041AC0C, 0, 0}, {0x0041AC3F, 0, 0},
-{0x0041B04A, 0, 0}, {0x0041D258, 0, 22}, {0x0041D268, 0, 6}, {0x0041F7B3, 8, 0}, {0x0041FF8C, 0, 0}, {0x00420051, 0, 0},
-{0x00421C41, 0, 0}, {0x00421C5D, 0, 0}, {0x0042216F, 8, 0}, {0x00422D31, 2, 0}, {0x00422D70, 0, 0}, {0x00422D7E, 0, 0},
-    {0x00422DB2, 0, 0}, {0x00422DC0, 0, 0}, {0x00422DD5, 2, 0}, {0x00422DE5, 0, 0}, {0x00422EF4, 0, 0}, {0x00422F0D, 0, 0},
-    {0x00422F23, 0, 0}, {0x00422FD9, 4, 0}, {0x004242CE, 8, 0}, {0x00424A05, 5, 9}, {0x00424BD8, 2, 0}, {0x00424BF9, 2, 0},
-    {0x00424EA5, 0, 0}, {0x0042556C, 0, 4}, {0x0042560F, 2, 0}, {0x00425639, 0, 4}, {0x004256BF, 2, 0}, {0x004256E9, 0, 4},
-    {0x0042576F, 2, 0}, {0x00425799, 0, 4}, {0x0042590F, 2, 0}, {0x00425939, 0, 4}, {0x00425A6F, 0, 21}, {0x00425A79, 4, 7},
-    {0x004265AB, 0, 0}, {0x0042C8B5, 0, 6}, {0x0042D59E, 11, 0}, {0x00431ED1, 11, 0}, {0x00433FF5, 0, 13}, {0x004341E8, 2, 0},
-    {0x00434212, 0, 4}, {0x00434236, 0, 4}, {0x00434508, 0, 0}, {0x00434531, 0, 0}, {0x0043484D, 0, 0}, {0x00434FCA, 0, 0},
-{0x004375B3, 0, 0}, {0x0043766C, 0, 0}, {0x004378E5, 2, 0}, {0x004380A5, 30, 0}, {0x004380ED, 6, 0}, {0x0043883C, 0, 0},
-    {0x00438BBA, 2, 4}, {0x00438E2D, 4, 4}, {0x00438E82, 0, 0}, {0x00438E9A, 0, 0}, {0x00438F9C, 0, 0}, {0x00438FC2, 0, 0}, 
-    {0x00438FDF, 0, 0}, {0x00438FFD, 0, 0}, {0x0043901B, 0, 0}, {0x00439528, 0, 0}, {0x00439585, 0, 0}, {0x004395F3, 0, 0}, 
-    {0x0043969B, 0, 0}, {0x0043972A, 0, 6}, {0x004399A9, 0, 0}, {0x004399BE, 0, 6}, {0x00439AE7, 0, 6}, {0x00439B6B, 2, 0},
-    {0x00439B8D, 0, 6}, {0x0043A342, 0, 4}, {0x0043A596, 0, 4}, {0x0043B229, 0, 4}, {0x0043B28C, 0, 0}, {0x0043CFF0, 5, 0},
-    {0x0043D00A, 0, 0}, {0x0043D01A, 0, 0}, {0x0043D039, 0, 0}, {0x0043D25C, 0, 0}, {0x0043D271, 0, 0}, {0x0043D281, 0, 0},
-    {0x0043D2C3, 4, 0}, {0x0043DA4A, 0, 0}, {0x0043DD79, 0, 3}, {0x0043DE11, 0, 0}, {0x0043DEF4, 5, 0}, {0x0043DF0E, 0, 0},
-    {0x0043769F, 0, 0}, {0x0043DF1E, 0, 0}, {0x0043DF3A, 0, 0}, {0x0043DFDA, 0, 0}, {0x0043E0E2, 0, 0}, {0x0043E0FB, 0, 0},
-    {0x0043E111, 0, 0}, {0x0043E144, 0, 2}, {0x0043E15D, 0, 0}, {0x0043FDAE, 0, 0}, {0x0043FF67, 0, 0}, {0x0043FFB9, 0, 0},
-    {0x004404EA, 5, 0}, {0x004409C0, 0, 9}, {0x00440A34, 0, 9}, {0x00440AB9, 4, 9}, {0x00440B1F, 8, 0}, {0x00440B4D, 0, 9},
-    {0x00440BC0, 0, 9}, {0x00440CF4, 0, 0}, {0x00440E25, 8, 9}, {0x0044114D, 3, 0}, {0x0044125E, 3, 0}, {0x00441412, 3, 0},
-    {0x00441570, 2, 0}, {0x00441592, 0, 0}, {0x004415B2, 0, 0}, {0x004415D2, 0, 0}, {0x004415F2, 0, 0}, {0x00441612, 0, 0},
-    {0x00441632, 0, 0}, {0x00441652, 0, 0}, {0x00441672, 0, 0}, {0x00441692, 0, 0}, {0x004416B2, 0, 0}, {0x004416D2, 0, 0},
-    {0x004416F2, 0, 0}, {0x00441712, 0, 0}, {0x00441732, 0, 0}, {0x00441752, 0, 0}, {0x00441772, 0, 0}, {0x00441792, 0, 0},
-    {0x004417B2, 0, 0}, {0x0044301E, 5, 0}, {0x0044306C, 5, 0}, {0x004430BD, 5, 0}, {0x004431FD, 0, 0}, {0x004432A8, 8, 0},
-    {0x004432C0, 0, 0}, {0x00443377, 8, 0}, {0x0044338F, 0, 0}, {0x00443464, 4, 0}, {0x00443501, 4, 0}, {0x00443626, 0, 0},
-    {0x00443644, 5, 9}, {0x004438DE, 5, 0}, {0x0044393B, 0, 34}, {0x00443945, 6, 18}, {0x00443FE4, 8, 0}, {0x004440FE, 16, 0}
-  };
 DWORD optimized2[] = { 0x0040100F, 0x00401D40, 0x00402478, 0x0041117C, 0x00411589, 0x00413A31, 0x00413A3D, 0x00413AEF,
 0x00413AFB, 0x004155B2, 0x004194EC, 0x0041963B, 0x0041A6CA, 0x0041AC5A, 0x004201CD, 0x004251F9, 0x00425250, 0x0042527D,
 0x0042528B, 0x004263CA, 0x0042641A, 0x0042646A, 0x004264BA, 0x0042651F, 0x0042657A, 0x004265DA, 0x004273F2, 0x00428254,
@@ -4002,7 +4145,7 @@ struct OptimizedArrayCRC
         ptr++;
         VirtualProtect((LPVOID)ptr, 4, PAGE_EXECUTE_READWRITE, &old);
         char* c = *(char**)ptr;
-        _printf("Optimizing array access: %s\n", c);
+        debug_print("Optimizing array access: %s\n", c);
         *(DWORD*)ptr = crc32f(c);
         if (string == 0x004B8306 || string == 0x004B830D)
             return;
@@ -4033,11 +4176,7 @@ OptimizedArrayCRC optimized3[] = { 0x00412035, 0x004142C2, 0x00418869, 0x00418BA
 0x004A6011, 0x004B50E9, 0x004B54C3, 0x004B5502, 0x004B5AC7, 0x004B6A37, 0x004B73C3, 0x004B8316, 0x004B8306, 0x004B830D, 
 0x004BB741, 0x004BC052,
 0x004BD32C, 0x004BDB05, 0x004BDE7A, 0x004BEA69, 0x004E3145, 0x004E31B2, 0x004E4E55, 0x004F07C5, };
-LARGE_INTEGER freq;
-double fFreq;
-LARGE_INTEGER endTime;
-#define startTime (*(LARGE_INTEGER*)0x008E8E18)
-LARGE_INTEGER elapsedTime;
+
 //void HookControls();
 DWORD old_trigger;
 DWORD old_trigger_frame;
@@ -4071,131 +4210,25 @@ __declspec(naked) void TriggerScript()
     _asm ret;
 }
 
-LARGE_INTEGER timer_time;
-DWORD timer_old_start;
-
-DWORD __cdecl GetTime()
-{
-    //timer_old_start = timer_time.LowPart;
-
-
-    QueryPerformanceCounter(&timer_time);
-    double ms = double(timer_time.LowPart)* fFreq;
-    ms += 0.5f;
-    DWORD truncated = ms;
-
-    if (timer_time.HighPart)
-    {
-        ms = double(timer_time.HighPart) * fFreq;
-        ms += 0.5f;
-        DWORD truncated2 = ms;
-        _asm mov edx, truncated2;
-    }
-    else
-        _asm xor edx, edx
-
-    return truncated;
-}
-
-DWORD TimerElapsed()
-{
-    QueryPerformanceCounter(&endTime);
-    if (endTime.HighPart == startTime.HighPart)
-    {
-        //elapsedTime.LowPart = (endTime.LowPart - startTime.LowPart);
-        _asm xor edx, edx
-        double ms = (double((endTime.LowPart - startTime.LowPart)) * fFreq);
-        ms += 0.55f;
-
-        DWORD truncated = ms;
-        /*double test = ms - (double)truncated;
-        if (ms - test >= 0.45)
-            truncated++;*/
-
-        return truncated;// (elapsedTime.LowPart * 1000) / freq.LowPart;
-    }
-    else
-    {
-        elapsedTime.LowPart = 0xFFFFFFFF - startTime.LowPart + endTime.LowPart;
-        _asm xor edx, edx
-        //return (elapsedTime.LowPart * 1000) / freq.LowPart;
-        double ms = (double(elapsedTime.LowPart) * fFreq);
-        ms += 0.55f;
-
-        DWORD truncated = ms;
-        return truncated;
-    }
-}
-
-/*DWORD TimerElapsed()
-{
-    QueryPerformanceCounter(&endTime);
-
-    if (endTime.HighPart == startTime.HighPart)
-    {
-        elapsedTime.LowPart = (endTime.LowPart - startTime.LowPart);
-        _asm xor edx, edx;
-        return (DWORD)((float)elapsedTime.LowPart * fFreq);
-    }
-    else
-    {
-        elapsedTime.LowPart = 0xFFFFFFFF - startTime.LowPart + endTime.LowPart;
-        _asm xor edx, edx
-        return (DWORD)((float)elapsedTime.LowPart * fFreq);
-    }
-}*/
-
-DWORD old_start = 0;
-DWORD timer_lock = 0x10;
-
-LARGE_INTEGER TimerStart()
-{
-    old_start = startTime.LowPart;
-
-
-    QueryPerformanceCounter(&startTime);
-    double ms = (double((startTime.LowPart - old_start)) * fFreq);
-    //_printf("2nd %f ", ms);
-
-    //We need to cap FPS around 60 because else some physics and scripts will not work correctly
-    //Also this is the most fair in a game heavily dependant on speed etc
-    //Maybe in the future can change this so can have more FPS
-    //Vsync is always on when we are using the new timer
-    //So on a screen with 60hz this will not matter too much because we will get perfect 60 FPS
-    //However on my screen with 144hz it's pretty hard to get consistent 60 FPS
-    //Currently worst case scenario is 59.9-65 and it's usually around 63-64
-    //For some reason it's more consistent in window mode than in fullscreen mode
-    if (ms >= 16.39) // ~61.01 FPS
-    {
-        BYTE target_ms = p_target_ms;
-        if (target_ms > 1)
-        {
-            target_ms--;
-            p_target_ms = target_ms;
-        }
-    }
-    else if (ms < 15.38) // ~65.02 FPS
-    {
-        BYTE target_ms = p_target_ms;
-        if (target_ms < timer_lock)
-        {
-            target_ms++;
-            p_target_ms = target_ms;
-        }
-    }
-    
-    return startTime;
-}
-
 void OilRigGrindPatch()
 {
     Vertex* __restrict pVel;
    _asm  mov pVel, edi;
-   if (Game::level_checksum != Checksums::Oil)
-       return;
-   //If we have speed greater than 100, rotate the velocity so we don't grind backwards on steep rails
-   if(((pVel->x * pVel->x) + (pVel->z * pVel->z)) > 100.0f)
-       pVel->RotateToPlane(Vertex(0, 1.0f, 0));
+
+   if (pVel->x == 0 && pVel->z == 0)
+   {
+       pVel->x = Game::skater->GetMatrix().m[Z][X];
+       pVel->z = Game::skater->GetMatrix().m[Z][Z];
+   }
+   else
+       //If we have speed greater than 100, rotate the velocity so we don't grind backwards on steep rails
+       if (Game::level_checksum == Checksums::Oil && (((pVel->x * pVel->x) + (pVel->z * pVel->z)) > 100.0f))
+       {
+           const RailNode* pStart = Game::skater->mp_rail_node;
+           const RailNode* pEnd = pStart->GetNextLink();
+           if(pEnd && RailManager::GetPos(pEnd).y - RailManager::GetPos(pStart).y > 50.0f)
+               pVel->RotateToPlane(Vertex(0, 1.0f, 0));
+       }
 }
 
 __declspec (naked) void HookEmptyRailNodeData()
@@ -4243,17 +4276,14 @@ skip_label:
 }
 
 bool force_rail_check = false;
-<<<<<<< Updated upstream
-=======
 bool force_rail_check2 = false;
 
 DWORD ForceRailCheck()
 {
     force_rail_check2 = true;
-    return NewTimer::GetFrameTime();
+    return NewTimer::GetTime();
 }
 
->>>>>>> Stashed changes
 void Skater::PointRail(const Vertex& rail_pos)
 {
     // for a single node rail, we apply in a single frame all the effects of enteringand exiting the rail state;
@@ -4297,7 +4327,7 @@ void Skater::PointRail(const Vertex& rail_pos)
 
 
     DWORD trigger_script = 0;
-    CStruct* pNode;
+    CStruct* pNode = NULL;
 
     if (mp_rail_node->GetNode() != -1)
     {
@@ -4305,6 +4335,7 @@ void Skater::PointRail(const Vertex& rail_pos)
         CArray* pNodeArray = Node::GetNodeArray();
         pNode = pNodeArray->GetStructure(mp_rail_node->GetNode());
         pNode->GetChecksum(Checksums::Name, &m_last_rail_node_name, QScript::ASSERT);
+        debug_print("PointRail %s\n", FindChecksumName(m_last_rail_node_name));
 
         //TrickOffObject(m_last_rail_node_name);
 
@@ -4354,11 +4385,7 @@ void Skater::PointRail(const Vertex& rail_pos)
 
     // (Mick) Set m_rail_time, otherwise there is a single frame where it is invalid
     // and this allows us to immediately re-rail and hence do the "insta-bail", since the triangle button will be held down   
-<<<<<<< Updated upstream
-    m_rail_time = GetTime();
-=======
     m_rail_time = NewTimer::GetFrameTime();
->>>>>>> Stashed changes
     //_asm mov m_rail_time2, edx;
 
     /////////////////////////////////////////////////////
@@ -4374,7 +4401,7 @@ void Skater::PointRail(const Vertex& rail_pos)
     // Emulate exiting the rail state
 
     // no need to call maybe_trip_rail_trigger for a single node rail
-    if (trigger_script)
+    if (trigger_script && pNode)
     {
         TripTrigger(
             Node::TRIGGER_SKATE_OFF,
@@ -4407,16 +4434,12 @@ void Skater::PointRail(const Vertex& rail_pos)
     return;
 }
 
-extern DWORD GetElapsedTime(DWORD currentTime, LARGE_INTEGER last_time);
+extern DWORD GetElapsedTime(DWORD currentTime, DWORD lastTime);
 bool Skater::will_take_rail()
 {
 
 
-<<<<<<< Updated upstream
-    return (!force_rail_check || (GetElapsedTime(GetTime(), *(LARGE_INTEGER*)&m_rail_time) > 500))
-=======
     return (!force_rail_check || (GetElapsedTime(NewTimer::GetFrameTime(), m_rail_time) > 200))
->>>>>>> Stashed changes
             && (m_state != RAIL 									// not already on a rail
                 && (!tracking || *GetVelocity()[Y] > 0.0f));		// must be not vert, or going up 
 }
@@ -4462,30 +4485,192 @@ __declspec(naked) void CheckForPointRail_Hook()
 
 void CheatDetected()
 {
-    CStruct params;
     CStructHeader param(QBKeyHeader::STRING, Checksums::text, stat_cheat_message);
-    params.AddParam(&param);
+    CStruct params(&param);
+    
     ExecuteQBScript("LaunchGrafCounter", &params);
+}
+
+DWORD GetTerrain(SuperSector* sector, DWORD index)
+{
+    typedef DWORD(__cdecl* const pGetTerrain)(SuperSector* sector, DWORD index);
+    DWORD terrain = pGetTerrain(0x00412530)(sector, index);
+    if (!terrain)
+        terrain = 1;
+    return terrain;
+}
+
+__declspec(naked) void UpdateFrameLength()
+{
+    //p_slomo is float that is set by slomo cheat, normally this is 1.0  //0.971593312 0.971639342 0.9761
+    p_framedelta = (float)(NewTimer::framelength /** 0.000001/*0028406688*/ * Gfx::frame_modifier) * p_slomo;
+    _asm ret;
+}
+
+bool safe;
+
+__declspec(naked) void FixUberFrig()
+{
+    static DWORD jmpBack_uber = 0x004A76D7;
+    static DWORD jmpBack_uber2 = 0x004A770B;
+    static DWORD caller = 0x0045D330;
+    _asm pushad;
+    //_asm pushfd;
+    if(Game::skater)
+        safe = Game::skater->UberFrigFix();
+    else
+        safe = false;
+    //_asm popfd;
+    _asm popad;
+    if (!safe)
+    {
+        _asm call[caller];
+        _asm jmp[jmpBack_uber];
+    }
+    else
+    {
+        _asm add esp, 4;
+        _asm jmp[jmpBack_uber2];
+    }
+}
+
+//Tricks that add points every frame will add too much if we increase fps
+//This function tries to calibrate it to be as close to original @ any given fps lock
+//Currently it may add slightly less score if using higher than 60 fps
+//Atleast it will never add too high score and @ 60 fps lock it uses 100% original values
+//So it will never be unfair advantage to have a higher fps lock
+//If change score to be double it would be even more accurate @ all fps locks
+//However this might reduce performance on poor PCs and might reduce maximum score
+__declspec(naked) void CalibrateScore()
+{
+    static int score;
+    static double fScore;
+    static const DWORD pCalculateScorePot = 0x00436300;
+    _asm mov score, edx;
+
+    //score here is the score added every frame
+    if (score)
+    {
+        //Only modify if fps lock is above 60
+        if (Gfx::target_fps > 60.0)
+        {
+            //need to store all CPU registers to not trash anything since we will be using SSE instructions
+            _asm pushad;
+
+            //convert delta score to double
+            fScore = score;
+
+            //divide our current framelength with original 60 fps framelength
+            fScore *= (NewTimer::framelength / (1000000.0 / 60.0));
+
+            //add 0.45 to get less rounding errors
+            score = (int)(fScore + 0.45);
+
+            //restore all CPU registers and the new delta score
+            _asm popad;
+            _asm mov edx, score;
+        }
+
+        //add the delta to the actual base score
+        _asm add[eax], edx;
+    }
+    _asm jmp[pCalculateScorePot]
+}
+
+void CallMenuSelectCallback(DWORD id)
+{
+    CStructHeader param(QBKeyHeader::LOCAL, Checksums::id, id);
+    CStruct params(&param);
+    
+    ExecuteQBScript(MenuSelectCallback, &params);
+}
+
+DWORD last_select_id = 0;
+
+__declspec(naked) void OnMenuSelect()
+{
+    static DWORD id;
+    static DWORD jmpBack_menu = 0x004CDFA0;
+    _asm mov id, ebx;
+    _asm mov[esi + 0x000001A4], ebx
+    if (MenuSelectCallback && last_select_id != id)
+    {
+        last_select_id = id;
+        _asm pushad;
+        CallMenuSelectCallback(id);
+        _asm popad;
+    }
+    _asm jmp [jmpBack_menu];
+}
+
+bool ScriptSetMenuSelectCallback(CStruct* pStruct, CScript* pScript)
+{
+    auto header = pStruct->GetHeader();
+    if (header)
+    {
+        last_select_id = 0;
+        if (header->Data == Checksum("NULL"))
+        {
+            debug_print("Setting menu select callback to NULL\n");
+            MenuSelectCallback = 0;
+        }
+        else
+        {
+            MenuSelectCallback = header->Data;
+            debug_print("Setting menu select callback to %s\n", FindChecksumName(MenuSelectCallback));
+        }
+        return true;
+    }
+    return false;
 }
 
 void InitLevelMod()
 {
     //HookControls();
 
-
     //Initializing the new timer
-    QueryPerformanceFrequency(&freq);
-    fFreq = 1000.0 / (double)freq.QuadPart;
+    NewTimer::Initialize();
 
-    if (!p_bWindowed)
-        timer_lock = 0x0D;
-
-    /*_printf("%d %f", freq.LowPart, fFreq);
+    /*debug_print("%d %f", freq.LowPart, fFreq);
     MessageBox(0, 0, 0, 0);*/
 
 
     DWORD old;
     //HookFunction(0x004C04F0, TimerElapsed);
+    if(Gfx::fps_fix)
+        HookFunction(0x004F9463, UpdateFrameLength);
+
+    //Fix script being able to call CFunctions
+    HookFunction(0x004CFCDE, &FrontEnd::SetScriptToRun_Hook);
+    HookFunction(0x004180DC, &CScript::SetScript);
+    HookFunction(0x0041816C, &CScript::SetScript);
+    HookFunction(0x004273FE, &CScript::SetScript);
+    HookFunction(0x00427455, &CScript::SetScript);
+    HookFunction(0x00427784, &CScript::SetScript);
+    HookFunction(0x0048F697, &CScript::SetScript);
+    HookFunction(0x0048F6EB, &CScript::SetScript);
+    HookFunction(0x0048F740, &CScript::SetScript);
+    HookFunction(0x0048F7B9, &CScript::SetScript);
+    HookFunction(0x0049A6DC, &CScript::SetScript);
+    HookFunction(0x0049A735, &CScript::SetScript);
+    HookFunction(0x0049A7BF, &CScript::SetScript);
+    HookFunction(0x0049AAD9, &CScript::SetScript);
+    HookFunction(0x0049AE1E, &CScript::SetScript);
+    HookFunction(0x0049B6BF, &CScript::SetScript);
+    HookFunction(0x0049B96E, &CScript::SetScript);
+    HookFunction(0x004A70DD, &CScript::SetScript);
+    HookFunction(0x004ACFAC, &CScript::SetScript);
+    HookFunction(0x004B2C0A, &CScript::SetScript);
+    HookFunction(0x004C27AF, &CScript::SetScript);
+    //HookFunction(0x004CFC76, &FrontEnd::UpdateScript_Hook);
+    HookFunction(0x0041801F, &CScript::SetScript);
+
+    //For camera controll
+    HookFunction(0x00498F39, &KeyState::XINPUT_UpdateCamera_Hook);
+
+    //Fix no terrain sound on missing terrain flag objects
+    HookFunction(0x0041272F, GetTerrain);
+    HookFunction(0x412800, GetTerrain);
 
     //Fix menu crashing
     VirtualProtect((LPVOID)0x004CEDE4, 8, PAGE_EXECUTE_READWRITE, &old);
@@ -4493,6 +4678,14 @@ void InitLevelMod()
     *(DWORD*)0x004CEDE9 = 0x0000008E;
     *(BYTE*)0x004CEDED = 0x90;
     *(WORD*)0x004CEDEE = 0x9090;*/
+
+    //Fix special animation speed
+    VirtualProtect((LPVOID)0x00458B68, 4, PAGE_EXECUTE_READWRITE, &old);
+    VirtualProtect((LPVOID)0x0058E100, 4, PAGE_EXECUTE_READWRITE, &old);
+    NewTimer::CalculateFPSTimers();
+
+    VirtualProtect((LPVOID)0x00474450, 4, PAGE_EXECUTE_READWRITE, &old);
+    *(DWORD*)0x00474450 = 0x900004C2;
 
     //Change the RailNode size
     BYTE optimize_grind[] = { 0xB8, 0x2C, 0x01, 0x00, 0x00, 0x89, 0x86, 0xB8, 0x84, 0x00, 0x00, 0xEB, 0x14, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0xD9 };
@@ -4503,13 +4696,10 @@ void InitLevelMod()
 
     HookFunction(0x004A8B1A, &Skater::got_rail_hook);
     HookFunction(0x004A656D, &CheckForPointRail_Hook, 0xE9);
-<<<<<<< Updated upstream
-=======
     
     //Fix multiple rerail bugs
-    /*VirtualProtect((LPVOID)0x004A54D5, 4, PAGE_EXECUTE_READWRITE, &old);
-    HookFunction(0x004A54D5, &ForceRailCheck);*/
->>>>>>> Stashed changes
+    VirtualProtect((LPVOID)0x004A54D5, 4, PAGE_EXECUTE_READWRITE, &old);
+    //HookFunction(0x004A54D5, &ForceRailCheck);
     //Cheat detection
     BYTE CheatDetection[]{ 0x8B, 0x44, 0x24, 0x04, 0x56, 0x8B, 0xF1, 0x81, 0xBC, 0x86, 0xD0, 0x83, 0x00, 0x00, 0x00, 0x00, 0x80, 0xBF, 0x75, 0x11, 0x6A, 0x01, 0x68, 0x78, 0x4C, 0x5C, 0x00, 0xE8, 0xEF, 0x6F, 0xF8, 0xFF, 0x83, 0xC4, 0x08, 0xEB, 0x2A, 0xD9, 0x84, 0x86, 0xD0, 0x83, 0x00, 0x00, 0xD8, 0x15, 0xFC, 0xF3, 0x49, 0x00, 0xDF, 0xE0, 0x66, 0xA9, 0x00, 0x41, 0x75, 0x15, 0x90, 0x90, 0x90, 0x90, 0x90, 0xEB, 0x0E, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x00, 0x00, 0x20, 0x41, 0xD9, 0x5C, 0x24, 0x08, 0x8B, 0xCE, 0x6A, 0xEC, 0xE8, 0x03, 0x5F, 0x01, 0x00, 0x84, 0xC0, 0x74, 0x08, 0xD9, 0x05, 0x3C, 0xF4, 0x49, 0x00, 0xEB, 0x04, 0xD9, 0x44, 0x24, 0x08, 0x8B, 0xB6, 0x68, 0x92, 0x00, 0x00, 0x85, 0xF6, 0x74, 0x0D, 0x8A, 0x46, 0x50, 0x84, 0xC0, 0x74, 0x06, 0xD8, 0x05, 0x38, 0xF4, 0x49, 0x00, 0x5E, 0xC2, 0x04, 0x00 , 0x00 , 0x00 , 0x40 , 0x40 , 0x00, 0x00 , 0x70 , 0x41 };
     InjectHook(0x0049F3B1, CheatDetection, sizeof(CheatDetection));
@@ -4528,15 +4718,14 @@ void InitLevelMod()
     HookFunction(0x004AB29B, 0x0049F3B1);
     //MessageBox(0, 0, 0, 0);
 
-    //Remove dublicate NodeArray loading...
+    HookFunction(0x004CDF9B, OnMenuSelect, 0xE9);
+
+    //Remove dublicate NodeArray loading
     BYTE nop_func[] = { 0x90, 0x90, 0x90, 0x90, 0x90 };
-    InjectHook(0x0043A6D6, nop_func, 5);
+    //InjectHook(0x0044A3E7, nop_func, 5);
+    //InjectHook(0x0043A6D6, nop_func, 5);
     //InjectHook(0x00419D07, nop_func, 5);
 
-<<<<<<< Updated upstream
-    InjectHook(0x0049D15D, nop_func, 5);
-    InjectHook(0x0049D180, nop_func, 5);
-=======
     //InjectHook(0x0049D15D, nop_func, 5);
     //InjectHook(0x0049D180, nop_func, 5);
 
@@ -4545,7 +4734,7 @@ void InitLevelMod()
     HookFunction(0x004A76D3, FixUberFrig, 0xE9);
     HookFunction(0x004994E5, &Skater::UberFrig);
     HookFunction(0x004996C6, &Skater::UberFrig);
-    //HookFunction(0x004A8B6F, &Skater::UberFrig);
+    //HookFunction(0x004A8B6F, &Skater::UberFrig);*/
     //HookFunction(0x004A8B76, &HandleTriggers);
     /*HookFunction(0x00400321, &Skater::CollisionCheck_Hook);
     HookFunction(0x0049EE9D, &Skater::CollisionCheck_Hook);
@@ -4555,14 +4744,14 @@ void InitLevelMod()
     HookFunction(0x004A0AF3, &Skater::CollisionCheck_Hook);
     HookFunction(0x004A0FF6, &Skater::CollisionCheck_Hook);
     HookFunction(0x004A10FA, &Skater::CollisionCheck_Hook);
-    HookFunction(0x004A13BE, &Skater::CollisionCheck_Hook);*/
-    /*HookFunction(0x004A14E9, &Skater::CollisionCheck_Hook);
-    //HookFunction(0x004A1752, &Skater::CollisionCheck_Hook);
-    //HookFunction(0x004A1884, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A13BE, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A14E9, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A1752, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A1884, &Skater::CollisionCheck_Hook);
     HookFunction(0x004A195D, &Skater::CollisionCheck_Hook);
     HookFunction(0x004A2946, &Skater::CollisionCheck_Hook);
     HookFunction(0x004A2BD6, &Skater::CollisionCheck_Hook);
-    //HookFunction(0x004A2E60, &Skater::CollisionCheck_Hook);
+    HookFunction(0x004A2E60, &Skater::CollisionCheck_Hook);
     HookFunction(0x004A3646, &Skater::CollisionCheck_Hook);
     HookFunction(0x004A3EE7, &Skater::CollisionCheck_Hook);
     HookFunction(0x004A4092, &Skater::CollisionCheck_Hook);
@@ -4580,7 +4769,6 @@ void InitLevelMod()
     BYTE OptimizedVertexFunc[] = { 0x8B, 0x54, 0x24, 0x04, 0x8B, 0x02, 0x3B, 0x01, 0x75, 0x20, 0x8B, 0x42, 0x04, 0x3B, 0x41, 0x04, 0x75, 0x18, 0x8B, 0x42, 0x08, 0x3B, 0x41, 0x08, 0x75, 0x10, 0x8B, 0x41, 0x0C, 0x3B, 0x41, 0x0C, 0x75, 0x08, 0xB8, 0x01, 0x00, 0x00, 0x00, 0xC2, 0x04, 0x00, 0x31, 0xC0, 0xC2, 0x04, 0x00 };
     VirtualProtect((LPVOID)0x0049EA70, sizeof(OptimizedVertexFunc), PAGE_EXECUTE_READWRITE, &old);
     memcpy((void*)0x0049EA70, OptimizedVertexFunc, sizeof(OptimizedVertexFunc));
->>>>>>> Stashed changes
 
     //Add RailNode to list
     BYTE AddRailFix[] = { 0x50, 0x51, 0x52, 0x56, 0x57, 0xE8, 0x00, 0x00, 0x00, 0x00, 0x5A, 0x59, 0x58, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90};
@@ -4633,193 +4821,207 @@ void InitLevelMod()
     HookFunction(0x004B088C, &Skater::maybe_trip_rail_trigger);
     HookFunction(0x00489C7F, &RailNode::ProbablyOnSameRailAs);
 
-    HookFunction(0x00403C13, GetTime);
-    HookFunction(0x00403D61, GetTime);
-    HookFunction(0x00403F29, GetTime);
-    HookFunction(0x00404086, GetTime);
-    HookFunction(0x0040409A, GetTime);
-    HookFunction(0x00405824, GetTime);
-    HookFunction(0x004058C1, GetTime);
-    HookFunction(0x0040864A, GetTime);
-    HookFunction(0x0040A1E7, GetTime);
-    HookFunction(0x0040A209, GetTime);
-    HookFunction(0x00417131, GetTime);
-    HookFunction(0x004171CA, GetTime);
-    HookFunction(0x00419764, GetTime);
-    HookFunction(0x004279BE, GetTime);
-    HookFunction(0x00428022, GetTime);
-    HookFunction(0x0042F0C4, GetTime);
-    HookFunction(0x0043A3DF, GetTime);
-    HookFunction(0x00441004, GetTime);
-    HookFunction(0x004615AF, GetTime);
-    HookFunction(0x0046E635, GetTime);
-    HookFunction(0x0046E788, GetTime);
-    HookFunction(0x0046E7E7, GetTime);
-    HookFunction(0x0046E933, GetTime);
-    HookFunction(0x0046E9D1, GetTime);
-    HookFunction(0x0046F4B9, GetTime);
-    HookFunction(0x004712F2, GetTime);
-    HookFunction(0x00471901, GetTime);
-    HookFunction(0x00473124, GetTime);
-    HookFunction(0x00473989, GetTime);
-    HookFunction(0x004740C6, GetTime);
-    HookFunction(0x0047418E, GetTime);
-    HookFunction(0x00474493, GetTime);
-    HookFunction(0x004745DD, GetTime);
-    HookFunction(0x00474649, GetTime);
-    HookFunction(0x004750B6, GetTime);
-    HookFunction(0x004751B9, GetTime);
-    HookFunction(0x004754F9, GetTime);
-    HookFunction(0x00475744, GetTime);
-    HookFunction(0x0047699C, GetTime);
-    HookFunction(0x00479098, GetTime);
-    HookFunction(0x0047BCF5, GetTime);
-    HookFunction(0x0047D172, GetTime);
-    HookFunction(0x0047D1A1, GetTime);
-    HookFunction(0x0047DEBF, GetTime);
-    HookFunction(0x0047E6B4, GetTime);
-    HookFunction(0x0047E72E, GetTime);
-    HookFunction(0x0047E757, GetTime);
-    HookFunction(0x0047EB75, GetTime);
-    HookFunction(0x0047F427, GetTime);
-    HookFunction(0x0047F449, GetTime);
-    HookFunction(0x0047FE62, GetTime);
-    HookFunction(0x0048154F, GetTime);
-    HookFunction(0x00481624, GetTime);
-    HookFunction(0x00487978, GetTime);
-    HookFunction(0x00487A4B, GetTime);
-    HookFunction(0x00487A63, GetTime);
-    HookFunction(0x00487C36, GetTime);
-    HookFunction(0x0048858E, GetTime);
-    HookFunction(0x00489E48, GetTime);
-    HookFunction(0x0048A026, GetTime);
-    HookFunction(0x0048E4F0, GetTime);
-    HookFunction(0x00498993, GetTime);
-    HookFunction(0x004989EB, GetTime);
-    HookFunction(0x00499AD9, GetTime);
-    HookFunction(0x00499ECA, GetTime);
-    HookFunction(0x00499EE9, GetTime);
-    HookFunction(0x0049AEE6, GetTime);
-    HookFunction(0x0049AFCF, GetTime);
-    HookFunction(0x0049B183, GetTime);
-    HookFunction(0x0049B282, GetTime);
-    HookFunction(0x0049B793, GetTime);
-    HookFunction(0x0049B85F, GetTime);
-    HookFunction(0x0049BA16, GetTime);
-    HookFunction(0x0049BAB6, GetTime);
-    HookFunction(0x0049BACD, GetTime);
-    HookFunction(0x0049BFB4, GetTime);
-    HookFunction(0x0049C222, GetTime);
-    HookFunction(0x0049C613, GetTime);
-    HookFunction(0x0049C63B, GetTime);
-    HookFunction(0x0049C686, GetTime);
-    HookFunction(0x0049C6B8, GetTime);
-    HookFunction(0x0049C6F6, GetTime);
-    HookFunction(0x0049C734, GetTime);
-    HookFunction(0x0049C767, GetTime);
-    HookFunction(0x0049C7A5, GetTime);
-    HookFunction(0x0049C910, GetTime);
-    HookFunction(0x0049CBB4, GetTime);
-    HookFunction(0x0049CBE1, GetTime);
-    HookFunction(0x0049D367, GetTime);
-    HookFunction(0x0049D386, GetTime);
-    HookFunction(0x0049D3A5, GetTime);
-    HookFunction(0x0049D3D5, GetTime);
-    HookFunction(0x0049D421, GetTime);
-    HookFunction(0x0049D666, GetTime);
-    HookFunction(0x0049D688, GetTime);
-    HookFunction(0x0049D6AA, GetTime);
-    HookFunction(0x0049D6E9, GetTime);
-    HookFunction(0x0049E3FA, GetTime);
-    HookFunction(0x0049EFC8, GetTime);
-    HookFunction(0x0049EFF7, GetTime);
-    HookFunction(0x0049F019, GetTime);
-    HookFunction(0x0049F035, GetTime);
-    HookFunction(0x0049F243, GetTime);
-    HookFunction(0x0049F35C, GetTime);
-    HookFunction(0x0049F37B, GetTime);
-    HookFunction(0x0049F6D6, GetTime);
-    HookFunction(0x0049F7C0, GetTime);
-    HookFunction(0x0049F912, GetTime);
-    HookFunction(0x0049F9BA, GetTime);
-    HookFunction(0x0049FB3B, GetTime);
-    HookFunction(0x004A11B1, GetTime);
-    HookFunction(0x004A11DA, GetTime);
-    HookFunction(0x004A19DB, GetTime);
-    HookFunction(0x004A2148, GetTime);
-    HookFunction(0x004A216A, GetTime);
-    HookFunction(0x004A218C, GetTime);
-    HookFunction(0x004A258E, GetTime);
-    HookFunction(0x004A2971, GetTime);
-    HookFunction(0x004A2999, GetTime);
-    HookFunction(0x004A29D8, GetTime);
-    HookFunction(0x004A3328, GetTime);
-    HookFunction(0x004A3653, GetTime);
-    HookFunction(0x004A38CA, GetTime);
-    HookFunction(0x004A54D5, GetTime);
-    HookFunction(0x004A61DB, GetTime);
-    HookFunction(0x004A6407, GetTime);
-    HookFunction(0x004A7C27, GetTime);
-    HookFunction(0x004A7C67, GetTime);
-    HookFunction(0x004A8B5A, GetTime);
-    HookFunction(0x004A90CD, GetTime);
-    HookFunction(0x004AA670, GetTime);
-    HookFunction(0x004AC942, GetTime);
-    HookFunction(0x004AC955, GetTime);
-    HookFunction(0x004ACA65, GetTime);
-    HookFunction(0x004ACAC7, GetTime);
-    HookFunction(0x004AD218, GetTime);
-    HookFunction(0x004ADD41, GetTime);
-    HookFunction(0x004AE5B1, GetTime);
-    HookFunction(0x004AE84B, GetTime);
-    HookFunction(0x004AF97C, GetTime);
-    HookFunction(0x004AF9A2, GetTime);
-    HookFunction(0x004AFBA2, GetTime);
-    HookFunction(0x004AFFB8, GetTime);
-    HookFunction(0x004B0797, GetTime);
-    HookFunction(0x004B0E52, GetTime);
-    HookFunction(0x004B1975, GetTime);
-    HookFunction(0x004B2FBD, GetTime);
-    HookFunction(0x004B3138, GetTime);
-    HookFunction(0x004B321B, GetTime);
-    HookFunction(0x004B3363, GetTime);
-    HookFunction(0x004B359F, GetTime);
-    HookFunction(0x004B389C, GetTime);
-    HookFunction(0x004B3B16, GetTime);
-    HookFunction(0x004B3C91, GetTime);
-    HookFunction(0x004B3DD2, GetTime);
-    HookFunction(0x004B3F5B, GetTime);
-    HookFunction(0x004B4147, GetTime);
-    HookFunction(0x004B43C1, GetTime);
-    HookFunction(0x004B45BD, GetTime);
-    HookFunction(0x004B486C, GetTime);
-    HookFunction(0x004B499E, GetTime);
-    HookFunction(0x004B49F4, GetTime);
-    HookFunction(0x004B4FCF, GetTime);
-    HookFunction(0x004C04AC, GetTime);
-    HookFunction(0x004D88E4, GetTime);
-    HookFunction(0x004D8ED3, GetTime);
-    HookFunction(0x004DA359, GetTime);
-    HookFunction(0x004DAAAA, GetTime);
-    HookFunction(0x004DD99D, GetTime);
-    HookFunction(0x004DD9B4, GetTime);
-    HookFunction(0x004DD9C4, GetTime);
-    HookFunction(0x004DFF25, GetTime);
-    HookFunction(0x004E062F, GetTime);
-    HookFunction(0x004E06DB, GetTime);
-    HookFunction(0x004E07D0, GetTime);
-    HookFunction(0x004EA1ED, GetTime);
-    HookFunction(0x004EA2C0, GetTime);
-    HookFunction(0x004EE836, GetTime);
-    HookFunction(0x004EF333, GetTime);
-    HookFunction(0x004F24BA, GetTime);
-    HookFunction(0x004F36F5, GetTime);
-    HookFunction(0x004F3BA1, GetTime);
-    HookFunction(0x004F3D07, GetTime);
-    HookFunction(0x004F40AB, GetTime);
-    HookFunction(0x004FA86D, GetTime);
-    HookFunction(0x00502BA0, GetTime);
-    HookFunction(0x00502BE2, GetTime);
+    if (Gfx::fps_fix)
+    {
+        //Improve accuracy and performance of franelength math
+        VirtualProtect((LPVOID)0x00409B90, 7, PAGE_EXECUTE_READWRITE, &old);
+        *(WORD*)0x00409B90 = 0x05D9;
+        *(DWORD*)0x00409B92 = 0x00850FD8;
+        *(BYTE*)0x00409B96 = 0xC3;
+    }
+
+    //Fix Score above 60 fps
+    VirtualProtect((LPVOID)0x00435992, 2, PAGE_EXECUTE_READWRITE, &old);
+    *(WORD*)0x00435992 = 0x9090;
+    HookFunction(0x00435995, CalibrateScore);
+
+    HookFunction(0x00403C13, NewTimer::GetTime);
+    HookFunction(0x00403D61, NewTimer::GetTime);
+    HookFunction(0x00403F29, NewTimer::GetTime);
+    HookFunction(0x00404086, NewTimer::GetTime);
+    HookFunction(0x0040409A, NewTimer::GetTime);
+    HookFunction(0x00405824, NewTimer::GetTime);
+    HookFunction(0x004058C1, NewTimer::GetTime);
+    HookFunction(0x0040864A, NewTimer::GetTime);
+    HookFunction(0x0040A1E7, NewTimer::GetTime);
+    HookFunction(0x0040A209, NewTimer::GetTime);
+    HookFunction(0x00417131, NewTimer::GetTime);
+    HookFunction(0x004171CA, NewTimer::GetTime);
+    HookFunction(0x00419764, NewTimer::GetTime);
+    HookFunction(0x004279BE, NewTimer::GetTime);
+    HookFunction(0x00428022, NewTimer::GetTime);
+    HookFunction(0x0042F0C4, NewTimer::GetTime);
+    HookFunction(0x0043A3DF, NewTimer::GetTime);
+    HookFunction(0x00441004, NewTimer::GetTime);
+    HookFunction(0x004615AF, NewTimer::GetTime);
+    HookFunction(0x0046E635, NewTimer::GetTime);
+    HookFunction(0x0046E788, NewTimer::GetTime);
+    HookFunction(0x0046E7E7, NewTimer::GetTime);
+    HookFunction(0x0046E933, NewTimer::GetTime);
+    HookFunction(0x0046E9D1, NewTimer::GetTime);
+    HookFunction(0x0046F4B9, NewTimer::GetTime);
+    HookFunction(0x004712F2, NewTimer::GetTime);
+    HookFunction(0x00471901, NewTimer::GetTime);
+    HookFunction(0x00473124, NewTimer::GetTime);
+    HookFunction(0x00473989, NewTimer::GetTime);
+    HookFunction(0x004740C6, NewTimer::GetTime);
+    HookFunction(0x0047418E, NewTimer::GetTime);
+    HookFunction(0x00474493, NewTimer::GetTime);
+    HookFunction(0x004745DD, NewTimer::GetTime);
+    HookFunction(0x00474649, NewTimer::GetTime);
+    HookFunction(0x004750B6, NewTimer::GetTime);
+    HookFunction(0x004751B9, NewTimer::GetTime);
+    HookFunction(0x004754F9, NewTimer::GetTime);
+    HookFunction(0x00475744, NewTimer::GetTime);
+    HookFunction(0x0047699C, NewTimer::GetTime);
+    HookFunction(0x00479098, NewTimer::GetTime);
+    HookFunction(0x0047BCF5, NewTimer::GetTime);
+    HookFunction(0x0047D172, NewTimer::GetTime);
+    HookFunction(0x0047D1A1, NewTimer::GetTime);
+    HookFunction(0x0047DEBF, NewTimer::GetTime);
+    HookFunction(0x0047E6B4, NewTimer::GetTime);
+    HookFunction(0x0047E72E, NewTimer::GetTime);
+    HookFunction(0x0047E757, NewTimer::GetTime);
+    HookFunction(0x0047EB75, NewTimer::GetTime);
+    HookFunction(0x0047F427, NewTimer::GetTime);
+    HookFunction(0x0047F449, NewTimer::GetTime);
+    HookFunction(0x0047FE62, NewTimer::GetTime);
+    HookFunction(0x0048154F, NewTimer::GetTime);
+    HookFunction(0x00481624, NewTimer::GetTime);
+    HookFunction(0x00487978, NewTimer::GetTime);
+    HookFunction(0x00487A4B, NewTimer::GetTime);
+    HookFunction(0x00487A63, NewTimer::GetTime);
+    HookFunction(0x00487C36, NewTimer::GetTime);
+    HookFunction(0x0048858E, NewTimer::GetTime);
+    HookFunction(0x00489E48, NewTimer::GetTime);
+    HookFunction(0x0048A026, NewTimer::GetTime);
+    HookFunction(0x0048E4F0, NewTimer::GetTime);
+    HookFunction(0x00498993, NewTimer::GetTime);
+    HookFunction(0x004989EB, NewTimer::GetTime);
+    HookFunction(0x00499AD9, NewTimer::GetTime);
+    HookFunction(0x00499ECA, NewTimer::GetTime);
+    HookFunction(0x00499EE9, NewTimer::GetTime);
+    HookFunction(0x0049AEE6, NewTimer::GetTime);
+    HookFunction(0x0049AFCF, NewTimer::GetTime);
+    HookFunction(0x0049B183, NewTimer::GetTime);
+    HookFunction(0x0049B282, NewTimer::GetTime);
+    HookFunction(0x0049B793, NewTimer::GetTime);
+    HookFunction(0x0049B85F, NewTimer::GetTime);
+    HookFunction(0x0049BA16, NewTimer::GetTime);
+    HookFunction(0x0049BAB6, NewTimer::GetTime);
+    HookFunction(0x0049BACD, NewTimer::GetTime);
+    HookFunction(0x0049BFB4, NewTimer::GetTime);
+    HookFunction(0x0049C222, NewTimer::GetTime);
+    HookFunction(0x0049C613, NewTimer::GetTime);
+    HookFunction(0x0049C63B, NewTimer::GetTime);
+    HookFunction(0x0049C686, NewTimer::GetTime);
+    HookFunction(0x0049C6B8, NewTimer::GetTime);
+    HookFunction(0x0049C6F6, NewTimer::GetTime);
+    HookFunction(0x0049C734, NewTimer::GetTime);
+    HookFunction(0x0049C767, NewTimer::GetTime);
+    HookFunction(0x0049C7A5, NewTimer::GetTime);
+    HookFunction(0x0049C910, NewTimer::GetTime);
+    HookFunction(0x0049CBB4, NewTimer::GetTime);
+    HookFunction(0x0049CBE1, NewTimer::GetTime);
+    HookFunction(0x0049D367, NewTimer::GetTime);
+    HookFunction(0x0049D386, NewTimer::GetTime);
+    HookFunction(0x0049D3A5, NewTimer::GetTime);
+    HookFunction(0x0049D3D5, NewTimer::GetTime);
+    HookFunction(0x0049D421, NewTimer::GetTime);
+    HookFunction(0x0049D666, NewTimer::GetTime);
+    HookFunction(0x0049D688, NewTimer::GetTime);
+    HookFunction(0x0049D6AA, NewTimer::GetTime);
+    HookFunction(0x0049D6E9, NewTimer::GetTime);
+    HookFunction(0x0049E3FA, NewTimer::GetTime);
+    HookFunction(0x0049EFC8, NewTimer::GetTime);
+    HookFunction(0x0049EFF7, NewTimer::GetTime);
+    HookFunction(0x0049F019, NewTimer::GetTime);
+    HookFunction(0x0049F035, NewTimer::GetTime);
+    HookFunction(0x0049F243, NewTimer::GetTime);
+    HookFunction(0x0049F35C, NewTimer::GetTime);
+    HookFunction(0x0049F37B, NewTimer::GetTime);
+    HookFunction(0x0049F6D6, NewTimer::GetTime);
+    HookFunction(0x0049F7C0, NewTimer::GetTime);
+    HookFunction(0x0049F912, NewTimer::GetTime);
+    HookFunction(0x0049F9BA, NewTimer::GetTime);
+    HookFunction(0x0049FB3B, NewTimer::GetTime);
+    HookFunction(0x004A11B1, NewTimer::GetTime);
+    HookFunction(0x004A11DA, NewTimer::GetTime);
+    HookFunction(0x004A19DB, NewTimer::GetTime);
+    HookFunction(0x004A2148, NewTimer::GetTime);
+    HookFunction(0x004A216A, NewTimer::GetTime);
+    HookFunction(0x004A218C, NewTimer::GetTime);
+    HookFunction(0x004A258E, NewTimer::GetTime);
+    HookFunction(0x004A2971, NewTimer::GetTime);
+    HookFunction(0x004A2999, NewTimer::GetTime);
+    HookFunction(0x004A29D8, NewTimer::GetTime);
+    HookFunction(0x004A3328, NewTimer::GetTime);
+    HookFunction(0x004A3653, NewTimer::GetTime);
+    HookFunction(0x004A38CA, NewTimer::GetTime);
+    HookFunction(0x004A54D5, NewTimer::GetTime);
+    HookFunction(0x004A61DB, NewTimer::GetTime);
+    HookFunction(0x004A6407, NewTimer::GetTime);
+    HookFunction(0x004A7C27, NewTimer::GetTime);
+    HookFunction(0x004A7C67, NewTimer::GetTime);
+    HookFunction(0x004A8B5A, NewTimer::GetTime);
+    HookFunction(0x004A90CD, NewTimer::GetTime);
+    HookFunction(0x004AA670, NewTimer::GetTime);
+    HookFunction(0x004AC942, NewTimer::GetTime);
+    HookFunction(0x004AC955, NewTimer::GetTime);
+    HookFunction(0x004ACA65, NewTimer::GetTime);
+    HookFunction(0x004ACAC7, NewTimer::GetTime);
+    HookFunction(0x004AD218, NewTimer::GetTime);
+    HookFunction(0x004ADD41, NewTimer::GetTime);
+    HookFunction(0x004AE5B1, NewTimer::GetTime);
+    HookFunction(0x004AE84B, NewTimer::GetTime);
+    HookFunction(0x004AF97C, NewTimer::GetTime);
+    HookFunction(0x004AF9A2, NewTimer::GetTime);
+    HookFunction(0x004AFBA2, NewTimer::GetTime);
+    HookFunction(0x004AFFB8, NewTimer::GetTime);
+    HookFunction(0x004B0797, NewTimer::GetTime);
+    HookFunction(0x004B0E52, NewTimer::GetTime);
+    HookFunction(0x004B1975, NewTimer::GetTime);
+    HookFunction(0x004B2FBD, NewTimer::GetTime);
+    HookFunction(0x004B3138, NewTimer::GetTime);
+    HookFunction(0x004B321B, NewTimer::GetTime);
+    HookFunction(0x004B3363, NewTimer::GetTime);
+    HookFunction(0x004B359F, NewTimer::GetTime);
+    HookFunction(0x004B389C, NewTimer::GetTime);
+    HookFunction(0x004B3B16, NewTimer::GetTime);
+    HookFunction(0x004B3C91, NewTimer::GetTime);
+    HookFunction(0x004B3DD2, NewTimer::GetTime);
+    HookFunction(0x004B3F5B, NewTimer::GetTime);
+    HookFunction(0x004B4147, NewTimer::GetTime);
+    HookFunction(0x004B43C1, NewTimer::GetTime);
+    HookFunction(0x004B45BD, NewTimer::GetTime);
+    HookFunction(0x004B486C, NewTimer::GetTime);
+    HookFunction(0x004B499E, NewTimer::GetTime);
+    HookFunction(0x004B49F4, NewTimer::GetTime);
+    HookFunction(0x004B4FCF, NewTimer::GetTime);
+    HookFunction(0x004C04AC, NewTimer::GetTime);
+    HookFunction(0x004D88E4, NewTimer::GetTime);
+    HookFunction(0x004D8ED3, NewTimer::GetTime);
+    HookFunction(0x004DA359, NewTimer::GetTime);
+    HookFunction(0x004DAAAA, NewTimer::GetTime);
+    HookFunction(0x004DD99D, NewTimer::GetTime);
+    HookFunction(0x004DD9B4, NewTimer::GetTime);
+    HookFunction(0x004DD9C4, NewTimer::GetTime);
+    HookFunction(0x004DFF25, NewTimer::GetTime);
+    HookFunction(0x004E062F, NewTimer::GetTime);
+    HookFunction(0x004E06DB, NewTimer::GetTime);
+    HookFunction(0x004E07D0, NewTimer::GetTime);
+    HookFunction(0x004EA1ED, NewTimer::GetTime);
+    HookFunction(0x004EA2C0, NewTimer::GetTime);
+    HookFunction(0x004EE836, NewTimer::GetTime);
+    HookFunction(0x004EF333, NewTimer::GetTime);
+    HookFunction(0x004F24BA, NewTimer::GetTime);
+    HookFunction(0x004F36F5, NewTimer::GetTime);
+    HookFunction(0x004F3BA1, NewTimer::GetTime);
+    HookFunction(0x004F3D07, NewTimer::GetTime);
+    HookFunction(0x004F40AB, NewTimer::GetTime);
+    HookFunction(0x004FA86D, NewTimer::GetTime);
+    HookFunction(0x00502BA0, NewTimer::GetTime);
+    HookFunction(0x00502BE2, NewTimer::GetTime);
 
     HookFunction(0x0049FAA1, &Skater::PlayJumpSound);
     HookFunction(0x0049FAC1, &Skater::PlayJumpSound);
@@ -4838,36 +5040,24 @@ void InitLevelMod()
     RailManager::Initialize();
 
     //Sound pan volume fix
-    HookFunction(0x004130C0, &SfxManager::SetVolumeFromPos);
-    HookFunction(0x004AAD61, &SfxManager::SetVolumeFromPos);
-    HookFunction(0x004C4777, &SfxManager::SetVolumeFromPos);
-    HookFunction(0x004C5B36, &SfxManager::SetVolumeFromPos);
-    HookFunction(0x004C601E, &SfxManager::SetVolumeFromPos);
-    HookFunction(0x004C62E8, &SfxManager::SetVolumeFromPos);
+    /*HookFunction(0x004130C0, &SfxManager::SetVolumeFromPosHook);
+    HookFunction(0x004AAD61, &SfxManager::SetVolumeFromPosHook);
+    HookFunction(0x004C4777, &SfxManager::SetVolumeFromPosHook);
+    HookFunction(0x004C5B36, &SfxManager::SetVolumeFromPosHook);
+    HookFunction(0x004C601E, &SfxManager::SetVolumeFromPosHook);
+    HookFunction(0x004C62E8, &SfxManager::SetVolumeFromPosHook);*/
 
     //This fixes the grinding on the crane in OilRig
-    BYTE oil_grind_fix[] = { 0x8D, 0xBE, 0x34, 0x03, 0x00, 0x00, 0xD9, 0x07, 0xD8, 0x1D, 0x5C, 0xD8, 0x58, 0x00, 0xDF, 0xE0, 0xF6, 0xC4, 0x44, 0x7A, 0x1B, 0xD9, 0x47, 0x08, 0xD8, 0x1D, 0x5C, 0xD8, 0x58, 0x00, 0xDF, 0xE0, 0xF6, 0xC4, 0x44, 0x7A, 0x0B, 0x8B, 0x47, 0x0, 0x8B, 0x4F, 0x48, 0x89, 0x07, 0x89, 0x4F, 0x08, 0xE8, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
+    BYTE oil_grind_fix[] = { 0x8D, 0xBE, 0x34, 0x03, 0x00, 0x00, 0xEB, 0x33, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 };
     VirtualProtect((LPVOID)0x004A66D0, sizeof(oil_grind_fix), PAGE_EXECUTE_READWRITE, &old);
     memcpy((void*)0x4a66d0, oil_grind_fix, sizeof(oil_grind_fix));
-    HookFunction(0x004A6701, OilRigGrindPatch);
+    HookFunction(0x4a66d7, OilRigGrindPatch, 0xE8);
 
-    if (Gfx::fps_fix)
-    {
-        BYTE timer[] = { 0xE8, 0x98, 0xF4, 0xF7, 0x79, 0xB9, 0x0E, 0x00, 0x00, 0x00, 0x39, 0xC8, 0x73, 0x27, 0x29, 0xC1, 0x51, 0xE8, 0xD7, 0x29, 0x8C, 0x75, 0xA1, 0x00, 0x00, 0x00, 0x00, 0x85, 0xC0, 0x75, 0x16, 0xE8, 0x00, 0x00, 0x00, 0x00, 0xEB, 0x0F };
-
-        *(DWORD*)&timer[1] = (PtrToUlong(TimerElapsed) - 0x004C04E4) - 4;
-        HookFunction(0x004C0519, TimerStart);
-        *(bool**)&timer[23] = &show_loading_screen;
-        *(BYTE*)&timer[31] = 0x90;
-        *(DWORD*)&timer[32] = 0x90909090;// (PtrToUlong(DrawEye) - (0x004C04E4 + 31)) - 4;
-
-        VirtualProtect((LPVOID)0x004C04E3, sizeof(timer), PAGE_EXECUTE_READWRITE, &old);
-        memcpy((void*)0x004C04E3, timer, sizeof(timer));
-
-
-        static const DWORD addr = (DWORD)GetProcAddress(GetModuleHandle("KERNELBASE.dll"), "Sleep");
-        HookFunction(0x004C04F5, (void*)addr);
-    }
+    //backup the original fps limiter timer
+    VirtualProtect((LPVOID)0x004C04E3, sizeof(LevelModSettings::original_timer), PAGE_EXECUTE_READWRITE, &old);
+    memcpy(LevelModSettings::original_timer, (void*)0x004C04E3, sizeof(LevelModSettings::original_timer));
+    //Fix stutter if it's enabled
+    MaybeFixStutter();
 
     VirtualProtect((LPVOID)0x00400019, 6, PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((LPVOID)0x0042FA0D, 9, PAGE_EXECUTE_READWRITE, &old);
@@ -4878,11 +5068,8 @@ void InitLevelMod()
     memcpy((void*)0x0042FA9D, codeCaveRenderHook2, sizeof(codeCaveRenderHook2));
 
     //Fixing bug that produces duplicate TriggerScripts
-<<<<<<< Updated upstream
-    HookFunction(0x00499B48, TriggerScript, 0xE9);
-=======
     //HookFunction(0x00499B48, TriggerScript, 0xE9);
-    /*HookFunction(0x0049F051, &Skater::CheckEventTrigger);
+    HookFunction(0x0049F051, &Skater::CheckEventTrigger);
     HookFunction(0x0049F2BB, &Skater::CheckEventTrigger);
     HookFunction(0x0049F2E3, &Skater::CheckEventTrigger);
     HookFunction(0x0049FAE1, &Skater::CheckEventTrigger);
@@ -4896,22 +5083,12 @@ void InitLevelMod()
     HookFunction(0x004A4222, &Skater::CheckEventTrigger);
     HookFunction(0x004A4256, &Skater::CheckEventTrigger);
     HookFunction(0x004A60E2, &Skater::CheckEventTrigger);
-    HookFunction(0x004A77BA, &Skater::CheckEventTrigger);*/
->>>>>>> Stashed changes
+    HookFunction(0x004A77BA, &Skater::CheckEventTrigger);
 
     for (DWORD i = 0; i < sizeof(optimized_grind) / sizeof(OptimizedGrind); i++)
     {
        optimized_grind[i].Optimize();
     }
-
-    //Optimize static checksum access
-    for (DWORD i = 0; i < sizeof(optimized) / sizeof(OptimizedCRC); i++)
-    {
-        optimized[i].Optimize();
-    }
-
-    *(DWORD*)0x0044410E -= 4;
-
 
     //BouncyObject fixes
     BYTE codeCaveBouncyObject[] = { 0x84, 0xC0, 0x0F, 0x84, 0xA0, 0x3E, 0x08, 0x00, 0x8A, 0x84, 0x24, 0x00, 0x01, 0x00, 0x00, 0x24, 0x40, 0x74, 0x0D, 0x8B, 0x84, 0x24, 0x14, 0x01, 0x00, 0x00, 0x89, 0x05, 0xCB, 0x03, 0x40, 0x00, 0x8A, 0x84, 0x24, 0x00, 0x01, 0x00, 0x00, 0x90, 0x90, 0x90, 0x90, 0x90, 0x24, 0x10, 0x0F, 0x85, 0x74, 0x3E, 0x08, 0x00, 0xE9, 0x0D, 0x3A, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -5006,11 +5183,6 @@ void InitLevelMod()
             VirtualProtect((LPVOID)addr, 4, PAGE_EXECUTE_READWRITE, &old);
             *(DWORD*)addr = 0x004110E0 - addr - 4;
         }
-
-        /*for (DWORD i = 0; i < sizeof(optimized_qphysics) / 4; i++)
-        {
-
-        }*/
     }
 
     /*VirtualProtect((LPVOID)0x004265D9, 3 + 4 * 4, PAGE_EXECUTE_READWRITE, &old);
@@ -5086,6 +5258,7 @@ static char version_string[150] = "";
 
 bool Initialize(CStruct* pStruct, CScript* pScript)
 {
+    MenuSelectCallback = 0;
     if (init)//00425e10
     {
 
@@ -5120,7 +5293,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
         Slerp::trying = false;
         Slerp::value = 0.0f;
         Slerp::wallplant = false;
-        Slerp::m_last_wallplant_time_stamp.QuadPart = 0;
+        Slerp::m_last_wallplant_time_stamp = 0;
         Slerp::realVelocity = Vertex(0.0f, 0.0f, 0.0f);
         Slerp::targetNormal = Vertex(0.0f, 0.0f, 0.0f);
         Slerp::target_normal = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -5169,7 +5342,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
 
         //MessageBox(0, "INIT", "", 0);
         init = false;
-        _printf("Going to init\n");
+        debug_print("Going to init\n");
         //MessageBox(0, "Going to Init", "", 0);
 
         InitLevelMod();
@@ -5204,8 +5377,12 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
             }
             //logFile = fopen("loggers.txt", "w+t");*/
         }
+        /*if (LevelModSettings::bLogging)
+        {
+            logFile = fopen("LM_Log.txt", "w+t");
+        }*/
 
-        printf("Init DONE\n");
+        debug_print("Init DONE\n");
         return true;
 
     }
@@ -5216,7 +5393,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
         //MessageBox(0, "GOING TO ADD HOSTOPTIONS", "", 0);
         CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CheckForScriptUpdates, NULL, 0/*CREATE_SUSPENDED*/, NULL);
         using namespace LevelModSettings;
-        _printf("Already inited\n");
+        debug_print("Already inited\n");
 
         bAddedOptions = true;
 
@@ -5230,6 +5407,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
         header = GetQBKeyHeader(crc32f("LM_HostOptions"));
 
         LevelModSettings::SpineButton3 = KeyMap::GetVKeyCode(KeyMap::MappedKey::Unused);
+
 
         /*if (!bDebugMode)
         {
@@ -5277,63 +5455,68 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
                             if (HostOption->GetStruct(crc32f("OVERRIDE_TRUE"), &override))
                             {
                                 type = OverrideOption::Type::OVERRIDE_TRUE;
-                                _printf("OVERRIDE TRUE ");
+                                debug_print("OVERRIDE TRUE ");
                             }
                             else if (HostOption->GetStruct(crc32f("OVERRIDE_FALSE"), &override))
                             {
                                 type = OverrideOption::Type::OVERRIDE_FALSE;
-                                _printf("OVERRIDE FALSE ");
+                                debug_print("OVERRIDE FALSE ");
 
                             }
                             else if (HostOption->GetStruct(crc32f("OVERRIDE"), &override))
                             {
                                 type = OverrideOption::Type::OVERRIDE;
-                                _printf("OVERRIDE ");
+                                debug_print("OVERRIDE ");
                             }
                             else
                             {
-                                _printf("Need param #OVERRIDE/#OVERRIDE_FALSE/#OVERRIDE_TRUE in HostOption %s\n", OptionName);
+                                debug_print("Need param #OVERRIDE/#OVERRIDE_FALSE/#OVERRIDE_TRUE in HostOption %s\n", OptionName);
                                 return true;
                             }
-                            _printf("%s\n", FindChecksumName(override->Data));
+                            debug_print("%s\n", FindChecksumName(override->Data));
                             AddOption(OptionName, Value->value.i, false, override->Data, (BYTE)type);
 
                         }
                         else
                         {
-                            _printf("Need param #Value in HostOption %s\n", OptionName);
+                            debug_print("Need param #Value in HostOption %s\n", OptionName);
                         }
                     }
                 }
 
             }
 
-            _printf("Going to Store OverrideData\n");
+            debug_print("Going to Store OverrideData\n");
             for (auto override = overrideOptions.begin(); override != overrideOptions.end(); ++override)
             {
                 auto it = options.find(override->second.option);
                 if (it != options.end())
                 {
-                    _printf("OK2\n");
+                    debug_print("OK2\n");
                     it->second.pOverride = &override->second;
                 }
                 else
-                    _printf("Option %s not found in HostOption %s\n", FindChecksumName(override->second.option), FindChecksumName(override->first));
+                    debug_print("Option %s not found in HostOption %s\n", FindChecksumName(override->second.option), FindChecksumName(override->first));
             }
-            _printf("Finished storing OverrideData\n");
+            debug_print("Finished storing OverrideData\n");
 
-            _printf("Truncating IniFile %s\n", IniPath);
+            debug_print("Truncating IniFile %s\n", IniPath);
             FILE* f = fopen(IniPath, "w");
             fclose(f);
             for (auto it = options.begin(); it != options.end(); ++it)
             {
                 char* name = FindChecksumName(it->first, false);
-                _printf("Adding Option to Ini %s\n", name);
+                debug_print("Adding Option to Ini %s\n", name);
                 OptionWriter->WriteInt("Script_Settings", name, it->second.value);
             }
         }
         else
-            _printf("Couldn't find HostOptions\n");
+            debug_print("Couldn't find HostOptions\n");
+
+
+        CStructHeader param(QBKeyHeader::LOCAL, 0, Checksums::LoadSettings);
+        CStruct params(&param);
+        KeyMapScript(&params, NULL);
     }
 
     /*int id = -255;
@@ -5352,7 +5535,7 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
         init2 = false;
 
     }*/
-    _printf("Already inited\n");
+    debug_print("Already inited\n");
     //MessageBox(0, "Already Inited", "", 0);
     return true;
 }
@@ -5400,7 +5583,7 @@ DWORD GetTagCount()
 }
 
 extern QBKeyHeader triggers[];
-EXTERN QBKeyHeader* GetQBKeyHeader(unsigned long QBKey)
+EXTERN __declspec(noalias) QBKeyHeader* Resolve(unsigned long QBKey)
 {
     int ShortedQBKey = QBKey & 0x0000FFFF;//last 16 bit of QBKey, old code - last 12 bits of QBKey
     int* LoadAddress = (int*)(ShortedQBKey + ShortedQBKey * 4);//get index
@@ -5409,12 +5592,74 @@ EXTERN QBKeyHeader* GetQBKeyHeader(unsigned long QBKey)
     while (header->QBKeyCheck)//loop until end of table or corect header is found
     {
         if (((header->QBKeyCheck << 0x0C) | ShortedQBKey) == QBKey)
+        {
+            return header;
+            /*if (header->type != QBKeyHeader::LOCAL)
+                return header;//found header lets return it
+            else//Header is LOCAL type, keep scanning
+            {
+                header++;
+                while (header->type == QBKeyHeader::LOCAL)
+                {
+                    if (((header->QBKeyCheck << 0x0C) | ShortedQBKey) != QBKey)//Mismatching QBKey, stop scanning and return NULL
+                        return NULL;
+                    header++;
+                }
+
+                if (((header->QBKeyCheck << 0x0C) | ShortedQBKey) == QBKey)//Still a match and not LOCAL, let's return it
+                    return header;
+                else
+                    return NULL;//Mismatching QBKey return NULL
+            }*/
+
+        }
+        header++;
+    }
+
+    return NULL;
+    /*typedef QBKeyHeader* (__cdecl* const GetQBKeyHeaderFunc)(const unsigned long QBKey);
+    return ((GetQBKeyHeaderFunc)(0x00426340))(QBKey);//didn't find header lets let game search through sub qbTables*/
+}
+
+__declspec(noalias)QBKeyHeader* Resolve_Game(unsigned long QBKey)
+{
+    typedef QBKeyHeader* (__cdecl* pResolve)(unsigned long QBKey);
+    return pResolve(0x00426340)(QBKey);
+}
+
+__declspec(noalias)QBKeyHeader* GetQBKeyHeader_NotWorking(unsigned long QBKey)
+{
+    int ShortedQBKey = QBKey & 0x0000FFFF;//last 16 bit of QBKey, old code - last 12 bits of QBKey
+    QBKeyHeader* header = (QBKeyHeader*)((DWORD)&triggers + ShortedQBKey * 0x14);//get index
+    if ((*(BYTE*)((DWORD)&triggers + 8 + ShortedQBKey * 5) & 2) == 0)
+        return NULL;
+
+    while (header->QBKeyCheck)//loop until end of table or corect header is found
+    {
+        if (((header->QBKeyCheck << 0x0C) | ShortedQBKey) == QBKey)
             return header;//found header lets return it
         header++;
     }
 
-    typedef QBKeyHeader* (__cdecl* const GetQBKeyHeaderFunc)(const unsigned long QBKey);
-    return ((GetQBKeyHeaderFunc)(0x00426340))(QBKey);//didn't find header lets let game search through sub qbTables
+    return NULL;
+}
+
+EXTERN __declspec(noalias)QBKeyHeader* GetQBKeyHeader(unsigned long QBKey)
+{
+    QBKeyHeader* header = Resolve_Game(QBKey);
+
+    for(DWORD i=0; i<15; i++)
+    {
+        if (!header)
+            return NULL;
+        if (header->type != QBKeyHeader::LOCAL)
+            return header;
+        header = Resolve_Game(header->GetInt());
+
+    }
+    return NULL;
+
+    //return Resolve(QBKey);
 }
 
 __restrict LPDIRECT3DDEVICE9 Gfx::pDevice = NULL;
@@ -5447,7 +5692,7 @@ void OnRelease()
 {
     if (!init)
     {
-        _printf("OnRelease\n");
+        debug_print("OnRelease\n");
         if (m_font)
         {
             m_font->Release();
@@ -5466,6 +5711,11 @@ void OnRelease()
         if (OptionReader)
             delete OptionReader;
         OptionReader = NULL;
+        if(logFile)
+           fclose(logFile);
+
+        if (observing)
+            LeaveObserveMode(NULL, NULL);
 
         /*for (DWORD i = 0; i < 6; i++)
         {
@@ -5477,7 +5727,9 @@ void OnRelease()
 
 void OnLost()
 {
-    _printf("OnLost\n");
+    QueryPerformanceCounter(&startTime);
+   // NewTimer::ResetTime();
+    debug_print("OnLost\n");
     if (m_font)
     {
         m_font->OnLostDevice();
@@ -5487,7 +5739,9 @@ void OnLost()
 
 void OnReset()
 {
-    _printf("OnReset\n");
+    QueryPerformanceCounter(&startTime);
+    //NewTimer::ResetTime();
+    debug_print("OnReset\n");
     if (m_font)
     {
         m_font->OnResetDevice();
@@ -6047,20 +6301,87 @@ void DrawEye()
     Gfx::pDevice->SetRenderTarget(0, old_target);
 }
 
+void EnableBackEvent()
+{
+    Sleep(300);
+    ExecuteQBScript("EnableBackEvent");
+    
+}
+
 bool bToggleWindowed = false;
 
 SHORT __stdcall proxy_GetAsyncKeyState(int key)
 {
-    if (KeyState::GetKeyboardState(VirtualKeyCode::ALT) && KeyState::GetKeyboardState(VirtualKeyCode::ENTER) && !KeyState::GetOldKeyboardState(VirtualKeyCode::ENTER))//alt + enter
+    //pEditKeyMap will point to a keymap if we are in edit control mode
+    if (LevelModSettings::pEditKeyMap)
     {
-        //Unpress the enter KeyboardState
-        KeyState::Unpress(VirtualKeyCode::ENTER);
-        bToggleWindowed = true;
+        //If press ESC stop edit
+        if (KeyState::GetKeyboardState(VirtualKeyCode::ESC))
+        {
+            //Reset error text
+            KeyMap::SetErrorText("");
+            //stop editing
+            LevelModSettings::pEditKeyMap = NULL;
+            //Enable back event after 300 ms
+            CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)EnableBackEvent, 0, 0/*CREATE_SUSPENDED*/, NULL);
+        }
+        //If press BACK unassign key
+        else if (KeyState::GetKeyboardState(VirtualKeyCode::BACK))
+        {
+            //Set map and update text
+            LevelModSettings::pEditKeyMap->Set(VirtualKeyCode::Undefined, false);
+            //Stop editing so we only assign first keypress
+            LevelModSettings::pEditKeyMap = NULL;
+        }
+        else
+        {
+            //Check all keys between Cancel and Max(3 and 207)
+            for (VirtualKeyCode key = VirtualKeyCode::CANCEL; key != VirtualKeyCode::MAX; key++)
+            {
+                //Don't assign ENTER key, since it's reserved for chat
+                if (key == VirtualKeyCode::ENTER)
+                    continue;
+
+                KeyMap::MappedKey already_mapped = KeyMap::MappedKey::Undefined;
+                if (KeyState::GetKeyboardState(key) && !KeyState::GetOldKeyboardState(key) && !KeyState::FindMappedKey(key, &already_mapped))
+                {
+                    //Set map and update text
+                    LevelModSettings::pEditKeyMap->Set(key);
+                    //Stop editing so we only assign first keypress
+                    LevelModSettings::pEditKeyMap = NULL;
+                    break;
+                }
+                else if (already_mapped != KeyMap::MappedKey::Undefined)
+                {
+                    char msg[50];
+                    sprintf(msg, "%s is already mapped to %s", KeyState::GetVKName(key), KeyMap::GetName(already_mapped));
+                    KeyMap::SetErrorText(msg);
+                }
+            }
+        }
+
+        //Clear all key presses so game don't go back in menu if press ESC etc
+        KeyState::ClearAllKeys();
     }
     else
-        bToggleWindowed = false;
+    {
+        if (KeyState::GetKeyboardState(VirtualKeyCode::ALT) && KeyState::GetKeyboardState(VirtualKeyCode::ENTER) && !KeyState::GetOldKeyboardState(VirtualKeyCode::ENTER))//alt + enter
+        {
+            if (!Gfx::bOldWindowed)
+            {
+                //Unpress the enter KeyboardState
+                KeyState::Unpress(VirtualKeyCode::ENTER);
+                bToggleWindowed = true;
+            }
+            else
+                QScript::CallCFunction(Checksum("LaunchPanelMessage"), (void*)"Please launch game in Fullscreen mode");
+        }
+        else
+            bToggleWindowed = false;
 
-    return GetAsyncKeyState(key);
+        return GetAsyncKeyState(key);
+    }
+    return 0;
 }
 
 typedef BOOL(__stdcall* const pGetMessage)(LPMSG lpMsg,
@@ -6108,27 +6429,32 @@ void ToggleWindowed()
     d3dpp->Windowed = !d3dpp->Windowed;
     //Toggle windowed mode flag
     d3dpp->Windowed ? *(BYTE*)0x00851094 &= ~1 : *(BYTE*)0x00851094 |= 1;
+    extern D3DPRESENT_PARAMETERS current_params;
+    current_params.Windowed = d3dpp->Windowed;
 
     RECT rect;
     rect.left = 0;
     rect.top = 0;
-    rect.right = d3dpp->BackBufferWidth;
-    rect.bottom = d3dpp->BackBufferHeight;
+    rect.right = *(DWORD*)0x00851084;
+    rect.bottom = *(DWORD*)0x00851088;
 
     if (d3dpp->Windowed)
     {
 
         ShowWindow(Gfx::hFocusWindow, SW_NORMAL);
         SetFocus(Gfx::hFocusWindow);
+        d3dpp->FullScreen_RefreshRateInHz = 0;
+        current_params.FullScreen_RefreshRateInHz = 0;
 
         SetWindowLongPtr(Gfx::hFocusWindow, GWL_STYLE, WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE);
         AdjustWindowRect(&rect, WS_CAPTION | WS_POPUPWINDOW, FALSE);
-        SetWindowPos(Gfx::hFocusWindow, HWND_NOTOPMOST, 0, 0, d3dpp->BackBufferWidth, d3dpp->BackBufferHeight, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+        SetWindowPos(Gfx::hFocusWindow, HWND_NOTOPMOST, 0, 0, *(DWORD*)0x00851084, *(DWORD*)0x00851088, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
         //MoveWindow(Gfx::hFocusWindow, 0, 0, rect.right - rect.left, rect.bottom - rect.top, TRUE);
 
     }
     else
     {
+        d3dpp->FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
         POINT Point = { 0 };
         HMONITOR Monitor = MonitorFromPoint(Point, MONITOR_DEFAULTTONEAREST);
         MONITORINFO MonitorInfo = { sizeof(MonitorInfo) };
@@ -6148,7 +6474,10 @@ void ToggleWindowed()
 
 bool ToggleWindowedScript(CStruct* pStruct, CScript* pScript)
 {
-    Gfx::command = Gfx::Command::ToggleWindowed;
+    if(!Gfx::bOldWindowed)
+        Gfx::command = Gfx::Command::ToggleWindowed;
+    else
+        QScript::CallCFunction(Checksum("LaunchPanelMessage"), (void*)"Please launch game in Fullscreen mode");
     return true;
 }
 
@@ -6170,28 +6499,86 @@ bool RestoreGoBackScript(CStruct* pStruct, CScript* pScript)
     return true;
 }
 
+void MaybeFixStutter()
+{
+#ifndef _DEBUG
+    HookFunction(0x0040CA2B, proxy_Dinput_GetDeviceState);
+#endif
+    if (Gfx::fps_fix)
+    {
+        BYTE timer[] = { 0xE8, 0x98, 0xF4, 0xF7, 0x79, 0xB9, 0x0E, 0x00, 0x00, 0x00, 0x39, 0xC8, 0x73, 0x27, 0x29, 0xC1, 0x51, 0xE8, 0xD7, 0x29, 0x8C, 0x75, 0xA1, 0x00, 0x00, 0x00, 0x00, 0x85, 0xC0, 0x75, 0x16, 0xE8, 0x00, 0x00, 0x00, 0x00, 0xEB, 0x0F };
+
+        switch (Gfx::fps_fix)
+        {
+        case 1:
+            *(DWORD*)&timer[1] = (PtrToUlong(NewTimer::TimerElapsed) - 0x004C04E4) - 4;
+            HookFunction(0x004C0519, NewTimer::TimerStart);
+            break;
+        case 2:
+            *(DWORD*)&timer[1] = (PtrToUlong(NewTimer::TimerElapsed_Hybrid) - 0x004C04E4) - 4;
+            HookFunction(0x004C0519, NewTimer::TimerStart_Hybrid);
+            break;
+        case 3:
+            *(DWORD*)&timer[1] = (PtrToUlong(NewTimer::TimerElapsed_Sleep) - 0x004C04E4) - 4;
+            HookFunction(0x004C0519, NewTimer::TimerStart_Sleep);
+            break;
+        }
+        /*if (Gfx::fps_fix == 3)
+            HookFunction(0x004C0519, TimerStart_Sleep);
+        else
+            HookFunction(0x004C0519, TimerStart);*/
+        *(bool**)&timer[23] = &show_loading_screen;
+        *(BYTE*)&timer[31] = 0x90;
+        *(DWORD*)&timer[32] = 0x90909090;// (PtrToUlong(DrawEye) - (0x004C04E4 + 31)) - 4;
+        if (Gfx::fps_fix != 3)
+            *(WORD*)&timer[5] = 0x2EEB;
+
+        memcpy((void*)0x004C04E3, timer, sizeof(timer));
+
+
+        static const DWORD addr = (DWORD)GetProcAddress(GetModuleHandle("KERNELBASE.dll"), "Sleep");
+        HookFunction(0x004C04F5, (void*)addr);
+    }
+    else//Set back original
+        memcpy((void*)0x004C04E3, LevelModSettings::original_timer, sizeof(LevelModSettings::original_timer));
+}
+
 bool LaunchGFXCommand(CStruct* pStruct, CScript* pScript)
 {
-    for (auto header = pStruct->head; header != NULL; header = header->NextHeader)
-    {
-        if (header->Type == QBKeyHeader::LOCAL)
-        {
-            switch (header->Data)
-            {
-            case Checksums::Reset:
-                MessageBox(0, 0, 0, 0);
-                Gfx::command = Gfx::Command::Reset;
-                    break;
-            case Checksums::ToggleWindowed:
-                if(IsOptionOn("LM_GFX_bWindowed") == (*(BYTE*)0x00851094 & 1))
-                    Gfx::command = Gfx::Command::ToggleWindowed;
-                break;
-            }
+    LevelModSettings::Option* option;
+    DWORD command = Checksums::Reset;
 
-            return true;
+    auto header = pStruct->GetHeader();
+    if (header)
+        command = header->Data;
+    switch (command)
+    {
+    case (DWORD)Checksums::Reset:
+        Gfx::command = Gfx::Command::Reset;
+        break;
+    case Checksums::FixStutter:
+        Gfx::command = Gfx::Command::FixStutter;
+        break;
+    case (DWORD)Checksums::TargetFPS:
+        option = GetOption(crc32f("LM_GFX_TargetFPS"));
+        if (option)
+        {
+            Gfx::target_fps = option->value;
         }
+        NewTimer::CalculateFPSTimers();
+        break;
+    case (DWORD)Checksums::ToggleWindowed:
+        if (!Gfx::bOldWindowed)
+        {
+            if (IsOptionOn("LM_GFX_bWindowed") == (*(BYTE*)0x00851094 & 1))
+                Gfx::command = Gfx::Command::ToggleWindowed;
+        }
+        else
+            QScript::CallCFunction(Checksum("LaunchPanelMessage"), (void*)"Please launch game in Fullscreen mode");
+        break;
     }
-    return false;
+
+    return true;
 }
 
 bool GetMaximumIndexScript(CStruct* pStruct, CScript* pScript)
@@ -6199,8 +6586,11 @@ bool GetMaximumIndexScript(CStruct* pStruct, CScript* pScript)
     const CArray* pArray;
     pStruct->GetArray("array", &pArray);
 
-    CStructHeader* param = pScript->params->AddParam("Max", QBKeyHeader::QBKeyType::INT);
-    param->Data = (pArray->GetNumItems() - 1);
+    if (pArray)
+    {
+        CStructHeader* param = pScript->params->AddParam("Max", QBKeyHeader::QBKeyType::INT);
+        param->Data = (pArray->GetNumItems() - 1);
+    }
     return true;
 }
 
@@ -6213,13 +6603,9 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
         {
 
             //Make sure we toggle only 1 per 2 sec
-<<<<<<< Updated upstream
-            DWORD time = GetCurrentTime();
-=======
             DWORD time = NewTimer::GetFrameTime();
->>>>>>> Stashed changes
             if (time < lastTime + 2000)
-                return false;
+                return hres;
             lastTime = time;
 
             //Unpress enter key, should already be unpressed but better safe than sorry...
@@ -6265,6 +6651,20 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
                 return D3DERR_DEVICELOST;
 
             case Gfx::Command::Reset:
+                option = GetOption(crc32f("LM_GFX_bVSync"));
+                if (option)
+                {
+                    Gfx::bVSync = option->value;
+                    if (Gfx::bVSync)
+                    {
+                        d3dpp->FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+                    }
+                    else
+                    {
+                        d3dpp->FullScreen_PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+                    }
+                }
+
                 option = GetOption(crc32f("LM_GFX_eBuffering"));
                 if(option)
                     Gfx::numBackBuffers = option->value;
@@ -6272,11 +6672,35 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
                 option = GetOption(crc32f("LM_GFX_eAntiAlias"));
                     Gfx::AntiAliasing = option->value;
                 break;
+
+            case Gfx::Command::FixStutter:
+                option = GetOption(crc32f("LM_GFX_eFixStutter"));
+                if (option)
+                {
+                    Gfx::fps_fix = option->value;
+                    debug_print("fps_fix %d\n", Gfx::fps_fix);
+                }
+                else
+                    debug_print("NO OPT\n");
+                MaybeFixStutter();
+                break;
+            case Gfx::Command::TargetFPS:
+                option = GetOption(crc32f("LM_GFX_TargetFPS"));
+                if (option)
+                {
+                    Gfx::target_fps = option->value;
+                }
+                NewTimer::CalculateFPSTimers();
+                break;
             }
 
 
             ShowWindow(Gfx::hFocusWindow, SW_NORMAL);
             SetFocus(Gfx::hFocusWindow);
+            if (d3dpp->Windowed)
+            {
+                SetWindowPos(Gfx::hFocusWindow, HWND_NOTOPMOST, 0, 0, *(DWORD*)0x00851084, *(DWORD*)0x00851088, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+            }
             return D3DERR_DEVICELOST;
         }
 
@@ -6284,11 +6708,14 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
     return hres;
 }
 
+LARGE_INTEGER tTime, old_time;
+
 __declspec(noalias) void DrawFrame()
 {
     //MessageBox(0, 0, 0, 0);
     if (!m_font) [[unlikely]]
     {
+        //CreateConsole();
         GameState::GotSuperSectors = false;
         XINPUT::Player1 = new CXBOXController();
         //MessageBox(0,"init font","",0);
@@ -6339,6 +6766,30 @@ __declspec(noalias) void DrawFrame()
             //Skater * skater = Skater::Instance();
             if (Game::skater) [[likely]]
             {
+                    /*old_time = tTime;
+    QueryPerformanceCounter(&tTime);
+    printf("CPU ticks %u Physics framelength %f\n", (DWORD)(tTime.QuadPart - old_time.QuadPart), Game::skater->GetFrameLength());*/
+                if (observing) [[unlikely]]
+                {
+                    //Get ollie keymap
+                    VirtualKeyCode ollie = KeyMap::GetVKeyCode(KeyMap::MappedKey::Ollie);
+                    //check if pressed this frame but not last
+                    if (KeyState::GetKeyboardState(ollie) && !KeyState::GetOldKeyboardState(ollie))
+                    {
+                        Network::NetHandler* net_manager = Network::NetHandler::Instance();
+                        if (net_manager)
+                            net_manager->ObserveNextPlayer();
+                    }
+                     /*KeyState* ollie = Game::skater->GetKeyState(KeyState::OLLIE);
+                     if (ollie->IsPressed() && ollie->GetPressedTime() != time_pressed_x)
+                     {
+                         ObserveNext(NULL, NULL);
+                         time_pressed_x = ollie->GetPressedTime();
+                     }*/
+                     //pObserve->Update();
+                }
+
+
                 Gfx::frameCounter++;
                 Gfx::uv_anim_timer += Game::skater->GetFrameLength();
                 if (LevelModSettings::bHookedControls && XINPUT::Player1->IsConnected())
@@ -6346,7 +6797,7 @@ __declspec(noalias) void DrawFrame()
                     if (XINPUT::vibrationFrames)
                     {
                         XINPUT::Player1->Vibrate(XINPUT::vibration.wLeftMotorSpeed, XINPUT::vibration.wRightMotorSpeed);
-                        XINPUT::vibrationFrames -= Game::skater->GetFrameLength();
+                        XINPUT::vibrationFrames-=100;
                     }
                     else
                     {
@@ -6355,22 +6806,23 @@ __declspec(noalias) void DrawFrame()
 
                 }
 
+
             //RenderShadows();
             //ProxyPad(skater);
 
             updatingObjects = true;
             for (DWORD i = 0; i < movingObjects.size(); i++) [[unlikely]]
             {
-                //_printf("Killed?...");
+                //debug_print("Killed?...");
                 if (!(movingObjects[i].state & MeshState::kill)) [[likely]]
                 {
-                    //_printf("FALSE\n");
+                    //debug_print("FALSE\n");
                     if (movingObjects[i].Update(Game::skater->GetFrameLength()))
                         movingObjects[i].sector->Update();//Send state to update vertexbuffer
                 }
                 else
                 {
-                    _printf("SuperSector->Killed(): TRUE\n");
+                    debug_print("SuperSector->Killed(): TRUE\n");
                     movingObjects.erase(movingObjects.begin() + i);
                     i--;
                 }
@@ -6384,23 +6836,6 @@ __declspec(noalias) void DrawFrame()
                DrawEye();*/
 
     //}
-    if (pObserve && pObserve->observing) [[unlikely]]
-    {
-        Skater * skater = Skater::Instance();
-        if (skater)
-        {
-            KeyState* ollie = skater->GetKeyState(KeyState::OLLIE);
-            if (ollie->IsPressed() && ollie->GetPressedTime() != pObserve->timeNext)
-                pObserve->Next(ollie->GetPressedTime());
-            pObserve->Update();
-        }
-        else
-        {
-            pObserve->Leave();
-            delete pObserve;
-            pObserve = NULL;
-        }
-    }
         if (LevelModSettings::bGrafCounter && Modulating()) [[unlikely]]
         {
             //TestForAcid();
@@ -6411,9 +6846,8 @@ __declspec(noalias) void DrawFrame()
                 {
                     oldTagCount = tagCount;
                     sprintf(&tags[6], "%u %X", tagCount, *(DWORD*)(0x0040033C + ((tagCount - 1) * 4)));
-                    CStruct params;
                     CStructHeader param(QBKeyHeader::STRING, Checksums::text, tags);
-                    params.AddParam(&param);
+                    CStruct params(&param);
                     ExecuteQBScript("LaunchGrafCounter", &params);
                 }
                 else
@@ -6605,7 +7039,8 @@ __declspec(noalias) void DrawFrame()
 
             m_pIDirect3DDevice8->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE);
             for (DWORD i = 0; i < pointList.size(); i++)
-            m_pIDirect3DDevice8->DrawPrimitiveUP(D3DPT_LINELIST, (pointList[i].numNodes - 1) / 2, &pointList[i].v[0], sizeof(pointList[i].v[0]));*/
+            m_pIDirect3DDevice8->DrawPrimitiveUP(D3DPT_LINELIST, (pointList[i].
+            - 1) / 2, &pointList[i].v[0], sizeof(pointList[i].v[0]));*/
 
 
             //}
@@ -6625,91 +7060,10 @@ __declspec(noalias) void DrawFrame()
             m_pIDirect3DDevice8->SetStreamSource(0, oldBuffer, oldStride);*/
 
 
-if (GameState::GotSuperSectors && bbox_rails.size())
-{
-    DWORD old_factor;
-    DWORD old_ref;
-    DWORD old_blend;
-    DWORD old_z;
-    DWORD old_bias;
-    DWORD old_slope;
-
-    LPDIRECT3DSURFACE9 old_target;
-    D3DXMATRIX old_view, old_world;
-
-    Gfx::pDevice->GetRenderTarget(0, &old_target);
-
-    LPDIRECT3DSURFACE9 old_surface;
-    D3DVIEWPORT9 old_viewport;
-    Gfx::pDevice->GetDepthStencilSurface(&old_surface);
-    Gfx::pDevice->GetViewport(&old_viewport);
-    Gfx::pDevice->SetDepthStencilSurface(nullptr);
-
-
-    Gfx::pDevice->SetViewport(&Gfx::world_viewport);
-
-    Gfx::pDevice->SetRenderTarget(0, Gfx::world_rendertarget);
-
-    Gfx::pDevice->GetRenderState(D3DRS_BLENDFACTOR, &old_factor);
-    Gfx::pDevice->GetRenderState(D3DRS_ALPHAREF, &old_ref);
-    Gfx::pDevice->GetRenderState(D3DRS_ALPHABLENDENABLE, &old_blend);
-    Gfx::pDevice->GetRenderState(D3DRS_ZFUNC, &old_z);
-    Gfx::pDevice->GetRenderState(D3DRS_DEPTHBIAS, &old_bias);
-    Gfx::pDevice->GetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, &old_slope);
-
-    Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-    Gfx::pDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
-    Gfx::pDevice->SetRenderState(D3DRS_BLENDFACTOR, D3DXCOLOR(255, 255, 0, 255));
-    Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-    Gfx::pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
-    Gfx::pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-    Gfx::pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
-    Gfx::pDevice->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
-
-    /*for (auto object = bbox_rails.begin(); object != bbox_rails.end(); object++)
-    {*/
-    //SuperSector* sector = *object;
-    Gfx::pDevice->DrawPrimitiveUP(D3DPRIMITIVETYPE::D3DPT_LINELIST, bbox_rails.size() / 2, &bbox_rails.front(), 0);
-    /*
-    if (sector->flag & 6 && sector->state && sector->mesh)
-    {
-        DWORD numSplits = sector->GetNumSplits();
-
-        for (auto i = 0; i < numSplits; i++)
-        {
-            Mesh::MaterialSplit* split = &sector->mesh->splits[i];
-            if (split->numVertices && split->numIndices && split->material && split->material->texture)
-            {
-                split->material->SubmitTextureOnly();
-
-                //_printf("VertexShader %X stride %X\n", split->vertexShader, split->stride);
-                Gfx::pDevice->SetFVF(split->vertexShader);
-
-                Gfx::pDevice->SetStreamSource(0, split->vertexBuffer->GetProxyInterface(), 0, split->stride);
-                Gfx::pDevice->SetIndices(split->indexBuffer->GetProxyInterface());
-                Gfx::pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, split->baseIndex, 0, split->numVertices, 0, split->numIndices-2);
-            }
-        }
-    }*/
-    // }
-
-    Gfx::pDevice->SetRenderState(D3DRS_BLENDFACTOR, old_factor);
-    Gfx::pDevice->SetRenderState(D3DRS_ALPHAREF, old_ref);
-    Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, old_blend);
-    Gfx::pDevice->SetRenderState(D3DRS_ZFUNC, old_z);
-    Gfx::pDevice->SetRenderState(D3DRS_DEPTHBIAS, old_bias);
-    Gfx::pDevice->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, old_slope);
-
-
-
-    Gfx::pDevice->SetDepthStencilSurface(old_surface);
-    Gfx::pDevice->SetViewport(&old_viewport);
-    Gfx::pDevice->SetRenderTarget(0, old_target);
-}
-
             if (Gfx::world_rendertarget)
             {
                 Gfx::world_rendertarget->Release();
+                Gfx::world_rendertarget = NULL;
             }
             return;
 }

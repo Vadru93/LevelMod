@@ -8,8 +8,8 @@
 
 #include "d3dx9.hpp"
 #include "d3d8to9.hpp"
-#include "..\QBKey.h"
-#include "..\CustomShaders.h"
+#include "..\Script\QBKey.h"
+#include "..\Render\CustomShaders.h"
 
 #define pRANDOM_SIZE 0x32000
 
@@ -84,13 +84,263 @@ PFN_D3DXLoadSurfaceFromSurface D3DXLoadSurfaceFromSurface = nullptr;
 std::ofstream LOG;
 #endif
 
+extern bool bDebugMode;
+#ifndef debug_print
+#ifdef _DEBUG
+#define debug_print(fmt, ...) \
+            do { printf(fmt, __VA_ARGS__); } while (0)
+#else
+#define debug_print(fmt, ...)
+#endif
+#endif
+
+
+extern unsigned long crc32f(const char* buf);
+//To optimize CRC we put the checksum in eax instead of calling Checksum("string")
+//string here means pointer in memory where string is pushed to stack
+//eax means pointer to where function is called and should be replaced with eax
+//esp means where stack is changed, since we remove the push string we need to decrease add esp with 4
+struct OptimizedCRC
+{
+    DWORD string;
+    DWORD eax;
+    DWORD esp;
+
+    void Optimize()
+    {
+        DWORD old;
+        DWORD temp_size = esp != 0xFF ? esp : 0;
+        VirtualProtect((LPVOID)string, 5 + 5 + 3 + eax + temp_size, PAGE_EXECUTE_READWRITE, &old);
+
+        DWORD ptr = string;
+        char error[256];
+        sprintf(error, "%X %d", string, esp);
+        ptr++;
+        char* c = *(char**)ptr;
+
+        *(BYTE*)string = 0x90;
+        string++;
+        ptr += 4;
+
+        //If trying to access esp we need to decrease by 4
+        DWORD temp_ptr = ptr;
+        if (esp != 0xFF)
+        {
+            while (*(BYTE*)temp_ptr == 0xC7 || *(BYTE*)temp_ptr == 0xC6 || *(BYTE*)temp_ptr == 0x88 || *(BYTE*)temp_ptr == 0x89)
+            {
+                if (temp_ptr > (ptr + eax))
+                {
+                    debug_print("temp_ptr %X ptr %X start %X\n", temp_ptr, ptr, string - 1);
+                    MessageBox(0, 0, 0, 0);
+                    break;
+                }
+                else if (*(BYTE*)temp_ptr == 0xC7 || *(BYTE*)temp_ptr == 0xC6)
+                {
+                    *(BYTE*)(temp_ptr + 3) -= 4;
+                    temp_ptr += 8;
+                }
+                else
+                {
+                    if (*(BYTE*)(temp_ptr + 1) == 0x9E)
+                    {
+                        *(BYTE*)(temp_ptr + 2) -= 4;
+                        temp_ptr += 6;
+                    }
+                    else
+                    {
+                        *(BYTE*)(temp_ptr + 3) -= 4;
+                        temp_ptr += 4;
+                    }
+                }
+            }
+        }
+
+        ptr += eax;
+        if (*(BYTE*)ptr != 0xE8)
+            MessageBox(0, "Wrong eax", "", 0);
+        *(BYTE*)ptr = 0xB8;
+        ptr++;
+        debug_print("Optimizing checksum access: %s\n", c);
+        *(DWORD*)ptr = crc32f(c);
+
+        //Replace push string with nop
+        *(DWORD*)string = 0x90909090;
+        if (esp == 0xFF)
+            return;
+        ptr += 4;
+        temp_ptr = ptr;
+
+        //If found push skip 5 bytes
+        if (*(BYTE*)temp_ptr == 0x68)
+            temp_ptr += 5;
+        else if (*(BYTE*)temp_ptr == 0x6A)
+            temp_ptr += 2;
+
+        //If trying to access esp we need to decrease by 4
+        while ((*(BYTE*)temp_ptr == 0x8B && (*(BYTE*)(temp_ptr + 2) != 0xE8 && *(BYTE*)(temp_ptr +1) != 0xF0 && *(BYTE*)(temp_ptr + 1) != 0xCB && *(BYTE*)(temp_ptr + 1) != 0x8F && *(BYTE*)(temp_ptr + 1) != 0x8E && *(BYTE*)(temp_ptr + 1) != 0x0E && *(BYTE*)(temp_ptr + 1) != 0x4E)) || *(BYTE*)temp_ptr == 0x88 || *(BYTE*)temp_ptr == 0x89)
+        {
+            if (temp_ptr >= (ptr + esp))
+            {
+                MessageBox(0, 0, 0, 0);
+                break;
+            }
+            else if (*(BYTE*)temp_ptr == 0x89  || *(BYTE*)temp_ptr == 0x88)
+            {
+                if (*(BYTE*)(temp_ptr + 1) == 0x9E)
+                {
+                    *(BYTE*)(temp_ptr + 2) -= 4;
+                    temp_ptr += 6;
+                }
+                else
+                {
+                    *(BYTE*)(temp_ptr + 3) -= 4;
+                    temp_ptr += 4;
+                }
+            }
+            else
+            {
+                /*printf("temp %X\n", temp_ptr);
+                MessageBox(0, "4", 0, 0);*/
+                *(BYTE*)(temp_ptr + 3) -= 4;
+                /*if (*(BYTE*)(temp_ptr + 3) == 0)
+                    *(BYTE*)(temp_ptr + 3) = 0x90;*/
+                    //advance to next
+                if (*(BYTE*)(temp_ptr + 1) == 0x8C)
+                    temp_ptr += 7;
+                else
+                    temp_ptr += 4;
+            }
+            //If found push skip 5 bytes
+            if (*(BYTE*)temp_ptr == 0x68 || *(BYTE*)temp_ptr == 0xE8 || *(BYTE*)temp_ptr == 0xB8)
+                temp_ptr += 5;
+            else if (*(BYTE*)temp_ptr == 0x6A)
+                temp_ptr += 2;
+        }
+        ptr += esp;
+        if (*(BYTE*)ptr != 0x83)
+        {
+            MessageBox(0, "Wrong esp", error, 0);
+        }
+
+        //If add esp, 4 replace it with nop
+        if (*(BYTE*)(ptr + 2) == 4)
+        {
+            *(BYTE*)ptr = 0x90;
+            ptr++;
+            *(BYTE*)ptr = 0x90;
+            ptr++;
+            *(BYTE*)ptr = 0x90;
+        }
+        //Else reduce by 4
+        else
+        {
+            *(BYTE*)(ptr + 2) -= 4;
+        }
+    }
+};
+
+OptimizedCRC optimized[] = { {0x00401B3F, 5, 9},  {0x00401E0C, 4, 9}, {0x004021DA, 4, 9}, {0x00404C50, 8, 0}, {0x00404C71, 0, 0},
+    {0x00404C89, 0, 0},  {0x00404CA1, 0, 0}, {0x00405240, 16, 0}, {0x00405640, 8, 0}, {0x0041525F, 0, 0}, {0x0041527A, 0, 0},
+    {0x00405660, 0, 0}, {0x00405678, 0, 0},  {0x0040BBA7, 0, 4},  {0x0040BBBD, 0, 4},  {0x0040BBD3, 0, 4},  {0x0040BBE9,0, 4},
+ {0x0040BBFF, 0, 4},  {0x00413C97, 0, 0},  {0x00413FB4, 0, 0},  {0x00413FD6, 0, 0},  {0x0041417E, 0, 0},   {0x0041419D, 0, 0},
+ {0x004141E7, 0, 0},  {0x00414206, 0, 0},  {0x004143BD, 0, 0},  {0x004146A4,8, 0 },  {0x004151A8, 0, 0},   {0x00415295, 0, 0},
+ {0x004152B2, 0, 0},  {0x004152D0, 0, 0},  {0x004152EC, 0, 0},  {0x00415374, 0, 0},  {0x00415397, 0, 0},   {0x004153BA, 0, 0},
+{0x004153E0, 0, 0}, {0x0041545B, 0, 0}, {0x00415476, 0, 0}, {0x00415491, 0, 0}, {0x004154A9, 0, 4}, {0x00416291, 8, 0},
+{0x004162DA, 0, 0}, {0x0041631B, 0, 0}, {0x004163A4, 0, 0}, {0x00416823, 8, 0}, {0x00416A52, 0, 9}, {0x00416A89, 0, 9},
+{0x00416AC0, 0, 9}, {0x00416AF3, 0, 9}, {0x00416B45, 0, 9}, {0x00416B75, 0, 9}, {0x00416BA5, 0, 9}, {0x00416C11, 0, 9},
+{0x00416C58, 0, 9}, {0x00416C7D, 0, 9}, {0x00416CA9, 0, 0}, {0x0041AA22, 0, 0}, {0x0041AC0C, 0, 0}, {0x0041AC3F, 0, 0},
+{0x0041B04A, 0, 0}, {0x0041D258, 0, 22}, {0x0041D268, 0, 6}, {0x0041F7B3, 8, 0}, {0x0041FF8C, 0, 0}, {0x00420051, 0, 0},
+{0x00421C41, 0, 0}, {0x00421C5D, 0, 0}, {0x0042216F, 8, 0}, {0x00422D31, 2, 0}, {0x00422D70, 0, 0}, {0x00422D7E, 0, 0},
+    {0x00422DB2, 0, 0}, {0x00422DC0, 0, 0}, {0x00422DD5, 2, 0}, {0x00422DE5, 0, 0}, {0x00422EF4, 0, 0}, {0x00422F0D, 0, 0},
+    {0x00422F23, 0, 0}, {0x00422FD9, 4, 0}, {0x004242CE, 8, 0}, {0x00424A05, 5, 9}, {0x00424BD8, 2, 0}, {0x00424BF9, 2, 0},
+    {0x00424EA5, 0, 0}, {0x0042556C, 0, 4}, {0x0042560F, 2, 0}, {0x00425639, 0, 4}, {0x004256BF, 2, 0}, {0x004256E9, 0, 4},
+    {0x0042576F, 2, 0}, {0x00425799, 0, 4}, {0x0042590F, 2, 0}, {0x00425939, 0, 4}, {0x00425A6F, 0, 21}, {0x00425A79, 4, 7},
+    {0x004265AB, 0, 0}, {0x0042C8B5, 0, 6}, {0x0042D59E, 11, 0}, {0x00431ED1, 11, 0}, {0x00433FF5, 0, 13}, {0x004341E8, 2, 0},
+    {0x00434212, 0, 4}, {0x00434236, 0, 4}, {0x00434508, 0, 0}, {0x00434531, 0, 0}, {0x0043484D, 0, 0}, {0x00434FCA, 0, 0},
+{0x004375B3, 0, 0}, {0x0043766C, 0, 0}, {0x004378E5, 2, 0}, /*{0x004380A5, 30, 0},*/ {0x004380ED, 6, 0}, {0x0043883C, 0, 0},
+    {0x00438BBA, 2, 4}, {0x00438E2D, 4, 4}, {0x00438E82, 0, 0}, {0x00438E9A, 0, 0}, {0x00438F9C, 0, 0}, {0x00438FC2, 0, 0},
+    {0x00438FDF, 0, 0}, {0x00438FFD, 0, 0}, {0x0043901B, 0, 0}, {0x00439528, 0, 0}, {0x00439585, 0, 0}, {0x004395F3, 0, 0},
+    {0x0043969B, 0, 0}, {0x0043972A, 0, 6}, {0x004399A9, 0, 0}, {0x004399BE, 0, 6}, {0x00439AE7, 0, 6}, {0x00439B6B, 2, 0},
+    {0x00439B8D, 0, 6}, {0x0043A342, 0, 4}, {0x0043A596, 0, 4}, {0x0043B229, 0, 4}, {0x0043B28C, 0, 0}, {0x0043CFF0, 5, 0},
+    {0x0043D00A, 0, 0}, {0x0043D01A, 0, 0}, {0x0043D039, 0, 0}, {0x0043D25C, 0, 0}, {0x0043D271, 0, 0}, {0x0043D281, 0, 0},
+    {0x0043D2C3, 4, 0}, {0x0043DA4A, 0, 0}, {0x0043DD79, 0, 3}, {0x0043DE11, 0, 0}, {0x0043DEF4, 5, 0}, {0x0043DF0E, 0, 0},
+    {0x0043769F, 0, 0}, {0x0043DF1E, 0, 0}, {0x0043DF3A, 0, 0}, {0x0043DFDA, 0, 0}, {0x0043E0E2, 0, 0}, {0x0043E0FB, 0, 0},
+    {0x0043E111, 0, 0}, {0x0043E144, 0, 2}, {0x0043E15D, 0, 0}, {0x0043FDAE, 0, 0}, {0x0043FF67, 0, 0}, {0x0043FFB9, 0, 0},
+    {0x004404EA, 5, 0}, {0x004409C0, 0, 9}, {0x00440A34, 0, 9}, {0x00440AB9, 4, 9}, {0x00440B1F, 8, 0}, {0x00440B4D, 0, 9},
+    {0x00440BC0, 0, 9}, {0x00440CF4, 0, 0}, {0x00440E25, 8, 9}, {0x0044114D, 3, 0}, {0x0044125E, 3, 0}, {0x00441412, 3, 0},
+    {0x00441570, 2, 0}, {0x00441592, 0, 0}, {0x004415B2, 0, 0}, {0x004415D2, 0, 0}, {0x004415F2, 0, 0}, {0x00441612, 0, 0},
+    {0x00441632, 0, 0}, {0x00441652, 0, 0}, {0x00441672, 0, 0}, {0x00441692, 0, 0}, {0x004416B2, 0, 0}, {0x004416D2, 0, 0},
+    {0x004416F2, 0, 0}, {0x00441712, 0, 0}, {0x00441732, 0, 0}, {0x00441752, 0, 0}, {0x00441772, 0, 0}, {0x00441792, 0, 0},
+    {0x004417B2, 0, 0}, {0x0044301E, 5 , 0}, {0x0044306C, 5, 0}, {0x004430BD, 5, 0}, {0x004431FD, 0, 0}, {0x004432A8, 8, 0},
+    {0x004432C0, 0, 0}, {0x00443377, 8, 0}, {0x0044338F, 0, 0}, {0x00443464, 4, 0}, {0x00443501, 4, 0}, {0x00443626, 0, 0},
+    {0x00443644, 5, 9}, {0x004438DE, 5, 0}, {0x0044393B, 0, 34}, {0x00443945, 6, 18}, {0x00443FE4, 8, 0}, {0x004440FE, 16, 0}
+};
+
+#ifdef _DEBUG
+namespace LevelModSettings
+{
+    extern bool bLogging;
+}
+#endif
+
+
+void PatchOpenSpy(DWORD address)
+{
+    DWORD old;
+    VirtualProtect((void*)address, 11, PAGE_EXECUTE_READWRITE, &old);
+    if (!strcmp((char*)address, "gamespy.com") && !strcmp((char*)address, "openspy.org"))
+    {
+        MessageBox(0, "Unknown exe detected", "Please install official 1.01 patch", 0);
+    }
+    else
+    {
+        char OpenSpy[] = "openspy.org";
+        memcpy((void*)address, OpenSpy, 11);
+    }
+}
+CRITICAL_SECTION critical;
+extern FILE* logFile;
 extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 {
+#ifdef _DEBUG
+    /*static char** ppArgs;
+    static DWORD num_args;
+    _asm mov eax, [esp+0x890+0xDC];
+    _asm mov ppArgs, eax;
+    _asm mov eax, [esp+0x8A0+0xDC];
+    _asm mov num_args, eax;
+    */
+    InitializeCriticalSection(&critical);
+    LPTSTR cmd = GetCommandLine();
+    cmd++;
+    while (*cmd != '"')
+        ++cmd;
+    cmd++;
+    while (isspace(*cmd))
+        cmd++;
+
+    while (*cmd == '-')
+    {
+        if (!_stricmp(cmd, "-log"))
+        {
+            LevelModSettings::bLogging = true;
+            logFile = fopen("LM_Log.txt", "w");
+            break;
+        }
+        else
+            cmd += strlen(cmd) + 1;
+    }
+#endif
     //MessageBox(0, 0, 0, 0);
     memcpy((char*)0x5BBAF8, "Scripts\\qdir_lm.txt", 20);
 
     ReadFirstOptions();
     DWORD old;
+
+    PatchOpenSpy(0x5CAEFD);
+    PatchOpenSpy(0x5CB46F);
+    PatchOpenSpy(0x5CB6DB);
+
     VirtualProtect((void*)0x0042B247, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((void*)0x0042B250, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((void*)0x0042B2C1, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
@@ -266,13 +516,38 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
     //*(DWORD*)0x54EA45 = 1; //fulscreen draw mode
     //*(DWORD*)0x54EA64 = 1; //windowed draw mode
 
+    //moved to here because code was executing in another thread and using half fixed stuff
+    //Optimize static checksum access
+    for (DWORD i = 0; i < sizeof(optimized) / sizeof(OptimizedCRC); i++)
+    {
+        /*for (DWORD j = 0; j < sizeof(optimized) / sizeof(OptimizedCRC); j++)
+        {
+            if (optimized[i].esp != 0xFF && optimized[i].string > optimized[j].string && optimized[i].string < (optimized[j].string + optimized[j].eax + optimized[j].esp + 10))
+            {
+                printf("%X\n", optimized[i].string);
+                MessageBox(0, 0, 0, 0);
+            }
+        }*/
+        optimized[i].Optimize();
+    }
+    /**(BYTE*)(0x00425A7E + 3) += 4;
+    *(BYTE*)(0x00425A87 + 3) += 4;
+    *(DWORD*)0x00425A8E = 0x8904C483;
+
+
+    *(BYTE*)(0x0044394A + 2) += 4;
+    *(BYTE*)(0x00443957 + 2) += 4;
+    *(DWORD*)0x00443967 = 0x8908C483;*/
+
+
+
     if (Gfx::fps_fix)
     {
         /**(DWORD*)0x004C067A = 0x90909090;
         *(DWORD*)(0x004C067A + 4) = 0x90909090;*/
-        *(DWORD*)0x004c050c = 0x3E80;// 16000;
+        /**(DWORD*)0x004c050c = 0x3E80;// 16000;
         *(DWORD*)0x004c067a = 0x90909090;
-        *(DWORD*)0x004c067e = 0x90909090;
+        *(DWORD*)0x004c067e = 0x90909090;*/
     }
 
     static BYTE CodeCave_AddAnimation[] = { 0x8D, 0x54, 0x29, 0x30, 0x8B, 0x03, 0x52, 0x85, 0xC0, 0x0F, 0x84, 0xD8, 0x49, 0x0F, 0x00, 0x05,

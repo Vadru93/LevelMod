@@ -1,3 +1,29 @@
+#ifndef COLLISION_H
+#define COLLISION_H
+
+struct RwLine
+{
+    Vertex start;
+    Vertex end;
+};
+
+namespace Collision
+{
+    struct Line;
+};
+typedef struct SuperSector;
+
+struct BBox
+{
+    Vertex max;
+    Vertex min;
+
+    bool Within_2D(const RwLine& line);
+    bool Intersect_2D(const BBox& bbox);
+    bool Intersect(const BBox& bbox);
+};
+
+
 namespace Collision
 {
 
@@ -6,18 +32,15 @@ namespace Collision
     {
         IGNORE0 = true,
     };
-    enum class Flags : unsigned char
+    enum class Flags : WORD
     {
-        Ignore = 0,
-        Wallride = 0x4,
-        Vert = 0x8,
-        Hollow = 0x10,
-        Trigger = 0x40,
-        Skatable = 0x80,
+        None = 0,
+        Wallride = 0x0004,
+        Vert = 0x0008,
+        Hollow = 0x0010,
+        Trigger = 0x0040,
+        Skatable = 0x0080,
     };
-<<<<<<< Updated upstream
-};
-=======
 
 
     Flags& operator+(const Flags& f1, const Flags& f2);
@@ -255,8 +278,8 @@ namespace Collision
         bool GetCollision()
         {
             return FindFirstCollision(*(RwLine*)&start, cld);
-            typedef bool(__thiscall* const pGetCollision)(CFeeler* pThis);
-            return pGetCollision(0x00496EA0)(this);
+            /*typedef bool(__thiscall* const pGetCollision)(CFeeler* pThis);
+            return pGetCollision(0x00496EA0)(this);*/
         }
     };
 
@@ -264,4 +287,3 @@ namespace Collision
     bool TriangleInsideSphere(D3DXVECTOR3 A, D3DXVECTOR3 B, D3DXVECTOR3 C, D3DXVECTOR3 P, float R);
 };
 #endif
->>>>>>> Stashed changes

@@ -89,12 +89,10 @@ namespace NewTimer
     void ProfileEnd()
     {
 //#ifdef _DEBUG
-        //char txt[200];
         LARGE_INTEGER end;
         QueryPerformanceCounter(&end);
         end.QuadPart -= profile_start.QuadPart;
         printf("Ms %f\n", (double)end.LowPart * NewTimer::fFreq);
-        //MessageBox(0, txt, txt, 0);
 //#endif
     }
 

@@ -11,7 +11,7 @@
 #include "d3d8to9.hpp"
 #include <regex>
 #include <assert.h>
-#include "..\CustomShaders.h"
+#include "..\Render\CustomShaders.h"
 
 extern D3DMULTISAMPLE_TYPE DeviceMultiSampleType;
 extern bool CopyRenderTarget;
@@ -180,12 +180,17 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateAdditionalSwapChain(D3DPRESENT_
     UpdatePresentParameterForMultisample(&d3dpp, DeviceMultiSampleType);
 
     d3dpp.BackBufferCount = Gfx::numBackBuffers; //(d3dpp.BackBufferCount) ? d3dpp.BackBufferCount : 1;
-    if (Gfx::fps_fix)
+    if (Gfx::bVSync)
     {
         d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-        d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+        //d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
         PresentParams.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-        PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+        //PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+    }
+    else
+    {
+        d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+        PresentParams.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
     }
     PresentParams.BackBufferCount = Gfx::numBackBuffers;// d3dpp.BackBufferCount;
     PresentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
@@ -197,7 +202,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::CreateAdditionalSwapChain(D3DPRESENT_
         D3DDEVICE_CREATION_PARAMETERS CreationParams;
         ProxyInterface->GetCreationParameters(&CreationParams);
 
-        for (int x = min((Gfx::AntiAliasing == 1 ? 16 : Gfx::AntiAliasing), 16); x > 0; x--)
+        for (int x = min((Gfx::AntiAliasing == 1 ? 16 : Gfx::AntiAliasing), 16); x > 1; x--)
         {
             d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)x;
             DWORD QualityLevels = 0;
@@ -248,10 +253,14 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::Reset(D3DPRESENT_PARAMETERS8* pPresen
     D3DPRESENT_PARAMETERS PresentParams;
     ConvertPresentParameters(*pPresentationParameters, PresentParams);
 
-    if (Gfx::fps_fix)
+    if (Gfx::bVSync)
     {
         PresentParams.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-        PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+        //PresentParams.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
+    }
+    else
+    {
+        PresentParams.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
     }
     PresentParams.BackBufferCount = Gfx::numBackBuffers;// d3dpp.BackBufferCount;
     PresentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;

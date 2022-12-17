@@ -117,7 +117,7 @@ EXTERN struct SuperSector
     {
         for (auto i = 0; i < numIndices; i++)
         {
-            if(!((WORD)pCollisionFlags[i] & (WORD)Collision::Flags::Hollow))
+            if (!((WORD)pCollisionFlags[i] & (WORD)Collision::Flags::Hollow))
                 return true;
         }
         return false;
@@ -272,9 +272,9 @@ namespace Collision
 
             //set default requirements to all collideable flags
             req_flags = ::SuperSector::Flags::Collideable;
-            
+
             //zero everything else
-            ZeroMemory(&idx, sizeof(CollCache)-sizeof(BBox)-4);
+            ZeroMemory(&idx, sizeof(CollCache) - sizeof(BBox) - 4);
         }
 
         void Clear()
@@ -291,7 +291,7 @@ namespace Collision
 
         void Update(RwLine& line, bool definite_mask = false);
 
-        CollCache* GetCache(RwLine & line, bool definite_mask = false)
+        CollCache* GetCache(RwLine& line, bool definite_mask = false)
         {
             if (!bbox.Within_2D(line))
             {
@@ -329,7 +329,7 @@ namespace Collision
     private:
         BBox bbox;
         DWORD			    numSectors;
-        ::RpWorldSector**   super_sectors;
+        ::RpWorldSector** super_sectors;
 
         void Sort()
         {
@@ -400,7 +400,7 @@ namespace Collision
 
                     for (DWORD i = 0; i < sector.numSectors; i++)
                     {
-                        ::SuperSector* s = sector.super_sectors[i]; 
+                        ::SuperSector* s = sector.super_sectors[i];
                         debug_print("%p %X\n", s, s->req_flags);
 
                         //Does the sector have collision plugin and is it collideable?
@@ -435,7 +435,7 @@ namespace Collision
                 }
             }
         }
-        __declspec(noalias) CollCache* GetIntersectingWorldSectors(const RwLine& line, CollData & data, bool update_cache = false) const
+        __declspec(noalias)CollCache* GetIntersectingWorldSectors(const RwLine& line, CollData& data, bool update_cache = false) const
         {
             if (data.cache)
             {
@@ -464,40 +464,31 @@ namespace Collision
             Vertex dir = line.end - line.start;
             dir.Normalize();
             dir.Scale(0.5f);
-
             test_line.start[X] = line.start[X] - dir.x;
             test_line.start[Y] = line.start[Y] - dir.y;
             test_line.start[Z] = line.start[Z] - dir.z;
             test_line.end[X] = line.end[X] + dir.x;
             test_line.end[Y] = line.end[Y] + dir.y;
             test_line.end[Z] = line.end[Z] + dir.z;
-
-
             float x_offset = test_line.start[X] - world_bbox.min[X];
             float z_offset = test_line.start[Z] - world_bbox.min[Z];
             int start_x_box = (int)(x_offset / sector_width);
             int start_z_box = (int)(z_offset / sector_depth);
-
             start_x_box < 0 ? start_x_box = 0 : start_x_box >= num_sectors_x ? start_x_box = num_sectors_x-1 : start_x_box = start_x_box;
             start_z_box < 0 ? start_z_box = 0 : start_z_box >= num_sectors_z ? start_z_box = num_sectors_z-1 : start_z_box = start_z_box;
-
             x_offset = test_line.end[X] - world_bbox.min[X];
             z_offset = test_line.end[Z] - world_bbox.min[Z];
             int end_x_box = (int)(x_offset / sector_width);
             int end_z_box = (int)(z_offset / sector_depth);
-
             end_x_box < 0 ? end_x_box = 0 : end_x_box >= num_sectors_x ? end_x_box = num_sectors_x-1 : end_x_box = end_x_box;
             end_z_box < 0 ? end_z_box = 0 : end_z_box >= num_sectors_z ? end_z_box = num_sectors_z-1 : end_z_box = end_z_box;
-
             //Optimization if in same Sector
             if (start_x_box == end_x_box && start_z_box == end_z_box)
             {
                 Sector* sector = &sectors[start_x_box][start_z_box];
-
                 for(coll_cache_idx = 0; coll_cache_idx < sector->numSectors; coll_cache_idx++)
                 {
                     ::RpWorldSector* world_sector = sector->super_sectors[coll_cache_idx];
-
                     //Skip if kill flag is set
                     if (!world_sector->unk_flag & 6 || world_sector->state & 6)
                         continue;
@@ -513,7 +504,6 @@ namespace Collision
                 pCollCache[coll_cache_idx] = NULL;
                 return pCollCache;
             }
-
             if (start_x_box > end_x_box)
             {
                 float temp = start_x_box;
@@ -526,13 +516,10 @@ namespace Collision
                 start_z_box = end_z_box;
                 end_z_box = temp;
             }
-
             //New operation ID
             operationId++;
-
             //Set CollCache Index to zero
             coll_cache_idx = 0;
-
             //Now get Sectors inside the line bbox start - end
             for (int i = start_x_box; i <= end_x_box; i++)
             {
@@ -541,14 +528,12 @@ namespace Collision
                     for (DWORD k = 0; k < sectors[i][j].numSectors; k++)
                     {
                         ::SuperSector* cs = sectors[i][j].super_sectors[k];
-
                         //OperationId is used so we only add each SuperSector once
                         if (cs->pUnknown != operationId)
                         {
                             //Skip if kill flag is set
                             if (!cs->unk_flag & 6 || cs->state & 6)
                                 continue;
-
                             if (coll_cache_idx < 1023)
                             {
                                 if (Collision::cache_bbox.max.x < sectors[i][j].bbox.max.x) Collision::cache_bbox.max.x = sectors[i][j].bbox.max.x;
@@ -557,11 +542,10 @@ namespace Collision
                                 if (Collision::cache_bbox.min.x > sectors[i][j].bbox.min.x) Collision::cache_bbox.min.x = sectors[i][j].bbox.min.x;
                                 if (Collision::cache_bbox.min.y > sectors[i][j].bbox.min.y) Collision::cache_bbox.min.y = sectors[i][j].bbox.min.y;
                                 if (Collision::cache_bbox.min.z > sectors[i][j].bbox.min.z) Collision::cache_bbox.min.z = sectors[i][j].bbox.min.z;
-                                pCollCache[coll_cache_idx++] = cs; 
+                                pCollCache[coll_cache_idx++] = cs;
                                 cs->pUnknown = operationId;
                             }
                         }
-
                     }
                 }
             }
@@ -695,7 +679,7 @@ namespace Collision
                 for (int j = start_z_box; j <= end_z_box; j++)
                 {
                     //Optimize array access
-                    const Collision::Sector & sector = sectors[i][j];
+                    const Collision::Sector& sector = sectors[i][j];
 
                     if (cache->bbox.max.x < sector.bbox.max.x) cache->bbox.max.x = sector.bbox.max.x;
                     if (cache->bbox.max.y < sector.bbox.max.y) cache->bbox.max.y = sector.bbox.max.y;
@@ -887,7 +871,6 @@ struct MovingObject
     /*bool SetUpLookAtPos(const Vertex& lookToPos, const Vertex& currentPos, int headingAxis, int rotAxis, float threshold)
     {
         Vertex pathHeading = lookToPos - currentPos;
-
         angle[rotAxis] = 0.0f;
         goalAngle[rotAxis] = GetAngle(orient, pathHeading, headingAxis, rotAxis);
         if (fabs(goalAngle[rotAxis]) > threshold)
@@ -895,7 +878,6 @@ struct MovingObject
             rotation |= (MOVINGOBJ_STATUS_ROTX << rotAxis);
             return true;
         }
-
         return false;
     }*/
 
@@ -949,23 +931,22 @@ struct MovingObject
         //D3DXVECTOR3 pathHeading = goal - pos;
         //goalAngle = //Vertex(0, GetAngle(orient, *(Vertex*)&pathHeading, Z, Y), 0);// 
         goalAngle = D3DXVECTOR3(0, atan2f((pos.x - goal.x), (pos.z - goal.z)), 0);//D3DXVECTOR3(0, AngleY(orient, pos, goal), 0);
-    //angle.y = D3DX_PI;
-    //goalAngle += angle;
+        //angle.y = D3DX_PI;
+        //goalAngle += angle;
 
-    /*D3DXVECTOR3 lookAt = goalAngle - angle;
-                debug_print("current lookAt %f %f %f\n", lookAt.x, lookAt.y, lookAt.z);
-                D3DXVec3Normalize(&lookAt, &lookAt);
-                lookAt *= delta;
-                debug_print("delta lookAt %f %f %f\n", lookAt.x, lookAt.y, lookAt.z);*/
-                /*(*(Matrix*)&orient).RotateYLocal(goalAngle.y);
-                (*(Matrix*)&orient).OrthoNormalizeAbout2(Y);*/
+        /*D3DXVECTOR3 lookAt = goalAngle - angle;
+                    debug_print("current lookAt %f %f %f\n", lookAt.x, lookAt.y, lookAt.z);
+                    D3DXVec3Normalize(&lookAt, &lookAt);
+                    lookAt *= delta;
+                    debug_print("delta lookAt %f %f %f\n", lookAt.x, lookAt.y, lookAt.z);*/
+                    /*(*(Matrix*)&orient).RotateYLocal(goalAngle.y);
+                    (*(Matrix*)&orient).OrthoNormalizeAbout2(Y);*/
 
-                /*direction = goal - pos;
-                D3DXVec3Normalize(&Velocity, &direction);
-                Velocity *= speed * delta;
-
-                D3DXMatrixTranslation(&nodeTranslation, Velocity.x + pos.x, Velocity.y + pos.y, Velocity.z + pos.z);
-                D3DXMatrixMultiply(&world, &nodeRotation, &nodeTranslation)*/
+                    /*direction = goal - pos;
+                    D3DXVec3Normalize(&Velocity, &direction);
+                    Velocity *= speed * delta;
+                    D3DXMatrixTranslation(&nodeTranslation, Velocity.x + pos.x, Velocity.y + pos.y, Velocity.z + pos.z);
+                    D3DXMatrixMultiply(&world, &nodeRotation, &nodeTranslation)*/
 
 
         bboxMax = D3DXVECTOR3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
@@ -1000,7 +981,6 @@ struct MovingObject
         /*bboxMax = D3DXVECTOR3(-FLT_MAX, -FLT_MAX, -FLT_MAX);
         bboxMin = D3DXVECTOR3(FLT_MAX, FLT_MAX, FLT_MAX);
         vertices = new D3DXVECTOR3[sector->numVertices];
-
         for (DWORD i = 0; i < sector->numVertices; i++)
         {
             vertices[i] = sector->vertices[i] - pos;
@@ -1008,12 +988,10 @@ struct MovingObject
                 bboxMax.x = sector->vertices[i].x;
             if (bboxMin.x > sector->vertices[i].x)
                 bboxMin.x = sector->vertices[i].x;
-
             if (bboxMax.y < sector->vertices[i].y)
                 bboxMax.y = sector->vertices[i].y;
             if (bboxMin.y > sector->vertices[i].y)
                 bboxMin.y = sector->vertices[i].y;
-
             if (bboxMax.z < sector->vertices[i].z)
                 bboxMax.z = sector->vertices[i].z;
             if (bboxMin.z > sector->vertices[i].z)
@@ -1047,4 +1025,4 @@ struct MovingObject
 };
 
 EXTERN extern std::vector<MovingObject> movingObjects;//List of Objects on the move
-#endif
+#endif 
