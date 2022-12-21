@@ -4,10 +4,10 @@
 
 bool BBox::Within_2D(const RwLine& line)
 {
-        return ((line.start[X] > min[X]) && /*(line.start[Y] > min[Y]) &&*/ (line.start[Z] > min[Z]) &&
-            (line.start[X] < max[X]) && /*(line.start[Y] < max[Y]) &&*/ (line.start[Z] < max[Z]) &&
-            (line.end[X] > min[X]) && /*(line.end[Y] > min[Y]) &&*/ (line.end[Z] > min[Z]) &&
-                (line.end[X] < max[X]) && /*(line.end[Y] < max[Y]) &&*/ (line.end[Z] < max[Z]));
+    return ((line.start[X] > min[X]) && /*(line.start[Y] > min[Y]) &&*/ (line.start[Z] > min[Z]) &&
+        (line.start[X] < max[X]) && /*(line.start[Y] < max[Y]) &&*/ (line.start[Z] < max[Z]) &&
+        (line.end[X] > min[X]) && /*(line.end[Y] > min[Y]) &&*/ (line.end[Z] > min[Z]) &&
+        (line.end[X] < max[X]) && /*(line.end[Y] < max[Y]) &&*/ (line.end[Z] < max[Z]));
 }
 
 bool BBox::Intersect(const BBox& bbox)
@@ -80,7 +80,7 @@ namespace Collision
     }
 
 
-    bool TriangleIntersection(const D3DXVECTOR3* v1, const D3DXVECTOR3* v2, const D3DXVECTOR3* v3, const D3DXVECTOR3* rayPos, const D3DXVECTOR3* rayDir, float & out_distance)
+    bool TriangleIntersection(const D3DXVECTOR3* v1, const D3DXVECTOR3* v2, const D3DXVECTOR3* v3, const D3DXVECTOR3* rayPos, const D3DXVECTOR3* rayDir, float& out_distance)
     {
         D3DXVECTOR3 edge1, edge2, tvec, pvec, qvec;
         float det, inv_det;
@@ -172,7 +172,7 @@ namespace Collision
 
         //don't remember if this was some wild idea I had or if it's actually how RW does it??
         //either way it seems to be a bad implementation, keeping it here just in case...
-        
+
         /*float start_min = *(float*)((BYTE*)(&line.start.x) + axis) - branch->min;
         float end_min = *(float*)((BYTE*)(&line.end.x) + axis) - branch->min;
         if ((*(int*)&start_min < 0) && (*(int*)&end_min < 0))
@@ -195,7 +195,108 @@ namespace Collision
                     bCollided_left = TraverseBranch(&branches[branch->leftIndex], line, dir, sector, data);
                 else
                     bCollided_left = CollideWithLine(leafs[branch->leftIndex], *(Vertex*)&line.start, dir, sector, data);
+                if (branch->rightType == 2)
+                    bCollided_right = TraverseBranch(&branches[branch->rightIndex], line, dir, sector, data);
+                else
+                    bCollided_right = CollideWithLine(leafs[branch->rightIndex], *(Vertex*)&line.start, dir, sector, data);
+                return bCollided_left || bCollided_right;
+            }
+            else
+            {
+                //debug_print("Going Righ\n");
+                if (branch->rightType == 2)
+                    return TraverseBranch(&branches[branch->rightIndex], line, dir, sector, data);
+                else
+                    return CollideWithLine(leafs[branch->rightIndex], *(Vertex*)&line.start, dir, sector, data);
+            }
+        }*/
+        return false;
+    }
 
+    __inline __declspec (noalias) bool CollisionPLG::FirstTraverseBranch(const Branch* const __restrict branch, const RwLine& line, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const
+    {
+        //axis is optimized for easy access of x, y and z
+        //x + 0 bytes = x
+        //x + 4 bytes = y
+        //x + 8 bytes = z
+        WORD axis = branch->axis;
+        //align the line start and end point with the branch
+        float axis_aligned_start = *(float*)((BYTE*)(&line.start.x) + axis);
+        float axis_aligned_end = *(float*)((BYTE*)(&line.end.x) + axis);
+
+        //debug_print("Axis %d branchmax % f branchmin % f linemax % f linemin % f\n", axis, branch->max, branch->min, axis_aligned_start, axis_aligned_end);
+
+        //compare to mid, go left or right?
+        //optimization suggestion: change BSP collision tree to store middle point directly instead of storing min and max
+        //this will use 4 less bytes per node and use few less instructions per node call
+        //this should improve collision detection speed since less bytes will lead to less cache misses
+        //and the removed instructions will obviusly be faster code, how much? who knows...
+        //RW 3.4 and later has this optimization
+        float mid = (branch->max - branch->min) * 0.5f + branch->min;
+
+        if (axis_aligned_start < mid && axis_aligned_end < mid)
+        {
+            //debug_print("Going Left\n");
+            if (branch->leftType == 2)
+                return FirstTraverseBranch(&branches[branch->leftIndex], line, dir, sector, data);
+            else
+                return FirstCollideWithLine(leafs[branch->leftIndex], *(Vertex*)&line.start, dir, sector, data);
+        }
+        else if (axis_aligned_start >= mid && axis_aligned_end >= mid)
+        {
+            //debug_print("Going Righ\n");
+            if (branch->rightType == 2)
+                return FirstTraverseBranch(&branches[branch->rightIndex], line, dir, sector, data);
+            else
+                return FirstCollideWithLine(leafs[branch->rightIndex], *(Vertex*)&line.start, dir, sector, data);
+        }
+        else
+        {
+            //How often are we going both ways?
+            //Maybe can optimize the tree creation in LevelEditor to make it happen less often
+            //debug_print("Going Both\n");
+            bool bCollided_left, bCollided_right;
+            if (branch->leftType == 2)
+                bCollided_left = FirstTraverseBranch(&branches[branch->leftIndex], line, dir, sector, data);
+            else
+                bCollided_left = FirstCollideWithLine(leafs[branch->leftIndex], *(Vertex*)&line.start, dir, sector, data);
+
+            if (bCollided_left)
+                return true;
+
+            if (branch->rightType == 2)
+                bCollided_right = FirstTraverseBranch(&branches[branch->rightIndex], line, dir, sector, data);
+            else
+                bCollided_right = FirstCollideWithLine(leafs[branch->rightIndex], *(Vertex*)&line.start, dir, sector, data);
+            return bCollided_right;
+        }
+
+
+        //don't remember if this was some wild idea I had or if it's actually how RW does it??
+        //either way it seems to be a bad implementation, keeping it here just in case...
+
+        /*float start_min = *(float*)((BYTE*)(&line.start.x) + axis) - branch->min;
+        float end_min = *(float*)((BYTE*)(&line.end.x) + axis) - branch->min;
+        if ((*(int*)&start_min < 0) && (*(int*)&end_min < 0))
+        {
+            //debug_print("Going Left\n");
+            if (branch->leftType == 2)
+                return TraverseBranch(&branches[branch->leftIndex], line, dir, sector, data);
+            else
+                return CollideWithLine(leafs[branch->leftIndex], *(Vertex*)&line.start, dir, sector, data);
+        }
+        else
+        {
+            float start_max = *(float*)((BYTE*)(&line.start.x) + axis) - branch->max;
+            float end_max = *(float*)((BYTE*)(&line.end.x) + axis) - branch->max;
+            if (*(int*)&start_max < 0 || *(int*)&end_max < 0)
+            {
+                //debug_print("Going Both\n");
+                bool bCollided_left, bCollided_right;
+                if (branch->leftType == 2)
+                    bCollided_left = TraverseBranch(&branches[branch->leftIndex], line, dir, sector, data);
+                else
+                    bCollided_left = CollideWithLine(leafs[branch->leftIndex], *(Vertex*)&line.start, dir, sector, data);
                 if (branch->rightType == 2)
                     bCollided_right = TraverseBranch(&branches[branch->rightIndex], line, dir, sector, data);
                 else
@@ -216,7 +317,7 @@ namespace Collision
 
     __inline __declspec (noalias) bool CollisionPLG::CollideWithLine(const Vertex& start, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const
     {
-#pragma omp parallel for
+        //#pragma omp parallel for never faster??
         for (auto idx = 0; idx < numFaces; idx++)
         {
             DWORD collFlags = (WORD)sector->pCollisionFlags[idx];
@@ -234,13 +335,16 @@ namespace Collision
                     if (data.unk > distance)
                     {
 
-                        data.unk = distance;
                         data.collided = true;
+                        data.unk = distance;
+
+                        data.collFlags = (Collision::Flags)collFlags;
+                        data.trigger = collFlags >> 6 & 1;
+
                         data.checksum = sector->name;
                         //data.p_sector = sector;
                         data.index = faces[idx];
-                        data.terrain = face.matIndex;
-                        data.collFlags = (Collision::Flags)collFlags;
+                        //data.terrain = face.matIndex;
                         data.v0 = v0;
                         data.v1 = v1;
                         data.v2 = v2;
@@ -251,6 +355,46 @@ namespace Collision
         }
 
         return data.collided;
+    }
+
+    __inline __declspec (noalias) bool CollisionPLG::FirstCollideWithLine(const Vertex& start, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const
+    {
+        //#pragma omp parallel for never faster??
+        for (auto idx = 0; idx < numFaces; idx++)
+        {
+            DWORD collFlags = (WORD)sector->pCollisionFlags[idx];
+            if (!(collFlags & (WORD)data.ignore_1) && !(~collFlags & (WORD)data.ignore_0))
+            {
+                RpTriangle& face = sector->triangles[idx];
+                Vertex v0 = sector->vertices[face.a];
+                Vertex v1 = sector->vertices[face.b];
+                Vertex v2 = sector->vertices[face.c];
+
+                float distance;/* , u, v;
+                Vertex normal;*/
+                if (TriangleIntersection(&v0, &v1, &v2, &start, &dir, distance))//if (intersect_triangle(*(D3DXVECTOR3*)&line.start, rayDir, v0, v1, v2, distance, u, v, normal))
+                {
+
+                    data.collided = true;
+                    data.unk = distance;
+
+                    data.collFlags = (Collision::Flags)collFlags;
+                    data.trigger = collFlags >> 6 & 1;
+
+                    data.checksum = sector->name;
+                    //data.p_sector = sector;
+                    data.index = faces[idx];
+                    //data.terrain = face.matIndex;
+                    data.v0 = v0;
+                    data.v1 = v1;
+                    data.v2 = v2;
+
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     __inline __declspec (noalias) bool CollisionPLG::CollideWithLine(const Leaf& leaf, const Vertex& start, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const
@@ -272,14 +416,16 @@ namespace Collision
                 {
                     if (data.unk > distance)
                     {
-
-                        data.unk = distance;
                         data.collided = true;
+                        data.unk = distance;
+
+                        data.collFlags = (Collision::Flags)collFlags;
+                        data.trigger = collFlags >> 6 & 1;
+
                         data.checksum = sector->name;
                         //data.p_sector = sector;
                         data.index = faces[idx];
-                        data.terrain = face.matIndex;
-                        data.collFlags = (Collision::Flags)collFlags;
+                        //data.terrain = face.matIndex;
                         data.v0 = v0;
                         data.v1 = v1;
                         data.v2 = v2;
@@ -289,6 +435,44 @@ namespace Collision
             }
         }
         return data.collided;
+    }
+
+    __inline __declspec (noalias) bool CollisionPLG::FirstCollideWithLine(const Leaf& leaf, const Vertex& start, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const
+    {
+        DWORD last = leaf.numFaces + leaf.idx;
+        for (DWORD idx = leaf.idx; idx < last; idx++)
+        {
+            DWORD collFlags = (WORD)sector->pCollisionFlags[faces[idx]];
+            if (!(collFlags & (WORD)data.ignore_1) && !(~collFlags & (WORD)data.ignore_0))
+            {
+                RpTriangle& face = sector->triangles[faces[idx]];
+                Vertex v0 = sector->vertices[face.a];
+                Vertex v1 = sector->vertices[face.b];
+                Vertex v2 = sector->vertices[face.c];
+
+                float distance;/* , u, v;
+                Vertex normal;*/
+                if (TriangleIntersection(&v0, &v1, &v2, &start, &dir, distance))//if (intersect_triangle(*(D3DXVECTOR3*)&line.start, rayDir, v0, v1, v2, distance, u, v, normal))
+                {
+                    data.collided = true;
+                    data.unk = distance;
+
+                    data.collFlags = (Collision::Flags)collFlags;
+                    data.trigger = collFlags >> 6 & 1;
+
+                    data.checksum = sector->name;
+                    //data.p_sector = sector;
+                    data.index = faces[idx];
+                    //data.terrain = face.matIndex;
+                    data.v0 = v0;
+                    data.v1 = v1;
+                    data.v2 = v2;
+
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     __declspec (noalias) bool FindFirstCollision(const RwLine& line, CollData& data, bool update_cache)
@@ -333,10 +517,13 @@ namespace Collision
 
         CollCache* cache = cld_manager->GetIntersectingWorldSectors(line, data, update_cache);
 
+        //Sanity check, probably not needed?
+        ::SuperSector* __restrict sector = cache->GetSuperSector(0);
+        if (sector == NULL)
+            return data.collided;
+
         for (const ::SuperSector* const* __restrict sectors = cache->GetSuperSectors(); const ::SuperSector* const __restrict sector = *sectors; sectors++)
         {
-            if (sector == NULL)
-                return data.collided;
 
             //is the line intersecting the sector bbox?
             if (line_bbox.Intersect((*(BBox*)&sector->bboxMax)))
@@ -345,7 +532,7 @@ namespace Collision
                 if (sector->state != 6)
                 {
                     //is the line intersecting any of the sector triangles?
-                    if (sector->GetCollisionPlugin()->CollideWithLine(extended_line, rayDir, sector, data))
+                    if (sector->GetCollisionPlugin()->FirstCollideWithLine(extended_line, rayDir, sector, data))
                     {
                         Vertex edge1 = data.v0 - data.v1;
                         Vertex edge2 = data.v1 - data.v2;
@@ -405,28 +592,58 @@ namespace Collision
         Collision::Manager* cld_manager = plg->GetManager();
 
         CollCache* cache = cld_manager->GetIntersectingWorldSectors(line, data, update_cache);
-//#pragma omp parallel for throwing a compiler error for some reason...
-        for(/*int i=0; i<cache->GetNumSuperSectors(); i++)//*/::SuperSector** sectors = cache->GetSuperSectors(); ::SuperSector* sector = *sectors;  sectors++)
+
+        //Sanity check, probably not needed?
+        ::SuperSector* __restrict sector = cache->GetSuperSector(0);
+        if (sector == NULL)
+            return data.collided;
+        //NewTimer::ProfileStart();
+        //if less than 75 sectors, single threaded is usually faster or around same speed
+        if (cache->GetNumSuperSectors() < 75)
         {
-            //::SuperSector* __restrict sector = cache->GetSuperSector(i);
-            if (sector == NULL)
-                return data.collided;
-
-            //is the line intersecting the sector bbox?
-            if (line_bbox.Intersect((*(BBox*)&sector->bboxMax)))
+            for (::SuperSector** __restrict sectors = cache->GetSuperSectors(); ::SuperSector * __restrict sector = *sectors; sectors++)
             {
-                //Is the sector killed since last cache update?
-                if (sector->state != 6)
-                {
-                    //is the line intersecting any of the sector triangles?
-                    if (sector->GetCollisionPlugin()->CollideWithLine(extended_line, rayDir, sector, data))
-                    {
-                        //debug_print("Colliding with sector %s\n", FindChecksumName(sector->name));
-                    }
-                }
 
+                //is the line intersecting the sector bbox?
+                if (line_bbox.Intersect((*(BBox*)&sector->bboxMax)))
+                {
+                    //Is the sector killed since last cache update?
+                    if (sector->state != 6)
+                    {
+                        //is the line intersecting any of the sector triangles?
+                        if (sector->GetCollisionPlugin()->CollideWithLine(extended_line, rayDir, sector, data))
+                        {
+                            //debug_print("Colliding with sector %s\n", FindChecksumName(sector->name));
+                        }
+                    }
+
+                }
             }
         }
+        else
+        {
+#pragma omp parallel for//above 75 multi-threaded is 50-200% faster
+            for (int i = 0; i < cache->GetNumSuperSectors(); i++)//::SuperSector** sectors = cache->GetSuperSectors(); ::SuperSector* sector = *sectors;  sectors++)
+            {
+                ::SuperSector* __restrict sector = cache->GetSuperSector(i);
+
+                //is the line intersecting the sector bbox?
+                if (line_bbox.Intersect((*(BBox*)&sector->bboxMax)))
+                {
+                    //Is the sector killed since last cache update?
+                    if (sector->state != 6)
+                    {
+                        //is the line intersecting any of the sector triangles?
+                        if (sector->GetCollisionPlugin()->CollideWithLine(extended_line, rayDir, sector, data))
+                        {
+                            //debug_print("Colliding with sector %s\n", FindChecksumName(sector->name));
+                        }
+                    }
+
+                }
+            }
+        }
+        //NewTimer::ProfileEnd();
         if (data.collided)
         {
             Vertex edge1 = data.v0 - data.v1;

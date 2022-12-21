@@ -93,6 +93,7 @@ double Gfx::target_fps = 60.0;
 double Gfx::frame_modifier = 0.0;
 DWORD Gfx::num_threads = 1;
 bool Gfx::bOldWindowed = false;
+RECT Gfx::window_rect = RECT(50,50,0,0);
 
 bool GameState::IsActive()
 {

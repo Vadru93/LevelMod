@@ -29,6 +29,7 @@ namespace NewTimer
     unsigned long long time_now;
     DWORD hybrid_loop_time = 0;
     DWORD ticks_hybrid;
+    DWORD lastTimeToggleWindowed = 0;
 
 
     void CalculateFPSTimers()
@@ -131,6 +132,9 @@ namespace NewTimer
         timeBeginPeriod(1);
         reset_time = timeGetTime();
         timeEndPeriod(1);
+        time_now = reset_time;
+
+        lastTimeToggleWindowed = 0;
 
         //Now we need to reset physics, script timers and KeyState timers
 
@@ -179,7 +183,7 @@ namespace NewTimer
     {
         //timer_old_start = timer_time.LowPart;
         timeBeginPeriod(1);
-        unsigned long long time_now = timeGetTime() - reset_time;
+        time_now = timeGetTime() - reset_time;
         timeEndPeriod(1);
         return time_now;
 

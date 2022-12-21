@@ -297,7 +297,7 @@ namespace Checksums
             revert_text_id = COMPILE_CRC32("revert_text_id"),
             spine_text_id = COMPILE_CRC32("spine_text_id"),
 
-
+            Wall_Non_Skatable_Angle = COMPILE_CRC32("wall_non_skatable_angle"),
 
         //Trick_KFBackflip = 0xF7B4E0CB
 

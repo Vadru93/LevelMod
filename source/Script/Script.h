@@ -105,6 +105,8 @@ namespace QScript
         bool  paused;
     };
 
+    float GetPhysicsFloat(DWORD name);
+
     void ClearScript(DWORD index);
 
     char* GetScriptDir(bool second = false);

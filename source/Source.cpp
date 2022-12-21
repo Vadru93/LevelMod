@@ -765,7 +765,8 @@ void DestroySuperSectors()
     RpWorld* world = RwViewer::Instance()->GetCurrentWorld();
     NxPlugin* plg = world->GetWorldPluginData();
     Collision::Manager* cld_manager = plg->GetManager();
-    cld_manager->RestoreWorldSectorFlags();
+    if(cld_manager)
+        cld_manager->RestoreWorldSectorFlags();
 
     debug_print("Restore vibration\n");
     if(LevelModSettings::bHookedControls && XINPUT::Player1->IsConnected())
@@ -3385,12 +3386,12 @@ __declspec(naked) void Checksum_naked()
 
     _asm call[jmpBack];
     _asm mov chc, eax
-    _asm pushad;
-    _asm pushfd;
+    //_asm pushad;
+    //_asm pushfd;
     retAddr = pESP[0];
     AddChecksum(chc, checksum_name, retAddr);
-    _asm popfd;
-    _asm popad;
+    //_asm popfd;
+    //_asm popad;
     _asm mov eax, chc
     _asm ret;
 }
@@ -4124,6 +4125,15 @@ DWORD optimized2[] = { 0x0040100F, 0x00401D40, 0x00402478, 0x0041117C, 0x0041158
 0x00441913, 0x00441AAE, 0x00441AB8, 0x004422FF, 0x00442375, 0x004423D9, 0x004423E5, 0x00442E2A, 0x00442EB7, 0x00443405,
 0x004434A7, 0x00443545, 0x00443D9F, 0x00443E8F, 0x00443F7F, 0x004449A9, 0x004C5E9E, 0x0047FAA0, 0x0047759E, 0x00474A98};
 
+DWORD optimized_qphysics[] = { 0x0040100F, 0x00401D40, 0x00402478, 0x0041117C, 0x00411589, 0x00413A31, 0x00413A3D, 0x00413AEF,
+0x00413AFB, 0x004155B2, 0x004194EC, 0x0041963B, 0x0041A6CA, 0x0041AC5A, 0x004201CD, 0x004251F9, 0x00425250, 0x0042527D,
+0x0042528B, 0x004263CA, 0x0042641A, 0x0042646A, 0x004264BA, 0x0042651F, 0x0042657A, 0x004265DA, 0x004273F2, 0x00428254,
+0x004286D8, 0x00429776, 0x00429856, 0x00429936, 0x00429A26, 0x00429B16, 0x00429C26, 0x00429CF6, 0x00429DD6, 0x00429E52,
+0x00429F16, 0x00429FCA, 0x0042B0DF, 0x0042B2E5, 0x0042BF87, 0x0042BFBF, 0x0042C6A6, 0x0042C6B2, 0x0043299E, 0x004329B1,
+0x00433BF7, 0x004355F4, 0x0043763D, 0x00438F6C, 0x0043D6D3, 0x0042A05A, 0x004508ED, 0x004508F9, 0x00504F7F, 0x004BA6F2,
+0x00441913, 0x00441AAE, 0x00441AB8, 0x004422FF, 0x00442375, 0x004423D9, 0x004423E5, 0x00442E2A, 0x00442EB7, 0x00443405,
+0x004434A7, 0x00443545, 0x00443D9F, 0x00443E8F, 0x00443F7F, 0x004449A9, 0x004C5E9E, 0x0047FAA0, 0x0047759E, 0x00474A98 };
+
 struct OptimizedArrayCRC
 {
     DWORD string;
@@ -4375,7 +4385,7 @@ void Skater::PointRail(const Vertex& rail_pos)
 
     // (Mick) Set m_rail_time, otherwise there is a single frame where it is invalid
     // and this allows us to immediately re-rail and hence do the "insta-bail", since the triangle button will be held down   
-    m_rail_time = NewTimer::GetTime();
+    m_rail_time = NewTimer::GetFrameTime();
     //_asm mov m_rail_time2, edx;
 
     /////////////////////////////////////////////////////
@@ -4429,7 +4439,7 @@ bool Skater::will_take_rail()
 {
 
 
-    return (!force_rail_check || (GetElapsedTime(NewTimer::GetTime(), m_rail_time) > 200))
+    return (!force_rail_check || (GetElapsedTime(NewTimer::GetFrameTime(), m_rail_time) > 200))
             && (m_state != RAIL 									// not already on a rail
                 && (!tracking || *GetVelocity()[Y] > 0.0f));		// must be not vert, or going up 
 }
@@ -4689,7 +4699,7 @@ void InitLevelMod()
     
     //Fix multiple rerail bugs
     VirtualProtect((LPVOID)0x004A54D5, 4, PAGE_EXECUTE_READWRITE, &old);
-    HookFunction(0x004A54D5, &ForceRailCheck);
+    //HookFunction(0x004A54D5, &ForceRailCheck);
     //Cheat detection
     BYTE CheatDetection[]{ 0x8B, 0x44, 0x24, 0x04, 0x56, 0x8B, 0xF1, 0x81, 0xBC, 0x86, 0xD0, 0x83, 0x00, 0x00, 0x00, 0x00, 0x80, 0xBF, 0x75, 0x11, 0x6A, 0x01, 0x68, 0x78, 0x4C, 0x5C, 0x00, 0xE8, 0xEF, 0x6F, 0xF8, 0xFF, 0x83, 0xC4, 0x08, 0xEB, 0x2A, 0xD9, 0x84, 0x86, 0xD0, 0x83, 0x00, 0x00, 0xD8, 0x15, 0xFC, 0xF3, 0x49, 0x00, 0xDF, 0xE0, 0x66, 0xA9, 0x00, 0x41, 0x75, 0x15, 0x90, 0x90, 0x90, 0x90, 0x90, 0xEB, 0x0E, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x00, 0x00, 0x20, 0x41, 0xD9, 0x5C, 0x24, 0x08, 0x8B, 0xCE, 0x6A, 0xEC, 0xE8, 0x03, 0x5F, 0x01, 0x00, 0x84, 0xC0, 0x74, 0x08, 0xD9, 0x05, 0x3C, 0xF4, 0x49, 0x00, 0xEB, 0x04, 0xD9, 0x44, 0x24, 0x08, 0x8B, 0xB6, 0x68, 0x92, 0x00, 0x00, 0x85, 0xF6, 0x74, 0x0D, 0x8A, 0x46, 0x50, 0x84, 0xC0, 0x74, 0x06, 0xD8, 0x05, 0x38, 0xF4, 0x49, 0x00, 0x5E, 0xC2, 0x04, 0x00 , 0x00 , 0x00 , 0x40 , 0x40 , 0x00, 0x00 , 0x70 , 0x41 };
     InjectHook(0x0049F3B1, CheatDetection, sizeof(CheatDetection));
@@ -4722,9 +4732,9 @@ void InitLevelMod()
     
     //Fix UberFrig
     HookFunction(0x004A76D3, FixUberFrig, 0xE9);
-    /*HookFunction(0x004994E5, &Skater::UberFrig);
+    HookFunction(0x004994E5, &Skater::UberFrig);
     HookFunction(0x004996C6, &Skater::UberFrig);
-    HookFunction(0x004A8B6F, &Skater::UberFrig);*/
+    //HookFunction(0x004A8B6F, &Skater::UberFrig);*/
     //HookFunction(0x004A8B76, &HandleTriggers);
     /*HookFunction(0x00400321, &Skater::CollisionCheck_Hook);
     HookFunction(0x0049EE9D, &Skater::CollisionCheck_Hook);
@@ -5157,6 +5167,9 @@ void InitLevelMod()
     /*if(!QScript::Scripts)
         QScript::Scripts = new QScript::QBScript();*/
 
+    HookFunction(0x0049FCA3, &Skater::SkaterCollided);
+    HookFunction(0x004AFB67, &Skater::SkaterCollided);
+
     //If debugmode is enabled we want to hook checksum generating function
     if (bDebugMode)
         HookFunction(0x004265F1, Checksum_naked, 0xE9);
@@ -5496,6 +5509,8 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
                 debug_print("Adding Option to Ini %s\n", name);
                 OptionWriter->WriteInt("Script_Settings", name, it->second.value);
             }
+            OptionWriter->WriteInt("Other_Settings", "LM_WindowedX", Gfx::window_rect.top);
+            OptionWriter->WriteInt("Other_Settings", "LM_WindowedY", Gfx::window_rect.left);
         }
         else
             debug_print("Couldn't find HostOptions\n");
@@ -6371,6 +6386,7 @@ SHORT __stdcall proxy_GetAsyncKeyState(int key)
     return 0;
 }
 
+bool moving_window = false;
 typedef BOOL(__stdcall* const pGetMessage)(LPMSG lpMsg,
     HWND  hWnd,
     UINT  wMsgFilterMin,
@@ -6380,25 +6396,31 @@ BOOL __stdcall proxy_GetMessage(LPMSG lpMsg,
     UINT  wMsgFilterMin,
     UINT  wMsgFilterMax)
 {
+    MSG WindowMessage;
     BOOL result = pGetMessage(*(DWORD*)0x0058D228)(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax);
     if (result)
     {
         switch (lpMsg->message)
         {
-        case WM_WINDOWPOSCHANGING:
-        case WM_WINDOWPOSCHANGED:
-        case WM_MOVING:
-        case WM_MOVE:
-                MessageBox(0, 0, 0, 0);
-                OptionWriter->WriteInt("Other_Settings", "LM_WindowedX", lpMsg->lParam);
-                OptionWriter->WriteInt("Other_Settings", "LM_WindowedY", lpMsg->wParam);
-                break;
+        case 160:
+            if (moving_window)
+            {
+                moving_window = false;
+                RECT window;
+                HWND hHandle = FindWindowA(NULL, TEXT("Skate3"));
+                GetWindowRect(Gfx::hFocusWindow, &window);
+                OptionWriter->WriteInt("Other_Settings", "LM_WindowedX", window.top+26);
+                OptionWriter->WriteInt("Other_Settings", "LM_WindowedY", window.left+3);
+            }
+            break;
+        case 161:
+            moving_window = true;
+            break;
         }
     }
+
     return result;
 }
-
-static DWORD lastTime = 0;
 
 bool IsOptionOn(const char* option)
 {
@@ -6419,11 +6441,10 @@ void ToggleWindowed()
     extern D3DPRESENT_PARAMETERS current_params;
     current_params.Windowed = d3dpp->Windowed;
 
-    RECT rect;
-    rect.left = 0;
-    rect.top = 0;
-    rect.right = *(DWORD*)0x00851084;
-    rect.bottom = *(DWORD*)0x00851088;
+    Gfx::window_rect.top = OptionReader->ReadInt("Other_Settings", "LM_WindowedX", Gfx::window_rect.top);
+    Gfx::window_rect.left = OptionReader->ReadInt("Other_Settings", "LM_WindowedY", Gfx::window_rect.left);
+    Gfx::window_rect.right = *(DWORD*)0x00851084;
+    Gfx::window_rect.bottom = *(DWORD*)0x00851088;
 
     if (d3dpp->Windowed)
     {
@@ -6434,8 +6455,8 @@ void ToggleWindowed()
         current_params.FullScreen_RefreshRateInHz = 0;
 
         SetWindowLongPtr(Gfx::hFocusWindow, GWL_STYLE, WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE);
-        AdjustWindowRect(&rect, WS_CAPTION | WS_POPUPWINDOW, FALSE);
-        SetWindowPos(Gfx::hFocusWindow, HWND_NOTOPMOST, 0, 0, *(DWORD*)0x00851084, *(DWORD*)0x00851088, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+        AdjustWindowRect(&Gfx::window_rect, WS_CAPTION | WS_POPUPWINDOW, FALSE);
+        SetWindowPos(Gfx::hFocusWindow, HWND_NOTOPMOST, Gfx::window_rect.left, Gfx::window_rect.top, *(DWORD*)0x00851084, *(DWORD*)0x00851088, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
         //MoveWindow(Gfx::hFocusWindow, 0, 0, rect.right - rect.left, rect.bottom - rect.top, TRUE);
 
     }
@@ -6589,11 +6610,11 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
         if (bToggleWindowed)
         {
 
-            //Make sure we toggle only 1 per 2 sec
-            DWORD time = NewTimer::GetTime();
-            if (time < lastTime + 2000)
+            //Make sure we toggle only 1 per 1 sec
+            DWORD time = NewTimer::GetFrameTime();
+            if (time < NewTimer::lastTimeToggleWindowed + 1000)
                 return hres;
-            lastTime = time;
+            NewTimer::lastTimeToggleWindowed = time;
 
             //Unpress enter key, should already be unpressed but better safe than sorry...
             KeyState::Unpress(KeyCode::ENTER);

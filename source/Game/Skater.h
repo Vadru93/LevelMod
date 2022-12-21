@@ -446,11 +446,13 @@ private://0575a190
     //86A0
     BYTE unk4[0x14];
     //86B4
-    DWORD collFlags;
+    WORD collFlags;
+    WORD alin;
     //86B8
-    BYTE unk5[0x10];
+    BYTE unk5[0xC];
     //bool trigger;//Maybe?
     //86C8
+    DWORD unk_now;
 public:
     DWORD checksumName;
 private:
@@ -527,6 +529,50 @@ public:
         return (position + (velocity * framelength));
     }
 
+    void SkaterCollided()
+    {
+        float z_angle = normal.y;
+        WORD collFlag = collFlags;
+
+        if (this->checksumName && this->unk_now)
+            m_trigger_script = 0;
+
+        trigger = false;
+        if ((collFlag & 8) == 0)
+        {
+            vert = false;
+
+            if ((collFlag & 1) == 0)
+            {
+                if ((collFlags & 2) != 0)
+                {
+                    skatable = false;
+                    return;
+                }
+
+                if ((collFlag & 4) != 0)
+                {
+                    skatable = false;
+                    trigger = true;
+                    return;
+                }
+
+                float skatable_angle = QScript::GetPhysicsFloat(Checksums::Wall_Non_Skatable_Angle);
+                float a = sinf(skatable_angle * 3.141593f * 0.005555556f);
+
+                if (a > z_angle)
+                {
+                    skatable = false;
+                    return;
+                }
+            }
+        }
+        else
+            vert = true;
+
+        skatable = true;
+    }
+
     void ResetNewPhysics();
 
     void ResetPhysics()
@@ -534,7 +580,7 @@ public:
         debug_print("ResetPhysics\n");
         ResetNewPhysics();
         typedef void(__thiscall* const pResetPhysics)(Skater* pThis);
-        pResetPhysics(0x004AD380)(this);
+        //pResetPhysics(0x004AD380)(this);
     }
 
     Collision::CFeeler & GetFeeler()
@@ -584,17 +630,25 @@ public:
             NewTimer::ProfileEnd();
             printf("-------------------\n");*/
             
-            if (Collision::FindNearestCollision(line, cld))
+            if (Collision::FindFirstCollision(line, cld))
             {
                 normal = cld.normal;
                 hitpoint = cld.point;
                 collFlags = (DWORD)cld.collFlags;
+                unk = cld.unk;
+                flag = cld.collided;
+                checksumName = cld.checksum;
+                unk_now = cld.checksum;
+
                 height = position.y - hitpoint.y;
+
                 if (height < 0.001f)
                 {
                     position.y = hitpoint.y + 0.001f;
                     height = 0.0f;
                 }
+
+                SkaterCollided();
             }
             else
             {

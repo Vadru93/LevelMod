@@ -74,36 +74,40 @@ namespace Collision
     {
         CollCache* cache;
         //4
+        bool collided;
+        BYTE alg[3];
+        //8
+        float unk;//distance?
+        //C
         Vertex normal;
-        //10
-        DWORD padding;
-        //14
-        float unk;
-        //18<g
+        //18
         Vertex point;
         //24
-        int index;//Or terrain?
-        //28
-        //Vertex* vertices[3];
-        BYTE unk1[0x20];
-        //38
-        bool collided;
-        //3C
-        DWORD checksum;
-        //40
+        BYTE unk1[0x10];
+        //34
         Collision::Flags ignore_1;
-        //41
+        //36
         Collision::Flags ignore_0;
+        //38
+        Collision::Flags collFlags;
+        //3A
+        BYTE unk2[0xA];
+        //44
+        SuperSector* sector;
+        //48
+        bool trigger;
+        BYTE align[3];
+        //4C
+        DWORD checksum;
+        //50
+        DWORD index;
+        //54
+        DWORD unk4;
+        //58
+        void* pRandomFunction;
 
-        DWORD unk_flags;//00 01 00 00
-        DWORD terrain;//Maybe?
-        void* pRandomFunclocation;
         const ::SuperSector* __restrict p_sector;
         void* node_data;//Not sure?
-        Collision::Flags collFlags;
-        WORD padd;
-        DWORD unk2[3];
-        float unk3[2];
 
         Surface surface;
         Vertex v0;
@@ -149,7 +153,7 @@ namespace Collision
 
     class CollisionPLG
     {
-        DWORD flags;//Always 1?
+        DWORD bHasTree;
         void* __restrict tree;//points to numLeafs
         DWORD numFaces;
         WORD* __restrict faces;
@@ -172,6 +176,9 @@ namespace Collision
         __inline __declspec (noalias) bool CollideWithLine(const Leaf& leaf, const Vertex& start, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const;
         __inline __declspec (noalias) bool CollideWithLine(const Vertex& start, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const;
         __inline __declspec (noalias) bool TraverseBranch(const Branch* const __restrict branch, const RwLine& line, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const;
+        __inline __declspec (noalias) bool FirstCollideWithLine(const Leaf& leaf, const Vertex& start, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const;
+        __inline __declspec (noalias) bool FirstCollideWithLine(const Vertex& start, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const;
+        __inline __declspec (noalias) bool FirstTraverseBranch(const Branch* const __restrict branch, const RwLine& line, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const;
 
     public:
         __declspec (noalias) bool CollideWithLine(const RwLine& line, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const
@@ -179,16 +186,46 @@ namespace Collision
             numInterFaces = 0;
             bool collided = false;
 
-            if (branches)
+            if (bHasTree)
             {
-                debug_print("Branches\n");
-                collided = TraverseBranch(&branches[0], line, dir, sector, data);
+                if (branches)
+                {
+                    debug_print("Branches\n");
+                    collided = TraverseBranch(&branches[0], line, dir, sector, data);
+                }
+                else
+                {
+                    debug_print("No branches\n");
+                    collided = CollideWithLine(line.start, dir, sector, data);
+                }
             }
             else
-            {
-                debug_print("No branches\n");
                 collided = CollideWithLine(line.start, dir, sector, data);
+
+            if (collided)
+                debug_print("collided with supersector %s\n", FindChecksumName(data.checksum, false));
+            return collided;
+        }
+        __declspec (noalias) bool FirstCollideWithLine(const RwLine& line, const Vertex& dir, const ::SuperSector* const __restrict sector, CollData& data) const
+        {
+            numInterFaces = 0;
+            bool collided = false;
+
+            if (bHasTree)
+            {
+                if (branches)
+                {
+                    debug_print("Branches\n");
+                    collided = TraverseBranch(&branches[0], line, dir, sector, data);
+                }
+                else
+                {
+                    debug_print("No branches\n");
+                    collided = FirstCollideWithLine(line.start, dir, sector, data);
+                }
             }
+            else
+                collided = FirstCollideWithLine(line.start, dir, sector, data);
 
             if (collided)
                 debug_print("collided with supersector %s\n", FindChecksumName(data.checksum, false));
@@ -240,9 +277,9 @@ namespace Collision
 
         bool GetCollision()
         {
-            //return FindFirstCollision(*(RwLine*)&start, cld);
-            typedef bool(__thiscall* const pGetCollision)(CFeeler* pThis);
-            return pGetCollision(0x00496EA0)(this);
+            return FindFirstCollision(*(RwLine*)&start, cld);
+            /*typedef bool(__thiscall* const pGetCollision)(CFeeler* pThis);
+            return pGetCollision(0x00496EA0)(this);*/
         }
     };
 

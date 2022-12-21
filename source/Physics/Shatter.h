@@ -164,7 +164,7 @@ struct ShatterData
                     *p_v1 = *(D3DXVECTOR3*)&m[Y];// +pos[i];
                     *p_v2 = *(D3DXVECTOR3*)&m[Z];// +pos[i];
                     Vertex normal = CalculateNormal(p_v0, p_v1, p_v2);
-                    printf("normal %f %f %f data %f %f %f\n", normal.x, normal.y, normal.z, data.normal.x, data.normal.y, data.normal.z);
+                    debug_print("normal %f %f %f data %f %f %f\n", normal.x, normal.y, normal.z, data.normal.x, data.normal.y, data.normal.z);
                     float angle = fabsf(data.normal.y - normal.y);
                     if (angle > 0.15f && i % 5 == 0)
                     {
@@ -375,7 +375,7 @@ struct ShatterData
             line.start = old_pos[index];
             line.end = pos[index];
 
-            if (Collision::FindNearestCollision(line, data) && data.normal.y > 0.1f)
+            if (Collision::FindFirstCollision(line, data) && data.normal.y > 0.1f)
             {
                 /*matrices[index].Ident();
                 matrices[index].Rotate(data.normal, 90.0f);*/
@@ -391,7 +391,7 @@ struct ShatterData
             line.end.x += v0->x;
             line.end.y += v0->y;
             line.end.z += v0->z;
-            if (Collision::FindNearestCollision(line, data) && data.normal.y > 0.1f)
+            if (Collision::FindFirstCollision(line, data) && data.normal.y > 0.1f)
             {
                 /*matrices[index].Ident();
                 matrices[index].Rotate(data.normal, 90.0f);*/
@@ -407,7 +407,7 @@ struct ShatterData
             line.end.x += v1->x;
             line.end.y += v1->y;
             line.end.z += v1->z;
-            if (Collision::FindNearestCollision(line, data) && data.normal.y > 0.1f)
+            if (Collision::FindFirstCollision(line, data) && data.normal.y > 0.1f)
             {
                 /*matrices[index].Ident();
                 matrices[index].Rotate(data.normal, 90.0f);*/
@@ -423,7 +423,7 @@ struct ShatterData
             line.end.x += v2->x;
             line.end.y += v2->y;
             line.end.z += v2->z;
-            if (Collision::FindNearestCollision(line, data) && data.normal.y > 0.1f)
+            if (Collision::FindFirstCollision(line, data) && data.normal.y > 0.1f)
             {
                 /*matrices[index].Ident();
                 matrices[index].Rotate(data.normal, 90.0f);*/
@@ -466,11 +466,11 @@ bool NewShatterScript(CStruct* pStruct, CScript* pScript);
 /*                                                                */
 /*                                                                */
 /******************************************************************/
-bool subdivide_tri_stack(BYTE** p_write, SuperSector* sector, float targetShatterArea, int& numTris)
+bool subdivide_tri_stack(BYTE** p_write, SuperSector* sector, float targetShatterArea, int& numTris, int valid_tris)
 {
 
-    static float dividers[4] = { 0.5f, 0.6f, 0.2f, 0.33f };
-    float divider = dividers[0/*rand() % 3*/];
+    static float dividers[3] = { 0.5f, 0.75f, 0.45f };
+    float divider = dividers[rand() % 3];
     // Three temporary buffers.
     static BYTE v0[256];
     static BYTE v1[256];
@@ -596,6 +596,8 @@ bool subdivide_tri_stack(BYTE** p_write, SuperSector* sector, float targetShatte
         memcpy(*p_write, v2, block_size);
         *p_write += block_size;
         numTris++;
+        if (numTris > valid_tris)
+            return false;
     }
     return true;
 }

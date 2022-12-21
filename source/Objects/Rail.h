@@ -1911,7 +1911,7 @@ __inline void Skater::MaybeSkateOffRail(bool last_segment, Vertex& extra_dist, R
     // sign is which way we are going along the rail
     float sign = Sgn(D3DXVec3Dot(&dir, GetVelocity()));
 
-    m_rail_time = NewTimer::GetTime();
+    m_rail_time = NewTimer::GetFrameTime();
 
     ((Vertex*)GetVelocity())->RotateToNormal(dir);
     random = 0;
@@ -2249,7 +2249,7 @@ void Skater::SkateOffRail()
                 debug_print("Really NewRail %s\n", FindChecksumName(Node::GetNodeArray()->GetStructure(mp_rail_node->GetNode())->GetName()));
 
                 really_off = false;
-                m_rail_time = NewTimer::GetTime();
+                m_rail_time = NewTimer::GetFrameTime();
             }
             else
             {

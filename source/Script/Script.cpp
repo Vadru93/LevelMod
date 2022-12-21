@@ -126,6 +126,12 @@ void QScript::SetMenuElementText(DWORD id, const char* text)
     QScript::CallCFunction(Checksums::SetMenuElementText, &params);
 }
 
+float QScript::GetPhysicsFloat(DWORD name)
+{
+    typedef float(__cdecl* const pGetPhysicsFloat)(DWORD name);
+    return pGetPhysicsFloat(0x00426380)(name);
+}
+
 void QScript::SpawnScript(DWORD checksum, CStruct* params, DWORD node, DWORD callback, CStruct* callback_params, bool AbsentInNetGames, bool NetEnabled, bool Permanent)
 {
     typedef DWORD(__cdecl* const pSpawnScript)(DWORD checksum, CStruct* params, DWORD callback, CStruct* callback_params, DWORD node, bool AbsentInNetGames, bool NetEnabled, bool Permanent);

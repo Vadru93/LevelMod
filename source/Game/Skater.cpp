@@ -54,7 +54,10 @@ bool Skater::CollisionCheck_Hook(Collision::Flags ignore0, Collision::Flags flag
             normal = cld.normal;
             hitpoint = cld.point;
             this->collFlags = (DWORD)cld.collFlags;
-            //this->checksumName = cld.checksum;
+            this->checksumName = cld.checksum;
+            unk = cld.unk;
+            flag = collided;
+            SkaterCollided();
         }
         return collided;
     }
@@ -434,7 +437,7 @@ void Skater::Slerping()
             if (Slerp::duration < 0.9f)
             {
                 Vector norm = *(Vector*)&Slerp::end.m[Y];
-                printf("norm %f %f %f, end %f %f %f", norm.x, norm.y, norm.z, Slerp::end.m[Y][X], Slerp::end.m[Y][Y], Slerp::end.m[Y][Z]);
+                debug_print("norm %f %f %f, end %f %f %f", norm.x, norm.y, norm.z, Slerp::end.m[Y][X], Slerp::end.m[Y][Y], Slerp::end.m[Y][Z]);
 
                 SetNormal(norm);
             }
@@ -544,7 +547,7 @@ void Skater::Restore()
 
 void Skater::CheckEventTrigger(Node::TriggerType type, Collision::CollData& col)
 {
-    if (col.collided)
+    if (col.trigger)
     {
         DWORD checksum = col.checksum;
         if (m_current_trigger_type != type || checksum != last_trigger_checksum || Gfx::frameCounter > new_trigger_frame)
@@ -560,7 +563,7 @@ void Skater::CheckEventTrigger(Node::TriggerType type, Collision::CollData& col)
                 {
                     last_trigger_node = NULL;
                     last_trigger_checksum = checksum;
-                    new_trigger_frame = Gfx::frameCounter + 10;
+                    new_trigger_frame = Gfx::frameCounter + 25;
                     m_current_trigger_type = type;
                     m_trigger_script = trigger_script;
                     SpawnAndRunScript(trigger_script, node_index, true, true);

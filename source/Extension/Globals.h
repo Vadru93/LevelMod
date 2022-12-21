@@ -109,6 +109,7 @@ namespace Gfx
     extern double frame_modifier;
     extern DWORD num_threads;
     extern bool bOldWindowed;
+    extern RECT window_rect;
 };
 
 namespace Physics

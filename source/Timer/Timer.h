@@ -15,6 +15,7 @@ namespace NewTimer
     extern double framelength;
     extern DWORD frameticks;
     extern double hybrid_limit;
+    extern DWORD lastTimeToggleWindowed;
 
 
 

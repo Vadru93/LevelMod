@@ -25,7 +25,7 @@ bool WallplantTimeGreaterThan(CStruct* pParams, CScript* pScript)
 {
     int time = pParams->GetInt();
     //debug_print("targetTime %d timeLapsed %d currentTime %d\n", time, diff, currentTime);
-    return GetElapsedTime(NewTimer::GetTime(), Slerp::m_last_wallplant_time_stamp) > time;
+    return GetElapsedTime(NewTimer::GetFrameTime(), Slerp::m_last_wallplant_time_stamp) > time;
 }
 
 //Spine and acid stuff, this is based off thug1src
@@ -2103,7 +2103,7 @@ __declspec(noalias) void MaybeAcid()
     if (Slerp::wallplant)
     {
         Skater* __restrict const skater = Skater::Instance();
-        if ((GetElapsedTime(NewTimer::GetTime(), Slerp::m_last_wallplant_time_stamp)) > Physics_Wallplant_Duration)
+        if ((GetElapsedTime(NewTimer::GetFrameTime(), Slerp::m_last_wallplant_time_stamp)) > Physics_Wallplant_Duration)
         {
             skater->SetState(Skater::AIR);
             debug_print("Wallplant wait time done - Applying velocity\n");
@@ -2235,7 +2235,7 @@ bool Skater::CheckForWallpant()
     debug_print("%f\n", GetMatrix().m[Y][Y]);
     //if(GetMatrix()[Y][Y] < -0.90f) return false;
 
-    DWORD currentTime = NewTimer::GetTime();
+    DWORD currentTime = NewTimer::GetFrameTime();
     DWORD currentTime2;
     _asm mov currentTime2, edx;
     if (GetElapsedTime(currentTime, Slerp::m_last_wallplant_time_stamp) < Physics_Disallow_Rewallplant_Duration) return false;
