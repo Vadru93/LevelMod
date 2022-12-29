@@ -6544,9 +6544,14 @@ bool LaunchGFXCommand(CStruct* pStruct, CScript* pScript)
     LevelModSettings::Option* option;
     DWORD command = Checksums::Reset;
 
-    auto header = pStruct->GetHeader();
-    if (header)
-        command = header->Data;
+    //Called with params?
+    if (pStruct)
+    {
+        auto header = pStruct->GetHeader();
+        if (header)
+            command = header->Data;
+    }
+
     switch (command)
     {
     case (DWORD)Checksums::Reset:
