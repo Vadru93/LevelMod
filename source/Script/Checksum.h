@@ -313,6 +313,7 @@ namespace Checksums
             Extra_NoseGrinds_BS_DD = COMPILE_CRC32("extra_nosegrinds_bs_dd"),
             Extra_TailGrinds_FS_DD = COMPILE_CRC32("extra_tailgrinds_fs_dd"),
             Extra_TailGrinds_BS_DD = COMPILE_CRC32("extra_tailgrinds_bs_dd"),
+            ExtraTricks = COMPILE_CRC32("extratricks"),
 
         //Trick_KFBackflip = 0xF7B4E0CB
 

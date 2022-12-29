@@ -737,9 +737,13 @@ bool MessageBoxScript(CStruct* pStruct, CScript* pScript)
 
 bool AllowDropDownScript(CStruct* pStruct, CScript* pScript)
 {
-    auto pArrayName = pScript->GetParam(Checksum("ExtraTricks"));
+    //Get the ExtraTricks array
+    auto pArrayName = pScript->GetParam(Checksums::ExtraTricks);
+
+    //This check should not be needed cause it's checked in scripts
     if (pArrayName)
     {
+        //change the ExtraTricks array to the correct dropdown version
         switch (pArrayName->Data)
         {
         case Checksums::Extra_5050_FS:
@@ -752,7 +756,7 @@ bool AllowDropDownScript(CStruct* pStruct, CScript* pScript)
             pArrayName->Data = Checksums::Extra_Trick_Crooked_FS_DD;
             return true;
         case Checksums::Extra_NoseGrinds_FS:
-i            pArrayName->Data = Checksums::Extra_NoseGrinds_FS_DD;
+            pArrayName->Data = Checksums::Extra_NoseGrinds_FS_DD;
             return true;
         case Checksums::Extra_NoseGrinds_BS:
             pArrayName->Data = Checksums::Extra_NoseGrinds_BS_DD;
@@ -763,12 +767,9 @@ i            pArrayName->Data = Checksums::Extra_NoseGrinds_FS_DD;
         case Checksums::Extra_TailGrinds_BS:
             pArrayName->Data = Checksums::Extra_TailGrinds_BS_DD;
             return true;
-        default:
-            MessageBox(0, "Wrong", "", 0);
-            return false;
         }
     }
-    MessageBox(0, "Wrong2", "", 0);
+    debug_print("Error in " __FUNCTION__ "\n");
     return false;
 }
 
