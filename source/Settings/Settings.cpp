@@ -752,7 +752,7 @@ bool AllowDropDownScript(CStruct* pStruct, CScript* pScript)
             pArrayName->Data = Checksums::Extra_Trick_Crooked_FS_DD;
             return true;
         case Checksums::Extra_NoseGrinds_FS:
-            pArrayName->Data = Checksums::Extra_NoseGrinds_FS_DD;
+i            pArrayName->Data = Checksums::Extra_NoseGrinds_FS_DD;
             return true;
         case Checksums::Extra_NoseGrinds_BS:
             pArrayName->Data = Checksums::Extra_NoseGrinds_BS_DD;
@@ -764,9 +764,11 @@ bool AllowDropDownScript(CStruct* pStruct, CScript* pScript)
             pArrayName->Data = Checksums::Extra_TailGrinds_BS_DD;
             return true;
         default:
+            MessageBox(0, "Wrong", "", 0);
             return false;
         }
     }
+    MessageBox(0, "Wrong2", "", 0);
     return false;
 }
 

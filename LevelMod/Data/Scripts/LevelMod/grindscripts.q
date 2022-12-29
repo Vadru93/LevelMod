@@ -122,60 +122,58 @@ Extra_TailGrinds_BS =
   { Trigger = { TripleInOrder Down Up Triangle 300 } Scr = Trick_Smith_BS Params = { Name = 'BS Smith' IsExtra = yes } }
   { Trigger = { InOrder Circle Circle 250 } Scr = Trick_Feeble_BS Params = { Name = 'BS Feeble' IsExtra = yes } }
   { Trigger = { InOrder Square Square 250 } Scr = Trick_Tailslide_BS_ok Params = { Name = 'BS Tailslide' IsExtra = yes } } ]
-  
 Extra_5050_FS_DD =
 [ { Trigger = { TripleInOrder Up Up Triangle 300 } Scr = Trick_NoseBluntSlide_FS Params = { IsExtra = yes } }
   { Trigger = { TripleInOrder Down Down Triangle 300 } Scr = Trick_Bluntslide_FS Params = { IsExtra = yes } }
   { Trigger = { AirTrickLogic Up Triangle 200 } Scr = Trick_NoseGrind_FS Params = { IsExtra = yes } }
   { Trigger = { AirTrickLogic Down Triangle 200 } Scr = Trick_5_0_FS Params = { IsExtra = yes } }
- { Trigger = { Press R2 300 } Scr = DropDownRight Params = { IsExtra = yes } }
+  { Trigger = { Press R2 300 } Scr = DropDownRight Params = { IsExtra = yes } }
   { Trigger = { Press L2 300 } Scr = DropDownLeft Params = { IsExtra = yes } } ]
 Extra_5050_BS_DD =
 [ { Trigger = { TripleInOrder Up Up Triangle 300 } Scr = Trick_NoseBluntSlide_BS Params = { IsExtra = yes } }
   { Trigger = { TripleInOrder Down Down Triangle 300 } Scr = Trick_Bluntslide_BS Params = { IsExtra = yes } }
   { Trigger = { AirTrickLogic Up Triangle 200 } Scr = Trick_NoseGrind_BS Params = { IsExtra = yes } }
   { Trigger = { AirTrickLogic Down Triangle 200 } Scr = Trick_5_0_BS Params = { IsExtra = yes } }
- { Trigger = { Press R2 300 } Scr = DropDownRight Params = { IsExtra = yes } }
+  { Trigger = { Press R2 300 } Scr = DropDownRight Params = { IsExtra = yes } }
   { Trigger = { Press L2 300 } Scr = DropDownLeft Params = { IsExtra = yes } } ]
 Extra_Trick_Crooked_FS_DD =
 [ { Trigger = { Press Square 200 } Trick_Crooked_FS Params = { IsExtra = yes } }
-{ Trigger = { Press R2 300 } Scr = DropDownRight Params = { IsExtra = yes } }
+  { Trigger = { Press R2 300 } Scr = DropDownRight Params = { IsExtra = yes } }
   { Trigger = { Press L2 300 } Scr = DropDownLeft Params = { IsExtra = yes } } ]
 Extra_NoseGrinds_FS_DD =
 [ { Trigger = { TripleInOrder Up Up Triangle 300 } Scr = Trick_NoseBluntSlide_FS Params = { Name = 'FS Nosebluntslide' IsExtra = yes } }
   { Trigger = { TripleInOrder Up Down Triangle 300 } Scr = Trick_Crooked_FS Params = { Name = 'FS Crooked' IsExtra = yes } }
   { Trigger = { InOrder Circle Circle 250 } Scr = Trick_NGCrook_FS Params = { Name = 'FS OverCrook' IsExtra = yes } }
   { Trigger = { InOrder Square Square 250 } Scr = Trick_Noseslide_FS_ok Params = { Name = 'FS Noseslide' IsExtra = yes } }
- { Trigger = { Press R2 300 } Scr = DropDownRight Params = { IsExtra = yes } }
+  { Trigger = { Press R2 300 } Scr = DropDownRight Params = { IsExtra = yes } }
   { Trigger = { Press L2 300 } Scr = DropDownLeft Params = { IsExtra = yes } } ]
 Extra_NoseGrinds_BS_DD =
 [ { Trigger = { TripleInOrder Up Up Triangle 300 } Scr = Trick_NoseBluntSlide_BS Params = { Name = 'BS Nosebluntslide' IsExtra = yes } }
   { Trigger = { TripleInOrder Up Down Triangle 300 } Scr = Trick_Crooked_BS Params = { Name = 'BS Crooked' IsExtra = yes } }
   { Trigger = { InOrder Circle Circle 250 } Scr = Trick_NGCrook_BS Params = { Name = 'BS OverCrook' IsExtra = yes } }
   { Trigger = { InOrder Square Square 250 } Scr = Trick_Noseslide_BS_ok Params = { Name = 'BS Noseslide' IsExtra = yes } }
- { Trigger = { Press R2 300 } Scr = DropDownRight Params = { IsExtra = yes } }
+  { Trigger = { Press R2 300 } Scr = DropDownRight Params = { IsExtra = yes } }
   { Trigger = { Press L2 300 } Scr = DropDownLeft Params = { IsExtra = yes } } ]
-  Extra_TailGrinds_FS_DD =
+Extra_TailGrinds_FS_DD =
 [ { Trigger = { TripleInOrder Down Down Triangle 300 } Scr = Trick_Bluntslide_FS Params = { Name = 'FS Bluntslide' IsExtra = yes } }
   { Trigger = { TripleInOrder Down Up Triangle 300 } Scr = Trick_Smith_FS Params = { Name = 'FS Smith' IsExtra = yes } }
   { Trigger = { InOrder Circle Circle 250 } Scr = Trick_Feeble_FS Params = { Name = 'FS Feeble' IsExtra = yes } }
   { Trigger = { InOrder Square Square 250 } Scr = Trick_Tailslide_FS_ok Params = { Name = 'FS Tailslide' IsExtra = yes } }
- { Trigger = { Press R2 300 } Scr = DropDownRight Params = { IsExtra = yes } }
+  { Trigger = { Press R2 300 } Scr = DropDownRight Params = { IsExtra = yes } }
   { Trigger = { Press L2 300 } Scr = DropDownLeft Params = { IsExtra = yes } } ]
-  Extra_TailGrinds_BS_DD =
+Extra_TailGrinds_BS_DD =
 [ { Trigger = { TripleInOrder Down Down Triangle 300 } Scr = Trick_Bluntslide_BS Params = { Name = 'BS Bluntslide' IsExtra = yes } }
   { Trigger = { TripleInOrder Down Up Triangle 300 } Scr = Trick_Smith_BS Params = { Name = 'BS Smith' IsExtra = yes } }
   { Trigger = { InOrder Circle Circle 250 } Scr = Trick_Feeble_BS Params = { Name = 'BS Feeble' IsExtra = yes } }
-  { Trigger = { InOrder Square Square 250 } Scr = Trick_Tailslide_BS_ok Params = { Name = 'BS Tailslide' IsExtra = yes } } 
+  { Trigger = { InOrder Square Square 250 } Scr = Trick_Tailslide_BS_ok Params = { Name = 'BS Tailslide' IsExtra = yes } }
   { Trigger = { Press R2 300 } Scr = DropDownRight Params = { IsExtra = yes } }
   { Trigger = { Press L2 300 } Scr = DropDownLeft Params = { IsExtra = yes } } ]
-
-  dropdown =
-  [ { Trigger = { Press R2 300 } Scr = DropDownRight Params = { IsExtra = yes } }
+dropdown =
+[ { Trigger = { Press R2 300 } Scr = DropDownRight Params = { IsExtra = yes } }
   { Trigger = { Press L2 300 } Scr = DropDownLeft Params = { IsExtra = yes } } ]
-  
-  script Grind GrindTweak = 7
-    KillExtraTricks
+
+script Grind GrindTweak = 7
+  KillExtraTricks
   if BailIsOn
     SetState Air
     goto DoingTrickBail
@@ -264,9 +262,9 @@ Extra_NoseGrinds_BS_DD =
   endif
   if GotParam Extratricks
     if IsOptionOn LM_Control_bDropDown
-       AllowDropDown
+      AllowDropDown
     endif
-    SetExtraTricks tricks = <ExtraTricks> ignore = <Name>
+    SetExtraTricks tricks = <Extratricks> ignore = <Name>
   endif
   if AnimEquals MaulRollGrind_Idle
     begin
@@ -449,7 +447,7 @@ script Trick_NoseGrind_FS Name = 'FS Nosegrind'
 endscript
 
 script Trick_NoseGrind_BS Name = 'BS Nosegrind'
-  Grind { Name = <Name> Score = 100 initanim = Init_Nosegrind Anim = Nosegrind_range Type = Grind Nollie = yes NoBlend = <NoBlend> GrindBail = FiftyFiftyFall Extratricks = Extra_NoseGrinds_BSIsExtra = <IsExtra> }
+  Grind { Name = <Name> Score = 100 initanim = Init_Nosegrind Anim = Nosegrind_range Type = Grind Nollie = yes NoBlend = <NoBlend> GrindBail = FiftyFiftyFall Extratricks = Extra_NoseGrinds_BS IsExtra = <IsExtra> }
 endscript
 
 script Trick_NoseGrind_BS_180
