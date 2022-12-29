@@ -564,19 +564,6 @@ __declspec(naked)  void __cdecl NotGood_naked()
     _asm jmp[jmpBack];
 }
 
-bool CheatIsOn(DWORD cheat)
-{
-    typedef bool(__cdecl* const pCheatIsOn)(DWORD, DWORD);
-    return pCheatIsOn(0x004B5310)(cheat, 1);
-}
-
-DWORD GetCheat(DWORD checksum)
-{
-    typedef DWORD(__cdecl* const pGetCheat)(DWORD, DWORD);
-    return pGetCheat(0x004263E0)(checksum, 1);
-}
-
-
 Vertex oldSpeed;
 float oldAngle1, oldAngle2;
 
@@ -2366,6 +2353,7 @@ const CompiledScript scripts[] =
     {"AddLights", AddLights},
     {"RemoveLights", RemoveLights},
     {"ResetKeyState", ResetKeyStateScript},
+    {"AllowDropDown", AllowDropDownScript},
 /*{"SetMemoryPoolSize", SetMemoryPoolSize},
 {"GetMemoryPoolSize", GetMemoryPoolSize},
 {"GetMemoryPoolSizeText", GetMemoryPoolSizeText},*/
@@ -5106,7 +5094,7 @@ void InitLevelMod()
 
     VirtualProtect((LPVOID)0x004092AB, 6, PAGE_EXECUTE_READWRITE, &old);
 
-    *(DWORD*)0x005CEC78 *= 4;
+    //*(DWORD*)0x005CEC78 *= 4;
 
     *(BYTE*)0x00483D55 = 0x0;
     *(BYTE*)0x00483DD0 = 0xE9;
@@ -5154,8 +5142,8 @@ void InitLevelMod()
     *(WORD*)(0x00427AA3 + 4) = 0x9090;
 
     //Temporarly commented out Obj_ functions until figure out why it causes issues
-    //HookFunction(0x0048E036, Obj_MoveToNode_Naked, 0xE9);
-    //HookFunction(0x0048DA53, Obj_FollowPathLinked_Naked, 0xE9);
+    HookFunction(0x0048E036, Obj_MoveToNode_Naked, 0xE9);
+    HookFunction(0x0048DA53, Obj_FollowPathLinked_Naked, 0xE9);
     HookFunction(0x004846E6, BouncyObj_Go_Naked, 0xE8);
 
     //Hooks to add custom net messages

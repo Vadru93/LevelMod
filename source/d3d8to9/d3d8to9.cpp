@@ -420,6 +420,12 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
     VirtualProtect((void*)0x004DC635, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((void*)0x000F4241, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
 
+    //VirtualProtect((void*)0x005CEC78, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &old);
+    *(DWORD*)0x005CEC78 *= 6;
+    VirtualProtect((void*)0x00535BB9, 6, PAGE_EXECUTE_READWRITE, &old);
+    *(DWORD*)0x00535BB9 = 0x0000F2E9;
+    *(WORD*)0x00535BBD = 0x9000;
+
     //VirtualProtect((void*)0x0049D936, sizeof(DWORD)*3, PAGE_EXECUTE_READWRITE, &old);
 
    /* *(DWORD*)0x0049D936 = 0x909090C3;

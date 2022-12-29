@@ -207,6 +207,8 @@ bool LaunchGFXCommand(CStruct* pStruct, CScript* pScript);
 bool MessageBoxScript(CStruct* pStruct, CScript* pScript);
 
 bool ScriptSetMenuSelectCallback(CStruct* pStruct, CScript* pScript);
+
+bool AllowDropDownScript(CStruct* pStruct, CScript* pScript);
 //--------Functions callable from script--------
 
 //--------Functions NOT callable from script--------

@@ -299,6 +299,21 @@ namespace Checksums
 
             Wall_Non_Skatable_Angle = COMPILE_CRC32("wall_non_skatable_angle"),
 
+            Extra_5050_FS = COMPILE_CRC32("extra_5050_fs"),
+            Extra_5050_BS = COMPILE_CRC32("extra_5050_bs"),
+            Extra_Trick_Crooked_FS = COMPILE_CRC32("extra_trick_crooked_fs"),
+            Extra_NoseGrinds_FS = COMPILE_CRC32("extra_nosegrinds_fs"),
+            Extra_NoseGrinds_BS = COMPILE_CRC32("extra_nosegrinds_bs"),
+            Extra_TailGrinds_FS = COMPILE_CRC32("extra_tailgrinds_fs"),
+            Extra_TailGrinds_BS = COMPILE_CRC32("extra_tailgrinds_bs"),
+            Extra_5050_FS_DD = COMPILE_CRC32("extra_5050_fs_dd"),
+            Extra_5050_BS_DD = COMPILE_CRC32("extra_5050_bs_dd"),
+            Extra_Trick_Crooked_FS_DD = COMPILE_CRC32("extra_trick_crooked_fs_dd"),
+            Extra_NoseGrinds_FS_DD = COMPILE_CRC32("extra_nosegrinds_fs_dd"),
+            Extra_NoseGrinds_BS_DD = COMPILE_CRC32("extra_nosegrinds_bs_dd"),
+            Extra_TailGrinds_FS_DD = COMPILE_CRC32("extra_tailgrinds_fs_dd"),
+            Extra_TailGrinds_BS_DD = COMPILE_CRC32("extra_tailgrinds_bs_dd"),
+
         //Trick_KFBackflip = 0xF7B4E0CB
 
 

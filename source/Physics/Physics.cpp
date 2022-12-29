@@ -9,6 +9,7 @@
 #include "Settings\Settings.h"
 #include "Objects\SuperSectors.h"
 
+
 DWORD GetElapsedTime(DWORD currentTime, DWORD lastTime)
 {
     /*DWORD currentTime2;
@@ -18,6 +19,19 @@ DWORD GetElapsedTime(DWORD currentTime, DWORD lastTime)
         return currentTime - lastTime;
     /*}
     return (0xFFFFFFFF - last_time.LowPart + currentTime);*/
+}
+
+
+bool CheatIsOn(DWORD cheat)
+{
+    typedef bool(__cdecl* const pCheatIsOn)(DWORD, DWORD);
+    return pCheatIsOn(0x004B5310)(cheat, 1);
+}
+
+DWORD GetCheat(DWORD checksum)
+{
+    typedef DWORD(__cdecl* const pGetCheat)(DWORD, DWORD);
+    return pGetCheat(0x004263E0)(checksum, 1);
 }
 
 
@@ -2824,8 +2838,13 @@ float Skater::GetAirGravity()
     float gravity = -1350.0f / this->GetScriptedStat(Checksums::Physics_vert_hang_Stat);
 
     //Check if moon gravity is on, if it's on multiply gravity by 0.5
-    /*if (CheatIsOn(GetCheat(crc32f((unsigned char*)"CHEAT_MOON"))))
-        gravity *= 0.5f;*/
+    Network::NetHandler* net_handler = Network::NetHandler::Instance();
+    if (net_handler && net_handler->OnServer())
+    {
+        DWORD moon = GetCheat(Checksums::CHEAT_MOON);
+        if (moon && CheatIsOn(moon))
+            gravity *= 0.5f;
+    }
     return gravity;
 }
 

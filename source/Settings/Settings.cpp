@@ -735,6 +735,41 @@ bool MessageBoxScript(CStruct* pStruct, CScript* pScript)
     return true;
 }
 
+bool AllowDropDownScript(CStruct* pStruct, CScript* pScript)
+{
+    auto pArrayName = pScript->GetParam(Checksum("ExtraTricks"));
+    if (pArrayName)
+    {
+        switch (pArrayName->Data)
+        {
+        case Checksums::Extra_5050_FS:
+            pArrayName->Data = Checksums::Extra_5050_FS_DD;
+            return true;
+        case Checksums::Extra_5050_BS:
+            pArrayName->Data = Checksums::Extra_5050_BS_DD;
+            return true;
+        case Checksums::Extra_Trick_Crooked_FS:
+            pArrayName->Data = Checksums::Extra_Trick_Crooked_FS_DD;
+            return true;
+        case Checksums::Extra_NoseGrinds_FS:
+            pArrayName->Data = Checksums::Extra_NoseGrinds_FS_DD;
+            return true;
+        case Checksums::Extra_NoseGrinds_BS:
+            pArrayName->Data = Checksums::Extra_NoseGrinds_BS_DD;
+            return true;
+        case Checksums::Extra_TailGrinds_FS:
+            pArrayName->Data = Checksums::Extra_TailGrinds_FS_DD;
+            return true;
+        case Checksums::Extra_TailGrinds_BS:
+            pArrayName->Data = Checksums::Extra_TailGrinds_BS_DD;
+            return true;
+        default:
+            return false;
+        }
+    }
+    return false;
+}
+
 bool GetParamScript(CStruct* pStruct, CScript* pScript)
 {
     if (!pStruct->GetNamedHeader(Checksums::ForceUpdate) && QScript::GotParam(pStruct, pScript))

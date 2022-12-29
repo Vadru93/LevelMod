@@ -58,8 +58,6 @@ __declspec(naked) void BouncyObj_Go_Naked()
     static CStruct* pStruct;
     /*static DWORD pOldESP;
     static DWORD pOldEBP;*/
-    _asm pushad;
-    _asm pushfd;
     static DWORD pJmp = 0x004842A0;
     _asm mov pModel, ecx;
     /*_asm mov pOldESP, esp;
@@ -68,8 +66,6 @@ __declspec(naked) void BouncyObj_Go_Naked()
     _asm mov ecx, pModel;
     /*_asm mov esp, pOldESP;
     _asm mov ebp, pOldEBP;*/
-    _asm popfd;
-    _asm popad;
     _asm jmp pJmp;
 }
 
@@ -290,70 +286,80 @@ void BouncyObj_Go(Model* mdl)
 
 void Obj_MoveToNode(Model* mdl, CStruct* pStruct)
 {
-    CStructHeader* node = Node::GetNodeStructByIndex(mdl->GetNodeIndex());
-
-    if (node)
+    if (mdl && pStruct)
     {
-        CStructHeader* collision;
-        if (node->GetStruct(Checksums::Collision, &collision))
+        CStructHeader* node = Node::GetNodeStructByIndex(mdl->GetNodeIndex());
+
+        if (node)
         {
-            SuperSector* sector = SuperSector::GetSuperSector(collision->Data);
-            if (sector)
+            CStructHeader* collision;
+            if (node->GetStruct(Checksums::Collision, &collision))
             {
-                debug_print(__FUNCTION__ " -> Going to move collision...\n");
+                SuperSector* sector = SuperSector::GetSuperSector(collision->Data);
+                if (sector)
+                {
+                    debug_print(__FUNCTION__ " -> Going to move collision...\n");
 
-                CStructHeader* pNode;
-                if (pStruct->GetStruct(Checksums::Name, &pNode))
-                    sector->MoveToNode(pNode->Data);
+                    CStructHeader* pNode;
+                    if (pStruct->GetStruct(Checksums::Name, &pNode))
+                        sector->MoveToNode(pNode->Data);
+                    else
+                        debug_print("Need param <Name> in " __FUNCTION__ "\n");
+
+                }
                 else
-                    debug_print("Need param <Name> in " __FUNCTION__ "\n");
-
+                {
+                    debug_print("Couldn't find SuperSector %s in " __FUNCTION__ "\n", FindChecksumName(collision->Data));
+                }
             }
-            else
-            {
-                debug_print("Couldn't find SuperSector %s in " __FUNCTION__ "\n", FindChecksumName(collision->Data));
-            }
+            /*else
+                //debug_print("No Collision found %X?\n", node);*/
         }
-        /*else
-            //debug_print("No Collision found %X?\n", node);*/
+        else
+            debug_print("Couldn't find NodeIndex %d in " __FUNCTION__ "\n", mdl->GetNodeIndex());
     }
     else
-        debug_print("Couldn't find NodeIndex %d in " __FUNCTION__ "\n", mdl->GetNodeIndex());
+        debug_print("mdl or pStruct = NULL? in " " __FUNCTION__ " "\n");
 }
 
 void Obj_FollowPathLinked(Model* mdl, CStruct* pStruct)
 {
-    CStructHeader* node = Node::GetNodeStructByIndex(mdl->GetNodeIndex());
-
-    if (node)
+    if (mdl && pStruct)
     {
-        CStructHeader* collision;
-        if (node->GetStruct(Checksums::Collision, &collision))
+        CStructHeader* node = Node::GetNodeStructByIndex(mdl->GetNodeIndex());
+
+        if (node)
         {
-            SuperSector* sector = SuperSector::GetSuperSector(collision->Data);
-            if (sector)
+            CStructHeader* collision;
+            if (node->GetStruct(Checksums::Collision, &collision))
             {
-                debug_print("model %X\n", mdl);
-                debug_print(__FUNCTION__ " -> Going to move collision...\n");
-
-                movingObjects.push_back(MovingObject(sector, mdl));
-
-                MovingObject& obj = movingObjects.back();
-                obj.vertices = new D3DXVECTOR3[sector->numVertices];
-                //std::copy(obj.sector->vertices, obj.sector->vertices + obj.sector->numVertices, obj.vertices);
-                D3DXVECTOR3 position = (sector->bboxMax + sector->bboxMin) / 2.0f;
-
-                for (DWORD i = 0; i < sector->numVertices; i++)
+                SuperSector* sector = SuperSector::GetSuperSector(collision->Data);
+                if (sector)
                 {
-                    obj.vertices[i] = (sector->vertices[i] - position);
+                    debug_print("model %X\n", mdl);
+                    debug_print(__FUNCTION__ " -> Going to move collision...\n");
+
+                    movingObjects.push_back(MovingObject(sector, mdl));
+
+                    MovingObject& obj = movingObjects.back();
+                    obj.vertices = new D3DXVECTOR3[sector->numVertices];
+                    //std::copy(obj.sector->vertices, obj.sector->vertices + obj.sector->numVertices, obj.vertices);
+                    D3DXVECTOR3 position = (sector->bboxMax + sector->bboxMin) / 2.0f;
+
+                    for (DWORD i = 0; i < sector->numVertices; i++)
+                    {
+                        obj.vertices[i] = (sector->vertices[i] - position);
+                    }
+                }
+                else
+                {
+                    debug_print("Couldn't find SuperSector %s in " __FUNCTION__ "\n", FindChecksumName(collision->Data));
                 }
             }
-            else
-            {
-                debug_print("Couldn't find SuperSector %s in " __FUNCTION__ "\n", FindChecksumName(collision->Data));
-            }
         }
+        else
+            debug_print("Couldn't find NodeIndex %d in " __FUNCTION__ "\n", mdl->GetNodeIndex());
     }
     else
-        debug_print("Couldn't find NodeIndex %d in " __FUNCTION__ "\n", mdl->GetNodeIndex());
+        debug_print("mdl or pStruct = NULL? in " " __FUNCTION__ " "\n");
 }

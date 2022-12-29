@@ -8,6 +8,7 @@ LevelMod\game.qb
 LevelMod\gameflow.qb
 LevelMod\gamemode.qb
 LevelMod\gameoptions.qb
+LevelMod\grindscripts.qb
 LevelMod\helper.qb
 LevelMod\mainmenu.qb
 LevelMod\levelmenu.qb
@@ -70,7 +71,6 @@ frontend.qb
 frontendcamanims.qb
 girl_a.qb
 grindlist.qb
-grindscripts.qb
 horse.qb
 iniskater.qb
 iniskater_exceptions.qb

@@ -902,6 +902,7 @@ struct EXTERN CStruct
     BYTE* MaybeAddCompressed(DWORD qbKey, BYTE* pFile, QBKeyInfoContainer* other);
     void AddCompressedNode(DWORD checksum, QBKeyInfoContainer* container);
 
+    //Gets the first param
 #ifdef _DEBUG
     __inline __declspec(noalias)CStructHeader const* __restrict GetHeader_debug(const char* func, const char* file, QBKeyHeader::QBKeyType type = QBKeyHeader::LOCAL) const
     {

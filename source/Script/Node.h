@@ -347,7 +347,8 @@ struct Node
     //Gets the CStructHeader of a node
     static CStructHeader* GetNodeStructByIndex(DWORD index)
     {
-        return GetNodeArray()->GetCStruct(index);
+        CArray* pArray = GetNodeArray();
+        return pArray ? pArray->GetCStruct(index) : (CStructHeader*)pArray;
     }
 
     static CStruct* GetNodeByIndex(DWORD index)
