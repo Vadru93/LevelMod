@@ -1817,25 +1817,31 @@ bool UnfreezeCamera(CStruct* pStruct, CScript* pScript)
     return true;
 }
 
+bool FileExist(char* path)
+{
+    //add data to path
+    static char dir[256] = "data\\";
+    memcpy(&dir[5], path, strlen(path) + 1);
+
+    //try to open file
+    FILE* f = fopen(dir, "rb");
+    if (f)
+    {
+        fclose(f);
+        return true;
+    }
+
+    return false;
+}
+
 bool FileExistsScript(CStruct* pStruct, CScript* pScript)
 {
     CStructHeader* header = pStruct->head;
 
     if (header)
-    {
-        static char dir[256] = "data\\";
-        DWORD len = strlen(header->pStr) + 1;
-        memcpy(&dir[5], header->pStr, len);
+        return FileExist(header->pStr);
 
-        FILE* f = fopen(dir, "rb");
-        if (f)
-        {
-            fclose(f);
-            return true;
-        }
-        return false;
-    }
-    return true;
+    return false;
 }
 
 bool AddParamScript(CStruct* pStruct, CScript* pScript)
@@ -4612,8 +4618,45 @@ bool ScriptSetMenuSelectCallback(CStruct* pStruct, CScript* pScript)
     return false;
 }
 
+static DWORD p_sprintf;
+
+__declspec (naked) void LoadFont_FileExist()
+{
+    //default font small
+    static char safe[16] = "fonts\\small.fnt";
+    static char safe2[10] = "small.fnt";
+    static char* path;
+
+    //call sprintf
+    _asm mov path, eax;
+    _asm push 0x005C9698
+    _asm push eax;
+    _asm call[p_sprintf];
+
+    _asm pushad;
+
+    if (FileExist(path))
+    {
+        _asm popad;
+    }
+    else
+    {
+        _asm popad;
+        static DWORD* pSafe = (DWORD*)&safe;
+        _asm mov eax, pSafe;
+        pSafe = (DWORD*)&safe2;
+        _asm mov edi, pSafe;
+    }
+
+    //return to LoadFont function
+    static DWORD pRet = 0x004F8F53;
+    _asm jmp[pRet];
+}
+
+void __stdcall RenderShatterObjects();
 void InitLevelMod()
 {
+    p_sprintf = *(DWORD*)0x0058D0B8;
     //HookControls();
 
     //Initializing the new timer
@@ -5086,7 +5129,9 @@ void InitLevelMod()
     HookFunction(0x004003BA, BouncyObj_OnBounce_Naked, 0xE9);
 
     //Rendering of models hook, currently used to render custom shattered meshes
-    HookFunction(0x004F9C0A, Render_Naked, 0xE9);
+    *(BYTE*)0x0042FAA6 = 0xE8;
+    HookFunction(0x0042FAA7, RenderShatterObjects);
+    //HookFunction(0x004F9C0A, Render_Naked, 0xE9);
 
     VirtualProtect((LPVOID)0x00483D55, 1, PAGE_EXECUTE_READWRITE, &old);
     VirtualProtect((LPVOID)0x00483DD0, 1, PAGE_EXECUTE_READWRITE, &old);
@@ -5205,6 +5250,9 @@ void InitLevelMod()
     {
         header->pFunction = DumpScripts;
     }
+
+    //Add safecheck to LoadFount
+    HookFunction(0x004F8F48, LoadFont_FileExist, 0xE9);
 
     /*header = GetQBKeyHeader(Checksum("DisplayLoadingScreen"));
     {
