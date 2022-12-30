@@ -5427,7 +5427,9 @@ bool Initialize(CStruct* pStruct, CScript* pScript)
 
     //Gfx::command = Gfx::Command::ToggleWindowed;
         //MessageBox(0, "GOING TO ADD HOSTOPTIONS", "", 0);
+#ifdef _DEBUG
         CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CheckForScriptUpdates, NULL, 0/*CREATE_SUSPENDED*/, NULL);
+#endif
         using namespace LevelModSettings;
         debug_print("Already inited\n");
 
@@ -6646,6 +6648,8 @@ bool GetMaximumIndexScript(CStruct* pStruct, CScript* pScript)
 __declspec(noalias) HRESULT PostRender(HRESULT hres)
 {
 
+    if (QScript::reload_qb)
+        TestReloadQB(NULL, NULL);
     if (hres == D3D_OK && GameState::IsActive())
     {
         if (bToggleWindowed)

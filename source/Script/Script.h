@@ -51,6 +51,7 @@ namespace QScript
     extern bool(*ResetClock)(CStruct*, CScript*);
     extern bool (*ShatterScript)(CStruct*, CScript*);
     extern bool (*LaunchPanelMessage)(CStruct*, CScript*);
+    extern bool reload_qb;
     auto constexpr ASSERT = 1;
     enum ScriptToken
     {

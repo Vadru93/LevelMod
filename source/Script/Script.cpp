@@ -87,6 +87,7 @@ bool(*QScript::GotParam)(CStruct*, CScript*) = NULL;
 bool(*QScript::ResetClock)(CStruct*, CScript*) = NULL;
 bool (*QScript::ShatterScript)(CStruct*, CScript*) = NULL;
 bool (*QScript::LaunchPanelMessage)(CStruct*, CScript*) = NULL;
+bool QScript::reload_qb = false;
 QScript::QBScript* QScript::Scripts=NULL;
 std::vector<QScript::CompressedNode> QScript::compNodes;
 std::vector<DWORD> QScript::qbKeys;
@@ -1289,7 +1290,7 @@ void QBScript::OpenScript(char* path, bool level)
         bool found = false;
         for (DWORD i = 0; i < qbFiles.size(); i++)
         {
-            if (_stricmp(qbFiles[i].fileName, qbFile.fileName))
+            if (!_stricmp(qbFiles[i].fileName, qbFile.fileName))
             {
                 qbFiles[i].checksum = checksum;
                 qbFiles[i].size = size;
@@ -1541,7 +1542,7 @@ void CheckForScriptUpdates()
         switch (dwWaitStatus)
         {
         case WAIT_OBJECT_0:
-            TestReloadQB(NULL, NULL);
+            QScript::reload_qb = true;//TestReloadQB(NULL, NULL);
             if (FindNextChangeNotification(dwChangeHandle) == FALSE)
             {
                 MessageBox(0, "Error trying checking for script changes", "Error trying checking for script changes", 0);
@@ -1585,6 +1586,8 @@ void UpdateScriptConstants()
 bool TestReloadQB(CStruct* pStruct, CScript* pScript)
 {
 
+    QScript::reload_qb = false;
+    QScript::CallCFunction(Checksum("StopAllScripts"));
     typedef void(__cdecl* const pLoadQB)(char* fileName, bool unknown);
 
     for (DWORD i = 0; i < qbFiles.size(); i++)
@@ -1595,7 +1598,7 @@ bool TestReloadQB(CStruct* pStruct, CScript* pScript)
             pLoadQB(0x0042B300)(qbFiles[i].fileName, false);
         }
     }
-    char* qbFiles = *(char**)0x008A8B48;
+    //char* qbFiles = *(char**)0x008A8B48;
 
 
     char* dir = GetScriptDir();
@@ -1629,9 +1632,9 @@ bool TestReloadQB(CStruct* pStruct, CScript* pScript)
         if (!FileExists(&dir[5]))
         {
             unsigned long checksum;
-            /*if (FastCRC::CFastCRC32::Calculate(&checksum, dir) != 0)
-                MessageBox(0, "Error calculating checksum for file", &dir[13], 0);
-            */
+            //if (FastCRC::CFastCRC32::Calculate(&checksum, dir) != 0)
+              //  MessageBox(0, "Error calculating checksum for file", &dir[13], 0);
+            
             if (FileHandler::CalculateCRC(checksum, dir) == false)
                 MessageBox(0, "Error calculating checksum for file", &dir[13], 0);
 
@@ -1647,5 +1650,7 @@ bool TestReloadQB(CStruct* pStruct, CScript* pScript)
     delete[] oldData;
     UpdateScriptConstants();
 
+    QScript::CallCFunction(Checksum("RestartLevel"));
+    QScript::CallCFunction(Checksum("ReinsertSkaters"));
     return true;
 }
