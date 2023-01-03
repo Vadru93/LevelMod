@@ -145,6 +145,8 @@ void SetArrayValues(CArray* pArray, CStructHeader* values);
 bool InvalidReadPtr(const void* const __restrict ptr, const DWORD size);
 bool InvalidReadPtr(const void* const __restrict ptr);
 
+bool IsOptionOn(const char* option);
+
 //Current version
 #define VERSION 4.8f
 static float version = VERSION;
@@ -1431,6 +1433,7 @@ void ReadFirstOptions()
         CreateConsole();
         debug_print("Welcome to DebugMode\n");
     }
+    
 }
 
 void FixTagLimitProtections()
@@ -6663,6 +6666,12 @@ __declspec(noalias) HRESULT PostRender(HRESULT hres)
 
             //Unpress enter key, should already be unpressed but better safe than sorry...
             KeyState::Unpress(KeyCode::ENTER);
+
+            //Update the option
+            CStructHeader param(QBKeyHeader::LOCAL, crc32f("LM_GFX_bWindowed"));
+            CStruct pStruct(QBKeyHeader::LOCAL, crc32f("LM_GFX_bWindowed"));
+            ToggleOption(&pStruct, NULL);
+
 
             //Set focus to desktop
             SetFocus(HWND_DESKTOP);
