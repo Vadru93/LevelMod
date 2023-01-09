@@ -1820,23 +1820,6 @@ bool UnfreezeCamera(CStruct* pStruct, CScript* pScript)
     return true;
 }
 
-bool FileExist(char* path)
-{
-    //add data to path
-    static char dir[256] = "data\\";
-    memcpy(&dir[5], path, strlen(path) + 1);
-
-    //try to open file
-    FILE* f = fopen(dir, "rb");
-    if (f)
-    {
-        fclose(f);
-        return true;
-    }
-
-    return false;
-}
-
 bool FileExistsScript(CStruct* pStruct, CScript* pScript)
 {
     CStructHeader* header = pStruct->head;
@@ -3239,6 +3222,18 @@ void LoadCustomShaderThread()
     //cld_manager->SortWorldSectors();
 }
 
+bool LoadAnimScript(CStruct* pStruct, CScript* pScript)
+{
+    auto path = pStruct->GetNamedHeader(Checksums::Name);
+    if (path && path->Type == QBKeyHeader::STRING)
+    {
+        typedef bool(__cdecl* const pLoadAnim)(CStruct*, CScript*);
+        if (FileExist(path->pStr))
+            return pLoadAnim(0x89921F5B)(pStruct, pScript);
+    }
+    return false;
+}
+
 bool OnPostLevelLoad(CStruct* pStruct, CScript* pScript)
 {
     debug_print("OnPostLevelLoad...\n");
@@ -4003,6 +3998,12 @@ void AddFunctions()
         header->pFunction = NewTimer::ResetTimeScript;
     }
 
+    header = GetQBKeyHeader(Checksum("LoadAnim"));
+    if (header)
+    {
+        header->pFunction = LoadAnimScript;
+    }
+
 #ifdef _DEBUG && 0
     FILE* f = fopen("func_info.txt", "w");
     fprintf(f, "# Functions\n| Name | Params | Returns | Example | Description |\n");
@@ -4698,6 +4699,8 @@ void InitLevelMod()
     HookFunction(0x004C27AF, &CScript::SetScript);
     //HookFunction(0x004CFC76, &FrontEnd::UpdateScript_Hook);
     HookFunction(0x0041801F, &CScript::SetScript);
+
+    HookFunction(0x004399E9, &QScript::RequestLoadLevel_Hook);
 
     //For camera controll
     HookFunction(0x00498F39, &KeyState::XINPUT_UpdateCamera_Hook);

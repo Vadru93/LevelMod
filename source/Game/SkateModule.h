@@ -8,7 +8,7 @@ struct SkateMod
     //004367E0 mdl::skate::GetPointer, increase VP count
     SkateMod* Instance()
     {
-        return 0;
+        return *(SkateMod**)0x008E1E90;
     }
 
     GameMode* GetGameMode()

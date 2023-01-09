@@ -27,6 +27,8 @@ EXTERN char* FindChecksumName(DWORD checksum, bool only_debug = true);
 
 void UpdateScriptConstants();
 
+bool FileExist(char* path);
+
 
 //inline unsigned long Checksum(const char* string);//THPS3 Function for CRC32
 struct Node;
@@ -137,6 +139,8 @@ namespace QScript
     void PanelMessage(const char* msg, ...);
 
     void SetMenuElementText(DWORD id, const char* text);
+
+    void RequestLoadLevel_Hook(const char* __restrict pScriptName, CStruct* __restrict pParams = NULL, const Node* __restrict pObject = NULL, bool assert = false);
 
     struct QBFile
     {
@@ -830,6 +834,16 @@ struct EXTERN CStruct
         *(DWORD*)0x008E1E30 = topHeap;
         *(DWORD*)0x008E1E34 = *(DWORD*)0x008E1E34 + 1;*/
         return (void*)topHeap;
+    }
+
+    void Dump()
+    {
+#ifdef _DEBUG
+        for (auto header = head; header != NULL; header = header->NextHeader)
+        {
+            debug_print("Name %s Data %s\n", FindChecksumName(header->QBkey), FindChecksumName(header->Data));
+        }
+#endif
     }
 
     CStruct(CStructHeader* param)

@@ -139,6 +139,75 @@ void QScript::SpawnScript(DWORD checksum, CStruct* params, DWORD node, DWORD cal
     pSpawnScript(0x00428510)(checksum, params, callback, callback_params, node, AbsentInNetGames, NetEnabled, Permanent);
 }
 
+bool FileExist(char* path)
+{
+    //add data to path
+    static char dir[256] = "data\\";
+    memcpy(&dir[5], path, strlen(path) + 1);
+
+    //try to open file
+    FILE* f = fopen(dir, "rb");
+    if (f)
+    {
+        fclose(f);
+        return true;
+    }
+
+    return false;
+}
+
+void QScript::RequestLoadLevel_Hook(const char* __restrict pScriptName, CStruct* __restrict pParams, const Node* __restrict pObject, bool assert)
+{
+    //Check if loading level or park
+    if (!strcmp(pScriptName, "LoadLevel"))
+    {
+        if (!pParams)
+        {
+            MessageBox(0, "No params to RequestLoadLevel...", "", 0);
+            return;
+        }
+
+        //dump for debug
+        pParams->Dump();
+
+        QBKeyHeader* load_func = GetQBKeyHeader(pParams->head->Data);
+        if (load_func)
+        {
+            char* pScript = load_func->pStr;
+            pScript += 14;
+
+            QBKeyHeader* level_def = GetQBKeyHeader(*(DWORD*)pScript);
+            if (level_def)
+            {
+                CStructHeader* lev_bsp = *level_def->pStruct;
+
+                while (lev_bsp)
+                {
+                    if (lev_bsp->QBkey == crc32f("lev_bsp"))
+                    {
+                        debug_print("Checking if file exists %s\n", lev_bsp->GetString());
+                        if (FileExist(lev_bsp->GetString()))
+                            break;
+                        else
+                            return;
+                    }
+                    lev_bsp = lev_bsp->NextHeader;
+                }
+
+                debug_print("File exists\n");
+            }
+            else
+                debug_print("No level def found\n");
+        }
+        else
+            debug_print("No load func found\n");
+    }
+
+    debug_print("Going to call original RequestLoadLevel func\n");
+    ExecuteQBScript(pScriptName, pParams, pObject, assert);
+    debug_print("Successfully called original RequestLoadLevel func\n");
+}
+
 void QScript::UpdateSpawnedScripts()
 {
     *(bool*)0x008E1DF4 = true;
