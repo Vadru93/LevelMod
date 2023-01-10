@@ -13,7 +13,7 @@ rem - prepare paths
 
 rem - copy files
 
-	copy "LevelMod\d3d8d.dll" "%target%\d3d8.dll"
+	copy "LevelMod\d3d8.dll" "%target%\d3d8.dll"
 	copy "README.MD" "%target%\LevelMod_ReadMe.txt"
 	copy "uninstall_levelmod.bat" "%target%\uninstall_levelmod.bat"
 	%systemroot%\System32\xcopy "%~dp0\LevelMod\Data\*.qb" "%target%\Data" /E /I /H /Y
