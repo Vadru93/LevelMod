@@ -50,12 +50,13 @@ unsigned long crc32f(const char* buf)
     unsigned char c = *buf++;
     while (c != 0x0)
     {
-        if (c >= 'A' && c <= 'Z') c += 32;
-        if (c == '/') c = '\\';
+        if (c == '/') [[unlikely]] c = '\\';
+        else if (c >= 'A' && c <= 'Z') [[unlikely]] c += 32;
 
         crc = checksumTable[(unsigned char)((crc ^ c) & 0xFF)] ^ (crc >> 8);
         c = *buf++;
     }
+    debug_print("%X (%s)", crc, buf);
     return crc;
 }
 
