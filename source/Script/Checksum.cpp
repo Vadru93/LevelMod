@@ -56,7 +56,7 @@ unsigned long crc32f(const char* buf)
         crc = checksumTable[(unsigned char)((crc ^ c) & 0xFF)] ^ (crc >> 8);
         c = *buf++;
     }
-    debug_print("%X (%s)", crc, buf);
+    //debug_print("%X (%s)", crc, buf);
     return crc;
 }
 

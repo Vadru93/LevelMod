@@ -5341,10 +5341,14 @@ void InitLevelMod()
         optimized3[i].Optimize();
     }
 
-    for (DWORD i = 0; i < sizeof(crc32_calls) / 4; i++)
+    //don't optimize checksum in DebugMode since we want to hook old checksum function to add all strings to memory
+    if (!bDebugMode)
     {
-        HookFunction(crc32_calls[i].addr+1, crc32f);
-        //crc32_calls->Optimize();
+        for (DWORD i = 0; i < sizeof(crc32_calls) / 4; i++)
+        {
+            HookFunction(crc32_calls[i].addr + 1, crc32f);
+            //crc32_calls->Optimize();
+        }
     }
 
     //This uses original code that was made for thps2 and used even in thug2
