@@ -1126,7 +1126,8 @@ Def_Si = {
     
     once_on_startup = StartRunScript
     once_on_exit = EndRunScript
-    load_script = Si_Startup
+    load_script = Load_Si
+    startup_func = Si_Startup
     
     lev_bsp = "Levels\si\si.bsp"
     lev_sky = "Levels\si_Sky\si_Sky.bsp"
@@ -1159,7 +1160,8 @@ Def_LA = {
     
     once_on_startup = StartRunScript
     once_on_exit = EndRunScript
-    load_script = La_Startup
+    load_script = Load_LA
+    startup_func = La_Startup
     
     lev_bsp = "Levels\la\la.bsp"
     lev_sky = "Levels\la_Sky\la_Sky.bsp"
@@ -1192,7 +1194,8 @@ Def_Tok = {
     
     once_on_startup = StartRunScript
     once_on_exit = EndRunScript
-    load_script = Tok_Startup
+    load_script = Load_Tok
+    startup_func = Tok_Startup
     
     lev_bsp = "Levels\tok\tok.bsp"
     lev_sky = "Levels\tok_Sky\tok_Sky.bsp"
@@ -1225,7 +1228,8 @@ Def_SHP = {
     
     once_on_startup = StartRunScript
     once_on_exit = EndRunScript
-    load_script = SHP_Startup
+    load_script = Load_SHP
+    startup_func = SHP_Startup
     
     lev_bsp = "Levels\shp\shp.bsp"
     lev_sky = "Levels\shp_Sky\shp_Sky.bsp"
@@ -1258,10 +1262,11 @@ Def_Oil = {
     
     once_on_startup = StartRunScript
     once_on_exit = EndRunScript
-    load_script = Oil_Startup
+    load_script = Load_Oil
+    startup_func = Oil_Startup
     
     lev_bsp = "Levels\oil\oil.bsp"
-    lev_sky = "Levels\oil\oil_Sky.bsp"
+    lev_sky = "Levels\oil_Sky\oil_Sky.bsp"
     lev_qb = "Levels\oil\oil.qb"
     lev_amb = "ambience\oil"
     loadscr = "images\loadscrn_oil.png"
@@ -1292,7 +1297,7 @@ Def_Roof = {
     
     once_on_startup = StartRunScript
     once_on_exit = EndRunScript
-    load_script = Oil_Startup
+    load_script = Load_Roof
     
     lev_bsp = "Levels\par\par.bsp"
     lev_sky = "Levels\par_Sky\par_Sky.bsp"

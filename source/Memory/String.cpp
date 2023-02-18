@@ -380,3 +380,4 @@ namespace String
         return new_string;
     }
 };
+//crc_and_copy 004DA370

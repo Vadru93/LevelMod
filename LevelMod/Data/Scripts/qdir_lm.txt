@@ -8,13 +8,14 @@ LevelMod\game.qb
 LevelMod\gameflow.qb
 LevelMod\gamemode.qb
 LevelMod\gameoptions.qb
-LevelMod\grindscripts.qb
 LevelMod\helper.qb
+LevelMod\js_oil.qb
 LevelMod\mainmenu.qb
 LevelMod\levelmenu.qb
 LevelMod\levels.qb
 LevelMod\gspymenu.qb
 LevelMod\groundtricks.qb
+LevelMod\grindscripts.qb
 LevelMod\looptricks.qb
 LevelMod\netmenu.qb
 LevelMod\netmessages.qb

@@ -115,12 +115,12 @@ script add_level_menu_item2
     VerifyParam param = target_script func = add_level_menu_item <...>
     VerifyParam param = parent_menu func = add_level_menu_item <...>
     DestroyElement id = <level_id>
-	
-	//If file don't exists make menu static
+    
+    //If file don't exists make menu static
     if NotTrue FileExists <lev_bsp>
-	    AddParam static
-	endif
-	
+        AddParam static
+    endif
+    
     if IsCareerMode
       if GotParam NoCareer
       else

@@ -32,6 +32,13 @@
 
 #define p_slomo *(float*)0x005B4E68
 
+/*__inline void SetTextureStageState(DWORD state, D3DTEXTURESTAGESTATETYPE type, DWORD value)
+{
+
+}*/
+
+void __cdecl fixedDrawWorldAgain(int16_t param_1, int param_2);
+
 extern unsigned long long __stdcall NewTimer::GetTime();
 
 //--------Spine and Acid--------

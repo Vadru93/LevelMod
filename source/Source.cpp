@@ -4777,6 +4777,9 @@ void InitLevelMod()
     if(Gfx::fps_fix)
         HookFunction(0x004F9463, UpdateFrameLength);
 
+    HookFunction(0x004f9ba3, &fixedDrawWorldAgain);
+    HookFunction(0x0042db89, &fixedDrawWorldAgain);
+
     //Fix script being able to call CFunctions
     HookFunction(0x004CFCDE, &FrontEnd::SetScriptToRun_Hook);
     HookFunction(0x004180DC, &CScript::SetScript);

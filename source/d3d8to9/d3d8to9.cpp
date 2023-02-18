@@ -906,3 +906,57 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
     return new Direct3D8(d3d);
 }
 
+//Code taken from PARTYMANX partymod 
+void __cdecl fixedDrawWorldAgain(int16_t param_1, int param_2) {
+    int* lastVertexBuffer = (int*)0x00906760;
+    int* rwObj = (int*)0x00970a8c;
+    int* currentTexture = (int*)0x0090675c;
+    int* numMeshes = (int*)0x005c94c8;
+    int* meshList = (int*)pRandom;
+    typedef void(__cdecl* RwGetRenderState)(int, void*);
+    typedef void(__cdecl* RwSetRenderState)(int, int);
+#define RwSetRenderState RwSetRenderState(0x0055ce10)
+    typedef void(__cdecl* SetTextureStage)(int*);
+#define SetTextureStage SetTextureStage(0x004f4320)
+    typedef void(__cdecl* SomeLightingStuff)(int, int);
+#define SomeLightingStuff SomeLightingStuff(0x0052fae0)
+    typedef void(__cdecl* DrawWorldMesh)(int, int);
+#define DrawWorldMesh DrawWorldMesh(0x004f4210)
+
+    int32_t uVar1;
+    int texture;
+    int i;
+    int* mesh;	// unknown struct
+
+    uVar1 = *rwObj;
+    SomeLightingStuff(0, 0);
+    *lastVertexBuffer = 0xffffffff;
+    *currentTexture = -1;
+    RwSetRenderState(0x14, 2);
+    i = 0;
+    if (0 < *numMeshes) {
+        mesh = meshList;
+        texture = *currentTexture;
+        while (i < *numMeshes) {
+            if ((mesh[2] != 0) && ((*(uint16_t*)(*mesh + 0x1a) & param_1) == 0)) {
+                if (texture != *mesh) {
+                    SetTextureStage(mesh);
+                    if ((*(uint8_t*)(*mesh + 0x1a) & 0x40)) {
+                        RwSetRenderState(0x14, 2);
+                    }
+                    else {
+                        RwSetRenderState(0x14, 1);
+                    }
+                }
+                DrawWorldMesh(*rwObj, mesh[3]);
+                texture = mesh[0];
+                *currentTexture = texture;
+            }
+            i = i + 1;
+            mesh = mesh + 5;
+        }
+    }
+    RwSetRenderState(0x14, 2);
+    RwSetRenderState(8, 1);
+    return;
+}

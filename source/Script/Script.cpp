@@ -145,6 +145,7 @@ bool FileExist(char* path)
     static char dir[256] = "data\\";
     memcpy(&dir[5], path, strlen(path) + 1);
 
+    debug_print("FileExist: %s\n", dir);
     //try to open file
     FILE* f = fopen(dir, "rb");
     if (f)
@@ -170,12 +171,14 @@ void QScript::RequestLoadLevel_Hook(const char* __restrict pScriptName, CStruct*
         //dump for debug
         pParams->Dump();
 
+        debug_print("Finding load_func %s\n", FindChecksumName(pParams->head->Data));
         QBKeyHeader* load_func = GetQBKeyHeader(pParams->head->Data);
         if (load_func)
         {
             char* pScript = load_func->pStr;
             pScript += 14;
 
+            debug_print("Finding def %s p %p\n", FindChecksumName(*(DWORD*)pScript), pScript);
             QBKeyHeader* level_def = GetQBKeyHeader(*(DWORD*)pScript);
             if (level_def)
             {
