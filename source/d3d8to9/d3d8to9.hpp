@@ -478,3 +478,9 @@ extern std::ofstream LOG;
 
 REFIID ConvertREFIID(REFIID riid);
 void genericQueryInterface(REFIID riid, LPVOID* ppvObj, Direct3DDevice8* pDevice);
+
+struct Skater;
+namespace Game
+{
+    extern Skater* __restrict skater;
+}

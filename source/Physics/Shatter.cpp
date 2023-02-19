@@ -358,6 +358,36 @@ void ShatterSuperSector(SuperSector* super_sector)
 
 bool rendering = false;
 
+/*void UpdateShatterObjects()
+{
+    rendering = true;
+    static DWORD lastFrameCount;
+
+    if (lastFrameCount != Gfx::frameCounter && Game::skater)
+    {
+        lastFrameCount = Gfx::frameCounter;
+
+        float framelength = Game::skater->GetFrameLength() * Gfx::shatter_speed;
+
+        for (DWORD i = 0; i < shatterObjects.size(); i++)
+        {
+            shatterObjects[i]->life -= framelength;
+
+            if (shatterObjects[i]->life <= 0)
+            {
+                delete shatterObjects[i];
+                shatterObjects[i] = NULL;
+                shatterObjects.erase(shatterObjects.begin() + i);
+                i--;
+                continue;
+            }
+
+            shatterObjects[i]->Update(framelength);
+        }
+    }
+    rendering = false;
+}*/
+
 void __stdcall RenderShatterObjects()
 {
     rendering = true;

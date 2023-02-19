@@ -4759,6 +4759,7 @@ __declspec (naked) void LoadFont_FileExist()
     _asm jmp[pRet];
 }
 
+//void UpdateShatterObjects();
 void __stdcall RenderShatterObjects();
 void InitLevelMod()
 {

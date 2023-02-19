@@ -906,6 +906,8 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
     return new Direct3D8(d3d);
 }
 
+//void UpdateShatterObjects();
+void __stdcall RenderShatterObjects();
 //Code taken from PARTYMANX partymod 
 void __cdecl fixedDrawWorldAgain(int16_t param_1, int param_2) {
     int* lastVertexBuffer = (int*)0x00906760;
@@ -956,7 +958,9 @@ void __cdecl fixedDrawWorldAgain(int16_t param_1, int param_2) {
             mesh = mesh + 5;
         }
     }
+
     RwSetRenderState(0x14, 2);
     RwSetRenderState(8, 1);
+
     return;
 }

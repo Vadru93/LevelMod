@@ -1142,7 +1142,7 @@ Def_Si = {
 }
 
 SCRIPT Load_Si
-    Load_Level_Func { Def_Ap }
+    Load_Level_Func { Def_Si }
 ENDSCRIPT
 
 //THPS3 LA
