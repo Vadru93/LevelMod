@@ -117,6 +117,18 @@ namespace Gfx
     extern DWORD num_threads;
     extern bool bOldWindowed;
     extern RECT window_rect;
+
+    void inline SetRenderState(D3DRENDERSTATETYPE state, DWORD value)
+    {
+        if (p_current_renderstate(state) != value)
+        {
+            //Set old src_blend
+            p_current_renderstate(state) = value;
+            p_target_renderstate(state) = value;
+            Gfx::pDevice->SetRenderState(state, value);
+        }
+    }
+
 };
 
 namespace Physics

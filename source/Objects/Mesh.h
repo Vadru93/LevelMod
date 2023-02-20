@@ -263,57 +263,20 @@ struct Material
         if (texture->shader.flags != 0x30303030)
         {
             //debug_print("%X\n", texture->shader.flags);
-            if (p_current_renderstate(D3DRS_BLENDOP) != texture->shader.blend_op)
-            {
-                //Set old blend_op
-                p_current_renderstate(D3DRS_BLENDOP) = texture->shader.blend_op;
-                p_target_renderstate(D3DRS_BLENDOP) = texture->shader.blend_op;
-                Gfx::pDevice->SetRenderState(D3DRS_BLENDOP, texture->shader.blend_op);
-            }
-
-            if (p_current_renderstate(D3DRS_SRCBLEND) != texture->shader.src_blend)
-            {
-                //Set old src_blend
-                p_current_renderstate(D3DRS_SRCBLEND) = texture->shader.src_blend;
-                p_target_renderstate(D3DRS_SRCBLEND) = texture->shader.src_blend;
-                Gfx::pDevice->SetRenderState(D3DRS_SRCBLEND, texture->shader.src_blend);
-            }
-
-            if (p_current_renderstate(D3DRS_DESTBLEND) != texture->shader.dest_blend)
-            {
-                //Set old dest_blend
-                p_current_renderstate(D3DRS_DESTBLEND) = texture->shader.dest_blend;
-                p_target_renderstate(D3DRS_DESTBLEND) = texture->shader.dest_blend;
-                Gfx::pDevice->SetRenderState(D3DRS_DESTBLEND, texture->shader.dest_blend);
-            }
+            Gfx::SetRenderState(D3DRS_BLENDOP, texture->shader.blend_op);
+            Gfx::SetRenderState(D3DRS_SRCBLEND, texture->shader.src_blend);
+            Gfx::SetRenderState(D3DRS_DESTBLEND, texture->shader.dest_blend);
         }
         else
         {
             typedef void(__cdecl* pSetTargetRenderStates)(BYTE state, BYTE pass);
             pSetTargetRenderStates(0x0055CE10)(8, 0);
 
-            DWORD target = p_target_renderstate(D3DRS_BLENDOP);
-            if (p_current_renderstate(D3DRS_BLENDOP) != target)
-            {
-                p_current_renderstate(D3DRS_BLENDOP) = target;
-                Gfx::pDevice->SetRenderState(D3DRS_BLENDOP, target);
-            }
+            Gfx::SetRenderState(D3DRS_BLENDOP, p_target_renderstate(D3DRS_BLENDOP));
+            Gfx::SetRenderState(D3DRS_SRCBLEND, p_target_renderstate(D3DRS_SRCBLEND));
+            Gfx::SetRenderState(D3DRS_DESTBLEND, p_target_renderstate(D3DRS_DESTBLEND));
 
-            target = p_target_renderstate(D3DRS_SRCBLEND);
-            if (p_current_renderstate(D3DRS_SRCBLEND) != target)
-            {
-                p_current_renderstate(D3DRS_SRCBLEND) = target;
-                Gfx::pDevice->SetRenderState(D3DRS_SRCBLEND, target);
-            }
-
-            target = p_target_renderstate(D3DRS_DESTBLEND);
-            if (p_current_renderstate(D3DRS_DESTBLEND) != target)
-            {
-                p_current_renderstate(D3DRS_DESTBLEND) = target;
-                Gfx::pDevice->SetRenderState(D3DRS_DESTBLEND, target);
-            }
-
-            if (flag)
+            /*if (flag)
                 target = D3DCULL_NONE;
             else
                 target = D3DCULL_CW;
@@ -322,7 +285,7 @@ struct Material
             {
                 p_current_renderstate(D3DRS_CULLMODE) = target;
                 Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, target);
-            }
+            }*/
         }
     }
 };

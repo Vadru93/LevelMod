@@ -106,7 +106,8 @@ bool NewShatterScript(CStruct* pStruct, CScript* pScript)
         SuperSector* sector = SuperSector::GetSuperSector(name);
         if (sector)
         {
-            area = max(1000.0f, area);
+            area = min(1000.0f, area);
+            area = max(5000.0f, area);
             ShatterSetParams(velocity, area, variance, spread, life, bounce, bounce_amp);
             ShatterSuperSector(sector);
         }
@@ -576,6 +577,9 @@ void __stdcall RenderShatterObjects()
             Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
             Gfx::pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
 
+            Gfx::SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+            Gfx::SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+            Gfx::SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 
             float framelength = Game::skater->GetFrameLength() * Gfx::shatter_speed;
 
