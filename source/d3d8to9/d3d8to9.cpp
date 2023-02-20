@@ -993,6 +993,7 @@ void __cdecl fixedDrawWorldAgain(int16_t param_1, int param_2) {
     }
 
     DrawDebugLines();
+    RenderShatterObjects();
 
     RwSetRenderState(0x14, 2);
     RwSetRenderState(8, 1);

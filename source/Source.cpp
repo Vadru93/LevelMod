@@ -4760,7 +4760,7 @@ __declspec (naked) void LoadFont_FileExist()
 }
 
 //void UpdateShatterObjects();
-void __stdcall RenderShatterObjects();
+void __stdcall RenderExtra();
 void InitLevelMod()
 {
     p_sprintf = *(DWORD*)0x0058D0B8;
@@ -5242,7 +5242,7 @@ void InitLevelMod()
 
     //Rendering of models hook, currently used to render custom shattered meshes
     *(BYTE*)0x0042FAA6 = 0xE8;
-    HookFunction(0x0042FAA7, RenderShatterObjects);
+    HookFunction(0x0042FAA7, RenderExtra);
     //HookFunction(0x004F9C0A, Render_Naked, 0xE9);
 
     VirtualProtect((LPVOID)0x00483D55, 1, PAGE_EXECUTE_READWRITE, &old);

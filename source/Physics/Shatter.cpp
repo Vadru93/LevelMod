@@ -477,10 +477,76 @@ void RenderBlendedSectors()
     Gfx::pDevice->SetRenderState(D3DRS_ZFUNC, z_func);
 #endif
 }
-
 void __stdcall RenderShatterObjects()
 {
     rendering = true;
+    static DWORD lastFrameCount;
+
+    if (shatterObjects.size())
+    {
+        //Make sure we update once per frame
+        bool update = false;
+        if (lastFrameCount != Gfx::frameCounter)
+        {
+            lastFrameCount = Gfx::frameCounter;
+            update = true;
+        }
+
+        //Make sure textures are set to zero
+        Gfx::pDevice->SetTexture(0, NULL);
+        p_current_texture(0) = 0;
+        Gfx::pDevice->SetTexture(1, NULL);
+        Gfx::pDevice->SetTexture(2, NULL);
+        Gfx::pDevice->SetTexture(3, NULL);
+
+        DWORD old, old_state;
+        Gfx::pDevice->GetFVF(&old);
+
+        old_state = p_current_renderstate(D3DRS_CULLMODE);
+        DWORD old_alpha = p_current_renderstate(D3DRS_ALPHABLENDENABLE);
+        DWORD old_alpha2 = p_current_renderstate(D3DRS_ALPHATESTENABLE);
+
+        Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+        Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+        Gfx::pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
+
+        Gfx::SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+        Gfx::SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+        Gfx::SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+
+        float framelength = Game::skater->GetFrameLength() * Gfx::shatter_speed;
+
+        for (DWORD i = 0; i < shatterObjects.size(); i++)
+        {
+            if (update)
+            {
+                shatterObjects[i]->life -= framelength;
+
+                if (shatterObjects[i]->life <= 0)
+                {
+                    delete shatterObjects[i];
+                    shatterObjects[i] = NULL;
+                    shatterObjects.erase(shatterObjects.begin() + i);
+                    i--;
+                    continue;
+                }
+
+                shatterObjects[i]->Update(framelength);
+            }
+
+            shatterObjects[i]->Render();
+        }
+
+        Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, old_state);
+        Gfx::pDevice->SetFVF(old);
+        Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, old_alpha);
+        Gfx::pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, old_alpha2);
+    }
+    rendering = false;
+}
+
+void __stdcall RenderExtra()
+{
     static DWORD lastFrameCount;
     extern bool restore_matrix;
     if (restore_matrix)
@@ -507,115 +573,8 @@ void __stdcall RenderShatterObjects()
     }
 
     RenderBlendedSectors();
-    void DrawDebugLines();
+    RenderShatterObjects();
 
-
-    //Make sure we update and render once per frame
-    if (lastFrameCount != Gfx::frameCounter)
-    {
-
-        /*Gfx::pDevice->GetRenderTarget(0, &Gfx::world_rendertarget);
-        Gfx::pDevice->GetViewport(&Gfx::world_viewport);*/
-
-        /*if (GameState::GotSuperSectors && bbox_rails.size())
-        {
-            DWORD old_factor;
-            DWORD old_ref;
-            DWORD old_blend;
-            DWORD old_z;
-            DWORD old_bias;
-            DWORD old_slope;
-
-            Gfx::pDevice->GetRenderState(D3DRS_BLENDFACTOR, &old_factor);
-            Gfx::pDevice->GetRenderState(D3DRS_ALPHAREF, &old_ref);
-            Gfx::pDevice->GetRenderState(D3DRS_ALPHABLENDENABLE, &old_blend);
-            Gfx::pDevice->GetRenderState(D3DRS_ZFUNC, &old_z);
-            Gfx::pDevice->GetRenderState(D3DRS_DEPTHBIAS, &old_bias);
-            Gfx::pDevice->GetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, &old_slope);
-
-            Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-            Gfx::pDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
-            Gfx::pDevice->SetRenderState(D3DRS_BLENDFACTOR, D3DXCOLOR(255, 255, 0, 255));
-            Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-            Gfx::pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
-            Gfx::pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-            Gfx::pDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
-            Gfx::pDevice->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_ALPHA | D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_BLUE | D3DCOLORWRITEENABLE_GREEN);
-            Gfx::pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_BLENDFACTOR);
-            Gfx::pDevice->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
-
-            Gfx::pDevice->DrawPrimitiveUP(D3DPRIMITIVETYPE::D3DPT_LINELIST, bbox_rails.size() / 2, &bbox_rails.front(), 0);
-
-
-            Gfx::pDevice->SetRenderState(D3DRS_BLENDFACTOR, old_factor);
-            Gfx::pDevice->SetRenderState(D3DRS_ALPHAREF, old_ref);
-            Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, old_blend);
-            Gfx::pDevice->SetRenderState(D3DRS_ZFUNC, old_z);
-            Gfx::pDevice->SetRenderState(D3DRS_DEPTHBIAS, old_bias);
-            Gfx::pDevice->SetRenderState(D3DRS_SLOPESCALEDEPTHBIAS, old_slope);
-        }*/
-
-        if (shatterObjects.size())
-        {
-            //Make sure textures are set to zero
-            Gfx::pDevice->SetTexture(0, NULL);
-            p_current_texture(0) = 0;
-            Gfx::pDevice->SetTexture(1, NULL);
-            Gfx::pDevice->SetTexture(2, NULL);
-            Gfx::pDevice->SetTexture(3, NULL);
-
-            lastFrameCount = Gfx::frameCounter;
-
-            DWORD old, old_state;
-            Gfx::pDevice->GetFVF(&old);
-
-            old_state = p_current_renderstate(D3DRS_CULLMODE);
-            DWORD old_alpha = p_current_renderstate(D3DRS_ALPHABLENDENABLE);
-            DWORD old_alpha2 = p_current_renderstate(D3DRS_ALPHATESTENABLE);
-
-            Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-            Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-            Gfx::pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
-
-            Gfx::SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-            Gfx::SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-            Gfx::SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-
-            float framelength = Game::skater->GetFrameLength() * Gfx::shatter_speed;
-
-            for (DWORD i = 0; i < shatterObjects.size(); i++)
-            {
-                shatterObjects[i]->life -= framelength;
-
-                if (shatterObjects[i]->life <= 0)
-                {
-                    delete shatterObjects[i];
-                    shatterObjects[i] = NULL;
-                    shatterObjects.erase(shatterObjects.begin() + i);
-                    i--;
-                    continue;
-                }
-
-                shatterObjects[i]->Update(framelength);
-                shatterObjects[i]->Render();
-            }
-
-            Gfx::pDevice->SetRenderState(D3DRS_CULLMODE, old_state);
-            Gfx::pDevice->SetFVF(old);
-            Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, old_alpha);
-            Gfx::pDevice->SetRenderState(D3DRS_ALPHATESTENABLE, old_alpha2);
-        }
-    }
-
-    /*RwViewer* viewer = RwViewer::Instance();
-    RpWorld* world = viewer->GetCurrentWorld();
-    if (world && Game::skater && Node::GetNodeArray())
-    {
-        SkaterCam* cam = Game::skater->GetSkaterCam();
-        if (cam)
-            world->RenderVisibleClumps(cam);
-    }*/
-    rendering = false;
 }
 
 void ClearHitSectors();
@@ -633,7 +592,7 @@ __declspec(naked) void Render_Naked()
     static DWORD pJmp = 0x004F9C0E;
    // _asm pushad;
     if (p_render_scene)
-        RenderShatterObjects();
+        RenderExtra();
    // _asm popad;
     _asm call[pCall];
     _asm jmp[pJmp];
