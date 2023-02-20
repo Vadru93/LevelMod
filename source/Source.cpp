@@ -6463,6 +6463,18 @@ void DrawEye()
     Gfx::pDevice->SetRenderTarget(0, old_target);
 }
 
+extern std::vector<SuperSector*> hit_sectors;
+void ClearHitSectors()
+{
+#ifdef _DEBUG
+    for (DWORD i = 0; i < hit_sectors.size(); i++)
+    {
+        hit_sectors[i]->flags &= ~SuperSector::Blend::Enabled;
+    }
+    hit_sectors.clear();
+#endif
+}
+
 void EnableBackEvent()
 {
     Sleep(300);

@@ -18,6 +18,8 @@ namespace Collision
 };
 extern void RemoveMovingObject(SuperSector* sector);
 extern bool updatingObjects;
+extern std::vector<SuperSector*> hit_sectors;
+
 //00491820
 //0051E060
 //#pragma pack(1)
@@ -34,6 +36,7 @@ EXTERN struct SuperSector
         Trigger = 0x0040,
         Skatable = 0x0080,
         Collideable = 0x008C,//maybe use 0xBF??
+        Hit = 0x1000,
     };
     union
     {
@@ -143,6 +146,26 @@ EXTERN struct SuperSector
     void Update()
     {
         sector->Update();
+    }
+
+    enum Blend : WORD
+    {
+        Red = 0x1000,
+        Green = 0x2000,
+        Blue = 0x3000,
+        Mix = 0x4000,
+        Enabled = 0x7000,
+    };
+
+    void Blend(Blend blend)
+    {
+#ifdef _DEBUG
+        if (this && mesh)
+        {
+            flags |= blend;
+            hit_sectors.push_back(this);
+        }
+#endif
     }
 
     //004fea30 00412230

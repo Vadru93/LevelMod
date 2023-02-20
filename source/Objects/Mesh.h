@@ -411,5 +411,25 @@ struct Mesh
     MaterialSplit splits[64];
 
     void AddShader(ShaderObject* shader, DWORD matIndex);
+
+    WORD GetNumSplits();
+
+    void Render()
+    {
+        for (DWORD i = 0; i < GetNumSplits(); i++)
+        {
+            MaterialSplit* split = &splits[i];
+            if (split->material && split->material->texture)
+            {
+                //debug_print("Going to submit material\n");
+                split->material->Submit();
+
+                Gfx::pDevice->SetStreamSource(0, split->vertexBuffer->GetProxyInterface(), 0, split->stride);
+                Gfx::pDevice->SetIndices(split->indexBuffer->GetProxyInterface());
+                Gfx::pDevice->DrawIndexedPrimitive(D3DPT_TRIANGLESTRIP, split->baseIndex, 0, split->numVertices, 0, split->numIndices-2); 
+            }
+        }
+    }
+
 };
 #endif

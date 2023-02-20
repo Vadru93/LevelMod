@@ -843,6 +843,7 @@ HRESULT STDMETHODCALLTYPE Direct3DDevice8::BeginScene()
     DrawFrame2();*/
     return hres;
 }
+void ClearHitSectors();
 HRESULT STDMETHODCALLTYPE Direct3DDevice8::EndScene()
 {
     HRESULT hres = ProxyInterface->EndScene();

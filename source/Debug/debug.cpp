@@ -96,3 +96,85 @@ bool ReportException(LPCTSTR pszFunction, LPEXCEPTION_POINTERS pExceptionInfo)
     Tracer("DLL: ** Exception: %08X, @  %08X, in \"%s\", from Module: \"%s\", Base: %08X **\n", pExceptionInfo->ExceptionRecord->ExceptionCode, pExceptionInfo->ExceptionRecord->ExceptionAddress, pszFunction, szModule, GetModuleHandle(szModule));
     return(false);
 }
+
+struct Line
+{
+    D3DXVECTOR3 v1;
+    D3DXVECTOR3 v2;
+    int color;
+
+    short numFrames;
+};
+
+#define MAX_NUM_LINES 500000
+
+Line DebugLines[500000];
+
+void AddDebugLine(Vertex v0,Vertex v1, int rgb0, int numDrawFrames)
+{
+#ifdef	_DEBUG
+    static int idx = 0;
+
+    DebugLines[idx].v1 = v0;
+    DebugLines[idx].v2 = v1;
+
+    DebugLines[idx].color = rgb0;
+
+    DebugLines[idx].numFrames = numDrawFrames;
+
+    if (++idx >= 500000)
+    {
+        idx = 0;
+    }
+#endif
+}
+
+void DrawDebugLines()
+{
+#ifdef _DEBUG
+    struct LineVert
+    {
+        D3DVECTOR	pos;
+        D3DCOLOR	col;
+    }; 
+
+    static LineVert	line_verts[500000 * 2];
+    DWORD index = 0;
+
+    for (int i = 0; i < 500000; ++i)
+    {
+        if (DebugLines[i].numFrames>0)
+        {
+            DebugLines[i].numFrames--;
+        }
+
+        line_verts[index].pos = DebugLines[i].v1;
+        line_verts[index].col = DebugLines[i].color;
+        index++;
+        line_verts[index].pos = DebugLines[i].v2;
+        line_verts[index].col = DebugLines[i].color;
+        index++;
+    }
+
+    if (index > 0)
+    {
+        DWORD old_op, old_src, old_dest, old_fvf;
+        Gfx::pDevice->GetRenderState(D3DRS_BLENDOP, &old_op);
+        Gfx::pDevice->GetRenderState(D3DRS_SRCBLEND, &old_src);
+        Gfx::pDevice->GetRenderState(D3DRS_DESTBLEND, &old_dest);
+        Gfx::pDevice->GetFVF(&old_fvf);
+
+        Gfx::pDevice->SetTexture(0, NULL);
+        Gfx::pDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+        Gfx::pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+        Gfx::pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+        Gfx::pDevice->SetFVF(D3DFVF_XYZ | D3DFVF_DIFFUSE);
+        Gfx::pDevice->DrawPrimitiveUP(D3DPT_LINELIST, index / 2, line_verts, sizeof(LineVert));
+
+        Gfx::pDevice->SetRenderState(D3DRS_BLENDOP, old_op);
+        Gfx::pDevice->SetRenderState(D3DRS_SRCBLEND, old_src);
+        Gfx::pDevice->SetRenderState(D3DRS_DESTBLEND, old_dest);
+        Gfx::pDevice->SetFVF(old_fvf);
+    }
+#endif
+}

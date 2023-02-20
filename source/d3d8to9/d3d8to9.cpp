@@ -11,6 +11,7 @@
 #include "..\Script\QBKey.h"
 #include "..\Render\CustomShaders.h"
 
+
 #define pRANDOM_SIZE 0x32000
 
 static BYTE pRandom[pRANDOM_SIZE + 0x14] = { 0 };
@@ -907,6 +908,12 @@ extern "C" Direct3D8 * WINAPI Direct3DCreate8(UINT SDKVersion)
 }
 
 //void UpdateShatterObjects();
+struct SuperSector;
+bool ShouldBlend(SuperSector*);
+void SetupBlendedMode(WORD flags);
+void RestoreBlendedMode();
+void RenderBlendedSectors();
+void DrawDebugLines();
 void __stdcall RenderShatterObjects();
 //Code taken from PARTYMANX partymod 
 void __cdecl fixedDrawWorldAgain(int16_t param_1, int param_2) {
@@ -941,6 +948,19 @@ void __cdecl fixedDrawWorldAgain(int16_t param_1, int param_2) {
         texture = *currentTexture;
         while (i < *numMeshes) {
             if ((mesh[2] != 0) && ((*(uint16_t*)(*mesh + 0x1a) & param_1) == 0)) {
+                SuperSector* sector = NULL;
+#ifdef _DEBUG
+                if (mesh[3])
+                {
+                    BYTE* p = (BYTE*)(mesh[3] + 8);
+                    if (p)
+                    {
+                        sector = *(SuperSector**)p;
+                    }
+                    //MessageBox(0, ok, ok, 0);
+                }
+#endif
+
                 if (texture != *mesh) {
                     SetTextureStage(mesh);
                     if ((*(uint8_t*)(*mesh + 0x1a) & 0x40)) {
@@ -950,7 +970,20 @@ void __cdecl fixedDrawWorldAgain(int16_t param_1, int param_2) {
                         RwSetRenderState(0x14, 1);
                     }
                 }
-                DrawWorldMesh(*rwObj, mesh[3]);
+                if (ShouldBlend(sector))
+                {
+                    DWORD old_blend, old_alpha;
+                    Gfx::pDevice->GetRenderState(D3DRS_SRCBLEND, &old_blend);
+                    Gfx::pDevice->GetRenderState(D3DRS_ALPHABLENDENABLE, &old_alpha);
+                    Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+                    Gfx::pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_BLENDFACTOR);
+                    DrawWorldMesh(*rwObj, mesh[3]);
+                    RestoreBlendedMode();
+                    Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, old_alpha);
+                    Gfx::pDevice->SetRenderState(D3DRS_SRCBLEND, old_blend);
+                }
+                else
+                    DrawWorldMesh(*rwObj, mesh[3]);
                 texture = mesh[0];
                 *currentTexture = texture;
             }
@@ -958,6 +991,8 @@ void __cdecl fixedDrawWorldAgain(int16_t param_1, int param_2) {
             mesh = mesh + 5;
         }
     }
+
+    DrawDebugLines();
 
     RwSetRenderState(0x14, 2);
     RwSetRenderState(8, 1);

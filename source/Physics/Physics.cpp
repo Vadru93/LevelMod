@@ -8,6 +8,7 @@
 #include "Script\Script.h"
 #include "Settings\Settings.h"
 #include "Objects\SuperSectors.h"
+std::vector<SuperSector*> hit_sectors;
 
 
 DWORD GetElapsedTime(DWORD currentTime, DWORD lastTime)
@@ -24,8 +25,8 @@ DWORD GetElapsedTime(DWORD currentTime, DWORD lastTime)
 
 bool CheatIsOn(DWORD cheat)
 {
-    typedef bool(__cdecl* const pCheatIsOn)(DWORD, DWORD);
-    return pCheatIsOn(0x004B5310)(cheat, 1);
+    typedef bool(__stdcall* const pCheatIsOn)(DWORD);
+    return pCheatIsOn(0x004B5310)(cheat);
 }
 
 DWORD GetCheat(DWORD checksum)
@@ -182,7 +183,7 @@ __declspec(noalias) bool look_for_transfer_target(const D3DXVECTOR3& search_dir,
 
     Skater* __restrict const skater = Skater::Instance();
 
-    for (float step = 10.0f; step < 650.0f; step += 5.0f)
+    for (float step = 10.0f; step < 1650.0f; step += 5.0f)
     {
         // First find a VERT point a bit in front of us
         // can be some distance below us 
@@ -197,8 +198,12 @@ __declspec(noalias) bool look_for_transfer_target(const D3DXVECTOR3& search_dir,
         line.end = line.start;
         line.end.y -= 4500.0f;									// long way below
         //skater->SetRay(*(D3DXVECTOR3*)&start, *(D3DXVECTOR3*)&end);
+        AddDebugLine(line.start, line.end);
         if (Collision::FindFirstCollision(line, data) && is_vert_for_transfers(&data.normal))//skater->CollisionCheck(Collision::Flags::Vert) && is_vert_for_transfers((Vertex*)skater->GetCollisionNormal()))
         {
+            
+            SuperSector* sector = SuperSector::GetSuperSector(data.checksum);
+            sector->Blend(SuperSector::Blend::Red);
             debug_print("Found Vert\n");
             Vertex horizontal_normal = data.normal;// *(Vertex*)skater->GetCollisionNormal();
             horizontal_normal.y = 0.0f;
@@ -218,15 +223,18 @@ __declspec(noalias) bool look_for_transfer_target(const D3DXVECTOR3& search_dir,
                     if (dot >= 0.4f && Sgn(start_normal.x) == Sgn(horizontal_normal.x) && Sgn(start_normal.z) == Sgn(horizontal_normal.z))
                     {
                         debug_print("HIP with too low angle?\n");
+                        AddDebugLine(line.start, line.end, MAKE_RGB(0, 0, 0));
                         return false;
                     }
                     debug_print("dot %f\nstart %f %f, target %f %f\n", dot, start_normal.x, start_normal.z, horizontal_normal.x, horizontal_normal.z);
                 }
 
+                AddDebugLine(line.start, line.end, MAKE_RGB(0, 255, 0));
                 return true;
             }
             else
             {
+                AddDebugLine(line.start, line.end, MAKE_RGB(0, 0, 255));
                 target = data.point;// *(Vertex*)skater->GetHitPoint();
                 target_normal = data.normal;// *(Vertex*)skater->GetCollisionNormal();
                 debug_print("FAlSE Target dot %f\n%f %f %f normal %f %f %f\n", dot, target.x, target.y, target.z, target_normal.x, target_normal.y, target_normal.z);
@@ -251,7 +259,7 @@ __declspec(noalias) bool look_for_transfer_target(const D3DXVECTOR3& search_dir,
 
     Skater* __restrict const skater = Skater::Instance();
 
-    for (float step = 10.0f; step < 650.0f; step += 5.0f)
+    for (float step = 10.0f; step < 550.0f; step += 5.0f)
     {
         // First find a VERT point a bit in front of us
         // can be some distance below us 
@@ -453,6 +461,8 @@ bool Skater::CheckForSpine()
     //SetRay(start, end);
     if (GetCollFlags() & 0x8)
     {
+        SuperSector* sector = SuperSector::GetSuperSector(this->checksumName);
+        sector->Blend(SuperSector::Blend::Green);
         wall_pos = *(Vertex*)GetHitPoint();
 
         Vertex start_normal = *(Vertex*)&this->normal;
@@ -461,15 +471,17 @@ bool Skater::CheckForSpine()
 
         //bound the cache to the maximum target distance, looking at all possible directions
         RwLine line;
-        line.start = *GetPosition();
+        line.start = *GetPosition() + wall_out * 0.5f;
+        line.start.y += 500.0f;
+        AddDebugLine(*GetPosition(), wall_pos, MAKE_RGB(255, 0, 0));
         //forward
-        line.end = line.start + (wall_out * 650.0f);
+        line.end = line.start + (wall_out * 550.0f);
         //sideways
         Vertex left_along_vert(-start_normal.z, 0.0f, start_normal.x);
         //left
-        Vertex left = line.start + ((-left_along_vert + wall_out) * 650.0f);
+        Vertex left = line.start + ((-left_along_vert + wall_out) * 550.0f);
         //right
-        Vertex right = line.start + ((left_along_vert + wall_out) * 650.0f);
+        Vertex right = line.start + ((left_along_vert + wall_out) * 550.0f);
 
         //make the line as small as possible but big enough to fit all possible directions
         if (line.start.x > line.end.x)
@@ -1350,6 +1362,8 @@ __declspec(noalias) bool maybe_acid(bool skated_off_edge, const Vertex& pos, con
         skater->SetRay(cstart, cend);
         if (skater->CollisionCheck(Collision::Flags::Vert) && is_vert_for_transfers((Vertex*)skater->GetCollisionNormal()))
         {
+            SuperSector* sector = SuperSector::GetSuperSector(skater->checksumName);
+            sector->Blend(SuperSector::Blend::Mix);
             // the horizontal projection of the vert's normal just correspond somewhat to our direction			 
             target_normal = *(Vertex*)skater->GetCollisionNormal();
             *(Vertex*)&(horizontal_target_normal) = target_normal;
@@ -1880,6 +1894,8 @@ __declspec(noalias) bool TestForAcid(CStruct* pParams, CScript* pScript)
 
                 if (skater->CollisionCheck(Collision::Flags::Vert) && is_vert_for_transfers((Vertex*)skater->GetCollisionNormal()))
                 {
+                    SuperSector* sector = SuperSector::GetSuperSector(skater->checksumName);
+                    sector->Blend(SuperSector::Blend::Mix);
                     Vertex target_normal = *(Vertex*)skater->GetCollisionNormal();
                     Vertex vel = *(Vertex*)skater->GetVelocity();
                     Vertex target = *(Vertex*)skater->GetHitPoint();
@@ -2518,8 +2534,10 @@ __declspec(naked) void Slerp_naked()
 
 
 
+void ClearHitSectors();
 __declspec(noalias) void OnGround()
 {
+    ClearHitSectors();
     Slerp::OnGround = true;
     Slerp::OnGrind = false;
     Slerp::landing = false;

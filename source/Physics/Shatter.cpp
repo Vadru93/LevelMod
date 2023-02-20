@@ -388,6 +388,95 @@ bool rendering = false;
     rendering = false;
 }*/
 
+void SetupBlendedMode(WORD flags);
+bool ShouldBlend(SuperSector* sector)
+{
+#ifdef _DEBUG
+    if (sector->flags & SuperSector::Blend::Enabled)
+    {
+        SetupBlendedMode(sector->flags);
+        return true;
+    }
+#endif
+    return false;
+}
+
+DWORD alpha_enabled, old_factor;
+
+void SetupBlendedMode(WORD flag)
+{
+#ifdef _DEBUG
+    Gfx::pDevice->GetRenderState(D3DRS_BLENDFACTOR, &old_factor);
+
+    switch (flag & SuperSector::Blend::Enabled)
+    {
+    case SuperSector::Blend::Red:
+        Gfx::pDevice->SetRenderState(D3DRS_BLENDFACTOR, D3DXCOLOR(255, 0, 0, 255));
+        break;
+    case SuperSector::Blend::Green:
+        Gfx::pDevice->SetRenderState(D3DRS_BLENDFACTOR, D3DXCOLOR(0, 255, 0, 255));
+        break;
+    case SuperSector::Blend::Blue:
+        Gfx::pDevice->SetRenderState(D3DRS_BLENDFACTOR, D3DXCOLOR(0, 0, 255, 255));
+        break;
+    case SuperSector::Blend::Mix:
+        Gfx::pDevice->SetRenderState(D3DRS_BLENDFACTOR, D3DXCOLOR(0, 255, 128, 255));
+        break;
+
+    }
+
+    Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+#endif
+}
+
+void RestoreBlendedMode()
+{
+#ifdef _DEBUG
+    Gfx::pDevice->SetRenderState(D3DRS_BLENDFACTOR, old_factor);
+#endif
+}
+
+extern std::vector<SuperSector*> hit_sectors;
+void RenderBlendedSectors()
+{
+#ifdef _DEBUG
+    DWORD old_ref, z_enabled, z_func, src_blend, alpha_enabled;
+    Gfx::pDevice->GetRenderState(D3DRS_ALPHAREF, &old_ref);
+    Gfx::pDevice->GetRenderState(D3DRS_SRCBLEND, &src_blend);
+    Gfx::pDevice->GetRenderState(D3DRS_ZENABLE, &z_enabled);
+    Gfx::pDevice->GetRenderState(D3DRS_ZFUNC, &z_func);
+    Gfx::pDevice->GetRenderState(D3DRS_ALPHABLENDENABLE, &alpha_enabled);
+    Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+    Gfx::pDevice->SetRenderState(D3DRS_ALPHAREF, 8);
+
+    Gfx::pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
+    Gfx::pDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+
+    Gfx::pDevice->SetTexture(0, NULL);
+    p_current_texture(0) = 0;
+    Gfx::pDevice->SetTexture(1, NULL);
+    Gfx::pDevice->SetTexture(2, NULL);
+    Gfx::pDevice->SetTexture(3, NULL);
+    
+    //Gfx::pDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+    
+    //Gfx::pDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_NEVER);
+
+    Gfx::pDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_BLENDFACTOR);
+    for (DWORD i = 0; i < hit_sectors.size(); i++)
+    {
+        SetupBlendedMode(hit_sectors[i]->flags);
+        hit_sectors[i]->mesh->Render();
+    }
+
+    RestoreBlendedMode();
+    Gfx::pDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, alpha_enabled);
+    Gfx::pDevice->SetRenderState(D3DRS_ALPHAREF, old_ref);
+    Gfx::pDevice->SetRenderState(D3DRS_SRCBLEND, src_blend);
+    Gfx::pDevice->SetRenderState(D3DRS_ZFUNC, z_func);
+#endif
+}
+
 void __stdcall RenderShatterObjects()
 {
     rendering = true;
@@ -415,6 +504,9 @@ void __stdcall RenderShatterObjects()
         Gfx::pDevice->SetTextureStageState(0, (D3DTEXTURESTAGESTATETYPE)D3DTSS_MIPFILTER, Value);
 
     }
+
+    RenderBlendedSectors();
+    void DrawDebugLines();
 
 
     //Make sure we update and render once per frame
@@ -522,11 +614,13 @@ void __stdcall RenderShatterObjects()
     rendering = false;
 }
 
+void ClearHitSectors();
 void UnloadShatterObjects()//004F9C09
 {
     while (rendering)
         Sleep(10);
     shatterObjects.clear();
+    ClearHitSectors();
 }
 
 __declspec(naked) void Render_Naked()

@@ -39,3 +39,7 @@ bool ReportException(LPCTSTR pszFunction, LPEXCEPTION_POINTERS pExceptionInfo);
 #define DEBUGEND()
 #endif
 #endif
+
+#define MAKE_RGB( r, g, b )		( ( ( 255 ) << 24 ) | ( ( b ) << 16 ) | ( ( g ) << 8 ) | ( r ) )
+void AddDebugLine(Vertex v0, Vertex v1, int rgb0 = MAKE_RGB(127, 127, 127), int numDrawFrames = -1);
+void DrawDebugLines();

@@ -67,6 +67,11 @@ void Gfx::UnloadShaders()
 D3DMATERIAL9* NULL_MAT;
 D3DMATERIAL9 NULLMAT;
 
+WORD Mesh::GetNumSplits()
+{
+    return sector->sector->numSplits;
+}
+
 void Mesh::AddShader(ShaderObject* shader, DWORD matIndex)
 {
     //matIndex++;
