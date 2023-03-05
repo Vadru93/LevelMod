@@ -37,7 +37,7 @@
     <TargetName>d3d8</TargetName>
     <OutDir>LevelMod\</OutDir>
     <IntDir>intermediate\$(Configuration)\</IntDir>
-    <IncludePath>$(IncludePath);$(DXSDK_DIR)\Include;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.18362.0\um\xinput.h;$(WindowsSdkDir)include;C:\Users\Vadru\Documents\Chilkat\include;C:\Users\Vidar\Documents\GitHub\LevelMod\source</IncludePath>
+    <IncludePath>$(IncludePath);$(DXSDK_DIR)\Include;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.18362.0\um\xinput.h;$(WindowsSdkDir)include;C:\Users\Vadru\Documents\Chilkat\include;$(ProjectDir)source</IncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.18362.0\um\x86\xinput.lib;C:\Users\Vadru\Documents\Chilkat\libs;$(DXSDK_DIR)\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
