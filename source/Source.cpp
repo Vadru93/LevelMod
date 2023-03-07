@@ -6985,7 +6985,7 @@ __declspec(noalias) void DrawFrame()
 
                 Gfx::frameCounter++;
                 Gfx::uv_anim_timer += Game::skater->GetFrameLength();
-                if (LevelModSettings::bHookedControls && XINPUT::Player1->IsConnected())
+                if (LevelModSettings::bHookedControls && XINPUT::Player1->IsConnected() && LevelModSettings::bVibration)
                 {
                     if (XINPUT::vibrationFrames)
                     {

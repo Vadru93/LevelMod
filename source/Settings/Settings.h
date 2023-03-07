@@ -25,6 +25,7 @@ namespace LevelModSettings
     extern bool bGrafCounter;// = true;
     extern DWORD MemorySize;// = 0xFA000;
     extern bool bHookedControls;// = false;
+    extern bool bVibration; // = true
     extern BYTE original_timer[38];
 
 

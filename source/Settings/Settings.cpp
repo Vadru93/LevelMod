@@ -43,6 +43,7 @@ bool LevelModSettings::bTeleFix = true;
 bool LevelModSettings::bGrafCounter = true;
 DWORD LevelModSettings::MemorySize = 0xFA000;
 bool LevelModSettings::bHookedControls = false;
+bool LevelModSettings::bVibration = true;
 BYTE LevelModSettings::original_timer[38];
 std::map<DWORD, Option> LevelModSettings::options;
 std::map<DWORD, OverrideOption> LevelModSettings::overrideOptions;
@@ -329,6 +330,9 @@ void UpdateOption(DWORD checksum, int value)//, bool HostOption)
         break;
     case Checksums::LM_Control_AirTrickSpeed:
         SetAirTrickSpeed(value);
+        break;
+    case (DWORD)Checksums::LM_Control_bVibration:
+        LevelModSettings::bVibration = value;
         break;
     case (DWORD)Checksums::LM_Control_bInvertedY:
         LevelModSettings::bInvertedY = value;

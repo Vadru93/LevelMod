@@ -163,6 +163,7 @@ namespace Checksums
         LM_Control_bWallplant = COMPILE_CRC32("lm_control_bwallplant"),
         LM_Control_bInvertedY = COMPILE_CRC32("lm_control_binvertedy"),
         LM_Control_bInvertedX = COMPILE_CRC32("lm_control_binvertedx"),
+        LM_Control_bVibration = COMPILE_CRC32("lm_control_bvibration"),
 
         LM_GFX_eNumThreads = COMPILE_CRC32("lm_gfx_enumthreads"),
 
