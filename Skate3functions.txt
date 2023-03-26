@@ -20,6 +20,8 @@
 00417760    ScriptAddMusicTrack
 00421250    SpawnScript
 004213d0    ScriptObserveNextSkater
+00429f50    ContainsFlag (by crc)
+00429fc0    ContainsFlag (by string)
 0042bd10    Init -Script-
 0042bfe0    InitAtStart -Script-
 0042d4d0    sSgltnInstance -RwViewer-
@@ -30,7 +32,11 @@
 00437010    ResetSkaterRotation
 00438b00    GetGameMode
 00439840    ResetSkaters
+00439a20    LaunchGame
 00439f50    ObserveNextSkater
+0045ae80    TogglePanel
+0045b180    SendConsoleMessage
+00459980    SetSwitchMode (HUDPanel)
 00464120    ClearZBuffer
 0046c2f0    CheckForBeachball
 0046d4b0    CheckForCTF
@@ -43,19 +49,33 @@
 0047e6a0    IsObserving
 00480d20    GetImageTexture
 00482540    FlipAnimation
+00489e70    DoManualPhysics
+0049bbd0    GetButton
 0049bcc0    MoveToRestart
 0049bee0    SkipToRestart
+0049da80    SlideOffSteepSlopes
+0049e380    HandleWindResistance
+0049e410    ApplyBrakingFriction
+0049e550    HandleRollingResistance
+0049e590    HandleGroundFriction
+0049f3c0    GetStat
+004a2130    DoOnGroundPhysics
 004a7bd0    UpdateReplayCam
+004a7cf0    UpdateCamera
+004a8620    DoGameLogic
+004b2170    SparksOff
+004b5310    GetCheat
+004b8270    SwitchReplayMode
 004b8840    Update (SkaterCam)
 004c0450    MainLoop
 004c0710    QuitLoop
 004c1230    MaskDigitalInput
+004c68e0    AddTrackToPlayList
+004d7330    UnloadPre       //deletes pre, unused on pc or mac
 004f5280    sSgltnInstance -TextureLoader
 004f52d0    sSgltnDelete -TextureLoader
 004f5330    LoadImageTexture    //loads image from images folder
 004f5570    GetImageTexture     //looks for checksum in memory and returns if found
-004c68e0    AddTrackToPlayList 
-004d7330    UnloadPre       //deletes pre, unused on pc or mac
 004f7710    SetFov -Camera-
 004f9c80    render_objects
 004f9aa0    RenderWorld     //main render routine

@@ -171,8 +171,8 @@ LevelModOptions = [
 LM_Menu_Shared_Vertical = {
   Type = verticalmenu
   parent = contain1
-  x = 170.0 y = 90.0 w = 300.0 h = 400.0 
-  just_center_x just_center_y blue_top 
+  x = 170.0 y = 90.0 w = 300.0 h = 400.0
+  just_center_x just_center_y blue_top
 }
 
 //shared options for a bool menu item
@@ -183,20 +183,20 @@ LM_Menu_Shared_Bool = {
 }
 
 script new_go_back
-    if GotParam from
-       SwitchOffMenu id = <From>
-     SwitchToMenu DoNotMakeRoot menu = <To>
+  if GotParam From
+    SwitchOffMenu id = <From>
+    SwitchToMenu DoNotMakeRoot menu = <To>
   else
-      go_back id = <id>
-    endif
+    go_back id = <id>
+  endif
 endscript
 
 //shared option for a back menu item
 LM_Menu_Shared_Back = {
-  Type = textmenuelement 
+  Type = textmenuelement
   auto_id 
   text = "Back"
-  target = "new_go_back"  
+  target = "new_go_back"
 }
 
 
@@ -220,21 +220,21 @@ Levelmod_menu_root = {
 }
 
 SCRIPT sFixGoBack
-    MoveMenu id = game_options_names_menu y = 0
-    MoveMenu id = game_options_on_off_menu y = 0
-    EnableBackEvent
+  MoveMenu id = game_options_names_menu y = 0
+  MoveMenu id = game_options_on_off_menu y = 0
+  EnableBackEvent
   FixGoBack
   if GotParam SelectCallback
-     SetMenuSelectCallback <SelectCallback>
+    SetMenuSelectCallback <SelectCallback>
   else
-      SetMenuSelectCallback NULL
+    SetMenuSelectCallback NULL
   endif
 ENDSCRIPT
 
 SCRIPT EditControls_OnShow
-    sFixGoBack
+  sFixGoBack
   MoveMenu id = game_options_names_menu y = 64
-    MoveMenu id = game_options_on_off_menu y = 64
+  MoveMenu id = game_options_on_off_menu y = 64
 ENDSCRIPT
 
 levelmod_menu_root_children = [
@@ -244,25 +244,24 @@ levelmod_menu_root_children = [
   //game options that affect gameplay
   { Type = textmenuelement auto_id text = "Game Options" link = newSettingsMenu  
   target = "populate_game_options" params = { mask = cat_game items = game_menu_items title = "Game Options" OnShow = sFixGoBack params = { SelectCallback = LevelModSettingsMenu_OnSelect } }  }
-  
+
   //GUI options, like Show HUD, show GrafCounter, etc
   { Type = textmenuelement auto_id text = "GUI Options" link = newSettingsMenu  
   target = "populate_game_options" params = { mask = cat_gui items = game_menu_items title = "GUI Options" OnShow = sFixGoBack } }
-  
+
   //hardware graphics options (AA, filtering, 
   { Type = textmenuelement auto_id text = "Graphics Options" link = newSettingsMenu  
   target = "populate_game_options" params = { mask = cat_gfx items = game_menu_items title = "Graphics Options" OnShow = sFixGoBack  params = { SelectCallback = LevelModSettingsMenu_OnSelect } } }
-  
-  
+
   //Options that affect certain parts of th level
-  { Type = textmenuelement auto_id text = "Level Options" link = levelmod_menu_LevelOptions } 
+  { Type = textmenuelement auto_id text = "Level Options" link = levelmod_menu_LevelOptions }
     
   //Control options, like spine transfer, acid drop, etc
-  { Type = textmenuelement auto_id text = "Control Options" link = newSettingsMenu  
+  { Type = textmenuelement auto_id text = "Control Options" link = newSettingsMenu
   target = "populate_game_options" params = { mask = cat_control items = game_menu_items title = "Control Options" OnShow = sFixGoBack  params = { SelectCallback = LevelModSettingsMenu_OnSelect } } }
-  
+
   //Edit Controls
-  { Type = textmenuelement auto_id text = "Edit Controls" link = newSettingsMenu     
+  { Type = textmenuelement auto_id text = "Edit Controls" link = newSettingsMenu
   target = "populate_game_options" params = { mask = cat_edit items = game_menu_items title = "Edit Controls" OnShow = EditControls_OnShow } }
 ]
 
@@ -416,20 +415,20 @@ script Save_KeyMapMenu_OnSelect
   //mask can be any number of params that you want to match
   //params can be any number of params you want to get
   //if function finds a match it will add the params to stack with the same name
-    if GetParamFromArray save_keymap_menu_items params = { save_info_text save_info_text2 } mask = { id = <id> }
-      SetMenuElementText <save_info_text> id = save_info_text
+  if GetParamFromArray save_keymap_menu_items params = { save_info_text save_info_text2 } mask = { id = <id> }
+    SetMenuElementText <save_info_text> id = save_info_text
     SetMenuElementText <save_info_text2> id = save_info_text2
   else
-      SetMenuElementText "" id = save_info_text
+    SetMenuElementText "" id = save_info_text
     SetMenuElementText "" id = save_info_text2
   endif
 endscript
 
 script Load_KeyMapMenu_OnSelect
-    if GetParamFromArray load_keymap_menu_items params = { load_info_text } mask = { id = <id> }
-      SetMenuElementText <load_info_text> id = load_info_text
+  if GetParamFromArray load_keymap_menu_items params = { load_info_text } mask = { id = <id> }
+    SetMenuElementText <load_info_text> id = load_info_text
   else
-      SetMenuElementText "" id = load_info_text
+    SetMenuElementText "" id = load_info_text
   endif
 endscript
 
@@ -438,10 +437,10 @@ script KeyMapMenuSetInfoText
 endscript
 
 script KeyMapMenu_OnShow
-    if GotParam SelectCallback
-        SetMenuSelectCallback <SelectCallback>
+  if GotParam SelectCallback
+    SetMenuSelectCallback <SelectCallback>
   endif
-    EnableBackEvent
+  EnableBackEvent
   FixGoBack
 endscript
 
@@ -456,7 +455,6 @@ levelmod_HostOptions_root = {
 SCRIPT CreateLevelModMenus
 Settings_CreateOptionsMenu //items = game_menu_items
 
-  
   //adds levelmod menus
   CreateAndAttachMenu { Levelmod_menu_Root }
   //CreateAndAttachMenu { LevelMod_menu_Control }
@@ -895,29 +893,29 @@ back_menu_item = {
 }
 
 game_menu_items = [
-    //Generic info text
-    { static text = ""                  option_id = info_text                                                               toggle_id = info         cat_game cat_gfx cat_control }
+  //Generic info text
+  { static text = ""                  option_id = info_text                                                               toggle_id = info         cat_game cat_gfx cat_control }
   { static text = ""                  option_id = info_text2                                                              toggle_id = info2        cat_gfx }
   
   //Game Options
-  { IsBool text = "251x Patch"    option_id = LM_GameOption_b251Patch_id      option = LM_GameOption_b251Patch    toggle_id = item1_toggle cat_game info_text = "Allow more than 251 multiplier" }
+  { IsBool text = "251x Patch"      option_id = LM_GameOption_b251Patch_id    option = LM_GameOption_b251Patch      toggle_id = item1_toggle cat_game info_text = "Allow more than 251 multiplier" }
   { IsBool text = "No BW Manual"    option_id = LM_GameOption_bFixBWManual_id option = LM_GameOption_bFixBWManual   toggle_id = item2_toggle cat_game info_text = "Fix backward manuals" }
   { IsBool text = "Unlimited Tags"  option_id = LM_GameOption_bUnLimitTags_id option = LM_GameOption_bUnLimitTags   toggle_id = item3_toggle cat_game info_text = "Allow more than 32 tags in 1 combo" }
-  { IsBool text = "Tele Stance Fix"   option_id = LM_BugFix_bTeleFix_id         option = LM_BugFix_bTeleFix       toggle_id = item4_toggle cat_game info_text = "Fix stance after teleport" }
-  { IsBool text = "Ped Props"     option_id = LM_Gameplay_bPedProps_id      option = LM_Gameplay_bPedProps      toggle_id = item5_toggle cat_game info_text = "Ped props messages" }
-  
+  { IsBool text = "Tele Stance Fix" option_id = LM_BugFix_bTeleFix_id         option = LM_BugFix_bTeleFix           toggle_id = item4_toggle cat_game info_text = "Fix stance after teleport" }
+  { IsBool text = "Ped Props"       option_id = LM_Gameplay_bPedProps_id      option = LM_Gameplay_bPedProps        toggle_id = item5_toggle cat_game info_text = "Ped props messages" }
+
   //since debug is now a separate dll, don't need this right?
   //{ IsBool text = "Debug Console"   option_id = item6 option = LM_DebugOption_bDebugMode    toggle_id = item6_toggle cat_game }
 
-    //Control Options
-  {      text = "Air"     option_id = levelmod_menu_air_id        link = levelmod_menu_air            toggle_id = item1_toggle cat_control info_text = "Air Options Menu" } 
-  {      text = "Wall"      option_id = levelmod_menu_wall_id       link = levelmod_menu_wall           toggle_id = item2_toggle cat_control info_text = "Wall Options Menu" }  
-  { IsBool text = "Reverts"     option_id = LM_Control_bRevert_id     option = LM_Control_bRevert     toggle_id = item3_toggle cat_control info_text = "Allow Reverts" }
-  { IsBool text = "Extra tricks"  option_id = LM_Control_bExtraTricks_id  option = LM_Control_bExtraTricks  toggle_id = item4_toggle cat_control info_text = "Allow Extra Tricks" }
-  { IsBool text = "XInput"    option_id = LM_Control_bXinput_id     option = LM_Control_bXinput     toggle_id = item5_toggle cat_control info_text = "XINPUT controller support" }
-  { IsBool text = "Vibration"    option_id = LM_Control_bVibration_id     option = LM_Control_bVibration     toggle_id = item8_toggle cat_control info_text = "Toggle vibration" }
-  { IsBool text = "Invert Cam X"  option_id = LM_Control_bInvertedX_id  option = LM_Control_bInvertedX    toggle_id = item6_toggle cat_control info_text = "Invert camera Left/Right" }
-  { IsBool text = "Invert Cam Y"  option_id = LM_Control_bInvertedY_id  option = LM_Control_bInvertedY    toggle_id = item7_toggle cat_control info_text = "Invert camera Up/Down" }
+  //Control Options
+  {        text = "Air"          option_id = levelmod_menu_air_id       link = levelmod_menu_air            toggle_id = item1_toggle cat_control info_text = "Air Options Menu" } 
+  {        text = "Wall"         option_id = levelmod_menu_wall_id      link = levelmod_menu_wall           toggle_id = item2_toggle cat_control info_text = "Wall Options Menu" }  
+  { IsBool text = "Reverts"      option_id = LM_Control_bRevert_id      option = LM_Control_bRevert         toggle_id = item3_toggle cat_control info_text = "Allow Reverts" }
+  { IsBool text = "Extra tricks" option_id = LM_Control_bExtraTricks_id option = LM_Control_bExtraTricks    toggle_id = item4_toggle cat_control info_text = "Allow Extra Tricks" }
+  { IsBool text = "XInput"       option_id = LM_Control_bXinput_id      option = LM_Control_bXinput         toggle_id = item5_toggle cat_control info_text = "XINPUT controller support" }
+  { IsBool text = "Vibration"    option_id = LM_Control_bVibration_id   option = LM_Control_bVibration      toggle_id = item8_toggle cat_control info_text = "Toggle vibration" }
+  { IsBool text = "Invert Cam X" option_id = LM_Control_bInvertedX_id   option = LM_Control_bInvertedX      toggle_id = item6_toggle cat_control info_text = "Invert camera Left/Right" }
+  { IsBool text = "Invert Cam Y" option_id = LM_Control_bInvertedY_id   option = LM_Control_bInvertedY      toggle_id = item7_toggle cat_control info_text = "Invert camera Up/Down" }
   //This freezes for some reason...
   //{        text = "Edit Controls" option_id = levelmod_menu_edit_id       link = newSettingsMenu              toggle_id = item8_toggle cat_control   target = "populate_game_options" params = { mask = cat_edit items = game_menu_items title = "Edit Controls" } }
   
@@ -1014,11 +1012,11 @@ script populate_game_options params = { }
 endscript
 
 script LevelModSettingsMenu_OnSelect
-    if GetParamFromArray game_menu_items params = { info_text info_text2 } mask = { option_id = <id> }
-      SetMenuElementText <info_text> id = info_text
+  if GetParamFromArray game_menu_items params = { info_text info_text2 } mask = { option_id = <id> }
+    SetMenuElementText <info_text> id = info_text
     SetMenuElementText <info_text2> id = info_text2
   else
-      SetMenuElementText "" id = info_text
+    SetMenuElementText "" id = info_text
     SetMenuElementText "" id = info_text2
   endif
 endscript
@@ -1026,13 +1024,16 @@ endscript
 script AddEnum
   GetMaximumIndex array = <TextValues>
   GetOptionValue <option>
-  AddLine { 
+  AddLine {
     parent = game_options_names_menu 
     Type = slidermenuelement 
     id = <option_id> 
     text = <text> 
-    lower = 0 upper = <max> delta = 1 start = <OptionValue> wrap = 1 right_side_w = 100
-    eventhandlers = [ {Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextFromValue = <TextValues> TextOnly } }{ Type = ContentsChangedEventHandler target = "LM_SetOption_Do" params = { Do = <Do> do_params = <do_params> name = <option> id = <option_id> TextFromValue = <TextValues> } } ]
+    lower = 0 upper = <max> delta = 1 start = <OptionValue> wrap = 1 right_side_w = -200.0
+    eventhandlers = [
+        { Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextFromValue = <TextValues> TextOnly } }
+        { Type = ContentsChangedEventHandler target = "LM_SetOption_Do" params = { Do = <Do> do_params = <do_params> name = <option> id = <option_id> TextFromValue = <TextValues> } }
+    ]
   }
   //if GotParam toggle_id
         //GetOptionText option = <option> text = <TextValues>
