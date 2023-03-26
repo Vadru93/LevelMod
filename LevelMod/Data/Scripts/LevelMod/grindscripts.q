@@ -203,13 +203,15 @@ script Grind GrindTweak = 7
     endif
     NollieOff
   endif
-  SetException Ex PointRail Scr PointRail
+  SetException Ex = PointRail Scr = PointRail
   SetException Ex = OffRail Scr = OffRail Params = { initanim = <initanim> OutAnim = <OutAnim> }
   SetException Ex = Landed Scr = Land
   SetException Ex = OffMeterTop Scr = SkateInOrBail Params = { <...> FallingLeft }
   SetException Ex = OffMeterBottom Scr = SkateInOrBail Params = { <...> FallingRight }
   SetException Ex = SkaterCollideBail Scr = SkaterCollideBail
   SetException Ex = MadeOtherSkaterBail Scr = MadeOtherSkaterBail_Called CallInsteadOfGoto
+
+
   SetTrickScore 50
   SetTrickName "Kissed the Rail"
   OnExceptionRun Grind_Kissed
@@ -306,6 +308,10 @@ script OffRail
   Vibrate Actuator = 0 Percent = 0
   SetState Air
   SetException Ex = Landed Scr = Land
+  //this is from th4, fixes rail to wallride if triangle is held
+  SetException Ex = WallRideLeft Scr = WallRide Params = { Left }
+  SetException Ex = WallRideRight Scr = WallRide Params = { Right }
+
   DoNextTrick
   if GotParam EarlyOut
     PlayAnim Anim = <EarlyOut> BlendPeriod = 0.1 Backwards
