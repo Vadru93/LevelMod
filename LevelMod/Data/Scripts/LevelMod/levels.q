@@ -225,7 +225,7 @@ SCRIPT Load_Level_Func
     IF GotParam lev_lights
         <lev_lights>
     ELSE
-        SetUpRioDeJaneiroLights
+        SetUpCanadaLights
     ENDIF
 
 
@@ -1219,7 +1219,7 @@ Def_SHP = {
     level_id = ship_id
     levelnum = LevelNum_Ship 
     level_name = "Cruise Ship"
-    location = "??"
+    location = "???"
     unlock_flag LEVEL_UNLOCKED_SHIP
     
     lev_lights = SetUpShipLights
@@ -1258,7 +1258,7 @@ Def_Oil = {
     
     lev_lights = SetUpOilLights
     
-    regular_level th3_level online_modes
+    regular_level NoCareer th3_level online_modes
     
     once_on_startup = StartRunScript
     once_on_exit = EndRunScript
@@ -1287,14 +1287,14 @@ ENDSCRIPT
 
 Def_Roof = {
     level_id = rooftops_id
-    levelnum = LevelNum_New 
+    levelnum = LevelNum_New
     level_name = "Paris"
-    location = "Italy"
-    
+    location = "France"
+
     lev_lights = SetUpSuburbiaLights
-    
-    regular_level misc_level
-    
+
+    regular_level misc_level NoCareer
+
     once_on_startup = StartRunScript
     once_on_exit = EndRunScript
     load_script = Load_Roof
@@ -1441,6 +1441,7 @@ Def_Kon = {
     default_clipping_params
 
     load_script = Load_Kon
+    lev_lights = SetUpShipLights
 }
 
 SCRIPT Load_Kon
