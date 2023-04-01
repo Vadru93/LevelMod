@@ -28,6 +28,7 @@ LevelMod\tricks.qb
 LevelMod\settings.qb
 LevelMod\skater_sfx.qb
 LevelMod\goal_scripts.qb
+LevelMod\walltricks.qb
 
 ajc_scripts.qb
 alf_scripts.qb
