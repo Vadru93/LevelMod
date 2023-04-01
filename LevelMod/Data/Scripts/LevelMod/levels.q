@@ -1081,15 +1081,15 @@ ENDSCRIPT
 //THPS3 AIRPORT
 
 Def_Ap = {
-    level_id = airport_id 
+    level_id = airport_id
     levelnum = LevelNum_Airport
     level_name = "Airport"
     location = "Hawaii?"
-    unlock_flag = LEVEL_UNLOCKED_AIRPORT 
+    unlock_flag = LEVEL_UNLOCKED_AIRPORT
     
     lev_lights = SetUpAirportLights
     
-    regular_level th3_level online_modes 
+    regular_level th3_level online_modes
     
     once_on_startup = StartRunScript 
     once_on_exit = EndRunScript 
@@ -1103,8 +1103,7 @@ Def_Ap = {
     loadscr = "images\loadscrn_ap.png"
 
     r = 134 g = 168 b = 190 a = 0 
-    cnear = 13 
-    cfar = 20000
+    cnear = 13 cfar = 20000
 }
 
 SCRIPT Load_Ap
@@ -1320,9 +1319,9 @@ ENDSCRIPT
 //THPS4 TRAINING
 
 Def_Trn = { 
-    level_name = "Training" 
+    level_name = "Training"
     location = "unknown"
-    level_id = Trn_id 
+    level_id = training_id 
     levelnum = Levelnum_New
 
     th4_level regular_level NoCareer online_modes
@@ -1347,7 +1346,7 @@ ENDSCRIPT
 
 Def_Sch = { 
     level_name = "College" 
-    location = "California"
+    location = "California, USA"
     level_id = college_id 
     levelnum = Levelnum_New
 
@@ -1373,7 +1372,7 @@ ENDSCRIPT
 
 Def_SF2 = { 
     level_name = "San Francisco" 
-    location = "California"
+    location = "California, USA"
     level_id = sanfran2_id
     levelnum = Levelnum_New
 
@@ -1399,7 +1398,7 @@ ENDSCRIPT
 
 Def_Alc = { 
     level_name = "Alcatraz" 
-    location = "California Bay"
+    location = "California Bay, USA"
     level_id = alcatraz_id
     levelnum = Levelnum_New
 
@@ -1556,7 +1555,7 @@ ENDSCRIPT
 
 Def_Hof = { 
     level_name = "Chicago" 
-    location = "Illinois"
+    location = "Illinois, USA"
     level_id = hoffman_id
     levelnum = Levelnum_New
 
@@ -1610,7 +1609,7 @@ ENDSCRIPT
 
 Def_NJ = { 
     level_name = "New Jersey" 
-    location = "Trenton"
+    location = "Trenton, USA"
     level_id = jersey_id
     levelnum = Levelnum_New
 
@@ -1636,7 +1635,7 @@ ENDSCRIPT
 
 Def_NY = { 
     level_name = "Manhattan" 
-    location = "New York"
+    location = "New York, USA"
     level_id = manhattan_id
     levelnum = Levelnum_New
 
@@ -1662,7 +1661,7 @@ ENDSCRIPT
 
 Def_FL = { 
     level_name = "Tampa" 
-    location = "Florida"
+    location = "Florida, USA"
     level_id = tampa_id
     levelnum = Levelnum_New
 
@@ -1688,7 +1687,7 @@ ENDSCRIPT
 
 Def_SD = { 
     level_name = "San Diego" 
-    location = "USA"
+    location = "California, USA"
     level_id = sandiego_id
     levelnum = Levelnum_New
 
@@ -1842,13 +1841,67 @@ ENDSCRIPT
 //=========================================THUG2===============================================
 
 
+//THUG2 BOSTON
+
+Def_BO = { 
+    level_name = "Boston" 
+    location = "Massachusetts, USA"
+    level_id = boston_id
+    levelnum = Levelnum_New
+
+    ug2_level regular_level NoCareer online_modes
+
+    lev_bsp = "levels_ug2\BO\BO.bsp" 
+    lev_sky = "levels_ug2\BO\BO_sky.bsp" 
+    lev_qb = "levels_ug2\BO\BO.qb" 
+    lev_amb = "ambience\thug2\BO"
+    loadscr = "images\load\ug2_bo.png"
+
+    r = 84 g = 84 b = 150 a = 0 
+    default_clipping_params
+
+    load_script = Load_BO_ug2
+}
+
+SCRIPT Load_BO_ug2
+    Load_Level_Func { Def_BO }
+ENDSCRIPT
+
+//THUG2 BARCELONA
+
+Def_BA = {
+    level_name = "Barcelona" 
+    location = "Spain"
+    level_id = barcelona_id
+    levelnum = Levelnum_New
+
+    ug2_level regular_level NoCareer online_modes
+
+    lev_bsp = "levels_ug2\BA\BA.bsp" 
+    lev_sky = "levels_ug2\BA\BA_sky.bsp" 
+    lev_qb = "levels_ug2\BA\BA.qb" 
+    lev_amb = "ambience\thug2\BA"
+    loadscr = "images\load\ug2_ba.png"
+
+    r = 84 g = 84 b = 150 a = 0 
+    default_clipping_params
+
+    load_script = Load_BA_ug2
+}
+
+SCRIPT Load_BA_ug2
+    Load_Level_Func { Def_BA }
+ENDSCRIPT
+
+
+
 //THUG2 AUSTRALIA
 
 Def_AU = { 
     level_name = "Australia" 
     location = "Bondi Beach"
-    level_id = AU_id
-    levelnum = Levelnum_AU
+    level_id = australia_id
+    levelnum = Levelnum_New
 
     ug2_level regular_level NoCareer online_modes
 
@@ -1872,9 +1925,9 @@ ENDSCRIPT
 
 Def_NO = { 
     level_name = "New Orleans" 
-    location = "??"
-    level_id = NO_id
-    levelnum = Levelnum_NO
+    location = "Louisiana, USA"
+    level_id = nawlins_id
+    levelnum = Levelnum_New
 
     ug2_level regular_level NoCareer online_modes
 
@@ -1887,46 +1940,20 @@ Def_NO = {
     r = 84 g = 84 b = 150 a = 0 
     default_clipping_params
 
-    load_script = Load_NO
+    load_script = Load_NO_ug2
 }
 
 SCRIPT Load_NO_ug2
     Load_Level_Func { Def_NO }
 ENDSCRIPT
 
-//THUG2 BARCELONA
-
-Def_BA = { 
-    level_name = "Barcelona" 
-    location = "??"
-    level_id = BA_id
-    levelnum = Levelnum_BA
-
-    ug2_level regular_level NoCareer online_modes
-
-    lev_bsp = "levels_ug2\BA\BA.bsp" 
-    lev_sky = "levels_ug2\BA\BA_sky.bsp" 
-    lev_qb = "levels_ug2\BA\BA.qb" 
-    lev_amb = "ambience\thug2\BA"
-    loadscr = "images\load\ug2_ba.png"
-
-    r = 84 g = 84 b = 150 a = 0 
-    default_clipping_params
-
-    load_script = Load_BA
-}
-
-SCRIPT Load_BA_ug2
-    Load_Level_Func { Def_BA }
-ENDSCRIPT
-
 //THUG2 Berlin
 
 Def_BE = { 
     level_name = "Berlin" 
-    location = "??"
-    level_id = BE_id
-    levelnum = Levelnum_BE
+    location = "Germany"
+    level_id = berlin_id
+    levelnum = Levelnum_New
 
     ug2_level regular_level NoCareer online_modes
 
@@ -1939,37 +1966,11 @@ Def_BE = {
     r = 84 g = 84 b = 150 a = 0 
     default_clipping_params
 
-    load_script = Load_BE
+    load_script = Load_BE_ug2
 }
 
 SCRIPT Load_BE_ug2
     Load_Level_Func { Def_BE }
-ENDSCRIPT
-
-//THUG2 BOSTON
-
-Def_BO = { 
-    level_name = "Boston" 
-    location = "??"
-    level_id = BO_id
-    levelnum = Levelnum_BO
-
-    ug2_level regular_level NoCareer online_modes
-
-    lev_bsp = "levels_ug2\BO\BO.bsp" 
-    lev_sky = "levels_ug2\BO\BO_sky.bsp" 
-    lev_qb = "levels_ug2\BO\BO.qb" 
-    lev_amb = "ambience\thug2\BO"
-    loadscr = "images\load\ug2_bo.png"
-
-    r = 84 g = 84 b = 150 a = 0 
-    default_clipping_params
-
-    load_script = Load_BO
-}
-
-SCRIPT Load_BO_ug2
-    Load_Level_Func { Def_BO }
 ENDSCRIPT
 
 //THUG2 PRO SKATER
@@ -1978,7 +1979,7 @@ Def_SE_ug2 = {
     level_name = "Pro Skater" 
     location = "??"
     level_id = proskater_id
-    levelnum = Levelnum_proskater
+    levelnum = Levelnum_New
 
     ug2_level regular_level NoCareer online_modes
 
@@ -2004,7 +2005,7 @@ Def_SE2_ug2 = {
     level_name = "The Triangle" 
     location = "??"
     level_id = triangle_id
-    levelnum = Levelnum_triangle
+    levelnum = Levelnum_New
 
     ug2_level regular_level NoCareer online_modes
 
@@ -2017,7 +2018,7 @@ Def_SE2_ug2 = {
     r = 84 g = 84 b = 150 a = 0 
     default_clipping_params
 
-    load_script = Load_SE2
+    load_script = Load_SE2_ug2
 }
 
 SCRIPT Load_SE2_ug2
@@ -2028,9 +2029,9 @@ ENDSCRIPT
 
 Def_ST_ug2 = { 
     level_name = "Skatopia" 
-    location = "??"
+    location = "Ohio, USA"
     level_id = skatopia_id
-    levelnum = Levelnum_Skatopia
+    levelnum = Levelnum_New
 
     ug2_level regular_level NoCareer online_modes
 
@@ -2055,6 +2056,7 @@ ENDSCRIPT
 master_level_list = [
     //THPS3
     { Def_Foun } { Def_Can } { Def_Rio } { Def_Sub } { Def_Ap } { Def_Si } { Def_La } { Def_Tok } { Def_Shp } { Def_Oil } { Def_Roof }
+
     { level_name = "Play custom park" load_script = custom_park level_id = custom_park debug_level }
     { level_name = "Tutorials" load_script = Load_Tut level_id = tutorials_id NoCareer once_on_startup = CPF_Tut_LoadingScript }
     { level_name = "Foo" load_script = Load_Foo level_id = foo_id debug_level }
@@ -2069,12 +2071,12 @@ master_level_list = [
     //THPS2X
     { Def_Club } { Def_Cons } { Def_Flor } { Def_Sway } { Def_Sky }
 
-    //THPS4 
-    { Def_Sch } { Def_Sf2 } { Def_Alc } { Def_Kon } { Def_Jnk } { Def_Lon } { Def_Zoo } { Def_Cnv } { Def_Hof } { Def_Mot } { Def_Trn } 
+    //THPS4
+    { Def_Sch } { Def_Sf2 } { Def_Alc } { Def_Kon } { Def_Jnk } { Def_Lon } { Def_Zoo } { Def_Cnv } { Def_Hof } { Def_Mot } { Def_Trn }
 
     //THUG
     { Def_NJ } { Def_NY } { Def_FL } { Def_SD } { Def_HI } { Def_VC } { Def_SJ } { Def_RU } { Def_SE } 
 
     //THUG2
-    { Def_BO } { Def_BA } { Def_BE } { Def_AU } { Def_NO } { Def_ST } { Def_SE } { Def_SE2 }
+    { Def_BO } { Def_BA } { Def_BE } { Def_AU } { Def_NO } { Def_ST_ug2 } { Def_SE_ug2 } { Def_SE2_ug2 }
 ]
