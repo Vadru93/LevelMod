@@ -17,7 +17,7 @@ LevelNum_Burnside = 13
 LevelNum_Roswell = 14
 LevelNum_New = 15
 
-SCRIPT InitLevelLoadProcess
+script InitLevelLoadProcess
     printf "***********************InitLevelLoadProcess"
     UninitializeFrontEndSprites
     Cleanup
@@ -25,32 +25,32 @@ SCRIPT InitLevelLoadProcess
     PauseMusic
     ClearMusicTrackList
     MouseShowCursor 0
-ENDSCRIPT
+endscript
 
-SCRIPT PreFreezeScreen
+script PreFreezeScreen
     SetArenaSize 1
-ENDSCRIPT
+endscript
 
-SCRIPT PostFreezeScreen
+script PostFreezeScreen
     SetArenaSize
-ENDSCRIPT
+endscript
 
 
-SCRIPT SetupForClipPlane
+script SetupForClipPlane
     EnableFog
     SetClippingDistances near = 12 far = 20000
     SetBackgroundColor { r = 128 g = 128 b = 128 alpha = 0 }
     SetFogDistance distance = 1280
     SetFogColor r = 128 g = 128 b = 128
-ENDSCRIPT
+endscript
 
-SCRIPT PreLevelLoad
+script PreLevelLoad
     SetArenaSize 1
     SetUpBasicLights
     SetSfxReverb Instant
     ClearScoreGoals
-    SetScoreGoal score = 10000 goalscript = DefaultHiScoreScript goal = GOAL_HIGHSCORE
-    SetScoreGoal score = 50000 goalscript = DefaultProScoreScript goal = GOAL_PROSCORE
+    SetScoreGoal score = 10000 goalscript = DefaultHiScorescript goal = GOAL_HIGHSCORE
+    SetScoreGoal score = 50000 goalscript = DefaultProScorescript goal = GOAL_PROSCORE
     ClearMusicTrackList
     IF GameModeEquals is_parkeditor
         IF InNetGame
@@ -59,9 +59,9 @@ SCRIPT PreLevelLoad
             DisplayLoadingScreen "images\loadscrn_editor.png"
         ENDIF
     ENDIF
-ENDSCRIPT
+endscript
 
-SCRIPT DisplayProperLoadingScreen
+script DisplayProperLoadingScreen
     printf "DisplayProperLoadingScreen"
     
     IF InMultiPlayerGame
@@ -95,23 +95,23 @@ SCRIPT DisplayProperLoadingScreen
     IF GotParam Simulate
         Wait <Simulate> seconds
     ENDIF
-ENDSCRIPT
+endscript
 
-SCRIPT PostLevelLoad
+script PostLevelLoad
     printf "PostLevelLoad"
     SetArenaSize
-ENDSCRIPT
+endscript
 
 
-SCRIPT script_assert <...>
-    printf "SCRIPT ASSERT!"
+script script_assert <...>
+    printf "script ASSERT!"
     printf <...>
     BEGIN
         wait 1 gameframe
     REPEAT
-ENDSCRIPT
+endscript
 
-SCRIPT request_level
+script request_level
     printf "Running script: request_level"
     change wall_non_skatable_angle = 25
     IF GotParam level
@@ -119,9 +119,9 @@ SCRIPT request_level
     ELSE
         script_assert "request_level needs a level param"
     ENDIF
-ENDSCRIPT
+endscript
 
-SCRIPT LoadLevel
+script LoadLevel
     printf "Running script: LoadLevel"
     change wall_non_skatable_angle = 25
     MemPushContext 0
@@ -130,22 +130,22 @@ SCRIPT LoadLevel
     PostLevelLoad
     MemPopContext
     //ForEachIn LevelModOptions do = OptionsOnChangeLevel params = <...>
-ENDSCRIPT
+endscript
 
-SCRIPT FireUpGame
+script FireUpGame
     ToggleSkater On
     SetGameState On
     LaunchMenuScreen screen = game_menu
-ENDSCRIPT
+endscript
 
 
-SCRIPT DistinguishLevels
+script DistinguishLevels
     SetCompetition LevelNum_Rio
     SetCompetition LevelNum_SkaterIsland
     SetCompetition LevelNum_Tokyo
-ENDSCRIPT
+endscript
 
-SCRIPT Load_SkateShop
+script Load_SkateShop
     DisplayProperLoadingScreen SkateShop
     CareerStartLevel level = LevelNum_Skateshop
     SetUpSkateShopLights
@@ -160,10 +160,10 @@ SCRIPT Load_SkateShop
     ENDIF
     SkateShop_Startup
     UnloadPreFile "SkateShop.pre" dont_assert
-ENDSCRIPT
+endscript
 
 //unused
-SCRIPT Load_Foo
+script Load_Foo
     SetUpFoundryLights
     LoadLevelGeometry level = "Levels\foo\foo.bsp" Sky = "" Pre_set = "Foo"
     LoadNodeArray "levels\foo\foo.qb"
@@ -173,9 +173,9 @@ SCRIPT Load_Foo
     SetClippingDistances near = 12 far = 22000
     Foo_Startup
     UnloadPreFile "Foo.pre" dont_assert
-ENDSCRIPT
+endscript
 
-SCRIPT Load_Tut
+script Load_Tut
     DisplayProperLoadingScreen loadscr = "images\loadscrn_tutorials.png"
     CareerStartLevel level = LevelNum_Tutorials
     SetUpLosAngelesLights
@@ -191,11 +191,11 @@ SCRIPT Load_Tut
     LoadTerrain
     Tut_Startup
     UnloadPreFile "Tut.pre" dont_assert
-ENDSCRIPT
+endscript
 
 //don't think default params are actually needed
 //if it crashes, fix the struct. we don't want to like load foundry if something's wrong.
-SCRIPT Load_Level_Func 
+script Load_Level_Func 
     printf "Load_Level_Func begins..."
 
     IF IsCareerMode
@@ -218,10 +218,13 @@ SCRIPT Load_Level_Func
         ENDIF
     ENDIF
 
+    ///maybe we got ambient track? add it to the list
+    //btw how this works? how does it unload it for other levels if limit is 25?
     IF GotParam lev_amb
         AddMusicTrack <lev_amb>
     ENDIF
 
+    //maybe we got custom lights func? else apply some default
     IF GotParam lev_lights
         <lev_lights>
     ELSE
@@ -231,16 +234,16 @@ SCRIPT Load_Level_Func
 
     printf "Loading Geometry..."
     LoadLevelGeometry { level = <lev_bsp> Sky = <lev_sky> }
-    
+
     IF InNetGame
         IF #"Not" IsOptionOn LM_GameOption_bNetSky
             LoadLevelGeometry { Sky = "" }
         ENDIF
     ENDIF
-    
+
     printf "Loading NodeArray..."
     LoadNodeArray <lev_qb>
-    
+
     LoadTerrain
     PrepareLevelFog <...>
     LM_MaybeSetTh2Physics <...>
@@ -250,18 +253,18 @@ SCRIPT Load_Level_Func
     ENDIF
 
     printf "...finished loading."
-ENDSCRIPT
+endscript
 
 
 DEFAULT_WALL_SKATABLE_ANGLE = 25
 LM_TH2_PHYSICS = 0
 
 
-SCRIPT LM_MaybeSetTh2Physics
+script LM_MaybeSetTh2Physics
     //reset to default angle
     Change Wall_Non_Skatable_Angle = DEFAULT_WALL_SKATABLE_ANGLE
     Change LM_TH2_PHYSICS = 0
-    
+
     if GotParam th1_level
         Change LM_TH2_PHYSICS = 1
     endif
@@ -283,9 +286,9 @@ SCRIPT LM_MaybeSetTh2Physics
         printf "need to fix vert angle!"
         Change Wall_Non_Skatable_Angle = 0
     endif
-ENDSCRIPT
+endscript
 
-SCRIPT PrepareLevelFog r = 128 b = 128 b = 128 a = 128 cnear = 12 cfar = 30000
+script PrepareLevelFog r = 128 b = 128 b = 128 a = 128 cnear = 12 cfar = 30000
     SetBackgroundColor <...>
 
     IF IsOptionOn LM_GameOption_bFog
@@ -297,7 +300,7 @@ SCRIPT PrepareLevelFog r = 128 b = 128 b = 128 a = 128 cnear = 12 cfar = 30000
         DisableFog
         SetClippingDistances { near = <cnear> far = <cfar> }
     ENDIF
-ENDSCRIPT
+endscript
 
 
 online_modes = { 
@@ -321,8 +324,8 @@ Def_Ware = {
     level_name = "Warehouse" 
     location = "Woodland Hills"
     level_id = warehouse_id 
-    levelnum = LevelNum_Warehouse   
-    unlock_flag = LEVEL_UNLOCKED_WAREHOUSE 
+    levelnum = LevelNum_Warehouse
+    unlock_flag = LEVEL_UNLOCKED_WAREHOUSE
 
     th1_level regular_level NoCareer online_modes ignore_th2_physics
 
@@ -339,9 +342,9 @@ Def_Ware = {
     load_script = Load_Ware 
 }
 
-SCRIPT Load_Ware
+script Load_Ware
     Load_Level_Func { Def_Ware }
-ENDSCRIPT
+endscript
 
 //THPS1 SCHOOL
 
@@ -365,9 +368,9 @@ Def_Sc1 = {
     load_script = Load_Sc1
 } 
 
-SCRIPT Load_Sc1
+script Load_Sc1
     Load_Level_Func { Def_Sc1 }
-ENDSCRIPT
+endscript
 
 //THPS1 MALL
 
@@ -391,9 +394,9 @@ Def_Mall = {
     load_script = Load_Mall
 } 
 
-SCRIPT Load_Mall
+script Load_Mall
     Load_Level_Func { Def_Mall }
-ENDSCRIPT
+endscript
 
 //THPS1 VANS
 
@@ -417,9 +420,9 @@ Def_Vans = {
     load_script = Load_Vans
 } 
 
-SCRIPT Load_Vans
+script Load_Vans
     Load_Level_Func { Def_Vans }
-ENDSCRIPT
+endscript
 
 //THPS1 DOWNTOWN
 
@@ -444,9 +447,9 @@ Def_Down = {
     load_script = Load_Down
 } 
 
-SCRIPT Load_Down
+script Load_Down
     Load_Level_Func { Def_Down }
-ENDSCRIPT
+endscript
 
 //THPS1 DOWNHILL JAM
 
@@ -471,9 +474,9 @@ Def_Jam = {
     load_script = Load_Jam
 } 
 
-SCRIPT Load_Jam
+script Load_Jam
     Load_Level_Func { Def_Jam }
-ENDSCRIPT
+endscript
 
 //THPS1 BURNSIDE
 
@@ -500,9 +503,9 @@ Def_Burn = {
     load_script = Load_Burn
 } 
 
-SCRIPT Load_Burn
+script Load_Burn
     Load_Level_Func { Def_Burn }
-ENDSCRIPT
+endscript
 
 //THPS1 STREETS
 
@@ -526,9 +529,9 @@ Def_SF1 = {
     load_script = Load_SF1
 }
 
-SCRIPT Load_SF1
+script Load_SF1
     Load_Level_Func { Def_SF1 }
-ENDSCRIPT
+endscript
 
 //THPS1 ROSWELL
 
@@ -554,9 +557,9 @@ Def_Ros = {
     load_script = Load_Ros
 }
 
-SCRIPT Load_Ros
+script Load_Ros
     Load_Level_Func { Def_Ros }
-ENDSCRIPT
+endscript
 
 //================THPS2===================
 
@@ -582,9 +585,9 @@ Def_Han = {
     load_script = Load_Han 
 } 
 
-SCRIPT Load_Han
+script Load_Han
     Load_Level_Func { Def_Han }
-ENDSCRIPT
+endscript
 
 //THPS2 SCHOOL 2
 
@@ -608,9 +611,9 @@ Def_Sc2 = {
     load_script = Load_Sc2 
 } 
 
-SCRIPT Load_Sc2
+script Load_Sc2
     Load_Level_Func { Def_Sc2 }
-ENDSCRIPT
+endscript
 
 //THPS2 MARSEILLE
 
@@ -634,9 +637,9 @@ Def_Mar = {
     load_script = Load_Mar
 }
 
-SCRIPT Load_Mar
+script Load_Mar
     Load_Level_Func { Def_Mar }
-ENDSCRIPT
+endscript
 
 //THPS2 NEW YORK CITY
 
@@ -660,9 +663,9 @@ Def_NY1 = {
     load_script = Load_NY1 
 }
 
-SCRIPT Load_NY1
+script Load_NY1
     Load_Level_Func { Def_NY1 }
-ENDSCRIPT
+endscript
 
 //THPS2 VENICE BEACH
 
@@ -686,9 +689,9 @@ Def_Ven = {
     load_script = Load_Ven
 }
 
-SCRIPT Load_Ven
+script Load_Ven
     Load_Level_Func { Def_Ven }
-ENDSCRIPT
+endscript
 
 //THPS2 SKATESTREET
 
@@ -712,9 +715,9 @@ Def_SSV = {
     load_script = Load_SSV
 }
 
-SCRIPT Load_SSV
+script Load_SSV
     Load_Level_Func { Def_SSV }
-ENDSCRIPT
+endscript
 
 //THPS2 PHILADELPHIA
 
@@ -738,9 +741,9 @@ Def_Ph = {
     load_script = Load_Ph
 }
 
-SCRIPT Load_Ph
+script Load_Ph
     Load_Level_Func { Def_Ph }
-ENDSCRIPT
+endscript
 
 //THPS2 BULLRING
 
@@ -764,9 +767,9 @@ Def_Bul = {
     load_script = Load_Bul
 }
 
-SCRIPT Load_Bul
+script Load_Bul
     Load_Level_Func { Def_Bul }
-ENDSCRIPT
+endscript
 
 //THPS2 SKATE HEAVEN
 
@@ -790,9 +793,9 @@ Def_Hvn = {
     load_script = Load_Hvn
 }
 
-SCRIPT Load_Hvn
+script Load_Hvn
     Load_Level_Func { Def_Hvn }
-ENDSCRIPT
+endscript
 
 //THPS2 CHOPPER DROP
 
@@ -816,9 +819,9 @@ Def_Drop = {
     load_script = Load_Drop
 }
 
-SCRIPT Load_Drop
+script Load_Drop
     Load_Level_Func { Def_Drop }
-ENDSCRIPT
+endscript
 
 
 //================THPS2X===================
@@ -844,9 +847,9 @@ Def_Cons = {
     load_script = Load_Cons 
 }
 
-SCRIPT Load_Cons
+script Load_Cons
     Load_Level_Func { Def_Cons }
-ENDSCRIPT
+endscript
 
 //THPS2X CLUB
 
@@ -870,9 +873,9 @@ Def_Club = {
     load_script = Load_Club 
 }
 
-SCRIPT Load_Club
+script Load_Club
     Load_Level_Func { Def_Club }
-ENDSCRIPT
+endscript
 
 //THPS2X SUBWAY
 
@@ -892,9 +895,9 @@ Def_Sway = {
     cnear = 12 cfar = 20000 
 }
 
-SCRIPT Load_Sway
+script Load_Sway
     Load_Level_Func { Def_Sway }
-ENDSCRIPT
+endscript
 
 //THPS2X TAMPA
 
@@ -917,9 +920,9 @@ Def_Flor = {
     cnear = 12 cfar = 20000 
 }
 
-SCRIPT Load_Flor
+script Load_Flor
     Load_Level_Func { Def_Flor }
-ENDSCRIPT
+endscript
 
 //THPS2X SKY LINES
 
@@ -940,9 +943,9 @@ Def_Sky = {
     cnear = 12 cfar = 20000 
 }
 
-SCRIPT Load_Sky
+script Load_Sky
     Load_Level_Func { Def_Sky }
-ENDSCRIPT
+endscript
 
 
 //================THPS3===================
@@ -959,8 +962,8 @@ Def_Foun = {
     
     regular_level th3_level online_modes
     
-    once_on_startup = StartRunScript 
-    once_on_exit = EndRunScript 
+    once_on_startup = StartRunscript 
+    once_on_exit = EndRunscript 
     load_script = Load_Foun 
     startup_func = Foun_Startup
 
@@ -974,9 +977,9 @@ Def_Foun = {
     cnear = 13 cfar = 20000
 }
 
-SCRIPT Load_Foun
+script Load_Foun
     Load_Level_Func { Def_Foun }
-ENDSCRIPT
+endscript
 
 //THPS3 CANADA
 
@@ -990,8 +993,8 @@ Def_Can = {
     
     regular_level th3_level online_modes
     
-    once_on_startup = StartRunScript 
-    once_on_exit = EndRunScript 
+    once_on_startup = StartRunscript 
+    once_on_exit = EndRunscript 
     load_script = Load_Can
     startup_func = Can_Startup
     
@@ -1005,11 +1008,11 @@ Def_Can = {
     cnear = 13 cfar = 16000
 }
 
-SCRIPT Load_Can
+script Load_Can
     Load_Level_Func { Def_Can }
     SetMovementVelocity 1500
     SetRotateVelocity 120
-ENDSCRIPT
+endscript
 
 //THPS3 RIO
 
@@ -1024,15 +1027,15 @@ Def_Rio = {
     
     regular_level th3_level online_modes competition
     
-    once_on_startup = StartRunScript 
-    once_on_exit = EndRunScript 
+    once_on_startup = StartRunscript 
+    once_on_exit = EndRunscript 
     load_script = Load_Rio 
     startup_func = Rio_Startup
 
     lev_bsp = "Levels\rio\rio.bsp" 
     lev_sky = "Levels\rio_Sky\rio_Sky.bsp" 
     lev_qb = "Levels\rio\rio.qb" 
-    le_amb = "ambience\th3\rio"
+    lev_amb = "ambience\th3\rio"
     loadscr = "images\loadscrn_rio.png"
     loadscr_comp = "images\loadscrn_rio_comp.png"
 
@@ -1040,11 +1043,11 @@ Def_Rio = {
     cnear = 13 cfar = 30000
 }
 
-SCRIPT Load_Rio
+script Load_Rio
     Load_Level_Func { Def_Rio }
     SetMovementVelocity 2000
     SetRotateVelocity 120
-ENDSCRIPT
+endscript
 
 //THPS3 SUBURBIA
 
@@ -1059,24 +1062,24 @@ Def_Sub = {
     
     regular_level th3_level online_modes 
     
-    once_on_startup = StartRunScript 
-    once_on_exit = EndRunScript 
+    once_on_startup = StartRunscript 
+    once_on_exit = EndRunscript 
     load_script = Load_Sub
     startup_func = Sub_Startup
 
     lev_bsp = "Levels\sub\sub.bsp" 
     lev_sky = "Levels\sub_Sky\sub_Sky.bsp" 
     lev_qb = "Levels\sub\sub.qb" 
-    le_amb = "ambience\th3\sub"
+    lev_amb = "ambience\th3\sub"
     loadscr = "images\loadscrn_sub.png"
 
     r = 121 g = 118 b = 140 a = 0 
     cnear = 13 cfar = 13500
 }
 
-SCRIPT Load_Sub
+script Load_Sub
     Load_Level_Func { Def_Sub }
-ENDSCRIPT
+endscript
 
 //THPS3 AIRPORT
 
@@ -1091,24 +1094,24 @@ Def_Ap = {
     
     regular_level th3_level online_modes
     
-    once_on_startup = StartRunScript 
-    once_on_exit = EndRunScript 
+    once_on_startup = StartRunscript
+    once_on_exit = EndRunscript
     load_script = Load_Ap
     startup_func = Ap_Startup
 
     lev_bsp = "Levels\ap\ap.bsp" 
     lev_sky = "Levels\ap_Sky\ap_Sky.bsp" 
     lev_qb = "Levels\ap\ap.qb" 
-    le_amb = "ambience\th3\ap"
+    lev_amb = "ambience\th3\ap"
     loadscr = "images\loadscrn_ap.png"
 
     r = 134 g = 168 b = 190 a = 0 
     cnear = 13 cfar = 20000
 }
 
-SCRIPT Load_Ap
+script Load_Ap
     Load_Level_Func { Def_Ap }
-ENDSCRIPT
+endscript
 
 //THPS3 Skater Island
 
@@ -1116,8 +1119,8 @@ Def_Si = {
     level_id = skaterisland_id
     levelnum = LevelNum_SkaterIsland 
     level_name = "Skater Island"
-    location = "??"
-    unlock_flag LEVEL_UNLOCKED_SKATERISLAND
+    location = "Rhode Island, USA"
+    unlock_flag = LEVEL_UNLOCKED_SKATERISLAND
     
     lev_lights = SetUpSkatersIslandLights
     
@@ -1131,27 +1134,26 @@ Def_Si = {
     lev_bsp = "Levels\si\si.bsp"
     lev_sky = "Levels\si_Sky\si_Sky.bsp"
     lev_qb = "Levels\si\si.qb"
-    lev_amb = "ambience\la"
+    lev_amb = "ambience\th3\si"
     loadscr = "images\loadscrn_si.png"
     loadscr_comp = "images\loadscrn_si_comp.png"
     
     r = 158 g = 211 b = 255 a = 0 
-    cnear = 13 
-    cfar = 12000
+    cnear = 13 cfar = 12000
 }
 
-SCRIPT Load_Si
+script Load_Si
     Load_Level_Func { Def_Si }
-ENDSCRIPT
+endscript
 
 //THPS3 LA
 
 Def_LA = {
-    level_id = airport_id
+    level_id = la_id
     levelnum = LevelNum_LA 
     level_name = "Los Angeles"
-    location = "Los Angeles"
-    unlock_flag LEVEL_UNLOCKED_LOSANGELES
+    location = "California, USA"
+    unlock_flag = LEVEL_UNLOCKED_LOSANGELES
     
     lev_lights = SetUpLosAngelesLights
     
@@ -1165,18 +1167,17 @@ Def_LA = {
     lev_bsp = "Levels\la\la.bsp"
     lev_sky = "Levels\la_Sky\la_Sky.bsp"
     lev_qb = "Levels\la\la.qb"
-    lev_amb = "ambience\la"
+    lev_amb = "ambience\th3\la"
     loadscr = "images\loadscrn_la.png"
     
     r = 158 g = 202 b = 220 a = 0 
-    cnear = 13 
-    cfar = 14000
+    cnear = 13 cfar = 14000
 }
 
 
-SCRIPT Load_La
+script Load_La
     Load_Level_Func { Def_LA }
-ENDSCRIPT
+endscript
 
 //THPS3 Tokyo
 
@@ -1185,7 +1186,7 @@ Def_Tok = {
     levelnum = LevelNum_Tokyo
     level_name = "Tokyo"
     location = "Japan"
-    unlock_flag LEVEL_UNLOCKED_TOKYO
+    unlock_flag = LEVEL_UNLOCKED_TOKYO
     
     lev_lights = SetUpTokyoLights
     
@@ -1199,18 +1200,17 @@ Def_Tok = {
     lev_bsp = "Levels\tok\tok.bsp"
     lev_sky = "Levels\tok_Sky\tok_Sky.bsp"
     lev_qb = "Levels\tok\tok.qb"
-    lev_amb = "ambience\tok"
+    lev_amb = "ambience\th3\tok"
     loadscr = "images\loadscrn_tok.png"
     loadscr_comp = "images\loadscrn_tok_comp.png"
     
     r = 16 g = 17 b = 26 a = 0 
-    cnear = 13 
-    cfar = 17000
+    cnear = 13 cfar = 17000
 }
 
-SCRIPT Load_Tok
+script Load_Tok
     Load_Level_Func { Def_Tok }
-ENDSCRIPT
+endscript
 
 //THPS3 Cruise Ship
 
@@ -1219,7 +1219,7 @@ Def_SHP = {
     levelnum = LevelNum_Ship 
     level_name = "Cruise Ship"
     location = "???"
-    unlock_flag LEVEL_UNLOCKED_SHIP
+    unlock_flag = LEVEL_UNLOCKED_SHIP
     
     lev_lights = SetUpShipLights
     
@@ -1233,19 +1233,18 @@ Def_SHP = {
     lev_bsp = "Levels\shp\shp.bsp"
     lev_sky = "Levels\shp_Sky\shp_Sky.bsp"
     lev_qb = "Levels\shp\shp.qb"
-    lev_amb = "ambience\ship"
+    lev_amb = "ambience\th3\ship"
     loadscr = "images\loadscrn_ship.png"
     
     r = 143 g = 205 b = 233 a = 0 
-    cnear = 13 
-    cfar = 32000
+    cnear = 13 cfar = 32000
 }
 
-SCRIPT Load_Shp
+script Load_Shp
     Load_Level_Func { Def_SHP }
     SetMovementVelocity 1500
     SetRotateVelocity 120
-ENDSCRIPT
+endscript
 
 //THPS3 Oil Rig
 
@@ -1267,20 +1266,19 @@ Def_Oil = {
     lev_bsp = "Levels\oil\oil.bsp"
     lev_sky = "Levels\oil_Sky\oil_Sky.bsp"
     lev_qb = "Levels\oil\oil.qb"
-    lev_amb = "ambience\oil"
+    lev_amb = "ambience\th3\oil"
     loadscr = "images\loadscrn_oil.png"
     
     r = 190 g = 205 b = 238 a = 0 
-    cnear = 13 
-    cfar = 30000
+    cnear = 13 cfar = 30000
 }
 
-SCRIPT Load_Oil
+script Load_Oil
     Load_Level_Func { Def_Oil }
     SetMovementVelocity 1000
     SetRotateVelocity 120
     SetRenderModeVU
-ENDSCRIPT
+endscript
 
 //THPS3 Paris
 
@@ -1309,9 +1307,9 @@ Def_Roof = {
     cfar = 20000
 }
 
-SCRIPT Load_Roof
+script Load_Roof
     Load_Level_Func { Def_Roof }
-ENDSCRIPT
+endscript
 
 
 //================THPS4===================
@@ -1338,9 +1336,9 @@ Def_Trn = {
     load_script = Load_Trn
 } 
 
-SCRIPT Load_Trn
+script Load_Trn
     Load_Level_Func { Def_Trn }
-ENDSCRIPT
+endscript
 
 //THPS4 COLLEGE
 
@@ -1364,9 +1362,9 @@ Def_Sch = {
     load_script = Load_Sch
 } 
 
-SCRIPT Load_Sch
+script Load_Sch
     Load_Level_Func { Def_Sch }
-ENDSCRIPT
+endscript
 
 //THPS4 SAN FRANCISCO
 
@@ -1390,9 +1388,9 @@ Def_SF2 = {
     load_script = Load_SF2
 }
 
-SCRIPT Load_SF2
+script Load_SF2
     Load_Level_Func { Def_Sf2 }
-ENDSCRIPT
+endscript
 
 //THPS4 ALCATRAZ
 
@@ -1416,9 +1414,9 @@ Def_Alc = {
     load_script = Load_Alc
 }
 
-SCRIPT Load_Alc
+script Load_Alc
     Load_Level_Func { Def_Alc }
-ENDSCRIPT
+endscript
 
 //THPS4 KONA USA
 
@@ -1443,9 +1441,9 @@ Def_Kon = {
     lev_lights = SetUpShipLights
 }
 
-SCRIPT Load_Kon
+script Load_Kon
     Load_Level_Func { Def_Kon }
-ENDSCRIPT
+endscript
 
 //THPS4 SHIPYARD
 
@@ -1469,9 +1467,9 @@ Def_Jnk = {
     load_script = Load_Jnk
 }
 
-SCRIPT Load_Jnk
+script Load_Jnk
     Load_Level_Func { Def_Jnk }
-ENDSCRIPT
+endscript
 
 //THPS4 LONDON
 
@@ -1495,9 +1493,9 @@ Def_Lon = {
     load_script = Load_Lon
 }
 
-SCRIPT Load_Lon
+script Load_Lon
     Load_Level_Func { Def_Lon }
-ENDSCRIPT
+endscript
 
 //THPS4 ZOO
 
@@ -1521,9 +1519,9 @@ Def_Zoo = {
     load_script = Load_Zoo
 }
 
-SCRIPT Load_Zoo
+script Load_Zoo
     Load_Level_Func { Def_Zoo }
-ENDSCRIPT
+endscript
 
 //THPS4 CARNIVAL
 
@@ -1547,9 +1545,9 @@ Def_Cnv = {
     load_script = Load_Cnv
 }
 
-SCRIPT Load_Cnv
+script Load_Cnv
     Load_Level_Func { Def_Cnv }
-ENDSCRIPT
+endscript
 
 //THPS4 CHICAGO
 
@@ -1573,9 +1571,9 @@ Def_Hof = {
     load_script = Load_Hof
 }
 
-SCRIPT Load_Hof
+script Load_Hof
     Load_Level_Func { Def_Hof }
-ENDSCRIPT
+endscript
 
 //THPS4 MOTOX
 
@@ -1599,9 +1597,9 @@ Def_Mot = {
     load_script = Load_Mot
 }
 
-SCRIPT Load_Mot
+script Load_Mot
     Load_Level_Func { Def_Mot }
-ENDSCRIPT
+endscript
 
 //=========================================THUG1===============================================
 
@@ -1627,9 +1625,9 @@ Def_NJ = {
     load_script = Load_NJ
 }
 
-SCRIPT Load_NJ
+script Load_NJ
     Load_Level_Func { Def_NJ }
-ENDSCRIPT
+endscript
 
 //THUG1 MANHATTAN
 
@@ -1653,9 +1651,9 @@ Def_NY = {
     load_script = Load_NY
 }
 
-SCRIPT Load_NY
+script Load_NY
     Load_Level_Func { Def_NY }
-ENDSCRIPT
+endscript
 
 //THUG1 TAMPA
 
@@ -1679,9 +1677,9 @@ Def_FL = {
     load_script = Load_FL
 }
 
-SCRIPT Load_FL
+script Load_FL
     Load_Level_Func { Def_FL }
-ENDSCRIPT
+endscript
 
 //THUG1 SAN DIEGO
 
@@ -1704,9 +1702,9 @@ Def_SD = {
 
     load_script = Load_SD
 }
-SCRIPT Load_SD
+script Load_SD
     Load_Level_Func { Def_SD }
-ENDSCRIPT
+endscript
 
 //THUG1 HAWAII
 
@@ -1729,9 +1727,9 @@ Def_HI = {
 
     load_script = Load_HI
 }
-SCRIPT Load_HI
+script Load_HI
     Load_Level_Func { Def_HI }
-ENDSCRIPT
+endscript
 
 //THUG1 VANCOUVER
 
@@ -1755,9 +1753,9 @@ Def_VC = {
     load_script = Load_VC
 }
 
-SCRIPT Load_VC
+script Load_VC
     Load_Level_Func { Def_VC }
-ENDSCRIPT
+endscript
 
 //THUG1 SLAM CITY JAM
 
@@ -1781,9 +1779,9 @@ Def_SJ = {
     load_script = Load_SJ
 }
 
-SCRIPT Load_SJ
+script Load_SJ
     Load_Level_Func { Def_SJ }
-ENDSCRIPT
+endscript
 
 //THUG1 MOSCOW
 
@@ -1807,9 +1805,9 @@ Def_RU = {
     load_script = Load_RU
 }
 
-SCRIPT Load_RU
+script Load_RU
     Load_Level_Func { Def_RU }
-ENDSCRIPT
+endscript
 
 //THUG1 HOTTER THAN HELL
 
@@ -1833,9 +1831,9 @@ Def_SE = {
     load_script = Load_SE
 }
 
-SCRIPT Load_SE
+script Load_SE
     Load_Level_Func { Def_SE }
-ENDSCRIPT
+endscript
 
 
 //=========================================THUG2===============================================
@@ -1863,9 +1861,9 @@ Def_BO = {
     load_script = Load_BO_ug2
 }
 
-SCRIPT Load_BO_ug2
+script Load_BO_ug2
     Load_Level_Func { Def_BO }
-ENDSCRIPT
+endscript
 
 //THUG2 BARCELONA
 
@@ -1889,9 +1887,9 @@ Def_BA = {
     load_script = Load_BA_ug2
 }
 
-SCRIPT Load_BA_ug2
+script Load_BA_ug2
     Load_Level_Func { Def_BA }
-ENDSCRIPT
+endscript
 
 
 
@@ -1917,9 +1915,9 @@ Def_AU = {
     load_script = Load_AU
 }
 
-SCRIPT Load_AU
+script Load_AU
     Load_Level_Func { Def_AU }
-ENDSCRIPT
+endscript
 
 //THUG2 NEW ORLEANS
 
@@ -1943,9 +1941,9 @@ Def_NO = {
     load_script = Load_NO_ug2
 }
 
-SCRIPT Load_NO_ug2
+script Load_NO_ug2
     Load_Level_Func { Def_NO }
-ENDSCRIPT
+endscript
 
 //THUG2 Berlin
 
@@ -1969,9 +1967,9 @@ Def_BE = {
     load_script = Load_BE_ug2
 }
 
-SCRIPT Load_BE_ug2
+script Load_BE_ug2
     Load_Level_Func { Def_BE }
-ENDSCRIPT
+endscript
 
 //THUG2 PRO SKATER
 
@@ -1995,9 +1993,9 @@ Def_SE_ug2 = {
     load_script = Load_SE_ug2
 }
 
-SCRIPT Load_SE_ug2
+script Load_SE_ug2
     Load_Level_Func { Def_SE_ug2 }
-ENDSCRIPT
+endscript
 
 //THUG2 THE TRIANGLE
 
@@ -2021,9 +2019,9 @@ Def_SE2_ug2 = {
     load_script = Load_SE2_ug2
 }
 
-SCRIPT Load_SE2_ug2
+script Load_SE2_ug2
     Load_Level_Func { Def_SE2_ug2 }
-ENDSCRIPT
+endscript
 
 //THUG2 SKATOPIA
 
@@ -2047,9 +2045,9 @@ Def_ST_ug2 = {
     load_script = Load_ST_ug2
 }
 
-SCRIPT Load_ST_ug2
+script Load_ST_ug2
     Load_Level_Func { Def_ST_ug2 }
-ENDSCRIPT
+endscript
 
 
 
@@ -2058,7 +2056,7 @@ master_level_list = [
     { Def_Foun } { Def_Can } { Def_Rio } { Def_Sub } { Def_Ap } { Def_Si } { Def_La } { Def_Tok } { Def_Shp } { Def_Oil } { Def_Roof }
 
     { level_name = "Play custom park" load_script = custom_park level_id = custom_park debug_level }
-    { level_name = "Tutorials" load_script = Load_Tut level_id = tutorials_id NoCareer once_on_startup = CPF_Tut_LoadingScript }
+    { level_name = "Tutorials" load_script = Load_Tut level_id = tutorials_id NoCareer once_on_startup = CPF_Tut_Loadingscript }
     { level_name = "Foo" load_script = Load_Foo level_id = foo_id debug_level }
     { level_name = "Skate Shop" load_script = Load_SkateShop level_id = skateshop_id debug_level }
 
