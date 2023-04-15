@@ -62,33 +62,133 @@ Trick_Beanplant = { Scr = Boneless Params = { Name = 'Beanplant' Score = 250 Ani
 SCR_MANUAL = { Scr = Manual }
 
 
-//special manual tricks
+//==============special manual tricks=====================
+
 TrickDef_Sproing = {
-  Name = 'Sproing'
-  Score = 1500
-  InitAnim = Sproing
-  FromAirAnim = Sproing
-  BalanceAnim = Manual_Range
-  OffMeterTop = ManualBail
-  OffMeterBottom = ManualLand
-  ExtraTricks = ManualBranches
-  IsSpecial
-  SproingFlip
+    Name = 'Sproing'
+    Score = 1500
+    InitAnim = Sproing
+    FromAirAnim = Sproing
+    BalanceAnim = Manual_Range
+    OffMeterTop = ManualBail
+    OffMeterBottom = ManualLand
+    ExtraTricks = ManualBranches
+    IsSpecial
+    SproingFlip
 }
 
 Trick_Sproing = { SCR_MANUAL Params = TrickDef_Sproing }
 
-Trick_ClawDrag = { SCR_MANUAL Params = { Name = 'The Claw Drag' UnlockFlag = SKATER_UNLOCKED_WOLVERINE OnlyWith = Wolverine Score = 1000 Sparks InitAnim = Clawdrag_Init FromAirAnim = Clawdrag_Init BalanceIdle = Clawdrag_Idle OffMeterTop = ManualBail OffMeterBottom = NoseManualBail IsSpecial ExtraTricks = FlatlandBranches } }
 
-Trick_LazyAss = { SCR_MANUAL Params = { Name = 'Lazy Ass Manual' UnlockFlag = SKATER_UNLOCKED_DICK Score = 1500 InitAnim = LazyAss_Init FromAirAnim = LazyAss_Init BalanceIdle = LazyAss_Idle OutAnim = LazyAss_Out OffMeterTop = ManualBail OffMeterBottom = NoseManualBail Friction = 0.5 IsSpecial WaitOnOlliePercent = 10 ExtraTricks = FlatlandBranches } }
+TrickDef_ClawDrag = {
+    Name = 'The Claw Drag'
+    UnlockFlag = SKATER_UNLOCKED_WOLVERINE
+    OnlyWith = Wolverine
+    Score = 1000
+    Sparks
+    InitAnim = Clawdrag_Init
+    FromAirAnim = Clawdrag_Init
+    BalanceIdle = Clawdrag_Idle
+    OffMeterTop = ManualBail
+    OffMeterBottom = NoseManualBail
+    IsSpecial
+    ExtraTricks = FlatlandBranches
+}
 
-Trick_HandStand50Flip = { SCR_MANUAL Params = { Name = 'HandStand 360 Hand Flip' Score = 1400 InitAnim = HandStand50Flip_Init FromAirAnim = HandStand50Flip_Init BalanceAnim = HandStand50Flip_Range OutAnim = HandStand50Flip_Out OffMeterTop = ManualBail OffMeterBottom = NoseManualBail Friction = 0.5 IsSpecial WaitOnOlliePercent = 20 ExtraTricks = FlatlandBranches } }
+Trick_ClawDrag = { SCR_MANUAL Params = TrickDef_ClawDrag }
 
-Trick_HandstandDoubleFlip = { SCR_MANUAL Params = { Name = 'HandStand Double Flip' Score = 1400 InitAnim = HandstandHandFlip_Init FromAirAnim = HandstandHandFlip_Init BalanceAnim = HandstandHandFlip_Range OutAnim = HandStandDoubleFlip OffMeterTop = NoseManualBail OffMeterBottom = ManualBail Friction = 0.5 IsSpecial WaitOnOlliePercent = 40 ExtraTricks = FlatlandBranches ExtraTricks2 = HandstandBranches } }
 
-Trick_ReemoSlide = { SCR_MANUAL Params = { Name = 'Reemo Slide' Score = 1300 InitAnim = ReemoSlide_Init FromAirAnim = ReemoSlide_Init BalanceAnim = ReemoSlide_Range OutAnim = ReemoSlide_out OffMeterTop = NoseManualBail OffMeterBottom = ManualBail Friction = 0.5 IsSpecial BoardRotate ExtraTricks = FlatlandBranches } }
+TrickDef_LazyAss = {
+    Name = 'Lazy Ass Manual'
+    UnlockFlag = SKATER_UNLOCKED_DICK
+    Score = 1500
+    InitAnim = LazyAss_Init
+    FromAirAnim = LazyAss_Init
+    BalanceIdle = LazyAss_Idle
+    OutAnim = LazyAss_Out
+    OffMeterTop = ManualBail
+    OffMeterBottom = NoseManualBail
+    Friction = 0.5
+    IsSpecial
+    WaitOnOlliePercent = 10
+    ExtraTricks = FlatlandBranches
+}
 
-Trick_PrimoSlide = { SCR_MANUAL Params = { Name = 'Primo' Score = 1200 InitAnim = Primo_Init FromAirAnim = Primo_Init BalanceAnim = Primo_Range OutAnim = Primo_out OffMeterTop = NoseManualBail OffMeterBottom = ManualBail Friction = 0.5 IsSpecial ExtraTricks = FlatlandBranches ExtraTricks2 = ToRail_Branches } }
+Trick_LazyAss = { SCR_MANUAL Params = TrickDef_LazyAss }
+
+
+TrickDef_HandStand50Flip = {
+    Name = 'HandStand 360 Hand Flip'
+    Score = 1400
+    InitAnim = HandStand50Flip_Init
+    FromAirAnim = HandStand50Flip_Init
+    BalanceAnim = HandStand50Flip_Range
+    OutAnim = HandStand50Flip_Out
+    OffMeterTop = ManualBail
+    OffMeterBottom = NoseManualBail
+    Friction = 0.5
+    IsSpecial
+    WaitOnOlliePercent = 20
+    ExtraTricks = FlatlandBranches
+}
+
+Trick_HandStand50Flip = { SCR_MANUAL Params = TrickDef_HandStand50Flip }
+
+
+TrickDef_HandstandDoubleFlip = {
+    Name = 'HandStand Double Flip'
+    Score = 1400
+    InitAnim = HandstandHandFlip_Init
+    FromAirAnim = HandstandHandFlip_Init
+    BalanceAnim = HandstandHandFlip_Range
+    OutAnim = HandStandDoubleFlip
+    OffMeterTop = NoseManualBail
+    OffMeterBottom = ManualBail
+    Friction = 0.5
+    IsSpecial
+    WaitOnOlliePercent = 40
+    ExtraTricks = FlatlandBranches
+    ExtraTricks2 = HandstandBranches
+}
+
+Trick_HandstandDoubleFlip = { SCR_MANUAL Params = TrickDef_HandstandDoubleFlip }
+
+
+TrickDef_ReemoSlide = {
+    Name = 'Reemo Slide'
+    Score = 1300
+    InitAnim = ReemoSlide_Init
+    FromAirAnim = ReemoSlide_Init
+    BalanceAnim = ReemoSlide_Range
+    OutAnim = ReemoSlide_out
+    OffMeterTop = NoseManualBail
+    OffMeterBottom = ManualBail
+    Friction = 0.5
+    IsSpecial
+    BoardRotate
+    ExtraTricks = FlatlandBranches
+}
+
+Trick_ReemoSlide = { SCR_MANUAL Params = TrickDef_ReemoSlide }
+
+
+TrickDef_PrimoSlide = {
+    Name = 'Primo'
+    Score = 1200
+    InitAnim = Primo_Init
+    FromAirAnim = Primo_Init
+    BalanceAnim = Primo_Range
+    OutAnim = Primo_out
+    OffMeterTop = NoseManualBail
+    OffMeterBottom = ManualBail
+    Friction = 0.5
+    IsSpecial
+    ExtraTricks = FlatlandBranches
+    ExtraTricks2 = ToRail_Branches
+}
+
+Trick_PrimoSlide = { SCR_MANUAL Params = TrickDef_PrimoSlide }
+
 
 Trick_OneFootOneWheel = { SCR_MANUAL Params = { Name = 'One Wheel Nosemanual' Score = 1400 InitAnim = OneFootOneWheel_Init FromAirAnim = OneFootOneWheel_Init BalanceAnim = OneFootOneWheel_Range OutAnim = OneFootOneWheel_Init OffMeterTop = ManualLand OffMeterBottom = NoseManualBail Friction = 0.5 IsSpecial Nollie ExtraTricks = NoseManualBranches PutDownAnim = PutDownOneWheel } }
 
@@ -108,28 +208,28 @@ Trick_WorkForFoodManual = { SCR_MANUAL Params = { Name = 'Can Ya Spare a Dime?' 
 
 
 TrickDef_Manual = {
-  Name = 'Manual'
-  Score = 100
-  InitAnim = Manual
-  FromAirAnim = ManualFromAir
-  BalanceAnim = Manual_Range
-  OffMeterTop = ManualBail
-  OffMeterBottom = ManualLand
-  Manual_Branchlinks
+    Name = 'Manual'
+    Score = 100
+    InitAnim = Manual
+    FromAirAnim = ManualFromAir
+    BalanceAnim = Manual_Range
+    OffMeterTop = ManualBail
+    OffMeterBottom = ManualLand
+    Manual_Branchlinks
 }
 
 Trick_Manual = { SCR_MANUAL Params = TrickDef_Manual }
 
 TrickDef_NoseManual = {
-  Name = 'Nose Manual'
-  Score = 100
-  InitAnim = Nosemanual
-  FromAirAnim = NoseManualFromAir
-  BalanceAnim = NoseManual_Range
-  Nollie
-  OffMeterTop = ManualLand
-  OffMeterBottom = NoseManualBail
-  NoseManual_Branchlinks
+    Name = 'Nose Manual'
+    Score = 100
+    InitAnim = Nosemanual
+    FromAirAnim = NoseManualFromAir
+    BalanceAnim = NoseManual_Range
+    Nollie
+    OffMeterTop = ManualLand
+    OffMeterBottom = NoseManualBail
+    NoseManual_Branchlinks
 }
 
 Trick_NoseManual = { SCR_MANUAL Params = TrickDef_NoseManual }
@@ -142,70 +242,70 @@ ManualBranches = [ { Trigger = { Press R2 200 } Trick_Gturn2 } ]
 //NoseManualBranches2 = [ { Trigger = { Press R2 200 } Trick_Gturn4 } ]
 
 TrickDef_NosePivot = {
-  Name = 'Nose Pivot'
-  Score = 250
-  Anim = GTurn
-  BalanceAnim = Manual
-  FlipAfter
-  BalanceAnim = Manual_Range
-  Trickslack = 0
-  PlayCessSound
-  Extrapercent = 100
-  TimeAdd = 2
-  SpeedMult = 1.2
-  OffMeterTop = ManualBail
-  OffMeterBottom = ManualLand
-  Manual_Branchlinks
+    Name = 'Nose Pivot'
+    Score = 250
+    Anim = GTurn
+    BalanceAnim = Manual
+    FlipAfter
+    BalanceAnim = Manual_Range
+    Trickslack = 0
+    PlayCessSound
+    Extrapercent = 100
+    TimeAdd = 2
+    SpeedMult = 1.2
+    OffMeterTop = ManualBail
+    OffMeterBottom = ManualLand
+    Manual_Branchlinks
 }
 
 Trick_Gturn = { Trigger = { Press R2 200 } Scr = ManualLink Params = TrickDef_NosePivot }
 
 TrickDef_Pivot = {
-  Name = 'Pivot'
-  Score = 250
-  Anim = GTurn2
-  BalanceAnim = Manual
-  FlipAfter
-  BalanceAnim = NoseManual_Range
-  Trickslack = 0
-  PlayCessSound
-  Extrapercent = 100
-  Nollie
-  TimeAdd = 2
-  SpeedMult = 1.2
-  OffMeterTop = ManualLand
-  OffMeterBottom = NoseManualBail
-  NoseManual_Branchlinks
+    Name = 'Pivot'
+    Score = 250
+    Anim = GTurn2
+    BalanceAnim = Manual
+    FlipAfter
+    BalanceAnim = NoseManual_Range
+    Trickslack = 0
+    PlayCessSound
+    Extrapercent = 100
+    Nollie
+    TimeAdd = 2
+    SpeedMult = 1.2
+    OffMeterTop = ManualLand
+    OffMeterBottom = NoseManualBail
+    NoseManual_Branchlinks
 }
 
 Trick_Gturn2 = { Trigger = { Press R2 200 } Scr = ManualLink Params = TrickDef_Pivot }
 
 Manual_Branchlinks = {
-  ExtraTricks = ManualBranches
-  NewExtraTricks = ManualBranches
-  NewExtraTricks2 = NewFlatlandBranches
+    ExtraTricks = ManualBranches
+    NewExtraTricks = ManualBranches
+    NewExtraTricks2 = NewFlatlandBranches
 }
 
 NoseManual_Branchlinks = {
-  ExtraTricks = NoseManualBranches
-  NewExtraTricks = NoseManualBranches
-  NewExtraTricks2 = NewFlatlandBranches
+    ExtraTricks = NoseManualBranches
+    NewExtraTricks = NoseManualBranches
+    NewExtraTricks2 = NewFlatlandBranches
 }
 
 TrickDef_AntiCasper = {
-  Name = 'Anti Casper'
-  Score = 1350
-  InitAnim = AntiCasper_Init
-  FromAirAnim = AntiCasper_Init
-  BalanceAnim = AntiCasper_Range
-  OutAnim = AntiCasper_out
-  OffMeterTop = ManualLand
-  OffMeterBottom = NoseManualBail
-  Friction = 0.5
-  BoardRotate
-  Nollie
-  ExtraTricks = FlatlandBranches
-  NewExtraTricks = NewFlatlandBranches
+    Name = 'Anti Casper'
+    Score = 1350
+    InitAnim = AntiCasper_Init
+    FromAirAnim = AntiCasper_Init
+    BalanceAnim = AntiCasper_Range
+    OutAnim = AntiCasper_out
+    OffMeterTop = ManualLand
+    OffMeterBottom = NoseManualBail
+    Friction = 0.5
+    BoardRotate
+    Nollie
+    ExtraTricks = FlatlandBranches
+    NewExtraTricks = NewFlatlandBranches
 }
 
 Trick_AntiCasper = { SCR_MANUAL Params = { TrickDef_AntiCasper IsSpecial } }
@@ -213,17 +313,17 @@ Trick_AntiCasper = { SCR_MANUAL Params = { TrickDef_AntiCasper IsSpecial } }
 
 
 TrickDef_Casper = {
-  Name = 'Casper'
-  Score = 1250
-  InitAnim = Casper_Init
-  FromAirAnim = Casper_Init
-  BalanceAnim = Casper_Range
-  OutAnim = Casper_out
-  OffMeterTop = ManualBail
-  OffMeterBottom = ManualLand
-  Friction = 0.5
-  BoardRotate
-  Casper_Branchlinks
+    Name = 'Casper'
+    Score = 1250
+    InitAnim = Casper_Init
+    FromAirAnim = Casper_Init
+    BalanceAnim = Casper_Range
+    OutAnim = Casper_out
+    OffMeterTop = ManualBail
+    OffMeterBottom = ManualLand
+    Friction = 0.5
+    BoardRotate
+    Casper_Branchlinks
 }
 
 Trick_Casper = { SCR_MANUAL Params = { TrickDef_Casper IsSpecial } }
@@ -232,39 +332,39 @@ CasperBranches = [ { Trigger = { AirTrickLogic Left Square 500 } Scr = ManualLin
 NewCasperBranches = [ { EXTRA_BRANCHFLIP Params = { TrickDef_CasperFlip IsExtra } } ]
 
 TrickDef_CasperFlip = {
-  Name = 'Casper Flip'
-  Score = 500
-  Extrapercent = 100
-  Anim = CasperFlip
-  BalanceAnim = Casper_Range
-  OutAnim = Casper_out
-  Trickslack = 0
-  BoardRotate
-  Parent = 'Casper'
-  Casper_Branchlinks
+    Name = 'Casper Flip'
+    Score = 500
+    Extrapercent = 100
+    Anim = CasperFlip
+    BalanceAnim = Casper_Range
+    OutAnim = Casper_out
+    Trickslack = 0
+    BoardRotate
+    Parent = 'Casper'
+    Casper_Branchlinks
 }
 
 Casper_Branchlinks = {
-  ExtraTricks = FlatlandBranches
-  ExtraTricks2 = CasperBranches
-  NewExtraTricks = NewFlatlandBranches
-  NewExtraTricks2 = NewCasperBranches
+    ExtraTricks = FlatlandBranches
+    ExtraTricks2 = CasperBranches
+    NewExtraTricks = NewFlatlandBranches
+    NewExtraTricks2 = NewCasperBranches
 }
 
 
 
 TrickDef_Handstand = {
-  Name = 'HandStand'
-  Score = 1250
-  InitAnim = HandstandHandFlip_Init
-  FromAirAnim = HandstandHandFlip_Init
-  BalanceAnim = HandstandHandFlip_Range
-  OutAnim = HandstandHandFlip_out
-  OffMeterTop = NoseManualBail
-  OffMeterBottom = ManualBail
-  Friction = 0.5
-  WaitOnOlliePercent = 10
-  Handstand_Branchlinks
+    Name = 'HandStand'
+    Score = 1250
+    InitAnim = HandstandHandFlip_Init
+    FromAirAnim = HandstandHandFlip_Init
+    BalanceAnim = HandstandHandFlip_Range
+    OutAnim = HandstandHandFlip_out
+    OffMeterTop = NoseManualBail
+    OffMeterBottom = ManualBail
+    Friction = 0.5
+    WaitOnOlliePercent = 10
+    Handstand_Branchlinks
 }
 
 Trick_Handstand = { SCR_MANUAL Params = { TrickDef_Handstand IsSpecial } }
@@ -273,37 +373,36 @@ HandstandBranches = [ { Trigger = { AirTrickLogic Left Square 500 } Scr = Manual
 NewHandstandBranches = [ { EXTRA_BRANCHFLIP Params = { TrickDef_Handflip IsExtra } } ]
 
 TrickDef_Handflip = {
-  Name = 'Handflip'
-  Score = 500
-  Anim = HStandFliptoHStand
-  BalanceAnim = HandstandHandFlip_Range
-  OutAnim = HandstandHandFlip_out
-  Trickslack = 0
-  Parent = 'HandStand'
-  Handstand_Branchlinks
+    Name = 'Handflip'
+    Score = 500
+    Anim = HStandFliptoHStand
+    BalanceAnim = HandstandHandFlip_Range
+    OutAnim = HandstandHandFlip_out
+    Trickslack = 0
+    Parent = 'HandStand'
+    Handstand_Branchlinks
 }
 
 Handstand_Branchlinks = {
-  ExtraTricks = FlatlandBranches
-  ExtraTricks2 = HandstandBranches
-  NewExtraTricks = NewFlatlandBranches
-  NewExtraTricks2 = NewHandstandBranches
+    ExtraTricks = FlatlandBranches
+    ExtraTricks2 = HandstandBranches
+    NewExtraTricks = NewFlatlandBranches
+    NewExtraTricks2 = NewHandstandBranches
 }
-
 
 
 
 TrickDef_ToRail = {
-  Name = 'To Rail'
-  Score = 500
-  InitAnim = Primo_Init
-  FromAirAnim = Primo_Init
-  BalanceAnim = Primo_Range
-  OutAnim = Primo_out
-  OffMeterTop = NoseManualBail
-  OffMeterBottom = ManualBail
-  Friction = 1.0
-  ToRail_Branchlinks
+    Name = 'To Rail'
+    Score = 500
+    InitAnim = Primo_Init
+    FromAirAnim = Primo_Init
+    BalanceAnim = Primo_Range
+    OutAnim = Primo_out
+    OffMeterTop = NoseManualBail
+    OffMeterBottom = ManualBail
+    Friction = 1.0
+    ToRail_Branchlinks
 }
 
 Trick_ToRail = { SCR_MANUAL Params = { TrickDef_ToRail IsSpecial } }
@@ -312,34 +411,34 @@ ToRail_Branches = [ { Trigger = { AirTrickLogic Left Square 500 } Scr = ManualLi
 NewToRail_Branches = [ { EXTRA_BRANCHFLIP Params = { TrickDef_RailFlip IsExtra } } ]
 
 TrickDef_RailFlip = {
-  Name = 'Rail Flip'
-  Score = 500
-  Anim = RailFlip
-  BalanceAnim = Primo_Range
-  Trickslack = 0
-  Parent = 'To Rail'
-  ToRail_Branchlinks
+    Name = 'Rail Flip'
+    Score = 500
+    Anim = RailFlip
+    BalanceAnim = Primo_Range
+    Trickslack = 0
+    Parent = 'To Rail'
+    ToRail_Branchlinks
 }
 
 ToRail_Branchlinks = {
-  ExtraTricks = FlatlandBranches
-  ExtraTricks2 = ToRail_Branches
-  NewExtraTricks = NewFlatlandBranches
-  NewExtraTricks2 = NewToRail_Branches
+    ExtraTricks = FlatlandBranches
+    ExtraTricks2 = ToRail_Branches
+    NewExtraTricks = NewFlatlandBranches
+    NewExtraTricks2 = NewToRail_Branches
 }
 
 
 TrickDef_Truckstand = {
-  Name = 'Truckstand'
-  Score = 1300
-  InitAnim = Truckstand_Init
-  FromAirAnim = Truckstand_Init
-  BalanceAnim = Truckstand_Range
-  OutAnim = Truckstand_Out
-  OffMeterTop = NoseManualBail
-  OffMeterBottom = ManualBail
-  Friction = 1
-  Truckstand_BranchLinks
+    Name = 'Truckstand'
+    Score = 1300
+    InitAnim = Truckstand_Init
+    FromAirAnim = Truckstand_Init
+    BalanceAnim = Truckstand_Range
+    OutAnim = Truckstand_Out
+    OffMeterTop = NoseManualBail
+    OffMeterBottom = ManualBail
+    Friction = 1
+    Truckstand_BranchLinks
 }
 
 Trick_Truckstand = { SCR_MANUAL Params = { TrickDef_Truckstand IsSpecial } }
@@ -399,13 +498,7 @@ NewFlatlandBranches = [
 
 
 
-
-
-
-
-
-
-SCRIPT Manual BlendPeriod = 0.3
+script Manual BlendPeriod = 0.3
   ClearLipCombos
   ClearExceptions
   KillExtraTricks
@@ -506,7 +599,7 @@ SCRIPT Manual BlendPeriod = 0.3
   GroundTricks_AddExtraManualTricks ignore = <Name> <...>
 
   IF AnimEquals WorkForFood_Init
-    SpawnSkaterScript Ollie_Signage
+    SpawnSkaterscript Ollie_Signage
   ENDIF
 
   WaitAnimFinished
@@ -570,10 +663,10 @@ SCRIPT Manual BlendPeriod = 0.3
       Wait 1 Frame
     REPEAT
   ENDIF
-ENDSCRIPT
+endscript
 
-SCRIPT SpecialManualSFX
-ENDSCRIPT
+script SpecialManualSFX
+endscript
 
 claw_sparks_partice_params = {
   Name = "Grass_1.png"
@@ -592,16 +685,16 @@ claw_sparks_partice_params = {
   life = 0.25
 }
 
-SCRIPT ClawSparks
+script ClawSparks
   IF ProfileEquals is_named = Wolverine
     Obj_Attachframe bone = "left_fingers"
     Obj_Attachframe bone = "right_fingers"
     BloodParticlesOn { claw_sparks_partice_params bone = "left_fingers" }
     BloodParticlesOn { claw_sparks_partice_params bone = "right_fingers" }
   ENDIF
-ENDSCRIPT
+endscript
 
-SCRIPT ManualOut
+script ManualOut
   IF GotParam MadeOtherSkaterBail
   ELSE
     KillExtraTricks
@@ -611,9 +704,9 @@ SCRIPT ManualOut
     SwitchOnAtomic skin
     SwitchOnBoard
   ENDIF
-ENDSCRIPT
+endscript
 
-SCRIPT ManualLand
+script ManualLand
   SetException Ex = RunHasEnded Scr = EndOfRun
   ClearPanel_Landed
   ClearManualTrick
@@ -631,14 +724,17 @@ SCRIPT ManualLand
   ENDIF
   WaitAnimWhilstChecking
   Goto OnGroundAI
-ENDSCRIPT
+endscript
 
 
-SCRIPT ManualLink grindslack = 25 Trickslack = 10 displaypercent = 50 Extrapercent = 50 TimeAdd = 0 SpeedMult = 1
+TrickDef_TruckSpin = { Name = 'Truck Spin' Score = 1000 Anim = Truckstand_Init BalanceAnim = Truckstand_Range OutAnim = Truckstand_Out ExtraTricks = FlatlandBranches ExtraTricks2 = TruckstandBranches Trickslack = 0 IsExtra }
+
+
+script ManualLink grindslack = 25 Trickslack = 10 displaypercent = 50 Extrapercent = 50 TimeAdd = 0 SpeedMult = 1
   IF GotParam RodneyOnly
     IF ProfileEquals is_named = mullen
     ELSE
-      Goto ManualLink Params = { Name = 'Truck Spin' Score = 1000 Anim = Truckstand_Init BalanceAnim = Truckstand_Range OutAnim = Truckstand_Out ExtraTricks = FlatlandBranches ExtraTricks2 = TruckstandBranches Trickslack = 0 IsExtra }
+      Goto ManualLink Params = TrickDef_TruckSpin
     ENDIF
   ENDIF
   IF GotParam Nollie
@@ -705,11 +801,11 @@ SCRIPT ManualLink grindslack = 25 Trickslack = 10 displaypercent = 50 Extraperce
       WaitoneGameFrame
     REPEAT
   ENDIF
-ENDSCRIPT
+endscript
 
 //the logic is that we store 2 sets of extra tricks: original and new
 //first we assign old tricks
-SCRIPT GroundTricks_AddExtraManualTricks
+script GroundTricks_AddExtraManualTricks
   IF GotParam ExtraTricks
     IF GotParam ExtraTricks2
       SetExtraTricks <ExtraTricks2> <ExtraTricks> ignore = <ignore>
@@ -731,10 +827,10 @@ SCRIPT GroundTricks_AddExtraManualTricks
       ENDIF
     ENDIF
   ENDIF
-ENDSCRIPT
+endscript
 
 
-SCRIPT Revert FSName = 'FS Revert' BSName = 'BS Revert' FSAnim = RevertFS BSAnim = RevertBS
+script Revert FSName = 'FS Revert' BSName = 'BS Revert' FSAnim = RevertFS BSAnim = RevertBS
   ClearLipCombos
   KillExtraTricks
   SetTrickScore 100
@@ -795,9 +891,9 @@ SCRIPT Revert FSName = 'FS Revert' BSName = 'BS Revert' FSAnim = RevertFS BSAnim
   ENDIF
   WaitAnimWhilstChecking AndManuals
   Goto OnGroundAI
-ENDSCRIPT
+endscript
 
-SCRIPT ToggleSwitchRegular
+script ToggleSwitchRegular
   OnGroundExceptions
   SetException Ex = Ollied Scr = Ollie Params = { NoDoNextTrick }
   Vibrate Actuator = 0 Percent = 80 Duration = 0.5
@@ -842,9 +938,9 @@ SCRIPT ToggleSwitchRegular
   ENDIF
   ClearTrickQueue
   Goto OnGroundAI
-ENDSCRIPT
+endscript
 
-SCRIPT ToggleNollieRegular
+script ToggleNollieRegular
   ClearExceptions
   SetException Ex = GroundGone Scr = GroundGone
   SetException Ex = Ollied Scr = Nollie Params = { NoDoNextTrick }
@@ -882,9 +978,9 @@ SCRIPT ToggleNollieRegular
   ELSE
     Goto OnGroundAI
   ENDIF
-ENDSCRIPT
+endscript
 
-SCRIPT Nollie
+script Nollie
   IF GotParam NoDoNextTrick
   ELSE
     DoNextTrick
@@ -914,9 +1010,9 @@ SCRIPT Nollie
   Bailoff
   WaitAnimWhilstChecking
   Goto Airborne
-ENDSCRIPT
+endscript
 
-SCRIPT NollieNoDisplay
+script NollieNoDisplay
   ClearTrickQueue
   ClearEventBuffer Buttons = Dpad OlderThan = TRICK_PRELOAD_TIME
   SetTrickName 'Nollie'
@@ -938,10 +1034,10 @@ SCRIPT NollieNoDisplay
   Bailoff
   WaitAnimWhilstChecking
   Goto Airborne
-ENDSCRIPT
+endscript
 
 
-SCRIPT Ollie
+script Ollie
   IF GotParam NoDoNextTrick
   ELSE
     DoNextTrick
@@ -983,9 +1079,9 @@ SCRIPT Ollie
   Bailoff
   WaitAnimWhilstChecking
   Goto Airborne
-ENDSCRIPT
+endscript
 
-SCRIPT NoComply
+script NoComply
   ClearTrickQueue
   ClearEventBuffer Buttons = Dpad OlderThan = TRICK_PRELOAD_TIME
   #"Jump"
@@ -1000,12 +1096,12 @@ SCRIPT NoComply
   PlayAnim Anim = NoComply BlendPeriod = 0.2
   WaitAnimWhilstChecking
   Goto Airborne
-ENDSCRIPT
+endscript
 
-SCRIPT Boneless Anim = Boneless Height = BonelessHeight
+script Boneless Anim = Boneless Height = BonelessHeight
   ClearTrickQueue
   ClearEventBuffer Buttons = Dpad OlderThan = TRICK_PRELOAD_TIME
-  Jump <Height>
+  #"Jump" <Height>
   InAirExceptions
   Vibrate Actuator = 1 Percent = 80 Duration = 0.1
   PlaySound boneless09 pitch = 85
@@ -1018,9 +1114,9 @@ SCRIPT Boneless Anim = Boneless Height = BonelessHeight
   Bailoff
   WaitAnimWhilstChecking
   Goto Airborne
-ENDSCRIPT
+endscript
 
-SCRIPT BonelessWaitAnimWhilstChecking
+script BonelessWaitAnimWhilstChecking
   BEGIN
     DoNextTrick
     IF GotParam AndManuals
@@ -1034,9 +1130,9 @@ SCRIPT BonelessWaitAnimWhilstChecking
       Goto Land
     ENDIF
   REPEAT
-ENDSCRIPT
+endscript
 
-SCRIPT Taunt
+script Taunt
   OnGroundExceptions
   PlayAnim Anim = <Anim> BlendPeriod = 0.3
   LaunchPanelMessage <PanelMessage>
@@ -1048,9 +1144,9 @@ SCRIPT Taunt
     WaitAnimWhilstChecking AndManuals
     Goto OnGroundAI
   ENDIF
-ENDSCRIPT
+endscript
 
-SCRIPT Props message1 = "Props"
+script Props message1 = "Props"
   OnGroundExceptions
   PlayAnim Anim = random( @Prop @Cheer1 ) BlendPeriod = 0.3
   LaunchPanelMessage <message1>
@@ -1062,35 +1158,35 @@ SCRIPT Props message1 = "Props"
     WaitAnimWhilstChecking AndManuals
     Goto OnGroundAI
   ENDIF
-ENDSCRIPT
+endscript
 
-//SCRIPT Taunt1
+//script Taunt1
 //  OnGroundExceptions
 //  PlayAnim Anim = Taunt1 NoRestart BlendPeriod = 0.3
 //  LaunchPanelMessage "Who's your Daddy?"
 //  WaitAnimWhilstChecking AndManuals
 //  Goto OnGroundAI
-//ENDSCRIPT
+//endscript
 
-//SCRIPT Taunt2
+//script Taunt2
 //  OnGroundExceptions
 //  PlayAnim Anim = Taunt2 NoRestart BlendPeriod = 0.3
 //  LaunchPanelMessage "No F-ckin' way"
 //  WaitAnimWhilstChecking AndManuals
 //  Goto OnGroundAI
-//ENDSCRIPT
+//endscript
 
-//SCRIPT Taunt3
+//script Taunt3
 //  OnGroundExceptions
 //  PlayAnim Anim = Taunt3 NoRestart BlendPeriod = 0.3
 //  LaunchPanelMessage "Come get some"
 //  WaitAnimWhilstChecking AndManuals
 //  Goto OnGroundAI
-//ENDSCRIPT
+//endscript
 
-SCRIPT BitchSlap
+script BitchSlap
   OnGroundExceptions
   PlayAnim Anim = Slapright NoRestart BlendPeriod = 0.3
   WaitAnimWhilstChecking AndManuals
   Goto OnGroundAI
-ENDSCRIPT
+endscript
