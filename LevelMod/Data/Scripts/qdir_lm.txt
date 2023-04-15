@@ -1,7 +1,6 @@
 LevelMod\airtricks.qb
 LevelMod\bails.qb
 LevelMod\bird_c.qb
-LevelMod\bird_c_resting.qb
 LevelMod\buttonscripts.qb
 LevelMod\framework.qb
 LevelMod\game.qb
