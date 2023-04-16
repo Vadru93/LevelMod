@@ -1,9 +1,18 @@
 
-
 //node compress items
 
+MENU_GLOBAL_X = 140.0 //(640 - MENU_GLOBAL_WIDTH) / 2
+MEBU_GLOBAL_Y = 70.0
+MENU_GLOBAL_WIDTH = 360.0
+MENU_GLOBAL_WIDTH_LEFT = 230.0
+MENU_GLOBAL_WIDTH_RIGHT = 130.0
+MENU_GLOBAL_WIDTH_RIGHT_MINUS = -130.0
+
 // basic menu size, exactly half of the screen in the middle
-LM_Menu_SharedSettings_Position = { x = 160.0 y = 70.0 w = 320.0 } //h = 400.0
+LM_Menu_SharedSettings_Position = { x = MENU_GLOBAL_X y = MEBU_GLOBAL_Y w = MENU_GLOBAL_WIDTH } //h = 400.0
+
+LM_Column_Left_Position  = { x = 0.0 y = 0.0 w = MENU_GLOBAL_WIDTH_LEFT }
+LM_Column_Right_Position = { x = MENU_GLOBAL_WIDTH_LEFT y = 0.0 w = MENU_GLOBAL_WIDTH_RIGHT }
 
 // blue top unselectable menu item
 LM_Menu_Shared_Title = { Type = textmenuelement static dont_gray drawer = title }
@@ -21,6 +30,13 @@ LM_Menu_Shared_Bool = {
     Type = textmenuelement 
     text = "Foo"
     target = "LM_ToggleOption"
+}
+
+//shared host option - host allow/deny setting
+LM_HostOption_MenuItem = {
+    Type = textmenuelement
+    text = "Foo"
+    target = "LM_ToggleHostOption"
 }
 
 //shared option for a back menu item
@@ -55,21 +71,6 @@ title_string = "Profile name:" eventhandlers =
 "EditKeyMapControlAccept" params = 
 { field_id = display_name keyboard_id = lm_edit_keymap_keyboard_control  } }
 ] default_to_accept hide_on_close parent = contain1 }
-
-LM_HostOption_MenuItem = { Type = textmenuelement text = "Foo" target = "LM_ToggleHostOption" }
-
-LM_HostOptions = [
-  { LM_Menu_Shared_Title auto_id text = "LevelMod HostOptions" }
-  { LM_HostOption_MenuItem  name = LM_HostOption_bSpine Value = 1 id = LM_HostOption_bSpine_id override_true = LM_Control_bSpine params = { name = LM_HostOption_bSpine id = LM_HostOption_bSpine_id on = "Spine: Allowed" off = "Spine: Disallowed" } }
-  { LM_HostOption_MenuItem  name = LM_HostOption_bBank Value = 1 id = LM_HostOption_bBank_id override_true = LM_Control_bBank params = { name = LM_HostOption_bBank id = LM_HostOption_bBank_id on = "Bank Drop: Allowed" off = "Bank Drop: Disallowed" } }
-  { LM_HostOption_MenuItem  name = LM_HostOption_bAcid Value = 1 id = LM_HostOption_bAcid_id override_true = LM_Control_bAcid params = { name = LM_HostOption_bAcid id = LM_HostOption_bAcid_id on = "Acid Drop: Allowed" off = "Acid Drop: Disallowed" } }
-  { LM_HostOption_MenuItem  name = LM_HostOption_bExtraTricks Value = 1 id = LM_HostOption_bExtraTricks_id override_true = LM_Control_bExtraTricks params = { name = LM_HostOption_bExtraTricks id = LM_HostOption_bExtraTricks_id on = "ExtraTricks: Allowed" off = "ExtraTricks: Disallowed" } }
-  { LM_HostOption_MenuItem  name = LM_HostOption_bUnLimitTags Value = 1 id = LM_HostOption_bUnLimitTags_id override_true = LM_GameOption_bUnLimitTags  params = { name = LM_HostOption_bUnLimitTags id = LM_HostOption_bUnLimitTags_id on = "32 TagFix: Allowed" off = "32 TagFix: Disallowed" } }
-  { LM_HostOption_MenuItem  name = LM_HostOption_bWallplant Value = 1 id = LM_HostOption_bWallplant_id override_true = LM_Control_bWallplant  params = { name = LM_HostOption_bWallplant id = LM_HostOption_bWallplant_id on = "Wallplant: Allowed" off = "Wallplant: Disallowed" } }
-  { LM_HostOption_MenuItem  name = LM_HostOption_bWalliePlant Value = 1 id = LM_HostOption_bWalliePlant_id override_true = LM_Control_bWalliePlant  params = { name = LM_HostOption_bWalliePlant id = LM_HostOption_bWalliePlant_id on = "Wallieplant: Allowed" off = "Wallieplant: Disallowed" } }
-  { LM_HostOption_MenuItem  name = LM_HostOption_bBoostPlant Value = 1 id = LM_HostOption_bBoostPlant_id override_true = LM_Control_bBoostPlant  params = { name = LM_HostOption_bBoostPlant id = LM_HostOption_bBoostPlant_id on = "Boostplant: Allowed" off = "Boostplant: Disallowed" } }
-  { LM_HostOption_MenuItem  name = LM_HostOption_bButtSlap Value = 1 id = LM_HostOption_bButtSlap_id override_true = LM_Control_bButtSlap  params = { name = LM_HostOption_bButtSlap id = LM_HostOption_bButtSlap_id on = "Buttslap: Allowed" off = "Buttslap: Disallowed" } }
-]
 
  
 //maybe move to shader.q, when enough code for shaders??s
@@ -217,10 +218,10 @@ Levelmod_menu_root = {
     LM_Menu_Shared_Vertical
     id = Levelmod_menu_root
     children = levelmod_menu_root_children
-    eventhandler = { type = showeventhandler target = "MaybeAddHostOption" }
+    eventhandler = { type = showeventhandler target = "Levelmod_menu_root_OnShow" }
 }
 
-script MaybeAddHostOption
+script Levelmod_menu_root_OnShow
     RestoreGoBack     //dll func?
 
     //maybe add to array and kill if not onserver instead?
@@ -429,9 +430,23 @@ endscript
 levelmod_HostOptions_root = {
   LM_Menu_Shared_Vertical 
   id = levelmod_HostOptions_root
-  eventhandler = { Type = showeventhandler target = "UpdateMenuText" params = levelmod_HostOptions_root }
   children = LM_HostOptions
+  eventhandler = { Type = showeventhandler target = "UpdateMenuText" params = levelmod_HostOptions_root }
 }
+
+LM_HostOptions = [
+    { LM_Menu_Shared_Title auto_id text = "LevelMod Host Options" }
+    { LM_HostOption_MenuItem  name = LM_HostOption_bSpine Value = 1 id = LM_HostOption_bSpine_id override_true = LM_Control_bSpine params = { name = LM_HostOption_bSpine id = LM_HostOption_bSpine_id on = "Spine: Allow" off = "Spine: Deny" } }
+    { LM_HostOption_MenuItem  name = LM_HostOption_bBank Value = 1 id = LM_HostOption_bBank_id override_true = LM_Control_bBank params = { name = LM_HostOption_bBank id = LM_HostOption_bBank_id on = "Bank Drop: Allow" off = "Bank Drop: Deny" } }
+    { LM_HostOption_MenuItem  name = LM_HostOption_bAcid Value = 1 id = LM_HostOption_bAcid_id override_true = LM_Control_bAcid params = { name = LM_HostOption_bAcid id = LM_HostOption_bAcid_id on = "Acid Drop: Allow" off = "Acid Drop: Deny" } }
+    { LM_HostOption_MenuItem  name = LM_HostOption_bExtraTricks Value = 1 id = LM_HostOption_bExtraTricks_id override_true = LM_Control_bExtraTricks params = { name = LM_HostOption_bExtraTricks id = LM_HostOption_bExtraTricks_id on = "ExtraTricks: Allow" off = "ExtraTricks: Deny" } }
+    { LM_HostOption_MenuItem  name = LM_HostOption_bUnLimitTags Value = 1 id = LM_HostOption_bUnLimitTags_id override_true = LM_GameOption_bUnLimitTags  params = { name = LM_HostOption_bUnLimitTags id = LM_HostOption_bUnLimitTags_id on = "32 TagFix: Allow" off = "32 TagFix: Deny" } }
+    { LM_HostOption_MenuItem  name = LM_HostOption_bWallplant Value = 1 id = LM_HostOption_bWallplant_id override_true = LM_Control_bWallplant  params = { name = LM_HostOption_bWallplant id = LM_HostOption_bWallplant_id on = "Wallplant: Allow" off = "Wallplant: Deny" } }
+    { LM_HostOption_MenuItem  name = LM_HostOption_bWalliePlant Value = 1 id = LM_HostOption_bWalliePlant_id override_true = LM_Control_bWalliePlant  params = { name = LM_HostOption_bWalliePlant id = LM_HostOption_bWalliePlant_id on = "Wallieplant: Allow" off = "Wallieplant: Deny" } }
+    { LM_HostOption_MenuItem  name = LM_HostOption_bBoostPlant Value = 1 id = LM_HostOption_bBoostPlant_id override_true = LM_Control_bBoostPlant  params = { name = LM_HostOption_bBoostPlant id = LM_HostOption_bBoostPlant_id on = "Boostplant: Allow" off = "Boostplant: Deny" } }
+    { LM_HostOption_MenuItem  name = LM_HostOption_bButtSlap Value = 1 id = LM_HostOption_bButtSlap_id override_true = LM_Control_bButtSlap  params = { name = LM_HostOption_bButtSlap id = LM_HostOption_bButtSlap_id on = "Buttslap: Allow" off = "Buttslap: Deny" } }
+    { LM_Menu_Shared_Back params = { from = levelmod_HostOptions_root to = Levelmod_menu_Root } }
+]
 
 
 script CreateLevelModMenus
@@ -924,10 +939,10 @@ game_menu_items = [
     { IsMap  text = "Revert"                 option_id = revert_id           KeyMap = R2               toggle_id = revert_text_id     cat_edit }
     { IsMap  text = "Nollie (ª2)"            option_id = nollie_id           KeyMap = L2               toggle_id = nollie_text_id     cat_edit }
     { IsMap  text = "Spine Transfer"         option_id = SpineTransfer_id    KeyMap = SpineTransfer    toggle_id = spine_text_id      cat_edit }
-    {        text = "Press any key to Map"   option_id = edit_tip1           x = 0  y = -64 w = 300   toggle_id = edit1_id           cat_edit }
-    {        text = "Press Back to unassign" option_id = edit_tip2           x = 0  y = -48 w = 300   toggle_id = edit2_id           cat_edit }
-    {        text = "Press Escape to abort"  option_id = edit_tip3           x = 0  y = -32 w = 300   toggle_id = edit3_id           cat_edit }
-    {        text = ""                       option_id = edit_error          x = 0  y = -16 w = 300   toggle_id = error_id           cat_edit }
+    {        text = "Press any key to Map"   option_id = edit_tip1           x = 0  y = -64 w = MENU_GLOBAL_WIDTH   toggle_id = edit1_id           cat_edit }
+    {        text = "Press Back to unassign" option_id = edit_tip2           x = 0  y = -48 w = MENU_GLOBAL_WIDTH   toggle_id = edit2_id           cat_edit }
+    {        text = "Press Escape to abort"  option_id = edit_tip3           x = 0  y = -32 w = MENU_GLOBAL_WIDTH   toggle_id = edit3_id           cat_edit }
+    {        text = ""                       option_id = edit_error          x = 0  y = -16 w = MENU_GLOBAL_WIDTH   toggle_id = error_id           cat_edit }
 
     //GUI Options
   { IsBool text = "Extra Messages"  option_id = LM_GUI_bTrickNotifications_id  option = LM_GUI_bTrickNotifications  toggle_id = item1_toggle cat_gui info_text = "Toggle hidden combo messages" }
@@ -941,7 +956,7 @@ game_menu_items = [
   { IsBool text = "Extra Layers"    option_id = LM_GameOption_bExtraLayer_id    option = LM_GameOption_bExtraLayer  toggle_id = item2_toggle cat_level info_text = "Toggle multipass layers" Do = UpdateExtraLayer }
   { IsBool text = "Net Sky"         option_id = LM_GameOption_bNetSky_id        option = LM_GameOption_bNetSky      toggle_id = item3_toggle cat_level info_text = "Toggle skybox"  Do = UpdateNetSky }
   { IsBool text = "Fog"             option_id = LM_GameOption_bFog_id           option = LM_GameOption_bFog         toggle_id = item4_toggle cat_level info_text = "Toggle fog" Do = UpdateFog }
-  { static text = "THPS4 specific"   cat_level drawer = keyboard_property option_id = th4_options_info_line info_text = "none"  toggle_id = item5_toggle}
+  { static text = "THPS4 specific"  option_id = th4_options_info_line info_text = "none"  toggle_id = item5_toggle cat_level drawer = keyboard_property }
   { IsBool text = "Proset Objects"  option_id = LM_LevelOption_TH4ProObjects_id option = LM_LevelOption_TH4ProObjects      toggle_id = item6_toggle cat_level info_text = "Toggle pro specific goal objects"  Do = UpdateTH4ProObjects }
   { IsBool text = "Comp Objects"    option_id = LM_LevelOption_TH4CompObjects_id option = LM_LevelOption_TH4CompObjects         toggle_id = item7_toggle cat_level info_text = "Toggle TH4 competition objects" Do = UpdateTH4CompObjects }
 
@@ -951,7 +966,7 @@ game_menu_items = [
   { IsBool text = "Windowed"        option_id = LM_GFX_bWindowed_id   option = LM_GFX_bWindowed     toggle_id = item3_toggle cat_gfx Do = LaunchGFXCommand do_params = { command = ToggleWindowed } info_text = "Launch game in windowed mode" info_text2 = "Toggle by pressing ALT + ENTER" }
   { IsBool text = "Texture Filtering" option_id = LM_GFX_bFiltering_id  option = LM_GFX_bFiltering  toggle_id = item5_toggle cat_gfx info_text = "Generate Texture mipmaps" info_text2 = "May produce slight graphic bugs"} 
   { IsBool text = "Enable VSync"      option_id = LM_GFX_bVSync_id      option = LM_GFX_bVSync        toggle_id = item6_toggle cat_gfx Do = LaunchGFXCommand info_text = "Sync rendering to monitor refresh rate" info_text2 = "Enable if you see tearing" } 
-  { IsInt  text = "FPS Lock:"         option_id = LM_GFX_TargetFPS_id   option = LM_GFX_TargetFPS     toggle_id = item7_toggle cat_gfx min = 30 max = 300  Do = LaunchGFXCommand do_params = { command = TargetFPS } info_text = "Set the target fps" info_text2 = "Only works if Stutter fix is enabled" }
+  { IsInt  text = "FPS Lock:"         option_id = LM_GFX_TargetFPS_id   option = LM_GFX_TargetFPS     toggle_id = item7_toggle cat_gfx min = 60 max = 300  Do = LaunchGFXCommand do_params = { command = TargetFPS } info_text = "Set the target fps" info_text2 = "Only works if Stutter fix is enabled" }
   { IsEnum text = "Stutter Fix"       option_id = LM_GFX_eFixStutter_id option = LM_GFX_eFixStutter   toggle_id = item8_toggle cat_gfx TextValues = [ "Off" "Exact" "Hybrid" "Sleep" ] Do = LaunchGFXCommand do_params = { command = FixStutter } info_text = "Improve framerate consistency" info_text2 = "Exact is usually best option" } 
 ]
 
@@ -972,11 +987,11 @@ LM_newSettingsMenu = {
     ]
 }
 
-LM_game_options_names_menu = { 
+LM_game_options_names_menu = {
     type = verticalmenu
     Id = game_options_names_menu
     parent = options_multi_container
-    x = 0.0 y = 0.0 w = 240.0
+    LM_Column_Left_Position
     //num_visible = 12 
     just_center_x just_center_y not_rounded 
 }
@@ -986,7 +1001,7 @@ LM_game_options_on_off_menu = {
     Id = game_options_on_off_menu 
     //follow_menu = game_options_names_menu 
     parent = options_multi_container 
-    x = 240.0 y = 0.0 w = 60.0
+    LM_Column_Right_Position
     //num_visible = 12 
     just_center_x just_center_y not_rounded static dont_gray 
 }
@@ -1016,7 +1031,7 @@ script populate_game_options params = { }
 
     //adds all settings, mask is passed as menu entry param
     ForeachIn <items> do = Settings_AddLine params = { <...> }
-
+    
     //adds "back" entry
     Settings_AddLine back_menu_item target = "go_back" Params = { id = game_options_names_menu }
 
@@ -1045,7 +1060,7 @@ script AddEnum
     Type = slidermenuelement 
     id = <option_id> 
     text = <text> 
-    lower = 0 upper = <max> delta = 1 start = <OptionValue> wrap = 1 right_side_w = -200.0
+    lower = 0 upper = <max> delta = 1 start = <OptionValue> wrap = 1 right_side_w = MENU_GLOBAL_WIDTH_RIGHT_MINUS
     eventhandlers = [
         { Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextFromValue = <TextValues> TextOnly } }
         { Type = ContentsChangedEventHandler target = "LM_SetOption_Do" params = { Do = <Do> do_params = <do_params> name = <option> id = <option_id> TextFromValue = <TextValues> } }
@@ -1084,15 +1099,18 @@ script AddBool
 endscript
 
 script AddInt
-  GetOptionValue <option>
-  AddLine { 
-    parent = game_options_names_menu 
-    Type = slidermenuelement 
-    id = <option_id> 
-    text = <text> 
-    lower = <min> upper = <max> delta = 1 start = <OptionValue> wrap = 1 right_side_w = 100
-    eventhandlers = [ {Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextOnly } }{ Type = ContentsChangedEventHandler target = "LM_SetOption_Do" params = { Do = <Do> do_params = <do_params> name = <option> id = <option_id>  } } ]
-  }
+    GetOptionValue <option>
+    AddLine { 
+        parent = game_options_names_menu 
+        Type = slidermenuelement 
+        id = <option_id> 
+        text = <text> 
+        lower = <min> upper = <max> delta = 1 start = <OptionValue> wrap = 1 right_side_w = MENU_GLOBAL_WIDTH_RIGHT_MINUS
+        eventhandlers = [
+            { Type = showeventhandler target = "LM_SetOption_Slider" params = { id = <option_id>  TextOnly } }
+            { Type = ContentsChangedEventHandler target = "LM_SetOption_Do" params = { Do = <Do> do_params = <do_params> name = <option> id = <option_id>  } }
+        ]
+    }
 endscript
 
 //to avoid multiple nested IFs
@@ -1130,7 +1148,7 @@ script Settings_AddLine drawer = main
             target = <target>
             params = <params>
             link = <link>
-            w = 300.0
+            w = MENU_GLOBAL_WIDTH_LEFT
           }
     else
         //MessageBox <option_id>
@@ -1155,6 +1173,7 @@ script Settings_AddLine drawer = main
                 text = <text> 
                 drawer = <drawer>
                 static 
+                w = MENU_GLOBAL_WIDTH
                 }
               else
                   AddLine { 
