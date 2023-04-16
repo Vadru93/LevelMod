@@ -9,7 +9,7 @@ EXTRA_BRANCHFLIP = { Trigger = TRIGGER_MANUAL_BRANCHFLIP Scr = ManualLink }
 
 //changed taunts to dpad, cause original layout doesn't make any sense anyway.
 GroundTricks = [
-  { Trigger = { InOrder Down R2 , 300 } scr = ToggleSwitchRegular params = { PowerSlide } }
+  { Trigger = { TripleInOrder Down Down R2 300 } scr = ToggleSwitchRegular params = { PowerSlide } }
   { Trigger = { Press R2 20 } Scr = ToggleSwitchRegular }
   { Trigger = { Press L2 20 } Scr = ToggleNollieRegular }
   { Trigger = { TapOnceRelease Up X 300 } Scr = NoComply Params = { Name = 'No Comply' Score = 100 } }

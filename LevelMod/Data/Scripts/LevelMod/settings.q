@@ -1,5 +1,46 @@
 
-//Options in this list will get added autmatically
+
+//node compress items
+
+// basic menu size, exactly half of the screen in the middle
+LM_Menu_SharedSettings_Position = { x = 160.0 y = 70.0 w = 320.0 } //h = 400.0
+
+// blue top unselectable menu item
+LM_Menu_Shared_Title = { Type = textmenuelement static dont_gray drawer = title }
+
+//shared options for a vertical menu
+LM_Menu_Shared_Vertical = {
+    Type = verticalmenu
+    parent = contain1
+    LM_Menu_SharedSettings_Position
+    just_center_x just_center_y blue_top
+}
+
+//shared options for a bool menu item
+LM_Menu_Shared_Bool = { 
+    Type = textmenuelement 
+    text = "Foo"
+    target = "LM_ToggleOption"
+}
+
+//shared option for a back menu item
+LM_Menu_Shared_Back = {
+  Type = textmenuelement
+  auto_id 
+  text = "Back"
+  target = "new_go_back"
+}
+
+script new_go_back
+  if GotParam From
+    SwitchOffMenu id = <From>
+    SwitchToMenu DoNotMakeRoot menu = <To>
+  else
+    go_back id = <id>
+  endif
+endscript
+
+//Options in this list will get added automatically
 //These options will override the original option
 //If no connection is found the client will use the Value parameter
 
@@ -12,13 +53,13 @@ gapname_charset min_chars = 0 max_chars = 16
 title_string = "Profile name:" eventhandlers = 
 [ { type = ContentsChangedEventHandler target = 
 "EditKeyMapControlAccept" params = 
-{ field_id = display_name keyboard_id = lm_edit_keymap_keyboard_control  } } 
+{ field_id = display_name keyboard_id = lm_edit_keymap_keyboard_control  } }
 ] default_to_accept hide_on_close parent = contain1 }
 
 LM_HostOption_MenuItem = { Type = textmenuelement text = "Foo" target = "LM_ToggleHostOption" }
 
 LM_HostOptions = [
-  { Type = textmenuelement auto_id text = "LevelMod HostOptions" static dont_gray drawer = title }
+  { LM_Menu_Shared_Title auto_id text = "LevelMod HostOptions" }
   { LM_HostOption_MenuItem  name = LM_HostOption_bSpine Value = 1 id = LM_HostOption_bSpine_id override_true = LM_Control_bSpine params = { name = LM_HostOption_bSpine id = LM_HostOption_bSpine_id on = "Spine: Allowed" off = "Spine: Disallowed" } }
   { LM_HostOption_MenuItem  name = LM_HostOption_bBank Value = 1 id = LM_HostOption_bBank_id override_true = LM_Control_bBank params = { name = LM_HostOption_bBank id = LM_HostOption_bBank_id on = "Bank Drop: Allowed" off = "Bank Drop: Disallowed" } }
   { LM_HostOption_MenuItem  name = LM_HostOption_bAcid Value = 1 id = LM_HostOption_bAcid_id override_true = LM_Control_bAcid params = { name = LM_HostOption_bAcid id = LM_HostOption_bAcid_id on = "Acid Drop: Allowed" off = "Acid Drop: Disallowed" } }
@@ -28,7 +69,6 @@ LM_HostOptions = [
   { LM_HostOption_MenuItem  name = LM_HostOption_bWalliePlant Value = 1 id = LM_HostOption_bWalliePlant_id override_true = LM_Control_bWalliePlant  params = { name = LM_HostOption_bWalliePlant id = LM_HostOption_bWalliePlant_id on = "Wallieplant: Allowed" off = "Wallieplant: Disallowed" } }
   { LM_HostOption_MenuItem  name = LM_HostOption_bBoostPlant Value = 1 id = LM_HostOption_bBoostPlant_id override_true = LM_Control_bBoostPlant  params = { name = LM_HostOption_bBoostPlant id = LM_HostOption_bBoostPlant_id on = "Boostplant: Allowed" off = "Boostplant: Disallowed" } }
   { LM_HostOption_MenuItem  name = LM_HostOption_bButtSlap Value = 1 id = LM_HostOption_bButtSlap_id override_true = LM_Control_bButtSlap  params = { name = LM_HostOption_bButtSlap id = LM_HostOption_bButtSlap_id on = "Buttslap: Allowed" off = "Buttslap: Disallowed" } }
-  
 ]
 
  
@@ -165,142 +205,84 @@ LevelModOptions = [
 ]
 
 
-//node compress items
 
-//shared options for a vertical menu
-LM_Menu_Shared_Vertical = {
-  Type = verticalmenu
-  parent = contain1
-  x = 170.0 y = 90.0 w = 300.0 h = 400.0
-  just_center_x just_center_y blue_top
-}
 
-//shared options for a bool menu item
-LM_Menu_Shared_Bool = { 
-  Type = textmenuelement 
-  text = "Foo"
-  target = "LM_ToggleOption"
-}
-
-script new_go_back
-  if GotParam From
-    SwitchOffMenu id = <From>
-    SwitchToMenu DoNotMakeRoot menu = <To>
-  else
-    go_back id = <id>
-  endif
-endscript
-
-//shared option for a back menu item
-LM_Menu_Shared_Back = {
-  Type = textmenuelement
-  auto_id 
-  text = "Back"
-  target = "new_go_back"
-}
 
 
 //=======================levelmod settings menus============================
 
-SCRIPT MaybeAddHostOption
-  RestoreGoBack
-  IF OnServer
-    AddLine parent = Levelmod_menu_root Type = textmenuelement id = lm_hostoption_id text = "Host Options" link = levelmod_HostOptions_root
-  ENDIF
-
-  AddLine parent = Levelmod_menu_root Type = textmenuelement id = back_id text = "Back" target = "go_back" Params = { id = Levelmod_menu_root } 
-ENDSCRIPT
-
 //levelmod settings root menu struct
+//this one get added to the 
 Levelmod_menu_root = { 
-  LM_Menu_Shared_Vertical
-  id = Levelmod_menu_root
-  children = levelmod_menu_root_children
-  eventhandler = { type = showeventhandler target = "MaybeAddHostOption" }
+    LM_Menu_Shared_Vertical
+    id = Levelmod_menu_root
+    children = levelmod_menu_root_children
+    eventhandler = { type = showeventhandler target = "MaybeAddHostOption" }
 }
 
-SCRIPT sFixGoBack
-  MoveMenu id = game_options_names_menu y = 0
-  MoveMenu id = game_options_on_off_menu y = 0
-  EnableBackEvent
-  FixGoBack
-  if GotParam SelectCallback
-    SetMenuSelectCallback <SelectCallback>
-  else
-    SetMenuSelectCallback NULL
-  endif
-ENDSCRIPT
+script MaybeAddHostOption
+    RestoreGoBack     //dll func?
 
-SCRIPT EditControls_OnShow
-  sFixGoBack
-  MoveMenu id = game_options_names_menu y = 64
-  MoveMenu id = game_options_on_off_menu y = 64
-ENDSCRIPT
+    //maybe add to array and kill if not onserver instead?
+    IF OnServer
+        AddLine parent = Levelmod_menu_root Type = textmenuelement id = lm_hostoption_id text = "Host Options" link = levelmod_HostOptions_root
+    ENDIF
 
+    AddLine parent = Levelmod_menu_root Type = textmenuelement id = back_id text = "Back" target = "go_back" Params = { id = Levelmod_menu_root }
+endscript
+
+
+script sFixGoBack
+    MoveMenu id = game_options_names_menu y = 0
+    MoveMenu id = game_options_on_off_menu y = 0
+    EnableBackEvent
+    FixGoBack
+
+    if GotParam SelectCallback
+        SetMenuSelectCallback <SelectCallback>
+    else
+        SetMenuSelectCallback NULL
+    endif
+endscript
+
+script EditControls_OnShow
+    sFixGoBack
+    MoveMenu id = game_options_names_menu y = 64
+    MoveMenu id = game_options_on_off_menu y = 64
+endscript
+
+
+
+//list of levelmod settings root menu elements
 levelmod_menu_root_children = [
-  //title
-  { Type = textmenuelement auto_id text = "LevelMod settings" static dont_gray drawer = title }
+    //title
+    { LM_Menu_Shared_Title auto_id text = "LevelMod settings" }
 
-  //game options that affect gameplay
-  { Type = textmenuelement auto_id text = "Game Options" link = newSettingsMenu  
-  target = "populate_game_options" params = { mask = cat_game items = game_menu_items title = "Game Options" OnShow = sFixGoBack params = { SelectCallback = LevelModSettingsMenu_OnSelect } }  }
+    //game options that affect gameplay
+    { Type = textmenuelement auto_id text = "Game Options" link = LM_newSettingsMenu
+    target = "populate_game_options" params = { mask = cat_game items = game_menu_items title = "Game Options" OnShow = sFixGoBack params = { SelectCallback = LevelModSettingsMenu_OnSelect } } }
 
-  //GUI options, like Show HUD, show GrafCounter, etc
-  { Type = textmenuelement auto_id text = "GUI Options" link = newSettingsMenu  
-  target = "populate_game_options" params = { mask = cat_gui items = game_menu_items title = "GUI Options" OnShow = sFixGoBack } }
+    //GUI options, like Show HUD, show GrafCounter, etc
+    { Type = textmenuelement auto_id text = "GUI Options" link = LM_newSettingsMenu
+    target = "populate_game_options" params = { mask = cat_gui items = game_menu_items title = "GUI Options" OnShow = sFixGoBack params = { SelectCallback = LevelModSettingsMenu_OnSelect } } }
 
-  //hardware graphics options (AA, filtering, 
-  { Type = textmenuelement auto_id text = "Graphics Options" link = newSettingsMenu  
-  target = "populate_game_options" params = { mask = cat_gfx items = game_menu_items title = "Graphics Options" OnShow = sFixGoBack  params = { SelectCallback = LevelModSettingsMenu_OnSelect } } }
+    //hardware graphics options (AA, filtering, 
+    { Type = textmenuelement auto_id text = "Graphics Options" link = LM_newSettingsMenu
+    target = "populate_game_options" params = { mask = cat_gfx items = game_menu_items title = "Graphics Options" OnShow = sFixGoBack  params = { SelectCallback = LevelModSettingsMenu_OnSelect } } }
 
-  //Options that affect certain parts of th level
-  { Type = textmenuelement auto_id text = "Level Options" link = levelmod_menu_LevelOptions }
-    
-  //Control options, like spine transfer, acid drop, etc
-  { Type = textmenuelement auto_id text = "Control Options" link = newSettingsMenu
-  target = "populate_game_options" params = { mask = cat_control items = game_menu_items title = "Control Options" OnShow = sFixGoBack  params = { SelectCallback = LevelModSettingsMenu_OnSelect } } }
+    //Options that affect certain parts of th level
+    { Type = textmenuelement auto_id text = "Level Options" link = LM_newSettingsMenu
+    target = "populate_game_options" params = { mask = cat_level items = game_menu_items title = "Level Options" OnShow = sFixGoBack  params = { SelectCallback = LevelModSettingsMenu_OnSelect } } }
 
-  //Edit Controls
-  { Type = textmenuelement auto_id text = "Edit Controls" link = newSettingsMenu
-  target = "populate_game_options" params = { mask = cat_edit items = game_menu_items title = "Edit Controls" OnShow = EditControls_OnShow } }
+    //Control options, like spine transfer, acid drop, etc
+    { Type = textmenuelement auto_id text = "Control Options" link = LM_newSettingsMenu
+    target = "populate_game_options" params = { mask = cat_control items = game_menu_items title = "Control Options" OnShow = sFixGoBack  params = { SelectCallback = LevelModSettingsMenu_OnSelect } } }
+
+    //Edit Controls, maybe move to control options menu?
+    { Type = textmenuelement auto_id text = "Edit Controls" link = LM_newSettingsMenu
+    target = "populate_game_options" params = { mask = cat_edit items = game_menu_items title = "Edit Controls" OnShow = EditControls_OnShow } }
 ]
 
-
-//Level menu struct
-levelmod_menu_LevelOptions = { 
-  LM_Menu_Shared_Vertical
-  id = levelmod_menu_LevelOptions
-  eventhandler = { Type = showeventhandler target = "UpdateMenuText" params = levelmod_menu_LevelOptions }
-  children = levelmod_menu_LevelOptions_items
-}
-
-levelmod_menu_LevelOptions_items = [ 
-  { Type = textmenuelement auto_id text = "Level Options" static dont_gray drawer = title }
-
-  //enables pseudo 3d layered grass in t2x and th4 levels
-  { LM_Menu_Shared_Bool id = LM_GameOption_bGrass_id params = { name = LM_GameOption_bGrass id = LM_GameOption_bGrass_id on = "3D Grass: on" off = "3D Grass: off" action = UpdateGrass } }
-
-  //enables extra layers in th4+ levels
-  { LM_Menu_Shared_Bool id = LM_GameOption_bExtraLayer_id params = { name = LM_GameOption_bExtraLayer id = LM_GameOption_bExtraLayer_id on = "Extra Layers: on" off = "Extra Layers: off" action = UpdateExtraLayer } }
-
-  //enables sky in network modes (an option cause of netname rendering bug) 
-  { LM_Menu_Shared_Bool id = LM_GameOption_bNetSky_id params = { name = LM_GameOption_bNetSky id = LM_GameOption_bNetSky_id on = "Net sky: on" off = "Net sky: off" action = UpdateNetSky } }
-  
-  //enables fog
-  { LM_Menu_Shared_Bool id = LM_GameOption_bFog_id params = { name = LM_GameOption_bFog id = LM_GameOption_bFog_id on = "Fog: on" off = "Fog: off" action = UpdateFog } }
-
-  //this one needs a better drawer here?
-  { Type = textmenuelement auto_id text = "THPS4 levels" static dont_gray drawer = keyboard_property }
-
-  //enables proset objects in thps4 levels 
-  { LM_Menu_Shared_Bool id = LM_LevelOption_TH4ProObjects_id params = { name = LM_LevelOption_TH4ProObjects id = LM_LevelOption_TH4ProObjects_id on = "Proset Objects: on" off = "Proset Objects: off" action = UpdateTH4ProObjects } }
-
-  //enables competition objects in thps4 levels 
-  { LM_Menu_Shared_Bool id = LM_LevelOption_TH4CompObjects_id params = { name = LM_LevelOption_TH4CompObjects id = LM_LevelOption_TH4CompObjects_id on = "Comp Objects: on" off = "Comp Objects: off" action = UpdateTH4CompObjects } }
-
-  //goes back to previous menu
-  { LM_Menu_Shared_Back Params = { id = levelmod_menu_LevelOptions } } 
-] 
 
 
 //Control->Air menu struct
@@ -313,8 +295,8 @@ LevelMod_menu_air = {
 }
 
 levelmod_menu_air_items = [
-  { Type = textmenuelement auto_id text = "Air" static dont_gray drawer = title }
-  
+  { LM_Menu_Shared_Title auto_id text = "Air" }
+
   //option to disable buttslap
   { LM_Menu_Shared_Bool id = LM_Control_bButtSlap_id params = { name = LM_Control_bButtSlap id = LM_Control_bButtSlap_id on = "Buttslap: on" off = "Buttslap: off" } }
   
@@ -351,7 +333,7 @@ LevelMod_menu_wall = {
 }
 
 levelmod_menu_wall_items = [
-  { Type = textmenuelement auto_id text = "Wall" static dont_gray drawer = title }
+  { LM_Menu_Shared_Title auto_id text = "Wall" }
   
   //option to disable wallieplant chain
   { LM_Menu_Shared_Bool id = LM_Control_bWalliePlant_id params = { name = LM_Control_bWalliePlant id = LM_Control_bWalliePlant_id on = "Wallieplant: on" off = "Wallieplant: off" LinkedTo_id = LM_Control_bBoostPlant_id } }
@@ -374,7 +356,7 @@ load_keymap_menu = {
 }
 
 load_keymap_menu_items = [
-  { Type = textmenuelement auto_id               text = "Load Controls"    static dont_gray drawer = title }
+  { LM_Menu_Shared_Title    auto_id               text = "Load Controls" }
   //This is used to display info text
   { Type = textmenuelement id = load_info_text   text = ""                 static }
   //Load from input.map
@@ -383,9 +365,8 @@ load_keymap_menu_items = [
   { Type = textmenuelement id = load_settings_id text = "Load From Settings" target = "sKeyMapScript" params = { LoadSettings Load } load_info_text = "Load File: Controls.ini" }
   //Load defaults(currently not implemented)
   { Type = textmenuelement id = load_default_id  text = "Load Defaults"      target = "sKeyMapScript" params = { LoadDefault Load } load_info_text = "Load Default Controls" }
-  { LM_Menu_Shared_Back Params = { from = load_keymap_menu to = newSettingsMenu } } 
-  ] 
-
+  { LM_Menu_Shared_Back Params = { from = load_keymap_menu to = LM_newSettingsMenu } }
+]
 
 //Control->Edit->Save menu struct
 save_keymap_menu = { 
@@ -396,7 +377,7 @@ save_keymap_menu = {
 }
 
 save_keymap_menu_items = [
-  { Type = textmenuelement auto_id               text = "Save Controls"    static dont_gray drawer = title }
+  { LM_Menu_Shared_Title auto_id               text = "Save Controls" }
   //This is used to display info text
   { Type = textmenuelement id = save_info_text   text = ""                 static }
   { Type = textmenuelement id = save_info_text2  text = ""                 static }
@@ -405,23 +386,24 @@ save_keymap_menu_items = [
     //Save to controls.ini
   { Type = textmenuelement id = save_settings_id text = "Save To Settings" target = "sKeyMapScript" params = { SaveSettings Save } save_info_text = "Save File: Controls.ini" save_info_text2 = "This will get loaded when game loads"  }
   //We need to figure out why back button keeps getting bugged...
-  { LM_Menu_Shared_Back Params = { from = save_keymap_menu to = newSettingsMenu } } 
+  { LM_Menu_Shared_Back Params = { from = save_keymap_menu to = LM_newSettingsMenu } } 
   ] 
+
 
 //Maybe we should add something like this to all menus?
 script Save_KeyMapMenu_OnSelect
     //This function can get param from array
-  //1st param need to be the array
-  //mask can be any number of params that you want to match
-  //params can be any number of params you want to get
-  //if function finds a match it will add the params to stack with the same name
-  if GetParamFromArray save_keymap_menu_items params = { save_info_text save_info_text2 } mask = { id = <id> }
-    SetMenuElementText <save_info_text> id = save_info_text
-    SetMenuElementText <save_info_text2> id = save_info_text2
-  else
-    SetMenuElementText "" id = save_info_text
-    SetMenuElementText "" id = save_info_text2
-  endif
+    //1st param need to be the array
+    //mask can be any number of params that you want to match
+    //params can be any number of params you want to get
+    //if function finds a match it will add the params to stack with the same name
+    if GetParamFromArray save_keymap_menu_items params = { save_info_text save_info_text2 } mask = { id = <id> }
+        SetMenuElementText <save_info_text> id = save_info_text
+        SetMenuElementText <save_info_text2> id = save_info_text2
+    else
+        SetMenuElementText "" id = save_info_text
+        SetMenuElementText "" id = save_info_text2
+    endif
 endscript
 
 script Load_KeyMapMenu_OnSelect
@@ -452,21 +434,19 @@ levelmod_HostOptions_root = {
 }
 
 
-SCRIPT CreateLevelModMenus
-Settings_CreateOptionsMenu //items = game_menu_items
+script CreateLevelModMenus
+    //adds levelmod menus
+    Settings_CreateOptionsMenu
+    CreateAndAttachMenu { Levelmod_menu_Root }
+    //CreateAndAttachMenu { LevelMod_menu_Control }
+    //CreateAndAttachMenu { LevelMod_menu_GUI }
+    //CreateAndAttachMenu { LevelMod_menu_GameOptions }
+    CreateAndAttachMenu { LevelMod_menu_Air }
+    CreateAndAttachMenu { LevelMod_menu_Wall }
+    CreateAndAttachMenu { load_keymap_menu }
+    CreateAndAttachMenu { save_keymap_menu }
 
-  //adds levelmod menus
-  CreateAndAttachMenu { Levelmod_menu_Root }
-  //CreateAndAttachMenu { LevelMod_menu_Control }
-  //CreateAndAttachMenu { LevelMod_menu_GUI }
-  //CreateAndAttachMenu { LevelMod_menu_GameOptions }
-  CreateAndAttachMenu { LevelMod_menu_Air }
-  CreateAndAttachMenu { LevelMod_menu_Wall }
-  CreateAndAttachMenu { load_keymap_menu }
-  CreateAndAttachMenu { save_keymap_menu }
-  CreateAndAttachMenu { levelmod_menu_LevelOptions }
-  
-  CreateAndAttachMenu { levelmod_HostOptions_root }
+    CreateAndAttachMenu { levelmod_HostOptions_root }
 
   CreateMenu { 
     Type = verticalmenu 
@@ -474,7 +454,7 @@ Settings_CreateOptionsMenu //items = game_menu_items
     x = 170.0 y = 90.0 w = 300.0 h = 400.0 
     just_center_x just_center_y blue_top 
     children = [ 
-      { Type = textmenuelement auto_id text = "Spine Button" static dont_gray drawer = title }
+      { LM_Menu_Shared_Title auto_id text = "Spine Button" }
       { Type = textmenuelement auto_id text = "Revert" target = "LM_SetOption" link = LevelMod_menu_air Params = { id = SpineButtonText_id name = LM_Control_SpineButton Value = 0 TextFromValue = LM_Control_SpineButton_Text } }
       { Type = textmenuelement auto_id text = "Nollie" target = "LM_SetOption" link = LevelMod_menu_air Params = { id = SpineButtonText_id name = LM_Control_SpineButton Value = 1 TextFromValue = LM_Control_SpineButton_Text } }
       { Type = textmenuelement auto_id text = "Left Spin Button" target = "LM_SetOption" link = LevelMod_menu_air Params = { id = SpineButtonText_id name = LM_Control_SpineButton Value = 2 TextFromValue = LM_Control_SpineButton_Text } }
@@ -482,13 +462,14 @@ Settings_CreateOptionsMenu //items = game_menu_items
       { Type = textmenuelement auto_id text = "Revert + Nollie" target = "LM_SetOption" link = LevelMod_menu_air Params = { id = SpineButtonText_id name = LM_Control_SpineButton Value = 4 TextFromValue = LM_Control_SpineButton_Text } } 
       { Type = textmenuelement auto_id text = "Both Spin Buttons" target = "LM_SetOption" link = LevelMod_menu_air Params = { id = SpineButtonText_id name = LM_Control_SpineButton Value = 5 TextFromValue = LM_Control_SpineButton_Text } } ] }
   AttachChild parent = contain1 child = spine_button_menu
-ENDSCRIPT
+
+endscript
 
 
 //toggle functions
 
-SCRIPT UpdateGrass
-  printf "Spawned Script UpdateGras..."
+script UpdateGrass
+  printf "Spawned script UpdateGras..."
   IF IsOptionOn LM_GameOption_bGrass
     Create prefix = "3DGrassMesh"
     printf "Grass On"
@@ -496,45 +477,45 @@ SCRIPT UpdateGrass
     Kill prefix = "3DGrassMesh"
     printf "Grass Off"
   ENDIF
-ENDSCRIPT
+endscript
 
-SCRIPT UpdateExtraLayer
-  printf "Spawned Script UpdateExtraLayer..."
+script UpdateExtraLayer
+  printf "Spawned script UpdateExtraLayer..."
   IF IsOptionOn LM_GameOption_bExtraLayer
     Create prefix = "ExtraLayer"
   ELSE
     
     Kill prefix = "ExtraLayer"
   ENDIF
-ENDSCRIPT
+endscript
 
-SCRIPT UpdateNetName
+script UpdateNetName
   IF IsOptionOn LM_GUI_bNetName
     TogglePlayerNames 1
   ELSE
     TogglePlayerNames 0
   ENDIF
-ENDSCRIPT
+endscript
 
-SCRIPT UpdateShowHUD
-  printf "Spawned Script UpdateShowHUD..."
+script UpdateShowHUD
+  printf "Spawned script UpdateShowHUD..."
   IF IsOptionOn LM_GUI_bShowHud
     TogglePanel 1
   ELSE
     TogglePanel 0
   ENDIF
-ENDSCRIPT
+endscript
 
 
-SCRIPT UpdateNetSky
+script UpdateNetSky
   IF IsOptionOn LM_GameOption_bNetSky
     ForEachIn master_level_list do = Settings_UpdateNetSky params = { <...> }
   ELSE
     LoadLevelGeometry sky = ""
   ENDIF
-ENDSCRIPT
+endscript
 
-SCRIPT Settings_UpdateNetSky
+script Settings_UpdateNetSky
   IF GotParam load_script
     IF LevelIs <load_script>
       IF GotParam lev_sky
@@ -542,52 +523,57 @@ SCRIPT Settings_UpdateNetSky
       ENDIF
     ENDIF
   ENDIF
-ENDSCRIPT
+endscript
 
-SCRIPT UpdateFog
+//this is a foreach wrapper for Settings_UpdateLevelFog
+//so we have to loop through every level and execute fog toggle
+script UpdateFog
   ForEachIn master_level_list do = Settings_UpdateLevelFog params = { <...> }
-ENDSCRIPT
+endscript
 
-SCRIPT Settings_UpdateLevelFog
-  IF GotParam load_script
-    IF LevelIs <load_script>
-      PrepareLevelFog <...>
-    ENDIF
-  ENDIF
-ENDSCRIPT
+    //this checks if current level matches the one in passed level struct and calls preparelevelfog func
+    script Settings_UpdateLevelFog
+      IF GotParam load_script
+        IF LevelIs <load_script>
+          PrepareLevelFog <...>
+        ENDIF
+      ENDIF
+    endscript
 
-SCRIPT DestroyMessageAndGoBack
+script DestroyMessageAndGoBack
     Wait 1.0 seconds
     SwitchOffMenu id = simple_menu
     SwitchToMenu DoNotMakeRoot <...>
-ENDSCRIPT
+endscript
 
-SCRIPT sKeyMapScript
+script sKeyMapScript
     if GotParam Load
-      DisplayMessage MessageScript = Message_LoadingData PauseLength = MemCardMessageShortPause
-    if KeyMapScript <...>
-        DisplayMessage MessageScript = Message_LoadSuccessful
-    else
-        DisplayMessage MessageScript = Message_LoadFailed
+        DisplayMessage Messagescript = Message_LoadingData PauseLength = MemCardMessageShortPause
+
+        if KeyMapscript <...>
+            DisplayMessage Messagescript = Message_LoadSuccessful
+        else
+            DisplayMessage Messagescript = Message_LoadFailed
+        endif
+
+        Spawnscript DestroyMessageAndGoBack params = { menu = load_keymap_menu }
     endif
-    SpawnScript DestroyMessageAndGoBack params = { menu = load_keymap_menu }
-      
-  endif
+
     if GotParam Save
-        DisplayMessage MessageScript = Message_SavingData PauseLength = MemCardMessageShortPause
-    if KeyMapScript <...>
-        DisplayMessage MessageScript = Message_SaveSuccessful
-    else
-        DisplayMessage MessageScript = Message_SaveFailed
+        DisplayMessage Messagescript = Message_SavingData PauseLength = MemCardMessageShortPause
+
+        if KeyMapscript <...>
+            DisplayMessage Messagescript = Message_SaveSuccessful
+        else
+            DisplayMessage Messagescript = Message_SaveFailed
+        endif
+
+        Spawnscript DestroyMessageAndGoBack params = { menu = save_keymap_menu }
     endif
-    SpawnScript DestroyMessageAndGoBack params = { menu = save_keymap_menu }
-    endif
-  
-
-ENDSCRIPT
+endscript
 
 
-SCRIPT UpdateTH4CompObjects
+script UpdateTH4CompObjects
   IF IsOptionOn LM_LevelOption_TH4CompObjects
     Create prefix = "G_Comp_"
     Create prefix = "TRG_G_COMP_"
@@ -599,9 +585,9 @@ SCRIPT UpdateTH4CompObjects
     Create prefix = "G_COMPNOT_"
     Create prefix = "TRG_G_COMPNOT_"
   ENDIF
-ENDSCRIPT
+endscript
 
-SCRIPT UpdateTH4ProObjects
+script UpdateTH4ProObjects
   IF IsOptionOn LM_LevelOption_TH4ProObjects
     Create prefix = "Proset"
     Create prefix = "TRG_Proset"
@@ -637,46 +623,46 @@ SCRIPT UpdateTH4ProObjects
     Create prefix = "TRG_PROSET6NOT_"
     Create prefix = "TRG_PROSET7NOT_"
   ENDIF
-ENDSCRIPT
+endscript
 
 
-SCRIPT OptionsOnChangeLevel
+script OptionsOnChangeLevel
    IF GotParam ChangeLevel
      printf "Going to spawn Script"
      IF GetParam do
        Goto <do>
      ENDIF
    ENDIF
-ENDSCRIPT
+endscript
 
-SCRIPT OptionsOnStartGame
+script OptionsOnStartGame
    IF GotParam StartGame
      printf "Going to spawn Script"
      IF GetParam do
        Goto <do>
      ENDIF
    ENDIF
-ENDSCRIPT
+endscript
 
-SCRIPT AddOptions
+script AddOptions
   ForEachIn LevelModOptions do = AddOption params =  <...>
-ENDSCRIPT
+endscript
 
-SCRIPT LM_SetOption_Do
+script LM_SetOption_Do
   LM_SetOption <...>
   IF GotParam Do
       GoTo <Do> params = <do_params>
   ENDIF
-ENDSCRIPT
+endscript
 
-SCRIPT LM_SetOption_Slider
+script LM_SetOption_Slider
   if GotParam TextFromValue
     SetSliderText id = <id> enum = <TextFromValue>
   endif
   LM_SetOption <...>
-ENDSCRIPT
+endscript
  
-SCRIPT LM_SetOption
+script LM_SetOption
   printf "Setting option"
   IF GetParam name
     GetParam id ForceUpdate
@@ -716,45 +702,45 @@ SCRIPT LM_SetOption
     printf "DONE"
   ENDIF
 
-ENDSCRIPT
+endscript
 
 //text too long. maybe should make menu wider
 LM_Control_AirTrickSpeed_Text = [
-  "Normal Trick Speed"
-  "THPS4 Trick Speed"
-  "Fast Air Trick Speed"
-  "10 percent faster"
-  "20 percent faster"
+    "Normal Trick Speed"
+    "THPS4 Trick Speed"
+    "Fast Air Trick Speed"
+    "10 percent faster"
+    "20 percent faster"
 ]
 
 LM_Control_SpineButton_Text = [
-  "Revert"
-  "Nollie"
-  "SpinLeft"
-  "SpinRight"
-  "Revert+Nollie"
-  "SpinLeft+SpinRight"
+    "Revert"
+    "Nollie"
+    "SpinLeft"
+    "SpinRight"
+    "Revert+Nollie"
+    "SpinLeft+SpinRight"
 ]
 
-SCRIPT LM_MaybeMakeStatic
-//IsOptionOverriden will auto-generate an option_id if none is found
-//It will generate it using syntax "[OptionName]_id"
-  IF IsOptionOverriden <option>
-    MakeTextMenuElementStatic <option_id>
-  ELSE
-    IF GotParam option_id
-      MakeTextMenuElementStatic <option_id> nonstatic = 1
+script LM_MaybeMakeStatic
+    //IsOptionOverriden will auto-generate an option_id if none is found
+    //It will generate it using syntax "[OptionName]_id"
+    IF IsOptionOverriden <option>
+        MakeTextMenuElementStatic <option_id>
+    ELSE
+        IF GotParam option_id
+            MakeTextMenuElementStatic <option_id> nonstatic = 1
+        ENDIF
     ENDIF
-  ENDIF
-ENDSCRIPT
+endscript
 
-SCRIPT LM_ToggleHostOption 
-  printf "called LM_ToggleHostOption"
+script LM_ToggleHostOption 
+    printf "called LM_ToggleHostOption"
     LM_ToggleOption  HostOption <...>
-ENDSCRIPT
+endscript
 
 //a generic toggle func to take option, item id and on off text
-SCRIPT LM_ToggleOption 
+script LM_ToggleOption
   //Check if this is the top item
   IF LM_GotParam auto_id
       printf "LevelModSettings"
@@ -864,18 +850,18 @@ SCRIPT LM_ToggleOption
   IF GotParam action
     <action>
   ENDIF
-ENDSCRIPT
+endscript
 
-//intented to loop through list items and update item text based on selected option
-SCRIPT UpdateMenuText
+//intended to loop through list items and update item text based on the selected option
+script UpdateMenuText
     EnableBackEvent
-  ForEachIn <children> do = LM_ToggleOption params = { TextOnly <...> }
-  printf "menu text init done"
-  IF GotParam RestoreBack
-      RestoreGoBack
-  ENDIF
-  SetMenuSelectCallback NULL
-ENDSCRIPT
+    ForEachIn <children> do = LM_ToggleOption params = { TextOnly <...> }
+    printf "menu text init done"
+    IF GotParam RestoreBack
+        RestoreGoBack
+    ENDIF
+    SetMenuSelectCallback NULL
+endscript
 
 
 
@@ -886,17 +872,18 @@ ENDSCRIPT
 //******************************
 
 back_menu_item = {
-  text = "Back"           
-  option_id = back_item
-  toggle_id = back_item_toggle 
-  link = Levelmod_menu_root
+    text = "Back"
+    option_id = back_item
+    toggle_id = back_item_toggle
+    link = Levelmod_menu_root //??
 }
 
+//this is 
 game_menu_items = [
   //Generic info text
-  { static text = ""                  option_id = info_text                                                               toggle_id = info         cat_game cat_gfx cat_control }
-  { static text = ""                  option_id = info_text2                                                              toggle_id = info2        cat_gfx }
-  
+  { static text = ""                  option_id = info_text                                                               toggle_id = info         cat_level cat_gui cat_game cat_gfx cat_control drawer = keyboard_property }
+  { static text = ""                  option_id = info_text2                                                              toggle_id = info2        cat_gfx drawer = keyboard_property }
+
   //Game Options
   { IsBool text = "251x Patch"      option_id = LM_GameOption_b251Patch_id    option = LM_GameOption_b251Patch      toggle_id = item1_toggle cat_game info_text = "Allow more than 251 multiplier" }
   { IsBool text = "No BW Manual"    option_id = LM_GameOption_bFixBWManual_id option = LM_GameOption_bFixBWManual   toggle_id = item2_toggle cat_game info_text = "Fix backward manuals" }
@@ -917,77 +904,84 @@ game_menu_items = [
   { IsBool text = "Invert Cam X" option_id = LM_Control_bInvertedX_id   option = LM_Control_bInvertedX      toggle_id = item6_toggle cat_control info_text = "Invert camera Left/Right" }
   { IsBool text = "Invert Cam Y" option_id = LM_Control_bInvertedY_id   option = LM_Control_bInvertedY      toggle_id = item7_toggle cat_control info_text = "Invert camera Up/Down" }
   //This freezes for some reason...
-  //{        text = "Edit Controls" option_id = levelmod_menu_edit_id       link = newSettingsMenu              toggle_id = item8_toggle cat_control   target = "populate_game_options" params = { mask = cat_edit items = game_menu_items title = "Edit Controls" } }
-  
-  //Edit Controls
-  {        text = "Load"                   option_id = load_id             link = load_keymap_menu   toggle_id = toggle_load_id     cat_edit }
-  {        text = "Save"                   option_id = save_id             link = save_keymap_menu   toggle_id = toggle_save_id     cat_edit }
-  //Editable keys
-  { IsMap  text = "Up (¡)"                 option_id = up_id               KeyMap = Up               toggle_id = up_text_id         cat_edit }
-  { IsMap  text = "Down (¥)"               option_id = down_id             KeyMap = Down             toggle_id = down_text_id       cat_edit }
-  { IsMap  text = "Left (§)"               option_id = left_id             KeyMap = Left             toggle_id = left_text_id       cat_edit }
-  { IsMap  text = "Right (£)"              option_id = right_id            KeyMap = Right            toggle_id = right_text_id      cat_edit }
-  { IsMap  text = "Ollie (¬)"              option_id = ollie_id            KeyMap = X                toggle_id = ollie_text_id      cat_edit }
-  { IsMap  text = "Grind (ª)"              option_id = grind_id            KeyMap = Triangle         toggle_id = grind_text_id      cat_edit }
-  { IsMap  text = "Flip (©)"               option_id = flip_id             KeyMap = Square           toggle_id = flip_text_id       cat_edit }
-  { IsMap  text = "Grab («)"               option_id = grab_id             KeyMap = Circle           toggle_id = grab_text_id       cat_edit }
-  { IsMap  text = "Spin Left (ª1)"         option_id = spinleft_id         KeyMap = L1               toggle_id = spinleft_text_id   cat_edit }
-  { IsMap  text = "Spin Right"             option_id = spinright_id        KeyMap = R1               toggle_id = spinright_text_id  cat_edit }
-  { IsMap  text = "Revert"                 option_id = revert_id           KeyMap = R2               toggle_id = revert_text_id     cat_edit }
-  { IsMap  text = "Nollie (ª2)"            option_id = nollie_id           KeyMap = L2               toggle_id = nollie_text_id     cat_edit }
-  { IsMap  text = "Spine Transfer"         option_id = SpineTransfer_id    KeyMap = SpineTransfer    toggle_id = spine_text_id      cat_edit }
-  {        text = "Press any key to Map"   option_id = edit_tip1           x = 0  y = -64 w = 300   toggle_id = edit1_id           cat_edit }
+  //{        text = "Edit Controls" option_id = levelmod_menu_edit_id       link = LM_newSettingsMenu              toggle_id = item8_toggle cat_control   target = "populate_game_options" params = { mask = cat_edit items = game_menu_items title = "Edit Controls" } }
+
+    //Edit Controls
+    {        text = "Load"                   option_id = load_id             link = load_keymap_menu   toggle_id = toggle_load_id     cat_edit }
+    {        text = "Save"                   option_id = save_id             link = save_keymap_menu   toggle_id = toggle_save_id     cat_edit }
+    //Editable keys
+    //note: not all fonts have these button icons
+    { IsMap  text = "Up (¡)"                 option_id = up_id               KeyMap = Up               toggle_id = up_text_id         cat_edit }
+    { IsMap  text = "Down (¥)"               option_id = down_id             KeyMap = Down             toggle_id = down_text_id       cat_edit }
+    { IsMap  text = "Left (§)"               option_id = left_id             KeyMap = Left             toggle_id = left_text_id       cat_edit }
+    { IsMap  text = "Right (£)"              option_id = right_id            KeyMap = Right            toggle_id = right_text_id      cat_edit }
+    { IsMap  text = "Ollie (¬)"              option_id = ollie_id            KeyMap = X                toggle_id = ollie_text_id      cat_edit }
+    { IsMap  text = "Grind (ª)"              option_id = grind_id            KeyMap = Triangle         toggle_id = grind_text_id      cat_edit }
+    { IsMap  text = "Flip (©)"               option_id = flip_id             KeyMap = Square           toggle_id = flip_text_id       cat_edit }
+    { IsMap  text = "Grab («)"               option_id = grab_id             KeyMap = Circle           toggle_id = grab_text_id       cat_edit }
+    { IsMap  text = "Spin Left (ª1)"         option_id = spinleft_id         KeyMap = L1               toggle_id = spinleft_text_id   cat_edit }
+    { IsMap  text = "Spin Right"             option_id = spinright_id        KeyMap = R1               toggle_id = spinright_text_id  cat_edit }
+    { IsMap  text = "Revert"                 option_id = revert_id           KeyMap = R2               toggle_id = revert_text_id     cat_edit }
+    { IsMap  text = "Nollie (ª2)"            option_id = nollie_id           KeyMap = L2               toggle_id = nollie_text_id     cat_edit }
+    { IsMap  text = "Spine Transfer"         option_id = SpineTransfer_id    KeyMap = SpineTransfer    toggle_id = spine_text_id      cat_edit }
+    {        text = "Press any key to Map"   option_id = edit_tip1           x = 0  y = -64 w = 300   toggle_id = edit1_id           cat_edit }
     {        text = "Press Back to unassign" option_id = edit_tip2           x = 0  y = -48 w = 300   toggle_id = edit2_id           cat_edit }
     {        text = "Press Escape to abort"  option_id = edit_tip3           x = 0  y = -32 w = 300   toggle_id = edit3_id           cat_edit }
-  {        text = ""                       option_id = edit_error          x = 0  y = -16 w = 300   toggle_id = error_id           cat_edit }
-    
+    {        text = ""                       option_id = edit_error          x = 0  y = -16 w = 300   toggle_id = error_id           cat_edit }
 
     //GUI Options
-  { IsBool text = "Extra Messages"  option_id = LM_GUI_bTrickNotifications_id  option = LM_GUI_bTrickNotifications  toggle_id = item1_toggle cat_gui } 
-  { IsBool text = "Show HUD"      option_id = LM_GUI_bShowHud_id             option = LM_GUI_bShowHud       toggle_id = item2_toggle cat_gui Do = UpdateShowHUD } 
-  { IsBool text = "Player names"    option_id = LM_GUI_bNetName_id             option = LM_GUI_bNetName       toggle_id = item3_toggle cat_gui Do = UpdateNetName } 
-  { IsBool text = "New Net Menu"    option_id = LM_GUI_bNewMenu_id             option = LM_GUI_bNewMenu       toggle_id = item4_toggle cat_gui } 
-  { IsBool text = "GrafCounter"     option_id = LM_GUI_bShowGrafCounter_id     option = LM_GUI_bShowGrafCounter   toggle_id = item5_toggle cat_gui } 
-  
+  { IsBool text = "Extra Messages"  option_id = LM_GUI_bTrickNotifications_id  option = LM_GUI_bTrickNotifications  toggle_id = item1_toggle cat_gui info_text = "Toggle hidden combo messages" }
+  { IsBool text = "Show HUD"        option_id = LM_GUI_bShowHud_id             option = LM_GUI_bShowHud             toggle_id = item2_toggle cat_gui info_text = "Toggle GUI" Do = UpdateShowHUD }
+  { IsBool text = "Player names"    option_id = LM_GUI_bNetName_id             option = LM_GUI_bNetName             toggle_id = item3_toggle cat_gui info_text = "Toggle online tags over the players"  Do = UpdateNetName }
+  { IsBool text = "New Net Menu"    option_id = LM_GUI_bNewMenu_id             option = LM_GUI_bNewMenu             toggle_id = item4_toggle cat_gui info_text = "Enable new online menu" }
+  { IsBool text = "GrafCounter"     option_id = LM_GUI_bShowGrafCounter_id     option = LM_GUI_bShowGrafCounter     toggle_id = item5_toggle cat_gui info_text = "Show graffiti counter" }
+
+    //Level Options
+  { IsBool text = "3D Grass"        option_id = LM_GameOption_bGrass_id         option = LM_GameOption_bGrass       toggle_id = item1_toggle cat_level info_text = "Toggle 3D grass meshes" Do = UpdateGrass }
+  { IsBool text = "Extra Layers"    option_id = LM_GameOption_bExtraLayer_id    option = LM_GameOption_bExtraLayer  toggle_id = item2_toggle cat_level info_text = "Toggle multipass layers" Do = UpdateExtraLayer }
+  { IsBool text = "Net Sky"         option_id = LM_GameOption_bNetSky_id        option = LM_GameOption_bNetSky      toggle_id = item3_toggle cat_level info_text = "Toggle skybox"  Do = UpdateNetSky }
+  { IsBool text = "Fog"             option_id = LM_GameOption_bFog_id           option = LM_GameOption_bFog         toggle_id = item4_toggle cat_level info_text = "Toggle fog" Do = UpdateFog }
+  { static text = "THPS4 specific"   cat_level drawer = keyboard_property option_id = th4_options_info_line info_text = "none"  toggle_id = item5_toggle}
+  { IsBool text = "Proset Objects"  option_id = LM_LevelOption_TH4ProObjects_id option = LM_LevelOption_TH4ProObjects      toggle_id = item6_toggle cat_level info_text = "Toggle pro specific goal objects"  Do = UpdateTH4ProObjects }
+  { IsBool text = "Comp Objects"    option_id = LM_LevelOption_TH4CompObjects_id option = LM_LevelOption_TH4CompObjects         toggle_id = item7_toggle cat_level info_text = "Toggle TH4 competition objects" Do = UpdateTH4CompObjects }
+
   //GFX Options
-  { IsEnum text = "Buffering"     option_id = LM_GFX_eBuffering_id  option = LM_GFX_eBuffering  toggle_id = item1_toggle cat_gfx TextValues = [ "Off" "Double" "Triple" ] Do = LaunchGFXCommand info_text = "Double/Tripple buffering" info_text2 = "May increase input lag" } 
+  { IsEnum text = "Buffering"     option_id = LM_GFX_eBuffering_id  option = LM_GFX_eBuffering  toggle_id = item1_toggle cat_gfx TextValues = [ "Off" "Double" "Triple" ] Do = LaunchGFXCommand info_text = "Double/Triple buffering" info_text2 = "May increase input lag" } 
   { IsEnum text = "MSAA Level"    option_id = LM_GFX_eAntiAlias_id  option = LM_GFX_eAntiAlias  toggle_id = item2_toggle cat_gfx TextValues = [ "Off" "auto" "2x" "4x" "8x" ] Do = LaunchGFXCommand info_text = "Anti Aliasing" info_text2 = "Disable to improve performance" } 
   { IsBool text = "Windowed"        option_id = LM_GFX_bWindowed_id   option = LM_GFX_bWindowed     toggle_id = item3_toggle cat_gfx Do = LaunchGFXCommand do_params = { command = ToggleWindowed } info_text = "Launch game in windowed mode" info_text2 = "Toggle by pressing ALT + ENTER" }
   { IsBool text = "Texture Filtering" option_id = LM_GFX_bFiltering_id  option = LM_GFX_bFiltering  toggle_id = item5_toggle cat_gfx info_text = "Generate Texture mipmaps" info_text2 = "May produce slight graphic bugs"} 
   { IsBool text = "Enable VSync"      option_id = LM_GFX_bVSync_id      option = LM_GFX_bVSync        toggle_id = item6_toggle cat_gfx Do = LaunchGFXCommand info_text = "Sync rendering to monitor refresh rate" info_text2 = "Enable if you see tearing" } 
-  { IsInt  text = "FPS Lock:"         option_id = LM_GFX_TargetFPS_id   option = LM_GFX_TargetFPS     toggle_id = item7_toggle cat_gfx min = 60 max = 300  Do = LaunchGFXCommand do_params = { command = TargetFPS } info_text = "Set the target fps" info_text2 = "Only works if Stutter fix is enabled" }
+  { IsInt  text = "FPS Lock:"         option_id = LM_GFX_TargetFPS_id   option = LM_GFX_TargetFPS     toggle_id = item7_toggle cat_gfx min = 30 max = 300  Do = LaunchGFXCommand do_params = { command = TargetFPS } info_text = "Set the target fps" info_text2 = "Only works if Stutter fix is enabled" }
   { IsEnum text = "Stutter Fix"       option_id = LM_GFX_eFixStutter_id option = LM_GFX_eFixStutter   toggle_id = item8_toggle cat_gfx TextValues = [ "Off" "Exact" "Hybrid" "Sleep" ] Do = LaunchGFXCommand do_params = { command = FixStutter } info_text = "Improve framerate consistency" info_text2 = "Exact is usually best option" } 
 ]
 
 
-script Settings_CreateOptionsMenu
+// menu hierarchy:
+// contain1 -> LM_newSettingsMenu
+// LM_newSettingsMenu -> options_multi_container
+// options_multi_container -> game_options_names_menu
+// options_multi_container -> game_options_on_off_menu
 
-  //game options shared container
-  CreateAndAttachMenu { 
-    type = verticalmenu 
-    Id = newSettingsMenu
-    parent = contain1 
-    x = 170.0 y = 40.0 w = 300.0
-    just_center_x just_center_y blue_top 
+LM_newSettingsMenu = {
+    LM_Menu_Shared_Vertical
+    Id = LM_newSettingsMenu
     //eventhandler = { type = showeventhandler target = "populate_game_options" params = { mask = <cat> items = <items> } }
     children = [ 
-      { type = textmenuelement id = game_options_title text = "test" static dont_gray drawer = title }
-      { type = menucontainer Id = options_multi_container show_all_children }
+        { LM_Menu_Shared_Title id = game_options_title text = "..." }
+        { type = menucontainer Id = options_multi_container show_all_children }
     ]
-  }
-  
-  //column for menu items
-  CreateAndAttachMenu { 
-    type = verticalmenu 
-    Id = game_options_names_menu 
-    parent = options_multi_container 
+}
+
+LM_game_options_names_menu = { 
+    type = verticalmenu
+    Id = game_options_names_menu
+    parent = options_multi_container
     x = 0.0 y = 0.0 w = 240.0
     //num_visible = 12 
     just_center_x just_center_y not_rounded 
-  }
-  
-  //column for setting state or enum values
-  CreateAndAttachMenu { 
+}
+
+LM_game_options_on_off_menu = { 
     type = verticalmenu 
     Id = game_options_on_off_menu 
     //follow_menu = game_options_names_menu 
@@ -995,20 +989,42 @@ script Settings_CreateOptionsMenu
     x = 240.0 y = 0.0 w = 60.0
     //num_visible = 12 
     just_center_x just_center_y not_rounded static dont_gray 
-  }
+}
+
+// initializes new settings menu
+script Settings_CreateOptionsMenu
+    //game options shared container
+    CreateAndAttachMenu { LM_newSettingsMenu }
+
+    //column for menu items
+    CreateAndAttachMenu { LM_game_options_names_menu }
+
+    //column for setting state or enum values
+    CreateAndAttachMenu { LM_game_options_on_off_menu }
 endscript
 
+//triggers on menu item click
+//the idea is to reuse same menu, but populate it from master settings array using category masking
 script populate_game_options params = { }
-  DepopulateMenu id = game_options_names_menu
-  DepopulateMenu id = game_options_on_off_menu
 
-  SetMenuElementText <title> id = game_options_title
-  
-  ForeachIn <items> do = Settings_AddLine params = { <...> }
-  Settings_AddLine back_menu_item target = "go_back" Params = { id = game_options_names_menu } 
-  IF GotParam OnShow
-    Goto <OnShow> params = <params>
-  ENDIF
+    //cleanup existing items
+    DepopulateMenu id = game_options_names_menu
+    DepopulateMenu id = game_options_on_off_menu
+
+    //set menu header text
+    SetMenuElementText <title> id = game_options_title
+
+    //adds all settings, mask is passed as menu entry param
+    ForeachIn <items> do = Settings_AddLine params = { <...> }
+
+    //adds "back" entry
+    Settings_AddLine back_menu_item target = "go_back" Params = { id = game_options_names_menu }
+
+    //if menu got onShow param, additionally executes onShow function
+    IF GotParam OnShow
+        Goto <OnShow> params = <params>
+    ENDIF
+
 endscript
 
 script LevelModSettingsMenu_OnSelect
@@ -1043,28 +1059,28 @@ endscript
 
 script AddKeyInput
     AddLine {
-  parent = game_options_names_menu 
-    Type = textmenuelement 
-    id = <option_id>
-    text = <text>
+        parent = game_options_names_menu 
+        Type = textmenuelement 
+        id = <option_id>
+        text = <text>
     }
-  
-  printf "Going to Attach"
-  AttachEventHandler { Type = ChooseEventHandler object = <option_id> target = "Settings_EditKeyMap" params = { KeyMap = <KeyMap> text_id = <toggle_id> <...> } }
-  printf "Going to update"
-  Settings_UpdateKeyMapText { KeyMap = <KeyMap> text_id = <toggle_id> }
+
+    printf "Going to Attach"
+    AttachEventHandler { Type = ChooseEventHandler object = <option_id> target = "Settings_EditKeyMap" params = { KeyMap = <KeyMap> text_id = <toggle_id> <...> } }
+    printf "Going to update"
+    Settings_UpdateKeyMapText { KeyMap = <KeyMap> text_id = <toggle_id> }
 endscript
 
 script AddBool
-  AddLine { 
-    parent = game_options_names_menu 
-    Type = textmenuelement 
-    id = <option_id>
-    text = <text>
-  }
-    
-  AttachEventHandler { Type = ChooseEventHandler object = <option_id> target = "Settings_ToggleOption" params = { option = <option> toggle_id = <toggle_id> <...> } }
-  Settings_UpdateBoolText { option = <option> toggle_id = <toggle_id> }
+    AddLine {
+        parent = game_options_names_menu
+        Type = textmenuelement
+        id = <option_id>
+        text = <text>
+    }
+
+    AttachEventHandler { Type = ChooseEventHandler object = <option_id> target = "Settings_ToggleOption" params = { option = <option> toggle_id = <toggle_id> <...> } }
+    Settings_UpdateBoolText { option = <option> toggle_id = <toggle_id> }
 endscript
 
 script AddInt
@@ -1082,15 +1098,18 @@ endscript
 //to avoid multiple nested IFs
 //should rewrite this func in switch-case-ish logic
 //like if isEnum call enum func, if IsBool call bool func etc.
-script Settings_AddLine
+//provide default drawer in case we dont pass any
+script Settings_AddLine drawer = main
   if GotParam <mask>
-          
+
+    //adds empty entry to the right column. pass drawer to make sure it's of the same height
     if GotParam toggle_id
       AddLine {
-        parent = game_options_on_off_menu 
-        Type = textmenuelement 
+        parent = game_options_on_off_menu
+        Type = textmenuelement
         id = <toggle_id>
         text = " "
+        drawer = <drawer>
       }
     else
       AddLine {
@@ -1098,6 +1117,7 @@ script Settings_AddLine
         Type = textmenuelement 
         auto_id
         text = " "
+        drawer = <drawer>
       }
     endif
 
@@ -1133,6 +1153,7 @@ script Settings_AddLine
                 Type = textmenuelement 
                 id = <option_id> 
                 text = <text> 
+                drawer = <drawer>
                 static 
                 }
               else
@@ -1167,9 +1188,9 @@ endscript
 script Settings_UpdateKeyMapText
     printf "GetText"
     GetTextFromKeyMap <KeyMap>
-  printf "SetElement"
-  SetMenuElementText <text> id = <text_id>
-  printf "Update done"
+    printf "SetElement"
+    SetMenuElementText <text> id = <text_id>
+    printf "Update done"
 endscript
 
 script Settings_EditKeyMap
@@ -1179,12 +1200,12 @@ endscript
 
 //Updates menu item text based on boolean setting
 script Settings_UpdateBoolText
-  VerifyParam param = option func = Settings_UpdateBoolText <...>
-  VerifyParam param = toggle_id func = Settings_UpdateBoolText <...>
-  
-  if IsOptionOn <option>
-    SetMenuElementText "On" id = <toggle_id> 
-  else
-    SetMenuElementText "Off" id = <toggle_id> 
-  endif
+    VerifyParam param = option func = Settings_UpdateBoolText <...>
+    VerifyParam param = toggle_id func = Settings_UpdateBoolText <...>
+
+    if IsOptionOn <option>
+        SetMenuElementText "On" id = <toggle_id>
+    else
+        SetMenuElementText "Off" id = <toggle_id>
+    endif
 endscript
