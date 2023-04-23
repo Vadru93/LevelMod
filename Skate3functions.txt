@@ -7,8 +7,11 @@
             //or also "Ryan", basically unconditional printf
 00401960    void Dbg_Message(char* message)    //can hook to output some original debug stuff
 00403bf0    KeyboardFrame
+
 00409ae0    GetTime
+00409b90    FrameLength //returns length of a single frame
 00409870    Init -Timer-
+
 00409f70    bool IsWindowedMode()
 00409f80    int GetWindowWidth()
 00409f90    int GetWindowHeight()
@@ -17,17 +20,40 @@
 0040e430    void InitialRand(int baseSeed)
 0040e540    void InitSinLookupTable()
 004115e0    LoadPre     //loads pre, unused on pc or mac
+
+//===============================================================
+// Script functions, lots of um
+//===============================================================
+
 00417760    ScriptAddMusicTrack
-00421250    SpawnScript
+0041d380    ScriptToggleRenderMode
+00421250    ScriptNotifyBailDone
 004213d0    ScriptObserveNextSkater
-00429f50    ContainsFlag (by crc)
-00429fc0    ContainsFlag (by string)
+
+//===============================================================
+
+00429f50    ContainsFlag //(by crc)
+00429fc0    ContainsFlag //(by string)
 0042bd10    Init -Script-
 0042bfe0    InitAtStart -Script-
+
+//===============================================================
+// RwViewer related funcs
+//===============================================================
+
 0042d4d0    sSgltnInstance -RwViewer-
 0042d520    sSgltnDelete -RwViewer-
 0042da10    RequestLoad
+00430240    SetScreenMode
+00430390    ToggleRenderMode //i guess translates to RW render mode? 1 = 2, 2 = 3, 3 = 4, 4 = 6, default = 1
 004309c0    GetCamera
+
+004314c0    CameraMoveX
+00431500    CameraMoveY
+00431540    CameraMoveZ
+00431580    CameraTilt
+00431610    CameraPan
+
 00434320    GetNameChecksum
 00437010    ResetSkaterRotation
 00438b00    GetGameMode
@@ -67,6 +93,9 @@
 004b5310    GetCheat
 004b8270    SwitchReplayMode
 004b8840    Update (SkaterCam)
+
+004c0090    LoadModelUsingStruct
+
 004c0450    MainLoop
 004c0710    QuitLoop
 004c1230    MaskDigitalInput
@@ -76,17 +105,59 @@
 004f52d0    sSgltnDelete -TextureLoader
 004f5330    LoadImageTexture    //loads image from images folder
 004f5570    GetImageTexture     //looks for checksum in memory and returns if found
+
+
+004f76b0    SetViewport
+004f76d0    SetFocalLength
 004f7710    SetFov -Camera-
-004f9c80    render_objects
+
+
+
+004f9470    start_engine
+004f95d0    stop_engine
+
+004f9980    ClumpSetLODCallback
+004f99a0    set_atomic_lod_callback
+004f99d0    select_lod
 004f9aa0    RenderWorld     //main render routine
+004f9c80    render_objects
+004f9dc0    render_visible_clumps
+004f9e10    render_visible_atomics
+004f9ec0    //inlined in render_visible_atomics
+004f9f20    render_visible_skin_clumps
+004f9f70    render_visible_skin_atomics
+004f9fd0    render_visible_particle_clumps
+004fa010    //inlined in render_visible_particle_clumps
+004fa070    render_hud_clumps
 004fa0a0    render_all_world_sectors
+004fa260    ToggleMetrics   //some debug func, does it work?
+004fa270
+004fa280    // some destructor
+004fa2b0    SetImageDirectory
+004fa320    SetImageDirectoryFromFileName
+004fa350    // some string manipulation, inlined in SetImageDirectoryFromFileName
+004fa3e0    HSVtoRGB    //converts HSV color to RGB color
+
+004faf80    apply_hsv   //applies HSV to model, CAS menus
+
+004fb110    load_file   //what file? dff? bsp? tdx? all?
+004fb8c0    ReplaceTexture  //replaces skin texture, CAS stuff
 
 00504d90    TexDictionaryNumTextures
 00504de0    TexDictionaryLoad   //loads tdx texture dictionary
 
+00504e70    TexDictionaryPurgeUnusedTextures
+00504ea0    s_purge_unused_textures
+00504ed0    TexDictionaryMoveTextures
+00504ef0    s_move_textures
 
-//renderware stuff, rw symbols are stripped on mac
-//but it's possible to find matching code, using rw reference
+00504f10    TexDictionaryReplaceTexture
+00504f70    s_replace_texture
+
+//=======================================================================
+// assuming 0055xxxx+ is renderware stuff, rw symbols are stripped on mac
+// but it's possible to find matching code, using rw reference code
+//=======================================================================
 
 00554110    RwD3D8SetTextureStageState //? not sure
 00558f90    RwCameraSetNearClipPlane
@@ -95,5 +166,5 @@
 00559130    RwCameraSetProjection
 0055a8f0    RwFrameUpdateObjects
 
-
-//578190    unwind beyond this
+//=======================================================================
+//578190    unwind beyond this point
