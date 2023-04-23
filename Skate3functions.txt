@@ -21,14 +21,40 @@
 0040e540    void InitSinLookupTable()
 004115e0    LoadPre     //loads pre, unused on pc or mac
 
+004121c0    ClearWorldSectorHashTable
+00413730    DestroySuperSectors
+
+
+
+
 //===============================================================
 // Script functions, lots of um
 //===============================================================
 
+004170e0    ScriptControllerDebounce
+
+004171a0    CheckButton
+
+004173a0    ScriptControllerPressed
+
+00417510    ScriptSetMusicVolume
+00417550    ScriptStopMusic
+00417560    ScriptPauseMusic
+00417590    ScriptPauseStream
+004175c0    ScriptLoadMusicHeader
+00417620    ScriptLoadStreamHeader
+00417680    ScriptStreamIsAvailable
 00417760    ScriptAddMusicTrack
+004177e0    ScriptClearMusicTrackList
+00417820    ScriptSetMusicMode
+00417860    ScriptSetRandomMode
+
+
 0041d380    ScriptToggleRenderMode
 00421250    ScriptNotifyBailDone
 004213d0    ScriptObserveNextSkater
+
+
 
 //===============================================================
 
@@ -43,7 +69,22 @@
 
 0042d4d0    sSgltnInstance -RwViewer-
 0042d520    sSgltnDelete -RwViewer-
+
 0042da10    RequestLoad
+
+0042dfa0    sky_load
+0042e110    scene_create
+
+0042e590    world_init
+
+0042eb80    world_deinit
+
+0042ecc0    rotate_clump
+0042ecf0    reset_clump_rotation
+
+0042ede0    s_shift_logic_code
+0042f080    s_logic_code
+
 00430240    SetScreenMode
 00430390    ToggleRenderMode //i guess translates to RW render mode? 1 = 2, 2 = 3, 3 = 4, 4 = 6, default = 1
 004309c0    GetCamera
@@ -53,6 +94,12 @@
 00431540    CameraMoveZ
 00431580    CameraTilt
 00431610    CameraPan
+
+00431790    SetColor    //DFFLight
+00431810    ModulateColor //DFFLight
+004318d0    SetRotation //DFFLight
+00431a00    Rotate //DFFLight
+
 
 00434320    GetNameChecksum
 00437010    ResetSkaterRotation
@@ -71,6 +118,7 @@
 00476ac0    GetLocalPlayer
 00474710    InNetworkGame
 004795b0    CheckForKingOfTheHill
+00472b10    s_observer_input_logic_code
 0047c170    IsZoneGame
 0047e6a0    IsObserving
 00480d20    GetImageTexture
@@ -96,10 +144,17 @@
 
 004c0090    LoadModelUsingStruct
 
+
+
 004c0450    MainLoop
 004c0710    QuitLoop
+
+004c0ec0    GetButtonIndex
 004c1230    MaskDigitalInput
 004c68e0    AddTrackToPlayList
+004c69f0    ClearPlaylist
+004c70f0    SetActiveTrackList
+
 004d7330    UnloadPre       //deletes pre, unused on pc or mac
 004f5280    sSgltnInstance -TextureLoader
 004f52d0    sSgltnDelete -TextureLoader
