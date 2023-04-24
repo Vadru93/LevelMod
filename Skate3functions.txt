@@ -34,6 +34,7 @@
 
 00413730    DestroySuperSectors
 
+00413820    //printf jump
 
 //===============================================================
 // Script functions, lots of um
@@ -42,6 +43,38 @@
 // if not, read comments
 //===============================================================
 
+00413830    ScriptWait
+00413930    ScriptIsZero
+00413960    ScriptIntegerEquals
+004139b0    ScriptChecksumEquals
+00413a00    ScriptStringEquals
+00413a60    ScriptArrayContains
+00413b60    ScriptCustomSkaterFilenameDefined
+00413c30    ScriptGetCustomSkaterFilename
+00413cf0    ScriptCurrentSkaterIsPro
+00413d90    //inlined in 2 following funcs
+00413e50    ScriptEnableEvent
+00413e70    ScriptDisableEvent
+00413e90    ScriptEditingPark
+00413f10    ScriptGetParkName
+00414020    ScriptParkEditorThemeWasSwitched
+00414080    ScriptGetGoalsCompleted
+00414250    ScriptGetNextLevelRequirements
+00414410    ScriptMenuIsShown
+004144a0    //called in ScriptMenuIsShown
+00414540    ScriptMenuIsSelected
+004145d0    //called in ScriptMenuIsSelected
+00414670    ScriptDecksAreSpinning
+00414710    ScriptInitializeMemCardFilesMenu
+00414720    ScriptEnoughRoomOnCard
+004147e0    CreateFilePath
+00414950    ScriptMemCardFileExists
+00414a70    ScriptDeleteMemCardFile
+00414b80    ScriptFormatCard
+00414c10    ScriptCardIsInSlot
+00414ca0    ScriptCardIsFormatted
+00414d40    ScriptSaveFailedDueToInsufficientSpace
+00414d50    //called in ScriptSaveToMemoryCard
 00414fa0    ScriptSaveToMemoryCard
 00415630    ScriptSetFrontEndActive     //script name = FrontEndSetActive
 004156a0    ScriptSetFrontEndInactive   //script name = FrontEndSetInactive
@@ -143,9 +176,27 @@
 0041ab70    ScriptSetPreferencesFromUI
 0041aca0    ScriptResetCamera
 0041ad30    ScriptInitializeTrickMenus
-
+0041ad40    ScriptUninitializeTrickMenus
+0041ad50    ScriptPopulateTrickMenus
+0041ad60    ScriptInitializeSFXMenus
+0041ad70    ScriptSetVolumeFromValue
+0041af40    ScriptGetValueFromVolume
+0041b090    ScriptSetSliderValue
+0041b150    ScriptInitializeCASMenus
+0041b160    ScriptAttachNewCASEventHandler
+0041b170    ScriptUpdateStatsElements
+0041b180    ScriptDisableAllCASMenusExcept
+0041b1b0    ScriptUpdateStatsUI
+0041b2b0    ScriptResetSkaterProfile
+0041b3c0    ScriptResetDefaultAppearance
+0041b430    ScriptResetDefaultTricks
+0041b4a0    ScriptResetDefaultStats
 
 0041d380    ScriptToggleRenderMode
+
+0041d120    ScriptCleanup
+
+0041e560    ScriptKillSpawnedScript
 
 00421250    ScriptNotifyBailDone
 004213d0    ScriptObserveNextSkater
@@ -157,9 +208,22 @@
 
 004265f0    //a jump to GenerateCRCFromString
 
+00426ec0    SkipToken
+00426f90    InitUsingArray
+00427270    SetArrayType
+
+00427940    Update
+
+00426fd0    WaitMovie
+00427fe0    Wait
+00428000    WaitTime
+
+00428720    KillSpawnedScriptsThatReferTo
+00428760    KillSpawnedScriptsWithId
+
 
 //===============================================================
-// CScript param parsing functions
+// QB parsing functions
 // overloads for string safe search and checksum search
 //===============================================================
 
@@ -190,6 +254,10 @@
 
 0042b020    DoAnyRandomsOrJumps
 
+0042b300    LoadQB
+0042b3d0    ParseQB
+0042b900    CreateNewSymbolEntry
+
 0042bd10    Init -Script-
 0042bfe0    InitAtStart -Script-
 
@@ -219,6 +287,20 @@
 00430390    ToggleRenderMode //i guess translates to RW render mode? 1 = 2, 2 = 3, 3 = 4, 4 = 6, default = 1
 004309c0    GetCamera
 
+00430c20    //inlined in ScriptSetDirectionalLightDirection
+00430c50    //inlined in ScriptSetDirectionalLightActive
+00430c90    IgnoreDFFLights
+00430d50    TurnOnAllDFFLights
+00430db0    ModulateAllDFFLights
+00430e90    UnmodulateAllDFFLights
+00430ef0    SetDynamicLightModulationFactor
+
+00430f40    GetCurrentWorld
+00430f50    Cleanup
+
+00431200    ScriptSetDirectionalLightDirection  //script name = SetDFFDirectRotation
+00431340    ScriptSetDirectionalLightActive     //script name = SetDFFDirectActive
+
 004314c0    CameraMoveX
 00431500    CameraMoveY
 00431540    CameraMoveZ
@@ -231,6 +313,7 @@
 00431a00    Rotate          //DFFLight
 
 
+
 00434320    GetNameChecksum
 00437010    ResetSkaterRotation
 00438b00    GetGameMode
@@ -238,7 +321,19 @@
 00439a20    LaunchGame
 00439f50    ObserveNextSkater
 
+
+004414a0    GetMenuElement
+00441530    UpdateStatsElements
+00441870    AttachNewCASEventHandler
+00443710    InitializeCASMenus
+004437b0    DisableAllCASMenusExcept
+
+00446e90    DecksAreSpinning
+
+0044e610    InitializeMemCardFilesMenu
+
 004556c0    InitializeTrickMenus
+004557f0    UninitializeTrickMenus
 
 0045ae80    TogglePanel
 0045b180    SendConsoleMessage
@@ -274,6 +369,11 @@
 004b5310    GetCheat
 004b8270    SwitchReplayMode
 004b8840    Update (SkaterCam)
+004bcb70    GetStatValue
+004bdba0    ResetDefaultStats   //dummy script, just printf
+
+
+
 
 004c0090    LoadModelUsingStruct
 
@@ -297,9 +397,16 @@
 004c6ad0    SetRandomMode
 004c70f0    SetActiveTrackList
 
+004ce8f0    DisableAllExcept
+
+004d2400    GetMenuElement
+004d2430    LaunchEvent
+
 004d7330    UnloadPre       //deletes pre, unused on pc or mac
 
 004dde80    SetPreference
+
+
 
 004f5280    sSgltnInstance -TextureLoader
 004f52d0    sSgltnDelete -TextureLoader
@@ -342,6 +449,10 @@
 
 004fb110    load_file   //what file? dff? bsp? tdx? all?
 004fb8c0    ReplaceTexture  //replaces skin texture, CAS stuff
+
+
+004ff910    DestroyAllSystems
+
 
 00504d90    TexDictionaryNumTextures
 00504de0    TexDictionaryLoad   //loads tdx texture dictionary
