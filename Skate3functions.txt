@@ -3,6 +3,11 @@
 //sometimes they are hard to guess cause they dont match 1 to 1
 //due to different compiler settings, inlining, etc.
 
+//there is one problem here, pc compiler was too agressive,
+//sometimes it linked to the same address if functions were
+//dummied, empty, return 0, return 1, etc.
+//it makes it impossible to hook by address, must hook
+//the calls instead
 
             //or also "Ryan", basically unconditional printf
 00401960    void Dbg_Message(char* message)    //can hook to output some original debug stuff
@@ -19,24 +24,49 @@
 0040d3c0    ResetActuators
 0040e430    void InitialRand(int baseSeed)
 0040e540    void InitSinLookupTable()
+
+004110e0    GenerateCRCFromString
 004115e0    LoadPre     //loads pre, unused on pc or mac
 
+00411e90    CallFunctionForAllWorldSectors
 004121c0    ClearWorldSectorHashTable
+00412330    ShatterWorldSector
+
 00413730    DestroySuperSectors
-
-
 
 
 //===============================================================
 // Script functions, lots of um
+// rule of thumb, if it starts with Script, it's a CScript
+// and script name is func name minus script prefix
+// if not, read comments
 //===============================================================
 
+00414fa0    ScriptSaveToMemoryCard
+00415630    ScriptSetFrontEndActive     //script name = FrontEndSetActive
+004156a0    ScriptSetFrontEndInactive   //script name = FrontEndSetInactive
+00415710    LoadIntoStructure
+00415880    ScriptLoadFromMemoryCard
+00415ef0    ScriptCreateDialogBox
+00416130    ScriptForEachIn
+00416250    ScriptUpdateWheelColor
+00416400    ScriptMoveMenu
+00416560    ScriptAttemptMenuSelect
+00416670    ScriptMakeMenuZoomOn
+00416730    ScriptMakeMenuPopOffScreen
+004167f0    ScriptDisplayCorrectDeckSet
+00416890    ScriptUpdateCareerInfoMenu
+004169a0    ShowMedalLevelIcon      //not a script, called from ScriptUpdateCareerInfoMenu
+00416dd0    ScriptUpdateSliderInfoMenu
+00416f20    ScriptGotParam
+00416f50    ScriptLaunchCommand
+00416fb0    ReplayModeEquals        //no script prefix, but script
+00417040    SetReplayMode           //same here
 004170e0    ScriptControllerDebounce
-
-004171a0    CheckButton
-
+00417170    //called in replayinit
+004171a0    CheckButton             //not a script, called in ScriptControllerPressed
 004173a0    ScriptControllerPressed
-
+00417480    ScriptSetVolume         //script name = SetSfxVolume
 00417510    ScriptSetMusicVolume
 00417550    ScriptStopMusic
 00417560    ScriptPauseMusic
@@ -46,20 +76,120 @@
 00417680    ScriptStreamIsAvailable
 00417760    ScriptAddMusicTrack
 004177e0    ScriptClearMusicTrackList
-00417820    ScriptSetMusicMode
-00417860    ScriptSetRandomMode
+00417810    ScriptSkipMusicTrack
+00417820    ScriptSetMusicMode      //music or ambience
+00417860    ScriptSetRandomMode     //random or sequential
+00417890    ScriptPlayMovie
+004178c0    ScriptLoadSound
+00417a20    ScriptLoadStream
+00417ad0    ScriptPlayStream
+00417b70    ScriptStopStream
+00417ba0    ScriptPlayTrack
+00417bd0    ScriptPlaySound
+00417cb0    ScriptSetReverb     //script name = SetSfxReverb
+00417d90    ScriptSetDropoff    //script name = SetSfxDropoff
+00417e40    ScriptSetTerrainParticleProperties
+00417e80    ScriptSetTerrainSoundInfo   //script name = SetTerrainSfxProperties
+00417fd0    ScriptJumpToScript  //huh? same as goto?
+00418030    ScriptGotoPreserveParams
+00418110    ScriptGotoRandomScript
+00418180    ScriptPrintStruct     //dummy func, does nothing
+00418190    ScriptPrintf    //prints string to console, basically printf wrapper
+00418200    ScriptSetHackFlag
+00418230    ScriptHackFlagIsSet
+00418240    ScriptSetCurrentSkaterProfile
+004182d0    ScriptCurrentSkaterProfileIs
+00418360    ScriptAddSkaterProfile
+004183e0    ScriptSyncPlayer2Profile
+00418450    ScriptEnableSkaterRotation
+004184a0    ScriptDisableSkaterRotation
+004184f0    ScriptResetSkaterRotation
+00418560    ScriptSetSkaterRotationPad
+00418610    ScriptPreloadModel
+00418690    ScriptLoadLevelGeometry
+00418810    ScriptCreateFromNodeIndex   //not a CScript
+00418b90    ScriptKillFromNodeIndex     //not a CScript
+00418dd0    DoNodeActionFromNodeNum     //not a CScript, called from DoNodeAction
+00419040    DoNodeAction                //not a CScript
+00419200    ScriptCreate
+00419220    ScriptKill
+00419240    ScriptVisible
+00419260    ScriptInvisible
+00419280    ScriptShatter
+00419440    PreloadModels           //not a CScript, called from ParseNodeArray, loads DFF
+00419580    PreloadAnimatedModels   //not a CScript, called from ParseNodeArray, loads SKN
+004196d0    ScriptReplayInit
+00419800    ScriptLoadCorrectSkaterForReplay
+00419870    ScriptParseNodeArray    //CScript, but never called directly i guess
+00419c60    ScriptLoadNodeArray
+00419d50    ScriptReLoadNodeArray   //only updates NodeArray without parsing, ever used?
+00419d70    ScriptSetRenderModeCPU
+00419de0    ScriptSetRenderModeVU
+00419e50    ScriptSetBackgroundColor
+00419f20    ScriptSetBSPAmbientColor
+0041a010    ScriptSetDFFAmbientColor
+0041a100    ScriptSetDFFDirectColor
+0041a210    ScriptSetDynamicLightModulationFactor
+0041a2e0    ScriptSetClippingDistances
+0041a400    ScriptSetTrivialFarZClip    //?
+0041a470    ScriptEnableFog
+0041a4c0    ScriptDisableFog
+0041a510    ScriptSetFogDistance
+0041a5b0    ScriptSetFogColor
+0041a670    ScriptSetUIFromPreferences
+0041a820    ScriptSetUIFromSkaterProfile
+0041aaa0    ScriptSetPreference
+0041ab00    ScriptPreferenceEquals
+0041ab70    ScriptSetPreferencesFromUI
+0041aca0    ScriptResetCamera
+0041ad30    ScriptInitializeTrickMenus
 
 
 0041d380    ScriptToggleRenderMode
+
 00421250    ScriptNotifyBailDone
 004213d0    ScriptObserveNextSkater
 
+//===============================================================
+// the end of CScript stuff
+//===============================================================
+
+
+004265f0    //a jump to GenerateCRCFromString
 
 
 //===============================================================
+// CScript param parsing functions
+// overloads for string safe search and checksum search
+//===============================================================
 
-00429f50    ContainsFlag //(by crc)
-00429fc0    ContainsFlag //(by string)
+00429690    GetText
+00429760    GetText
+004297b0    GetLocalText
+00429840    GetLocalText
+00429890    GetInteger
+00429920    GetInteger
+00429970    GetVector
+00429a10    GetVector
+00429a60    GetPair
+00429b00    GetPair
+00429b50    GetFloat
+00429c10    GetFloat
+00429c60    GetStructure
+00429ce0    GetStructure
+00429d30    GetChecksum
+00429dc0    GetChecksum
+00429e10    GetChecksumOrStringChecksum
+00429e70    GetArray
+00429f00    GetArray
+00429f50    ContainsFlag    //by crc
+00429fc0    ContainsFlag    //by string
+00429fe0    ContainsComponentNamed  //by crc
+0042a050    ContainsComponentNamed  //by string
+0042a070    WriteToBuffer
+
+0042b020    DoAnyRandomsOrJumps
+
 0042bd10    Init -Script-
 0042bfe0    InitAtStart -Script-
 
@@ -95,10 +225,10 @@
 00431580    CameraTilt
 00431610    CameraPan
 
-00431790    SetColor    //DFFLight
-00431810    ModulateColor //DFFLight
-004318d0    SetRotation //DFFLight
-00431a00    Rotate //DFFLight
+00431790    SetColor        //DFFLight
+00431810    ModulateColor   //DFFLight
+004318d0    SetRotation     //DFFLight
+00431a00    Rotate          //DFFLight
 
 
 00434320    GetNameChecksum
@@ -107,6 +237,9 @@
 00439840    ResetSkaters
 00439a20    LaunchGame
 00439f50    ObserveNextSkater
+
+004556c0    InitializeTrickMenus
+
 0045ae80    TogglePanel
 0045b180    SendConsoleMessage
 00459980    SetSwitchMode (HUDPanel)
@@ -144,29 +277,41 @@
 
 004c0090    LoadModelUsingStruct
 
-
+// === main loop func ===
 
 004c0450    MainLoop
 004c0710    QuitLoop
 
+// input stuff
+
 004c0ec0    GetButtonIndex
 004c1230    MaskDigitalInput
+
+// audio stuff
+
+004c43e0    SetDefaultDropoffDist
+004c5100    SetReverb
 004c68e0    AddTrackToPlayList
 004c69f0    ClearPlaylist
+004c6a30    SkipMusicTrack
+004c6ad0    SetRandomMode
 004c70f0    SetActiveTrackList
 
 004d7330    UnloadPre       //deletes pre, unused on pc or mac
+
+004dde80    SetPreference
+
 004f5280    sSgltnInstance -TextureLoader
 004f52d0    sSgltnDelete -TextureLoader
 004f5330    LoadImageTexture    //loads image from images folder
 004f5570    GetImageTexture     //looks for checksum in memory and returns if found
-
 
 004f76b0    SetViewport
 004f76d0    SetFocalLength
 004f7710    SetFov -Camera-
 
 
+// rendering stuff
 
 004f9470    start_engine
 004f95d0    stop_engine
