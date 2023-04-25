@@ -191,6 +191,50 @@
 0041b3c0    ScriptResetDefaultAppearance
 0041b430    ScriptResetDefaultTricks
 0041b4a0    ScriptResetDefaultStats
+0041b510    ScriptRandomizeAppearance
+0041b580    ScriptPrintCurrentAppearance	//debug func, does nothing
+0041b5f0    ScriptSetNeversoftSkater
+0041b740    ScriptCurrentProfileIsLocked
+0041b7c0    ScriptSetIconTexture
+0041b890    ScriptSetWorldSize
+0041b920    ScriptSetMovementVelocity
+0041b9b0    ScriptSetRotateVelocity
+0041ba40    ScriptResetEngine       //calls QuitLoop
+0041bab0    ScriptResetSkaters
+0041bb20    ScriptToggleMetrics
+0041bc00    ScriptToggleVRAMViewer
+0041bc60    ScriptDumpVRAMUsage
+0041bcd0    ScriptToggleImageViewer
+0041be00    ScriptToggleLightViewer
+0041be70    ScriptSetVideoMode
+0041bfa0    ScriptToggleSkater
+0041c040    ScriptReloadCurrentSkater
+0041c0c0    ScriptViewSkaterModel
+0041c130    ScriptRemoveAllSkaters
+0041c1a0    ScriptSetStat
+0041c2b0    ScriptToggleAlwaysSpecial
+0041c380    ScriptSkaterSpeedGreaterThan
+0041c460    ScriptSkaterSpeedLessThan
+0041c540    ScriptLastScoreLandedGreaterThan
+0041c570    //inlined, wraps GetInteger in score funcs
+0041c590    //inlined, wraps GetScoreObject in score funcs
+0041c630    ScriptLastScoreLandedLessThan
+0041c660    ScriptTotalScoreGreaterThan
+0041c6a0    ScriptTotalScoreLessThan
+0041c6e0    ScriptCurrentScorePotGreaterThan
+0041c720    ScriptCurrentScorePotLessThan
+0041c760    ScriptGoalsGreaterThan
+0041c820    ScriptGoalsEqualTo
+0041c8e0    ScriptMedalsGreaterThan
+0041c9a0    ScriptMedalsEqualTo
+0041ca60    ScriptToggleStats
+0041cae0    ScriptToggleSkaterCamMode
+0041cbc0    ScriptPlaySkaterCamAnim
+0041ccf0    ScriptSetSkaterCamAnimSkippable
+0041cdc0    ScriptSkaterCamAnimFinished
+0041ce80    ScriptSkaterCamAnimHeld
+0041cf40    ScriptSetSkaterCamLerpReductionTimer
+
 
 0041d380    ScriptToggleRenderMode
 
@@ -287,6 +331,8 @@
 00430390    ToggleRenderMode //i guess translates to RW render mode? 1 = 2, 2 = 3, 3 = 4, 4 = 6, default = 1
 004309c0    GetCamera
 
+00430ad0    SetMovementVelocity
+00430ae0    SetRotateVelocity
 00430c20    //inlined in ScriptSetDirectionalLightDirection
 00430c50    //inlined in ScriptSetDirectionalLightActive
 00430c90    IgnoreDFFLights
@@ -298,6 +344,7 @@
 00430f40    GetCurrentWorld
 00430f50    Cleanup
 
+00431130    ToggleLightViewer
 00431200    ScriptSetDirectionalLightDirection  //script name = SetDFFDirectRotation
 00431340    ScriptSetDirectionalLightActive     //script name = SetDFFDirectActive
 
@@ -364,14 +411,23 @@
 004a2130    DoOnGroundPhysics
 004a7bd0    UpdateReplayCam
 004a7cf0    UpdateCamera
+004a7fc0    ToggleCamMode
 004a8620    DoGameLogic
+
 004b2170    SparksOff
+004b24e0    BloodPSOff  //??
+004b25d0    BloodOn
+004b26f0    BloodOff
+
 004b5310    GetCheat
+004b5990    PrintContents	//CSkaterAppearance
 004b8270    SwitchReplayMode
 004b8840    Update (SkaterCam)
+004ba7f0    IsAnimFinished
+004ba800    IsAnimHeld
 004bcb70    GetStatValue
 004bdba0    ResetDefaultStats   //dummy script, just printf
-
+004bdbc0    RandomizeAppearance
 
 
 
