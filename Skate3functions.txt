@@ -22,6 +22,7 @@
 00409f90    int GetWindowHeight()
 0040a340    GameMain
 0040d3c0    ResetActuators
+0040de50    UnPause //IOManager
 0040e430    void InitialRand(int baseSeed)
 0040e540    void InitSinLookupTable()
 
@@ -234,16 +235,77 @@
 0041cdc0    ScriptSkaterCamAnimFinished
 0041ce80    ScriptSkaterCamAnimHeld
 0041cf40    ScriptSetSkaterCamLerpReductionTimer
-
-
-0041d380    ScriptToggleRenderMode
-
+0041cfa0    ScriptToggleViewMode
+0041d020    ScriptToggleMetricItem
+0041d0b0    ScriptToggleMemMetrics
 0041d120    ScriptCleanup
-
+0041d380    ScriptToggleRenderMode
+0041d3f0    ScriptSetVRAMPackContext    //does nothing
+0041d410    ScriptScreenShot
+0041d4a0    ScriptReadNewExceptions
+0041d530    ScriptSkaterDebugOn     //unused debug stuff
+0041d540    ScriptSkaterDebugOff    //unused debug stuff
+0041d550    ScriptIfDebugOn         //unused debug stuff
+0041d560    ScriptIfDebugOff        //unused debug stuff
+0041d570    ScriptCasArtist
+0041d590    ScriptNotCasArtist
+0041d5b0    ScriptClearFlag         //flag funcs, wrappers for DoAction
+0041d5d0    ScriptSendFlag
+0041d5f0    ScriptQueryFlag
+0041d610    ScriptFlagException     //script name = SendException
+0041d660    ScriptCheckIfAlive      //script name = IsAlive
+0041d680    ScriptDoAction
+0041d960    DoAction        //called in ScriptDoAction
+0041da60    Action_ByNodeIndex      //validate these two do actions
+0041da90    //some inlined func
+0041dab0    ScriptSetVisibilityFromNodeIndex
+0041dd00    ScriptCheckExistenceFromNodeIndex
+0041dfd0    ScriptShatterFromNodeIndex
+0041e180    ScriptMakeSkaterGoto        //this one jumps to script
+0041e270    ScriptMakeSkaterGosub       //this one calls script
+0041e360    ScriptSpawnScript
+0041e450    ScriptSpawnSkaterScript
 0041e560    ScriptKillSpawnedScript
+0041e5d0    ScriptPauseSkaters
+0041e6e0    ScriptUnPauseSkaters
+0041e7f0    ScriptPauseSkater
+0041e880    ScriptUnPauseSkater
+0041e910    ScriptPauseGame
+0041e980    ScriptUnPauseGame
+0041e9f0    ScriptPauseClock
+0041ea60    ScriptUnPauseClock
+0041ead0    ScriptShowClock
+0041eb40    ScriptHideClock
+0041ebb0    ScriptResetClock
+0041eca0    ScriptDoFlash
+0041ef30    ScriptSetCASViewer
+
+
+00420430    ScriptDumpNetMessageStats
+
 
 00421250    ScriptNotifyBailDone
+
+00421300    ScriptDisplayLoadingScreen
 004213d0    ScriptObserveNextSkater
+
+00421ed0    ScriptInMultiplayerGame
+
+00422960    ScriptUnhookSkaters
+
+004231b0    ScriptStartCompetitionRun
+
+00424520    ScriptDestroyElement
+
+
+00425ce0    ScriptGameModeChecksumEquals
+00425d70    ScriptGameTypePrefEquals
+00425e10    ScriptGetVersionNumber
+00425e70    ScriptInTeamGame
+00425ed0    ScriptRestripWorld
+00425f20    ScriptMouseShow     //script name = MouseShowCursor
+
+
 
 //===============================================================
 // the end of CScript stuff
@@ -261,6 +323,8 @@
 00426fd0    WaitMovie
 00427fe0    Wait
 00428000    WaitTime
+
+00428330    UnpauseSpawnedScript
 
 00428720    KillSpawnedScriptsThatReferTo
 00428760    KillSpawnedScriptsWithId
@@ -360,13 +424,18 @@
 00431a00    Rotate          //DFFLight
 
 
-
+00434030    GetTimeLimit
 00434320    GetNameChecksum
 00437010    ResetSkaterRotation
+00437e40    SetTimeLimit
 00438b00    GetGameMode
 00439840    ResetSkaters
 00439a20    LaunchGame
 00439f50    ObserveNextSkater
+
+0043a060    IsMultiplayerGame
+
+00440940    AllowPause
 
 
 004414a0    GetMenuElement
@@ -377,12 +446,16 @@
 
 00446e90    DecksAreSpinning
 
+00449eb0    PauseGame
+
+0044a150    PauseGameTimer
 0044e610    InitializeMemCardFilesMenu
 
 004556c0    InitializeTrickMenus
 004557f0    UninitializeTrickMenus
 
 0045ae80    TogglePanel
+0045b160    SetClockVisibility
 0045b180    SendConsoleMessage
 00459980    SetSwitchMode (HUDPanel)
 00464120    ClearZBuffer
