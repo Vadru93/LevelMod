@@ -11,20 +11,30 @@
 
             //or also "Ryan", basically unconditional printf
 00401960    void Dbg_Message(char* message)    //can hook to output some original debug stuff
+
+00402530    InitializeControllerMenu
+
 00403bf0    KeyboardFrame
 
 00409ae0    GetTime
 00409b90    FrameLength //returns length of a single frame
 00409870    Init -Timer-
 
-00409f70    bool IsWindowedMode()
-00409f80    int GetWindowWidth()
-00409f90    int GetWindowHeight()
-0040a340    GameMain
-0040d3c0    ResetActuators
-0040de50    UnPause //IOManager
-0040e430    void InitialRand(int baseSeed)
-0040e540    void InitSinLookupTable()
+00409f70    IsWindowedMode
+00409f80    GetWindowWidth      //returns global ptr to screenX
+00409f90    GetWindowHeight     //returns global ptr to screenY
+0040a340    GameMain            //main skate3 func
+
+0040c570    process             //IOManager
+0040d3c0    ResetActuators      //IOManager
+
+0040d810    sSgltnInstance      //IOManager
+0040d860    sSgltnDelete        //IOManager
+0040d8a0    process_devices
+0040dcc0    GetDeviceByIndex
+0040de50    UnPause             //IOManager
+0040e430    InitialRand         //pseudorandom number initialization, takes a uint seed as param
+0040e540    InitSinLookupTable
 
 004110e0    GenerateCRCFromString
 004115e0    LoadPre     //loads pre, unused on pc or mac
@@ -279,7 +289,41 @@
 0041ebb0    ScriptResetClock
 0041eca0    ScriptDoFlash
 0041ef30    ScriptSetCASViewer
-
+0041efc0    ScriptStartServer
+0041f090    ScriptLeaveServer
+0041f100    ScriptJoinServer
+0041f270    ScriptSetNetworkMode
+0041f320    ScriptMemViewToggle
+0041f330    ScriptMemPopContext     //memory management func, unused on pc
+0041f340    ScriptLoadAndSetTexDict
+0041f3a0    ScriptLoadTexDictModel
+0041f430    ScriptSaveTexDict
+0041f480    ScriptProfileTasks      //likely a debug func
+0041f520    ScriptToggleConsole
+0041f590    ScriptUseNetworkPreferences
+0041f600    ScriptConnectToInternet
+0041f670    ScriptDisconnectFromInternet
+0041f6e0    ScriptStopAllScripts
+0041f6f0    ScriptSetMenuElementText
+0041f830    ScriptMakeTextMenuElementStatic
+0041f8f0    ScriptFirstTimeThisIsCalled     //?
+0041f910    ScriptVibrationIsOn
+0041f970    ScriptVibrationOn
+0041f9c0    ScriptVibrationOff
+0041fa10    ScriptEnableActuators
+0041fae0    ScriptAutoKickIsOn
+0041fb40    ScriptAutoKickOn
+0041fb90    ScriptAutoKickOff
+0041fbe0    ScriptSpinTapsAreOn
+0041fc40    ScriptSpinTapsOn
+0041fc90    ScriptSpinTapsOff
+0041fce0    ScriptInNetGame
+0041fd50    ScriptIsObserving
+0041fdf0    ScriptSetSlomo
+0041fe20    ScriptSetArenaSize
+0041fe30    ScriptLoadNextUnlockedPro
+00420000    ScriptGetCurrentProDisplayInfo
+00420090    ScriptSetPlayerAppearance
 
 00420430    ScriptDumpNetMessageStats
 
@@ -295,9 +339,53 @@
 
 004231b0    ScriptStartCompetitionRun
 
+
+
+
+00424210    ScriptAttachChild
+00424290    ScriptCreateAndAttachMenu
+00424320    ScriptAttachEventHandler
+004243a0    ScriptAttachScript
+00424420    ScriptSetProperty
+004244a0    ScriptSetDefaultProperty
 00424520    ScriptDestroyElement
-
-
+004245b0    ScriptDepopulateMenu
+00424640    ScriptGameFlow
+004246d0    ScriptSetCompetition
+00424700    ScriptAwardStatPoint
+00424770    ScriptApplyStatChange
+004247f0    ScriptAwardSpecialTrickSlot
+00424860    ScriptUpdateSkaterStats
+00424910    ScriptJoinWithPassword
+004249a0    ScriptTestNetworkSetup
+00424ae0    ScriptSendChatMessage
+00424b90    ScriptInSlapGame
+00424c60    ScriptSetScreenModeFromGameMode
+00424d00    ScriptLoadPendingPlayers
+00424d70    ScriptLaunchQueuedScripts
+00424de0    ScriptHideMenu
+00424e50    ScriptGetInitialsString
+00424ef0    SetInitialsString
+00424f80    ScriptUpdateInitials
+00425020    ScriptNewRecord
+00425080    ScriptDumpMenuTree
+00425100    ScriptAttachToSkater
+004251a0    ScriptTryCheatString
+00425390    ScriptLevelIs
+00425420    ScriptStartNetworkLobby
+00425490    ScriptObserversAllowed
+00425500    ScriptNumPlayersAllowed
+004255d0    ScriptAutoDNS
+00425680    ScriptUsingDefaultMasterServers
+00425730    ScriptUsingDHCP
+004257e0    ScriptInInternetMode
+00425850    ScriptEnteringNetGame
+004258d0    ScriptDeviceChosen
+00425980    ScriptGameIsOver
+004259f0    //return true. apparently some specific CFunc, but compiler optimized this into multiple calls.
+00425a00    ScriptQuitGame
+00425a50    SetPrimaryControllerName
+00425cd0    ScriptInitializeControllerMenu
 00425ce0    ScriptGameModeChecksumEquals
 00425d70    ScriptGameTypePrefEquals
 00425e10    ScriptGetVersionNumber
@@ -305,12 +393,12 @@
 00425ed0    ScriptRestripWorld
 00425f20    ScriptMouseShow     //script name = MouseShowCursor
 
-
-
 //===============================================================
 // the end of CScript stuff
 //===============================================================
-
+            //can probably rewrite this to be calculated dynamically on game launch?
+00426060    GetCFunctionLookupTableSize     //returns hardcoded array size, 0x1D9 on PC
+00426070    GetNumMemberFunctions           //returns hardcoded array size, 0x1D9 on PC
 
 004265f0    //a jump to GenerateCRCFromString
 
@@ -367,7 +455,11 @@
 0042b900    CreateNewSymbolEntry
 
 0042bd10    Init -Script-
+0042bf70    RegisterFunctions
 0042bfe0    InitAtStart -Script-
+
+0042c0f0    InitSymbolTables
+0042c220    DeleteSymbols
 
 //===============================================================
 // RwViewer related funcs
@@ -462,11 +554,13 @@
 0046c2f0    CheckForBeachball
 0046d4b0    CheckForCTF
 0046de60    GetHolderOfFlag
+00472b10    s_observer_input_logic_code
+00474710    InNetworkGame
 00476420    ObservePlayer
 00476ac0    GetLocalPlayer
-00474710    InNetworkGame
+00477b70    StartNetworkLobby
+004788b0    SendChatMessage
 004795b0    CheckForKingOfTheHill
-00472b10    s_observer_input_logic_code
 0047c170    IsZoneGame
 0047e6a0    IsObserving
 00480d20    GetImageTexture
@@ -508,7 +602,7 @@
 
 // === main loop func ===
 
-004c0450    MainLoop
+004c0450    MainLoop        //main game processing loop
 004c0710    QuitLoop
 
 // input stuff
@@ -526,10 +620,12 @@
 004c6ad0    SetRandomMode
 004c70f0    SetActiveTrackList
 
+004cd990    DebugDumpTree
 004ce8f0    DisableAllExcept
 
 004d2400    GetMenuElement
 004d2430    LaunchEvent
+004d24b0    PrintContents
 
 004d7330    UnloadPre       //deletes pre, unused on pc or mac
 
@@ -605,6 +701,7 @@
 00559060    RwCameraSetFarClipPlane
 00559130    RwCameraSetProjection
 0055a8f0    RwFrameUpdateObjects
+0055bfe0    RwResourcesSetArenaSize //?
 
 //=======================================================================
 //578190    unwind beyond this point
