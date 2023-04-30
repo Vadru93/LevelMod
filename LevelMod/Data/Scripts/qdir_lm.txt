@@ -2,6 +2,7 @@ LevelMod\airtricks.qb
 LevelMod\bails.qb
 LevelMod\bird_c.qb
 LevelMod\buttonscripts.qb
+LevelMod\cheats.qb
 LevelMod\framework.qb
 LevelMod\game.qb
 LevelMod\gameflow.qb
