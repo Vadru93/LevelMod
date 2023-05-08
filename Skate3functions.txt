@@ -324,24 +324,105 @@
 0041fe30    ScriptLoadNextUnlockedPro
 00420000    ScriptGetCurrentProDisplayInfo
 00420090    ScriptSetPlayerAppearance
-
+00420170    ScriptSetParticleSysVisibility
+00420240    ScriptTogglePlayerNames
+004202b0    ScriptLoadSprite
+00420330    ScriptUnloadSprite
+004203c0    ScriptSetCurrentGameType
 00420430    ScriptDumpNetMessageStats
-
-
+004205e0    ScriptCareerStartLevel
+00420690    ScriptIsCompetition
+00420720    ScriptCareerLevelIs
+004207b0    ScriptGetRecordText
+00420860    ScriptUpdateRecords
+004208d0    ScriptCareerReset
+00420950    ScriptSetGoal
+00420a20    ScriptUnSetGoal
+00420ab0    ScriptGetGoal
+00420b50    ScriptJustGotGoal
+00420bf0    ScriptSetFlag
+00420ca0    ScriptUnSetFlag
+00420d30    ScriptGetFlag
+00420dd0    ScriptJustGotFlag
+00420e70    ScriptUnlockNextSecret
+00420fa0    ScriptSetGlobalFlag
+00420fe0    //inlined in getset global flag
+00421080    ScriptUnSetGlobalFlag
+00421110    ScriptGetGlobalFlag
+004211d0    SetServerMode
 00421250    ScriptNotifyBailDone
-
 00421300    ScriptDisplayLoadingScreen
+00421350    ScriptHideLoadingScreen
+00421360    ScriptEnterObserverMode
 004213d0    ScriptObserveNextSkater
-
+00421440    ScriptProfileEquals
+00421540    ScriptIsCareerMode
+004215c0    ScriptClearScoreGoals
+00421630    ScriptSetScoreGoal
+004216f0    ScriptEndRun
+00421740    ScriptAllowPause
+004217f0    ScriptRefreshServerList
+00421860    ScriptStartServerList
+004218d0    ScriptStopServerList
+00421940    ScriptFreeServerList
+004219b0    ScriptSetJoinMode
+00421a40    ScriptSwitchToMenu
+00421bc0    ScriptLaunchEvent
+00421cc0    ScriptPauseGameFlow
+00421d30    ScriptUnpauseGameFlow
+00421da0    ScriptInFrontEnd
+00421e10    ScriptInSplitScreenGame
 00421ed0    ScriptInMultiplayerGame
-
+00421f40    ScriptGameModeEquals
+00421fd0    ScriptOnServer
+00422040    ScriptShouldEndRun
+004220c0    ScriptLoadRequestedLevel
+00422130    ScriptGetCurrentLevel
+004221c0    ScriptTogglePanel
+00422250    ScriptInitializeSkaters
+00422300    ScriptSkatersAreReady
+00422400    ScriptRestartLevel
+00422470    ScriptEndRunSelected
+004224d0    ScriptAllSkatersAreIdle
+00422540    ScriptFirstTrickStarted
+004225b0    ScriptFirstTrickCompleted
+00422620    ScriptSpawnLevelScript
+00422790    ScriptCalculateFinalScores
+00422880    ScriptReinsertSkaters
 00422960    ScriptUnhookSkaters
-
+00422a00    ScriptHookUpSkaters
+00422ad0    ScriptShouldRunIntroScript
+00422ba0    ScriptIntroScriptFinished
+00422c10    ScriptLoadSkaters
+00422c80    ScriptToggleScores
+00422cf0    ScriptApplySplitScreenOptions
+00423080    //called in ScriptApplySplitScreenOptions
+00423090    ScriptStartCompetition
 004231b0    ScriptStartCompetitionRun
-
-
-
-
+00423220    ScriptEndCompetitionRun
+004232b0    ScriptIsTopJudge
+00423340    ScriptPlaceIs
+004233d0    ScriptRoundIs
+00423460    ScriptEndCompetition
+004234d0    ScriptCompetitionEnded
+00423540    ScriptStartHorse
+004235b0    ScriptHorseEnded
+00423620    ScriptHorseStatusEquals
+004236a0    ScriptStartHorseRun
+00423780    ScriptSwitchHorsePlayers
+004237f0    ScriptUpdateHorseDisplay    //obsolete function, does nothing
+00423810    ScriptApplyToHorsePanelString
+00423940    ScriptIsCurrentHorseSkater
+004239d0    ScriptPanelMessagesOnscreen
+00423a40    ScriptXTriggered
+00423b40    ScriptApplyToSkaterProfile
+00423d90    ScriptApplyColorToSkaterProfile
+00423f30    ScriptRefreshSkaterColors
+00423ff0    ScriptIsTrue
+00424020    ScriptCreatePanels
+004240b0    ScriptDeletePanel
+00424120    ScriptToggleShadowType
+00424190    ScriptCreateMenu
 00424210    ScriptAttachChild
 00424290    ScriptCreateAndAttachMenu
 00424320    ScriptAttachEventHandler
@@ -396,9 +477,10 @@
 //===============================================================
 // the end of CScript stuff
 //===============================================================
+
             //can probably rewrite this to be calculated dynamically on game launch?
-00426060    GetCFunctionLookupTableSize     //returns hardcoded array size, 0x1D9 on PC
-00426070    GetNumMemberFunctions           //returns hardcoded array size, 0x1D9 on PC
+00426060    GetCFunctionLookupTableSize     //returns hardcoded array size, 0x1D9 on PC, 0x1DC on MAC
+00426070    GetNumMemberFunctions           //returns hardcoded array size, 0x124 on PC and MAC
 
 004265f0    //a jump to GenerateCRCFromString
 
@@ -527,6 +609,8 @@
 
 0043a060    IsMultiplayerGame
 
+0043a610    ScriptRetry     //why is it here?
+
 00440940    AllowPause
 
 
@@ -575,11 +659,20 @@
 0049e550    HandleRollingResistance
 0049e590    HandleGroundFriction
 0049f3c0    GetStat
+
 004a2130    DoOnGroundPhysics
 004a7bd0    UpdateReplayCam
 004a7cf0    UpdateCamera
 004a7fc0    ToggleCamMode
 004a8620    DoGameLogic
+
+
+
+004ab2f0    SwitchOnShadow
+004ab380    SwitchOffShadow
+
+
+004ad590    SkaterEquals
 
 004b2170    SparksOff
 004b24e0    BloodPSOff  //??
@@ -679,6 +772,10 @@
 004ff910    DestroyAllSystems
 
 
+005010e0    ShadowAddObject
+00501320    ShadowRemoveObject
+
+
 00504d90    TexDictionaryNumTextures
 00504de0    TexDictionaryLoad   //loads tdx texture dictionary
 
@@ -691,9 +788,20 @@
 00504f70    s_replace_texture
 
 //=======================================================================
-// assuming 0055xxxx+ is renderware stuff, rw symbols are stripped on mac
+// assuming 0053xxxx+ is renderware stuff, rw symbols are stripped on mac
 // but it's possible to find matching code, using rw reference code
 //=======================================================================
+
+0052fec0    RxNodeDefinitionGetPreLight
+005313d0    RxNodeDefinitionGetLight
+00531800    RxNodeDefinitionGetPostLight
+005322c0    RxNodeDefinitionGetAtomicInstance
+00532470    RxNodeDefinitionGetAtomicEnumerateLights
+00532eb0    RxNodeDefinitionGetWorldSectorInstance
+00532fe0    RxNodeDefinitionGetWorldSectorEnumerateLights
+00533110    RxNodeDefinitionGetMaterialScatter
+
+//0053bxxx  likely libpng 1.0.12, included in RW?
 
 00554110    RwD3D8SetTextureStageState //? not sure
 00558f90    RwCameraSetNearClipPlane
@@ -702,6 +810,11 @@
 00559130    RwCameraSetProjection
 0055a8f0    RwFrameUpdateObjects
 0055bfe0    RwResourcesSetArenaSize //?
+
+0055f3f0    RxNodeDefinitionGetTransform
+0055faf0    RxNodeDefinitionGetCullTriangle
+00560dc0    RxNodeDefinitionGetClipTriangle
+00561000    RxNodeDefinitionGetSubmitTriangle
 
 //=======================================================================
 //578190    unwind beyond this point
