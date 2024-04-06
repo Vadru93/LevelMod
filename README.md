@@ -32,11 +32,11 @@ LevelMod features:
 2. [X360CE For DirectInput gamepads](#links) - converts DirectInput calls to XInput, ensuring proper L2-R2 separation
 
 ### Contributing
-*** Q files ***
+**Q files**
 Q script files are compiled using ThpsQScriptEd tool, you can get it here:
 https://github.com/DCxDemo/LegacyThps
 
-*** DLL code changes ***
+**DLL code changes**
 Additional code used to be loaded in LevelMod.flt by integrated MSS plugin system, but this method is deprecated now. Now you only need d3d8.dll, hence you must remove all instances of legacy levelmod.flt, including copies/backups. If the game finds flt file in same folder as skate3.exe or data/MILES, it will try to load it and since it's already loaded inside d3d8.dll it will crash the game. This also means you don't need a custom game executable anymore, since all the patches were moved to d3d8.dll.
 
 **DLL Compilation notes**
