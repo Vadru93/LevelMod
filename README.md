@@ -31,7 +31,12 @@ LevelMod features:
 1. [Widescreen patch by thirteenAG](#links) - adds custom resolutions and proper widescreen support
 2. [X360CE For DirectInput gamepads](#links) - converts DirectInput calls to XInput, ensuring proper L2-R2 separation
 
-### DLL code changes
+### Contributing
+*** Q files ***
+Q script files are compiled using ThpsQScriptEd tool, you can get it here:
+https://github.com/DCxDemo/LegacyThps
+
+*** DLL code changes ***
 Additional code used to be loaded in LevelMod.flt by integrated MSS plugin system, but this method is deprecated now. Now you only need d3d8.dll, hence you must remove all instances of legacy levelmod.flt, including copies/backups. If the game finds flt file in same folder as skate3.exe or data/MILES, it will try to load it and since it's already loaded inside d3d8.dll it will crash the game. This also means you don't need a custom game executable anymore, since all the patches were moved to d3d8.dll.
 
 **DLL Compilation notes**
@@ -51,4 +56,4 @@ Additional code used to be loaded in LevelMod.flt by integrated MSS plugin syste
 * [THPS3 Widescreen patch by thirteenAG](https://github.com/ThirteenAG/WidescreenFixesPack/releases/tag/thps3)
 * [X360CE For DirectInput gamepads](https://github.com/x360ce/x360ce/releases/latest)
 
-2011-2021, DCxDemo* and Vadru'Qc.
+2011-2024, DCxDemo* and Vadru'Qc.
