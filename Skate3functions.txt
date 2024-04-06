@@ -37,11 +37,19 @@
 0040e540    InitSinLookupTable
 
 004110e0    GenerateCRCFromString
+
 004115e0    LoadPre     //loads pre, unused on pc or mac
+00411610    ScriptInPreFile
+00411690    ScriptLoadPre   //CFunc, okay...
 
 00411e90    CallFunctionForAllWorldSectors
 004121c0    ClearWorldSectorHashTable
 00412330    ShatterWorldSector
+
+004126c0    world_collision_cb
+00412910    FindNearestWorldCollision
+
+004134b0    GetIntersectingWorldSectors
 
 00413730    DestroySuperSectors
 
@@ -293,7 +301,7 @@
 0041f090    ScriptLeaveServer
 0041f100    ScriptJoinServer
 0041f270    ScriptSetNetworkMode
-0041f320    ScriptMemViewToggle
+0041f320    ScriptMemViewToggle     //dummied debug func, calls empty MemViewToggle
 0041f330    ScriptMemPopContext     //memory management func, unused on pc
 0041f340    ScriptLoadAndSetTexDict
 0041f3a0    ScriptLoadTexDictModel
@@ -349,7 +357,7 @@
 00420fe0    //inlined in getset global flag
 00421080    ScriptUnSetGlobalFlag
 00421110    ScriptGetGlobalFlag
-004211d0    SetServerMode
+004211d0    ScriptSetServerMode
 00421250    ScriptNotifyBailDone
 00421300    ScriptDisplayLoadingScreen
 00421350    ScriptHideLoadingScreen
@@ -446,7 +454,7 @@
 00424d70    ScriptLaunchQueuedScripts
 00424de0    ScriptHideMenu
 00424e50    ScriptGetInitialsString
-00424ef0    SetInitialsString
+00424ef0    ScriptSetInitialsString
 00424f80    ScriptUpdateInitials
 00425020    ScriptNewRecord
 00425080    ScriptDumpMenuTree
@@ -465,7 +473,7 @@
 00425980    ScriptGameIsOver
 004259f0    //return true. apparently some specific CFunc, but compiler optimized this into multiple calls.
 00425a00    ScriptQuitGame
-00425a50    SetPrimaryControllerName
+00425a50    ScriptSetPrimaryControllerName
 00425cd0    ScriptInitializeControllerMenu
 00425ce0    ScriptGameModeChecksumEquals
 00425d70    ScriptGameTypePrefEquals
@@ -495,6 +503,8 @@
 00428000    WaitTime
 
 00428330    UnpauseSpawnedScript
+
+00428510    SpawnScript
 
 00428720    KillSpawnedScriptsThatReferTo
 00428760    KillSpawnedScriptsWithId
@@ -635,6 +645,9 @@
 0045b180    SendConsoleMessage
 00459980    SetSwitchMode (HUDPanel)
 00464120    ClearZBuffer
+
+00465a30    ScriptParkEditorCommand     //CScript
+
 0046c2f0    CheckForBeachball
 0046d4b0    CheckForCTF
 0046de60    GetHolderOfFlag
@@ -647,9 +660,23 @@
 004795b0    CheckForKingOfTheHill
 0047c170    IsZoneGame
 0047e6a0    IsObserving
+
 00480d20    GetImageTexture
 00482540    FlipAnimation
 00489e70    DoManualPhysics
+
+0048fc20    AddToCurrentWorld
+0048fcc0    RemoveFromCurrentWorld
+
+00493ea0    TraversePath
+
+00494710    CallMemberFunction  //CPed
+
+00496e20    SetIgnore
+00496e40    SetStart
+00496e60    SetEnd
+00496ea0    GetCollision
+
 0049bbd0    GetButton
 0049bcc0    MoveToRestart
 0049bee0    SkipToRestart
@@ -702,6 +729,8 @@
 
 004c0ec0    GetButtonIndex
 004c1230    MaskDigitalInput
+
+004c1d10    SpawnScriptPlease
 
 // audio stuff
 
@@ -788,7 +817,7 @@
 00504f70    s_replace_texture
 
 //=======================================================================
-// assuming 0053xxxx+ is renderware stuff, rw symbols are stripped on mac
+// assuming 0051cxxx+ is renderware stuff, rw symbols are stripped on mac
 // but it's possible to find matching code, using rw reference code
 //=======================================================================
 
@@ -802,6 +831,25 @@
 00533110    RxNodeDefinitionGetMaterialScatter
 
 //0053bxxx  likely libpng 1.0.12, included in RW?
+
+00542f10    png_handle_gAMA
+00543360    png_handle_sBIT
+005437d0    png_handle_cHRM
+00544190    png_handle_sRGB
+00544690    png_handle_iCCP
+00544b80    png_handle_sPLT
+00544ef0    png_handle_tRNS
+00545460    png_handle_bKGD
+00545940    png_handle_hIST
+00545db0    png_handle_pHYs
+00546170    png_handle_oFFs
+00546530    png_handle_pCAL
+00546a70    png_handle_sCAL
+00546f30    png_handle_tIME
+005472f0    png_handle_tEXt
+00547490    png_handle_zTXt
+00547680    png_handle_iTXt
+
 
 00554110    RwD3D8SetTextureStageState //? not sure
 00558f90    RwCameraSetNearClipPlane
