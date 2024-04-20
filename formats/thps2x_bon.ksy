@@ -4,161 +4,71 @@ meta:
   title: Tony Hawk's Pro SKater 2X (XBOX) skater mesh file
   file-extension: bon
   endian: le
-  
+doc-ref: https://github.com/Vadru93/LevelMod/blob/master/formats/thps2x_bon.ksy
 doc: |
-  Describes skater model in BON format found in Original Xbox game
-  Tony Hawk's Pro Skater 2X.
-  TODO: skeleton in the end
+  Describes skater model in BON format found in THPS2x for the Original Xbox.
+  File mapped by DCxDemo*.
 
 seq:
+
   - id: magic
     contents: [Bon, 0]
+
   - id: version
     type: u4
+
   - id: num_mats
     type:
       switch-on: version
       cases:
         3: u2
         4: u4
+
   - id: materials
     type: material
     repeat: expr
     repeat-expr: num_mats
+
   - id: num_vertices
     type:
       switch-on: version
       cases:
         3: u2
         4: u4
+
   - id: num_unk2
     type:
       switch-on: version
       cases:
         3: u2
-        4: u4 
-  - id: vertices
+        4: u4
+
+  - id: vertices # array of vetrices
     type: vertex
     repeat: expr
-    repeat-expr: num_vertices  
+    repeat-expr: num_vertices
+
   - id: num_indices
     type:
       switch-on: version
       cases:
         3: u2
         4: u4
-  - id: indices
+  - id: indices # array of tristrip indices
     type: u2
     repeat: expr
     repeat-expr: num_indices
-    
-  - id: somenum1
+
+  - id: num_hier
     type: u4
-    
-  - id: b1
-    type: bone
-  - id: b2
-    type: bone
-  - id: b3
-    type: bone
-  - id: b4
-    type: bone
-  - id: flts1
-    type: somefloats
-  - id: flts2
-    type: somefloats
-  - id: flts3
-    type: somefloats
-  - id: someshorts
-    type: u2
+
+  - id: hier
+    type: mesh
     repeat: expr
-    repeat-expr: 6
-  - id: b5
-    type: bone    
-  - id: b6
-    type: bone
-  - id: b7
-    type: bone
-  - id: flts4
-    type: somefloats
-  - id: flts5
-    type: somefloats
-  - id: flts6
-    type: somefloats
-  - id: someshorts2
-    type: u2
-    repeat: expr
-    repeat-expr: 6
-    
+    repeat-expr: num_hier
+
 types:
 
-  somefloats:
-    seq:
-      - id: floats
-        type: f4
-        repeat: expr
-        repeat-expr: 9
-      - id: ints
-        type: u2
-        repeat: expr
-        repeat-expr: 5
-        
-  bonstring: 
-    seq:
-      - id: length
-        type: u2
-      - id: content
-        type: str
-        encoding: ascii
-        size: length
-        
-  color:
-    seq:
-      - id: r
-        type: u1
-      - id: g
-        type: u1
-      - id: b
-        type: u1
-      - id: a
-        type: u1
-        
-  vector4f:
-    seq:
-      - id: x
-        type: f4
-      - id: y
-        type: f4
-      - id: z
-        type: f4
-      - id: w
-        type: f4  
-        
-  vector3f:
-    seq:
-      - id: x
-        type: f4
-      - id: y
-        type: f4
-      - id: z
-        type: f4
-               
-  vector2f:
-    seq:
-      - id: x
-        type: f4
-      - id: y
-        type: f4
-
-  vertex:
-    seq:
-      - id: position
-        type: vector4f
-      - id: normal
-        type: vector4f 
-      - id: uv
-        type: vector2f
-        
   material:
     seq:
       - id: name
@@ -179,26 +89,110 @@ types:
         type: u1
       - id: flag3
         type: u1
-      - id: texture_size
+      - id: size
         type: u4
-      - id: texture
-        size: texture_size
-        
-  bone:
+      - id: data
+        size: size
+
+  mesh:
     seq:
-      - id: boneflag
+      - id: entry_type
         type: u1
-    
       - id: name
         type: bonstring
-    
       - id: matrix
+        type: matrix
+      - id: position
+        type: vector3f
+      - id: num_children
+        type: u2
+      - id: children
+        type: mesh
+        repeat: expr
+        repeat-expr: num_children
+      - id: matrix2
+        type: matrix
+      - id: num_base_splits # base mesh parts
+        type: u2
+      - id: mat_splits
+        type: mat_split
+        repeat: expr
+        repeat-expr: num_base_splits
+      - id: num_joint_splits # stiches in the original engine
+        type: u2
+      - id: mat_splits2
+        type: mat_split
+        repeat: expr
+        repeat-expr: num_joint_splits
+
+  mat_split:
+    seq:
+      - id: material_index
+        type: u2
+      - id: offset
+        type: u2
+      - id: size
+        type: u2
+
+  matrix:
+    seq:
+      - id: entries
         type: f4
         repeat: expr
         repeat-expr: 9
-    
-      - id: position
-        type: vector3f
-    
-      - id: num_children
+
+  bonstring:
+    seq:
+      - id: length
         type: u2
+      - id: content
+        type: str
+        encoding: ascii
+        size: length
+
+  color:
+    seq:
+      - id: r
+        type: u1
+      - id: g
+        type: u1
+      - id: b
+        type: u1
+      - id: a
+        type: u1
+
+  vector4f:
+    seq:
+      - id: x
+        type: f4
+      - id: y
+        type: f4
+      - id: z
+        type: f4
+      - id: w
+        type: f4
+
+  vector3f:
+    seq:
+      - id: x
+        type: f4
+      - id: y
+        type: f4
+      - id: z
+        type: f4
+
+  vector2f:
+    seq:
+      - id: x
+        type: f4
+      - id: y
+        type: f4
+
+  vertex:
+    seq:
+      - id: position
+        type: vector4f
+      - id: normal
+        type: vector4f
+      - id: uv
+        type: vector2f
