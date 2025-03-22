@@ -45,7 +45,6 @@ camera.qb
 cas.qb
 casmenu.qb
 casnames.qb
-cheats.qb
 cjr_scripts.qb
 compmenu.qb
 compress.qb
