@@ -173,6 +173,8 @@ LevelModOptions = [
   { name = "LM_Control_bInvertedX" value = 0 }
   { name = "LM_Control_bInvertedY" value = 0 }
   { name = "LM_Control_bVibration" value = 1 }
+  { name = "LM_Control_bDropDown" value = 1 }
+
 
   { name = "LM_GUI_bShowHud" Value = 1 StartGame Do = UpdateShowHUD }
   { name = "LM_GUI_bNewMenu" Value = 1 }
@@ -203,6 +205,7 @@ LevelModOptions = [
   { name = "LM_GFX_bVSync" value = 0 }
   { name = "LM_GFX_bWindowed" value = 0 }
   { name = "LM_GFX_TargetFPS" value = 60 max = 300 }
+ 
 ]
 
 
